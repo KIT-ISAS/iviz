@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -13,8 +14,12 @@ namespace Iviz.Core
         /// Returns the pointer enclosed in the array as a ref. 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T GetUnsafeRef<T>(this NativeArray<T> array) where T : unmanaged =>
-            ref *(T*)NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(array);
+        public static ref T GetUnsafeRef<T>(this NativeArray<T> array) where T : unmanaged => ref *GetUnsafePtr(array);
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T* GetUnsafePtr<T>(this NativeArray<T> array) where T : unmanaged =>
+            (T*)NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(array);
 
         /// <summary>
         /// Creates a temporary native array that lasts one frame.
@@ -31,31 +36,20 @@ namespace Iviz.Core
             return array;
         }
 
-        public static NativeArray<T> CreateNativeArrayWrapper<T>(this T[] ptr) where T : unmanaged
+        public static NativeArray<T> AsNativeArray<T>(this T[] ptr) where T : unmanaged
         {
             return CreateNativeArrayWrapper(ref ptr[0], ptr.Length);
         }
 
-        public static NativeArray<T> CreateNativeArrayWrapper<T>(this Span<T> ptr) where T : unmanaged
+        public static NativeArray<T> AsNativeArray<T>(this List<T> ptr) where T : unmanaged
         {
-            return CreateNativeArrayWrapper(ref ptr[0], ptr.Length);
+            return CreateNativeArrayWrapper(ref ptr.AsSpan()[0], ptr.Count);
         }
 
-        public static NativeArray<T> CreateNativeArrayWrapper<T>(this ReadOnlySpan<T> ptr) where T : unmanaged
-        {
-            return CreateNativeArrayWrapper(ref ptr.GetReference(), ptr.Length);
-        }
-        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeArray<TU> Cast<TT, TU>(this NativeArray<TT> ptr) where TT : unmanaged where TU : unmanaged
         {
             return ptr.Reinterpret<TU>(Unsafe.SizeOf<TT>());
-        }
-
-        public static NativeArray<T> TempArrayFromValue<T>(T t) where T : unmanaged
-        {
-            var array = new NativeArray<T>(1, Allocator.TempJob);
-            array[0] = t;
-            return array;
         }
     }
 }

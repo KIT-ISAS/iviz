@@ -87,7 +87,7 @@ namespace Iviz.Core
             return Xx32Hash.Hash(ref value, size, startHash);
         }
 
-        /// Implementation of the xxHash32 algorithm, using Zhent_xxHash32 as the starting point 
+        /// Implementation of the xxHash32 algorithm, using Zhent_xxHash32 as the starting point.
         /// Stolen from https://github.com/Zhentar/xxHash3.NET
         static class Xx32Hash
         {
@@ -97,6 +97,8 @@ namespace Iviz.Core
             const uint Prime32_4 = 668265263U;
             const uint Prime32_5 = 374761393U;
 
+            const int MinForBurst = 8;
+
             public static uint Hash(ref byte data, int length, uint seed)
             {
                 if (length <= 0)
@@ -104,100 +106,94 @@ namespace Iviz.Core
                     return Prime32_5;
                 }
 
-                unchecked
+                int lengthInBulk = length / 16 * 16;
+
+                uint h32 = lengthInBulk switch
                 {
-                    int lengthInBulk = length / 16 * 16;
+                    0 => Prime32_5,
+                    < MinForBurst * 16 => ExecuteDirect(seed, ref data, lengthInBulk / 16),
+                    _ => ExecuteBurst(seed, ref data, lengthInBulk / 16)
+                };
 
-                    uint h32 = lengthInBulk switch
-                    {
-                        0 => Prime32_5,
-                        < 128 => ExecuteDirect(seed, ref data, lengthInBulk / 16),
-                        _ => ExecuteBurst(seed, ref data, lengthInBulk / 16)
-                    };
+                //Profile(seed, ref data, lengthInBulk);
 
-                    //Profile(seed, ref data, lengthInBulk);
+                h32 += (uint)length;
 
-                    h32 += (uint)length;
+                ref uint remainingInt = ref Unsafe.As<byte, uint>(ref data.Plus(lengthInBulk));
+                int remainingLength = length - lengthInBulk;
 
-                    ref uint remainingInt = ref Unsafe.As<byte, uint>(ref data.Plus(lengthInBulk));
-                    int remainingLength = length - lengthInBulk;
-
-                    switch (remainingLength >> 2)
-                    {
-                        case 3:
-                            h32 = RotateLeft(h32 + remainingInt * Prime32_3, 17) * Prime32_4;
-                            remainingInt = ref remainingInt.Plus(1);
-                            goto case 2;
-                        case 2:
-                            h32 = RotateLeft(h32 + remainingInt * Prime32_3, 17) * Prime32_4;
-                            remainingInt = ref remainingInt.Plus(1);
-                            goto case 1;
-                        case 1:
-                            h32 = RotateLeft(h32 + remainingInt * Prime32_3, 17) * Prime32_4;
-                            remainingInt = ref remainingInt.Plus(1);
-                            break;
-                    }
-
-                    ref byte remaining = ref Unsafe.As<uint, byte>(ref remainingInt);
-
-                    switch (remainingLength % 4)
-                    {
-                        case 3:
-                            h32 = RotateLeft(h32 + remaining * Prime32_5, 11) * Prime32_1;
-                            remaining = ref remaining.Plus(1);
-                            goto case 2;
-                        case 2:
-                            h32 = RotateLeft(h32 + remaining * Prime32_5, 11) * Prime32_1;
-                            remaining = ref remaining.Plus(1);
-                            goto case 1;
-                        case 1:
-                            h32 = RotateLeft(h32 + remaining * Prime32_5, 11) * Prime32_1;
-                            break;
-                    }
-
-                    h32 ^= h32 >> 15;
-                    h32 *= Prime32_2;
-                    h32 ^= h32 >> 13;
-                    h32 *= Prime32_3;
-                    h32 ^= h32 >> 16;
-
-                    return h32;
+                switch (remainingLength >> 2)
+                {
+                    case 3:
+                        h32 = RotateLeft(h32 + remainingInt * Prime32_3, 17) * Prime32_4;
+                        remainingInt = ref remainingInt.Plus(1);
+                        goto case 2;
+                    case 2:
+                        h32 = RotateLeft(h32 + remainingInt * Prime32_3, 17) * Prime32_4;
+                        remainingInt = ref remainingInt.Plus(1);
+                        goto case 1;
+                    case 1:
+                        h32 = RotateLeft(h32 + remainingInt * Prime32_3, 17) * Prime32_4;
+                        remainingInt = ref remainingInt.Plus(1);
+                        break;
                 }
+
+                ref byte remaining = ref Unsafe.As<uint, byte>(ref remainingInt);
+
+                switch (remainingLength % 4)
+                {
+                    case 3:
+                        h32 = RotateLeft(h32 + remaining * Prime32_5, 11) * Prime32_1;
+                        remaining = ref remaining.Plus(1);
+                        goto case 2;
+                    case 2:
+                        h32 = RotateLeft(h32 + remaining * Prime32_5, 11) * Prime32_1;
+                        remaining = ref remaining.Plus(1);
+                        goto case 1;
+                    case 1:
+                        h32 = RotateLeft(h32 + remaining * Prime32_5, 11) * Prime32_1;
+                        break;
+                }
+
+                h32 ^= h32 >> 15;
+                h32 *= Prime32_2;
+                h32 ^= h32 >> 13;
+                h32 *= Prime32_3;
+                h32 ^= h32 >> 16;
+
+                return h32;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static uint ExecuteDirect(uint seed, ref byte data, int length)
             {
-                unchecked
+                uint v1 = seed + Prime32_1 + Prime32_2;
+                uint v2 = seed + Prime32_2;
+                uint v3 = seed;
+                uint v4 = seed - Prime32_1;
+
+                ref uint4 val = ref Unsafe.As<byte, uint4>(ref data);
+                for (int i = length; i > 0; i--)
                 {
-                    uint v1 = seed + Prime32_1 + Prime32_2;
-                    uint v2 = seed + Prime32_2;
-                    uint v3 = seed;
-                    uint v4 = seed - Prime32_1;
+                    v1 += val.x * Prime32_2;
+                    v2 += val.y * Prime32_2;
+                    v3 += val.z * Prime32_2;
+                    v4 += val.w * Prime32_2;
 
-                    ref uint4 val = ref Unsafe.As<byte, uint4>(ref data);
-                    for (int i = 0; i < length; i++)
-                    {
-                        v1 += val.x * Prime32_2;
-                        v2 += val.y * Prime32_2;
-                        v3 += val.z * Prime32_2;
-                        v4 += val.w * Prime32_2;
+                    v1 = RotateLeft(v1, 13);
+                    v2 = RotateLeft(v2, 13);
+                    v3 = RotateLeft(v3, 13);
+                    v4 = RotateLeft(v4, 13);
 
-                        v1 = RotateLeft(v1, 13);
-                        v2 = RotateLeft(v2, 13);
-                        v3 = RotateLeft(v3, 13);
-                        v4 = RotateLeft(v4, 13);
+                    v1 *= Prime32_1;
+                    v2 *= Prime32_1;
+                    v3 *= Prime32_1;
+                    v4 *= Prime32_1;
 
-                        v1 *= Prime32_1;
-                        v2 *= Prime32_1;
-                        v3 *= Prime32_1;
-                        v4 *= Prime32_1;
-
-                        val = ref val.Plus(1);
-                    }
-
-                    return MergeValues(v1, v2, v3, v4);
+                    val = ref val.Plus(1);
                 }
+
+                return MergeValues(v1, v2, v3, v4);
             }
 
             static unsafe uint ExecuteBurst(uint seed, ref byte data, int lengthInBulk)
@@ -219,8 +215,7 @@ namespace Iviz.Core
             static unsafe class Hash32Job
             {
                 [BurstCompile(CompileSynchronously = true)]
-                public static void Execute(uint seed, [NoAlias] uint4* input, [NoAlias] uint4* output,
-                    [AssumeRange(8, int.MaxValue)] int length)
+                public static void Execute(uint seed, [NoAlias] uint4* input, [NoAlias] uint4* output, int length)
                 {
                     uint4 v;
                     unchecked
@@ -228,7 +223,14 @@ namespace Iviz.Core
                         v = new uint4(Prime32_1 + Prime32_2, Prime32_2, 0, 0 - Prime32_1) + seed;
                     }
 
-                    for (int i = 0; i < length; i++)
+                    for (int i = 0; i < MinForBurst; i++)
+                    {
+                        v += input[i] * Prime32_2;
+                        v = (v << 13) | (v >> (32 - 13));
+                        v *= Prime32_1;
+                    }
+
+                    for (int i = MinForBurst; i < length; i++)
                     {
                         v += input[i] * Prime32_2;
                         v = (v << 13) | (v >> (32 - 13));

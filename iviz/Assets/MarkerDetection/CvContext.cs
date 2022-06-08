@@ -246,7 +246,7 @@ namespace Iviz.MarkerDetection
 
         void ReleaseUnmanagedResources()
         {
-            if (mContextPtr != default)
+            if (mContextPtr != IntPtr.Zero)
             {
                 Native.DisposeContext(mContextPtr);
             }
@@ -259,8 +259,7 @@ namespace Iviz.MarkerDetection
             ReleaseUnmanagedResources();
             GC.SuppressFinalize(this);
         }
-
-
+        
         ~CvContext()
         {
             ReleaseUnmanagedResources();

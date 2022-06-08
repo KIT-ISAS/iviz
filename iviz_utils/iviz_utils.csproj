@@ -28,10 +28,6 @@
         <ProjectReference Include="..\iviz_xmlrpc\iviz_xmlrpc.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="BitMiracle.LibJpeg.NET" Version="1.5.324" />
-    </ItemGroup>
-
     <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
         <ItemGroup>
             <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />

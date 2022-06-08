@@ -212,13 +212,12 @@ namespace Iviz.MsgsGen
             {
                 return new[] { $"{attrStr} {result}" };
             }
-            
+
             return new[]
             {
                 $"/// <summary> {char.ToUpper(comment[0]).ToString()}{comment[1..]} </summary>",
                 $"{attrStr} {result}"
             };
-            
         }
 
         public string ToRosString()
@@ -283,7 +282,7 @@ namespace Iviz.MsgsGen
                 throw new ArgumentNullException(nameof(type));
             }
 
-            return GetClassStringConstant(type,  "Md5Sum");
+            return GetClassStringConstant(type, "Md5Sum");
         }
 
         static string GetClassStringConstant(Type type, string name)

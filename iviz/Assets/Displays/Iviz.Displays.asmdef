@@ -1,15 +1,15 @@
 {
     "name": "Iviz.Displays",
-    "rootNamespace": "",
+    "rootNamespace": "Iviz",
     "references": [
         "GUID:31a80e3fb3ac64b8385cd739784d42de",
         "GUID:6055be8ebefd69e48b49212b09b47b2f",
-        "GUID:0775440a70b5e459d9534389409d8fa8",
         "GUID:8fcae4bc21c4646db87e41dd8bdaa097",
         "GUID:fe685ec1767f73d42b749ea8045bfe43",
         "GUID:d8b63aba1907145bea998dd612889d6b",
         "GUID:a9420e37d7990b54abdef6688edbe313",
-        "GUID:92703082f92b41ba80f0d6912de66115"
+        "GUID:92703082f92b41ba80f0d6912de66115",
+        "GUID:d3ca6aa43a4e74320912b942d6a88064"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

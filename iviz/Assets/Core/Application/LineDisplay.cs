@@ -102,11 +102,11 @@ namespace Iviz.Displays
             Set(MemoryMarshal.Cast<LineWithColor, float4x2>(lines), overrideNeedsAlpha);
         }
 
-        public void Set(ReadOnlySpan<float4x2> lines, bool? overrideNeedsAlpha)
+        public void Set(ReadOnlySpan<float4x2> lines, bool? needsAlpha)
         {
             lineBuffer.Clear();
             lineBuffer.AddRange(lines);
-            UpdateLines(overrideNeedsAlpha);
+            UpdateLines(needsAlpha);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -151,9 +151,9 @@ namespace Iviz.Displays
             UpdateLines(overrideNeedsAlpha);
         }
 
-        void UpdateLines(bool? overrideNeedsAlpha)
+        void UpdateLines(bool? needsAlpha)
         {
-            linesNeedAlpha = !UseColormap && (overrideNeedsAlpha ?? CheckIfAlphaNeeded());
+            linesNeedAlpha = !UseColormap && (needsAlpha ?? CheckIfAlphaNeeded());
 
             if (UseCapsuleLines)
             {
@@ -189,20 +189,6 @@ namespace Iviz.Displays
                 }
 
                 linesPtr = ref linesPtr.Plus(1);
-
-                /*
-                Color32 cA = UnityUtils.AsColor32(line.c0.w);
-                if (cA.a < 255)
-                {
-                    return true;
-                }
-
-                Color32 cB = UnityUtils.AsColor32(line.c1.w);
-                if (cB.a < 255)
-                {
-                    return true;
-                }
-                */
             }
 
             return false;

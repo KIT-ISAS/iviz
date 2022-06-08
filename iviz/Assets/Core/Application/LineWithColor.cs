@@ -13,14 +13,11 @@ namespace Iviz.Displays
     /// Internally a wrapper around <see cref="float4x2"/>. 
     /// </summary>    
     [StructLayout(LayoutKind.Sequential)]
-    public struct LineWithColor
+    public readonly struct LineWithColor
     {
         static float WhiteBits => UnityUtils.AsFloat(Color.white);
 
-        public float4x2 f;
-
-        readonly Color32 ColorA => UnityUtils.AsColor32(f.c0.w);
-        readonly Color32 ColorB => UnityUtils.AsColor32(f.c1.w);
+         readonly float4x2 f;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public LineWithColor(in Vector3 start, Color32 colorA, in Vector3 end, Color32 colorB) :
@@ -54,7 +51,7 @@ namespace Iviz.Displays
             f.c1.w = intensityB;
         }
 
-        public readonly override string ToString()
+        public override string ToString()
         {
             return $"[x={f.c0.x} y={f.c0.y} z={f.c0.z} ---- " +
                    $"x={f.c1.x} y={f.c1.y} z={f.c1.z}]";

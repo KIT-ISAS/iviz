@@ -2,9 +2,17 @@
 
 using System;
 using System.Runtime.InteropServices;
+using AOT;
+using Iviz.Core;
+using Iviz.Tools;
+using UnityEngine;
 
 namespace Iviz.ImageWrappers
 {
+    /// <summary>
+    /// Png Decoder.
+    /// This code was adapted from https://github.com/qmfrederik/libpng-sharp
+    /// </summary>
     public sealed class PngDecoder : IDisposable
     {
         readonly IntPtr version;
@@ -20,105 +28,115 @@ namespace Iviz.ImageWrappers
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
         readonly PngNative.png_error warningCallback;
 
-        readonly PngReadCallback onReadCallback;
+        readonly byte[] readBuffer;
+        int position;
 
-        uint currentOffset;
         bool disposed;
 
-        /// <summary>
-        /// Gets the version of libpng.
-        /// </summary>
-        public string Version { get; }
-
-        /// <summary>
-        /// The event which is raised when an error occurs.
-        /// </summary>
-        public event Action<string>? Error;
-
-        /// <summary>
-        /// The event which is raised when a warning occurs.
-        /// </summary>
-        public event Action<string>? Warning;
-
-        public delegate void PngReadCallback(uint currentOffset, Span<byte> buffer);
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PngDecoder"/> class.
-        /// </summary>
-        public unsafe PngDecoder(PngReadCallback onReadCallback)
+        public PngInfo PngInfo { get; }
+        
+        public unsafe PngDecoder(byte[] readBuffer)
         {
+            this.readBuffer = readBuffer;
+
             Span<byte> header = stackalloc byte[8];
-            onReadCallback(0, header);
+            readBuffer.AsSpan(0, 8).CopyTo(header);
+            position = 8;
 
             fixed (byte* headerPtr = header)
             {
                 if (PngNative.png_sig_cmp((IntPtr)headerPtr, 0, 8) != 0)
                 {
-                    throw new ArgumentException("Stream is not a PNG file!");
+                    throw new DecoderException("Data is not a PNG file!");
                 }
             }
 
-
-            this.onReadCallback = onReadCallback;
-
             version = PngNative.png_get_libpng_ver(IntPtr.Zero);
-            Version = Marshal.PtrToStringAnsi(version) ?? "";
 
             errorCallback = OnError;
             warningCallback = OnWarning;
             readCallback = Read;
 
-            pngPtr = PngNative.png_create_read_struct(version, (IntPtr)1, errorCallback, warningCallback);
-            ThrowOnZero(pngPtr);
+            pngPtr = PngNative.png_create_read_struct(version, IntPtr.Zero, errorCallback, warningCallback);
+
+            if (pngPtr == IntPtr.Zero)
+            {
+                ThrowHelper.ThrowInvalidOperation("Failed to initialize " + nameof(pngPtr));
+            }
 
             infoPtr = PngNative.png_create_info_struct(pngPtr);
-            ThrowOnZero(infoPtr);
+            if (infoPtr == IntPtr.Zero)
+            {
+                ThrowHelper.ThrowInvalidOperation("Failed to initialize " + nameof(infoPtr));
+            }
 
-            PngNative.png_set_read_fn(pngPtr, IntPtr.Zero, readCallback);
-            PngNative.png_set_sig_bytes(pngPtr, 8);
-        }
+            try
+            {
+                PngNative.png_set_read_fn(pngPtr, IntPtr.Zero, readCallback);
+                PngNative.png_set_sig_bytes(pngPtr, 8);
 
-        public PngInfo ReadInfo()
-        {
-            PngNative.png_read_info(pngPtr, infoPtr);
+                PngNative.png_read_info(pngPtr, infoPtr);
 
-            // Transforms paletted images to RGB.
-            PngNative.png_set_palette_to_rgb(pngPtr);
-            // Transforms grayscale images of less than 8 to 8 bits
-            PngNative.png_set_gray_1_2_4_to_8(pngPtr);
-            // Changes the pixel byte order for 16-bit pixels from bit-endian to little-endian.
-            PngNative.png_set_swap(pngPtr);
+                PngNative.png_set_palette_to_rgb(pngPtr); // transforms palette images to RGB.
+                PngNative.png_set_expand_gray_1_2_4_to_8(
+                    pngPtr); // transforms grayscale images of less than 8 to 8 bits
+                PngNative.png_set_swap(pngPtr); // changes the pixel byte order from big-endian to little-endian.
+                PngNative.png_set_strip_alpha(pngPtr); // removes the alpha channel
 
-            PngNative.png_read_update_info(pngPtr, infoPtr);
-
-            return new PngInfo(
-                (int)PngNative.png_get_image_width(pngPtr, infoPtr),
-                (int)PngNative.png_get_image_height(pngPtr, infoPtr),
-                PngNative.png_get_bit_depth(pngPtr, infoPtr),
-                PngNative.png_get_channels(pngPtr, infoPtr),
-                (int)PngNative.png_get_rowbytes(pngPtr, infoPtr),
-                PngNative.png_get_color_type(pngPtr, infoPtr));
+                PngNative.png_read_update_info(pngPtr, infoPtr);
+                
+                PngInfo = new PngInfo(
+                    (int)PngNative.png_get_image_width(pngPtr, infoPtr),
+                    (int)PngNative.png_get_image_height(pngPtr, infoPtr),
+                    PngNative.png_get_bit_depth(pngPtr, infoPtr),
+                    PngNative.png_get_channels(pngPtr, infoPtr),
+                    (int)PngNative.png_get_rowbytes(pngPtr, infoPtr),
+                    PngNative.png_get_color_type(pngPtr, infoPtr));
+            }
+            catch
+            {
+                Dispose();
+                throw;
+            }
         }
 
         /// <summary>
         /// Decodes the image into a decompressed buffer.
         /// </summary>
-        public unsafe void Decode(in PngInfo pngInfo, Span<byte> destBuffer)
+        public unsafe void Decode(Span<byte> destBuffer)
         {
-            Span<IntPtr> rowPointers = stackalloc IntPtr[pngInfo.Height];
-
-            fixed (byte* ptr = destBuffer)
-            fixed (IntPtr* rowPointersPtr = rowPointers)
+            int requiredLength = PngInfo.DecompressedSize;
+            if (requiredLength == 0)
             {
-                var currentRow = (IntPtr)ptr;
+                return;
+            }
 
-                for (int i = 0; i < pngInfo.Height; i++)
+            if (destBuffer.Length == 0)
+            {
+                ThrowHelper.ThrowArgument("Destination buffer is empty", nameof(destBuffer));
+            }
+
+            int height = PngInfo.Height;
+            var ptrRent = Rent.Empty<IntPtr>();
+            Span<IntPtr> rowPointers = height < 256
+                ? stackalloc IntPtr[height]
+                : (ptrRent = new Rent<IntPtr>(height));
+
+            using (ptrRent)
+            {
+                fixed (byte* destBufferPtr = destBuffer)
+                fixed (IntPtr* rowPointersPtr = rowPointers)
                 {
-                    rowPointers[i] = currentRow;
-                    currentRow += pngInfo.BytesPerRow;
-                }
+                    IntPtr currentRowPtr = (IntPtr)destBufferPtr;
 
-                PngNative.png_read_image(pngPtr, (IntPtr)rowPointersPtr);
+                    for (int i = 0; i < height; i++)
+                    {
+                        rowPointers[i] = currentRowPtr;
+                        currentRowPtr += PngInfo.BytesPerRow;
+                    }
+
+                    PngNative.png_read_image(pngPtr, (IntPtr)rowPointersPtr);
+                }
             }
 
             // Don't actually read the end_info data.
@@ -127,29 +145,35 @@ namespace Iviz.ImageWrappers
 
         unsafe void Read(IntPtr _, IntPtr outBytes, uint byteCountToRead)
         {
-            var target = new Span<byte>(outBytes.ToPointer(), (int)byteCountToRead);
-            onReadCallback.Invoke(currentOffset, target);
-            currentOffset += byteCountToRead;
-        }
-
-        void OnError(IntPtr _, IntPtr strPtr)
-        {
-            string error = Marshal.PtrToStringAnsi(strPtr) ?? "";
-            Error?.Invoke(error);
-        }
-
-        void OnWarning(IntPtr _, IntPtr strPtr)
-        {
-            string error = Marshal.PtrToStringAnsi(strPtr) ?? "";
-            Warning?.Invoke(error);
-        }
-
-        static void ThrowOnZero(IntPtr value)
-        {
-            if (value == IntPtr.Zero)
+            int countToRead = (int)byteCountToRead;
+            var targetBuffer = new Span<byte>(outBytes.ToPointer(), countToRead);
+            if (position + countToRead > readBuffer.Length)
             {
-                throw new Exception();
+                RosLogger.Debug(nameof(PngDecoder) + ": Buffer underflow!");
+                targetBuffer.Fill(0);
+                return;
             }
+
+            readBuffer.AsSpan(position, countToRead).CopyTo(targetBuffer);
+            position += countToRead;
+        }
+
+        [MonoPInvokeCallback(typeof(PngNative.png_error))]
+        static void OnError(IntPtr _, IntPtr strPtr)
+        {
+            string error = Marshal.PtrToStringAnsi(strPtr) ?? "";
+
+            // this is nasty! we are throwing across p/invoke and back into C#, probably causing leaks. 
+            // but libpng has no other error handling mechanism, i.e, if this function returns without throwing,
+            // it will crash the whole app!
+            throw new DecoderException(error);
+        }
+
+        [MonoPInvokeCallback(typeof(PngNative.png_error))]
+        static void OnWarning(IntPtr _, IntPtr strPtr)
+        {
+            string error = Marshal.PtrToStringAnsi(strPtr) ?? "";
+            RosLogger.Debug($"{nameof(PngDecoder)}: {error}");
         }
 
         void ReleaseUnmanagedResources()
@@ -173,54 +197,6 @@ namespace Iviz.ImageWrappers
         ~PngDecoder()
         {
             ReleaseUnmanagedResources();
-        }
-    }
-
-    public readonly struct PngInfo
-    {
-        /// <summary>
-        /// Gets the image width in pixels.
-        /// </summary>
-        public int Width { get; }
-
-        /// <summary>
-        /// Gets the image height in pixels.
-        /// </summary>
-        public int Height { get; }
-
-        /// <summary>
-        /// Gets the image color type.
-        /// </summary>
-        public PngColorType ColorType { get; }
-
-        /// <summary>
-        /// Gets the number of color channels in the image.
-        /// </summary>
-        public int Channels { get; }
-
-        /// <summary>
-        /// Gets the image bit depth.
-        /// </summary>
-        public int BitDepth { get; }
-
-        /// <summary>
-        /// Gets the number of bytes in a row.
-        /// </summary>
-        public int BytesPerRow { get; }
-
-        /// <summary>
-        /// Gets the size of the decompressed image.
-        /// </summary>
-        public int DecompressedSize => BytesPerRow * Height;
-
-        public PngInfo(int width, int height, int bitDepth, int channels, int bytesPerRow, PngColorType colorType)
-        {
-            Width = width;
-            Height = height;
-            ColorType = colorType;
-            Channels = channels;
-            BitDepth = bitDepth;
-            BytesPerRow = bytesPerRow;
         }
     }
 }

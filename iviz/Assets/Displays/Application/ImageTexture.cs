@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 using BitMiracle.LibJpeg;
 using Iviz.Common;
 using Iviz.Core;
+using Iviz.ImageWrappers;
 using Iviz.Resources;
 using Iviz.Tools;
+using MarcusW.VncClient.Protocol.Implementation.Native;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -21,6 +23,8 @@ namespace Iviz.Displays
 {
     public sealed class ImageTexture
     {
+        readonly object owner;
+
         byte[] bitmapBuffer = Array.Empty<byte>();
         Vector2 normalizedIntensityBounds;
         ColormapId colormap;
@@ -109,9 +113,10 @@ namespace Iviz.Displays
 
         Texture2D ColormapTexture => Resource.Colormaps.Textures[Colormap];
 
-        public ImageTexture()
+        public ImageTexture(object owner)
         {
             Material = Resource.Materials.ImagePreview.Instantiate();
+            this.owner = owner;
         }
 
         static int? FieldSizeFromEncoding(string encoding)
@@ -151,188 +156,170 @@ namespace Iviz.Displays
             }
         }
 
-        static string? EncodingFromPng(BigGustave.Png png)
-        {
-            return png.Header.ColorType switch
-            {
-                BigGustave.ColorType.None => png.Header.BitDepth switch
-                {
-                    8 => "mono8",
-                    16 => "mono16",
-                    _ => null
-                },
-                BigGustave.ColorType.ColorUsed => png.Header.BitDepth switch
-                {
-                    8 => "rgb8",
-                    16 => "rgb16",
-                    _ => null
-                },
-                BigGustave.ColorType.AlphaChannelUsed => png.Header.BitDepth switch
-                {
-                    8 => "rgba8",
-                    16 => "rgba16",
-                    _ => null
-                },
-                _ => null
-            };
-        }
-
         public void ProcessPng(byte[] data, Action onFinished)
         {
             ThrowHelper.ThrowIfNull(data, nameof(data));
             ThrowHelper.ThrowIfNull(onFinished, nameof(onFinished));
 
+            if (data.Length < 8)
+            {
+                RosLogger.Debug($"{this}: Error processing PNG image. Data array is too short to be a PNG file");
+                GameThread.PostInListenerQueue(onFinished);
+                return;
+            }
+
             Task.Run(() =>
             {
                 try
                 {
-                    var png = BigGustave.Png.Open(data);
-                    string? encoding = EncodingFromPng(png);
-                    if (encoding == null)
-                    {
-                        RosLogger.Error($"{this}: Ignoring PNG with unsupported encoding '{png.Header.ColorType}'");
-                        return;
-                    }
-
-                    byte[] newData;
-                    if (png.RowOffset != 0)
-                    {
-                        int reqSize = png.Height * png.RowSize;
-                        if (bitmapBuffer.Length < reqSize)
-                        {
-                            bitmapBuffer = new byte[reqSize];
-                        }
-
-                        int srcOffset = png.RowOffset;
-                        int dstOffset = 0;
-                        int rowSize = png.RowSize;
-                        foreach (int _ in ..png.Height)
-                        {
-                            Buffer.BlockCopy(png.Data, srcOffset, bitmapBuffer, dstOffset, rowSize);
-                            srcOffset += png.RowStep;
-                            dstOffset += rowSize;
-                        }
-
-                        newData = bitmapBuffer;
-                    }
-                    else
-                    {
-                        newData = png.Data;
-                    }
-
-                    GameThread.PostInListenerQueue(() =>
-                    {
-                        try
-                        {
-                            Set(png.Width, png.Height, encoding, newData);
-                        }
-                        finally
-                        {
-                            onFinished();
-                        }
-                    });
+                    ProcessPngCore(data, onFinished);
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Error processing PNG", e);
+                    RosLogger.Error($"{this}: Error processing PNG image", e);
                     GameThread.PostInListenerQueue(onFinished);
                 }
             });
         }
 
-        public void ProcessJpg(byte[] data, Action onFinished)
+        void ProcessPngCore(byte[] data, Action onFinished)
+        {
+            int width;
+            int height;
+            string? encoding;
+
+            using (var pngDecoder = new PngDecoder(data))
+            {
+                var info = pngDecoder.PngInfo;
+                if (info.Width >= Settings.MaxTextureSize || info.Height >= Settings.MaxTextureSize)
+                {
+                    RosLogger.Error($"{this}: Error processing PNG image. Required destination buffer is too large");
+                    GameThread.PostInListenerQueue(onFinished);
+                    return;
+                }
+
+                encoding = info.ColorType switch
+                {
+                    PngColorType.Gray when info.BitDepth == 8 => "mono8",
+                    PngColorType.Gray when info.BitDepth == 16 => "mono16",
+                    PngColorType.Gray when info.BitDepth == 16 => "mono16",
+                    PngColorType.RGB when info.BitDepth == 8 => "rgb8",
+                    PngColorType.RGBA when info.BitDepth == 8 => "rgba8",
+                    _ => null
+                };
+
+                if (encoding == null)
+                {
+                    RosLogger.Error($"{this}: Ignoring PNG with unsupported encoding '{info.ColorType}'");
+                    GameThread.PostInListenerQueue(onFinished);
+                    return;
+                }
+
+                int reqSize = info.DecompressedSize;
+                if (bitmapBuffer.Length < reqSize)
+                {
+                    bitmapBuffer = new byte[reqSize];
+                }
+
+                pngDecoder.Decode(bitmapBuffer);
+
+                width = info.Width;
+                height = info.Height;
+            }
+
+            GameThread.PostInListenerQueue(() =>
+            {
+                try
+                {
+                    Set(width, height, encoding, bitmapBuffer);
+                }
+                finally
+                {
+                    onFinished();
+                }
+            });
+        }
+
+        public void ProcessJpeg(byte[] data, Action onFinished)
         {
             ThrowHelper.ThrowIfNull(data, nameof(data));
             ThrowHelper.ThrowIfNull(onFinished, nameof(onFinished));
+
+            if (data.Length < 2)
+            {
+                RosLogger.Debug($"{this}: Error processing JPG image. Data array is too short to be a JPG file");
+                GameThread.PostInListenerQueue(onFinished);
+                return;
+            }
 
             Task.Run(() =>
             {
                 try
                 {
-                    var image = new JpegImage(new MemoryStream(data));
-
-                    string? encoding;
-                    int reqSize = image.Height * image.Width;
-                    switch (image.Colorspace)
-                    {
-                        case Colorspace.RGB when image.BitsPerComponent == 8:
-                        {
-                            if (image.Width % 4 != 0)
-                            {
-                                RosLogger.Debug($"{this}: Row padding not implemented");
-                                return;
-                            }
-
-                            encoding = "rgb";
-                            reqSize *= 3;
-                            break;
-                        }
-                        case Colorspace.Grayscale when image.BitsPerComponent == 8:
-                        {
-                            if (image.Width % 4 != 0)
-                            {
-                                RosLogger.Debug($"{this}: Row padding not implemented");
-                                return;
-                            }
-
-                            encoding = "mono8";
-                            break;
-                        }
-                        case Colorspace.Grayscale when image.BitsPerComponent == 16:
-                        {
-                            if (image.Width % 2 != 0)
-                            {
-                                RosLogger.Debug($"{this}: Row padding not implemented");
-                                return;
-                            }
-
-                            encoding = "mono16";
-                            reqSize *= 2;
-                            break;
-                        }
-                        default:
-                            encoding = null;
-                            break;
-                    }
-
-                    if (encoding == null)
-                    {
-                        RosLogger.Debug($"{this}: Unsupported encoding '{image.Colorspace}' " +
-                                        $"with size {image.BitsPerComponent.ToString()}");
-                        return;
-                    }
-
-                    const int bmpHeaderLength = 54;
-                    reqSize += bmpHeaderLength;
-
-                    if (bitmapBuffer.Length < reqSize)
-                    {
-                        bitmapBuffer = new byte[reqSize];
-                    }
-
-                    using (var outStream = new MemoryStream(bitmapBuffer))
-                    {
-                        image.WriteBitmap(outStream);
-                    }
-
-                    byte[] newBitmapBuffer = bitmapBuffer;
-
-                    GameThread.PostInListenerQueue(() =>
-                    {
-                        try
-                        {
-                            Set(image.Width, image.Height, encoding, newBitmapBuffer.AsReadOnlySpan(bmpHeaderLength..));
-                        }
-                        finally
-                        {
-                            onFinished();
-                        }
-                    });
+                    ProcessJpegCore(data, onFinished);
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Error processing JPG", e);
+                    RosLogger.Error($"{this}: Error processing JPG image", e);
                     GameThread.PostInListenerQueue(onFinished);
+                }
+            });
+        }
+
+        void ProcessJpegCore(byte[] data, Action onFinished)
+        {
+            int width;
+            int height;
+            string? encoding;
+
+            using (var jpegDecoder = new JpegDecoder(data))
+            {
+                var info = jpegDecoder.JpegInfo;
+                if (info.Width >= Settings.MaxTextureSize || info.Height >= Settings.MaxTextureSize)
+                {
+                    RosLogger.Error($"{this}: Error processing JPG image. Required destination buffer is too large");
+                    GameThread.PostInListenerQueue(onFinished);
+                    return;
+                }
+
+                encoding = info.Format switch
+                {
+                    TurboJpegPixelFormat.Gray => "mono8",
+                    TurboJpegPixelFormat.RGB => "rgb",
+                    TurboJpegPixelFormat.RGBA or TurboJpegPixelFormat.RGBX => "rgba",
+                    TurboJpegPixelFormat.BGR => "bgr",
+                    TurboJpegPixelFormat.BGRA or TurboJpegPixelFormat.BGRX => "bgra",
+                    _ => null
+                };
+
+                if (encoding == null)
+                {
+                    RosLogger.Error($"{this}: Ignoring PNG with unsupported encoding '{info.Colorspace}'");
+                    GameThread.PostInListenerQueue(onFinished);
+                    return;
+                }
+
+                int reqSize = info.DecompressedSize;
+                if (bitmapBuffer.Length < reqSize)
+                {
+                    bitmapBuffer = new byte[reqSize];
+                }
+
+                jpegDecoder.Decode(bitmapBuffer);
+
+                width = info.Width;
+                height = info.Height;
+            }
+
+            GameThread.PostInListenerQueue(() =>
+            {
+                try
+                {
+                    Set(width, height, encoding, bitmapBuffer);
+                }
+                finally
+                {
+                    onFinished();
                 }
             });
         }
@@ -340,6 +327,12 @@ namespace Iviz.Displays
         public void Set(int width, int height, string encoding, ReadOnlySpan<byte> data, bool generateMipmaps = false)
         {
             ThrowHelper.ThrowIfNull(encoding, nameof(encoding));
+
+            if (width >= Settings.MaxTextureSize || height >= Settings.MaxTextureSize)
+            {
+                RosLogger.Debug($"{this}: Required destination buffer is too large");
+                return;
+            }
 
             int size = width * height;
 
@@ -351,9 +344,9 @@ namespace Iviz.Displays
 
             if (data.Length < size * bpp)
             {
-                RosLogger.Debug(
+                RosLogger.Error(
                     $"{this}: Invalid image! Expected at least {(size * bpp).ToString()} bytes, " +
-                    $"received {data.Length.ToString()}");
+                    $"but received {data.Length.ToString()}");
                 return;
             }
 
@@ -435,16 +428,21 @@ namespace Iviz.Displays
                     {
                         texture = EnsureSize(width, height, TextureFormat.R8);
                         ConversionUtils.CopyPixelsR16ToR8(texture.AsSpan(), data);
+                        
+                        intensityBounds = CalculateBounds(texture.GetRawTextureData<byte>());
+                        MeasuredIntensityBounds = intensityBounds;
+                        normalizationFactor = 1f / byte.MaxValue;
                     }
                     else
                     {
                         texture = EnsureSize(width, height, TextureFormat.R16);
                         texture.CopyFrom(data);
+
+                        intensityBounds = CalculateBounds(texture.GetRawTextureData<ushort>());
+                        MeasuredIntensityBounds = intensityBounds;
+                        normalizationFactor = 1f / ushort.MaxValue;
                     }
 
-                    intensityBounds = CalculateBounds(texture.GetRawTextureData<ushort>());
-                    MeasuredIntensityBounds = intensityBounds;
-                    normalizationFactor = 1f / ushort.MaxValue;
                     if (!OverrideIntensityBounds)
                     {
                         IntensityBounds = intensityBounds;
@@ -595,5 +593,7 @@ namespace Iviz.Displays
             UnityEngine.Object.Destroy(Material);
             bitmapBuffer = Array.Empty<byte>();
         }
+
+        public override string ToString() => $"[{nameof(ImageTexture)} from {owner}]";
     }
 }

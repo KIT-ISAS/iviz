@@ -11,12 +11,12 @@ namespace Iviz.Displays
     /// The same field is read either as a Color32 or a float depending on whether UseColormap is enabled in the display.
     /// Internally a wrapper around <see cref="float4"/>. 
     /// </summary>
-    public struct PointWithColor
+    public readonly struct PointWithColor
     {
-        public float4 f;
-        
-        readonly Color32 Color => UnityUtils.AsColor32(f.w);
-        readonly float Intensity => f.w;
+        readonly float4 f;
+
+        Color32 Color => UnityUtils.AsColor32(f.w);
+        float Intensity => f.w;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public PointWithColor(in Vector3 position, Color32 color) :
@@ -41,7 +41,7 @@ namespace Iviz.Displays
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [NotNull]
-        public readonly override string ToString()
+        public override string ToString()
         {
             return $"[x={f.x} y={f.y} z={f.z} i={Intensity} c={Color}]";
         }

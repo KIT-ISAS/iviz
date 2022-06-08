@@ -26,7 +26,7 @@ namespace Iviz.Displays
         [SerializeField] bool useLines;
         [SerializeField] float maxLineDistance;
 
-        readonly List<LineWithColor> lineBuffer = new();
+        readonly List<float4x2> lineBuffer = new();
         readonly List<float4> pointBuffer = new();
         Vector2[] cache = Array.Empty<Vector2>();
 
@@ -294,9 +294,9 @@ namespace Iviz.Displays
             var points = pointBuffer.AsReadOnlySpan();
             lineBuffer.Clear();
 
-            var line = new LineWithColor();
-            ref var pA = ref line.f.c0;
-            ref var pB = ref line.f.c1;
+            var line = new float4x2();
+            ref var pA = ref line.c0;
+            ref var pB = ref line.c1;
 
             for (int i = 0; i < points.Length - 1; i++)
             {

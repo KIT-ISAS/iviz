@@ -8,6 +8,7 @@ using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
 using Iviz.Tools;
+using Unity.Burst;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -26,15 +27,12 @@ namespace Iviz.Displays
         
         readonly NativeList<float4> pointBuffer = new();
 
-        bool isDirty;
-
-        Mesh? mesh;
-
         [SerializeField] MeshRenderer? meshRenderer;
         [SerializeField] MeshFilter? meshFilter;
         ComputeBuffer? pointComputeBuffer;
-
+        Mesh? mesh;
         Material? currentMaterial;
+        bool isDirty;
 
         MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
         MeshFilter MeshFilter => meshFilter.AssertNotNull(nameof(meshFilter));
@@ -162,12 +160,13 @@ namespace Iviz.Displays
             
             using (var vertices = new Rent<Vector3>(pointsLength))
             {
-                ref float4 pPtr = ref pointBuffer.GetReference();
-                ref Vector3 vPtr = ref vertices.Array[0];
+                //ref float4 pPtr = ref pointBuffer.GetReference();
+                //ref Vector3 vPtr = ref vertices.Array[0];
 
                 if (UseColormap)
                 {
                     using var uvs = new Rent<Vector2>(pointsLength);
+                    /*
                     ref Vector2 uvsPtr = ref uvs.Array[0];
                     for (int i = pointsLength; i > 0; i--)
                     {
@@ -182,6 +181,9 @@ namespace Iviz.Displays
                         vPtr = ref vPtr.Plus(1);
                         uvsPtr = ref uvsPtr.Plus(1);
                     }
+                    */
+                    IndicesUtils.FillVector3(pointBuffer.AsArray(), vertices);
+                    IndicesUtils.FillUV(pointBuffer.AsArray(), uvs);
 
                     mesh.SetVertices(vertices);
                     mesh.SetUVs(uvs);
@@ -189,6 +191,7 @@ namespace Iviz.Displays
                 else
                 {
                     using var colors = new Rent<Color32>(pointsLength);
+                    /*
                     ref float cPtr = ref Unsafe.As<Color32, float>(ref colors[0]);
                     for (int i = pointsLength; i > 0; i--)
                     {
@@ -203,6 +206,9 @@ namespace Iviz.Displays
                         vPtr = ref vPtr.Plus(1);
                         cPtr = ref cPtr.Plus(1);
                     }
+                    */
+                    IndicesUtils.FillVector3(pointBuffer.AsArray(), vertices);
+                    IndicesUtils.FillColor(pointBuffer.AsArray(), colors);
 
                     mesh.SetVertices(vertices);
                     mesh.SetColors(colors);
@@ -211,6 +217,7 @@ namespace Iviz.Displays
 
             using (var indices = new Rent<int>(pointsLength))
             {
+                /*
                 ref int iPtr = ref indices.Array[0];
                 for (int i = 0; i < pointsLength; i++)
                 {
@@ -218,6 +225,8 @@ namespace Iviz.Displays
                     iPtr = ref iPtr.Plus(1);
                     //iArray[i] = i;
                 }
+                */
+                IndicesUtils.FillIndices(indices);
 
                 mesh.SetIndices(indices, MeshTopology.Points);
             }

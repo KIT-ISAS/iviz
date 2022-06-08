@@ -215,7 +215,7 @@ namespace Iviz.Controllers
 
         public ImageListener(ImageConfiguration? config, string topic, string type)
         {
-            imageTexture = new ImageTexture();
+            imageTexture = new ImageTexture(this);
             node = new FrameNode("ImageNode");
             billboard = ResourcePool.RentDisplay<ImageResource>();
             billboard.Texture = imageTexture;
@@ -242,6 +242,18 @@ namespace Iviz.Controllers
 
         bool HandlerCompressed(CompressedImage msg)
         {
+            if (msg.Format.Length == 0)
+            {
+                RosLogger.Error($"{this}: Image format field is not set!");
+                return true;
+            }
+
+            if (msg.Data.Length == 0)
+            {
+                RosLogger.Error($"{this}: Data field is not set!");
+                return true;
+            }
+
             if (IsProcessing)
             {
                 return false;
@@ -268,10 +280,9 @@ namespace Iviz.Controllers
                     descriptionOverride = null;
                     imageTexture.ProcessPng(msg.Data, PostProcess);
                     break;
-                case "JPEG":
-                case "JPG":
+                case "JPEG" or "JPG":
                     descriptionOverride = null;
-                    imageTexture.ProcessJpg(msg.Data, PostProcess);
+                    imageTexture.ProcessJpeg(msg.Data, PostProcess);
                     break;
                 default:
                     descriptionOverride = msg.Format.Length == 0
@@ -286,6 +297,25 @@ namespace Iviz.Controllers
 
         bool Handler(Image msg)
         {
+            // basic checks
+            if (msg.Data.Length < msg.Width * msg.Height)
+            {
+                RosLogger.Error($"{this}: Image data is too small!");
+                return true;
+            }
+
+            if (msg.Step < msg.Width || msg.Data.Length < msg.Step * msg.Height)
+            {
+                RosLogger.Error($"{this}: Image step does not correspond to image size!");
+                return true;
+            }
+
+            if (msg.Encoding.Length == 0)
+            {
+                RosLogger.Error($"{this}: Image encoding field is not set!");
+                return true;
+            }
+
             if (IsProcessing)
             {
                 return false;

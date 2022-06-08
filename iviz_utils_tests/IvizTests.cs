@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -7,6 +8,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.MoveitMsgs;
 using Iviz.Msgs.NavMsgs;
+using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Msgs.VisualizationMsgs;
@@ -22,10 +24,12 @@ namespace Iviz.UtilsTests;
 [Category("Iviz")]
 public class IvizTests
 {
-    //static readonly Uri CallerUri = new Uri("http://localhost:7616");
-    //static readonly Uri MasterUri = new Uri("http://localhost:11311");
-    static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
-    static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
+    static readonly Uri CallerUri = new Uri("http://localhost:7616");
+
+    static readonly Uri MasterUri = new Uri("http://localhost:11311");
+
+    //static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
+    //static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
     const string CallerId = "/iviz_util_tests";
     const string IvizId = "/iviz_osxeditor";
 
@@ -179,7 +183,7 @@ public class IvizTests
     [Test]
     public void TestMarkers()
     {
-        var writer = client.CreateWriter<MarkerArray>("/markers", true);
+        using var writer = client.CreateWriter<MarkerArray>("/markers", true);
 
         var ivizController = new IvizController(client, IvizId);
         ivizController.AddModuleFromTopic("/markers");
@@ -302,10 +306,10 @@ public class IvizTests
         //----------------
 
         markers.Add(RosMarkerHelper.CreatePointList(id: 13, pose: Pose.Identity.WithPosition(0, 7, 0),
-            positions: points.ToArray(), scale: 0.05));
+            positions: points.ToArray(), scale: -0.05));
 
         markers.Add(RosMarkerHelper.CreateMeshList(id: 14, pose: Pose.Identity.WithPosition(2, 7, 0),
-            positions: points.ToArray(), scale: (0.05, 0.05, 0.05)));
+            positions: points.ToArray(), scale: (-0.05, 0.05, 0.05)));
 
         //----------------
 
@@ -327,7 +331,7 @@ public class IvizTests
         }
 
         markers.Add(RosMarkerHelper.CreateTriangleList(id: 15, pose: Pose.Identity.WithPosition(0, 9, 0),
-            positions: indices.ToArray(), scale: (1, 1, 5)));
+            positions: indices.ToArray(), scale: (1, 1, -5)));
 
         indices[^1] *= float.PositiveInfinity;
         markers.Add(RosMarkerHelper.CreateTriangleList(id: 16, pose: Pose.Identity.WithPosition(2, 9, 0),
@@ -341,8 +345,8 @@ public class IvizTests
     [Test]
     public void TestInteractiveMarkers()
     {
-        var writer = client.CreateWriter<InteractiveMarkerUpdate>("/interactive_markers/update", true);
-        var writer2 = client.CreateWriter<InteractiveMarkerInit>("/interactive_markers/update_full", true);
+        using var writer = client.CreateWriter<InteractiveMarkerUpdate>("/interactive_markers/update", true);
+        using var writer2 = client.CreateWriter<InteractiveMarkerInit>("/interactive_markers/update_full", true);
 
         //var ivizController = new IvizController(client, IvizId);
         //ivizController.AddModuleFromTopic("/interactive_markers");
@@ -356,18 +360,68 @@ public class IvizTests
         var control2 =
             RosInteractiveMarkerHelper.CreateControl(mode: RosInteractionMode.MoveAxis, markers: Array.Empty<Marker>());
 
-        var imarker = RosInteractiveMarkerHelper.Create(frameId: "map", name: "marker", controls: new[] { control1, control2 });
+        var imarker =
+            RosInteractiveMarkerHelper.Create(frameId: "map", name: "marker", controls: new[] { control1, control2 });
         var update = RosInteractiveMarkerHelper.CreateMarkerUpdate(args: imarker);
 
         var init = new InteractiveMarkerInit
         {
-            Markers = new[] {imarker},
+            Markers = new[] { imarker },
             ServerId = "iviz"
         };
-        
+
         writer2.Write(init);
         writer.Write(update);
 
         Thread.Sleep(10000);
+    }
+
+    [Test]
+    public void TestImages()
+    {
+        using var writer = client.CreateWriter<CompressedImage>("/compressed_image", true);
+
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.AddModuleFromTopic("/compressed_image");
+
+        var image = new CompressedImage();
+        image.Format = "png";
+
+
+        string path;
+        
+        path = "../../../images/grey.png";
+        image.Data = File.ReadAllBytes(path);
+        writer.Write(image);
+        Thread.Sleep(1000);
+
+        path = "../../../images/mask-2.png";
+        image.Data = File.ReadAllBytes(path);
+        writer.Write(image);
+        Thread.Sleep(1000);
+
+        path = "../../../images/mask-2.png";
+        image.Data = File.ReadAllBytes(path);
+        image.Data.AsSpan()[100..200].Fill(0); // break image
+        writer.Write(image);
+        Thread.Sleep(1000);
+        
+        path = "../../../images/testorig.jpg";
+        image.Data = File.ReadAllBytes(path);
+        writer.Write(image);
+        Thread.Sleep(1000);
+
+        image.Format = "whee";
+        writer.Write(image);
+        Thread.Sleep(1000);
+
+        image.Format = "jpg";
+        writer.Write(image);
+        Thread.Sleep(1000);
+
+        image.Format = "jpg";
+        image.Data.AsSpan()[100..200].Fill(0); // break image
+        writer.Write(image);
+        Thread.Sleep(1000);
     }
 }

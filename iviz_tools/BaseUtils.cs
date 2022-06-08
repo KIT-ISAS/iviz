@@ -146,7 +146,8 @@ public static class BaseUtils
         if (chunkField == null)
         {
             chunkField =
-                typeof(StringBuilder).GetField("m_ChunkChars", BindingFlags.NonPublic | BindingFlags.Instance)
+                typeof(StringBuilder).GetField("m_ChunkChars",
+                    BindingFlags.NonPublic | BindingFlags.Instance) // should survive trimming
                 ?? throw new InvalidOperationException("Failed to find StringBuilder chunk field!");
         }
 
@@ -217,7 +218,7 @@ public static class BaseUtils
         if (span.Length < sizeof(int))
         {
             ThrowIndexOutOfRange();
-        } 
+        }
 
         Unsafe.WriteUnaligned(ref span[0], t);
     }
@@ -226,7 +227,7 @@ public static class BaseUtils
 
     [DoesNotReturn, AssertionMethod]
     public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);
-    
+
     [DoesNotReturn]
     static int ThrowIndexOutOfRange() => throw new IndexOutOfRangeException();
 }

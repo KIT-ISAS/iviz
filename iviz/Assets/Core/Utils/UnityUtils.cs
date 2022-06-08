@@ -756,7 +756,7 @@ namespace Iviz.Core
 
         public static Task AsTask(this JobHandle handle)
         {
-            return GameThread.WaitUntilAsync(() => handle.IsCompleted);
+            return GameThread.WaitUntilAsync(() => handle.IsCompleted); // IsCompleted schedules batched job
         }
 
         public static string FormatFloat(float x) => Mathf.Abs(x) is >= 1e4f or < 1e-3f

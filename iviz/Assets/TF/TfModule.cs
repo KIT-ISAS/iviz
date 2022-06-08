@@ -309,7 +309,7 @@ namespace Iviz.Controllers.TF
             {
                 child = GetOrCreateFrame(childId, keepAllListenerNode);
             }
-            else if (!TryGetFrameImpl(childId, out child))
+            else if (!TryGetFrameCore(childId, out child))
             {
                 return;
             }
@@ -409,7 +409,7 @@ namespace Iviz.Controllers.TF
         public static bool TryGetFrame(string id, [NotNullWhen(true)] out TfFrame? frame)
         {
             ThrowHelper.ThrowIfNull(id, nameof(id));
-            return Instance.TryGetFrameImpl(id, out frame);
+            return Instance.TryGetFrameCore(id, out frame);
         }
 
         public static string ResolveFrameId(string frameId)
@@ -457,7 +457,7 @@ namespace Iviz.Controllers.TF
                 _ => frameId
             };
 
-            var frame = Instance.GetOrCreateFrameImpl(validatedFrameId);
+            var frame = Instance.GetOrCreateFrameCore(validatedFrameId);
 
             if (listener != null)
             {
@@ -467,9 +467,9 @@ namespace Iviz.Controllers.TF
             return frame;
         }
 
-        TfFrame GetOrCreateFrameImpl(string id)
+        TfFrame GetOrCreateFrameCore(string id)
         {
-            return TryGetFrameImpl(id, out TfFrame? frame)
+            return TryGetFrameCore(id, out TfFrame? frame)
                 ? frame
                 : Add(CreateFrameObject(id, DefaultFrame));
         }
@@ -486,7 +486,7 @@ namespace Iviz.Controllers.TF
             return frame;
         }
 
-        bool TryGetFrameImpl(string id, [NotNullWhen(true)] out TfFrame? t)
+        bool TryGetFrameCore(string id, [NotNullWhen(true)] out TfFrame? t)
         {
             return frames.TryGetValue(id, out t);
         }

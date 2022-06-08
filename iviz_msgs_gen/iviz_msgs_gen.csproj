@@ -7,6 +7,14 @@
     <RootNamespace>Iviz.MsgsGen</RootNamespace>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />

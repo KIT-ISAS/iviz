@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Core.XR;
+using Iviz.ImageWrappers;
 using Iviz.Tools;
 using Iviz.Urdf;
 using MarcusW.VncClient;
@@ -75,7 +76,10 @@ namespace VNC
 
         public VncScreen()
         {
-            TurboJpeg.IsAvailable = true;
+            if (TurboJpeg.TurboJpegBackend is not TurboJpegUnityWrapper)
+            {
+                TurboJpeg.TurboJpegBackend = new TurboJpegUnityWrapper();
+            }
         }
 
         void Awake()

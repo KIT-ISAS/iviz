@@ -96,7 +96,6 @@ namespace Iviz.Roslib
             return GetEnumerator();
         }
 
-#if !NETSTANDARD2_0
         public async IAsyncEnumerable<IMessage> ReadAllAsync([EnumeratorCancellation] CancellationToken token = default)
         {
             Task<bool>[] tasks = new Task<bool>[sources.Length];
@@ -130,6 +129,5 @@ namespace Iviz.Roslib
         {
             return ReadAllAsync(token).GetAsyncEnumerator(token);
         }
-#endif
     }
 }

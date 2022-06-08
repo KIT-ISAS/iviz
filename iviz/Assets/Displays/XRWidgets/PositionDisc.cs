@@ -31,8 +31,6 @@ namespace Iviz.App.ARDialogs
         Color color = new(0, 1f, 0.6f);
         Color secondaryColor = Color.white;
 
-        readonly LineWithColor[] lineBuffer = new LineWithColor[2];
-
         MeshMarkerDisplay Anchor => anchor.AssertNotNull(nameof(anchor));
         MeshMarkerDisplay OuterDisc => outerDisc.AssertNotNull(nameof(outerDisc));
         MeshMarkerDisplay InnerDisc => innerDisc.AssertNotNull(nameof(innerDisc));
@@ -87,9 +85,9 @@ namespace Iviz.App.ARDialogs
             {
                 Draggable.Interactable = value;
                 Button.Interactable = value;
-            } 
+            }
         }
-        
+
         void Awake()
         {
             Line.ElementScale = linkWidth;
@@ -97,8 +95,8 @@ namespace Iviz.App.ARDialogs
 
             Color = Color;
             SecondaryColor = SecondaryColor;
-            Glow.Visible = false;            
-            
+            Glow.Visible = false;
+
             Button.Icon = XRIcon.Ok;
             Button.Caption = "Send!";
             Button.Visible = false;
@@ -111,7 +109,7 @@ namespace Iviz.App.ARDialogs
             TooltipY.Scale = 0.03f;
             TooltipX.Visible = false;
             TooltipY.Visible = false;
-            
+
             Draggable.StartDragging += () =>
             {
                 Button.Visible = false;
@@ -131,8 +129,11 @@ namespace Iviz.App.ARDialogs
                 var p1 = new Vector3(0, 0, discPosition.z);
                 var p2 = discPosition;
 
-                lineBuffer[0] = new LineWithColor(p0, p1, Color.red.WithAlpha(0.5f));
-                lineBuffer[1] = new LineWithColor(p1, p2, Color.green.WithAlpha(0.5f));
+                ReadOnlySpan<LineWithColor> lineBuffer = stackalloc LineWithColor[]
+                {
+                    new LineWithColor(p0, p1, Color.red.WithAlpha(0.5f)),
+                    new LineWithColor(p1, p2, Color.green.WithAlpha(0.5f))
+                };
 
                 TooltipX.Transform.localPosition = ((p1 + p0) / 2).WithY(0.5f);
                 TooltipY.Transform.localPosition = ((p2 + p1) / 2).WithY(0.5f);
@@ -140,20 +141,20 @@ namespace Iviz.App.ARDialogs
                 TooltipX.Caption = "X: " + ((p1 - p0) / Scale).WithY(0).Magnitude().ToString("0.###") + " m";
                 TooltipY.Caption = "Y: " + ((p2 - p1) / Scale).WithY(0).Magnitude().ToString("0.###") + " m";
 
-                Line.Set(lineBuffer, true);                
+                Line.Set(lineBuffer, true);
             };
             Draggable.EndDragging += () =>
             {
                 InnerDisc.EmissiveColor = Color.black;
                 OuterDisc.EmissiveColor = Color.black;
                 Glow.Visible = false;
-                
+
                 Button.Transform.localPosition = Draggable.Transform.localPosition + buttonDistance * Vector3.up;
                 Button.Visible = true;
             };
-            
+
             Button.Clicked += () =>
-            { 
+            {
                 Button.Visible = false;
                 TooltipX.Visible = false;
                 TooltipY.Visible = false;
@@ -163,11 +164,9 @@ namespace Iviz.App.ARDialogs
                 tokenSource = new CancellationTokenSource();
 
                 var startPosition = Draggable.Transform.localPosition;
-                FAnimator.Spawn(tokenSource.Token, 0.1f, t =>
-                {
-                    Draggable.Transform.localPosition = (1 - Mathf.Sqrt(t)) * startPosition;
-                });                
-                
+                FAnimator.Spawn(tokenSource.Token, 0.1f,
+                    t => { Draggable.Transform.localPosition = (1 - Mathf.Sqrt(t)) * startPosition; });
+
                 Moved?.Invoke(startPosition);
             };
         }

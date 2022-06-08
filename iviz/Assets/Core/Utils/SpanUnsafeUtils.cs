@@ -23,13 +23,13 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe T* AsPointer<T>(this Span<T> span) where T : unmanaged
+        public static unsafe T* GetPointer<T>(this Span<T> span) where T : unmanaged
         {
             return (T*)Unsafe.AsPointer(ref span[0]);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe T* AsPointer<T>(this ReadOnlySpan<T> span) where T : unmanaged
+        public static unsafe T* GetPointer<T>(this ReadOnlySpan<T> span) where T : unmanaged
         {
             return (T*)Unsafe.AsPointer(ref span.GetReference());
         }

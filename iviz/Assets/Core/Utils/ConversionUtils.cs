@@ -10,6 +10,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace Iviz.Core
 {
@@ -24,7 +25,7 @@ namespace Iviz.Core
         {
             if (withBurst)
             {
-                CopyPixelsRgbToRgbaJob.Execute(src3.AsPointer(), (Rgba*)dst4.AsPointer(), src3.Length);
+                CopyPixelsRgbToRgbaJob.Execute(src3.GetPointer(), (Rgba*)dst4.GetPointer(), src3.Length);
                 return;
             }
 
@@ -108,7 +109,7 @@ namespace Iviz.Core
         {
             if (withBurst)
             {
-                Convert565To888Job.Execute(src2.AsPointer(), (int*)dst4.AsPointer(), src2.Length);
+                Convert565To888Job.Execute(src2.GetPointer(), (int*)dst4.GetPointer(), src2.Length);
                 return;
             }
 
@@ -175,7 +176,7 @@ namespace Iviz.Core
         {
             if (withBurst)
             {
-                CopyPixelsR16ToR8Job.Execute(src.Cast<R16>().AsPointer(), dst.AsPointer(), dst.Length);
+                CopyPixelsR16ToR8Job.Execute(src.Cast<R16>().GetPointer(), dst.GetPointer(), dst.Length);
                 return;
             }
 
@@ -271,12 +272,18 @@ namespace Iviz.Core
 
         public static JobHandle MirrorXfFast(int width, int height, NativeArray<float> src, byte[] dst)
         {
+            int minSize = width * height;
+            if (src.Length < minSize || dst.Length < minSize * sizeof(float))
+            {
+                ThrowHelper.ThrowArgument("Size does not match!", nameof(src));
+            }
+
             return new MirrorXFloatJob
             {
                 width = width,
                 height = height,
                 input = src,
-                output = dst.CreateNativeArrayWrapper().Cast<byte, float>()
+                output = dst.AsNativeArray().Cast<byte, float>()
             }.Schedule();
         }
 
@@ -322,13 +329,212 @@ namespace Iviz.Core
 
         public static JobHandle MirrorXbFast(int width, int height, NativeArray<byte> src, byte[] dst)
         {
+            int minSize = width * height;
+            if (src.Length < minSize || dst.Length < minSize)
+            {
+                ThrowHelper.ThrowArgument("Size does not match!", nameof(src));
+            }
+
             return new MirrorXByteJob
             {
                 width = width,
                 height = height,
                 input = src,
-                output = dst.CreateNativeArrayWrapper()
+                output = dst.AsNativeArray()
             }.Schedule();
+        }
+    }
+
+    [BurstCompile]
+    public static unsafe class IndicesUtils
+    {
+        static class Impl
+        {
+            [BurstCompile(CompileSynchronously = true)]
+            public static void FillIndices([NoAlias] int* input, int inputLength)
+            {
+                for (int i = 0; i < inputLength; i++)
+                {
+                    input[i] = i;
+                }
+            }
+
+            [BurstCompile(CompileSynchronously = true)]
+            public static void FillFlipped([NoAlias] int3* input, int inputLength)
+            {
+                int j = 0;
+                for (int i = 0; i < inputLength; i++)
+                {
+                    int3 triangle;
+                    triangle.x = j;
+                    triangle.y = j + 2;
+                    triangle.z = j + 1;
+                    input[i] = triangle;
+                    j += 3;
+                }
+            }
+
+            [BurstCompile(CompileSynchronously = true)]
+            public static void ToVector3([NoAlias] float4* input, [NoAlias] float3* output, int inputLength)
+            {
+                for (int i = 0; i < inputLength; i++)
+                {
+                    output[i] = input[i].xyz;
+                }
+            }
+
+            [BurstCompile(CompileSynchronously = true)]
+            public static void ToUV([NoAlias] float4* input, [NoAlias] float2* output, int inputLength)
+            {
+                for (int i = 0; i < inputLength; i++)
+                {
+                    output[i] = input[i].ww;
+                }
+            }
+
+            [BurstCompile(CompileSynchronously = true)]
+            public static void ToColor([NoAlias] float4* input, [NoAlias] float* output, int inputLength)
+            {
+                for (int i = 0; i < inputLength; i++)
+                {
+                    output[i] = input[i].w;
+                }
+            }
+        }
+
+        public static void FillIndices(Span<int> input)
+        {
+            Impl.FillIndices(input.GetPointer(), input.Length);
+        }
+
+        public static void FillIndicesFlipped(Span<int> input)
+        {
+            var input3 = MemoryMarshal.Cast<int, int3>(input);
+            Impl.FillFlipped(input3.GetPointer(), input3.Length);
+        }
+
+        public static void FillVector3(NativeArray<float4> input, Span<Vector3> output)
+        {
+            if (input.Length != output.Length)
+            {
+                ThrowHelper.ThrowArgument("Size does not match!", nameof(input));
+            }
+
+            Impl.ToVector3(input.GetUnsafePtr(), (float3*)output.GetPointer(), input.Length);
+        }
+
+        public static void FillUV(NativeArray<float4> input, Span<Vector2> output)
+        {
+            if (input.Length != output.Length)
+            {
+                ThrowHelper.ThrowArgument("Size does not match!", nameof(input));
+            }
+
+            Impl.ToUV(input.GetUnsafePtr(), (float2*)output.GetPointer(), input.Length);
+        }
+
+        public static void FillColor(NativeArray<float4> input, Span<Color32> output)
+        {
+            if (input.Length != output.Length)
+            {
+                ThrowHelper.ThrowArgument("Size does not match!", nameof(input));
+            }
+
+            Impl.ToColor(input.GetUnsafePtr(), (float*)output.GetPointer(), input.Length);
+        }
+    }
+
+    public static unsafe class OccupancyGridUtils
+    {
+        [BurstCompile]
+        static class Impl
+        {
+            [BurstCompile(CompileSynchronously = true)]
+            public static void Fill([NoAlias] SByte2* row0, [NoAlias] SByte2* row1, [NoAlias] sbyte* output,
+                int inputLength)
+            {
+                for (int i = 0; i < inputLength; i++)
+                {
+                    output[i] = (sbyte)Fuse(row0[i].a, row0[i].b, row1[i].a, row1[i].b);
+                }
+            }
+
+            static int Fuse(int a, int b, int c, int d)
+            {
+                int signA = ~a >> 8; // a >= 0 ? -1 : 0
+                int valueA = a & signA; // a >= 0 ? a : 0
+                int numValid = -signA;
+                int sum = valueA;
+
+                int signB = ~b >> 8; // b >= 0 ? -1 : 0
+                int valueB = b & signB; // b >= 0 ? b : 0
+                numValid -= signB;
+                sum += valueB;
+
+                int signC = ~c >> 8; // c >= 0 ? -1 : 0
+                int valueC = c & signC; // c >= 0 ? c : 0
+                numValid -= signC;
+                sum += valueC;
+
+                int signD = ~d >> 8; // d >= 0 ? -1 : 0
+                int valueD = d & signD; // d >= 0 ? d : 0
+                numValid -= signD;
+                sum += valueD;
+
+                return numValid switch
+                {
+                    < 2 => -1,
+                    2 => sum >> 1, // sum / 2
+                    3 => (sum * 21845) >> 16, // sum * (65536/3) / 65536
+                    _ => sum >> 2
+                };
+            }
+
+            [BurstCompile(CompileSynchronously = true)]
+            public static void CountValid([NoAlias] sbyte* input, int inputLength, out int numValidValues)
+            {
+                numValidValues = 0;
+                for (int i = 0; i < inputLength; i++)
+                {
+                    numValidValues += (input[i] >> 8) + 1;
+                }
+            }
+
+
+            public struct SByte2
+            {
+                public sbyte a, b;
+            }
+        }
+
+        public static void ReduceRows(ReadOnlySpan<sbyte> row0, ReadOnlySpan<sbyte> row1, Span<sbyte> output)
+        {
+            var row02 = MemoryMarshal.Cast<sbyte, Impl.SByte2>(row0);
+            var row12 = MemoryMarshal.Cast<sbyte, Impl.SByte2>(row1);
+
+            if (row02.Length != output.Length || row12.Length != output.Length)
+            {
+                ThrowHelper.ThrowArgument("Size does not match!", nameof(output));
+            }
+
+            Impl.Fill(row02.GetPointer(), row12.GetPointer(), output.GetPointer(), output.Length);
+        }
+
+        public static int CountValidValues(ReadOnlySpan<sbyte> row0)
+        {
+            /*
+            var row02 = MemoryMarshal.Cast<sbyte, MipmapUtils.SByte2>(row0);
+            var row12 = MemoryMarshal.Cast<sbyte, MipmapUtils.SByte2>(row1);
+            
+            if (row02.Length != output.Length || row12.Length != output.Length)
+            {
+                ThrowHelper.ThrowArgument("Size does not match!", nameof(output));
+            }
+
+            MipmapUtils.Fill(row02.GetPointer(), row12.GetPointer(), output.GetPointer(), output.Length);
+            */
+            Impl.CountValid(row0.GetPointer(), row0.Length, out int numValidValues);
+            return numValidValues;
         }
     }
 

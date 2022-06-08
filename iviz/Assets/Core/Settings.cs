@@ -145,6 +145,11 @@ namespace Iviz.Core
             VirtualCamera = null;
             ARCamera = null;
             ScreenCaptureManager = null;
+
+            // just set these values
+            _ = SupportsR16;
+            _ = SupportsRGB24;
+            _ = MaxTextureSize;
         }
 
         /// <summary>
@@ -170,6 +175,7 @@ namespace Iviz.Core
         static bool? supportsComputeBuffersHelper;
         static bool? supportsR16;
         static bool? supportsRGB24;
+        static int? maxTextureSize;
 
         static string PersistentDataPath => persistentDataPath ??= Application.persistentDataPath;
         public static string SavedFolder => savedFolder ??= PersistentDataPath + "/saved";
@@ -263,6 +269,7 @@ namespace Iviz.Core
 
         public static bool SupportsR16 => supportsR16 ??= SystemInfo.SupportsTextureFormat(TextureFormat.R16);
         public static bool SupportsRGB24 => supportsRGB24 ??= SystemInfo.SupportsTextureFormat(TextureFormat.RGB24);
+        public static int MaxTextureSize => maxTextureSize ??= Mathf.Min(4096, SystemInfo.maxTextureSize);
 
         /// <summary>
         /// Set when the app is being closed.

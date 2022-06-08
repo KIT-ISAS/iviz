@@ -274,7 +274,7 @@ namespace Iviz.Ros
                 }
             }
 
-            await DisconnectImpl();
+            await DisconnectCore();
             return false;
         }
 
@@ -538,10 +538,10 @@ namespace Iviz.Ros
                 return;
             }
 
-            Post(DisconnectImpl);
+            Post(DisconnectCore);
         }
 
-        async ValueTask DisconnectImpl()
+        async ValueTask DisconnectCore()
         {
             if (!Connected)
             {
@@ -587,7 +587,7 @@ namespace Iviz.Ros
             {
                 try
                 {
-                    await AdvertiseImpl(advertiser, token);
+                    await AdvertiseCore(advertiser, token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -600,7 +600,7 @@ namespace Iviz.Ros
             });
         }
 
-        async ValueTask AdvertiseImpl<T>(Sender<T> advertiser, CancellationToken token) where T : IMessage, new()
+        async ValueTask AdvertiseCore<T>(Sender<T> advertiser, CancellationToken token) where T : IMessage, new()
         {
             if (publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
@@ -663,7 +663,7 @@ namespace Iviz.Ros
             {
                 try
                 {
-                    await AdvertiseServiceImpl(service, callback, token);
+                    await AdvertiseServiceCore(service, callback, token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -676,7 +676,7 @@ namespace Iviz.Ros
             });
         }
 
-        async ValueTask AdvertiseServiceImpl<T>(string serviceName, Func<T, ValueTask> callback,
+        async ValueTask AdvertiseServiceCore<T>(string serviceName, Func<T, ValueTask> callback,
             CancellationToken token)
             where T : IService, new()
         {
@@ -834,7 +834,7 @@ namespace Iviz.Ros
             {
                 try
                 {
-                    await UnadvertiseImpl(advertiser, token);
+                    await UnadvertiseCore(advertiser, token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -847,7 +847,7 @@ namespace Iviz.Ros
             });
         }
 
-        ValueTask UnadvertiseImpl(ISender advertiser, CancellationToken token)
+        ValueTask UnadvertiseCore(ISender advertiser, CancellationToken token)
         {
             if (!publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
@@ -880,7 +880,7 @@ namespace Iviz.Ros
             {
                 try
                 {
-                    await UnsubscribeImpl(subscriber, token);
+                    await UnsubscribeCore(subscriber, token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -893,7 +893,7 @@ namespace Iviz.Ros
             });
         }
 
-        ValueTask UnsubscribeImpl(IListener subscriber, CancellationToken token)
+        ValueTask UnsubscribeCore(IListener subscriber, CancellationToken token)
         {
             if (!subscribersByTopic.TryGetValue(subscriber.Topic, out var subscribedTopic))
             {
@@ -921,7 +921,7 @@ namespace Iviz.Ros
             {
                 try
                 {
-                    await UnadvertiseServiceImpl(service, token);
+                    await UnadvertiseServiceCore(service, token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -934,7 +934,7 @@ namespace Iviz.Ros
             });
         }
 
-        async ValueTask UnadvertiseServiceImpl(string serviceName, CancellationToken token)
+        async ValueTask UnadvertiseServiceCore(string serviceName, CancellationToken token)
         {
             if (!servicesByTopic.TryGetValue(serviceName, out var service))
             {

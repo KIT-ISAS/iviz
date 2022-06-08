@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Iviz.Core;
 using Iviz.Resources;
 using Unity.Mathematics;
@@ -145,11 +146,13 @@ namespace Iviz.Displays
             {
                 var colorB = colorA;
                 colorB.a = (byte)(i * scale);
-                
+
                 var line = new LineWithColor(a, colorA, b, colorB);
-                if (LineDisplay.IsElementValid(line.f))
+                ref var f = ref Unsafe.As<LineWithColor, float4x2>(ref line);
+                
+                if (LineDisplay.IsElementValid(f))
                 {
-                    lineBuffer.AddUnsafe(line.f);
+                    lineBuffer.AddUnsafe(f);
                 }
 
                 colorA = colorB;

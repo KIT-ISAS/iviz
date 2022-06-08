@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Roslib;
+using Iviz.Roslib.Utils;
 using Iviz.Tools;
 
 namespace Iviz.ModelService
@@ -96,16 +97,9 @@ namespace Iviz.ModelService
 
             Console.WriteLine("** Iviz.ModelService started. Standing by for requests...");
 
-            await WaitForCancel();
+            await RosEventHandler.WaitForCancelAsync();
 
             Console.WriteLine();
-        }
-
-        static Task WaitForCancel()
-        {
-            var tc = new TaskCompletionSource();
-            Console.CancelKeyPress += (_, _) => tc.TrySetResult();
-            return tc.Task;
         }
 
         static async Task<string?> GetPathExtras()

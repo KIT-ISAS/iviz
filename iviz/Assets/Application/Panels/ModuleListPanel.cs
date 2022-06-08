@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers;
+using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Controllers.XR;
 using Iviz.Core;

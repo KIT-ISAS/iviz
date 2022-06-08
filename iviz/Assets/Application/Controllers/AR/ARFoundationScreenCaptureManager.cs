@@ -203,45 +203,6 @@ namespace Iviz.Controllers
 
                 return screenshot;
             }
-
-
-            /*
-            image.ConvertAsync(conversionParams, (status, _, array) =>
-            {
-                if (token.IsCancellationRequested)
-                {
-                    ts.TrySetCanceled(token);
-                    return;
-                }
-
-                if (status != XRCpuImage.AsyncConversionStatus.Ready)
-                {
-                    ts.TrySetException(InvalidScreenshotException(status));
-                    return;
-                }
-
-                float scale = width / (float)colorWidth;
-                var screenshot = new Screenshot(ScreenshotFormat.Float,
-                    GameThread.TimeNow, width, height,
-                    Intrinsic.Scale(scale), pose, array.ToArray());
-
-                Task.Run(() =>
-                {
-                    try
-                    {
-                        ConversionUtils.MirrorXf(screenshot.Width, screenshot.Height, screenshot.Bytes);
-                        lastDepth = screenshot;
-                        ts.TrySetResult(screenshot);
-                    }
-                    catch (Exception e)
-                    {
-                        ts.TrySetException(e);
-                    }
-                }, token);
-            });
-
-            return ts.Task.AsValueTask();
-            */
         }
 
         public async ValueTask<Screenshot?> CaptureDepthConfidenceAsync(
@@ -306,59 +267,12 @@ namespace Iviz.Controllers
 
                 return screenshot;
             }
-
-            /*
-            var ts = TaskUtils.CreateCompletionSource<Screenshot?>();
-            int width = image.width;
-            int height = image.height;
-            var pose = arCameraTransform.AsPose();
-
-            int colorWidth = cameraManager.subsystem.currentConfiguration?.width ?? width;
-
-            using var _ = image;
-            image.ConvertAsync(conversionParams, (status, _, array) =>
-            {
-                if (token.IsCancellationRequested)
-                {
-                    ts.TrySetCanceled();
-                    return;
-                }
-
-                if (status != XRCpuImage.AsyncConversionStatus.Ready)
-                {
-                    ts.TrySetException(InvalidScreenshotException(status));
-                    return;
-                }
-
-                float scale = width / (float)colorWidth;
-                var screenshot = new Screenshot(ScreenshotFormat.Mono8,
-                    GameThread.TimeNow, width, height,
-                    Intrinsic.Scale(scale), pose, array.ToArray());
-
-                Task.Run(() =>
-                {
-                    try
-                    {
-                        ConversionUtils.MirrorXb(screenshot.Width, screenshot.Height, screenshot.Bytes);
-                        lastConfidence = screenshot;
-                        ts.TrySetResult(screenshot);
-                    }
-                    catch (Exception e)
-                    {
-                        ts.TrySetException(e);
-                    }
-                }, token);
-            });
-
-            return ts.Task.AsValueTask();
-            */
         }
 
         static bool IsFinished(XRCpuImage.AsyncConversion conversion) =>
             conversion.status is XRCpuImage.AsyncConversionStatus.Ready or XRCpuImage.AsyncConversionStatus.Failed;
 
         static Exception InvalidScreenshotException(XRCpuImage.AsyncConversionStatus status) =>
-            new InvalidOperationException(
-                $"Conversion request of color image failed with status {status}");
+            new InvalidOperationException($"Conversion request failed with status {status}");
     }
 }

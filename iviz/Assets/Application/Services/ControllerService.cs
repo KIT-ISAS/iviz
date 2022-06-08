@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BigGustave;
 using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.TF;

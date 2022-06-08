@@ -7,6 +7,9 @@ using Iviz.Controllers;
 using Iviz.Controllers.XR;
 using Iviz.Core;
 using Iviz.Tools;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
@@ -18,12 +21,12 @@ namespace Iviz.Displays
     public sealed class ARMeshLines : DisplayWrapper, IRecyclable
     {
         static GameObject? container;
-        static MeshQueueType? meshQueue;
 
-        static MeshQueueType MeshQueue => meshQueue ??= new MeshQueueType();
+        readonly List<Vector3> vertices = new();
+        readonly List<int> indices = new();
 
-        readonly List<float4x2> lines = new();
         bool pulseMaterialSet;
+        bool dirty;
 
         MeshFilter? meshFilter;
         LineDisplay? resource;
@@ -79,15 +82,10 @@ namespace Iviz.Displays
             }
 
             ARController.ARCameraViewChanged += OnARCameraViewChanged;
+            GameThread.EverySecond += CheckMesh;
+
             OnARCameraViewChanged(ARController.IsXRVisible);
         }
-
-        /*
-        void Start()
-        {
-            WriteMeshLines();
-        }
-        */
 
         void OnARCameraViewChanged(bool value)
         {
@@ -98,19 +96,13 @@ namespace Iviz.Displays
         {
             if (args.added.Contains(MeshFilter) || args.updated.Contains(MeshFilter))
             {
-                WriteMeshLines();
+                dirty = true;
             }
 
             if (args.removed.Contains(MeshFilter))
             {
                 Resource.Reset();
             }
-        }
-
-        void Process()
-        {
-            Resource.Set(lines.AsSpan(), false);
-            lines.Clear();
         }
 
         void Update()
@@ -136,10 +128,15 @@ namespace Iviz.Displays
             }
         }
 
-        void WriteMeshLines()
+        async void CheckMesh()
         {
-            var indices = MeshQueue.indices;
-            var vertices = MeshQueue.vertices;
+            if (!dirty)
+            {
+                return;
+            }
+
+            dirty = false;
+
             var mesh = MeshFilter.sharedMesh;
 
             indices.Clear();
@@ -149,88 +146,73 @@ namespace Iviz.Displays
             mesh.GetVertices(vertices);
 
             var topology = mesh.GetTopology(0);
-            var mIndices = indices.AsSpan();
-            var mVertices = vertices.AsSpan();
-
-            int count = indices.Count;
-
-            lines.Clear();
-            lines.Capacity = Mathf.Max(lines.Capacity, count);
-
-            float4x2 p0 = default;
-
-            switch (topology)
+            if (topology != MeshTopology.Triangles)
             {
-                case MeshTopology.Triangles:
-                    for (int i = 0; i < count; i += 3)
-                    {
-                        int ia = mIndices[i];
-                        ref readonly var a = ref mVertices[ia];
-
-                        int ib = mIndices[i + 1];
-                        ref readonly var b = ref mVertices[ib];
-                        Write(ref p0, a, b);
-                        lines.Add(p0);
-
-                        int ic = mIndices[i + 2];
-                        ref readonly var c = ref mVertices[ic];
-                        Write(ref p0, b, c);
-                        lines.Add(p0);
-
-                        Write(ref p0, c, a);
-                        lines.Add(p0);
-                    }
-
-                    break;
-                case MeshTopology.Quads:
-                    for (int i = 0; i < count; i += 4)
-                    {
-                        int ia = mIndices[i];
-                        ref readonly var a = ref mVertices[ia];
-
-                        int ib = mIndices[i + 1];
-                        ref readonly var b = ref mVertices[ib];
-                        Write(ref p0, a, b);
-                        lines.Add(p0);
-
-                        int ic = mIndices[i + 2];
-                        ref readonly var c = ref mVertices[ic];
-                        Write(ref p0, b, c);
-                        lines.Add(p0);
-
-                        int id = mIndices[i + 3];
-                        ref readonly var d = ref mVertices[id];
-                        Write(ref p0, c, d);
-                        lines.Add(p0);
-
-                        Write(ref p0, d, a);
-                        lines.Add(p0);
-                    }
-
-                    break;
-                default:
-                    RosLogger.Debug($"{nameof(ARMeshLines)}: Unknown topology " + topology);
-                    break;
+                return;
             }
 
-            MeshQueue.Add(this);
+            using var output = new NativeArray<float4x2>(indices.Count * 3, Allocator.TempJob);
+
+            await new CopyTriangles
+            {
+                indices = indices.AsNativeArray().Cast<int, int3>(),
+                vertices = vertices.AsNativeArray().Cast<Vector3, float3>(),
+                output = output
+            }.Schedule().AsTask();
+
+            // we're in a different frame now!
+            Resource.Set(output.AsReadOnlySpan(), false);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Write(ref float4x2 f, in Vector3 a, in Vector3 b)
+        [BurstCompile(CompileSynchronously = true)]
+        struct CopyTriangles : IJob
         {
-            f.c0.x = a.x;
-            f.c0.y = a.y;
-            f.c0.z = a.z;
+            [ReadOnly] public NativeArray<int3> indices;
+            [ReadOnly] public NativeArray<float3> vertices;
+            [WriteOnly] public NativeArray<float4x2> output;
 
-            f.c1.x = b.x;
-            f.c1.y = b.y;
-            f.c1.z = b.z;
-        }
+            public void Execute()
+            {
+                var output3 = output.Cast<float4x2, Float4x2x3>();
+                
+                for (int i = 0; i < indices.Length; i++)
+                {
+                    int ia = indices[i].x;
+                    var a = vertices[ia];
 
-        public override void Suspend()
-        {
-            lines.Clear();
+                    int ib = indices[i].y;
+                    var b = vertices[ib];
+
+                    int ic = indices[i].z;
+                    var c = vertices[ic];
+
+                    Float4x2x3 f;
+                    Write(out f.a, a, b);
+                    Write(out f.b, b, c);
+                    Write(out f.c, c, a);
+
+                    output3[i] = f;
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static void Write(out float4x2 f, in float3 a, in float3 b)
+            {
+                f.c0.x = a.x;
+                f.c0.y = a.y;
+                f.c0.z = a.z;
+                f.c0.w = a.z;
+
+                f.c1.x = b.x;
+                f.c1.y = b.y;
+                f.c1.z = b.z;
+                f.c1.w = b.z;
+            }
+
+            struct Float4x2x3
+            {
+                public float4x2 a, b, c;
+            }
         }
 
         public void SplitForRecycle()
@@ -244,63 +226,13 @@ namespace Iviz.Displays
             resource.ReturnToPool();
 
             ARController.ARCameraViewChanged -= OnARCameraViewChanged;
+            GameThread.EverySecond -= CheckMesh;
 
             Destroy(MeshFilter.sharedMesh);
 
             if (XRUtils.TryGetMeshManager(out var meshManager))
             {
                 meshManager.meshesChanged -= OnMeshChanged;
-            }
-        }
-
-        sealed class MeshQueueType
-        {
-            public readonly List<Vector3> vertices = new();
-            public readonly List<int> indices = new();
-
-            readonly HashSet<ARMeshLines> lineSet = new();
-            readonly Queue<ARMeshLines> lineQueue = new();
-
-            public MeshQueueType()
-            {
-                GameThread.EveryFrame += Process;
-                GameThread.ApplicationPause += OnApplicationPause;
-            }
-
-            void OnApplicationPause()
-            {
-                lineSet.Clear();
-                lineQueue.Clear();
-            }
-
-            public void Add(ARMeshLines lines)
-            {
-                if (lineSet.Contains(lines))
-                {
-                    return;
-                }
-
-                lineQueue.Enqueue(lines);
-                lineSet.Add(lines);
-            }
-
-            void Process()
-            {
-                foreach (int _ in ..5)
-                {
-                    if (!lineQueue.TryDequeue(out var lines))
-                    {
-                        return;
-                    }
-
-                    lineSet.Remove(lines);
-                    if (lines == null)
-                    {
-                        continue;
-                    }
-
-                    lines.Process();
-                }
             }
         }
     }

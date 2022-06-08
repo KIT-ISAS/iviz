@@ -113,7 +113,7 @@ namespace Iviz.MsgsGen
                 return;
             }
 
-            PackageInfo p = new PackageInfo();
+            var p = new PackageInfo();
 
             for (int i = 3; i < args.Length; i += 4)
             {
@@ -183,8 +183,8 @@ namespace Iviz.MsgsGen
                 {
                     if (Directory.Exists(absolutePath))
                     {
-                        Console.WriteLine(
-                            $"EE File path '{absolutePath}' refers to a directory. Did you mean to use '-if' instead of '-i'?");
+                        Console.WriteLine($"EE File path '{absolutePath}' refers to a directory. " +
+                                          $"Did you mean to use '-if' instead of '-i'?");
                         return;
                     }
 
@@ -291,8 +291,8 @@ namespace Iviz.MsgsGen
             }
             else
             {
-                Console.WriteLine(
-                    "EE Failed to find the iviz_msgs and ros_msgs folders. They should be in the ../ folder from where you run this.");
+                Console.WriteLine("EE Failed to find the iviz_msgs and ros_msgs folders. " +
+                                  "They should be in the ../ folder from where you run this.");
                 return;
             }
 

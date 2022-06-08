@@ -1,9 +1,12 @@
 ﻿#nullable enable
 
 using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Tools;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -81,20 +84,22 @@ namespace Iviz.Displays
             switch (meshTopology)
             {
                 case MeshTopology.Triangles:
-                    for (int i = 1; i < array.Length; i += 3)
+                    var array3 = MemoryMarshal.Cast<int, uint3>(array);
+                    int length3 = array3.Length;
+                    for (int i = 0; i < length3; i++)
                     {
-                        ref int a = ref array[i];
-                        ref int b = ref array[i + 1];
-                        (a, b) = (b, a);
+                        ref uint3 triangle = ref array3[i];
+                        (triangle.y, triangle.z) = (triangle.z, triangle.y);
                     }
 
                     break;
                 case MeshTopology.Quads:
-                    for (int i = 1; i < array.Length; i += 4)
+                    var array4 = MemoryMarshal.Cast<int, uint4>(array);
+                    int length4 = array4.Length;
+                    for (int i = 0; i < length4; i++)
                     {
-                        ref int a = ref array[i];
-                        ref int c = ref array[i + 2];
-                        (a, c) = (c, a);
+                        ref uint4 quad = ref array4[i];
+                        (quad.y, quad.w) = (quad.w, quad.y);
                     }
 
                     break;
@@ -138,29 +143,40 @@ namespace Iviz.Displays
                 ownMesh.SetColors(colors);
             }
 
-            using (var triangles = new Rent<int>(pointsLength))
+            using (var indices = new Rent<int>(pointsLength))
             {
-                ref int tPtr = ref triangles.Array[0];
                 if (FlipWinding)
                 {
-                    for (int i = 0; i < pointsLength; i += 3)
+                    /*
+                    var triangles = MemoryMarshal.Cast<int, int3>(indices.AsSpan());
+                    int trianglesLength = triangles.Length;
+
+                    int j = 0;
+                    for (int i = 0; i < trianglesLength; i++)
                     {
-                        tPtr = i;
-                        tPtr.Plus(1) = i + 2;
-                        tPtr.Plus(2) = i + 1;
-                        tPtr = ref tPtr.Plus(3);
+                        int3 triangle;
+                        triangle.x = j;
+                        triangle.y = j + 2;
+                        triangle.z = j + 1;
+                        triangles[i] = triangle;
+                        j += 3;
                     }
+                    */
+                    IndicesUtils.FillIndicesFlipped(indices);
                 }
                 else
                 {
+                    /*
+                    int[] array = indices.Array; 
                     for (int i = 0; i < pointsLength; i++)
                     {
-                        tPtr = i;
-                        tPtr = ref tPtr.Plus(1);
+                        array[i] = i;
                     }
+                    */
+                    IndicesUtils.FillIndices(indices);
                 }
 
-                ownMesh.SetTriangles(triangles);
+                ownMesh.SetTriangles(indices);
             }
 
             ownMesh.RecalculateNormals();

@@ -1,6 +1,8 @@
 #nullable enable
 
 using System;
+using System.Buffers;
+using System.Runtime.InteropServices;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
@@ -64,12 +66,12 @@ namespace Iviz.Controllers.Markers
             ref float4 c1 = ref f.c1;
 
             float colorAsFloat = UnityUtils.AsFloat(color32);
-            
+
             lineBuffer.EnsureCapacity(mPoints.Length - 1);
             lineBuffer.Clear();
 
             mPoints[0].Ros2Unity(colorAsFloat, out c1);
-            
+
             for (int i = 1; i < mPoints.Length; i++)
             {
                 c0 = c1;
@@ -174,23 +176,18 @@ namespace Iviz.Controllers.Markers
 
         bool? ProcessLineListSingleColor(NativeList<float4x2> lineBuffer)
         {
-            var mPoints = points;
-
-            var f = new float4x2();
-            ref float4 c0 = ref f.c0;
-            ref float4 c1 = ref f.c1;
+            var lines = MemoryMarshal.Cast<Point, double3x2>(points);
 
             float colorAsFloat = UnityUtils.AsFloat(color32);
-            c0.w = colorAsFloat;
-            c1.w = colorAsFloat;
 
-            lineBuffer.EnsureCapacity(mPoints.Length / 2);
+            lineBuffer.EnsureCapacity(lines.Length);
             lineBuffer.Clear();
 
-            for (int i = 0; i < mPoints.Length; i += 2)
+            for (int i = 0; i < lines.Length; i++)
             {
-                mPoints[i + 0].Ros2Unity(colorAsFloat, out c0);
-                mPoints[i + 1].Ros2Unity(colorAsFloat, out c1);
+                float4x2 f;
+                lines[i].c0.Ros2Unity(colorAsFloat, out f.c0);
+                lines[i].c1.Ros2Unity(colorAsFloat, out f.c1);
                 if (LineDisplay.IsElementValid(f))
                 {
                     lineBuffer.AddUnsafe(f);
@@ -202,22 +199,19 @@ namespace Iviz.Controllers.Markers
 
         bool? ProcessLineListNoTint(NativeList<float4x2> lineBuffer)
         {
-            var mPoints = points;
-            var mColors = colors;
+            var lines = MemoryMarshal.Cast<Point, double3x2>(points);
+            var colors2 = MemoryMarshal.Cast<ColorRGBA, ColorRGBA2>(colors);
 
-            var f = new float4x2();
-            ref var c0 = ref f.c0;
-            ref var c1 = ref f.c1;
-
-            lineBuffer.EnsureCapacity(mPoints.Length / 2);
+            lineBuffer.EnsureCapacity(colors2.Length);
             lineBuffer.Clear();
 
-            for (int i = 0; i < mPoints.Length; i += 2)
+            for (int i = 0; i < lines.Length; i++)
             {
-                float w0 = UnityUtils.AsFloat(mColors[i + 0].ToUnityColor32());
-                mPoints[i + 0].Ros2Unity(w0, out c0);
-                float w1 = UnityUtils.AsFloat(mColors[i + 1].ToUnityColor32());
-                mPoints[i + 1].Ros2Unity(w1, out c1);
+                float4x2 f;
+                float w0 = UnityUtils.AsFloat(colors2[i].c0.ToUnityColor32());
+                lines[i].c0.Ros2Unity(w0, out f.c0);
+                float w1 = UnityUtils.AsFloat(colors2[i].c1.ToUnityColor32());
+                lines[i].c1.Ros2Unity(w1, out f.c1);
 
                 if (LineDisplay.IsElementValid(f))
                 {
@@ -230,23 +224,24 @@ namespace Iviz.Controllers.Markers
 
         bool? ProcessLineListTintColor(NativeList<float4x2> lineBuffer)
         {
-            var mPoints = points;
-            var mColors = colors;
+            var lines = MemoryMarshal.Cast<Point, double3x2>(points);
+            var colors2 = MemoryMarshal.Cast<ColorRGBA, ColorRGBA2>(colors);
             Color color = color32;
 
-            var f = new float4x2();
-            ref float4 c0 = ref f.c0;
-            ref float4 c1 = ref f.c1;
-
-            lineBuffer.EnsureCapacity(mPoints.Length / 2);
+            lineBuffer.EnsureCapacity(points.Length);
             lineBuffer.Clear();
 
-            for (int i = 0; i < mPoints.Length; i += 2)
+            for (int i = 0; i < lines.Length; i++)
             {
-                float w0 = UnityUtils.AsFloat(color * mColors[i + 0].ToUnity());
-                mPoints[i + 0].Ros2Unity(w0, out c0);
-                float w1 = UnityUtils.AsFloat(color * mColors[i + 1].ToUnity());
-                mPoints[i + 1].Ros2Unity(w1, out c1);
+                float4x2 f;
+
+                Color mixedColor0 = color * colors2[i].c0.ToUnity();
+                float w0 = UnityUtils.AsFloat(mixedColor0);
+                lines[i].c0.Ros2Unity(w0, out f.c0);
+
+                Color mixedColor1 = color * colors2[i].c1.ToUnity();
+                float w1 = UnityUtils.AsFloat(mixedColor1);
+                lines[i].c1.Ros2Unity(w1, out f.c1);
 
                 if (LineDisplay.IsElementValid(f))
                 {
@@ -255,6 +250,12 @@ namespace Iviz.Controllers.Markers
             }
 
             return color.a < 1 ? true : null;
+        }
+
+        struct ColorRGBA2
+        {
+            public ColorRGBA c0;
+            public ColorRGBA c1;
         }
     }
 }

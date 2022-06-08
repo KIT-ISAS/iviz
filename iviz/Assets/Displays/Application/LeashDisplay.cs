@@ -108,12 +108,12 @@ namespace Iviz.Displays
 
             l0.w = UnityUtils.AsFloat(color);
 
-            var rented = Rent.Empty<float4x2>();
+            var segmentRent = Rent.Empty<float4x2>();
             Span<float4x2> span = numSegments < 64
                 ? stackalloc float4x2[numSegments]
-                : (rented = new Rent<float4x2>(numSegments));
+                : (segmentRent = new Rent<float4x2>(numSegments));
 
-            using (rented)
+            using (segmentRent)
             {
                 for (int i = 0; i < numSegments; i++)
                 {

@@ -19,7 +19,7 @@ namespace Iviz.Core
             return texture.GetRawTextureData<byte>().AsSpan();
         }
 
-        static Span<T> AsSpan<T>(this in NativeArray<T> array) where T : unmanaged
+        public static Span<T> AsSpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
             return MemoryMarshal.CreateSpan(ref array.GetUnsafeRef(), array.Length);
         }
@@ -31,7 +31,7 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<byte> AsReadOnlySpan(this in NativeArray<byte> array)
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
             return MemoryMarshal.CreateReadOnlySpan(ref array.GetUnsafeRef(), array.Length);
         }

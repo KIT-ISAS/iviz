@@ -30,8 +30,6 @@ namespace Iviz.App.ARDialogs
         Color color = new(0, 1f, 0.6f);
         Color secondaryColor = Color.white;
 
-        readonly LineWithColor[] lineBuffer = new LineWithColor[3];
-
         MeshMarkerDisplay Anchor => anchor.AssertNotNull(nameof(anchor));
         MeshMarkerDisplay Disc => disc.AssertNotNull(nameof(disc));
         MeshMarkerDisplay Glow => glow.AssertNotNull(nameof(glow));
@@ -116,9 +114,12 @@ namespace Iviz.App.ARDialogs
                 var p2 = new Vector3(0, discPosition.y, discPosition.z);
                 var p3 = discPosition;
 
-                lineBuffer[0] = new LineWithColor(p0, p1, Color.blue.WithAlpha(0.5f));
-                lineBuffer[1] = new LineWithColor(p1, p2, Color.red.WithAlpha(0.5f));
-                lineBuffer[2] = new LineWithColor(p2, p3, Color.green.WithAlpha(0.5f));
+                ReadOnlySpan<LineWithColor> lineBuffer = stackalloc LineWithColor[]
+                {
+                    new LineWithColor(p0, p1, Color.blue.WithAlpha(0.5f)),
+                    new LineWithColor(p1, p2, Color.red.WithAlpha(0.5f)),
+                    new LineWithColor(p2, p3, Color.green.WithAlpha(0.5f))
+                };
 
                 Line.Set(lineBuffer, true);
             };

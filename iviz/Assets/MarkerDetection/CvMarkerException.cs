@@ -8,7 +8,7 @@ namespace Iviz.MarkerDetection
         {
         }
 
-        public CvMarkerException(string message, Exception e) : base(message, e)
+        protected CvMarkerException(string message, Exception e) : base(message, e)
         {
         }
     }

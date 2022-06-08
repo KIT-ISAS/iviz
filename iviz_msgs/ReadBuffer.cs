@@ -141,7 +141,6 @@ namespace Iviz.Msgs
             }
         }
 
-        [SkipLocalsInit]
         public void DeserializeStructArray<T>(int count, out T[] val) where T : unmanaged
         {
             int sizeOfT = Unsafe.SizeOf<T>();

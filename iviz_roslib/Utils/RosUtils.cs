@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Tools;
@@ -305,5 +306,26 @@ internal static class RosUtils
             < 1024 * 1024 => 1024 * 1024,
             _ => 4 * 1024 * 1024,
         };
+    }
+}
+
+public static class RosEventHandler
+{
+    /// <summary>
+    /// Waits until Ctrl+C is pressed. 
+    /// </summary>
+    public static Task WaitForCancelAsync()
+    {
+        var tc = new TaskCompletionSource(TaskCreationOptions.None);
+        Console.CancelKeyPress += (_, _) => tc.TrySetResult();
+        return tc.Task;
+    }
+    
+    /// <summary>
+    /// Waits until Ctrl+C is pressed. 
+    /// </summary>
+    public static void WaitUntilCancel()
+    {
+        WaitForCancelAsync().Wait();
     }
 }

@@ -8,6 +8,7 @@ using Iviz.Core;
 using Iviz.Displays.Highlighters;
 using Iviz.Resources;
 using Iviz.Tools;
+using Unity.Burst;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -186,7 +187,10 @@ namespace Iviz.Displays
                 var dstSpan = dest.Slice(dstOffset, rowSize);
 
                 srcSpan.CopyTo(dstSpan);
+                
                 hash = HashCalculator.Compute(srcSpan, hash);
+                numValidValues += OccupancyGridUtils.CountValidValues(srcSpan);
+                /*
 
                 ref sbyte uPtr = ref srcSpan.GetReference();
                 //foreach (sbyte u in srcSpan)
@@ -197,6 +201,7 @@ namespace Iviz.Displays
                     numValidValues += (uPtr >> 8) + 1;
                     uPtr = ref uPtr.Plus(1);
                 }
+                */
             }
 
             return (hash, numValidValues);
@@ -300,6 +305,9 @@ namespace Iviz.Displays
                 var row1 = srcSpan.Slice(width * (vSrc + 1), width);
                 var rowDst = dstSpan.Slice(halfWidth * vDst, halfWidth);
 
+                OccupancyGridUtils.ReduceRows(row0, row1, rowDst);
+                
+                #if false
                 ref sbyte row0Ptr = ref row0[0];
                 ref sbyte row1Ptr = ref row1[0];
                 ref sbyte rowDstPtr = ref rowDst[0];
@@ -328,6 +336,7 @@ namespace Iviz.Displays
                     row1Ptr = ref row1Ptr.Plus(2);
                     rowDstPtr = ref rowDstPtr.Plus(1);
                 }
+#endif
             }
         }
 

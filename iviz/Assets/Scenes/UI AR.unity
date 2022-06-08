@@ -8158,6 +8158,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 992632204}
+  - component: {fileID: 992632205}
   m_Layer: 5
   m_Name: Image Canvases
   m_TagString: Untagged
@@ -8185,6 +8186,27 @@ RectTransform:
   m_AnchoredPosition: {x: 0.53149414, y: -21.599976}
   m_SizeDelta: {x: 332.14087, y: 291.31238}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!223 &992632205
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 992632203}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 0
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 1
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 1
+  m_TargetDisplay: 0
 --- !u!1 &1001560856
 GameObject:
   m_ObjectHideFlags: 0

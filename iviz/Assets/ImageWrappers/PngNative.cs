@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using Iviz.Core;
 
 namespace Iviz.ImageWrappers
 {
@@ -75,11 +76,9 @@ namespace Iviz.ImageWrappers
         /// The name of the libpng library, excluding any platform-dependent prefixes (such as <c>lib</c>) and suffixes (such as <c>.so</c>).
         /// </summary>
         const string Library =
-#if !UNITY_EDITOR && UNITY_IOS
-            "__Internal";
-#else
-            "png16";
-#endif            
+            Settings.IsIPhone
+                ? "__Internal"
+                : "png16";
 
         /// <summary>
         /// Gets the library version string.
@@ -276,7 +275,8 @@ namespace Iviz.ImageWrappers
         public static extern void png_set_palette_to_rgb(IntPtr png_ptr);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void png_set_gray_1_2_4_to_8(IntPtr png_ptr);
+        //public static extern void png_set_gray_1_2_4_to_8(IntPtr png_ptr);
+        public static extern void png_set_expand_gray_1_2_4_to_8(IntPtr png_ptr);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
         public static extern void png_set_strip_16(IntPtr png_ptr);

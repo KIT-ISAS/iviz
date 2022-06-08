@@ -281,8 +281,8 @@ namespace Iviz.Controllers
 
         public DepthCloudController(DepthCloudConfiguration? config)
         {
-            depthImageTexture = new ImageTexture();
-            colorImageTexture = new ImageTexture
+            depthImageTexture = new ImageTexture(this);
+            colorImageTexture = new ImageTexture(this)
             {
                 Colormap = ColormapId.gray,
                 OverrideIntensityBounds = true,
@@ -300,6 +300,25 @@ namespace Iviz.Controllers
 
         bool DepthHandler(Image msg)
         {
+            // basic checks
+            if (msg.Data.Length < msg.Width * msg.Height)
+            {
+                RosLogger.Error($"{this}: Image data is too small!");
+                return true;
+            }
+
+            if (msg.Step < msg.Width || msg.Data.Length < msg.Step * msg.Height)
+            {
+                RosLogger.Error($"{this}: Image step does not correspond to image size!");
+                return true;
+            }
+
+            if (msg.Encoding.Length == 0)
+            {
+                RosLogger.Error($"{this}: Image encoding field is not set!");
+                return true;
+            }
+
             if (DepthIsProcessing)
             {
                 return false;
@@ -334,6 +353,18 @@ namespace Iviz.Controllers
 
         bool DepthHandlerCompressed(CompressedImage msg)
         {
+            if (msg.Format.Length == 0)
+            {
+                RosLogger.Error($"{this}: Image format field is not set!");
+                return true;
+            }
+
+            if (msg.Data.Length == 0)
+            {
+                RosLogger.Error($"{this}: Data field is not set!");
+                return true;
+            }
+
             if (DepthIsProcessing)
             {
                 return false;
@@ -342,6 +373,7 @@ namespace Iviz.Controllers
             DepthIsProcessing = true;
 
             var shared = msg.Data.Share();
+
             void PostProcess()
             {
                 if (!node.IsAlive)
@@ -366,12 +398,12 @@ namespace Iviz.Controllers
                 case "PNG":
                     depthImageTexture.ProcessPng(msg.Data, PostProcess);
                     break;
-                case "JPEG":
-                case "JPG":
-                    depthImageTexture.ProcessJpg(msg.Data, PostProcess);
+                case "JPEG" or "JPG":
+                    depthImageTexture.ProcessJpeg(msg.Data, PostProcess);
                     break;
                 default:
-                    PostProcess();
+                    RosLogger.Error($"{this}: Unknown format '{msg.Format}'");
+                    GameThread.PostInListenerQueue(PostProcess);
                     break;
             }
 
@@ -388,6 +420,25 @@ namespace Iviz.Controllers
 
         bool ColorHandler(Image msg)
         {
+            // basic checks
+            if (msg.Data.Length < msg.Width * msg.Height)
+            {
+                RosLogger.Error($"{this}: Image data is too small!");
+                return true;
+            }
+
+            if (msg.Step < msg.Width || msg.Data.Length < msg.Step * msg.Height)
+            {
+                RosLogger.Error($"{this}: Image step does not correspond to image size!");
+                return true;
+            }
+
+            if (msg.Encoding.Length == 0)
+            {
+                RosLogger.Error($"{this}: Image encoding field is not set!");
+                return true;
+            }
+
             if (ColorIsProcessing)
             {
                 return false;
@@ -419,6 +470,18 @@ namespace Iviz.Controllers
 
         bool ColorHandlerCompressed(CompressedImage msg)
         {
+            if (msg.Format.Length == 0)
+            {
+                RosLogger.Error($"{this}: Image format field is not set!");
+                return true;
+            }
+
+            if (msg.Data.Length == 0)
+            {
+                RosLogger.Error($"{this}: Data field is not set!");
+                return true;
+            }
+
             if (ColorIsProcessing)
             {
                 return false;
@@ -427,6 +490,7 @@ namespace Iviz.Controllers
             ColorIsProcessing = true;
 
             var shared = msg.Data.Share();
+
             void PostProcess()
             {
                 shared.TryReturn();
@@ -440,9 +504,10 @@ namespace Iviz.Controllers
                     break;
                 case "JPEG":
                 case "JPG":
-                    colorImageTexture.ProcessJpg(msg.Data, PostProcess);
+                    colorImageTexture.ProcessJpeg(msg.Data, PostProcess);
                     break;
                 default:
+                    RosLogger.Error($"{this}: Unknown format '{msg.Format}'");
                     PostProcess();
                     break;
             }
@@ -455,7 +520,7 @@ namespace Iviz.Controllers
             var intrinsic = new Intrinsic(info.K);
             if (!intrinsic.IsValid)
             {
-                RosLogger.Error($"{this}: Ignoring invalid intrinsic {intrinsic.ToString()}.");
+                RosLogger.Error($"{this}: Ignoring invalid intrinsic {intrinsic.ToString()}");
                 return;
             }
 
@@ -486,5 +551,7 @@ namespace Iviz.Controllers
             DepthListener?.Reset();
             depthInfoListener?.Reset();
         }
+
+        public override string ToString() => $"[{nameof(DepthCloudController)} '{DepthTopic}']";
     }
 }

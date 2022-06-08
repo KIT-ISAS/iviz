@@ -216,6 +216,16 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Ros2Unity(this in double3 p, float w, out float4 q)
+        {
+            //(f.x, f.y, f.z) = ((float)-p.Y, (float)p.Z, (float)p.X);
+            q.x = (float)-p.y;
+            q.y = (float)p.z;
+            q.z = (float)p.x;
+            q.w = w;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Ros2Unity(this in Point p, out Vector3 q)
         {
             q.x = (float)-p.Y;
@@ -244,14 +254,11 @@ namespace Iviz.Core
         public static ColorRGBA Sanitize(this in ColorRGBA c)
         {
             ColorRGBA d;
-            d.R = SanitizeChannel(c.R);
-            d.G = SanitizeChannel(c.G);
-            d.B = SanitizeChannel(c.B);
-            d.A = SanitizeChannel(c.A);
+            d.R = Mathf.Clamp01(c.R);
+            d.G = Mathf.Clamp01(c.G);
+            d.B = Mathf.Clamp01(c.B);
+            d.A = Mathf.Clamp01(c.A);
             return d;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static float SanitizeChannel(float f) => f.IsInvalid() ? 0 : Mathf.Clamp01(f);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using Iviz.Core;
 using Iviz.Tools;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz.Displays.XR
@@ -143,11 +144,11 @@ namespace Iviz.Displays.XR
             currentAngle += AngleDifference(discAngle, currentAngle);
 
             // update lines
-            var line = new LineWithColor(Vector3.zero, Vector3.zero);
-            ref var a = ref line.f.c0;
-            ref var b = ref line.f.c1;
+            var line = new float4x2();
+            ref var a = ref line.c0;
+            ref var b = ref line.c1;
 
-            Span<LineWithColor> lineBuffer = stackalloc LineWithColor[RingElements];
+            Span<float4x2> lineBuffer = stackalloc float4x2[RingElements];
             
             (a.x, a.z) = (0, 1);
             foreach (int i in ..RingElements)
