@@ -31,7 +31,7 @@ namespace Iviz.Displays.XR
         void OnEnable()
         {
             Node.Parent = TfModule.OriginFrame;
-            TfModule.AfterFramesUpdatedLate += UpdateSegmentEnds;
+            GameThread.AfterFramesUpdatedLate += UpdateSegmentEnds;
         }
 
         void OnDisable()
@@ -41,7 +41,7 @@ namespace Iviz.Displays.XR
                 Node.Parent = null;
             }
 
-            TfModule.AfterFramesUpdatedLate -= UpdateSegmentEnds;
+            GameThread.AfterFramesUpdatedLate -= UpdateSegmentEnds;
         }
 
         MeshMarkerDisplay RentSphere()

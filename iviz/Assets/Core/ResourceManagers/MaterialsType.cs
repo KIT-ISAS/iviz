@@ -108,14 +108,24 @@ namespace Iviz.Resources
             LineSimpleWithColormap = Create(assetHolder.LineSimpleWithColormap);
             TransparentLineSimpleWithColormap = Create(assetHolder.TransparentLineSimpleWithColormap);
 
+            /*
             LinePulse = Create(Settings.SupportsComputeBuffers
                 ? assetHolder.LinePulse
                 : assetHolder.LinePulseSimple);
             LinePulse.Object.SetColor(ShaderIds.TintId, Color.white);
+            */
 
+            /*
             LineMesh = Create(Settings.SupportsComputeBuffers
                 ? assetHolder.LineMesh
                 : assetHolder.LineMeshSimple);
+            LineMesh.Object.SetColor(ShaderIds.TintId, Color.white);
+            */
+            
+            LinePulse = Create(assetHolder.LinePulseSimple);
+            LinePulse.Object.SetColor(ShaderIds.TintId, Color.white);
+            
+            LineMesh = Create(assetHolder.LineMeshSimple);
             LineMesh.Object.SetColor(ShaderIds.TintId, Color.white);
 
             MeshList = Create(assetHolder.MeshListMaterial);

@@ -199,7 +199,7 @@ namespace Iviz.Controllers
                     GameThread.TimeNow, width, height,
                     Intrinsic.Scale(scale), pose, array);
 
-                await ConversionUtils.MirrorXfFast(width, height, conversion.GetData<float>(), array).AsTask();
+                await ConversionUtils.MirrorXf(width, height, conversion.GetData<float>(), array).AsTask();
 
                 return screenshot;
             }
@@ -263,7 +263,7 @@ namespace Iviz.Controllers
                     GameThread.TimeNow, width, height,
                     Intrinsic.Scale(scale), pose, array);
 
-                await ConversionUtils.MirrorXbFast(width, height, conversion.GetData<byte>(), array).AsTask();
+                await ConversionUtils.MirrorXb(width, height, conversion.GetData<byte>(), array).AsTask();
 
                 return screenshot;
             }

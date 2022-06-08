@@ -16,7 +16,7 @@ using UnityEngine.XR.ARFoundation;
 
 namespace Iviz.Displays
 {
-    // disabled until I can find a way to make it work in mobile suspend without crashing
+    // disabled until I can find a way to make it work in mobile suspend without crashing!
     [RequireComponent(typeof(MeshFilter))]
     public sealed class ARMeshLines : DisplayWrapper, IRecyclable
     {
@@ -50,6 +50,7 @@ namespace Iviz.Displays
                 resource = ResourcePool.RentDisplay<LineDisplay>(container.transform);
                 resource.ElementScale = 0.001f;
                 resource.Visible = ARController.IsXRVisible;
+                resource.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
                 resource.MaterialOverride = ARController.IsPulseActive
                     ? Resources.Resource.Materials.LinePulse.Object
                     : Resources.Resource.Materials.LineMesh.Object;
@@ -82,7 +83,7 @@ namespace Iviz.Displays
             }
 
             ARController.ARCameraViewChanged += OnARCameraViewChanged;
-            GameThread.EverySecond += CheckMesh;
+            GameThread.EveryTenthOfASecond += CheckMesh;
 
             OnARCameraViewChanged(ARController.IsXRVisible);
         }
@@ -139,6 +140,12 @@ namespace Iviz.Displays
 
             var mesh = MeshFilter.sharedMesh;
 
+            if (mesh.vertexCount == 0)
+            {
+                Resource.Reset();
+                return;
+            }
+
             indices.Clear();
             mesh.GetIndices(indices, 0);
 
@@ -151,11 +158,13 @@ namespace Iviz.Displays
                 return;
             }
 
-            using var output = new NativeArray<float4x2>(indices.Count * 3, Allocator.TempJob);
+            int numLines = indices.Count;  // 3 indices per triangle, 3 lines per triangle => 1 line per index
+            using var output =
+                new NativeArray<float4x2>(numLines, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
 
             await new CopyTriangles
             {
-                indices = indices.AsNativeArray().Cast<int, int3>(),
+                triangles = indices.AsNativeArray().Cast<int, int3>(),
                 vertices = vertices.AsNativeArray().Cast<Vector3, float3>(),
                 output = output
             }.Schedule().AsTask();
@@ -167,23 +176,23 @@ namespace Iviz.Displays
         [BurstCompile(CompileSynchronously = true)]
         struct CopyTriangles : IJob
         {
-            [ReadOnly] public NativeArray<int3> indices;
+            [ReadOnly] public NativeArray<int3> triangles;
             [ReadOnly] public NativeArray<float3> vertices;
             [WriteOnly] public NativeArray<float4x2> output;
 
             public void Execute()
             {
                 var output3 = output.Cast<float4x2, Float4x2x3>();
-                
-                for (int i = 0; i < indices.Length; i++)
+
+                for (int i = 0; i < triangles.Length; i++)
                 {
-                    int ia = indices[i].x;
+                    int ia = triangles[i].x;
                     var a = vertices[ia];
 
-                    int ib = indices[i].y;
+                    int ib = triangles[i].y;
                     var b = vertices[ib];
 
-                    int ic = indices[i].z;
+                    int ic = triangles[i].z;
                     var c = vertices[ic];
 
                     Float4x2x3 f;
@@ -201,12 +210,12 @@ namespace Iviz.Displays
                 f.c0.x = a.x;
                 f.c0.y = a.y;
                 f.c0.z = a.z;
-                f.c0.w = a.z;
+                f.c0.w = a.z; // unused
 
                 f.c1.x = b.x;
                 f.c1.y = b.y;
                 f.c1.z = b.z;
-                f.c1.w = b.z;
+                f.c1.w = b.z; // unused
             }
 
             struct Float4x2x3
@@ -226,7 +235,7 @@ namespace Iviz.Displays
             resource.ReturnToPool();
 
             ARController.ARCameraViewChanged -= OnARCameraViewChanged;
-            GameThread.EverySecond -= CheckMesh;
+            GameThread.EveryTenthOfASecond -= CheckMesh;
 
             Destroy(MeshFilter.sharedMesh);
 

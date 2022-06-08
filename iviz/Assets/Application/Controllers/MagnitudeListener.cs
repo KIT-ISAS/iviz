@@ -419,7 +419,7 @@ namespace Iviz.Controllers
         {
             var (linear, angular) = msg.Twist.Twist;
 
-            Magnitude = new Magnitude("Odometry", linear, angular, msg.Twist.Twist);
+            Magnitude = new Magnitude("Odometry", linear, angular, msg.ChildFrameId);
 
             frameNode.AttachTo(msg.Header);
             childNode?.AttachTo(msg.ChildFrameId);

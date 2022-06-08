@@ -98,7 +98,7 @@ namespace Iviz.Core
             length = 0;
         }
 
-        public void Trim()
+        public void Reset()
         {
             if (Capacity <= 16)
             {

@@ -111,7 +111,7 @@ namespace Iviz.Controllers
                 control.Dispose();
             }
 
-            TfModule.AfterFramesUpdatedLate -= PointToCamera;
+            GameThread.AfterFramesUpdatedLate -= PointToCamera;
             Transform.rotation = Quaternion.identity;
 
             boundsControls.Clear();
@@ -259,7 +259,7 @@ namespace Iviz.Controllers
 
             if (orientationMode == OrientationMode.ViewFacing)
             {
-                TfModule.AfterFramesUpdatedLate += PointToCamera;
+                GameThread.AfterFramesUpdatedLate += PointToCamera;
             }
         }
 
@@ -300,7 +300,7 @@ namespace Iviz.Controllers
 
         public void Dispose()
         {
-            TfModule.AfterFramesUpdatedLate -= PointToCamera;
+            GameThread.AfterFramesUpdatedLate -= PointToCamera;
             DisposeAllMarkers();
             Object.Destroy(node);
         }

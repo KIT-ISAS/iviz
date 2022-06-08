@@ -125,9 +125,14 @@ namespace Iviz.Displays
             Transform.LookAt(2 * Transform.position - Settings.MainCameraPose.position, Vector3.up);
         }
 
-        void Update()
+        void OnEnable()
         {
-            PointToCamera();
+            GameThread.AfterFramesUpdatedLate += PointToCamera;
+        }
+
+        void OnDisable()
+        {
+            GameThread.AfterFramesUpdatedLate -= PointToCamera;
         }
 
         public static float GetRecommendedSize(in Vector3 unityPosition)

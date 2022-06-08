@@ -201,8 +201,8 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool ProvidesMesh { get; private set; }
-        public bool ProvidesOcclusion { get; private set; }
+        public bool ProvidesMesh { get; }
+        public bool ProvidesOcclusion { get; }
 
         public ARFoundationController(ARConfiguration? config)
         {
@@ -227,7 +227,9 @@ namespace Iviz.Controllers
 
             var subsystems = new List<ISubsystem>();
             SubsystemManager.GetInstances(subsystems);
-            ProvidesMesh = subsystems.Any(s => s is XRMeshSubsystem);
+            
+            //ProvidesMesh = subsystems.Any(s => s is XRMeshSubsystem);
+            ProvidesMesh = false; // disabled for now!
             ProvidesOcclusion = subsystems.Any(s => s is XROcclusionSubsystem);
 
             Config = config ?? new ARConfiguration();

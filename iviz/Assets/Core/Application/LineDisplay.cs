@@ -76,6 +76,7 @@ namespace Iviz.Displays
                 if (UseCapsuleLines)
                 {
                     UpdateMeshMaterial();
+                    UpdateProperties();
                 }
             }
         }
@@ -403,7 +404,7 @@ namespace Iviz.Displays
             MaterialOverride = null;
 
             lineBuffer.Clear();
-            lineBuffer.Trim();
+            lineBuffer.Reset();
 
             lineComputeBuffer?.Release();
             lineComputeBuffer = null;

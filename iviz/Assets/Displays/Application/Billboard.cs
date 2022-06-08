@@ -32,12 +32,12 @@ namespace Iviz.Displays
         
         void OnEnable()
         {
-            TfModule.AfterFramesUpdatedLate += UpdatePose;
+            GameThread.AfterFramesUpdatedLate += UpdatePose;
         }
 
         void OnDisable()
         {
-            TfModule.AfterFramesUpdatedLate -= UpdatePose;
+            GameThread.AfterFramesUpdatedLate -= UpdatePose;
         }
 
         void UpdatePose()

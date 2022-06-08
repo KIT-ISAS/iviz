@@ -332,7 +332,7 @@ namespace Iviz.App
         void OnDestroy()
         {
             instance = null;
-            TfModule.AfterFramesUpdated -= PoseChanges;
+            GameThread.AfterFramesUpdated -= PoseChanges;
             GameThread.EveryFrame -= ProcessPointer;
             TfModule.ResetFrames -= OnResetFrames;
         }
@@ -361,7 +361,7 @@ namespace Iviz.App
 
             if (ModuleListPanel.TryGetInstance() is { } moduleListPanel)
             {
-                TfModule.AfterFramesUpdated += PoseChanges;
+                GameThread.AfterFramesUpdated += PoseChanges;
                 moduleListPanel.UnlockButton.onClick.AddListener(DisableCameraLock);
             }
             else

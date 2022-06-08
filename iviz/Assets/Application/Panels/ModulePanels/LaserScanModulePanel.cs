@@ -17,8 +17,8 @@ namespace Iviz.App
         public DropdownWidget Colormap { get; private set; }
         public SimpleButtonWidget CloseButton { get; private set; }
         public ToggleWidget ForceMinMax { get; private set; }
-        public NumberInputFieldWidget MinIntensity { get; private set; }
-        public NumberInputFieldWidget MaxIntensity { get; private set; }
+        public SliderWidgetWithScale MinIntensity { get; private set; }
+        public SliderWidgetWithScale MaxIntensity { get; private set; }
         public ToggleWidget FlipMinMax { get; private set; }
         public ToggleWidget UseLines { get; private set; }
 
@@ -37,8 +37,8 @@ namespace Iviz.App
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)ColormapId.hsv);
             ForceMinMax = p.AddToggle("Colormap Override Min/Max");
-            MinIntensity = p.AddNumberInputField("Colormap Min");
-            MaxIntensity = p.AddNumberInputField("Colormap Max");
+            MinIntensity = p.AddSliderWidgetWithScale("Colormap Min");
+            MaxIntensity = p.AddSliderWidgetWithScale("Colormap Max");
             FlipMinMax = p.AddToggle("Flip Min/Max");
 
             p.AddCollapsibleWidget("Colormap")

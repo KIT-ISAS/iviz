@@ -90,6 +90,14 @@ namespace Iviz.Core
         public static event Action? LateEverySecond;
 
         public static event Action? ApplicationPause;
+        
+        /// Called after all the TFs of the frame have been processed, but before <see cref="AfterFramesUpdatedLate"/>
+        public static event Action? AfterFramesUpdated; // camera
+        
+        /// Called after all the TFs of the frame have been processed, but after <see cref="AfterFramesUpdated"/>
+        public static event Action? AfterFramesUpdatedLate; // sprites
+
+        
 
         readonly ConcurrentQueue<Action> actionsQueue = new();
         readonly ConcurrentQueue<Action> listenerQueue = new();
@@ -248,6 +256,8 @@ namespace Iviz.Core
             EverySecond = null;
             LateEverySecond = null;
             EveryTenthOfASecond = null;
+            AfterFramesUpdated = null;
+            AfterFramesUpdatedLate = null;
         }
 
         /// <summary>
@@ -421,6 +431,12 @@ namespace Iviz.Core
                 EveryFrame -= KeepChecking;
                 ts.TrySetResult();
             }
+        }
+
+        public static void InvokeAfterFramesUpdated()
+        {
+            AfterFramesUpdated?.Invoke();
+            AfterFramesUpdatedLate?.Invoke();
         }
     }
 }

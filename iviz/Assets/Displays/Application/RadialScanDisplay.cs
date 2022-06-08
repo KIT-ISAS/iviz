@@ -294,25 +294,36 @@ namespace Iviz.Displays
             var points = pointBuffer.AsReadOnlySpan();
             lineBuffer.Clear();
 
-            var line = new float4x2();
-            ref var pA = ref line.c0;
-            ref var pB = ref line.c1;
-
             for (int i = 0; i < points.Length - 1; i++)
             {
-                pA = points[i];
-                pB = points[i + 1];
-                lineBuffer.Add(line);
+                float4x2 line;
+                line.c0 = points[i];
+                line.c1 = points[i + 1];
+                CheckAndAdd(line);
             }
 
             if (points.Length != 0)
             {
-                pA = points[^1];
-                pB = points[0];
-                lineBuffer.Add(line);
+                float4x2 line;
+                line.c0 = points[^1];
+                line.c1 = points[0];
+                CheckAndAdd(line);
             }
 
             Lines.Set(lineBuffer.AsReadOnlySpan(), false);
+
+            void CheckAndAdd(in float4x2 line)
+            {
+                float aLenSq = math.lengthsq(line.c0.xyz);
+                float bLenSq = math.lengthsq(line.c1.xyz);
+                float min = Mathf.Min(aLenSq, bLenSq);
+                float max = Mathf.Max(aLenSq, bLenSq);
+                const float f = 1.1f;
+                if (max < f * f * min)
+                {
+                    lineBuffer.Add(line);
+                }
+            }
         }
     }
 }

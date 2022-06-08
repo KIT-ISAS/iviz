@@ -16,16 +16,15 @@ namespace Iviz.App
     {
         public readonly string name;
         public readonly Vector3 position;
-
         public readonly Vector3? orientation;
-        //readonly Twist? twist; // TODO
+        public readonly string? childFrame;
 
-        public Magnitude(string name, in Vector3 position, Vector3? orientation = null, Twist? twist = null)
+        public Magnitude(string name, in Vector3 position, Vector3? orientation = null, string? childFrame = null)
         {
             this.name = name;
             this.position = position;
             this.orientation = orientation;
-            //this.twist = twist;
+            this.childFrame = childFrame;
         }
     }
 
@@ -71,12 +70,27 @@ namespace Iviz.App
 
         void OnClick()
         {
-            if (dataSource is { Magnitude: not null } and { Frame: not null })
+            if (dataSource?.Magnitude is not { } magnitude)
             {
-                GuiInputModule.Instance.LookAt(
-                    dataSource.Frame.Transform,
-                    dataSource.Magnitude.Value.position.Ros2Unity());
+                return;
             }
+
+            TfFrame frame;
+            if (magnitude.childFrame is { } childFrameId
+                && TfModule.TryGetFrame(childFrameId, out var childFrame))
+            {
+                frame = childFrame;
+            }
+            else if (dataSource.Frame != null)
+            {
+                frame = dataSource.Frame;
+            }
+            else
+            {
+                return;
+            }
+
+            GuiInputModule.Instance.LookAt(frame.Transform, magnitude.position.Ros2Unity());
         }
 
         void UpdateMagnitude()
@@ -92,20 +106,18 @@ namespace Iviz.App
 
             {
                 var (x, y, z) = magnitude.position;
-                const string format = "#,0.###";
-                string xStr = (x == 0) ? "0" : x.ToString(format, UnityUtils.Culture);
-                string yStr = (y == 0) ? "0" : y.ToString(format, UnityUtils.Culture);
-                string zStr = (z == 0) ? "0" : z.ToString(format, UnityUtils.Culture);
+                string xStr = (x == 0) ? "0" : UnityUtils.FormatFloat(x);
+                string yStr = (y == 0) ? "0" : UnityUtils.FormatFloat(y);
+                string zStr = (z == 0) ? "0" : UnityUtils.FormatFloat(z);
                 description.Append(xStr).Append(", ").Append(yStr).Append(", ").Append(zStr).AppendLine();
             }
 
             if (magnitude.orientation is { } orientation)
             {
                 var (x, y, z) = orientation;
-                const string format = "#,0.###";
-                string xStr = (x == 0) ? "0" : x.ToString(format, UnityUtils.Culture);
-                string yStr = (y == 0) ? "0" : y.ToString(format, UnityUtils.Culture);
-                string zStr = (z == 0) ? "0" : z.ToString(format, UnityUtils.Culture);
+                string xStr = (x == 0) ? "0" : UnityUtils.FormatFloat(x);
+                string yStr = (y == 0) ? "0" : UnityUtils.FormatFloat(y);
+                string zStr = (z == 0) ? "0" : UnityUtils.FormatFloat(z);
                 description.Append("r: ").Append(xStr).Append(" p: ").Append(yStr).Append(" y: ").Append(zStr)
                     .AppendLine();
             }

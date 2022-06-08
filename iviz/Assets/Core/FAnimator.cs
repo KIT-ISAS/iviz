@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using Iviz.Common;
 using Iviz.Msgs;
+using Iviz.TfHelpers;
 using UnityEngine;
 
 namespace Iviz.Core
@@ -43,7 +44,7 @@ namespace Iviz.Core
                 return;
             }
             
-            GameThread.EveryFrame += OnFrameUpdate;
+            GameThread.AfterFramesUpdated += OnFrameUpdate;
         }
 
         void OnFrameUpdate()
@@ -51,7 +52,7 @@ namespace Iviz.Core
             if (token.IsCancellationRequested)
             {
                 TryCallDispose();
-                GameThread.EveryFrame -= OnFrameUpdate;
+                GameThread.AfterFramesUpdated -= OnFrameUpdate;
                 return;
             }
 
@@ -65,7 +66,7 @@ namespace Iviz.Core
             }
             
             TryCallDispose();
-            GameThread.EveryFrame -= OnFrameUpdate;
+            GameThread.AfterFramesUpdated -= OnFrameUpdate;
         }
 
         void TryCallUpdate(float t)

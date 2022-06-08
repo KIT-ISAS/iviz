@@ -134,7 +134,7 @@ namespace Iviz.Core
             q.z = p.X;
             return q;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Msgs.GeometryMsgs.Vector3 Abs(this in Msgs.GeometryMsgs.Vector3 p)
         {
@@ -247,7 +247,7 @@ namespace Iviz.Core
             fixed (ColorRGBA* ptr = &c)
             {
                 return ref *(Color*)ptr;
-            } 
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -279,8 +279,8 @@ namespace Iviz.Core
             fixed (Color* ptr = &c)
             {
                 return ref *(ColorRGBA*)ptr;
-            } 
-        } 
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UnityEngine.Quaternion Ros2Unity(this in Quaternion p)
@@ -365,7 +365,7 @@ namespace Iviz.Core
             p.position.Unity2Ros(out q.Translation);
             p.rotation.Unity2Ros(out q.Rotation);
         }
-        
+
         public static void AppendBandwidth(this in BuilderPool.BuilderRent description, long bytesPerSecond)
         {
             AppendBandwidth((StringBuilder)description, bytesPerSecond);
@@ -414,9 +414,16 @@ namespace Iviz.Core
                     _ => "#,0.",
                 };
 
-                string pXStr = (pX == 0) ? "0" : pX.ToString(positionFormat, UnityUtils.Culture);
-                string pYStr = (pY == 0) ? "0" : pY.ToString(positionFormat, UnityUtils.Culture);
-                string pZStr = (pZ == 0) ? "0" : pZ.ToString(positionFormat, UnityUtils.Culture);
+                string pXStr = FormatValue(pX);
+                string pYStr = FormatValue(pY);
+                string pZStr = FormatValue(pZ);
+
+                string FormatValue(double f)
+                {
+                    if (f == 0) return "0";
+                    if (f.IsInvalid() || Math.Abs(f) >= 1e3) return f.ToString("G", UnityUtils.Culture);
+                    return f.ToString(positionFormat, UnityUtils.Culture);
+                }
 
                 description.Append(pXStr).Append(", ").Append(pYStr).Append(", ").Append(pZStr);
             }

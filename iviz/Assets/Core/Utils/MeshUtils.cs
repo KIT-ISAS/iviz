@@ -90,6 +90,9 @@ namespace Iviz.Core
         
         public static void SetTriangles(this Mesh mesh, NativeArray<int> ps)
         {
+            mesh.indexFormat = ps.Length < ushort.MaxValue
+                ? IndexFormat.UInt16
+                : IndexFormat.UInt32;
             mesh.SetIndices(ps, MeshTopology.Triangles, 0);
         }
     }

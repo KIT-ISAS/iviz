@@ -52,21 +52,27 @@ namespace Iviz.App
 
             panel.UseLines.Value = listener.UseLines;
 
-            panel.UseIntensity.ValueChanged += f => { listener.UseIntensity = f; };
-            panel.PointSize.ValueChanged += f => { listener.PointSize = f; };
-            panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId)i; };
+            panel.UseIntensity.ValueChanged += f => listener.UseIntensity = f;
+            panel.PointSize.ValueChanged += f => listener.PointSize = f;
+            panel.Colormap.ValueChanged += (i, _) => listener.Colormap = (ColormapId)i;
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
             panel.ForceMinMax.ValueChanged += f =>
             {
                 listener.ForceMinMax = f;
+                if (listener.MeasuredIntensityBounds is var (min, max))
+                {
+                    panel.MinIntensity.Value = min;
+                    panel.MaxIntensity.Value = max;
+                }                
+                
                 panel.MinIntensity.Interactable = f;
                 panel.MaxIntensity.Interactable = f;
             };
-            panel.FlipMinMax.ValueChanged += f => { listener.FlipMinMax = f; };
-            panel.MinIntensity.ValueChanged += f => { listener.MinIntensity = f; };
-            panel.MaxIntensity.ValueChanged += f => { listener.MaxIntensity = f; };
-            panel.UseLines.ValueChanged += f => { listener.UseLines = f; };
+            panel.FlipMinMax.ValueChanged += f => listener.FlipMinMax = f; 
+            panel.MinIntensity.ValueChanged += f => listener.MinIntensity = f; 
+            panel.MaxIntensity.ValueChanged += f => listener.MaxIntensity = f; 
+            panel.UseLines.ValueChanged += f => listener.UseLines = f; 
         }
 
 
@@ -78,12 +84,13 @@ namespace Iviz.App
 
         string BuildDescriptionString()
         {
-            string minIntensityStr = UnityUtils.FormatFloat(listener.MeasuredIntensityBounds.x);
-            string maxIntensityStr = UnityUtils.FormatFloat(listener.MeasuredIntensityBounds.y);
+            string MinIntensityStr() => UnityUtils.FormatFloat(listener.MeasuredIntensityBounds.x);
+            string MaxIntensityStr() => UnityUtils.FormatFloat(listener.MeasuredIntensityBounds.y);
+            
             return $"<b>{listener.Size.ToString("N0")} Points</b>\n" +
                    (listener.Size == 0
                        ? "Empty"
-                       : $"[{minIntensityStr} .. {maxIntensityStr}]");
+                       : $"[{MinIntensityStr()} .. {MaxIntensityStr()}]");
         }
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)

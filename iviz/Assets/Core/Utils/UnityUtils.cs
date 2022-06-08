@@ -759,7 +759,11 @@ namespace Iviz.Core
             return GameThread.WaitUntilAsync(() => handle.IsCompleted); // IsCompleted schedules batched job
         }
 
-        public static string FormatFloat(float x) => Mathf.Abs(x) is >= 1e4f or < 1e-3f
+        public static string FormatFloat(float x) => x.IsInvalid() || Mathf.Abs(x) is >= 1e4f or < 1e-3f
+            ? x.ToString("G", Culture)
+            : x.ToString("#,0.###", Culture);
+        
+        public static string FormatFloat(double x) => x.IsInvalid() || Math.Abs(x) is >= 1e4 or < 1e-3
             ? x.ToString("G", Culture)
             : x.ToString("#,0.###", Culture);
     }

@@ -17,10 +17,11 @@ namespace Iviz.Displays
         {
             ThrowHelper.ThrowIfNull(mesh, nameof(mesh));
 
+            mesh.Clear();
+
             int bufferLength = lineBuffer.Length;
             if (bufferLength == 0)
             {
-                mesh.Clear();
                 return;
             }
 

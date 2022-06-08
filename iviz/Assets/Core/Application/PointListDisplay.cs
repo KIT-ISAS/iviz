@@ -182,8 +182,8 @@ namespace Iviz.Displays
                         uvsPtr = ref uvsPtr.Plus(1);
                     }
                     */
-                    IndicesUtils.FillVector3(pointBuffer.AsArray(), vertices);
-                    IndicesUtils.FillUV(pointBuffer.AsArray(), uvs);
+                    IndicesUtils.FillVector3(pointBuffer, vertices);
+                    IndicesUtils.FillUV(pointBuffer, uvs);
 
                     mesh.SetVertices(vertices);
                     mesh.SetUVs(uvs);
@@ -207,8 +207,8 @@ namespace Iviz.Displays
                         cPtr = ref cPtr.Plus(1);
                     }
                     */
-                    IndicesUtils.FillVector3(pointBuffer.AsArray(), vertices);
-                    IndicesUtils.FillColor(pointBuffer.AsArray(), colors);
+                    IndicesUtils.FillVector3(pointBuffer, vertices);
+                    IndicesUtils.FillColor(pointBuffer, colors);
 
                     mesh.SetVertices(vertices);
                     mesh.SetColors(colors);
@@ -360,7 +360,7 @@ namespace Iviz.Displays
             base.Suspend();
 
             pointBuffer.Clear();
-            pointBuffer.Trim();
+            pointBuffer.Reset();
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;

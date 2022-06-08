@@ -92,7 +92,9 @@ namespace Iviz.App
         {
             arVisible.Enabled = Controller.Visible;
             move.Enabled = Controller.ShowARJoystick;
+            meshEnabled.Visible = Controller.ProvidesMesh;
             meshEnabled.Enabled = Controller.EnableMeshing;
+            occlusionEnabled.Visible = Controller.ProvidesOcclusion;
             occlusionEnabled.Enabled = Controller.OcclusionQuality != OcclusionQualityType.Off;
             tfVisible.Enabled = TfModule.Instance.Visible;
         }

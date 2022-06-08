@@ -132,7 +132,7 @@ namespace Iviz.Displays.XR
             resetOrientation = true;
             currentPosition = null;
 
-            TfModule.AfterFramesUpdatedLate += UpdatePose;
+            GameThread.AfterFramesUpdatedLate += UpdatePose;
         }
 
         protected virtual void Awake()
@@ -242,7 +242,7 @@ namespace Iviz.Displays.XR
             Expired?.Invoke();
             Expired = null;
             
-            TfModule.AfterFramesUpdatedLate -= UpdatePose;
+            GameThread.AfterFramesUpdatedLate -= UpdatePose;
         }
 
         static Quaternion GetFlatCameraRotationRelativeTo(in Vector3 localPosition)

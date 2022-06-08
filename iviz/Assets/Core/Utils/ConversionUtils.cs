@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using Iviz.Urdf;
 using JetBrains.Annotations;
 using Unity.Burst;
+using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -270,7 +271,7 @@ namespace Iviz.Core
             }
         }
 
-        public static JobHandle MirrorXfFast(int width, int height, NativeArray<float> src, byte[] dst)
+        public static JobHandle MirrorXf(int width, int height, NativeArray<float> src, byte[] dst)
         {
             int minSize = width * height;
             if (src.Length < minSize || dst.Length < minSize * sizeof(float))
@@ -327,7 +328,7 @@ namespace Iviz.Core
             }
         }
 
-        public static JobHandle MirrorXbFast(int width, int height, NativeArray<byte> src, byte[] dst)
+        public static JobHandle MirrorXb(int width, int height, NativeArray<byte> src, byte[] dst)
         {
             int minSize = width * height;
             if (src.Length < minSize || dst.Length < minSize)
@@ -345,9 +346,9 @@ namespace Iviz.Core
         }
     }
 
-    [BurstCompile]
     public static unsafe class IndicesUtils
     {
+        [BurstCompile]
         static class Impl
         {
             [BurstCompile(CompileSynchronously = true)]
@@ -493,6 +494,7 @@ namespace Iviz.Core
             [BurstCompile(CompileSynchronously = true)]
             public static void CountValid([NoAlias] sbyte* input, int inputLength, out int numValidValues)
             {
+                CheckBurst();
                 numValidValues = 0;
                 for (int i = 0; i < inputLength; i++)
                 {
@@ -500,6 +502,21 @@ namespace Iviz.Core
                 }
             }
 
+            [BurstDiscard]
+            static void CheckBurst()
+            {
+                Debug.Log("no burst!");
+            } 
+            /*
+            [BurstCompile(CompileSynchronously = true)]
+            public static void Palette([NoAlias] byte* input, [NoAlias] float *palette, int inputLength, [NoAlias] float *output)
+            {
+                for (int i = 0; i < 16; i++)
+                {
+                    output[i] = palette[input[i]];
+                }
+            }
+            */
 
             public struct SByte2
             {
@@ -522,17 +539,6 @@ namespace Iviz.Core
 
         public static int CountValidValues(ReadOnlySpan<sbyte> row0)
         {
-            /*
-            var row02 = MemoryMarshal.Cast<sbyte, MipmapUtils.SByte2>(row0);
-            var row12 = MemoryMarshal.Cast<sbyte, MipmapUtils.SByte2>(row1);
-            
-            if (row02.Length != output.Length || row12.Length != output.Length)
-            {
-                ThrowHelper.ThrowArgument("Size does not match!", nameof(output));
-            }
-
-            MipmapUtils.Fill(row02.GetPointer(), row12.GetPointer(), output.GetPointer(), output.Length);
-            */
             Impl.CountValid(row0.GetPointer(), row0.Length, out int numValidValues);
             return numValidValues;
         }
