@@ -24,10 +24,9 @@ namespace Iviz.Displays
         [SerializeField] float minIntensity;
         [SerializeField] float maxIntensity;
         [SerializeField] bool useLines;
-        [SerializeField] float maxLineDistance;
 
-        readonly List<float4x2> lineBuffer = new();
-        readonly List<float4> pointBuffer = new();
+        readonly List<float4x2> lineBuffer = new(32);
+        readonly List<float4> pointBuffer = new(32);
         Vector2[] cache = Array.Empty<Vector2>();
 
         LineDisplay? lines;
@@ -147,27 +146,11 @@ namespace Iviz.Displays
                 {
                     Lines.Visible = Visible;
                     PointCloud.Visible = !Visible;
-                    SetLines();
                 }
                 else
                 {
                     PointCloud.Visible = Visible;
                     Lines.Visible = !Visible;
-                    SetPoints();
-                }
-            }
-        }
-
-        public float MaxLineDistance
-        {
-            get => maxLineDistance;
-            set
-            {
-                bool changed = !Mathf.Approximately(value, maxLineDistance);
-                maxLineDistance = value;
-                if (changed)
-                {
-                    SetLines();
                 }
             }
         }
@@ -193,7 +176,6 @@ namespace Iviz.Displays
             UseLines = true;
             Colormap = ColormapId.hsv;
             PointSize = 0.01f;
-            MaxLineDistance = 0.3f;
         }
 
         void IDisplay.Suspend()
@@ -252,77 +234,76 @@ namespace Iviz.Displays
             }
 
             pointBuffer.Clear();
+            lineBuffer.Clear();
+
             bool useIntensity = UseIntensityNotRange && intensities.Length != 0;
-            var mCache = cache.AsSpan(0, ranges.Length);
-            foreach (int i in ..ranges.Length)
-            {
-                float range = ranges[i];
-                if (range.IsInvalid() || range > rangeMax || range < rangeMin)
-                {
-                    continue;
-                }
-
-                var (x, z) = mCache[i];
-
-                float4 f;
-                f.x = x * range;
-                f.y = 0;
-                f.z = z * range;
-                f.w = useIntensity ? intensities[i] : range;
-                pointBuffer.Add(f);
-            }
-
-            Size = pointBuffer.Count;
+            var mCache = cache;
 
             if (!UseLines)
             {
-                SetPoints();
+                foreach (int i in ..ranges.Length)
+                {
+                    float range = ranges[i];
+                    if (range.IsInvalid() || range > rangeMax || range < rangeMin)
+                    {
+                        continue;
+                    }
+
+                    var (x, z) = mCache[i];
+
+                    float4 f;
+                    f.x = x * range;
+                    f.y = 0;
+                    f.z = z * range;
+                    f.w = useIntensity ? intensities[i] : range;
+                    pointBuffer.Add(f);
+                }
+
+                Size = pointBuffer.Count;
+                PointCloud.Set(pointBuffer.AsReadOnlySpan());
             }
             else
             {
-                SetLines();
-            }
-        }
+                float4? prevF = null;
+                float prevRange = 0; 
 
-        void SetPoints()
-        {
-            PointCloud.Set(pointBuffer.AsReadOnlySpan());
-        }
-
-        void SetLines()
-        {
-            var points = pointBuffer.AsReadOnlySpan();
-            lineBuffer.Clear();
-
-            for (int i = 0; i < points.Length - 1; i++)
-            {
-                float4x2 line;
-                line.c0 = points[i];
-                line.c1 = points[i + 1];
-                CheckAndAdd(line);
-            }
-
-            if (points.Length != 0)
-            {
-                float4x2 line;
-                line.c0 = points[^1];
-                line.c1 = points[0];
-                CheckAndAdd(line);
-            }
-
-            Lines.Set(lineBuffer.AsReadOnlySpan(), false);
-
-            void CheckAndAdd(in float4x2 line)
-            {
-                float aLenSq = math.lengthsq(line.c0.xyz);
-                float bLenSq = math.lengthsq(line.c1.xyz);
-                float min = Mathf.Min(aLenSq, bLenSq);
-                float max = Mathf.Max(aLenSq, bLenSq);
-                const float f = 1.1f;
-                if (max < f * f * min)
+                foreach (int i in ..ranges.Length)
                 {
-                    lineBuffer.Add(line);
+                    float range = ranges[i];
+                    if (range.IsInvalid() || range > rangeMax || range < rangeMin)
+                    {
+                        prevF = null;
+                        continue;
+                    }
+
+                    var (x, z) = mCache[i];
+
+                    float4 f1;
+                    f1.x = x * range;
+                    f1.y = 0;
+                    f1.z = z * range;
+                    f1.w = useIntensity ? intensities[i] : range;
+
+                    if (prevF is { } f0)
+                    {
+                        float min = Mathf.Min(range, prevRange);
+                        float max = Mathf.Max(range, prevRange);
+                        const float k = 1.5f;
+                        if (max < k * min)
+                        {
+                            float4x2 f;
+                            f.c0 = f0;
+                            f.c1 = f1;
+                            lineBuffer.Add(f);
+                        }
+                    }
+
+                    prevF = f1;
+                    prevRange = range;
                 }
+
+                Size = lineBuffer.Count;
+                Lines.Set(lineBuffer.AsReadOnlySpan(), false);
             }
         }
     }

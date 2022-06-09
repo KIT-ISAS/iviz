@@ -1,10 +1,11 @@
 #nullable enable
 
 using System.Runtime.Serialization;
+using Iviz.Common;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Roslib.Utils;
 
-namespace Iviz.Common.Configurations
+namespace Iviz.Core.Configurations
 {
     [DataContract]
     public sealed class CameraConfiguration : JsonToString, IConfiguration

@@ -1,9 +1,10 @@
 #nullable enable
 
 using System.Runtime.Serialization;
+using Iviz.Common;
 using Iviz.Roslib.Utils;
 
-namespace Iviz.Common.Configurations
+namespace Iviz.Core.Configurations
 {
     [DataContract]
     public sealed class GuiWidgetConfiguration : JsonToString, IConfigurationWithTopic

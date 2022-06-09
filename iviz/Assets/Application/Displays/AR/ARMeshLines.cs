@@ -50,7 +50,7 @@ namespace Iviz.Displays
                 resource = ResourcePool.RentDisplay<LineDisplay>(container.transform);
                 resource.ElementScale = 0.001f;
                 resource.Visible = ARController.IsXRVisible;
-                resource.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
+                //resource.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
                 resource.MaterialOverride = ARController.IsPulseActive
                     ? Resources.Resource.Materials.LinePulse.Object
                     : Resources.Resource.Materials.LineMesh.Object;

@@ -260,20 +260,6 @@ namespace Iviz.Displays
                 null, Properties, ShadowCastingMode.Off, false, gameObject.layer);
         }
 
-        void OnDestroy()
-        {
-            lineBuffer.Dispose();
-
-            if (lineComputeBuffer != null)
-            {
-                lineComputeBuffer.Release();
-                lineComputeBuffer = null;
-                Properties.SetBuffer(ShaderIds.LinesId, (ComputeBuffer?)null);
-            }
-
-            Destroy(Mesh);
-        }
-
         protected override void UpdateProperties()
         {
             MeshRenderer.SetPropertyBlock(Properties);
@@ -289,6 +275,7 @@ namespace Iviz.Displays
 
             if (lineComputeBuffer == null || lineComputeBuffer.count < lineBuffer.Capacity)
             {
+                Properties.SetBuffer(ShaderIds.LinesId, (ComputeBuffer?)null);
                 lineComputeBuffer?.Release();
                 lineComputeBuffer = new ComputeBuffer(lineBuffer.Capacity, Unsafe.SizeOf<float4x2>());
                 Properties.SetBuffer(ShaderIds.LinesId, lineComputeBuffer);
@@ -393,7 +380,7 @@ namespace Iviz.Displays
             Colormap = Colormap;
             Tint = Tint;
         }
-        
+
         public override string ToString() => $"[{nameof(LineDisplay)}]";
 
         public override void Suspend()
@@ -403,12 +390,28 @@ namespace Iviz.Displays
             MeshRenderer.enabled = false;
             MaterialOverride = null;
 
-            lineBuffer.Clear();
             lineBuffer.Reset();
+
+            Properties.SetBuffer(ShaderIds.LinesId, (ComputeBuffer?)null);
 
             lineComputeBuffer?.Release();
             lineComputeBuffer = null;
-            Properties.SetBuffer(ShaderIds.LinesId, (ComputeBuffer?)null);
         }
+        
+        void OnDestroy()
+        {
+            lineBuffer.Dispose();
+
+            Properties.SetBuffer(ShaderIds.LinesId, (ComputeBuffer?)null);
+            
+            if (lineComputeBuffer != null)
+            {
+                lineComputeBuffer.Release();
+                lineComputeBuffer = null;
+            }
+
+            Mesh.Clear();
+            Destroy(Mesh);
+        }        
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Iviz.Common.Configurations
+﻿using Iviz.Common;
+
+namespace Iviz.Core.Configurations
 {
     /// <summary>
     /// Common interface for the configuration classes of the controllers.

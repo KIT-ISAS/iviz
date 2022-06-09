@@ -15,13 +15,16 @@ namespace Iviz.App
     public readonly struct Magnitude
     {
         public readonly string name;
+        public readonly Vector3 referencePoint;
         public readonly Vector3 position;
         public readonly Vector3? orientation;
         public readonly string? childFrame;
 
-        public Magnitude(string name, in Vector3 position, Vector3? orientation = null, string? childFrame = null)
+        public Magnitude(string name, in Vector3 position, Vector3? orientation = null, string? childFrame = null,
+            Vector3 referencePoint = default)
         {
             this.name = name;
+            this.referencePoint = referencePoint;
             this.position = position;
             this.orientation = orientation;
             this.childFrame = childFrame;
@@ -90,7 +93,7 @@ namespace Iviz.App
                 return;
             }
 
-            GuiInputModule.Instance.LookAt(frame.Transform, magnitude.position.Ros2Unity());
+            GuiInputModule.Instance.LookAt(frame.Transform, magnitude.referencePoint.Ros2Unity());
         }
 
         void UpdateMagnitude()

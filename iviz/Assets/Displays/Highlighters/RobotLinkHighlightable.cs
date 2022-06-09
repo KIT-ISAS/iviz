@@ -44,7 +44,6 @@ namespace Iviz.Displays
 
         public static void ProcessRobot(string robotName, GameObject baseLink)
         {
-            string robotNameCaption = $"<b>{robotName}</b>\n";
             /*
             var nodes = baseLink.GetComponentsInChildren<Transform>()
                 .Where(transform => transform.CompareTag(RobotModel.ColliderTag));
@@ -54,21 +53,21 @@ namespace Iviz.Displays
             foreach (var node in nodes)
             {
                 string linkName = node.parent.name;
+                string highlightableCaption = $"<b>{linkName}</b>\n{robotName}";
                 if (node.TryGetComponent<Collider>(out var collider))
                 {
                     var highlightable = node.gameObject.AddComponent<RobotLinkHighlightable>();
                     highlightable.Collider = collider;
-                    highlightable.Caption = robotNameCaption + linkName;
+                    highlightable.Caption = highlightableCaption;
                 }
                 else
                 {
-                    //var colliders = node.GetComponentsInChildren<Collider>();
                     var colliders = node.GetAllChildren().WithComponent<Collider>();
                     foreach (var subCollider in colliders)
                     {
                         var highlightable = subCollider.gameObject.AddComponent<RobotLinkHighlightable>();
                         highlightable.Collider = subCollider;
-                        highlightable.Caption = robotNameCaption + linkName;
+                        highlightable.Caption = highlightableCaption;
                     }
                 }
             }

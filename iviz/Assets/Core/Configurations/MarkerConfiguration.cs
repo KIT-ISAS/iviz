@@ -3,11 +3,12 @@
 using System;
 using System.Linq;
 using System.Runtime.Serialization;
+using Iviz.Common;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Roslib.Utils;
 
-namespace Iviz.Common.Configurations
+namespace Iviz.Core.Configurations
 {
     [DataContract]
     public sealed class MarkerConfiguration : JsonToString, IConfigurationWithTopic

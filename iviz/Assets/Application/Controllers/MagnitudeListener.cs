@@ -2,9 +2,9 @@
 
 using System;
 using Iviz.App;
-using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Core.Configurations;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
@@ -323,6 +323,8 @@ namespace Iviz.Controllers
 
         void Handler(Pose msg)
         {
+            Magnitude = new Magnitude("Pose", msg.Position);
+
             if (msg.IsInvalid())
             {
                 RosLogger.Debug($"{this}: Pose contains invalid values. Ignoring.");
@@ -340,7 +342,7 @@ namespace Iviz.Controllers
 
         void Handler(Point msg)
         {
-            Magnitude = new Magnitude("Point", msg);
+            Magnitude = new Magnitude("Point", msg, referencePoint: msg);
 
             if (msg.IsInvalid())
             {

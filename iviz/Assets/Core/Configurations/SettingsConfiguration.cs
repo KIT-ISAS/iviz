@@ -1,15 +1,16 @@
 #nullable enable
 
 using System.Runtime.Serialization;
+using Iviz.Common;
 using Iviz.Roslib.Utils;
 
-namespace Iviz.Common.Configurations
+namespace Iviz.Core.Configurations
 {
     [DataContract]
     public sealed class SettingsConfiguration : JsonToString
     {
         [DataMember] public QualityType QualityInView { get; set; } = QualityType.Ultra;
-        [DataMember] public QualityType QualityInAr { get; set; } = QualityType.Ultra;
+        [DataMember] public QualityType QualityInAr { get; set; } = QualityType.Low;
         
         /// How many frames to skip when processing data from the ROS network.
         /// 1 means to process in every frame, 2 means every second frame, and so on.  

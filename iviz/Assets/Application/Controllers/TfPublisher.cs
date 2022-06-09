@@ -124,14 +124,14 @@ namespace Iviz.Controllers.TF
             return newFrame;
         }
 
-        public bool Remove(string frameId)
+        public bool Remove(string frameId, bool allowRemoveInternal = false)
         {
             if (!frames.TryGetValue(frameId, out var frame))
             {
                 return false;
             }
 
-            if (frame.isInternal)
+            if (frame.isInternal && !allowRemoveInternal)
             {
                 RosLogger.Info($"{this}: Cannot remove '{frameId}'. Reason: It is being managed by iviz.");
                 return false;

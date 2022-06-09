@@ -2,9 +2,10 @@
 
 using System;
 using System.Runtime.Serialization;
+using Iviz.Common;
 using Iviz.Roslib.Utils;
 
-namespace Iviz.Common
+namespace Iviz.Core.Configurations
 {
     [DataContract]
     public sealed class ARMarkersConfiguration : JsonToString

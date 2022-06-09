@@ -211,7 +211,6 @@ namespace Iviz.Displays
             OcclusionOnly = false;
             UseIntensityForScaleY = false;
 
-            pointBuffer.Clear();
             pointBuffer.Reset();
 
             pointComputeBuffer?.Release();

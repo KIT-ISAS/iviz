@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Controllers;
 using Iviz.Core;
+using Iviz.Core.Configurations;
 using Iviz.Msgs;
 using Iviz.Tools;
 

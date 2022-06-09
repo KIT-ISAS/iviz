@@ -3,9 +3,9 @@
 using System;
 using System.Collections.Concurrent;
 using Iviz.Common;
-using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Core.Configurations;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
