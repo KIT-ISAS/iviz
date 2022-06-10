@@ -3,8 +3,8 @@
 using System;
 using System.Runtime.Serialization;
 using Iviz.Common;
-using Iviz.Common.Configurations;
 using Iviz.Core;
+using Iviz.Core.Configurations;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Roslib.Utils;
 

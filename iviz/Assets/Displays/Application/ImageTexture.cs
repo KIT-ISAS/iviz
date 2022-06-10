@@ -1,21 +1,14 @@
 ﻿#nullable enable
 
 using System;
-using System.IO;
-using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using BitMiracle.LibJpeg;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.ImageWrappers;
 using Iviz.Resources;
-using Iviz.Tools;
 using MarcusW.VncClient.Protocol.Implementation.Native;
 using Unity.Collections;
-using Unity.Mathematics;
 using UnityEngine;
-using Buffer = System.Buffer;
 using Vector2 = UnityEngine.Vector2;
 using Vector4 = UnityEngine.Vector4;
 
@@ -313,6 +306,12 @@ namespace Iviz.Displays
 
             GameThread.PostInListenerQueue(() =>
             {
+                if (Material == null) // check if we're shutting down
+                {
+                    onFinished();
+                    return;
+                }
+
                 try
                 {
                     Set(width, height, encoding, bitmapBuffer);
@@ -347,6 +346,7 @@ namespace Iviz.Displays
                 RosLogger.Error(
                     $"{this}: Invalid image! Expected at least {(size * bpp).ToString()} bytes, " +
                     $"but received {data.Length.ToString()}");
+
                 return;
             }
 
@@ -428,7 +428,7 @@ namespace Iviz.Displays
                     {
                         texture = EnsureSize(width, height, TextureFormat.R8);
                         ConversionUtils.CopyPixelsR16ToR8(texture.AsSpan(), data);
-                        
+
                         intensityBounds = CalculateBounds(texture.GetRawTextureData<byte>());
                         MeasuredIntensityBounds = intensityBounds;
                         normalizationFactor = 1f / byte.MaxValue;

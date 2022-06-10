@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 using Iviz.Common;
-using Iviz.Common.Configurations;
+using Iviz.Core.Configurations;
 
 namespace Iviz.App
 {

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Threading;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using TMPro;
@@ -59,7 +61,7 @@ namespace Iviz.App
         {
             set => gameObject.SetActive(value);
         }
-        
+
         public event Action<Vector3> ValueChanged;
         public event Action<Vector3> EndEdit;
 
@@ -92,6 +94,7 @@ namespace Iviz.App
             }
 
             ParseValue();
+            
             ValueChanged?.Invoke(value);
         }
 
@@ -110,9 +113,9 @@ namespace Iviz.App
         void UpdateInputLabels()
         {
             disableUpdates = true;
-            inputX.Value = value.x.ToString(UnityUtils.Culture);
-            inputY.Value = value.y.ToString(UnityUtils.Culture);
-            inputZ.Value = value.z.ToString(UnityUtils.Culture);
+            inputX.Value = value.x.ToString("0.###", UnityUtils.Culture);
+            inputY.Value = value.y.ToString("0.###", UnityUtils.Culture);
+            inputZ.Value = value.z.ToString("0.###", UnityUtils.Culture);
             disableUpdates = false;
         }
 
@@ -153,24 +156,20 @@ namespace Iviz.App
         void Awake()
         {
             Interactable = true;
-            UpdateInputLabels();
 
             inputX.SetContentType(TMP_InputField.ContentType.DecimalNumber);
             inputY.SetContentType(TMP_InputField.ContentType.DecimalNumber);
             inputZ.SetContentType(TMP_InputField.ContentType.DecimalNumber);
 
+            UpdateInputLabels();
+
             inputX.SubscribeValueChanged(_ => OnValueChanged());
             inputY.SubscribeValueChanged(_ => OnValueChanged());
             inputZ.SubscribeValueChanged(_ => OnValueChanged());
-            
+
             inputX.SubscribeEndEdit(_ => OnEndEdit());
             inputY.SubscribeEndEdit(_ => OnEndEdit());
             inputZ.SubscribeEndEdit(_ => OnEndEdit());
-        }
-
-        void Start()
-        {
-            OnValueChanged();
         }
     }
 }

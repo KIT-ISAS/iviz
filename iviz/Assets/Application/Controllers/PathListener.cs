@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Core.Configurations;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;

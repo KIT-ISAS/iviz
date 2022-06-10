@@ -22,7 +22,7 @@ using UnityEngine.XR.ARSubsystems;
 
 namespace Iviz.Controllers
 {
-    public sealed class ARFoundationScreenCaptureManager : IScreenCaptureManager
+    public sealed class ARScreenCaptureManager : IScreenCaptureManager
     {
         readonly ARCameraManager cameraManager;
         readonly Transform arCameraTransform;
@@ -63,7 +63,7 @@ namespace Iviz.Controllers
 
         public bool Started => true;
 
-        public ARFoundationScreenCaptureManager(
+        public ARScreenCaptureManager(
             ARCameraManager cameraManager,
             Transform arCameraTransform,
             AROcclusionManager occlusionManager)

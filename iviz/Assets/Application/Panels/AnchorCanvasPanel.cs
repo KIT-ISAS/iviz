@@ -17,7 +17,7 @@ namespace Iviz.App
 
         public AnchorToggleButton BottomHideGui => hideGui.AssertNotNull(nameof(hideGui));
         public Button LeftHideGui => sideHideGui.AssertNotNull(nameof(sideHideGui));
-        public AnchorToggleButton ARSet => arSet.AssertNotNull(nameof(arSet));
+        public AnchorToggleButton ARStartSession => arSet.AssertNotNull(nameof(arSet));
         public Button Unlock => unlock.AssertNotNull(nameof(unlock));
         public AnchorToggleButton Interact => interact.AssertNotNull(nameof(interact));
         public GameObject ARInfoPanel => arInfoPanel.AssertNotNull(nameof(arInfoPanel));

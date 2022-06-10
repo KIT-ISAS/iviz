@@ -16,7 +16,7 @@ namespace Iviz.Editor
 {
     public class SavedAssetLoader : UnityEditor.Editor
     {
-        [MenuItem("Iviz/Import Saved Assets To Unity")]
+        //[MenuItem("Iviz/Import Saved Assets To Unity")]
         public static async void CreateAllAssets()
         {
             Resource.ClearResources();

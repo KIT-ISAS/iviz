@@ -1,8 +1,8 @@
 ﻿#nullable enable
 
 using Iviz.Common;
-using Iviz.Common.Configurations;
 using Iviz.Core;
+using Iviz.Core.Configurations;
 using Iviz.Displays.XR;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;

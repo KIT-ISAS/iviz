@@ -1,12 +1,13 @@
 using System;
 using System.Runtime.Serialization;
+using Iviz.Common;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Roslib.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Iviz.Common.Configurations
+namespace Iviz.Core.Configurations
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum GridOrientation

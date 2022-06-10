@@ -1,6 +1,6 @@
-﻿using Iviz.Common.Configurations;
+﻿#nullable enable
 
-#nullable enable
+using Iviz.Core.Configurations;
 
 namespace Iviz.Common
 {
