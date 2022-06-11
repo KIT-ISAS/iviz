@@ -489,6 +489,9 @@ namespace Iviz.Controllers
             DepthConfidenceSender?.Dispose();
 
             pulseManager.Dispose();
+            
+            TfPublisher.Instance.Remove(HeadFrameId, true);
+            TfPublisher.Instance.Remove(CameraFrameId, true);
         }
 
         void IController.ResetController()

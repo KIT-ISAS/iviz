@@ -1,8 +1,9 @@
 using System.Runtime.Serialization;
+using Iviz.Common;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Roslib.Utils;
 
-namespace Iviz.Common.Configurations
+namespace Iviz.Core.Configurations
 {
     public enum JoystickMode
     {

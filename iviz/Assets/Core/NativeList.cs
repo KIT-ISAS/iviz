@@ -100,6 +100,8 @@ namespace Iviz.Core
 
         public void Reset()
         {
+            length = 0;
+            
             if (Capacity <= 16)
             {
                 return;

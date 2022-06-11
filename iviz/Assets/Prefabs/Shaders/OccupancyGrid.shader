@@ -14,7 +14,7 @@
         }
 
         CGPROGRAM
-        #pragma surface surf Standard alpha:fade
+        #pragma surface surf Standard fullforwardshadows alpha:fade
 
         struct Input
         {

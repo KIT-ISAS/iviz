@@ -2,9 +2,9 @@
 
 using System;
 using Iviz.Common;
-using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Core.Configurations;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
@@ -245,12 +245,14 @@ namespace Iviz.Controllers
             if (msg.Format.Length == 0)
             {
                 RosLogger.Error($"{this}: Image format field is not set!");
+                descriptionOverride = "[Format field empty]";
                 return true;
             }
 
             if (msg.Data.Length == 0)
             {
                 RosLogger.Error($"{this}: Data field is not set!");
+                descriptionOverride = "[Data field empty]";
                 return true;
             }
 
@@ -274,7 +276,8 @@ namespace Iviz.Controllers
                 IsProcessing = false;
             }
 
-            switch (msg.Format.ToUpperInvariant())
+            string format = msg.Format.ToUpperInvariant();
+            switch (format)
             {
                 case "PNG":
                     descriptionOverride = null;
@@ -285,11 +288,26 @@ namespace Iviz.Controllers
                     imageTexture.ProcessJpeg(msg.Data, PostProcess);
                     break;
                 default:
-                    descriptionOverride = msg.Format.Length == 0
-                        ? "[Unknown Format (empty)]"
-                        : $"[Unknown Format '{msg.Format}']";
-                    GameThread.PostInListenerQueue(PostProcess);
+                {
+                    if (format.Contains("PNG"))
+                    {
+                        descriptionOverride = null;
+                        imageTexture.ProcessPng(msg.Data, PostProcess);
+                    }
+                    else if (format.Contains("JPEG"))
+                    {
+                        descriptionOverride = null;
+                        imageTexture.ProcessJpeg(msg.Data, PostProcess);
+                    }
+                    else
+                    {
+                        RosLogger.Error($"{this}: Unknown format '{msg.Format}'");
+                        descriptionOverride = $"[Unknown Format '{msg.Format}']";
+                        GameThread.PostInListenerQueue(PostProcess);
+                    }
+
                     break;
+                }
             }
 
             return true;

@@ -3,10 +3,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Controllers.XR;
+using Iviz.Core.Configurations;
 
 namespace Iviz.App
 {

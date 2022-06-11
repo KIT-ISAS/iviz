@@ -27,29 +27,29 @@ struct Context
 };
 
 extern "C" {
-    static Callback DebugFn = nullptr;
-    static Callback InfoFn = nullptr;
-    static Callback ErrorFn = nullptr;
+    static IvizCallback DebugFn = nullptr;
+    static IvizCallback InfoFn = nullptr;
+    static IvizCallback ErrorFn = nullptr;
     
     static const std::vector<float> distCoeffs = { 0, 0, 0, 0, 0 };
     
     
-    void SetupDebug(Callback callback)
+    void IvizSetupDebug(IvizCallback callback)
     {
         DebugFn = callback;
     }
     
-    void SetupInfo(Callback callback)
+    void IvizSetupInfo(IvizCallback callback)
     {
         InfoFn = callback;
     }
     
-    void SetupError(Callback callback)
+    void IvizSetupError(IvizCallback callback)
     {
         ErrorFn = callback;
     }
     
-    void LogDebug(const std::string &str)
+    static void LogDebug(const std::string &str)
     {
         if (DebugFn != nullptr)
         {
@@ -57,7 +57,7 @@ extern "C" {
         }
     }
     
-    void LogInfo(const std::string &str)
+    static void LogInfo(const std::string &str)
     {
         if (InfoFn != nullptr)
         {
@@ -65,7 +65,7 @@ extern "C" {
         }
     }
     
-    void LogError(const std::string &str)
+    static void LogError(const std::string &str)
     {
         if (ErrorFn != nullptr)
         {
@@ -73,14 +73,14 @@ extern "C" {
         }
     }
     
-    void* CreateContext(int width, int height)
+    void* IvizCreateContext(int width, int height)
     {
         Context *ctx = new Context();
         ctx->image = cv::Mat(height, width, CV_8UC3);
         return ctx;
     }
     
-    int ImageWidth(const void *ctx_base)
+    int IvizImageWidth(const void *ctx_base)
     {
         if (ctx_base == nullptr)
         {
@@ -92,7 +92,7 @@ extern "C" {
         return ctx->image.cols;
     }
     
-    int ImageHeight(const void *ctx_base)
+    int IvizImageHeight(const void *ctx_base)
     {
         if (ctx_base == nullptr)
         {
@@ -104,7 +104,7 @@ extern "C" {
         return ctx->image.rows;
     }
     
-    int ImageFormat(const void *ctx_base)
+    int IvizImageFormat(const void *ctx_base)
     {
         if (ctx_base == nullptr)
         {
@@ -116,7 +116,7 @@ extern "C" {
         return ctx->image.type();
     }
     
-    int ImageSize(const void *ctx_base)
+    int IvizImageSize(const void *ctx_base)
     {
         if (ctx_base == nullptr)
         {
@@ -129,7 +129,7 @@ extern "C" {
     }
     
     
-    bool CopyFrom(void *ctx_base, const uint8_t *ptr, int size)
+    bool IvizCopyFrom(void *ctx_base, const uint8_t *ptr, int size)
     {
         if (ctx_base == nullptr)
         {
@@ -155,7 +155,7 @@ extern "C" {
         return true;
     }
     
-    bool CopyTo(const void *ctx_base, uint8_t *ptr, int size)
+    bool IvizCopyTo(const void *ctx_base, uint8_t *ptr, int size)
     {
         if (ctx_base == nullptr)
         {
@@ -181,7 +181,7 @@ extern "C" {
         return true;
     }
     
-    void *GetImagePtr(void *ctx_base)
+    void *IvizGetImagePtr(void *ctx_base)
     {
         if (ctx_base == nullptr)
         {
@@ -200,7 +200,7 @@ extern "C" {
     }
 
     
-    bool SetDictionary(void *ctx_base, int value)
+    bool IvizSetDictionary(void *ctx_base, int value)
     {
         if (ctx_base == nullptr)
         {
@@ -213,7 +213,7 @@ extern "C" {
         return true;
     }
     
-    bool DetectArucoMarkers(void *ctx_base)
+    bool IvizDetectArucoMarkers(void *ctx_base)
     {
         if (ctx_base == nullptr)
         {
@@ -251,7 +251,7 @@ extern "C" {
         return true;
     }
     
-    bool DetectQrMarkers(void *ctx_base)
+    bool IvizDetectQrMarkers(void *ctx_base)
     {
         if (ctx_base == nullptr)
         {
@@ -302,7 +302,7 @@ extern "C" {
         return true;
     }
     
-    int GetNumDetectedMarkers(const void *ctx_base)
+    int IvizGetNumDetectedMarkers(const void *ctx_base)
     {
         if (ctx_base == nullptr)
         {
@@ -314,7 +314,7 @@ extern "C" {
         return (int) ctx->markerCorners.size();
     }
     
-    bool GetArucoMarkerIds(const void *ctx_base, int *arrayPtr, int arraySize)
+    bool IvizGetArucoMarkerIds(const void *ctx_base, int *arrayPtr, int arraySize)
     {
         if (ctx_base == nullptr)
         {
@@ -339,7 +339,7 @@ extern "C" {
         return true;
     }
     
-    bool GetQrMarkerCodes(const void *ctx_base, const void **arrayPtr, int *arrayLengths, int arraySize)
+    bool IvizGetQrMarkerCodes(const void *ctx_base, const void **arrayPtr, int *arrayLengths, int arraySize)
     {
         if (ctx_base == nullptr)
         {
@@ -365,7 +365,7 @@ extern "C" {
     }
     
     
-    bool GetMarkerCorners(const void *ctx_base, float *arrayPtr, int arraySize)
+    bool IvizGetMarkerCorners(const void *ctx_base, float *arrayPtr, int arraySize)
     {
         if (ctx_base == nullptr)
         {
@@ -397,7 +397,7 @@ extern "C" {
         return true;
     }
     
-    bool SetCameraMatrix(void *ctx_base, float *arrayPtr, int arraySize)
+    bool IvizSetCameraMatrix(void *ctx_base, float *arrayPtr, int arraySize)
     {
         if (ctx_base == nullptr)
         {
@@ -431,7 +431,7 @@ extern "C" {
         return true;
     }
     
-    bool EstimateMarkerPoses(const void *ctx_base, float markerSize, float *rotations, int rotationsSize, float *translations, int translationsSize)
+    bool IvizEstimateMarkerPoses(const void *ctx_base, float markerSize, float *rotations, int rotationsSize, float *translations, int translationsSize)
     {
         if (ctx_base == nullptr)
         {
@@ -494,13 +494,13 @@ extern "C" {
     }
     
     
-    void DisposeContext(void *ctx_base)
+    void IvizDisposeContext(void *ctx_base)
     {
         Context *ctx = (Context*) ctx_base;
         delete ctx;
     }
 
-    bool EstimatePnp(const float *inputs, int inputSize, const float *outputs, int outputSize, float *cameraArray, int cameraArraySize, float *result, int resultSize)
+    bool IvizEstimatePnp(const float *inputs, int inputSize, const float *outputs, int outputSize, float *cameraArray, int cameraArraySize, float *result, int resultSize)
     {
         if (inputSize % 2 != 0)
         {
@@ -538,11 +538,6 @@ extern "C" {
         {
             input.at<float>(i, 0) = inputs[2 * i];
             input.at<float>(i, 1) = inputs[2 * i + 1];
-            /*
-            LogDebug(std::to_string(i));
-            LogDebug(std::to_string(input.at<float>(i, 0)));
-            LogDebug(std::to_string(input.at<float>(i, 1)));
-             */
         }
         
         cv::Mat output(outputSize / 3, 3, CV_32F);
@@ -551,12 +546,6 @@ extern "C" {
             output.at<float>(i, 0) = outputs[3 * i];
             output.at<float>(i, 1) = outputs[3 * i + 1];
             output.at<float>(i, 2) = outputs[3 * i + 2];
-            /*
-            LogDebug(std::to_string(i));
-            LogDebug(std::to_string(output.at<float>(i, 0)));
-            LogDebug(std::to_string(output.at<float>(i, 1)));
-            LogDebug(std::to_string(output.at<float>(i, 2)));
-             */
         }
         
         cv::Mat cameraMatrix(3, 3, CV_32F);
@@ -570,15 +559,6 @@ extern "C" {
         cameraMatrix.at<float>(2, 0) = 0;
         cameraMatrix.at<float>(2, 1) = 0;
         cameraMatrix.at<float>(2, 2) = 1;
-        
-        /*
-        LogDebug(std::to_string(cameraMatrix.at<float>(0, 0)));
-        LogDebug(std::to_string(cameraMatrix.at<float>(0, 1)));
-        LogDebug(std::to_string(cameraMatrix.at<float>(0, 2)));
-        LogDebug(std::to_string(cameraMatrix.at<float>(1, 0)));
-        LogDebug(std::to_string(cameraMatrix.at<float>(1, 1)));
-        LogDebug(std::to_string(cameraMatrix.at<float>(1, 2)));
-         */
 
         cv::Mat distCoeffs = cv::Mat::zeros(1, 5, CV_32F);
         
@@ -602,77 +582,6 @@ extern "C" {
         return true;
 
     }
-
-/*
-    bool EstimateUmeyama(const float *inputs, int inputSize, const float *outputs, int outputSize, bool estimateScale, float *result, int resultSize)
-    {
-        if (inputSize % 3 != 0)
-        {
-            LogError("[OpenCV native] Invalid inputSize");
-            return false;
-        }
-
-        if (outputSize % 3 != 0)
-        {
-            LogError("[OpenCV native] Invalid outputSize");
-            return false;
-        }
-
-        if (inputSize != outputSize)
-        {
-            LogError("[OpenCV native] Input and output sizes do not match");
-            return false;
-        }
-        
-        if (resultSize < 7)
-        {
-            LogError("[OpenCV native] Result size is too small");
-            return false;
-        }
-
-        
-        Eigen::Matrix3Xf input(3, inputSize / 3);
-        for (int i = 0; i < inputSize; i += 3)
-        {
-            input(0, i) = inputs[i];
-            input(1, i) = inputs[i + 1];
-            input(2, i) = inputs[i + 2];
-        }
-        
-        Eigen::Matrix3Xf output(3, outputSize / 3);
-        for (int i = 0; i < outputSize; i += 3)
-        {
-            output(0, i) = outputs[i];
-            output(1, i) = outputs[i + 1];
-            output(2, i) = outputs[i + 2];
-        }
-
-        Eigen::Matrix4f T = Eigen::umeyama(input, output, estimateScale);
-        
-        Eigen::Matrix3f R = T.topLeftCorner<3, 3>();
-        float scale;
-        if (estimateScale)
-        {
-            scale = R.col(0).norm();
-            R /= scale;
-        }
-        else
-        {
-            scale = 1;
-        }
-        
-        Eigen::AngleAxisf aa(R);
-        result[0] = aa.angle() * aa.axis()(0);
-        result[1] = aa.angle() * aa.axis()(1);
-        result[2] = aa.angle() * aa.axis()(2);
-        result[3] = T(0, 3);
-        result[4] = T(1, 3);
-        result[5] = T(2, 3);
-        result[6] = scale;
-        
-        return true;
-    }
- */
     
 }
 

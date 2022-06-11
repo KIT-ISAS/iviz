@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using Iviz.Common;
-using Iviz.Common.Configurations;
+using Iviz.Core.Configurations;
 using UnityEngine;
 
 namespace Iviz.Core

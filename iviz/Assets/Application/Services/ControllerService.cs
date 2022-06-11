@@ -10,6 +10,7 @@ using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.Roscpp;
 using Iviz.Resources;
@@ -339,6 +340,7 @@ namespace Iviz.Controllers
             try
             {
                 var moduleInfo = JsonConvert.DeserializeObject<GenericConfiguration>(config);
+
                 if (moduleInfo.ModuleType is not { } type)
                 {
                     result.success = false;
@@ -367,15 +369,15 @@ namespace Iviz.Controllers
                         ModuleListPanel.Instance.CameraModuleData.UpdateConfiguration(config, validatedFields);
                         result.success = true;
                         return;
-                    } 
-                    
+                    }
+
                     if (moduleType is ModuleType.TFPublisher)
                     {
                         ModuleListPanel.Instance.TfPublisher.UpdateConfiguration(config, validatedFields);
                         result.success = true;
                         return;
                     }
-                    
+
                     if (!ModuleDatas.TryGetFirst(data => data.Configuration.Id == id, out var module))
                     {
                         result.success = false;
@@ -455,9 +457,16 @@ namespace Iviz.Controllers
             */
         }
 
+        [Preserve]
         sealed class GenericConfiguration
         {
-            [UsedImplicitly] public ModuleType? ModuleType { get; set; }
+            [Preserve, UsedImplicitly] 
+            public ModuleType? ModuleType { get; set; }
+
+            [Preserve, UsedImplicitly]
+            public GenericConfiguration()
+            {
+            }
         }
 
         static string[] GetFields(string json)
@@ -1037,6 +1046,6 @@ namespace Iviz.Controllers
                 srv.Response.Feedback = feedback;
             }
         }
-        */        
+        */
     }
 }

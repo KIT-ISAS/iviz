@@ -174,7 +174,7 @@ namespace Iviz.Displays
 
             foreach (var link in robot.Links)
             {
-                var linkObject = new GameObject("Link:" + link.Name);
+                var linkObject = new GameObject(link.Name);
                 linkObject.transform.SetParentLocal(baseLinkObject.transform);
                 linkObjects[link.Name ?? ""] = linkObject;
             }

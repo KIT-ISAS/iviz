@@ -84,9 +84,9 @@ namespace Iviz.App
             }
         }
 
-        public Vector3MultiWidget SetLabel(string label)
+        public Vector3MultiWidget SetLabel(string newLabel)
         {
-            Label = label;
+            Label = newLabel;
             return this;
         }
 

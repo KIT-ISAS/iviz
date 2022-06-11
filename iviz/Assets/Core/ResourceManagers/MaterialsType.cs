@@ -122,10 +122,10 @@ namespace Iviz.Resources
             LineMesh.Object.SetColor(ShaderIds.TintId, Color.white);
             */
             
-            LinePulse = Create(assetHolder.LinePulseSimple);
+            LinePulse = Create(assetHolder.LinePulse);
             LinePulse.Object.SetColor(ShaderIds.TintId, Color.white);
             
-            LineMesh = Create(assetHolder.LineMeshSimple);
+            LineMesh = Create(assetHolder.LineMesh);
             LineMesh.Object.SetColor(ShaderIds.TintId, Color.white);
 
             MeshList = Create(assetHolder.MeshListMaterial);

@@ -26,6 +26,8 @@
             //PreferUdp = p.AddToggle("Prefer UDP");
 
             ShowDescriptions = p.AddToggle("Show Descriptions");
+            Mask = p.AddDropdown("Visible Mask");
+            
             OcclusionOnlyMode = p.AddToggle("AR Occlusion Only Mode");
             TriangleListFlipWinding = p.AddToggle("Clockwise Winding in Triangle Lists");
             Tint = p.AddColorPicker("Tint");
@@ -46,7 +48,6 @@
             HideButton = p.AddHideButton();
             ResetButton = p.AddResetButton();
 
-            Mask = p.AddDropdown("Visible Mask");
             Marker = p.AddMarker();
 
             p.UpdateSize();

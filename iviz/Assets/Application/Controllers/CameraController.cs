@@ -1,8 +1,8 @@
 #nullable enable
 
 using Iviz.App;
-using Iviz.Common.Configurations;
 using Iviz.Core;
+using Iviz.Core.Configurations;
 using UnityEngine;
 
 namespace Iviz.Controllers

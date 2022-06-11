@@ -1,0 +1,482 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		238FB56528300AB4004AE9F7 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 239F617A25F74C09000CC38F /* opencv2.framework */; };
+		23A502FF285494710061ABBE /* OpenCv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 23A502E9285494710061ABBE /* OpenCv.cpp */; };
+		23A50300285494710061ABBE /* OpenCv.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 23A502EA285494710061ABBE /* OpenCv.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		23A50301285494710061ABBE /* dictionary.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 23A502EF285494710061ABBE /* dictionary.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		23A50302285494710061ABBE /* charuco.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 23A502F0285494710061ABBE /* charuco.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		23A50303285494710061ABBE /* aruco.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 23A502F1285494710061ABBE /* aruco.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		23A50304285494710061ABBE /* zmaxheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 23A502F3285494710061ABBE /* zmaxheap.cpp */; };
+		23A50305285494710061ABBE /* precomp.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 23A502F4285494710061ABBE /* precomp.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		23A50306285494710061ABBE /* unionfind.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 23A502F5285494710061ABBE /* unionfind.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		23A50307285494710061ABBE /* predefined_dictionaries_apriltag.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 23A502F6285494710061ABBE /* predefined_dictionaries_apriltag.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		23A50308285494710061ABBE /* zarray.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 23A502F7285494710061ABBE /* zarray.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		23A50309285494710061ABBE /* apriltag_quad_thresh.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 23A502F8285494710061ABBE /* apriltag_quad_thresh.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		23A5030A285494710061ABBE /* aruco.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 23A502F9285494710061ABBE /* aruco.cpp */; };
+		23A5030B285494710061ABBE /* charuco.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 23A502FA285494710061ABBE /* charuco.cpp */; };
+		23A5030C285494710061ABBE /* predefined_dictionaries.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 23A502FB285494710061ABBE /* predefined_dictionaries.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		23A5030D285494710061ABBE /* zmaxheap.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 23A502FC285494710061ABBE /* zmaxheap.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		23A5030E285494710061ABBE /* apriltag_quad_thresh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 23A502FD285494710061ABBE /* apriltag_quad_thresh.cpp */; };
+		23A5030F285494710061ABBE /* dictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 23A502FE285494710061ABBE /* dictionary.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		232F7387283004B4007430EC /* iviz_opencv.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = iviz_opencv.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2391451225F3AAFA0073171E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		239F617A25F74C09000CC38F /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = opencv2.framework; sourceTree = "<group>"; };
+		23A502E9285494710061ABBE /* OpenCv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenCv.cpp; path = src/OpenCv.cpp; sourceTree = "<group>"; };
+		23A502EA285494710061ABBE /* OpenCv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = OpenCv.hpp; path = src/OpenCv.hpp; sourceTree = "<group>"; };
+		23A502EF285494710061ABBE /* dictionary.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = dictionary.hpp; sourceTree = "<group>"; };
+		23A502F0285494710061ABBE /* charuco.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = charuco.hpp; sourceTree = "<group>"; };
+		23A502F1285494710061ABBE /* aruco.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = aruco.hpp; sourceTree = "<group>"; };
+		23A502F3285494710061ABBE /* zmaxheap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zmaxheap.cpp; sourceTree = "<group>"; };
+		23A502F4285494710061ABBE /* precomp.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = precomp.hpp; sourceTree = "<group>"; };
+		23A502F5285494710061ABBE /* unionfind.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = unionfind.hpp; sourceTree = "<group>"; };
+		23A502F6285494710061ABBE /* predefined_dictionaries_apriltag.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = predefined_dictionaries_apriltag.hpp; sourceTree = "<group>"; };
+		23A502F7285494710061ABBE /* zarray.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = zarray.hpp; sourceTree = "<group>"; };
+		23A502F8285494710061ABBE /* apriltag_quad_thresh.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = apriltag_quad_thresh.hpp; sourceTree = "<group>"; };
+		23A502F9285494710061ABBE /* aruco.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aruco.cpp; sourceTree = "<group>"; };
+		23A502FA285494710061ABBE /* charuco.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = charuco.cpp; sourceTree = "<group>"; };
+		23A502FB285494710061ABBE /* predefined_dictionaries.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = predefined_dictionaries.hpp; sourceTree = "<group>"; };
+		23A502FC285494710061ABBE /* zmaxheap.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = zmaxheap.hpp; sourceTree = "<group>"; };
+		23A502FD285494710061ABBE /* apriltag_quad_thresh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = apriltag_quad_thresh.cpp; sourceTree = "<group>"; };
+		23A502FE285494710061ABBE /* dictionary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dictionary.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2359D2E825F4BCBD00316810 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				238FB56528300AB4004AE9F7 /* opencv2.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		238647CD25F73C3200DA5604 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				23A502E9285494710061ABBE /* OpenCv.cpp */,
+				23A502EA285494710061ABBE /* OpenCv.hpp */,
+			);
+			name = src;
+			sourceTree = "<group>";
+		};
+		2391450625F3AAFA0073171E = {
+			isa = PBXGroup;
+			children = (
+				23A502EB285494710061ABBE /* aruco */,
+				238647CD25F73C3200DA5604 /* src */,
+				2391451125F3AAFA0073171E /* IvizOpencv */,
+				2391453925F3D98C0073171E /* Frameworks */,
+				232F7387283004B4007430EC /* iviz_opencv.framework */,
+			);
+			sourceTree = "<group>";
+		};
+		2391451125F3AAFA0073171E /* IvizOpencv */ = {
+			isa = PBXGroup;
+			children = (
+				2391451225F3AAFA0073171E /* Info.plist */,
+			);
+			path = IvizOpencv;
+			sourceTree = "<group>";
+		};
+		2391453925F3D98C0073171E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				239F617A25F74C09000CC38F /* opencv2.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		23A502EB285494710061ABBE /* aruco */ = {
+			isa = PBXGroup;
+			children = (
+				23A502EC285494710061ABBE /* include */,
+				23A502F2285494710061ABBE /* src */,
+			);
+			path = aruco;
+			sourceTree = "<group>";
+		};
+		23A502EC285494710061ABBE /* include */ = {
+			isa = PBXGroup;
+			children = (
+				23A502ED285494710061ABBE /* opencv2 */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		23A502ED285494710061ABBE /* opencv2 */ = {
+			isa = PBXGroup;
+			children = (
+				23A502EE285494710061ABBE /* aruco */,
+				23A502F1285494710061ABBE /* aruco.hpp */,
+			);
+			path = opencv2;
+			sourceTree = "<group>";
+		};
+		23A502EE285494710061ABBE /* aruco */ = {
+			isa = PBXGroup;
+			children = (
+				23A502EF285494710061ABBE /* dictionary.hpp */,
+				23A502F0285494710061ABBE /* charuco.hpp */,
+			);
+			path = aruco;
+			sourceTree = "<group>";
+		};
+		23A502F2285494710061ABBE /* src */ = {
+			isa = PBXGroup;
+			children = (
+				23A502F3285494710061ABBE /* zmaxheap.cpp */,
+				23A502F4285494710061ABBE /* precomp.hpp */,
+				23A502F5285494710061ABBE /* unionfind.hpp */,
+				23A502F6285494710061ABBE /* predefined_dictionaries_apriltag.hpp */,
+				23A502F7285494710061ABBE /* zarray.hpp */,
+				23A502F8285494710061ABBE /* apriltag_quad_thresh.hpp */,
+				23A502F9285494710061ABBE /* aruco.cpp */,
+				23A502FA285494710061ABBE /* charuco.cpp */,
+				23A502FB285494710061ABBE /* predefined_dictionaries.hpp */,
+				23A502FC285494710061ABBE /* zmaxheap.hpp */,
+				23A502FD285494710061ABBE /* apriltag_quad_thresh.cpp */,
+				23A502FE285494710061ABBE /* dictionary.cpp */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		2359D2E625F4BCBD00316810 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				23A50300285494710061ABBE /* OpenCv.hpp in Headers */,
+				23A5030D285494710061ABBE /* zmaxheap.hpp in Headers */,
+				23A50306285494710061ABBE /* unionfind.hpp in Headers */,
+				23A50302285494710061ABBE /* charuco.hpp in Headers */,
+				23A50301285494710061ABBE /* dictionary.hpp in Headers */,
+				23A50307285494710061ABBE /* predefined_dictionaries_apriltag.hpp in Headers */,
+				23A50309285494710061ABBE /* apriltag_quad_thresh.hpp in Headers */,
+				23A50305285494710061ABBE /* precomp.hpp in Headers */,
+				23A50303285494710061ABBE /* aruco.hpp in Headers */,
+				23A50308285494710061ABBE /* zarray.hpp in Headers */,
+				23A5030C285494710061ABBE /* predefined_dictionaries.hpp in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		2359D2EA25F4BCBD00316810 /* iviz_opencv */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2359D30025F4BCBD00316810 /* Build configuration list for PBXNativeTarget "iviz_opencv" */;
+			buildPhases = (
+				2359D2E625F4BCBD00316810 /* Headers */,
+				2359D2E725F4BCBD00316810 /* Sources */,
+				2359D2E825F4BCBD00316810 /* Frameworks */,
+				2359D2E925F4BCBD00316810 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = iviz_opencv;
+			productName = "IvizOpencv-iOS";
+			productReference = 232F7387283004B4007430EC /* iviz_opencv.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2391450725F3AAFA0073171E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1320;
+				ORGANIZATIONNAME = "Antonio Zea";
+				TargetAttributes = {
+					2359D2EA25F4BCBD00316810 = {
+						CreatedOnToolsVersion = 10.0;
+					};
+				};
+			};
+			buildConfigurationList = 2391450A25F3AAFA0073171E /* Build configuration list for PBXProject "iviz_opencv" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 2391450625F3AAFA0073171E;
+			productRefGroup = 2391450625F3AAFA0073171E;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2359D2EA25F4BCBD00316810 /* iviz_opencv */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2359D2E925F4BCBD00316810 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2359D2E725F4BCBD00316810 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				23A5030F285494710061ABBE /* dictionary.cpp in Sources */,
+				23A5030E285494710061ABBE /* apriltag_quad_thresh.cpp in Sources */,
+				23A50304285494710061ABBE /* zmaxheap.cpp in Sources */,
+				23A5030A285494710061ABBE /* aruco.cpp in Sources */,
+				23A5030B285494710061ABBE /* charuco.cpp in Sources */,
+				23A502FF285494710061ABBE /* OpenCv.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2359D2FC25F4BCBD00316810 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BITCODE_GENERATION_MODE = bitcode;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = TF5SLD77X2;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				GENERATE_MASTER_OBJECT_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include/eigen3,
+					aruco/include,
+				);
+				INFOPLIST_FILE = "IvizOpencv-iOS/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				LLVM_LTO = YES;
+				MACH_O_TYPE = staticlib;
+				OTHER_CFLAGS = "-fembed-bitcode";
+				PRELINK_LIBS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "isas.kit.edu.IvizOpencv-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		2359D2FD25F4BCBD00316810 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BITCODE_GENERATION_MODE = bitcode;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = TF5SLD77X2;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				GENERATE_MASTER_OBJECT_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include/eigen3,
+					aruco/include,
+				);
+				INFOPLIST_FILE = "IvizOpencv-iOS/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				LLVM_LTO = YES;
+				MACH_O_TYPE = staticlib;
+				OTHER_CFLAGS = "-fembed-bitcode";
+				PRELINK_LIBS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "isas.kit.edu.IvizOpencv-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		2391451325F3AAFA0073171E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_BITCODE = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		2391451425F3AAFA0073171E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_BITCODE = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2359D30025F4BCBD00316810 /* Build configuration list for PBXNativeTarget "iviz_opencv" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2359D2FC25F4BCBD00316810 /* Debug */,
+				2359D2FD25F4BCBD00316810 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2391450A25F3AAFA0073171E /* Build configuration list for PBXProject "iviz_opencv" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2391451325F3AAFA0073171E /* Debug */,
+				2391451425F3AAFA0073171E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2391450725F3AAFA0073171E /* Project object */;
+}

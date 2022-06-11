@@ -8,12 +8,12 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Common;
-using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Controllers.XR;
 using Iviz.Core;
+using Iviz.Core.Configurations;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Resources;
@@ -176,6 +176,8 @@ namespace Iviz.App
 
         void Awake()
         {
+            Thread.CurrentThread.CurrentCulture = BuiltIns.Culture;
+
             Settings.SettingsManager = new SettingsManager();
         }
 

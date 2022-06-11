@@ -3,9 +3,9 @@
 using System;
 using System.Collections.Generic;
 using Iviz.Common;
-using Iviz.Common.Configurations;
 using Iviz.Controllers.XR;
 using Iviz.Core;
+using Iviz.Core.Configurations;
 
 namespace Iviz.App
 {
