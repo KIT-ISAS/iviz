@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2359D2EA25F4BCBD00316810"
-               BuildableName = "IvizOpencv.framework"
+               BuildableName = "iviz_opencv.framework"
                BlueprintName = "iviz_opencv"
                ReferencedContainer = "container:iviz_opencv.xcodeproj">
             </BuildableReference>
@@ -51,7 +51,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2359D2EA25F4BCBD00316810"
-            BuildableName = "IvizOpencv.framework"
+            BuildableName = "iviz_opencv.framework"
             BlueprintName = "iviz_opencv"
             ReferencedContainer = "container:iviz_opencv.xcodeproj">
          </BuildableReference>
