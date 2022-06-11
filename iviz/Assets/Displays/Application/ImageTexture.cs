@@ -4,7 +4,7 @@ using System;
 using System.Threading.Tasks;
 using Iviz.Common;
 using Iviz.Core;
-using Iviz.ImageWrappers;
+using Iviz.ImageDecoders;
 using Iviz.Resources;
 using MarcusW.VncClient.Protocol.Implementation.Native;
 using Unity.Collections;

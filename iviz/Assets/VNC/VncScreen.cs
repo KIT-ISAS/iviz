@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Core.XR;
-using Iviz.ImageWrappers;
+using Iviz.ImageDecoders;
 using Iviz.Tools;
 using Iviz.Urdf;
 using MarcusW.VncClient;

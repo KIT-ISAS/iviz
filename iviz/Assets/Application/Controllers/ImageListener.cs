@@ -301,9 +301,8 @@ namespace Iviz.Controllers
                     }
                     else
                     {
-                        descriptionOverride = msg.Format.Length == 0
-                            ? "[Unknown Format (empty)]"
-                            : $"[Unknown Format '{msg.Format}']";
+                        RosLogger.Error($"{this}: Unknown format '{msg.Format}'");
+                        descriptionOverride = $"[Unknown Format '{msg.Format}']";
                         GameThread.PostInListenerQueue(PostProcess);
                     }
 
