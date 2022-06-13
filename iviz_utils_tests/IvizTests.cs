@@ -24,14 +24,16 @@ namespace Iviz.UtilsTests;
 [Category("Iviz")]
 public class IvizTests
 {
-    static readonly Uri CallerUri = new Uri("http://localhost:7616");
+    //static readonly Uri CallerUri = new Uri("http://localhost:7616");
 
-    static readonly Uri MasterUri = new Uri("http://localhost:11311");
+    //static readonly Uri MasterUri = new Uri("http://localhost:11311");
 
-    //static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
-    //static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
+    static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
+    static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
+    
     const string CallerId = "/iviz_util_tests";
-    const string IvizId = "/iviz_osxeditor";
+    //const string IvizId = "/iviz_osxeditor";
+    const string IvizId = "/iviz_iphoneplayer";
 
     RosClient client;
 
@@ -92,7 +94,7 @@ public class IvizTests
     [Test]
     public void TestOccupancyGrid()
     {
-        var writer = client.CreateWriter<OccupancyGrid>("/occupancy_grid");
+        using var writer = client.CreateWriter<OccupancyGrid>("/occupancy_grid");
 
         var ivizController = new IvizController(client, IvizId);
         ivizController.AddModuleFromTopic("/occupancy_grid");
@@ -151,7 +153,7 @@ public class IvizTests
     [Test]
     public void TestMagnitude()
     {
-        var writer = client.CreateWriter<Twist>("/magnitude");
+        using var writer = client.CreateWriter<Twist>("/magnitude");
 
         var ivizController = new IvizController(client, IvizId);
         ivizController.AddModuleFromTopic("/magnitude");
@@ -377,6 +379,39 @@ public class IvizTests
     }
 
     [Test]
+    public void TestMarkers2()
+    {
+        using var writer = client.CreateWriter<MarkerArray>("/markers", true);
+
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.AddModuleFromTopic("/markers");
+        var markers = new List<Marker>();
+        
+        var points = new List<Point>();
+        for (int i = 0; i < 2 * 360; i += 9)
+        {
+            float angle = i * 180 / MathF.PI;
+            Point point = (MathF.Cos(angle), MathF.Sin(angle), i * 0.001);
+            points.Add(point);
+        }
+
+        int o = 0;
+        for (int j = 0; j < 32; j++)
+        {
+            for (int i = 0; i < 32; i++)
+            {
+                markers.Add(RosMarkerHelper.CreateLineStrip(id: o++, pose: Pose.Identity.WithPosition(i, j, 0),
+                    color: ColorRGBA.Blue, lines: points.ToArray(), width: 0.01));
+            }
+        }
+
+        writer.Write(new MarkerArray(markers.ToArray()));
+
+        Thread.Sleep(1000);
+
+    }
+
+    [Test]
     public void TestImages()
     {
         using var writer = client.CreateWriter<CompressedImage>("/compressed_image", true);
@@ -390,6 +425,7 @@ public class IvizTests
 
         string path;
         
+        /*
         path = "../../../images/grey.png";
         image.Data = File.ReadAllBytes(path);
         writer.Write(image);
@@ -414,14 +450,19 @@ public class IvizTests
         image.Format = "whee";
         writer.Write(image);
         Thread.Sleep(1000);
+        */
 
+        path = "../../../images/testorig.jpg";
+        image.Data = File.ReadAllBytes(path);
         image.Format = "jpg";
         writer.Write(image);
         Thread.Sleep(1000);
 
+        /*
         image.Format = "jpg";
         image.Data.AsSpan()[100..200].Fill(0); // break image
         writer.Write(image);
         Thread.Sleep(1000);
+        */
     }
 }
