@@ -38,6 +38,7 @@ namespace Iviz.Displays
 
                 trail = ResourcePool.RentDisplay<TrailDisplay>(TfModule.UnityTransform);
                 trail.TimeWindowInMs = TrailTimeWindowInMs;
+                trail.ElementScale = 0.02f;
                 trail.Color = Color.yellow;
                 trail.name = $"[Trail:{Id}]";
                 return trail;

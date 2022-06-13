@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Resources;
 using Unity.Mathematics;
@@ -25,6 +26,7 @@ namespace Iviz.Displays
         ITrailDataSource? dataSource;
         int timeWindowInMs = 5000;
         int maxMeasurements = 160;
+        float elementScale;
         Color color = UnityEngine.Color.red;
         Vector3? lastMeasurement;
         LineDisplay? resource;
@@ -95,7 +97,11 @@ namespace Iviz.Displays
 
         public float ElementScale
         {
-            set => Resource.ElementScale = value;
+            set
+            {
+                elementScale = value;
+                Resource.ElementScale = value * TfModule.RootScale;   
+            }
         }
 
         void Awake()
@@ -133,7 +139,9 @@ namespace Iviz.Displays
             }
 
             lastMeasurement = newMeasurement;
+            
             Resource.SetDirect(lineSetterDelegate, measurements.Count);
+            Resource.ElementScale = elementScale * TfModule.RootScale;   
         }
 
         bool? LineSetter(NativeList<float4x2> lineBuffer)
