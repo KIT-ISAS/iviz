@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace Iviz.Tools;
 
@@ -26,17 +28,22 @@ public static class BuilderPool
     /// </summary>
     public readonly struct BuilderRent : IDisposable
     {
-        static ConcurrentQueue<(StringBuilder builder, ReadOnlyMemory<char> chunk)>? pool;
+        static ConcurrentQueue<StringBuilder>? pool;
 
-        static ConcurrentQueue<(StringBuilder builder, ReadOnlyMemory<char> chunk)> Pool =>
-            pool ??= new ConcurrentQueue<(StringBuilder builder, ReadOnlyMemory<char> chunk)>();
+        static ConcurrentQueue<StringBuilder> Pool => pool ??= new ConcurrentQueue<StringBuilder>();
 
         readonly StringBuilder builder;
-        readonly ReadOnlyMemory<char> chunk;
 
-        public ReadOnlyMemory<char> Chunk => chunk.Length >= builder.Length
-            ? chunk[..builder.Length]
-            : chunk;
+        public ReadOnlyMemory<char> Chunk
+        {
+            get
+            {
+                var chunk = GetMainChunk();
+                return chunk.Length >= builder.Length
+                    ? chunk[..builder.Length]
+                    : chunk;
+            }
+        }
 
         /// Returns the length of the enclosed string builder.
         public int Length
@@ -49,19 +56,17 @@ public static class BuilderPool
         {
             if (Pool.TryDequeue(out var entry))
             {
-                builder = entry.builder;
-                chunk = entry.chunk;
+                builder = entry;
                 return;
             }
 
             builder = new StringBuilder(65536);
-            chunk = builder.GetMainChunk();
         }
 
         public void Dispose()
         {
             builder.Clear();
-            Pool.Enqueue((builder, chunk));
+            Pool.Enqueue(builder);
         }
 
         /// <summary>
@@ -222,7 +227,29 @@ public static class BuilderPool
         /// </summary>
         public Rent<byte> AsRent()
         {
-            return builder.AsRent(chunk);
+            int length = builder.Length;
+            var bytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(length));
+            int size;
+
+            var mainChunk = Chunk;
+            if (mainChunk.Length >= length)
+            {
+                size = Defaults.UTF8.GetBytes(mainChunk[..length].Span, bytes);
+            }
+            else
+            {
+                // slow path
+                using var chars = new Rent<char>(length);
+                var array = chars.AsSpan();
+                for (int i = 0; i < length; i++)
+                {
+                    array[i] = builder[i];
+                }
+
+                size = Defaults.UTF8.GetBytes(chars, bytes);
+            }
+
+            return bytes.Resize(size);
         }
 
         public override string ToString()
@@ -234,5 +261,33 @@ public static class BuilderPool
         {
             return s.builder;
         }
+
+#if NETSTANDARD2_1
+        [StructLayout(LayoutKind.Explicit)]
+        struct StringBuilderConverter
+        {
+            [UsedImplicitly]
+            class OpenStringBuilder
+            {
+                public char[]? chunkChars;
+            }
+
+            [FieldOffset(0)] public StringBuilder builder;
+            [FieldOffset(0)] readonly OpenStringBuilder openBuilder;
+
+            public char[] ExtractChars() => openBuilder.chunkChars ?? Array.Empty<char>();
+        }
+
+        ReadOnlyMemory<char> GetMainChunk()
+        {
+            return new StringBuilderConverter { builder = builder }.ExtractChars();
+        }
+#else
+        ReadOnlyMemory<char> GetMainChunk()
+        {
+            var e = builder.GetChunks();
+            return !e.MoveNext() ? ReadOnlyMemory<char>.Empty : e.Current;
+        }
+#endif
     }
 }

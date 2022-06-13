@@ -113,54 +113,6 @@ public static class BaseUtils
         return bytes.Resize(size);
     }
 
-    internal static Rent<byte> AsRent(this StringBuilder str, in ReadOnlyMemory<char> mainChunk)
-    {
-        var bytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(str.Length));
-        int size;
-
-        if (mainChunk.Length >= str.Length)
-        {
-            size = Defaults.UTF8.GetBytes(mainChunk[..str.Length].Span, bytes);
-        }
-        else
-        {
-            // slow path
-            using var chars = new Rent<char>(str.Length);
-            var array = chars.AsSpan();
-            for (int i = 0; i < str.Length; i++)
-            {
-                array[i] = str[i];
-            }
-
-            size = Defaults.UTF8.GetBytes(chars, bytes);
-        }
-
-        return bytes.Resize(size);
-    }
-
-#if NETSTANDARD2_1
-    static FieldInfo? chunkField;
-
-    internal static ReadOnlyMemory<char> GetMainChunk(this StringBuilder str)
-    {
-        if (chunkField == null)
-        {
-            chunkField =
-                typeof(StringBuilder).GetField("m_ChunkChars",
-                    BindingFlags.NonPublic | BindingFlags.Instance) // should survive trimming
-                ?? throw new InvalidOperationException("Failed to find StringBuilder chunk field!");
-        }
-
-        return (char[])chunkField.GetValue(str)!;
-    }
-#else
-    internal static ReadOnlyMemory<char> GetMainChunk(this StringBuilder str)
-    {
-        var e = str.GetChunks();
-        return !e.MoveNext() ? ReadOnlyMemory<char>.Empty : e.Current;
-    }
-#endif
-
     /// <summary>
     ///     A string hash that does not change every run unlike <see cref="string.GetHashCode()"/>
     /// </summary>
