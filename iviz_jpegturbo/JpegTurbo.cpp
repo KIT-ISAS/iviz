@@ -22,7 +22,7 @@ int IvizDestroy(void *handle) {
 }
 
 __attribute__((visibility("default")))
-void *IvizGetStr() {
+void *IvizGetErrorStr() {
     return tjGetErrorStr();
 }
 
