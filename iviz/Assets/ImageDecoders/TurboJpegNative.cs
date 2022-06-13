@@ -68,38 +68,55 @@ namespace Iviz.ImageDecoders
     /// <summary>
     /// Bindings for the JPEG library wrapped in an interface. Also used by the VNC module.
     /// </summary>
-    public class TurboJpegUnityWrapper : ITurboJpeg
+    public sealed class TurboJpegUnityWrapper : ITurboJpeg
     {
-        public IntPtr InitDecompressorInstance() => Settings.IsIPhone
-            ? TurboJpegNativeIOS.InitDecompressorInstance()
-            : TurboJpegNative.InitDecompressorInstance();
+        public IntPtr InitDecompressorInstance() =>
+#if UNITY_IOS
+            TurboJpegNativeIOS.InitDecompressorInstance();
+#else
+            TurboJpegNative.InitDecompressorInstance();
+#endif
 
-        public int DestroyInstance(IntPtr handle) => Settings.IsIPhone
-            ? TurboJpegNativeIOS.DestroyInstance(handle)
-            : TurboJpegNative.DestroyInstance(handle);
+        public int DestroyInstance(IntPtr handle) =>
+#if UNITY_IOS
+            TurboJpegNativeIOS.DestroyInstance(handle);
+#else
+            TurboJpegNative.DestroyInstance(handle);
+#endif
 
         public int DecompressHeader(IntPtr handle, IntPtr jpegBuf, ulong jpegSize, out int width,
-            out int height, out int subsampling, out int colorspace)
-        {
-            colorspace = (int)TurboJpegColorspace.TJCS_RGB;
-            return Settings.IsIPhone
-                ? TurboJpegNativeIOS.DecompressHeader(handle, jpegBuf, jpegSize, out width, out height, out subsampling,
-                    out colorspace)
-                : TurboJpegNative.DecompressHeader(handle, jpegBuf, jpegSize, out width, out height, out subsampling);
-        }
+            out int height, out int subsampling, out int colorspace) =>
+#if UNITY_IOS
+            TurboJpegNativeIOS.DecompressHeader(handle, jpegBuf, jpegSize, out width, out height, out subsampling,
+                out colorspace);
+#else
+            TurboJpegNative.DecompressHeader(handle, jpegBuf, jpegSize, out width, out height, out subsampling,
+                out colorspace);
+#endif
 
         public int Decompress(IntPtr handle, IntPtr jpegBuf, ulong jpegSize, IntPtr dstBuf, int width,
-            int pitch, int height, int pixelFormat, int flags) => Settings.IsIPhone
-            ? TurboJpegNativeIOS.Decompress(handle, jpegBuf, jpegSize, dstBuf, width, pitch, height, pixelFormat, flags)
-            : TurboJpegNative.Decompress(handle, jpegBuf, jpegSize, dstBuf, width, pitch, height, pixelFormat,
-                flags);
+            int pitch, int height, int pixelFormat, int flags) =>
+#if UNITY_IOS
+            TurboJpegNativeIOS.Decompress(handle, jpegBuf, jpegSize, dstBuf, width, pitch, height, pixelFormat, flags);
+#else
+            TurboJpegNative.Decompress(handle, jpegBuf, jpegSize, dstBuf, width, pitch, height, pixelFormat, flags);
+#endif
 
-        public IntPtr GetLastError() => Settings.IsIPhone
-            ? TurboJpegNativeIOS.GetLastError()
-            : TurboJpegNative.GetLastError();
+        public IntPtr GetLastError() =>
+#if UNITY_IOS
+            TurboJpegNativeIOS.GetLastError();
+#else
+            TurboJpegNative.GetLastError();
+#endif
+
+        public IntPtr GetLastError(IntPtr handle) =>
+#if UNITY_IOS
+            TurboJpegNativeIOS.GetLastError(handle);
+#else
+            TurboJpegNative.GetLastError(handle);
+#endif
+
     }
-
-
 
     /// <summary>
     /// Native bindings for the turbojpeg decoder, standalone / editor version.
@@ -119,44 +136,46 @@ namespace Iviz.ImageDecoders
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "tjGetErrorStr")]
         public static extern IntPtr GetLastError();
 
-        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "tjDecompressHeader2")]
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "tjGetErrorStr2")]
+        public static extern IntPtr GetLastError(IntPtr handle);
+
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "tjDecompressHeader3")]
         public static extern int DecompressHeader(IntPtr handle, IntPtr jpegBuf, ulong jpegSize, out int width,
-            out int height, out int jpegSubsamp);
+            out int height, out int jpegSubsamp, out int colorspace);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "tjDecompress2")]
         public static extern int Decompress(IntPtr handle, IntPtr jpegBuf, ulong jpegSize, IntPtr dstBuf,
             int width, int pitch, int height, int pixelFormat, int flags);
     }
-    
+
+#if UNITY_IOS
     /// <summary>
     /// Native bindings for the turbojpeg decoder, iOS version.
-    /// Doing this was annoying because Unity has its own version of libjpeg and you will always get errors in the form
-    /// of "JPEG parameter struct mismatch: library thinks size is 600, caller expects 632"
-    /// So I just created a new static library that links to libturbojpeg.a and libjpeg.a, and calls the corresponding
-    /// turbojpeg functions but using other function names.
-    /// Then from XCode select "Perform Single-Object Prelink", and put the two static libraries into "Prelink Libraries"
-    /// (full path). Finally set "Symbols Hidden by Default" to true, and add
-    /// __attribute__((visibility("default"))) to all the new methods you want to be visible.
+    /// Names (entry points) changed because Unity has its own version of turbojpeg and the names would collide.
     /// </summary>
     internal static class TurboJpegNativeIOS
     {
         const string Library = "__Internal";
 
-        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "IvizInitDecompressorInstance")]
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "IvizInitDecompress")]
         public static extern IntPtr InitDecompressorInstance();
 
-        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "IvizDestroyInstance")]
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "IvizDestroy")]
         public static extern int DestroyInstance(IntPtr handle);
 
-        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "IvizGetLastError")]
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "IvizGetErrorStr")]
         public static extern IntPtr GetLastError();
 
-        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "IvizDecompressHeader")]
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "IvizGetErrorStr2")]
+        public static extern IntPtr GetLastError(IntPtr handle);
+
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "IvizDecompressHeader3")]
         public static extern int DecompressHeader(IntPtr handle, IntPtr jpegBuf, ulong jpegSize, out int width,
             out int height, out int jpegSubsamp, out int jpegColorSpace);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "IvizDecompress")]
         public static extern int Decompress(IntPtr handle, IntPtr jpegBuf, ulong jpegSize, IntPtr dstBuf,
             int width, int pitch, int height, int pixelFormat, int flags);
-    }    
+    }
+#endif
 }

@@ -33,9 +33,9 @@ namespace Iviz.ImageDecoders
                     $"Initializing TurboJPEG decompressor instance failed: {GetLastError()}");
             }
 
-            fixed (byte* jpegBufferPtr = readBuffer)
+            fixed (byte* readBufferPtr = readBuffer)
             {
-                if (TurboJpegNative.DecompressHeader(jpegPtr, (IntPtr)jpegBufferPtr, (ulong)readBuffer.Length,
+                if (TurboJpegNative.DecompressHeader(jpegPtr, (IntPtr)readBufferPtr, (ulong)readBuffer.Length,
                         out int width, out int height, out int subsampling, out int colorspace) == -1)
                 {
                     throw new DecoderException(GetLastError());
@@ -55,6 +55,11 @@ namespace Iviz.ImageDecoders
 
         public unsafe void Decode(Span<byte> destBuffer)
         {
+            if (disposed)
+            {
+                throw new ObjectDisposedException(nameof(JpegDecoder));
+            }
+            
             int bpp = JpegInfo.Format switch
             {
                 TurboJpegPixelFormat.Gray => 1,
@@ -78,10 +83,10 @@ namespace Iviz.ImageDecoders
                     $"when decompressing. ");
             }
 
-            fixed (byte* jpegBufferPtr = readBuffer)
+            fixed (byte* readBufferPtr = readBuffer)
             fixed (byte* pixelsBufferPtr = destBuffer)
             {
-                if (TurboJpegNative.Decompress(jpegPtr, (IntPtr)jpegBufferPtr, (ulong)readBuffer.Length,
+                if (TurboJpegNative.Decompress(jpegPtr, (IntPtr)readBufferPtr, (ulong)readBuffer.Length,
                         (IntPtr)pixelsBufferPtr, JpegInfo.Width, stride, JpegInfo.Height, (int)JpegInfo.Format,
                         (int)(TurboJpegFlags.FastUpsample | TurboJpegFlags.FastDct | TurboJpegFlags.NoRealloc)) == -1)
                     throw new DecoderException(GetLastError());
@@ -110,9 +115,9 @@ namespace Iviz.ImageDecoders
             ReleaseUnmanagedResources();
         }
 
-        static string GetLastError()
+        string GetLastError()
         {
-            return Marshal.PtrToStringAnsi(TurboJpegNative.GetLastError()) ?? "";
+            return Marshal.PtrToStringAnsi(TurboJpegNative.GetLastError(jpegPtr)) ?? "";
         }
     }
 }

@@ -109,6 +109,11 @@ namespace Iviz.ImageDecoders
         /// </summary>
         public unsafe void Decode(Span<byte> destBuffer)
         {
+            if (disposed)
+            {
+                throw new ObjectDisposedException(nameof(JpegDecoder));
+            }
+            
             int requiredLength = PngInfo.DecompressedSize;
             if (requiredLength == 0)
             {
@@ -158,7 +163,7 @@ namespace Iviz.ImageDecoders
             var targetBuffer = new Span<byte>(outBytes.ToPointer(), countToRead);
             if (self.position + countToRead > self.readBuffer.Length)
             {
-                RosLogger.Debug(nameof(PngDecoder) + ": Buffer underflow!");
+                RosLogger.Error(nameof(PngDecoder) + ": Buffer underflow!");
                 targetBuffer.Fill(0);
                 return;
             }

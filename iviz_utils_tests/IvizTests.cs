@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.GridMapMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.MoveitMsgs;
 using Iviz.Msgs.NavMsgs;
@@ -16,6 +17,7 @@ using Iviz.RemoteLib;
 using Iviz.Roslib;
 using Iviz.Roslib.MarkerHelper;
 using Iviz.Tools;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
@@ -441,7 +443,7 @@ public class IvizTests
         image.Data.AsSpan()[100..200].Fill(0); // break image
         writer.Write(image);
         Thread.Sleep(1000);
-        
+
         path = "../../../images/testorig.jpg";
         image.Data = File.ReadAllBytes(path);
         writer.Write(image);
@@ -464,5 +466,105 @@ public class IvizTests
         writer.Write(image);
         Thread.Sleep(1000);
         */
+    }
+
+
+    [Test]
+    public void TestGridmap()
+    {
+        var writer = client.CreateWriter<GridMap>("/gridmap");
+
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.AddModuleFromTopic("/gridmap");
+
+        writer.WaitForAnySubscriber();
+        Thread.Sleep(100);
+        uint s = 0;
+        const int w = 100;
+        const int h = 100;
+
+        float[] data = new float[w * h];
+
+        var msg = CreateGridmap(w, h);
+        msg.Data[0].Data = data;
+
+        foreach (int i in ..2000)
+        {
+            foreach (int v in ..h)
+            {
+                foreach (int u in ..w)
+                {
+                    data[v * w + u] = MathF.Sin((i + u + v) / 50f);
+                }
+            }
+
+            writer.Write(msg);
+            Thread.Sleep(5);
+        }
+    }
+
+
+    [Test]
+    public void TestGridmap2()
+    {
+        var writer = client.CreateWriter<GridMap>("/gridmap");
+
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.AddModuleFromTopic("/gridmap");
+
+        writer.WaitForAnySubscriber();
+        Thread.Sleep(100);
+        uint s = 0;
+        const int w = 100;
+        const int h = 100;
+
+        float[] data = new float[w * h];
+
+        var msg = CreateGridmap(w, h);
+        msg.Data[0].Data = data;
+
+        data[0] = 10;
+        writer.Write(msg);
+        Thread.Sleep(2000);
+    }
+
+    [NotNull]
+    static GridMap CreateGridmap(uint w, uint h)
+    {
+        return new GridMap
+        {
+            Info = new GridMapInfo
+            {
+                LengthX = h * 0.05f,
+                LengthY = w * 0.05f,
+                Pose = Pose.Identity,
+                Resolution = 0.05f,
+                Header = new Header(0, time.Now(), ""),
+            },
+            Data = new Float32MultiArray[]
+            {
+                new Float32MultiArray
+                {
+                    Layout = new MultiArrayLayout
+                    {
+                        Dim = new MultiArrayDimension[]
+                        {
+                            new MultiArrayDimension
+                            {
+                                Label = "column_index",
+                                Size = h,
+                                Stride = w * h
+                            },
+                            new MultiArrayDimension
+                            {
+                                Label = "row_index",
+                                Size = w,
+                                Stride = w
+                            }
+                        }
+                    },
+                }
+            }
+        };        
     }
 }

@@ -156,7 +156,7 @@ namespace Iviz.Displays
 
             if (data.Length < 8)
             {
-                RosLogger.Debug($"{this}: Error processing PNG image. Data array is too short to be a PNG file");
+                RosLogger.Error($"{this}: Error processing PNG image. Data array is too short to be a PNG file");
                 GameThread.PostInListenerQueue(onFinished);
                 return;
             }
@@ -240,7 +240,7 @@ namespace Iviz.Displays
 
             if (data.Length < 2)
             {
-                RosLogger.Debug($"{this}: Error processing JPG image. Data array is too short to be a JPG file");
+                RosLogger.Error($"{this}: Error processing JPG image. Data array is too short to be a JPG file");
                 GameThread.PostInListenerQueue(onFinished);
                 return;
             }

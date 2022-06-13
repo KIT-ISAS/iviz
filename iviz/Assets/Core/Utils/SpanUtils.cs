@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -8,6 +9,7 @@ using System.Runtime.InteropServices;
 using Unity.Collections;
 using UnityEngine;
 using Iviz.Tools;
+using JetBrains.Annotations;
 
 namespace Iviz.Core
 {
@@ -93,32 +95,24 @@ namespace Iviz.Core
             return MemoryMarshal.Cast<byte, T>(src);
         }
 
-        static Func<object, Array>? extractArrayFromListTypeFn;
-
-        static Func<object, Array> ExtractArrayFromList
+        [StructLayout(LayoutKind.Explicit)]
+        struct ListConverter
         {
-            get
+            [UsedImplicitly]
+            class OpenList
             {
-                if (extractArrayFromListTypeFn != null)
-                {
-                    return extractArrayFromListTypeFn;
-                }
-
-                var assembly = typeof(MonoBehaviour /* any type in UnityEngine.CoreModule */).Assembly;
-                var type = assembly?.GetType("UnityEngine.NoAllocHelpers");
-                var methodInfo = type?.GetMethod("ExtractArrayFromList", BindingFlags.Static | BindingFlags.Public);
-                if (methodInfo == null)
-                {
-                    throw new InvalidOperationException("Failed to retrieve function ExtractArrayFromList");
-                }
-
-                extractArrayFromListTypeFn =
-                    (Func<object, Array>)methodInfo.CreateDelegate(typeof(Func<object, Array>));
-
-                return extractArrayFromListTypeFn;
+                public Array? items;
             }
+
+            [FieldOffset(0)] public IList list;
+            [FieldOffset(0)] readonly OpenList openList;
+
+            public Array? ExtractArray() => openList.items;
         }
 
-        static T[] ExtractArray<T>(List<T> list) => (T[])ExtractArrayFromList(list);
+        static T[] ExtractArray<T>(List<T> list)
+        {
+            return (T[]?)new ListConverter { list = list }.ExtractArray() ?? Array.Empty<T>();
+        }
     }
 }

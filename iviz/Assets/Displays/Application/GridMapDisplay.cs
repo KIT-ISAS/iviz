@@ -182,9 +182,12 @@ namespace Iviz.Displays
             int indexSize = cellsX * cellsY;
 
             using (var pointsArray = new Rent<Vector3>(verticesSize))
+            using (var uvArray = new Rent<Vector2>(verticesSize))
             using (var indicesArray = new Rent<int>(indexSize * 4))
             {
-                var points = pointsArray.AsSpan();
+                var points = pointsArray.Array;
+                var uvs = uvArray.Array;
+                
                 float stepX = 1f / cellsX;
                 float stepY = 1f / cellsY;
                 int off = 0;
@@ -192,15 +195,19 @@ namespace Iviz.Displays
                 {
                     foreach (int u in ..(cellsX + 1))
                     {
-                        points[off++] = new Vector3(
+                        points[off] = new Vector3(
                             u * stepX,
                             v * stepY,
                             0
                         ).Ros2Unity();
+                        uvs[off++] = new Vector2(
+                            u * stepX,
+                            1 - v * stepY
+                        );
                     }
                 }
 
-                var indices = indicesArray.AsSpan();
+                int[] indices = indicesArray.Array;
                 foreach (int v in ..cellsY)
                 {
                     int iOffset = v * cellsX * 4;
@@ -219,6 +226,7 @@ namespace Iviz.Displays
 
                 mesh.Clear();
                 mesh.SetVertices(pointsArray);
+                mesh.SetUVs(uvArray);
                 mesh.SetIndices(indicesArray, MeshTopology.Quads);
                 mesh.RecalculateNormals();
                 mesh.Optimize();
@@ -229,7 +237,11 @@ namespace Iviz.Displays
                 Destroy(texture);
             }
 
-            texture = new Texture2D(cellsX, cellsY, TextureFormat.RFloat, true);
+            texture = new Texture2D(cellsX, cellsY, TextureFormat.RFloat, false)
+            {
+                wrapMode = TextureWrapMode.Clamp
+            };
+
             var textureParams = new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY);
             if (opaqueMaterial != null)
             {

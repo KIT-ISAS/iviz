@@ -22,7 +22,7 @@ namespace Iviz.MarkerDetection
         bool enableQr;
         bool enableAruco;
 
-        readonly Task task;
+        readonly Task? task;
         readonly CancellationTokenSource tokenSource = new();
 
         public event Action<Screenshot, IReadOnlyList<IDetectedMarker>>? MarkerDetected;
@@ -55,7 +55,10 @@ namespace Iviz.MarkerDetection
 
         public MarkerDetector()
         {
-            task = TaskUtils.Run(RunAsync);
+            if (CvNative.IsEnabled)
+            {
+                task = TaskUtils.Run(RunAsync);
+            }
         }
 
         async Task RunAsync()
@@ -88,7 +91,7 @@ namespace Iviz.MarkerDetection
                         continue;
                     }
 
-                    cvContext = EnsureCvContext(cvContext, screenshot.Width, screenshot.Height);
+                    EnsureCvContext(ref cvContext, screenshot.Width, screenshot.Height);
                     if (cvContext == null)
                     {
                         RosLogger.Info($"{this}: Creating CV context failed. Stopping marker detector.");
@@ -117,9 +120,14 @@ namespace Iviz.MarkerDetection
             {
                 context.SetImageDataFlipY(screenshot.Bytes, screenshot.Bpp);
             }
+            else if (screenshot.Bpp == 3)
+            {
+                context.SetImageData(screenshot.Bytes);
+            }
             else
             {
-                context.SetImageData(screenshot.Bytes, screenshot.Bpp);
+                // shouldn't happen
+                return null;
             }
 
             if (enableQr && (!enableAruco || lastTypeFound == ARMarkerType.QrCode))
@@ -181,6 +189,11 @@ namespace Iviz.MarkerDetection
 
         public static Pose SolvePnp(ReadOnlySpan<Vector2f> imageCorners, in Intrinsic intrinsic, float sizeInM)
         {
+            if (!CvNative.IsEnabled)
+            {
+                return default;
+            }
+            
             ReadOnlySpan<Vector3f> objectCorners = stackalloc[]
             {
                 new Vector3f(-sizeInM / 2, sizeInM / 2, 0),
@@ -192,27 +205,28 @@ namespace Iviz.MarkerDetection
             return CvContext.SolvePnp(imageCorners, objectCorners, intrinsic);
         }
 
-        static CvContext? EnsureCvContext(CvContext? cvContext, int width, int height)
+        static void EnsureCvContext(ref CvContext? cvContext, int width, int height)
         {
             if (cvContext != null)
             {
                 if (cvContext.MatchesSize(width, height))
                 {
-                    return cvContext;
+                    return;
                 }
 
                 cvContext.Dispose();
+                cvContext = null;
                 // fall through
             }
 
             try
             {
-                return new CvContext(width, height);
+                cvContext = new CvContext(width, height);
             }
             catch (CvNotAvailableException e)
             {
                 RosLogger.Error($"[{nameof(MarkerDetector)}]: No OpenCV library found", e);
-                return null;
+                cvContext = null;
             }
         }
 
@@ -232,7 +246,7 @@ namespace Iviz.MarkerDetection
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"Error during {nameof(MarkerDetected)} event:", e);
+                    RosLogger.Error($"Error during {nameof(MarkerDetected)} event", e);
                 }
             });
         }

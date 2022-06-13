@@ -12,18 +12,18 @@
 
 extern "C"
 {
-void* IvizInitDecompressorInstance();
+void* IvizInitDecompress();
 
-int IvizDestroyInstance(void *handle);
+int IvizDestroy(void *handle);
 
-void *IvizGetLastError();
+void *IvizGetErrorStr();
 
-int IvizDecompressHeader(void *handle, const unsigned char *jpegBuf, unsigned long jpegSize,
+int IvizDecompressHeader3(void *handle, const unsigned char *jpegBuf, unsigned long jpegSize,
                          int *width, int *height, int *jpegSubSamp, int *jpegColorSpace);
 
-int IvizDecompress(void *handle, const unsigned char *jpegBuf, unsigned long jpegSize,
-                   unsigned char *dstBuf, int width, int pitch, int height, int pixelFormat,
-                   int flags);
+int IvizDecompress2(void *handle, const unsigned char *jpegBuf, unsigned long jpegSize,
+                    unsigned char *dstBuf, int width, int pitch, int height, int pixelFormat,
+                    int flags);
 
 void* IvizInitCompress(void);
 

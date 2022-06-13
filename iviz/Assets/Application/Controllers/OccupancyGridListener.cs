@@ -229,33 +229,41 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (msg.Data.Length != msg.Info.Width * msg.Info.Height)
+            sbyte[] data = msg.Data;
+            var info = msg.Info;
+            
+            if (data.Length != info.Width * info.Height)
             {
-                RosLogger.Info($"{this}: Size {msg.Info.Width.ToString()}x{msg.Info.Height.ToString()} " +
-                               $"does not match data length {msg.Data.Length.ToString()}");
+                RosLogger.Error($"{this}: Size {info.Width.ToString()}x{info.Height.ToString()} " +
+                               $"does not match data length {data.Length.ToString()}");
                 return;
             }
 
-            if (float.IsNaN(msg.Info.Resolution))
+            if (info.Resolution.IsInvalid() || info.Resolution < 0)
             {
-                RosLogger.Info($"{this}: NaN in header!");
+                RosLogger.Error($"{this}: {nameof(MapMetaData)} has invalid values");
                 return;
             }
 
-            cubeNode.AttachTo(msg.Header);
-            textureNode.AttachTo(msg.Header);
-
-            if (msg.Info.Origin.IsInvalid())
+            if (info.Origin.IsInvalid())
             {
-                RosLogger.Info($"{this}: NaN in origin!");
+                RosLogger.Error($"{this}: Origin has invalid values");
                 return;
             }
 
-            var origin = msg.Info.Origin.Ros2Unity();
+            int maxGridSize = Settings.MaxTextureSize;
+            if (info.Width > maxGridSize || info.Height > maxGridSize)
+            {
+                RosLogger.Error($"{this}: Gridmap is too large! Iviz only supports gridmap sizes " +
+                               $"up to {maxGridSize.ToString()}");
+                return;
+            }
+
+            var origin = info.Origin.Ros2Unity();
             Pose validatedOrigin;
             if (!origin.IsUsable())
             {
-                RosLogger.Info($"{this}: Cannot use ({origin.position.x.ToString(BuiltIns.Culture)}, " +
+                RosLogger.Warn($"{this}: Cannot use ({origin.position.x.ToString(BuiltIns.Culture)}, " +
                                $"{origin.position.y.ToString(BuiltIns.Culture)}, " +
                                $"{origin.position.z.ToString(BuiltIns.Culture)}) " +
                                "as position. Values too large!");
@@ -266,9 +274,12 @@ namespace Iviz.Controllers
                 validatedOrigin = origin;
             }
 
-            numCellsX = (int)msg.Info.Width;
-            numCellsY = (int)msg.Info.Height;
-            cellSize = msg.Info.Resolution;
+            cubeNode.AttachTo(msg.Header);
+            textureNode.AttachTo(msg.Header);
+            
+            numCellsX = (int)info.Width;
+            numCellsY = (int)info.Height;
+            cellSize = info.Resolution;
 
             var tasks = new List<Task>();
 
@@ -277,12 +288,12 @@ namespace Iviz.Controllers
                 IsProcessing = true;
                 if (CubesVisible)
                 {
-                    tasks.AddRange(SetCubes(msg.Data, validatedOrigin));
+                    tasks.AddRange(SetCubes(data, validatedOrigin));
                 }
 
                 if (TextureVisible)
                 {
-                    tasks.AddRange(SetTextures(msg.Data, validatedOrigin));
+                    tasks.AddRange(SetTextures(data, validatedOrigin));
                 }
             }
             finally

@@ -4,7 +4,6 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using AOT;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Msgs;
@@ -25,8 +24,6 @@ namespace Iviz.MarkerDetection
         readonly int height;
         bool disposed;
 
-        ArucoDictionaryName dictionaryName;
-
         IntPtr ContextPtr => !disposed
             ? mContextPtr
             : throw new ObjectDisposedException(nameof(mContextPtr), "Context already disposed");
@@ -37,11 +34,9 @@ namespace Iviz.MarkerDetection
 
         ArucoDictionaryName DictionaryName
         {
-            get => dictionaryName;
             set
             {
-                dictionaryName = value;
-                if (!Native.SetDictionary(ContextPtr, (int)value))
+                if (!CvNative.IvizSetDictionary(ContextPtr, (int)value))
                 {
                     throw new CvMarkerException();
                 }
@@ -66,20 +61,19 @@ namespace Iviz.MarkerDetection
             {
                 if (!loggerSet)
                 {
-                    Native.SetupDebug(Native.Debug);
-                    Native.SetupInfo(Native.Info);
-                    Native.SetupError(Native.Error);
+                    CvNative.IvizSetupDebug(CvNative.Debug);
+                    CvNative.IvizSetupInfo(CvNative.Info);
+                    CvNative.IvizSetupError(CvNative.Error);
                     loggerSet = true;
                 }
 
-
-                mContextPtr = Native.CreateContext(width, height);
+                mContextPtr = CvNative.IvizCreateContext(width, height);
                 this.width = width;
                 this.height = height;
                 DictionaryName = ArucoDictionaryName.DictArucoOriginal;
 
                 imageSize = width * height * 3;
-                imagePtr = Native.GetImagePtr(ContextPtr);
+                imagePtr = CvNative.IvizGetImagePtr(ContextPtr);
             }
             catch (EntryPointNotFoundException e)
             {
@@ -93,17 +87,12 @@ namespace Iviz.MarkerDetection
 
         public bool MatchesSize(int otherWidth, int otherHeight) => (otherWidth, otherHeight) == (width, height);
 
-        public void SetImageData(ReadOnlySpan<byte> image, int bpp)
+        public void SetImageData(ReadOnlySpan<byte> image)
         {
-            if (bpp != 3)
-            {
-                throw new NotImplementedException();
-            }
-
             var span = ImageSpan;
             if (span.Length > image.Length)
             {
-                throw new ArgumentException("Image size is too small", nameof(image));
+                throw new ArgumentOutOfRangeException(nameof(image), "Image size is too small");
             }
 
             image.CopyTo(span);
@@ -135,9 +124,9 @@ namespace Iviz.MarkerDetection
 
         public DetectedQrMarker[] DetectQrMarkers()
         {
-            Native.DetectQrMarkers(ContextPtr);
+            CvNative.IvizDetectQrMarkers(ContextPtr);
 
-            int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
+            int numDetected = CvNative.IvizGetNumDetectedMarkers(ContextPtr);
             if (numDetected < 0)
             {
                 throw new CvMarkerException();
@@ -152,8 +141,8 @@ namespace Iviz.MarkerDetection
             using var pointerLengths = new Rent<int>(numDetected);
             using var corners = new Rent<float>(8 * numDetected);
 
-            if (!Native.GetQrMarkerCodes(ContextPtr, ref pointers.Array[0], ref pointerLengths.Array[0], numDetected)
-                || !Native.GetMarkerCorners(ContextPtr, ref corners.Array[0], corners.Length))
+            if (!CvNative.IvizGetQrMarkerCodes(ContextPtr, ref pointers.Array[0], ref pointerLengths.Array[0], numDetected)
+                || !CvNative.IvizGetMarkerCorners(ContextPtr, ref corners.Array[0], corners.Length))
             {
                 throw new CvMarkerException();
             }
@@ -175,9 +164,9 @@ namespace Iviz.MarkerDetection
 
         public DetectedArucoMarker[] DetectArucoMarkers()
         {
-            Native.DetectArucoMarkers(ContextPtr);
+            CvNative.IvizDetectArucoMarkers(ContextPtr);
 
-            int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
+            int numDetected = CvNative.IvizGetNumDetectedMarkers(ContextPtr);
             if (numDetected < 0)
             {
                 throw new CvMarkerException();
@@ -193,8 +182,8 @@ namespace Iviz.MarkerDetection
 
             var srcCorners = MemoryMarshal.Cast<float, Vector2f>(corners.AsReadOnlySpan());
 
-            if (!Native.GetArucoMarkerIds(ContextPtr, ref indices.Array[0], indices.Length) ||
-                !Native.GetMarkerCorners(ContextPtr, ref corners.Array[0], corners.Length))
+            if (!CvNative.IvizGetArucoMarkerIds(ContextPtr, ref indices.Array[0], indices.Length) ||
+                !CvNative.IvizGetMarkerCorners(ContextPtr, ref corners.Array[0], corners.Length))
             {
                 throw new CvMarkerException();
             }
@@ -225,7 +214,7 @@ namespace Iviz.MarkerDetection
 
             intrinsic.CopyTo(cameraFloats);
 
-            if (!Native.EstimatePnp(in inputFloats[0], inputFloats.Length,
+            if (!CvNative.IvizEstimatePnp(in inputFloats[0], inputFloats.Length,
                     in outputFloats[0], outputFloats.Length,
                     in cameraFloats[0], cameraFloats.Length,
                     ref resultFloats[0], resultFloats.Length))
@@ -248,7 +237,7 @@ namespace Iviz.MarkerDetection
         {
             if (mContextPtr != IntPtr.Zero)
             {
-                Native.DisposeContext(mContextPtr);
+                CvNative.IvizDisposeContext(mContextPtr);
             }
         }
 
@@ -264,104 +253,8 @@ namespace Iviz.MarkerDetection
         {
             ReleaseUnmanagedResources();
         }
-
-        static class Native
-        {
-            const string Library =
-                Settings.IsIPhone
-                    ? "__Internal"
-                    : "IvizOpencv";
-
-            public delegate void Callback(string s);
-
-            [MonoPInvokeCallback(typeof(Callback))]
-            public static void Debug(string? t)
-            {
-                UnityEngine.Debug.Log(t);
-            }
-
-            [MonoPInvokeCallback(typeof(Callback))]
-            public static void Info(string? t)
-            {
-                UnityEngine.Debug.LogWarning(t);
-            }
-
-            [MonoPInvokeCallback(typeof(Callback))]
-            public static void Error(string? t)
-            {
-                UnityEngine.Debug.LogError(t);
-            }
-
-            [DllImport(Library)]
-            public static extern IntPtr CreateContext(int width, int height);
-
-            [DllImport(Library)]
-            public static extern void DisposeContext(IntPtr ctx);
-
-            [DllImport(Library)]
-            public static extern void SetupDebug(Callback callback);
-
-            [DllImport(Library)]
-            public static extern void SetupInfo(Callback callback);
-
-            [DllImport(Library)]
-            public static extern void SetupError(Callback callback);
-            
-            [DllImport(Library)]
-            public static extern int ImageWidth(IntPtr ctx);
-
-            [DllImport(Library)]
-            public static extern int ImageHeight(IntPtr ctx);
-
-            [DllImport(Library)]
-            public static extern int ImageFormat(IntPtr ctx);
-
-            [DllImport(Library)]
-            public static extern int ImageSize(IntPtr ctx);
-
-            [DllImport(Library)]
-            public static extern bool CopyFrom(IntPtr ctx, /* const */ byte[] ptr, int size);
-
-            [DllImport(Library)]
-            public static extern bool CopyTo( /* const */ IntPtr ctx, ref byte ptr, int size);
-
-            [DllImport(Library)]
-            public static extern IntPtr GetImagePtr(IntPtr ctx);
-
-            [DllImport(Library)]
-            public static extern bool SetDictionary(IntPtr ctx, int value);
-
-            [DllImport(Library)]
-            public static extern bool DetectArucoMarkers(IntPtr ctx);
-
-            [DllImport(Library)]
-            public static extern bool DetectQrMarkers(IntPtr ctx);
-
-            [DllImport(Library)]
-            public static extern int GetNumDetectedMarkers(IntPtr ctx);
-
-            [DllImport(Library)]
-            public static extern bool GetArucoMarkerIds(IntPtr ctx, ref int arrayPtr, int arraySize);
-
-            [DllImport(Library)]
-            public static extern bool GetQrMarkerCodes(IntPtr ctx, ref IntPtr arrayPtr, ref int arrayLengths,
-                int arraySize);
-
-            [DllImport(Library)]
-            public static extern bool GetMarkerCorners(IntPtr ctx, ref float arrayPtr, int arraySize);
-
-            [DllImport(Library)]
-            public static extern bool SetCameraMatrix(IntPtr ctx, float[] arrayPtr, int arraySize);
-
-            [DllImport(Library)]
-            public static extern bool EstimateMarkerPoses(IntPtr ctx, float markerSize, float[] rotations,
-                int rotationsSize, float[] translations, int translationsSize);
-
-            [DllImport(Library)]
-            public static extern bool EstimatePnp(in float inputs, int inputSize, in float outputs, int outputSize,
-                in float cameraArray, int cameraArraySize, ref float result, int resultSize);
-        }
     }
+
 
     public enum SolvePnPMethod
     {

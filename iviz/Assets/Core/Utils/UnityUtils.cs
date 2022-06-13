@@ -229,7 +229,7 @@ namespace Iviz.Core
             return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w > 0.9999989867210388f;
         }
 
-        public static Pose Lerp(this in Pose p, in Pose o, float t) => new Pose(
+        public static Pose Lerp(this in Pose p, in Pose o, float t) => new(
             Vector3.Lerp(p.position, o.position, t),
             Quaternion.Lerp(p.rotation, o.rotation, t)
         );
@@ -347,7 +347,7 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Pose WithRotation(this Pose p, in Quaternion v)
+        public static Pose WithRotation(this in Pose p, in Quaternion v)
         {
             Pose q;
             q.position = p.position;

@@ -13,38 +13,35 @@
 
 extern "C"
 {
-    typedef void(*Callback)(const char *);
+    typedef void(*IvizCallback)(const char *);
 
-    void SetupDebug(Callback callback);
-    void SetupInfo(Callback callback);
-    void SetupError(Callback callback);
+    void IvizSetupDebug(IvizCallback callback);
+    void IvizSetupInfo(IvizCallback callback);
+    void IvizSetupError(IvizCallback callback);
 
-    void *CreateContext(int32_t width, int32_t height);
-    int ImageWidth(const void *ctx);
-    int ImageHeight(const void *ctx);
-    int ImageFormat(const void *ctx);
-    int ImageSize(const void *ctx);
-    bool CopyFrom(void *ctx, const uint8_t *ptr, int size);
-    bool CopyTo(const void *ctx, uint8_t *ptr, int size);
-    void *GetImagePtr(void *ctx);
+    void *IvizCreateContext(int32_t width, int32_t height);
+    int IvizImageWidth(const void *ctx);
+    int IvizImageHeight(const void *ctx);
+    int IvizImageFormat(const void *ctx);
+    int IvizImageSize(const void *ctx);
+    bool IvizCopyFrom(void *ctx, const uint8_t *ptr, int size);
+    bool IvizCopyTo(const void *ctx, uint8_t *ptr, int size);
+    void *IvizGetImagePtr(void *ctx);
     
     
-    bool SetDictionary(void *ctx, int value);
-    bool DetectArucoMarkers(void *ctx);
-    bool DetectQrMarkers(void *ctx_base);
-    int GetNumDetectedMarkers(const void *ctx);
-    bool GetArucoMarkerIds(const void *ctx, int *arrayPtr, int arraySize);
-    bool GetQrMarkerCodes(const void *ctx_base, const void **arrayPtr, int *arrayLengths, int arraySize);
-    bool GetMarkerCorners(const void *ctx, float *arrayPtr, int arraySize);
-    bool SetCameraMatrix(void *ctx, float *arrayPtr, int arraySize);
-    bool EstimateMarkerPoses(const void *ctx, float markerSize, float *rotations, int rotationsSize, float *translations, int translationsSize);
+    bool IvizSetDictionary(void *ctx, int value);
+    bool IvizDetectArucoMarkers(void *ctx);
+    bool IvizDetectQrMarkers(void *ctx_base);
+    int IvizGetNumDetectedMarkers(const void *ctx);
+    bool IvizGetArucoMarkerIds(const void *ctx, int *arrayPtr, int arraySize);
+    bool IvizGetQrMarkerCodes(const void *ctx_base, const void **arrayPtr, int *arrayLengths, int arraySize);
+    bool IvizGetMarkerCorners(const void *ctx, float *arrayPtr, int arraySize);
+    bool IvizSetCameraMatrix(void *ctx, float *arrayPtr, int arraySize);
+    bool IvizEstimateMarkerPoses(const void *ctx, float markerSize, float *rotations, int rotationsSize, float *translations, int translationsSize);
     
-    bool EstimatePnp(const float *inputs, int inputSize, const float *outputs, int outputSize, float *cameraArray, int cameraArraySize, float *result, int resultSize);
-/*
-    bool EstimateUmeyama(const float *inputs, int inputSize, const float *outputs, int outputSize, bool estimateScale, float *result, int resultSize);
- */
+    bool IvizEstimatePnp(const float *inputs, int inputSize, const float *outputs, int outputSize, float *cameraArray, int cameraArraySize, float *result, int resultSize);
     
-    void DisposeContext(void *ctx);
+    void IvizDisposeContext(void *ctx);
 }
 
 

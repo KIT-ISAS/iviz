@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:/Users/akzeac/Documents/iviz/iviz_opencv/Iviz_Opencv2/IvizOpencv.xcodeproj">
+      location = "self:/Users/akzeac/Documents/iviz/iviz_opencv/iviz_opencv.xcodeproj">
    </FileRef>
 </Workspace>

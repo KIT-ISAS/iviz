@@ -21,7 +21,7 @@ namespace Iviz.Controllers
         const string ErrorStr = "<color=red>Error:</color> ";
 
         readonly Dictionary<(string Ns, int Id), MarkerObject> markers = new();
-        readonly Dictionary<IBoundsControl, Quaternion> boundsControls = new();
+        readonly List<(IBoundsControl, Quaternion)> boundsControls = new();
         readonly GameObject node;
         readonly InteractiveMarkerObject parent;
         readonly string rosId;
@@ -46,8 +46,8 @@ namespace Iviz.Controllers
                 {
                     marker.Visible = value;
                 }
-                
-                foreach (var control in boundsControls.Keys)
+
+                foreach (var (control, _) in boundsControls)
                 {
                     control.Visible = value;
                 }
@@ -65,7 +65,7 @@ namespace Iviz.Controllers
             set
             {
                 interactable = value;
-                foreach (var control in boundsControls.Keys)
+                foreach (var (control, _) in boundsControls)
                 {
                     control.Interactable = value;
                 }
@@ -106,7 +106,7 @@ namespace Iviz.Controllers
 
         void ResetState()
         {
-            foreach (var control in boundsControls.Keys)
+            foreach (var (control, _) in boundsControls)
             {
                 control.Dispose();
             }
@@ -200,7 +200,7 @@ namespace Iviz.Controllers
 
                     var baseOrientation = orientation * marker.LocalRotation.Inverse();
                     control.BaseOrientation = baseOrientation;
-                    boundsControls.Add(control, baseOrientation);
+                    boundsControls.Add((control, baseOrientation));
                 }
             }
             else
@@ -208,23 +208,23 @@ namespace Iviz.Controllers
                 switch (interactionMode)
                 {
                     case InteractionMode.MoveAxis:
-                        boundsControls.Add(new LineWrapperBoundsControl(Transform, target)
-                            { BaseOrientation = orientation }, orientation);
+                        boundsControls.Add((new LineWrapperBoundsControl(Transform, target)
+                            { BaseOrientation = orientation }, orientation));
                         break;
                     case InteractionMode.RotateAxis:
-                        boundsControls.Add(new RotationWrapperBoundsControl(Transform, target)
-                            { BaseOrientation = orientation }, orientation);
+                        boundsControls.Add((new RotationWrapperBoundsControl(Transform, target)
+                            { BaseOrientation = orientation }, orientation));
                         break;
                     case InteractionMode.MoveRotate:
-                        boundsControls.Add(new LineWrapperBoundsControl(Transform, target)
-                            { BaseOrientation = orientation }, orientation);
-                        boundsControls.Add(new RotationWrapperBoundsControl(Transform, target)
-                            { BaseOrientation = orientation }, orientation);
+                        boundsControls.Add((new LineWrapperBoundsControl(Transform, target)
+                            { BaseOrientation = orientation }, orientation));
+                        boundsControls.Add((new RotationWrapperBoundsControl(Transform, target)
+                            { BaseOrientation = orientation }, orientation));
                         break;
                 }
             }
 
-            foreach (var control in boundsControls.Keys)
+            foreach (var (control, _) in boundsControls)
             {
                 control.Interactable = Interactable;
 
@@ -399,7 +399,7 @@ namespace Iviz.Controllers
         public override string ToString() => $"[{nameof(InteractiveMarkerControlObject)} '{rosId}']";
 
         internal IEnumerable<MarkerObject> GetAllMarkers() => markers.Values;
-        
+
         static InteractionMode? ValidateInteractionMode(int mode) =>
             mode is < 0 or > (int)InteractionMode.MoveRotate3D ? null : (InteractionMode?)mode;
 
