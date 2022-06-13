@@ -809,7 +809,8 @@ namespace Iviz.App
         public void LookAt(Transform targetTransform, Vector3? localOffset = null)
         {
             lookAtTokenSource?.Cancel();
-            CancellationTokenSource newToken = new();
+            
+            var newToken = new CancellationTokenSource();
             lookAtTokenSource = newToken;
 
             var lookAtCameraStartPosition = CameraPosition;

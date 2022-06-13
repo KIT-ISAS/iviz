@@ -8,6 +8,7 @@ using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.Configurations;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.GridMapMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -17,8 +18,6 @@ namespace Iviz.Controllers
 {
     public sealed class GridMapListener : ListenerController
     {
-        const int MaxGridSize = 4096;
-
         readonly FrameNode node;
         readonly GridMapDisplay resource;
 
@@ -196,34 +195,36 @@ namespace Iviz.Controllers
         {
             static bool IsInvalidSize(double x) => x.IsInvalid() || x <= 0;
 
-            if (IsInvalidSize(msg.Info.LengthX) ||
-                IsInvalidSize(msg.Info.LengthY) ||
-                IsInvalidSize(msg.Info.Resolution))
+            var info = msg.Info;
+            if (IsInvalidSize(info.LengthX) ||
+                IsInvalidSize(info.LengthY) ||
+                IsInvalidSize(info.Resolution))
             {
-                RosLogger.Info($"{this}: Message info has invalid values!");
+                RosLogger.Error($"{this}: {nameof(GridMapInfo)} has invalid values!");
                 return;
             }
 
-            int widthByResolution = (int)(msg.Info.LengthX / msg.Info.Resolution + 0.5);
-            int heightByResolution = (int)(msg.Info.LengthY / msg.Info.Resolution + 0.5);
+            int widthByResolution = (int)(info.LengthX / info.Resolution + 0.5);
+            int heightByResolution = (int)(info.LengthY / info.Resolution + 0.5);
 
-            if (widthByResolution > MaxGridSize || heightByResolution > MaxGridSize)
+            int maxGridSize = Settings.MaxTextureSize;
+            if (widthByResolution > maxGridSize || heightByResolution > maxGridSize)
             {
                 // quit quickly
-                RosLogger.Info($"{this}: Gridmap is too large! Iviz only supports gridmap sizes " +
-                               $"up to {MaxGridSize.ToString()}");
+                RosLogger.Error($"{this}: Gridmap is too large! Iviz only supports gridmap sizes " +
+                                $"up to {maxGridSize.ToString()}");
                 return;
             }
 
-            if (msg.Info.Pose.IsInvalid())
+            if (info.Pose.IsInvalid())
             {
-                RosLogger.Info($"{this}: Pose contains invalid values!");
+                RosLogger.Error($"{this}: Pose contains invalid values!");
                 return;
             }
 
             if (msg.OuterStartIndex != 0 || msg.InnerStartIndex != 0)
             {
-                RosLogger.Info($"{this}: Nonzero start indices not implemented!");
+                RosLogger.Error($"{this}: Nonzero start indices not implemented!");
                 return;
             }
 
@@ -233,68 +234,91 @@ namespace Iviz.Controllers
             int layer = string.IsNullOrWhiteSpace(IntensityChannel) ? 0 : fieldNames.IndexOf(IntensityChannel);
             if (layer == -1 || layer >= msg.Data.Length)
             {
-                RosLogger.Info($"{this}: Gridmap layer {layer.ToString()} is missing!");
+                RosLogger.Error($"{this}: Gridmap layer {layer.ToString()} is missing!");
                 return;
             }
 
             var multiArray = msg.Data[layer];
-            int length = multiArray.Data.Length;
+            var layout = multiArray.Layout;
+            int dataLength = multiArray.Data.Length;
 
-            if (multiArray.Layout.Dim.Length == 0)
+            if (layout.Dim.Length == 0)
             {
                 RosLogger.Error($"{this}: MultiArray layout has not been set!");
                 return;
             }
 
-            if (multiArray.Layout.Dim.Length != 2)
+            if (layout.Dim.Length != 2)
             {
                 RosLogger.Error($"{this}: Only layouts with 2 dimensions are supported");
                 return;
             }
 
-            uint height = multiArray.Layout.Dim[0].Size;
-            uint width = multiArray.Layout.Dim[1].Size;
+            uint height = layout.Dim[0].Size;
+            uint width = layout.Dim[1].Size;
+            uint numElements = width * height;
 
-            if (width > MaxGridSize || height > MaxGridSize)
+            if (width > maxGridSize || height > maxGridSize)
             {
-                RosLogger.Info($"{this}: Gridmap is too large! Iviz only supports gridmap sizes " +
-                               $"up to {MaxGridSize.ToString()}");
+                RosLogger.Error($"{this}: Gridmap is too large! Iviz only supports gridmap sizes " +
+                                $"up to {maxGridSize.ToString()}");
                 return;
             }
 
-            uint expectedLength = width * height + multiArray.Layout.DataOffset;
-            if (length < expectedLength)
+            uint expectedLength = numElements + layout.DataOffset;
+            if (dataLength < expectedLength)
             {
                 RosLogger.Error($"{this}: Gridmap layer size does not match. " +
-                                $"Expected {expectedLength.ToString()} entries, but got {length.ToString()}!");
+                                $"Expected {expectedLength.ToString()} entries, but got {dataLength.ToString()}!");
                 return;
             }
 
-            if (multiArray.Layout.Dim[0].Stride != width * height
-                || multiArray.Layout.Dim[1].Stride != width)
+            if (layout.Dim[0].Stride < numElements || layout.Dim[1].Stride < width)
+            {
+                RosLogger.Error($"{this}: Strides are set incorrectly");
+                return;
+            }
+            
+            if (layout.Dim[0].Stride > width * height || layout.Dim[1].Stride > width)
             {
                 RosLogger.Error($"{this}: Padded strides are not supported");
                 return;
             }
 
             const string rowMajorLabel = "column_index";
-            if (multiArray.Layout.Dim[0].Label != rowMajorLabel)
+            if (layout.Dim[0].Label != rowMajorLabel)
             {
                 RosLogger.Error($"{this}: For rviz compatibility, the matrix data should be row-major. " +
                                 $"Indicate this by setting the first label in the layout to \"{rowMajorLabel}\".");
                 return;
             }
 
-            node.AttachTo(msg.Info.Header);
-            node.Transform.SetLocalPose(msg.Info.Pose.Ros2Unity());
+            node.AttachTo(info.Header);
+            
+            var origin = info.Pose.Ros2Unity();
+            Pose validatedOrigin;
+            if (!origin.IsUsable())
+            {
+                RosLogger.Warn($"{this}: Cannot use ({origin.position.x.ToString(BuiltIns.Culture)}, " +
+                               $"{origin.position.y.ToString(BuiltIns.Culture)}, " +
+                               $"{origin.position.z.ToString(BuiltIns.Culture)}) " +
+                               "as position. Values too large!");
+                validatedOrigin = Pose.identity;
+            }
+            else
+            {
+                validatedOrigin = origin;
+            }
+            
+            node.Transform.SetLocalPose(validatedOrigin);
 
-            int offset = (int)multiArray.Layout.DataOffset;
+            int offset = (int)layout.DataOffset;
             int size = (int)(width * height);
 
             if (size != 0)
             {
                 resource.Set((int)width, (int)height,
-                    (float)msg.Info.LengthX, (float)msg.Info.LengthY,
+                    (float)info.LengthX, (float)info.LengthY,
                     multiArray.Data.AsSpan().Slice(offset, size));
             }
             else
@@ -304,7 +328,7 @@ namespace Iviz.Controllers
 
             numCellsX = widthByResolution;
             numCellsY = heightByResolution;
-            cellSize = (float)msg.Info.Resolution;
+            cellSize = (float)info.Resolution;
         }
 
         public override void ResetController()

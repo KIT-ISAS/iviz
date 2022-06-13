@@ -35,10 +35,9 @@
         {
             UNITY_INITIALIZE_OUTPUT(Input, o);
 
-            float2 uv = v.vertex.xz; // ros transform
-            uv = uv.yx * float2(-1, 1); // y positive is down
+            float2 uv = v.texcoord;
             const float input = tex2Dlod(_InputTex, float4(uv, 0, 0));
-            v.vertex.y = input;
+            v.vertex.y += input;
             o.intensityUV = float2(input * _IntensityCoeff + _IntensityAdd, _AtlasRow);
             o.squareTextureUV = uv * _SquareCoeff.xy;
         }

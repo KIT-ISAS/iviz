@@ -103,14 +103,14 @@ namespace Iviz.Core
             {
                 if (length <= 0)
                 {
-                    return Prime32_5;
+                    return seed;
                 }
 
                 int lengthInBulk = length / 16 * 16;
 
                 uint h32 = lengthInBulk switch
                 {
-                    0 => Prime32_5,
+                    0 => seed + Prime32_5,
                     < MinForBurst * 16 => ExecuteDirect(seed, ref data, lengthInBulk / 16),
                     _ => ExecuteBurst(seed, ref data, lengthInBulk / 16)
                 };

@@ -1,3 +1,5 @@
+// This code is mostly taken from https://github.com/qmfrederik/libpng-sharp with minor changes
+
 using System;
 using System.Runtime.InteropServices;
 using Iviz.Core;

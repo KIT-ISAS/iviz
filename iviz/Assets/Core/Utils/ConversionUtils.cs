@@ -8,6 +8,7 @@ using Iviz.Urdf;
 using JetBrains.Annotations;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
+using Unity.Burst.Intrinsics;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -104,6 +105,17 @@ namespace Iviz.Core
                     };
                 }
             }
+        
+            /*
+            [BurstCompile(CompileSynchronously = true)]
+            public static void Palette([NoAlias] byte* input, [NoAlias] float* palette, [NoAlias] float* output, int inputLength)
+            {
+                for (int i = 0; i < inputLength; i++)
+                {
+                    output[i] = palette[input[i]];
+                }
+            }
+            */
         }
 
         public static void CopyPixels565ToRgba(Span<uint> dst4, ReadOnlySpan<ushort> src2, bool withBurst = true)
@@ -494,29 +506,12 @@ namespace Iviz.Core
             [BurstCompile(CompileSynchronously = true)]
             public static void CountValid([NoAlias] sbyte* input, int inputLength, out int numValidValues)
             {
-                CheckBurst();
                 numValidValues = 0;
                 for (int i = 0; i < inputLength; i++)
                 {
                     numValidValues += (input[i] >> 8) + 1;
                 }
             }
-
-            [BurstDiscard]
-            static void CheckBurst()
-            {
-                Debug.Log("no burst!");
-            } 
-            /*
-            [BurstCompile(CompileSynchronously = true)]
-            public static void Palette([NoAlias] byte* input, [NoAlias] float *palette, int inputLength, [NoAlias] float *output)
-            {
-                for (int i = 0; i < 16; i++)
-                {
-                    output[i] = palette[input[i]];
-                }
-            }
-            */
 
             public struct SByte2
             {
