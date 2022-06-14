@@ -59,8 +59,9 @@ namespace Iviz.App
 
             panel.Tint.Value = listener.Tint;
             panel.Alpha.Value = listener.Tint.a;
-            panel.Metallic.Value = listener.Metallic;
-            panel.Smoothness.Value = listener.Smoothness;
+            //panel.Metallic.Value = listener.Metallic;
+            //panel.Smoothness.Value = listener.Smoothness;
+            panel.UseNormals.Value = listener.UseNormals;
             
             panel.IntensityChannel.Submit += s => listener.IntensityChannel = s;
             panel.Colormap.ValueChanged += (i, _) => listener.Colormap = (ColormapId) i;
@@ -79,8 +80,9 @@ namespace Iviz.App
             
             panel.Tint.ValueChanged += f => listener.Tint = f.WithAlpha(panel.Alpha.Value);
             panel.Alpha.ValueChanged += f => listener.Tint = panel.Tint.Value.WithAlpha(f);
-            panel.Smoothness.ValueChanged += f => listener.Smoothness = panel.Smoothness.Value;
-            panel.Metallic.ValueChanged += f => listener.Metallic = panel.Metallic.Value;
+            panel.UseNormals.ValueChanged += f => listener.UseNormals = f;
+            //panel.Smoothness.ValueChanged += f => listener.Smoothness = panel.Smoothness.Value;
+            //panel.Metallic.ValueChanged += f => listener.Metallic = panel.Metallic.Value;
         }
 
         public override void UpdatePanel()
@@ -131,6 +133,9 @@ namespace Iviz.App
                         break;
                     case nameof(GridMapConfiguration.Smoothness):
                         listener.Smoothness = config.Smoothness;
+                        break;
+                    case nameof(GridMapConfiguration.UseNormals):
+                        listener.UseNormals = config.UseNormals;
                         break;
 
                     default:

@@ -16,7 +16,7 @@ namespace Iviz.Displays
     public sealed class GridMapDisplay : MarkerDisplayWithColormap, ISupportsPbr, ISupportsShadows
     {
         static float baseOffset = 0.001f + 5e-6f;
-        
+
         [SerializeField] Material? opaqueMaterial;
         [SerializeField] Material? transparentMaterial;
         [SerializeField] MeshRenderer? meshRenderer;
@@ -30,6 +30,21 @@ namespace Iviz.Displays
         float smoothness = 0.5f;
         float metallic = 0.5f;
         float scaleHeight = 1;
+        bool useNormals;
+
+        Mesh Mesh
+        {
+            get
+            {
+                if (mesh == null)
+                {
+                    mesh = new Mesh { name = "GridMap Mesh" };
+                    GetComponent<MeshFilter>().sharedMesh = mesh;
+                }
+
+                return mesh;
+            }
+        }
 
         MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
 
@@ -56,6 +71,15 @@ namespace Iviz.Displays
             set
             {
                 metallic = value;
+                UpdateMaterial();
+            }
+        }
+        
+        public bool UseNormals
+        {
+            set
+            {
+                useNormals = value;
                 UpdateMaterial();
             }
         }
@@ -114,12 +138,22 @@ namespace Iviz.Displays
         void UpdateMaterial()
         {
             var material = MeshRenderer.sharedMaterial;
+            if (useNormals)
+            {
+                material.EnableKeyword("USE_NORMALS");
+            }
+            else
+            {
+                material.DisableKeyword("USE_NORMALS");
+            }
+
             material.SetTexture(ShaderIds.InputTextureId, texture);
             material.SetVector(ShaderIds.SquareCoeffId,
                 new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
             material.SetColor(ShaderIds.TintId, Tint);
             material.SetFloat(ShaderIds.SmoothnessId, smoothness);
             material.SetFloat(ShaderIds.MetallicId, metallic);
+
             UpdateProperties();
         }
 
@@ -137,7 +171,7 @@ namespace Iviz.Displays
             textureToUse.CopyFrom(data);
             textureToUse.Apply();
 
-            var (min, max) = MinMaxJobs.CalculateBounds(data);
+            var (min, max) = MinMaxJobs.CalculateBoundsNoNans(data);
             /*
             float min = float.MaxValue, max = float.MinValue;
             foreach (float val in data)
@@ -163,6 +197,13 @@ namespace Iviz.Displays
             {
                 IntensityBounds = span;
             }
+
+            //var material = MeshRenderer.sharedMaterial;
+            //material.SetVector(ShaderIds.NormalCoeffId, new Vector4(cellsX * width, cellsY * height, 0, 0));
+
+            Mesh.bounds = new Bounds(
+                new Vector3(0.5f, 0.5f, (max + min) / 2).Ros2Unity(), 
+                new Vector3(1, 1, max - min).Ros2Unity().Abs());
         }
 
         Texture2D EnsureSize(int newWidth, int newHeight)
@@ -170,12 +211,6 @@ namespace Iviz.Displays
             if (texture != null && newWidth == cellsX && newHeight == cellsY)
             {
                 return texture;
-            }
-
-            if (mesh == null)
-            {
-                mesh = new Mesh { name = "GridMap Mesh" };
-                GetComponent<MeshFilter>().sharedMesh = mesh;
             }
 
             cellsX = newWidth;
@@ -190,7 +225,7 @@ namespace Iviz.Displays
             {
                 var points = pointsArray.Array;
                 var uvs = uvArray.Array;
-                
+
                 float stepX = 1f / cellsX;
                 float stepY = 1f / cellsY;
                 int off = 0;
@@ -227,12 +262,13 @@ namespace Iviz.Displays
                     }
                 }
 
-                mesh.Clear();
-                mesh.SetVertices(pointsArray);
-                mesh.SetUVs(uvArray);
-                mesh.SetIndices(indicesArray, MeshTopology.Quads);
-                mesh.RecalculateNormals();
-                mesh.Optimize();
+                var mMesh = Mesh;
+                mMesh.Clear();
+                mMesh.SetVertices(pointsArray);
+                mMesh.SetUVs(uvArray);
+                mMesh.SetIndices(indicesArray, MeshTopology.Quads);
+                mMesh.RecalculateNormals();
+                mMesh.Optimize();
             }
 
             if (texture != null)
@@ -303,7 +339,7 @@ namespace Iviz.Displays
             Collider.size = new Vector3(1, 1, 0).Ros2Unity().Abs();
 
             var span = Vector2.zero;
-            
+
             MeasuredIntensityBounds = span;
             if (!OverrideIntensityBounds)
             {

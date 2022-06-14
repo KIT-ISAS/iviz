@@ -56,8 +56,8 @@ MeshRenderer:
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -99,11 +99,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Transform: {fileID: 8890165288296654495}
   boxCollider: {fileID: 2234756334549693617}
-  colormap: 0
-  intensityBounds: {x: 0, y: 0}
-  flipMinMax: 0
-  tint: {r: 0, g: 0, b: 0, a: 0}
-  elementScale: 1
   opaqueMaterial: {fileID: 0}
   transparentMaterial: {fileID: 0}
   meshRenderer: {fileID: 6789157690098177885}

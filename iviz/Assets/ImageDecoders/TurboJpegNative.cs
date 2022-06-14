@@ -173,7 +173,7 @@ namespace Iviz.ImageDecoders
         public static extern int DecompressHeader(IntPtr handle, IntPtr jpegBuf, ulong jpegSize, out int width,
             out int height, out int jpegSubsamp, out int jpegColorSpace);
 
-        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "IvizDecompress")]
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "IvizDecompress2")]
         public static extern int Decompress(IntPtr handle, IntPtr jpegBuf, ulong jpegSize, IntPtr dstBuf,
             int width, int pitch, int height, int pixelFormat, int flags);
     }

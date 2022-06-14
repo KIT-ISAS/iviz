@@ -20,8 +20,9 @@ namespace Iviz.App
         public ToggleWidget FlipMinMax { get; private set; }
         public ColorPickerWidget Tint { get; private set; }
         public SliderWidget Alpha { get; private set; }
-        public SliderWidget Smoothness { get; private set; }
-        public SliderWidget Metallic { get; private set; }
+        public ToggleWidget UseNormals { get; private set; }
+        //public SliderWidget Smoothness { get; private set; }
+        //public SliderWidget Metallic { get; private set; }
         CollapsibleWidget Material { get; set; }
 
         void Awake()
@@ -43,14 +44,15 @@ namespace Iviz.App
 
             Tint = p.AddColorPicker("Tint");
             Alpha = p.AddSlider("Alpha").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
-            Metallic = p.AddSlider("Metallic").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
-            Smoothness = p.AddSlider("Smoothness").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
+            UseNormals = p.AddToggle("Use Normals");
+            //Metallic = p.AddSlider("Metallic").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
+            //Smoothness = p.AddSlider("Smoothness").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
 
             Material = p.AddCollapsibleWidget("Visuals")
                 .Attach(Tint)
                 .Attach(Alpha)
-                .Attach(Metallic)
-                .Attach(Smoothness)
+                //.Attach(Metallic)
+                //.Attach(Smoothness)
                 .FinishAttaching();            
             
             CloseButton = p.AddTrashButton();

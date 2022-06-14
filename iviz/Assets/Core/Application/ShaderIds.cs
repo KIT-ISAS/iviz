@@ -41,6 +41,8 @@ namespace Iviz.Displays
         public static readonly int SquareTextureId = Shader.PropertyToID("_SquareTex");
         public static readonly int SquareCoeffId = Shader.PropertyToID("_SquareCoeff");
         
+        public static readonly int NormalCoeffId = Shader.PropertyToID("_NormalCoeff");
+
         public static readonly int IntensityTextureId = Shader.PropertyToID("_IntensityTexture");
         
         public static readonly int PulseCenterId = Shader.PropertyToID("_PulseCenter");

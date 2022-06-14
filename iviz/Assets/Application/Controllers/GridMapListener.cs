@@ -119,6 +119,16 @@ namespace Iviz.Controllers
             }
         }
 
+        public bool UseNormals
+        {
+            get => config.UseNormals;
+            set
+            {
+                config.UseNormals = value;
+                resource.UseNormals = value;
+            }
+        }
+
         public float Metallic
         {
             get => config.Metallic;

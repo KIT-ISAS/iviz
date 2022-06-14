@@ -63,6 +63,29 @@ namespace Iviz.Displays
             }
 
             [BurstCompile(CompileSynchronously = true)]
+            public static void MinMaxFloatNoNans([NoAlias] float* input, [NoAlias] float* output, int inputLength)
+            {
+                float min = float.MaxValue;
+                float max = float.MinValue;
+                for (int index = 0; index < inputLength; index++)
+                {
+                    float val = input[index];
+                    if (val < min)
+                    {
+                        min = val;
+                    }
+
+                    if (val > max)
+                    {
+                        max = val;
+                    }
+                }
+
+                output[0] = min;
+                output[1] = max;
+            }
+            
+            [BurstCompile(CompileSynchronously = true)]
             public static void MinMaxUshort([NoAlias] ushort* input, [NoAlias] ushort* output, int inputLength)
             {
                 ushort min = ushort.MaxValue;
@@ -138,8 +161,8 @@ namespace Iviz.Displays
             bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
             intensitySpan = new Vector2(output[0].w, output[1].w);
         }
-
-        public static (float, float) CalculateBounds(ReadOnlySpan<float> pointBuffer)
+        
+        public static (float, float) CalculateBoundsNoNans(ReadOnlySpan<float> pointBuffer)
         {
             if (pointBuffer.Length == 0)
             {
@@ -149,7 +172,7 @@ namespace Iviz.Displays
             float* output = stackalloc float[2];
             fixed (float* pointBufferPtr = pointBuffer)
             {
-                Impl.MinMaxFloat(pointBufferPtr, output, pointBuffer.Length);
+                Impl.MinMaxFloatNoNans(pointBufferPtr, output, pointBuffer.Length);
             }
 
             return (output[0], output[1]);

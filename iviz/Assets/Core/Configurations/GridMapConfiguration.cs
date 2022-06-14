@@ -18,8 +18,9 @@ namespace Iviz.Core.Configurations
         [DataMember] public float MinIntensity { get; set; }
         [DataMember] public float MaxIntensity { get; set; } = 1;
         [DataMember] public bool FlipMinMax { get; set; }
-        [DataMember] public float Smoothness { get; set; } = 0.5f;
-        [DataMember] public float Metallic { get; set; } = 0.5f;
+        [DataMember] public float Smoothness { get; set; } = 0.3f;
+        [DataMember] public float Metallic { get; set; } = 0.3f;
         [DataMember] public ColorRGBA Tint { get; set; } = ColorRGBA.White;
+        [DataMember] public bool UseNormals { get; set; } = false;
     }
 }

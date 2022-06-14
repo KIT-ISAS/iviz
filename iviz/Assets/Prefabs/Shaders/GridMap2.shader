@@ -12,6 +12,9 @@
         CGPROGRAM
         #pragma surface surf Standard vertex:vert addshadow fullforwardshadows
 
+        #pragma multi_compile _ USE_NORMALS
+        #pragma multi_compile_instancing
+
         float _AtlasRow;
         sampler2D _SquareTex;
         sampler2D _InputTex;
@@ -22,7 +25,7 @@
         float4 _Tint;
         float _Metallic;
         float _Smoothness;
-        
+
         float4 _SquareCoeff;
 
         struct Input
@@ -38,6 +41,19 @@
             float2 uv = v.texcoord;
             const float input = tex2Dlod(_InputTex, float4(uv, 0, 0));
             v.vertex.y += input;
+
+#if USE_NORMALS
+            const float2 normalCoeff = _SquareCoeff.xy;
+            const float2 normalOffset = _SquareCoeff.zw;
+            const float px = tex2Dlod(_InputTex, float4(uv.x + normalOffset.x, uv.y, 0, 0));
+            const float py = tex2Dlod(_InputTex, float4(uv.x, uv.y + normalOffset.y, 0, 0));
+            float3 f;
+            f.x = (py - input) * normalCoeff.x;
+            f.y = 1;
+            f.z = -(px -  input) * normalCoeff.y;
+            v.normal = normalize(f);
+#endif
+
             o.intensityUV = float2(input * _IntensityCoeff + _IntensityAdd, _AtlasRow);
             o.squareTextureUV = uv * _SquareCoeff.xy;
         }
@@ -49,7 +65,7 @@
                 tex2D(_IntensityTex, IN.intensityUV) *
                 tex2D(_SquareTex, IN.squareTextureUV) *
                 _Tint;
-            //o.Emission = o.Albedo * 0;
+            //o.Albedo = float4(1,1,1,1);
             o.Metallic = _Metallic;
             o.Smoothness = _Smoothness;
         }
