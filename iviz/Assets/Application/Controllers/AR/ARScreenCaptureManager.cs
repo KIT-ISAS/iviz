@@ -5,6 +5,7 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Common;
@@ -199,7 +200,16 @@ namespace Iviz.Controllers
                     GameThread.TimeNow, width, height,
                     Intrinsic.Scale(scale), pose, array);
 
-                await ConversionUtils.MirrorXf(width, height, conversion.GetData<float>(), array).AsTask();
+                var handle = GCHandle.Alloc(array);
+                try
+                {
+                    await ConversionUtils.MirrorXf(width, height, conversion.GetData<float>(),
+                        NativeArrayUtils.CreateWrapper(handle, array.Length));
+                }
+                finally
+                {
+                    handle.Free();
+                }
 
                 return screenshot;
             }
@@ -263,7 +273,16 @@ namespace Iviz.Controllers
                     GameThread.TimeNow, width, height,
                     Intrinsic.Scale(scale), pose, array);
 
-                await ConversionUtils.MirrorXb(width, height, conversion.GetData<byte>(), array).AsTask();
+                var handle = GCHandle.Alloc(array);
+                try
+                {
+                    await ConversionUtils.MirrorXb(width, height, conversion.GetData<byte>(),
+                        NativeArrayUtils.CreateWrapper(handle, array.Length));
+                }
+                finally
+                {
+                    handle.Free();
+                }
 
                 return screenshot;
             }

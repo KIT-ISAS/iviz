@@ -55,15 +55,20 @@ namespace Iviz.Core
         {
             int nextLength = length + 1;
             EnsureCapacity(nextLength);
-            Unsafe.Add(ref array.GetUnsafeRef(), length) = t;
+            Set(length, t);
             length = nextLength;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddUnsafe(in T t)
         {
-            Unsafe.Add(ref array.GetUnsafeRef(), length++) = t;
+            Set(length++, t);
         }
+
+        unsafe void Set(int index, in T t)
+        {
+            array.GetUnsafePtr()[index] = t;
+        } 
 
         public void AddRange(ReadOnlySpan<T> otherArray)
         {
@@ -81,17 +86,9 @@ namespace Iviz.Core
 
         public int Length => length;
 
-        public ref T GetReference()
-        {
-            if (length == 0)
-            {
-                ThrowHelper.ThrowIndexOutOfRange();
-            }
+        public unsafe Span<T> AsSpan() => new(array.GetUnsafePtr(), length);
 
-            return ref array.GetUnsafeRef();
-        }
-
-        ReadOnlySpan<T> AsReadOnlySpan() => MemoryMarshal.CreateReadOnlySpan(ref array.GetUnsafeRef(), length);
+        unsafe ReadOnlySpan<T> AsReadOnlySpan() => new(array.GetUnsafePtr(), length);
 
         public void Clear()
         {

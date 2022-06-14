@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
@@ -19,19 +20,9 @@ namespace Iviz.Core
     {
         public const uint DefaultSeed = 0;
 
-        public static uint Compute(int value, uint startHash = DefaultSeed)
+        public static uint Compute<T>(T value, uint startHash = DefaultSeed) where T : unmanaged
         {
-            return Compute(ref Unsafe.As<int, byte>(ref value), sizeof(int), startHash);
-        }
-
-        public static uint Compute(Vector3 value, uint startHash = DefaultSeed)
-        {
-            return Compute(ref Unsafe.As<Vector3, byte>(ref value), Unsafe.SizeOf<Vector3>(), startHash);
-        }
-
-        public static uint Compute(ColorRGBA value, uint startHash = DefaultSeed)
-        {
-            return Compute(ref Unsafe.As<ColorRGBA, byte>(ref value), Unsafe.SizeOf<ColorRGBA>(), startHash);
+            return Compute(ref Unsafe.As<T, byte>(ref value), Unsafe.SizeOf<T>(), startHash);
         }
 
         public static uint Compute(in BuilderPool.BuilderRent value, uint startHash = DefaultSeed)
@@ -45,42 +36,34 @@ namespace Iviz.Core
             return Compute(value.Chunk.Span, startHash);
         }
 
-        public static uint Compute(Point[] array, uint startHash = DefaultSeed)
-        {
-            int length = array.Length;
-            return length == 0
-                ? startHash
-                : Compute(ref Unsafe.As<Point, byte>(ref array[0]), length * Unsafe.SizeOf<Point>(), startHash);
-        }
-
-        public static uint Compute(ColorRGBA[] array, uint startHash = DefaultSeed)
-        {
-            int length = array.Length;
-            return length == 0
-                ? startHash
-                : Compute(ref Unsafe.As<ColorRGBA, byte>(ref array[0]), length * Unsafe.SizeOf<ColorRGBA>(), startHash);
-        }
-
         public static uint Compute(string array, uint startHash = DefaultSeed)
         {
             return Compute(array.AsSpan(), startHash);
         }
 
-        static uint Compute(ReadOnlySpan<char> array, uint startHash = DefaultSeed)
+        public static uint Compute<T>(T[] array, uint startHash = DefaultSeed) where T : unmanaged
         {
-            int length = array.Length;
-            return length == 0
-                ? startHash
-                : Compute(ref Unsafe.As<char, byte>(ref array.GetReference()), length * sizeof(char), startHash);
+            return Compute((ReadOnlySpan<T>)array, startHash);
         }
 
-        public static uint Compute(ReadOnlySpan<sbyte> array, uint startHash = DefaultSeed)
+        public static uint Compute<T>(ReadOnlySpan<T> array, uint startHash = DefaultSeed) where T : unmanaged
         {
-            int length = array.Length;
-            return length == 0
-                ? startHash
-                : Compute(ref Unsafe.As<sbyte, byte>(ref array.GetReference()), length * sizeof(sbyte), startHash);
+            return Compute(MemoryMarshal.AsBytes(array), startHash);
         }
+
+        static unsafe uint Compute(ReadOnlySpan<byte> span, uint startHash)
+        {
+            if (span.Length == 0)
+            {
+                return startHash;
+            }
+
+            fixed (byte* spanPtr = span)
+            {
+                return Xx32Hash.Hash(ref *spanPtr, span.Length, startHash);
+            }
+        }
+
 
         static uint Compute(ref byte value, int size, uint startHash)
         {

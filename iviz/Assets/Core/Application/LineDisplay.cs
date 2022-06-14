@@ -173,23 +173,22 @@ namespace Iviz.Displays
             {
                 return false;
             }
-
-            ref float4x2 linesPtr = ref lineBuffer.GetReference();
-            for (int i = 0; i < bufferLength; i++)
+            
+            var lineSpan = lineBuffer.AsSpan();
+            for (int i = 0; i < lineSpan.Length; i++)
             {
-                uint cA = Unsafe.As<float, uint>(ref linesPtr.c0.w);
+                ref float4x2 line = ref lineSpan[i];
+                uint cA = Unsafe.As<float, uint>(ref line.c0.w);
                 if (cA >> 24 < 255)
                 {
                     return true;
                 }
 
-                uint cB = Unsafe.As<float, uint>(ref linesPtr.c1.w);
+                uint cB = Unsafe.As<float, uint>(ref line.c1.w);
                 if (cB >> 24 < 255)
                 {
                     return true;
                 }
-
-                linesPtr = ref linesPtr.Plus(1);
             }
 
             return false;

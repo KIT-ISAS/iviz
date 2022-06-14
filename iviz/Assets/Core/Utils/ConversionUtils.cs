@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Iviz.Urdf;
 using JetBrains.Annotations;
 using Unity.Burst;
@@ -18,20 +19,18 @@ namespace Iviz.Core
 {
     public static unsafe class ConversionUtils
     {
-        public static void CopyPixelsRgbToRgba(Span<byte> dst4, ReadOnlySpan<byte> src3, bool withBurst = true)
+        public static void CopyPixelsRgbToRgba(Span<byte> dst4, ReadOnlySpan<byte> src3)
         {
-            CopyPixelsRgbToRgba(dst4.Cast<uint>(), src3.Cast<Rgb>(), withBurst);
+            CopyPixelsRgbToRgba(dst4.Cast<uint>(), src3.Cast<Rgb>());
         }
 
-        public static void CopyPixelsRgbToRgba(Span<uint> dst4, ReadOnlySpan<Rgb> src3, bool withBurst = true)
+        public static void CopyPixelsRgbToRgba(Span<uint> dst4, ReadOnlySpan<Rgb> src3)
         {
-            if (withBurst)
+            fixed (Rgb* src3Ptr = src3)
+            fixed (uint* dst4Ptr = dst4)
             {
-                CopyPixelsRgbToRgbaJob.Execute(src3.GetPointer(), (Rgba*)dst4.GetPointer(), src3.Length);
-                return;
+                CopyPixelsRgbToRgbaJob.Execute(src3Ptr, (Rgba*)dst4Ptr, src3.Length);
             }
-
-            CopyPixelsRgbToRgbaNoBurst(dst4, src3);
         }
 
         static void CopyPixelsRgbToRgbaNoBurst(Span<uint> dst4, ReadOnlySpan<Rgb> src3)
@@ -105,7 +104,7 @@ namespace Iviz.Core
                     };
                 }
             }
-        
+
             /*
             [BurstCompile(CompileSynchronously = true)]
             public static void Palette([NoAlias] byte* input, [NoAlias] float* palette, [NoAlias] float* output, int inputLength)
@@ -118,15 +117,13 @@ namespace Iviz.Core
             */
         }
 
-        public static void CopyPixels565ToRgba(Span<uint> dst4, ReadOnlySpan<ushort> src2, bool withBurst = true)
+        public static void CopyPixels565ToRgba(Span<uint> dst4, ReadOnlySpan<ushort> src2)
         {
-            if (withBurst)
+            fixed (ushort* src2Ptr = src2)
+            fixed (uint* dst4Ptr = dst4)
             {
-                Convert565To888Job.Execute(src2.GetPointer(), (int*)dst4.GetPointer(), src2.Length);
-                return;
+                Convert565To888Job.Execute(src2Ptr, (int*)dst4Ptr, src2.Length);
             }
-
-            CopyPixels565ToRgbaNoBurst(dst4, src2);
         }
 
 
@@ -185,15 +182,13 @@ namespace Iviz.Core
 
         public static int Convert565To888(int rgb565) => InternalConvert565To888(rgb565);
 
-        public static void CopyPixelsR16ToR8(Span<byte> dst, ReadOnlySpan<byte> src, bool withBurst = true)
+        public static void CopyPixelsR16ToR8(Span<byte> dst, ReadOnlySpan<byte> src)
         {
-            if (withBurst)
+            fixed (byte* srcPtr = src)
+            fixed (byte* dstPtr = dst)
             {
-                CopyPixelsR16ToR8Job.Execute(src.Cast<R16>().GetPointer(), dst.GetPointer(), dst.Length);
-                return;
+                CopyPixelsR16ToR8Job.Execute((R16*)srcPtr, dstPtr, dst.Length);
             }
-
-            CopyPixelsR16ToR8NoBurst(dst, src);
         }
 
         static void CopyPixelsR16ToR8NoBurst(Span<byte> dst, ReadOnlySpan<byte> src)
@@ -283,7 +278,7 @@ namespace Iviz.Core
             }
         }
 
-        public static JobHandle MirrorXf(int width, int height, NativeArray<float> src, byte[] dst)
+        public static Task MirrorXf(int width, int height, NativeArray<float> src, NativeArray<byte> dst)
         {
             int minSize = width * height;
             if (src.Length < minSize || dst.Length < minSize * sizeof(float))
@@ -296,8 +291,8 @@ namespace Iviz.Core
                 width = width,
                 height = height,
                 input = src,
-                output = dst.AsNativeArray().Cast<byte, float>()
-            }.Schedule();
+                output = dst.Cast<byte, float>()
+            }.Schedule().AsTask();
         }
 
         [BurstCompile(CompileSynchronously = true)]
@@ -340,7 +335,7 @@ namespace Iviz.Core
             }
         }
 
-        public static JobHandle MirrorXb(int width, int height, NativeArray<byte> src, byte[] dst)
+        public static Task MirrorXb(int width, int height, NativeArray<byte> src, NativeArray<byte> dst)
         {
             int minSize = width * height;
             if (src.Length < minSize || dst.Length < minSize)
@@ -353,8 +348,8 @@ namespace Iviz.Core
                 width = width,
                 height = height,
                 input = src,
-                output = dst.AsNativeArray()
-            }.Schedule();
+                output = dst
+            }.Schedule().AsTask();
         }
     }
 
@@ -417,13 +412,19 @@ namespace Iviz.Core
 
         public static void FillIndices(Span<int> input)
         {
-            Impl.FillIndices(input.GetPointer(), input.Length);
+            fixed (int* inputPtr = input)
+            {
+                Impl.FillIndices(inputPtr, input.Length);
+            }
         }
 
         public static void FillIndicesFlipped(Span<int> input)
         {
             var input3 = MemoryMarshal.Cast<int, int3>(input);
-            Impl.FillFlipped(input3.GetPointer(), input3.Length);
+            fixed (int3* input3Ptr = input3)
+            {
+                Impl.FillFlipped(input3Ptr, input3.Length);
+            }
         }
 
         public static void FillVector3(NativeArray<float4> input, Span<Vector3> output)
@@ -433,7 +434,10 @@ namespace Iviz.Core
                 ThrowHelper.ThrowArgument("Size does not match!", nameof(input));
             }
 
-            Impl.ToVector3(input.GetUnsafePtr(), (float3*)output.GetPointer(), input.Length);
+            fixed (Vector3* outputPtr = output)
+            {
+                Impl.ToVector3(input.GetUnsafePtr(), (float3*)outputPtr, input.Length);
+            }
         }
 
         public static void FillUV(NativeArray<float4> input, Span<Vector2> output)
@@ -443,7 +447,10 @@ namespace Iviz.Core
                 ThrowHelper.ThrowArgument("Size does not match!", nameof(input));
             }
 
-            Impl.ToUV(input.GetUnsafePtr(), (float2*)output.GetPointer(), input.Length);
+            fixed (Vector2* outputPtr = output)
+            {
+                Impl.ToUV(input.GetUnsafePtr(), (float2*)outputPtr, input.Length);
+            }
         }
 
         public static void FillColor(NativeArray<float4> input, Span<Color32> output)
@@ -453,7 +460,10 @@ namespace Iviz.Core
                 ThrowHelper.ThrowArgument("Size does not match!", nameof(input));
             }
 
-            Impl.ToColor(input.GetUnsafePtr(), (float*)output.GetPointer(), input.Length);
+            fixed (Color32* outputPtr = output)
+            {
+                Impl.ToColor(input.GetUnsafePtr(), (float*)outputPtr, input.Length);
+            }
         }
     }
 
@@ -529,13 +539,21 @@ namespace Iviz.Core
                 ThrowHelper.ThrowArgument("Size does not match!", nameof(output));
             }
 
-            Impl.Fill(row02.GetPointer(), row12.GetPointer(), output.GetPointer(), output.Length);
+            fixed (Impl.SByte2* row02Ptr = row02)
+            fixed (Impl.SByte2* row12Ptr = row12)
+            fixed (sbyte* outputPtr = output)
+            {
+                Impl.Fill(row02Ptr, row12Ptr, outputPtr, output.Length);
+            }
         }
 
         public static int CountValidValues(ReadOnlySpan<sbyte> row0)
         {
-            Impl.CountValid(row0.GetPointer(), row0.Length, out int numValidValues);
-            return numValidValues;
+            fixed (sbyte* row0Ptr = row0)
+            {
+                Impl.CountValid(row0Ptr, row0.Length, out int numValidValues);
+                return numValidValues;
+            }
         }
     }
 

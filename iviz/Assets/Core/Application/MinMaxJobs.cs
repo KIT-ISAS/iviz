@@ -54,7 +54,7 @@ namespace Iviz.Displays
                 for (int index = 0; index < inputLength; index++)
                 {
                     float t = input[index];
-                    min = Mathf.Min(min, t); 
+                    min = Mathf.Min(min, t);
                     max = Mathf.Max(max, t);
                 }
 
@@ -107,8 +107,8 @@ namespace Iviz.Displays
                 return;
             }
 
-            Span<float4> output = stackalloc float4[2];
-            Impl.MinMaxFloat4(pointBuffer.GetUnsafePtr(), output.GetPointer(), pointBuffer.Length);
+            float4* output = stackalloc float4[2];
+            Impl.MinMaxFloat4(pointBuffer.GetUnsafePtr(), output, pointBuffer.Length);
 
             Vector3 positionMin = output[0].xyz;
             Vector3 positionMax = output[1].xyz;
@@ -116,7 +116,7 @@ namespace Iviz.Displays
             bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
             intensitySpan = new Vector2(output[0].w, output[1].w);
         }
-        
+
         public static void CalculateBounds(
             in NativeArray<float4x2> pointBuffer,
             out Bounds bounds,
@@ -128,15 +128,31 @@ namespace Iviz.Displays
                 intensitySpan = Vector2.zero;
                 return;
             }
-            
-            Span<float4> output = stackalloc float4[2];
-            Impl.MinMaxFloat4x2(pointBuffer.GetUnsafePtr(), output.GetPointer(), pointBuffer.Length);
+
+            float4* output = stackalloc float4[2];
+            Impl.MinMaxFloat4x2(pointBuffer.GetUnsafePtr(), output, pointBuffer.Length);
 
             Vector3 positionMin = output[0].xyz;
             Vector3 positionMax = output[1].xyz;
 
             bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
             intensitySpan = new Vector2(output[0].w, output[1].w);
+        }
+
+        public static (float, float) CalculateBounds(ReadOnlySpan<float> pointBuffer)
+        {
+            if (pointBuffer.Length == 0)
+            {
+                return (0, 0);
+            }
+
+            float* output = stackalloc float[2];
+            fixed (float* pointBufferPtr = pointBuffer)
+            {
+                Impl.MinMaxFloat(pointBufferPtr, output, pointBuffer.Length);
+            }
+
+            return (output[0], output[1]);
         }
 
         public static (float, float) CalculateBounds(in NativeArray<float> pointBuffer)
@@ -146,8 +162,8 @@ namespace Iviz.Displays
                 return (0, 0);
             }
 
-            Span<float> output = stackalloc float[2];
-            Impl.MinMaxFloat(pointBuffer.GetUnsafePtr(), output.GetPointer(), pointBuffer.Length);
+            float* output = stackalloc float[2];
+            Impl.MinMaxFloat(pointBuffer.GetUnsafePtr(), output, pointBuffer.Length);
 
             return (output[0], output[1]);
         }
@@ -159,9 +175,9 @@ namespace Iviz.Displays
                 return (0, 0);
             }
 
-            Span<ushort> output = stackalloc ushort[2];
-            Impl.MinMaxUshort(pointBuffer.GetUnsafePtr(), output.GetPointer(), pointBuffer.Length);
-            
+            ushort* output = stackalloc ushort[2];
+            Impl.MinMaxUshort(pointBuffer.GetUnsafePtr(), output, pointBuffer.Length);
+
             return (output[0], output[1]);
         }
 
@@ -172,8 +188,8 @@ namespace Iviz.Displays
                 return (0, 0);
             }
 
-            Span<byte> output = stackalloc byte[2];
-            Impl.MinMaxByte(pointBuffer.GetUnsafePtr(), output.GetPointer(), pointBuffer.Length);
+            byte* output = stackalloc byte[2];
+            Impl.MinMaxByte(pointBuffer.GetUnsafePtr(), output, pointBuffer.Length);
 
             return (output[0], output[1]);
         }

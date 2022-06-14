@@ -162,6 +162,7 @@ namespace Iviz.Displays
             using var output =
                 new NativeArray<float4x2>(numLines, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
 
+            /*
             await new CopyTriangles
             {
                 triangles = indices.AsNativeArray().Cast<int, int3>(),
@@ -171,6 +172,7 @@ namespace Iviz.Displays
 
             // we're in a different frame now!
             Resource.Set(output.AsReadOnlySpan(), false);
+            */
         }
 
         [BurstCompile(CompileSynchronously = true)]

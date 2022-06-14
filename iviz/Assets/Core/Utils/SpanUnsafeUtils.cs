@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Iviz.Msgs.GeometryMsgs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -7,31 +8,14 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Core
 {
-    /// <summary>
-    /// Note: These operations are meant for il2cpp.
-    /// In normal C# using 'fixed' is really slow and should be avoided in hot paths, but in il2cpp it is a free operation.
-    /// We use this variants because <see cref="Unsafe.AsRef{T}"/> is slow in il2cpp and generics have lots of
-    /// unnecessary internal checks.
-    /// Note that the <see cref="Plus(ref byte,int)"/> pointers will probably break in GCs with compacting (i.e., normal .NET). 
-    /// </summary>
+    // TODO: get rid of this
     public static class SpanUnsafeUtils
     {
+        [Obsolete]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T GetReference<T>(this ReadOnlySpan<T> span) where T : unmanaged
         {
             fixed (T* ptr = &span[0]) return ref *ptr;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe T* GetPointer<T>(this Span<T> span) where T : unmanaged
-        {
-            return (T*)Unsafe.AsPointer(ref span[0]);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe T* GetPointer<T>(this ReadOnlySpan<T> span) where T : unmanaged
-        {
-            return (T*)Unsafe.AsPointer(ref span.GetReference());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -91,10 +75,5 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref R16 Plus(this ref R16 ptr, int i) => ref Unsafe.Add(ref ptr, i);
 
-        /// <summary>
-        /// Creates a span from the given pointer and size. 
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> AsSpan(this IntPtr ptr, int size) => new(ptr.ToPointer(), size);
     }
 }

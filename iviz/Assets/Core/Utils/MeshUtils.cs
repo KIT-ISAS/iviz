@@ -8,12 +8,14 @@ using UnityEngine.Rendering;
 
 namespace Iviz.Core
 {
-    public static class MeshUtils
+    public static unsafe class MeshUtils
     {
         public static void SetVertices(this Mesh mesh, ReadOnlySpan<Vector3> ps)
         {
-            var array = NativeArrayUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
-            mesh.SetVertices(array);
+            fixed (Vector3* psPtr = ps)
+            {
+                mesh.SetVertices(NativeArrayUtils.CreateWrapper(psPtr, ps.Length));
+            }
         }
 
         public static void SetVertices(this Mesh mesh, Rent<Vector3> ps)
@@ -23,26 +25,34 @@ namespace Iviz.Core
 
         public static void SetNormals(this Mesh mesh, ReadOnlySpan<Vector3> ps)
         {
-            var array = NativeArrayUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
-            mesh.SetNormals(array);
+            fixed (Vector3* psPtr = ps)
+            {
+                mesh.SetNormals(NativeArrayUtils.CreateWrapper(psPtr, ps.Length));
+            }
         }
 
         public static void SetTangents(this Mesh mesh, ReadOnlySpan<Vector4> ps)
         {
-            var array = NativeArrayUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
-            mesh.SetTangents(array);
+            fixed (Vector4* psPtr = ps)
+            {
+                mesh.SetTangents(NativeArrayUtils.CreateWrapper(psPtr, ps.Length));
+            }
         }
 
         public static void SetColors(this Mesh mesh, ReadOnlySpan<Color> ps)
         {
-            var array = NativeArrayUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
-            mesh.SetColors(array);
+            fixed (Color* psPtr = ps)
+            {
+                mesh.SetColors(NativeArrayUtils.CreateWrapper(psPtr, ps.Length));
+            }
         }
 
         public static void SetColors(this Mesh mesh, ReadOnlySpan<Color32> ps)
         {
-            var array = NativeArrayUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
-            mesh.SetColors(array);
+            fixed (Color32* psPtr = ps)
+            {
+                mesh.SetColors(NativeArrayUtils.CreateWrapper(psPtr, ps.Length));
+            }
         }
 
         public static void SetColors(this Mesh mesh, Rent<Color32> ps)
@@ -62,24 +72,28 @@ namespace Iviz.Core
 
         public static void SetUVs(this Mesh mesh, ReadOnlySpan<Vector3> ps, int channel = 0)
         {
-            var array = NativeArrayUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
-            mesh.SetUVs(channel, array);
+            fixed (Vector3* psPtr = ps)
+            {
+                mesh.SetUVs(channel, NativeArrayUtils.CreateWrapper(psPtr, ps.Length));
+            }
         }
 
         public static void SetTriangles(this Mesh mesh, ReadOnlySpan<int> ps)
         {
-            var array = NativeArrayUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
             mesh.indexFormat = ps.Length < ushort.MaxValue
                 ? IndexFormat.UInt16
                 : IndexFormat.UInt32;
-            mesh.SetIndices(array, MeshTopology.Triangles, 0);
+            fixed (int* psPtr = ps)
+            {
+                mesh.SetIndices(NativeArrayUtils.CreateWrapper(psPtr, ps.Length), MeshTopology.Triangles, 0);
+            }
         }
 
         public static void SetTriangles(this Mesh mesh, Rent<int> ps)
         {
             mesh.SetIndices(ps, MeshTopology.Triangles);
         }
-        
+
         public static void SetIndices(this Mesh mesh, Rent<int> ps, MeshTopology topology)
         {
             mesh.indexFormat = ps.Length < ushort.MaxValue
@@ -87,7 +101,7 @@ namespace Iviz.Core
                 : IndexFormat.UInt32;
             mesh.SetIndices(ps.Array, 0, ps.Length, topology, 0);
         }
-        
+
         public static void SetTriangles(this Mesh mesh, NativeArray<int> ps)
         {
             mesh.indexFormat = ps.Length < ushort.MaxValue

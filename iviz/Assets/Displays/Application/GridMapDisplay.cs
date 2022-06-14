@@ -137,6 +137,8 @@ namespace Iviz.Displays
             textureToUse.CopyFrom(data);
             textureToUse.Apply();
 
+            var (min, max) = MinMaxJobs.CalculateBounds(data);
+            /*
             float min = float.MaxValue, max = float.MinValue;
             foreach (float val in data)
             {
@@ -150,6 +152,7 @@ namespace Iviz.Displays
                     max = val;
                 }
             }
+            */
 
             Collider.center = new Vector3(0.5f, 0.5f, (max + min) / 2).Ros2Unity();
             Collider.size = new Vector3(1, 1, max - min).Ros2Unity().Abs();

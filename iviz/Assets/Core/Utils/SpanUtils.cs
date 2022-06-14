@@ -13,7 +13,7 @@ using JetBrains.Annotations;
 
 namespace Iviz.Core
 {
-    public static class SpanUtils
+    public static unsafe class SpanUtils
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<byte> AsSpan(this Texture2D texture)
@@ -21,9 +21,16 @@ namespace Iviz.Core
             return texture.GetRawTextureData<byte>().AsSpan();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte* GetUnsafePtr(this Texture2D texture)
+        {
+            return texture.GetRawTextureData<byte>().GetUnsafePtr();
+        }
+
+
         public static Span<T> AsSpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
-            return MemoryMarshal.CreateSpan(ref array.GetUnsafeRef(), array.Length);
+            return new Span<T>(array.GetUnsafePtr(), array.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -35,7 +42,7 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
-            return MemoryMarshal.CreateReadOnlySpan(ref array.GetUnsafeRef(), array.Length);
+            return new ReadOnlySpan<T>(array.GetUnsafePtr(), array.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -60,29 +67,26 @@ namespace Iviz.Core
         public static void CopyFrom<T>(this Texture2D dst, ReadOnlySpan<T> srcSpan) where T : unmanaged
         {
             var srcBytes = MemoryMarshal.AsBytes(srcSpan);
-            var dstBytes = dst.AsSpan();
-            Unsafe.CopyBlock(
-                ref dstBytes[0],
-                ref srcBytes.GetReference(),
-                (uint)srcBytes.Length);
+            fixed (byte* srcBytesPtr = srcBytes)
+            {
+                Unsafe.CopyBlock(dst.GetUnsafePtr(), srcBytesPtr, (uint)srcBytes.Length);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BlockCopyTo(this ReadOnlySpan<byte> src, Span<byte> dst)
         {
-            Unsafe.CopyBlock(
-                ref dst[0],
-                ref src.GetReference(),
-                (uint)src.Length);
+            fixed (byte* srcPtr = src)
+            fixed (byte* dstPtr = dst)
+            {
+                Unsafe.CopyBlock(dstPtr, srcPtr, (uint)src.Length);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BlockCopyTo(this Span<byte> src, Span<byte> dst)
         {
-            Unsafe.CopyBlock(
-                ref dst[0],
-                ref src[0],
-                (uint)src.Length);
+            BlockCopyTo((ReadOnlySpan<byte>)src, dst);
         }
 
         public static ReadOnlySpan<T> Cast<T>(this ReadOnlySpan<byte> src) where T : unmanaged
@@ -114,5 +118,11 @@ namespace Iviz.Core
         {
             return (T[]?)new ListConverter { list = list }.ExtractArray() ?? Array.Empty<T>();
         }
+        
+        /// <summary>
+        /// Creates a span from the given pointer and size. 
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<byte> AsSpan(this IntPtr ptr, int size) => new(ptr.ToPointer(), size);
     }
 }
