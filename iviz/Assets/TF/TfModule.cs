@@ -248,7 +248,8 @@ namespace Iviz.Controllers.TF
 
                 KeepAllFrames = true;
 
-                //GameThread.LateEveryFrame += LateUpdate;
+                //RootScale = 0.25f;
+                //RootFrame.Transform.localPosition = new Vector3(1, 0, 1);
             }
             catch
             {

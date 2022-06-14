@@ -47,6 +47,8 @@ namespace Iviz.Controllers
                 TriangleListFlipWinding = value.TriangleListFlipWinding;
                 PreferUdp = value.PreferUdp;
                 ShowDescriptions = value.ShowDescriptions;
+                Metallic = value.Metallic;
+                Smoothness = value.Smoothness;
 
                 if (value.VisibleMask.Length != config.VisibleMask.Length)
                 {

@@ -123,6 +123,15 @@ namespace Iviz.App
                     case nameof(GridMapConfiguration.FlipMinMax):
                         listener.FlipMinMax = config.FlipMinMax;
                         break;
+                    case nameof(GridMapConfiguration.Tint):
+                        listener.Tint = config.Tint.ToUnity();
+                        break;
+                    case nameof(GridMapConfiguration.Metallic):
+                        listener.Metallic = config.Metallic;
+                        break;
+                    case nameof(GridMapConfiguration.Smoothness):
+                        listener.Smoothness = config.Smoothness;
+                        break;
 
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");
