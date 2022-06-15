@@ -192,15 +192,15 @@ namespace Iviz.Displays
             Lines.ReturnToPool();
         }
 
-        public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax,
-            ReadOnlySpan<float> ranges, ReadOnlySpan<float> intensities)
+        public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, float[] ranges,
+            float[] intensities)
         {
-            if (float.IsNaN(rangeMin) || rangeMin > rangeMax)
+            if (rangeMin.IsInvalid() || rangeMin > rangeMax)
             {
                 throw new ArgumentException("rangeMin is nan or invalid!", nameof(rangeMin));
             }
 
-            if (float.IsNaN(rangeMax))
+            if (rangeMax.IsInvalid())
             {
                 throw new ArgumentException("rangeMax is nan!", nameof(rangeMax));
             }
@@ -265,7 +265,7 @@ namespace Iviz.Displays
             else
             {
                 float4? prevF = null;
-                float prevRange = 0; 
+                float prevRange = 0;
 
                 foreach (int i in ..ranges.Length)
                 {

@@ -326,22 +326,29 @@ namespace Iviz.Displays
         public void Set(int width, int height, string encoding, ReadOnlySpan<byte> data, bool generateMipmaps = false)
         {
             ThrowHelper.ThrowIfNull(encoding, nameof(encoding));
-
+            
+            if (width < 0 || height < 0)
+            {
+                RosLogger.Error($"{this}: Invalid size");
+                return;
+            }
+            
             if (width >= Settings.MaxTextureSize || height >= Settings.MaxTextureSize)
             {
-                RosLogger.Debug($"{this}: Required destination buffer is too large");
+                RosLogger.Error($"{this}: Required destination buffer is too large");
+                return;
+            }
+
+            if (FieldSizeFromEncoding(encoding) is not { } bpp)
+            {
+                RosLogger.Error($"{this}: Unsupported encoding '{encoding}'");
                 return;
             }
 
             int size = width * height;
+            int expectedLength = size * bpp;
 
-            if (FieldSizeFromEncoding(encoding) is not { } bpp)
-            {
-                RosLogger.Debug($"{this}: Unsupported encoding '{encoding}'");
-                return;
-            }
-
-            if (data.Length < size * bpp)
+            if (data.Length < expectedLength)
             {
                 RosLogger.Error(
                     $"{this}: Invalid image! Expected at least {(size * bpp).ToString()} bytes, " +
@@ -393,7 +400,7 @@ namespace Iviz.Displays
                     return;
             }
 
-            ApplyTexture(width, height, data[..(size * bpp)], encoding, generateMipmaps);
+            ApplyTexture(width, height, data[..expectedLength], encoding, generateMipmaps);
         }
 
         void ApplyTexture(int width, int height, ReadOnlySpan<byte> data, string encoding, bool generateMipmaps)

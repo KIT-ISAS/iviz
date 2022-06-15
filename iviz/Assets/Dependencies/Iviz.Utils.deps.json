@@ -9,7 +9,6 @@
     ".NETStandard,Version=v2.1/": {
       "Iviz.Utils/1.0.0": {
         "dependencies": {
-          "BigGustave": "1.0.0",
           "Iviz.ModelService.Lib": "1.0.0",
           "Iviz.MsgsGen.Lib": "1.0.0",
           "Iviz.Ntp": "1.0.0",

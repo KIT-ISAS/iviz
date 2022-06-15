@@ -231,12 +231,15 @@ namespace Iviz.Controllers
 
             sbyte[] data = msg.Data;
             var info = msg.Info;
-            
-            if (data.Length != info.Width * info.Height)
+
+            checked
             {
-                RosLogger.Error($"{this}: Size {info.Width.ToString()}x{info.Height.ToString()} " +
-                               $"does not match data length {data.Length.ToString()}");
-                return;
+                if (data.Length != info.Width * info.Height)
+                {
+                    RosLogger.Error($"{this}: Size {info.Width.ToString()}x{info.Height.ToString()} " +
+                                    $"does not match data length {data.Length.ToString()}");
+                    return;
+                }
             }
 
             if (info.Resolution.IsInvalid() || info.Resolution < 0)

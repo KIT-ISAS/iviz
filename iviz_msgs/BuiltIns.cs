@@ -179,8 +179,24 @@ namespace Iviz.Msgs
             return ReadBuffer.Deserialize(new T(), bytes);
         }
 
+        public static int GetArraySize(GeometryMsgs.TransformStamped[]? array)
+        {
+            if (array == null)
+            {
+                return 0;
+            }
+
+            int size = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                size += array[i].RosMessageLength;
+            }
+
+            return size;
+        }
+        
         /// Returns the size in bytes of a message array when deserialized in ROS
-        public static int GetArraySize<T>(T[]? array) where T : IMessage
+        public static int GetArraySize(IMessage[]? array)
         {
             if (array == null)
             {

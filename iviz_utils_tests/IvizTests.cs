@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -32,10 +34,11 @@ public class IvizTests
 
     static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
     static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
-    
+
     const string CallerId = "/iviz_util_tests";
-    //const string IvizId = "/iviz_osxeditor";
-    const string IvizId = "/iviz_iphoneplayer";
+
+    const string IvizId = "/iviz_osxeditor";
+    //const string IvizId = "/iviz_iphoneplayer";
 
     RosClient client;
 
@@ -388,7 +391,7 @@ public class IvizTests
         var ivizController = new IvizController(client, IvizId);
         ivizController.AddModuleFromTopic("/markers");
         var markers = new List<Marker>();
-        
+
         var points = new List<Point>();
         for (int i = 0; i < 2 * 360; i += 9)
         {
@@ -410,7 +413,6 @@ public class IvizTests
         writer.Write(new MarkerArray(markers.ToArray()));
 
         Thread.Sleep(1000);
-
     }
 
     [Test]
@@ -426,8 +428,8 @@ public class IvizTests
 
 
         string path;
-        
-        /*
+
+
         path = "../../../images/grey.png";
         image.Data = File.ReadAllBytes(path);
         writer.Write(image);
@@ -452,7 +454,7 @@ public class IvizTests
         image.Format = "whee";
         writer.Write(image);
         Thread.Sleep(1000);
-        */
+
 
         path = "../../../images/testorig.jpg";
         image.Data = File.ReadAllBytes(path);
@@ -460,19 +462,18 @@ public class IvizTests
         writer.Write(image);
         Thread.Sleep(1000);
 
-        /*
+
         image.Format = "jpg";
         image.Data.AsSpan()[100..200].Fill(0); // break image
         writer.Write(image);
         Thread.Sleep(1000);
-        */
     }
 
 
     [Test]
     public void TestGridmap()
     {
-        var writer = client.CreateWriter<GridMap>("/gridmap");
+        using var writer = client.CreateWriter<GridMap>("/gridmap");
 
         var ivizController = new IvizController(client, IvizId);
         ivizController.AddModuleFromTopic("/gridmap");
@@ -507,7 +508,7 @@ public class IvizTests
     [Test]
     public void TestGridmap2()
     {
-        var writer = client.CreateWriter<GridMap>("/gridmap");
+        using var writer = client.CreateWriter<GridMap>("/gridmap");
 
         var ivizController = new IvizController(client, IvizId);
         ivizController.AddModuleFromTopic("/gridmap");
@@ -565,6 +566,217 @@ public class IvizTests
                     },
                 }
             }
-        };        
+        };
+    }
+
+    [Test]
+    public void TestPointCloud()
+    {
+        using var writer = client.CreateWriter<PointCloud2>("/pointcloud");
+
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.AddModuleFromTopic("/pointcloud");
+
+        writer.WaitForAnySubscriber();
+        Thread.Sleep(100);
+        const int w = 100;
+        const int h = 100;
+
+        byte[] data = new byte[w * h * Unsafe.SizeOf<Float4>()];
+        var data4 = MemoryMarshal.Cast<byte, Float4>(data);
+
+        var msg = new PointCloud2
+        {
+            Data = data,
+            Fields = new[]
+            {
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "x", Offset = 0, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "y", Offset = 4, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "z", Offset = 8, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "i", Offset = 12, },
+            },
+            Width = w,
+            Height = h,
+            PointStep = (uint)Unsafe.SizeOf<Float4>(),
+            RowStep = (uint)Unsafe.SizeOf<Float4>() * w,
+        };
+        foreach (int i in ..2000)
+        {
+            foreach (int v in ..h)
+            {
+                foreach (int u in ..w)
+                {
+                    float I = MathF.Sin((i + u + v) / 50f);
+                    data4[v * w + u] = new Float4
+                    {
+                        x = u / 100f,
+                        y = v / 100f,
+                        z = I,
+                        w = I
+                    };
+                }
+            }
+
+            writer.Write(msg);
+            Thread.Sleep(5);
+        }
+    }
+
+    [Test]
+    public void TestPointCloud2()
+    {
+        using var writer = client.CreateWriter<PointCloud2>("/pointcloud");
+
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.AddModuleFromTopic("/pointcloud");
+
+        writer.WaitForAnySubscriber();
+        Thread.Sleep(100);
+        const int w = 100;
+        const int h = 100;
+
+        byte[] data = new byte[w * h * Unsafe.SizeOf<Float3>()];
+        var data4 = MemoryMarshal.Cast<byte, Float3>(data);
+
+        var msg = new PointCloud2
+        {
+            Data = data,
+            Fields = new[]
+            {
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "x", Offset = 0, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "y", Offset = 4, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "z", Offset = 8, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "i", Offset = 8, },
+            },
+            Width = w,
+            Height = h,
+            PointStep = (uint)Unsafe.SizeOf<Float3>(),
+            RowStep = (uint)Unsafe.SizeOf<Float3>() * w,
+        };
+        foreach (int i in ..2000)
+        {
+            foreach (int v in ..h)
+            {
+                foreach (int u in ..w)
+                {
+                    float I = MathF.Sin((i + u + v) / 50f);
+                    data4[v * w + u] = new Float3
+                    {
+                        x = u / 100f,
+                        y = v / 100f,
+                        z = I,
+                    };
+                }
+            }
+
+            writer.Write(msg);
+            Thread.Sleep(5);
+        }
+    }
+
+    [Test]
+    public void TestPointCloud3()
+    {
+        using var writer = client.CreateWriter<PointCloud2>("/pointcloud");
+
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.AddModuleFromTopic("/pointcloud");
+
+        writer.WaitForAnySubscriber();
+        Thread.Sleep(100);
+        const int w = 100;
+        const int h = 100;
+
+        byte[] data = new byte[w * h * Unsafe.SizeOf<Float3>()];
+        var data4 = MemoryMarshal.Cast<byte, Float3>(data);
+
+        var msg = new PointCloud2
+        {
+            Fields = new[]
+            {
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "x", Offset = 0, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "y", Offset = 4, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "z", Offset = 8, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "i", Offset = 8, },
+            },
+            Width = w,
+            Height = h,
+            PointStep = (uint)Unsafe.SizeOf<Float3>(),
+            RowStep = (uint)Unsafe.SizeOf<Float3>() * w,
+        };
+
+        Console.WriteLine("Sending!");
+        writer.Write(msg);
+        Thread.Sleep(2000);
+        
+        msg = new PointCloud2
+        {
+            Data = data,
+            Fields = new[]
+            {
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "x", Offset = uint.MaxValue, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "y", Offset = 4, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "z", Offset = 8, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "i", Offset = uint.MaxValue, },
+            },
+            Width = w,
+            Height = h,
+            PointStep = (uint)Unsafe.SizeOf<Float3>(),
+            RowStep = (uint)Unsafe.SizeOf<Float3>() * w,
+        };
+
+        Console.WriteLine("Sending!");
+        writer.Write(msg);
+        Thread.Sleep(2000);        
+        
+        msg = new PointCloud2
+        {
+            Data = data,
+            Fields = new[]
+            {
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "x", Offset = 0, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "y", Offset = 4, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "z", Offset = 8, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "i", Offset = 8, },
+            },
+            Width = uint.MaxValue,
+            Height = h,
+            PointStep = (uint)Unsafe.SizeOf<Float3>(),
+            RowStep = (uint)Unsafe.SizeOf<Float3>() * w,
+        };
+
+        Console.WriteLine("Sending!");
+        writer.Write(msg);
+        Thread.Sleep(2000);   
+        
+        msg = new PointCloud2
+        {
+            Data = data,
+            Fields = new[]
+            {
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "x", Offset = 0, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "y", Offset = 4, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "z", Offset = 8, },
+                new PointField { Count = 1, Datatype = PointField.FLOAT32, Name = "i", Offset = 8, },
+            },
+            Width = w,
+            Height = h,
+            PointStep = uint.MaxValue,
+            RowStep = uint.MaxValue,
+        };
+
+        Console.WriteLine("Sending!");
+        writer.Write(msg);
+        Thread.Sleep(2000);  
+    }
+
+    struct Float4
+    {
+        public float x, y, z, w;
+    }
+
+    struct Float3
+    {
+        public float x, y, z;
     }
 }

@@ -33,6 +33,13 @@ namespace Iviz.Controllers
 
             var (minDistanceSq, closestMarker) =
                 seenMarkers.Values.Min(marker => ((marker.UnityPose.position - position).sqrMagnitude, marker));
+
+            if (closestMarker.LastSeen < GameThread.GameTime - 3)
+            {
+                pose = default;
+                return false;
+            }
+            
             if (minDistanceSq > MaxSnapDistanceInM * MaxSnapDistanceInM)
             {
                 pose = default;
@@ -63,6 +70,8 @@ namespace Iviz.Controllers
 
             if (seenMarkers.TryGetValue(key, out var knownMarker))
             {
+                knownMarker.SizeInMm = (float)rosMarker.MarkerSizeInMm;
+                knownMarker.UnityPose = ARController.GetAbsoluteMarkerPose(rosMarker);
                 knownMarker.LastSeen = GameThread.GameTime;
                 return;
             }

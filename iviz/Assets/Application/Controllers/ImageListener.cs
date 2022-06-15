@@ -315,17 +315,20 @@ namespace Iviz.Controllers
 
         bool Handler(Image msg)
         {
-            // basic checks
-            if (msg.Data.Length < msg.Width * msg.Height)
+            checked
             {
-                RosLogger.Error($"{this}: Image data is too small!");
-                return true;
-            }
+                // basic checks
+                if (msg.Data.Length < msg.Width * msg.Height)
+                {
+                    RosLogger.Error($"{this}: Image data is too small!");
+                    return true;
+                }
 
-            if (msg.Step < msg.Width || msg.Data.Length < msg.Step * msg.Height)
-            {
-                RosLogger.Error($"{this}: Image step does not correspond to image size!");
-                return true;
+                if (msg.Step < msg.Width || msg.Data.Length < msg.Step * msg.Height)
+                {
+                    RosLogger.Error($"{this}: Image step does not correspond to image size!");
+                    return true;
+                }
             }
 
             if (msg.Encoding.Length == 0)

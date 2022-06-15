@@ -9,8 +9,6 @@
     ".NETStandard,Version=v2.1/": {
       "Iviz.Utils/1.0.0": {
         "dependencies": {
-          "BigGustave": "1.0.0",
-          "BitMiracle.LibJpeg.NET": "1.5.324",
           "Iviz.ModelService.Lib": "1.0.0",
           "Iviz.MsgsGen.Lib": "1.0.0",
           "Iviz.Ntp": "1.0.0",
@@ -34,14 +32,6 @@
           "lib/netstandard1.3/AssimpNet.dll": {
             "assemblyVersion": "4.1.0.0",
             "fileVersion": "4.1.0.0"
-          }
-        }
-      },
-      "BitMiracle.LibJpeg.NET/1.5.324": {
-        "runtime": {
-          "lib/netstandard2.0/BitMiracle.LibJpeg.NET.dll": {
-            "assemblyVersion": "1.5.324.0",
-            "fileVersion": "1.5.324.0"
           }
         }
       },
@@ -913,11 +903,6 @@
           }
         }
       },
-      "BigGustave/1.0.0": {
-        "runtime": {
-          "BigGustave.dll": {}
-        }
-      },
       "Iviz.ModelService.Lib/1.0.0": {
         "dependencies": {
           "AssimpNet": "4.1.0",
@@ -1053,13 +1038,6 @@
       "sha512": "sha512-z/4Tmf3Q2r1+vN6o/szArEZvPsdYNRYiS0L/yArybQd7n7KCiS9L4lRZhwwlHJb/edECM+Jky0XisVspr5aQWQ==",
       "path": "assimpnet/4.1.0",
       "hashPath": "assimpnet.4.1.0.nupkg.sha512"
-    },
-    "BitMiracle.LibJpeg.NET/1.5.324": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-2lcsK3+JwJueFIOdii/Dz8bFI2OOWHFn1m1co050CPr6yBdQhAhO5Nq/zsj4f/oj7TBo29T7k0qHMsUJzgKJiw==",
-      "path": "bitmiracle.libjpeg.net/1.5.324",
-      "hashPath": "bitmiracle.libjpeg.net.1.5.324.nupkg.sha512"
     },
     "JetBrains.Annotations/2021.3.0": {
       "type": "package",
@@ -1627,11 +1605,6 @@
       "sha512": "sha512-5zJ0XDxAIg8iy+t4aMnQAu0MqVbqyvfoUVl1yDV61xdo3Vth45oA2FoY4pPkxYAH5f8ixpmTqXeEIya95x0aCQ==",
       "path": "system.xml.xdocument/4.3.0",
       "hashPath": "system.xml.xdocument.4.3.0.nupkg.sha512"
-    },
-    "BigGustave/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
     },
     "Iviz.ModelService.Lib/1.0.0": {
       "type": "project",

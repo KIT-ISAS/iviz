@@ -422,11 +422,15 @@ namespace Iviz.Controllers
             headFrame.LocalPose = TfModule.RelativeToFixedFrame(absoluteArCameraPose).ToCameraFrame();
         }
 
+        static bool arMarkerWarningShown;
+
         void OnMarkerDetected(Screenshot screenshot, IReadOnlyList<IDetectedMarker> markers)
         {
             if (!(TfModule.RootScale - 1).ApproximatelyZero())
             {
-                //Debug.Log(this + ": Marker detection disabled if scale is not 1!");
+                if (arMarkerWarningShown) return;
+                arMarkerWarningShown = true;
+                RosLogger.Warn($"{this}: Marker detection disabled if scale is not 1");
                 return;
             }
 
@@ -489,7 +493,7 @@ namespace Iviz.Controllers
             DepthConfidenceSender?.Dispose();
 
             pulseManager.Dispose();
-            
+
             TfPublisher.Instance.Remove(HeadFrameId, true);
             TfPublisher.Instance.Remove(CameraFrameId, true);
         }

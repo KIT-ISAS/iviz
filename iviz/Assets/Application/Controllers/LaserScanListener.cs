@@ -152,9 +152,9 @@ namespace Iviz.Controllers
         {
             node.AttachTo(msg.Header);
 
-            if (float.IsNaN(msg.AngleMin) || float.IsNaN(msg.AngleMax) ||
-                float.IsNaN(msg.RangeMin) || float.IsNaN(msg.RangeMax) ||
-                float.IsNaN(msg.AngleIncrement))
+            if (msg.AngleMin.IsInvalid() || msg.AngleMax.IsInvalid() ||
+                msg.RangeMin.IsInvalid() || msg.RangeMax.IsInvalid() ||
+                msg.AngleIncrement.IsInvalid())
             {
                 RosLogger.Info($"{this}: NaN in header!");
                 return;

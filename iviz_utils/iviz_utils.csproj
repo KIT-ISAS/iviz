@@ -15,7 +15,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\biggustave\biggustave.csproj" />
         <ProjectReference Include="..\iviz_model_service_lib\iviz_model_service_lib.csproj" />
         <ProjectReference Include="..\iviz_msgs_gen_lib\iviz_msgs_gen_lib.csproj" />
         <ProjectReference Include="..\iviz_ntp_lib\iviz_ntp_lib.csproj" />

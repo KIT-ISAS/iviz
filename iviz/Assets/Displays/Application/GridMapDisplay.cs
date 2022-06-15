@@ -36,12 +36,9 @@ namespace Iviz.Displays
         {
             get
             {
-                if (mesh == null)
-                {
-                    mesh = new Mesh { name = "GridMap Mesh" };
-                    GetComponent<MeshFilter>().sharedMesh = mesh;
-                }
-
+                if (mesh != null) return mesh;
+                mesh = new Mesh { name = "GridMap Mesh" };
+                GetComponent<MeshFilter>().sharedMesh = mesh;
                 return mesh;
             }
         }
@@ -74,7 +71,7 @@ namespace Iviz.Displays
                 UpdateMaterial();
             }
         }
-        
+
         public bool UseNormals
         {
             set
@@ -172,24 +169,13 @@ namespace Iviz.Displays
             textureToUse.Apply();
 
             var (min, max) = MinMaxJobs.CalculateBoundsNoNans(data);
-            /*
-            float min = float.MaxValue, max = float.MinValue;
-            foreach (float val in data)
-            {
-                if (val < min)
-                {
-                    min = val;
-                }
 
-                if (val > max)
-                {
-                    max = val;
-                }
-            }
-            */
+            var meshCenter = new Vector3(0.5f, 0.5f, (max + min) / 2).Ros2Unity();
+            var meshSize = new Vector3(1, 1, max - min).Ros2Unity().Abs();
+            var meshBounds = new Bounds(meshCenter, meshSize);
 
-            Collider.center = new Vector3(0.5f, 0.5f, (max + min) / 2).Ros2Unity();
-            Collider.size = new Vector3(1, 1, max - min).Ros2Unity().Abs();
+            Collider.SetLocalBounds(meshBounds);
+            Mesh.bounds = meshBounds;
 
             var span = new Vector2(min, max);
             MeasuredIntensityBounds = span;
@@ -197,13 +183,6 @@ namespace Iviz.Displays
             {
                 IntensityBounds = span;
             }
-
-            //var material = MeshRenderer.sharedMaterial;
-            //material.SetVector(ShaderIds.NormalCoeffId, new Vector4(cellsX * width, cellsY * height, 0, 0));
-
-            Mesh.bounds = new Bounds(
-                new Vector3(0.5f, 0.5f, (max + min) / 2).Ros2Unity(), 
-                new Vector3(1, 1, max - min).Ros2Unity().Abs());
         }
 
         Texture2D EnsureSize(int newWidth, int newHeight)

@@ -20,9 +20,13 @@ namespace Iviz.Core
     {
         public const uint DefaultSeed = 0;
 
-        public static uint Compute<T>(T value, uint startHash = DefaultSeed) where T : unmanaged
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe uint Compute<T>(in T value, uint startHash = DefaultSeed) where T : unmanaged
         {
-            return Compute(ref Unsafe.As<T, byte>(ref value), Unsafe.SizeOf<T>(), startHash);
+            fixed (T* valuePtr = &value)
+            {
+                return Xx32Hash.Hash(ref *(byte*)valuePtr, sizeof(T), startHash);
+            }
         }
 
         public static uint Compute(in BuilderPool.BuilderRent value, uint startHash = DefaultSeed)
@@ -41,29 +45,34 @@ namespace Iviz.Core
             return Compute(array.AsSpan(), startHash);
         }
 
-        public static uint Compute<T>(T[] array, uint startHash = DefaultSeed) where T : unmanaged
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe uint Compute<T>(T[] array, uint startHash = DefaultSeed) where T : unmanaged
         {
-            return Compute((ReadOnlySpan<T>)array, startHash);
+            if (array.Length == 0)
+            {
+                return startHash;
+            }
+
+            fixed (T* spanPtr = array)
+            {
+                return Xx32Hash.Hash(ref *(byte*)spanPtr, array.Length * sizeof(T), startHash);
+            }
         }
 
-        public static uint Compute<T>(ReadOnlySpan<T> array, uint startHash = DefaultSeed) where T : unmanaged
-        {
-            return Compute(MemoryMarshal.AsBytes(array), startHash);
-        }
-
-        static unsafe uint Compute(ReadOnlySpan<byte> span, uint startHash)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe uint Compute<T>(ReadOnlySpan<T> span, uint startHash = DefaultSeed) where T : unmanaged
         {
             if (span.Length == 0)
             {
                 return startHash;
             }
 
-            fixed (byte* spanPtr = span)
+            fixed (T* spanPtr = span)
             {
-                return Xx32Hash.Hash(ref *spanPtr, span.Length, startHash);
+                return Xx32Hash.Hash(ref *(byte*)spanPtr, span.Length * sizeof(T), startHash);
             }
         }
-
 
         static uint Compute(ref byte value, int size, uint startHash)
         {
@@ -182,7 +191,7 @@ namespace Iviz.Core
             static unsafe uint ExecuteBurst(uint seed, ref byte data, int lengthInBulk)
             {
                 uint4 output;
-                uint4* pointer = (uint4*)Unsafe.AsPointer(ref data);
+                uint4* pointer = (uint4*)Unsafe.AsPointer(ref data); // data is already fixed
                 Hash32Job.Execute(seed, pointer, &output, lengthInBulk);
                 return MergeValues(output.x, output.y, output.z, output.w);
             }

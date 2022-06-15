@@ -342,7 +342,7 @@ namespace Iviz.Displays
 
             if (pointBuffer.Capacity != 0)
             {
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<float4>());
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Unsafe.SizeOf<float4>());
                 pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
                 Properties.SetBuffer(ShaderIds.PointsId, pointComputeBuffer);
             }

@@ -55,17 +55,17 @@ namespace Iviz.Core
         {
             int nextLength = length + 1;
             EnsureCapacity(nextLength);
-            Set(length, t);
+            SetUnsafe(length, t);
             length = nextLength;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddUnsafe(in T t)
         {
-            Set(length++, t);
+            SetUnsafe(length++, t);
         }
 
-        unsafe void Set(int index, in T t)
+        unsafe void SetUnsafe(int index, in T t)
         {
             array.GetUnsafePtr()[index] = t;
         } 

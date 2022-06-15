@@ -172,7 +172,7 @@ namespace Iviz.Controllers
                 string minIntensityStr = UnityUtils.FormatFloat(MeasuredIntensityBounds.x);
                 string maxIntensityStr = UnityUtils.FormatFloat(MeasuredIntensityBounds.y);
                 string cellSizeStr = UnityUtils.FormatFloat(cellSize);
-                
+
                 return $"<b>{numCellsX.ToString("N0")}x{numCellsY.ToString("N0")} cells | " +
                        $"{cellSizeStr} m/cell</b>\n" +
                        $"[{minIntensityStr} .. {maxIntensityStr}]";
@@ -242,7 +242,7 @@ namespace Iviz.Controllers
             fieldNames.AddRange(msg.Layers);
 
             int layer = string.IsNullOrWhiteSpace(IntensityChannel) ? 0 : fieldNames.IndexOf(IntensityChannel);
-            if (layer == -1 || layer >= msg.Data.Length)
+            if (layer < 0 || layer >= msg.Data.Length)
             {
                 RosLogger.Error($"{this}: Gridmap layer {layer.ToString()} is missing!");
                 return;
@@ -266,7 +266,6 @@ namespace Iviz.Controllers
 
             uint height = layout.Dim[0].Size;
             uint width = layout.Dim[1].Size;
-            uint numElements = width * height;
 
             if (width > maxGridSize || height > maxGridSize)
             {
@@ -275,7 +274,13 @@ namespace Iviz.Controllers
                 return;
             }
 
-            uint expectedLength = numElements + layout.DataOffset;
+            uint numElements = width * height;
+            uint expectedLength;
+            checked
+            {
+                expectedLength = numElements + layout.DataOffset;
+            }
+
             if (dataLength < expectedLength)
             {
                 RosLogger.Error($"{this}: Gridmap layer size does not match. " +
@@ -288,7 +293,7 @@ namespace Iviz.Controllers
                 RosLogger.Error($"{this}: Strides are set incorrectly");
                 return;
             }
-            
+
             if (layout.Dim[0].Stride > width * height || layout.Dim[1].Stride > width)
             {
                 RosLogger.Error($"{this}: Padded strides are not supported");
@@ -304,7 +309,7 @@ namespace Iviz.Controllers
             }
 
             node.AttachTo(info.Header);
-            
+
             var origin = info.Pose.Ros2Unity();
             Pose validatedOrigin;
             if (!origin.IsUsable())
@@ -319,7 +324,7 @@ namespace Iviz.Controllers
             {
                 validatedOrigin = origin;
             }
-            
+
             node.Transform.SetLocalPose(validatedOrigin);
 
             int offset = (int)layout.DataOffset;
