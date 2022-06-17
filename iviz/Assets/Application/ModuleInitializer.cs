@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.ImageDecoders;
 using Iviz.Resources;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Iviz.App
 {

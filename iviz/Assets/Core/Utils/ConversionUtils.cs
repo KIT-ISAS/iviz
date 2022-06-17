@@ -33,59 +33,6 @@ namespace Iviz.Core
             }
         }
 
-        static void CopyPixelsRgbToRgbaNoBurst(Span<uint> dst4, ReadOnlySpan<Rgb> src3)
-        {
-            int sizeToWrite = src3.Length;
-            AssertSize(dst4, sizeToWrite);
-
-            var srcI4 = MemoryMarshal.Cast<Rgb, uint>(src3);
-
-            ref uint dstIPtr = ref dst4[0];
-            ref uint srcIPtr = ref srcI4.GetReference();
-
-            while (sizeToWrite >= 8)
-            {
-                // stolen from https://stackoverflow.com/questions/2973708/fast-24-bit-array-32-bit-array-conversion
-
-                uint sa = srcIPtr;
-                dstIPtr = sa;
-
-                uint sb = srcIPtr.Plus(1);
-                dstIPtr.Plus(1) = (sa >> 24) | (sb << 8);
-
-                uint sc = srcIPtr.Plus(2);
-                dstIPtr.Plus(2) = (sb >> 16) | (sc << 16);
-                dstIPtr.Plus(3) = sc >> 8;
-
-                // but twice!
-
-                uint sd = srcIPtr.Plus(3);
-                dstIPtr.Plus(4) = sd;
-
-                uint se = srcIPtr.Plus(4);
-                dstIPtr.Plus(5) = (sd >> 24) | (se << 8);
-
-                uint sf = srcIPtr.Plus(5);
-                dstIPtr.Plus(6) = (se >> 16) | (sf << 16);
-                dstIPtr.Plus(7) = sf >> 8;
-
-
-                sizeToWrite -= 8;
-                srcIPtr = ref srcIPtr.Plus(6);
-                dstIPtr = ref dstIPtr.Plus(8);
-            }
-
-            ref var srcPtr = ref Unsafe.As<uint, Rgb>(ref srcIPtr);
-            ref var dstPtr = ref Unsafe.As<uint, Rgba>(ref dstIPtr);
-
-            for (int i = sizeToWrite; i > 0; i--)
-            {
-                dstPtr.r = srcPtr.r; // dstPtr->rgb = *srcPtr;
-                srcPtr = ref Unsafe.Add(ref srcPtr, 1); // srcPtr++;
-                dstPtr = ref Unsafe.Add(ref dstPtr, 1); // dstPtr++;
-            }
-        }
-
         [BurstCompile]
         static class CopyPixelsRgbToRgbaJob
         {
@@ -127,28 +74,6 @@ namespace Iviz.Core
         }
 
 
-        static void CopyPixels565ToRgbaNoBurst(Span<uint> dst4, ReadOnlySpan<ushort> src2)
-        {
-            int sizeToWrite = src2.Length;
-            AssertSize(dst4, sizeToWrite);
-
-            ref int dstPtr = ref Unsafe.As<uint, int>(ref dst4[0]);
-            ref ushort srcPtr = ref src2.GetReference();
-
-            for (int x = sizeToWrite; x > 0; x--)
-            {
-                // stolen from https://stackoverflow.com/questions/2442576/how-does-one-convert-16-bit-rgb565-to-24-bit-rgb888
-
-                int rgb565 = srcPtr;
-                srcPtr = ref srcPtr.Plus(1); // srcPtr++;
-
-                int rgba = InternalConvert565To888(rgb565);
-
-                dstPtr = rgba;
-                dstPtr = ref dstPtr.Plus(1); // dstPtr++;
-            }
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int InternalConvert565To888(int rgb565)
         {
@@ -188,45 +113,6 @@ namespace Iviz.Core
             fixed (byte* dstPtr = dst)
             {
                 CopyPixelsR16ToR8Job.Execute((R16*)srcPtr, dstPtr, dst.Length);
-            }
-        }
-
-        static void CopyPixelsR16ToR8NoBurst(Span<byte> dst, ReadOnlySpan<byte> src)
-        {
-            var dst4 = dst.Cast<uint>();
-            var src4 = src.Cast<uint>();
-
-            ref uint dstIPtr = ref dst4[0];
-            ref uint srcIPtr = ref src4.GetReference();
-
-            int sizeToWrite = src.Length / 2;
-            AssertSize(dst, sizeToWrite);
-
-            while (sizeToWrite >= 4)
-            {
-                uint src0 = srcIPtr;
-                uint a = (src0 >> 8) & 0xff;
-                uint b = (src0 >> 16) & 0xff00;
-
-                uint src1 = srcIPtr.Plus(1);
-                uint c = (src1 << 8) & 0xff0000;
-                uint d = (src1 << 16) & 0xff000000;
-
-                dstIPtr = a + b + c + d;
-
-                sizeToWrite -= 4;
-                srcIPtr = ref srcIPtr.Plus(2);
-                dstIPtr = ref dstIPtr.Plus(1);
-            }
-
-            ref R16 srcPtr = ref Unsafe.As<uint, R16>(ref srcIPtr);
-            ref byte dstPtr = ref Unsafe.As<uint, byte>(ref dstIPtr);
-
-            for (int i = sizeToWrite; i > 0; i--)
-            {
-                dstPtr = srcPtr.low;
-                srcPtr = ref srcPtr.Plus(1);
-                dstPtr = ref dstPtr.Plus(1);
             }
         }
 
@@ -514,13 +400,15 @@ namespace Iviz.Core
             }
 
             [BurstCompile(CompileSynchronously = true)]
-            public static void CountValid([NoAlias] sbyte* input, int inputLength, out int numValidValues)
+            public static int CountValid([NoAlias] sbyte* input, int inputLength)
             {
-                numValidValues = 0;
+                int numValidValues = 0;
                 for (int i = 0; i < inputLength; i++)
                 {
                     numValidValues += (input[i] >> 8) + 1;
                 }
+
+                return numValidValues;
             }
 
             public struct SByte2
@@ -551,8 +439,7 @@ namespace Iviz.Core
         {
             fixed (sbyte* row0Ptr = row0)
             {
-                Impl.CountValid(row0Ptr, row0.Length, out int numValidValues);
-                return numValidValues;
+                return Impl.CountValid(row0Ptr, row0.Length);
             }
         }
     }

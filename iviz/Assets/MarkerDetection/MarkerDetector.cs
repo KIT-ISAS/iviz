@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Iviz.Core;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Tools;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
 namespace Iviz.MarkerDetection
@@ -154,6 +156,7 @@ namespace Iviz.MarkerDetection
 
             var newArucoMarkers = context.DetectArucoMarkers();
             var newQrMarkers = context.DetectQrMarkers();
+            
             switch (newArucoMarkers.Length != 0, newQrMarkers.Length != 0)
             {
                 case (true, false):

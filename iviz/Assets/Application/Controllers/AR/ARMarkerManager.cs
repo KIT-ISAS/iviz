@@ -2,7 +2,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.TF;
@@ -12,6 +14,9 @@ using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Tools;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
@@ -39,15 +44,21 @@ namespace Iviz.Controllers
                 pose = default;
                 return false;
             }
-            
+
             if (minDistanceSq > MaxSnapDistanceInM * MaxSnapDistanceInM)
             {
                 pose = default;
                 return false;
             }
 
-            var rotation = Quaternion.Euler(0, closestMarker.UnityPose.rotation.eulerAngles.y, 0);
-            pose = closestMarker.UnityPose.WithRotation(rotation);
+            var markerRotation = closestMarker.UnityPose.rotation;
+            var dirX = (markerRotation * Vector3.right).WithY(0);
+
+            var newRotation = dirX.sqrMagnitude.ApproximatelyZero()
+                ? Quaternion.identity
+                : Quaternion.LookRotation(dirX, Vector3.up);
+
+            pose = closestMarker.UnityPose.WithRotation(newRotation);
             return true;
         }
 

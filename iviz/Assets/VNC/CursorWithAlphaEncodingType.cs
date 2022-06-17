@@ -10,7 +10,7 @@ using MarcusW.VncClient.Protocol.Implementation.EncodingTypes.Pseudo;
 
 namespace VNC.Extensions
 {
-    public class CursorWithAlphaEncodingType : PseudoEncodingType
+    public sealed class CursorWithAlphaEncodingType : PseudoEncodingType
     {
         /// <inheritdoc />
         public override int Id => (int)WellKnownEncodingType.CursorWithAlpha;

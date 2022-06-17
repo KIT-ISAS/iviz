@@ -200,7 +200,7 @@ namespace Iviz.Controllers
                     GameThread.TimeNow, width, height,
                     Intrinsic.Scale(scale), pose, array);
 
-                var handle = GCHandle.Alloc(array);
+                var handle = GCHandle.Alloc(array, GCHandleType.Pinned);
                 try
                 {
                     await ConversionUtils.MirrorXf(width, height, conversion.GetData<float>(),
@@ -273,7 +273,7 @@ namespace Iviz.Controllers
                     GameThread.TimeNow, width, height,
                     Intrinsic.Scale(scale), pose, array);
 
-                var handle = GCHandle.Alloc(array);
+                var handle = GCHandle.Alloc(array, GCHandleType.Pinned);
                 try
                 {
                     await ConversionUtils.MirrorXb(width, height, conversion.GetData<byte>(),

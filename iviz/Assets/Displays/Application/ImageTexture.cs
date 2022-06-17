@@ -405,6 +405,14 @@ namespace Iviz.Displays
 
         void ApplyTexture(int width, int height, ReadOnlySpan<byte> data, string encoding, bool generateMipmaps)
         {
+            if (width == 0 || height == 0)
+            {
+                EnsureSize(0, 0, TextureFormat.RGBA32);
+                MeasuredIntensityBounds = null;
+                normalizationFactor = 1;
+                return;
+            }
+            
             Texture2D texture;
             Vector2 intensityBounds;
             switch (encoding.ToUpperInvariant())

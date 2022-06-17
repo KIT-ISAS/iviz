@@ -581,8 +581,8 @@ namespace Iviz.Controllers
                 {
                     var src = dataRow.Cast<float4>()[..width];
                     var dst = dstBuffer.AsSpan(dstOff, width);
-                    fixed (float4* srcPtr = src)
-                    fixed (float4* dstPtr = dst)
+                    fixed (float4* srcPtr = &src[0])
+                    fixed (float4* dstPtr = &dst[0])
                     {
                         dstOff += Utils.ParseFloat4(srcPtr, dstPtr, width);
                     }
@@ -596,8 +596,8 @@ namespace Iviz.Controllers
                 {
                     var src = dataRow.Cast<float3>()[..width];
                     var dst = dstBuffer.AsSpan(dstOff, width);
-                    fixed (float3* srcPtr = src)
-                    fixed (float4* dstPtr = dst)
+                    fixed (float3* srcPtr = &src[0])
+                    fixed (float4* dstPtr = &dst[0])
                     {
                         dstOff += Utils.ParseFloat3(srcPtr, dstPtr, width);
                     }
@@ -623,7 +623,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = dataOff)
+                    fixed (byte* dataPtr0 = &dataOff[0])
                     {
                         byte* dataPtr = dataPtr0;
                         for (int u = width; u > 0; u--)
@@ -642,7 +642,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = dataOff)
+                    fixed (byte* dataPtr0 = &dataOff[0])
                     {
                         byte* dataPtr = dataPtr0;
                         for (int u = width; u > 0; u--)
@@ -661,7 +661,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = dataOff)
+                    fixed (byte* dataPtr0 = &dataOff[0])
                     {
                         byte* dataPtr = dataPtr0;
                         for (int u = width; u > 0; u--)
@@ -680,7 +680,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = dataOff)
+                    fixed (byte* dataPtr0 = &dataOff[0])
                     {
                         byte* dataPtr = dataPtr0;
                         for (int u = width; u > 0; u--)
@@ -699,7 +699,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = dataOff)
+                    fixed (byte* dataPtr0 = &dataOff[0])
                     {
                         byte* dataPtr = dataPtr0;
                         for (int u = width; u > 0; u--)
@@ -718,7 +718,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = dataOff)
+                    fixed (byte* dataPtr0 = &dataOff[0])
                     {
                         byte* dataPtr = dataPtr0;
                         for (int u = width; u > 0; u--)
@@ -737,7 +737,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = dataOff)
+                    fixed (byte* dataPtr0 = &dataOff[0])
                     {
                         byte* dataPtr = dataPtr0;
                         for (int u = width; u > 0; u--)
@@ -756,7 +756,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = dataOff)
+                    fixed (byte* dataPtr0 = &dataOff[0])
                     {
                         byte* dataPtr = dataPtr0;
                         for (int u = width; u > 0; u--)

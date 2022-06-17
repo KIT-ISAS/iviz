@@ -45,7 +45,6 @@ namespace Iviz.Core
             return Compute(array.AsSpan(), startHash);
         }
 
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe uint Compute<T>(T[] array, uint startHash = DefaultSeed) where T : unmanaged
         {
@@ -68,15 +67,10 @@ namespace Iviz.Core
                 return startHash;
             }
 
-            fixed (T* spanPtr = span)
+            fixed (T* spanPtr = &span[0])
             {
                 return Xx32Hash.Hash(ref *(byte*)spanPtr, span.Length * sizeof(T), startHash);
             }
-        }
-
-        static uint Compute(ref byte value, int size, uint startHash)
-        {
-            return Xx32Hash.Hash(ref value, size, startHash);
         }
 
         /// Implementation of the xxHash32 algorithm, using Zhent_xxHash32 as the starting point.

@@ -9,7 +9,6 @@ using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using TMPro;
 using UnityEngine;
-using Vector3 = Iviz.Msgs.GeometryMsgs.Vector3;
 
 namespace Iviz.Controllers
 {
@@ -30,17 +29,17 @@ namespace Iviz.Controllers
         public override void Suspend()
         {
             base.Suspend();
-            var scale = new UnityEngine.Vector3(2, 2, 1);
+            var scale = new Vector3(2, 2, 1);
             TopLeft.localScale = scale;
             TopRight.localScale = scale;
             BottomRight.localScale = scale;
             BottomLeft.localScale = scale;
-            Text.transform.localScale = 0.05f * UnityEngine.Vector3.one;
+            Text.transform.localScale = 0.05f * Vector3.one;
 
-            TopLeft.localPosition = new UnityEngine.Vector3(-0.5f, 0.5f, 0);
-            TopRight.localPosition = new UnityEngine.Vector3(0.5f, 0.5f, 0);
-            BottomRight.localPosition = new UnityEngine.Vector3(0.5f, -0.5f, 0);
-            BottomLeft.localPosition = new UnityEngine.Vector3(-0.5f, -0.5f, 0);
+            TopLeft.localPosition = new Vector3(-0.5f, 0.5f, 0);
+            TopRight.localPosition = new Vector3(0.5f, 0.5f, 0);
+            BottomRight.localPosition = new Vector3(0.5f, -0.5f, 0);
+            BottomLeft.localPosition = new Vector3(-0.5f, -0.5f, 0);
         }
 
         public static void Highlight(ARMarker marker)
@@ -52,11 +51,11 @@ namespace Iviz.Controllers
             }
             else
             {
-                Highlight(marker.Corners, marker.Code, marker.CameraIntrinsic, 1);
+                Highlight(marker.Corners, marker.Code, marker.CameraIntrinsic, 0.5f);
             }
         }
 
-        static void Highlight(Vector3[] corners, string code, double[] intrinsicArray,
+        static void Highlight(Msgs.GeometryMsgs.Vector3[] corners, string code, double[] intrinsicArray,
             float highlightTimeInSec)
         {
             const float cameraZ = 0.05f;
@@ -75,13 +74,14 @@ namespace Iviz.Controllers
             foreach (var (cornerX, cornerY, _) in corners)
             {
                 var (x, y, _) = intrinsic.Unproject(cornerX, cornerY) * cameraZ;
+                y *= -1; // y is flipped
                 minX = Mathf.Min(x, minX);
                 minY = Mathf.Min(y, minY);
                 maxX = Mathf.Max(x, maxX);
                 maxY = Mathf.Max(y, maxY);
             }
 
-            var center = new UnityEngine.Vector3((maxX + minX) / 2, (maxY + minY) / 2, cameraZ);
+            var center = new Vector3((maxX + minX) / 2, (maxY + minY) / 2, cameraZ);
             float sizeX = maxX - center.x;
             float sizeY = maxY - center.y;
             float scaleX = sizeX / cornerScale;
@@ -93,14 +93,14 @@ namespace Iviz.Controllers
             mTransform.parent = Settings.ARCamera != null ? Settings.ARCamera.transform : null;
             mTransform.localRotation = Quaternion.identity;
             mTransform.localPosition = center;
-            mTransform.localScale = highlightScale * UnityEngine.Vector3.one;
+            mTransform.localScale = highlightScale * Vector3.one;
 
-            highlighter.TopLeft.localPosition = new UnityEngine.Vector3(-scaleX, scaleY, 0);
-            highlighter.TopRight.localPosition = new UnityEngine.Vector3(scaleX, scaleY, 0);
-            highlighter.BottomRight.localPosition = new UnityEngine.Vector3(scaleX, -scaleY, 0);
-            highlighter.BottomLeft.localPosition = new UnityEngine.Vector3(-scaleX, -scaleY, 0);
+            highlighter.TopLeft.localPosition = new Vector3(-scaleX, scaleY, 0);
+            highlighter.TopRight.localPosition = new Vector3(scaleX, scaleY, 0);
+            highlighter.BottomRight.localPosition = new Vector3(scaleX, -scaleY, 0);
+            highlighter.BottomLeft.localPosition = new Vector3(-scaleX, -scaleY, 0);
 
-            highlighter.Text.transform.localPosition = new UnityEngine.Vector3(0, scaleY, 0);
+            highlighter.Text.transform.localPosition = new Vector3(0, scaleY, 0);
             highlighter.Text.text = code;
 
             Spawn(highlighter, highlightTimeInSec);
@@ -118,15 +118,15 @@ namespace Iviz.Controllers
             var mTransform = highlighter.transform;
             mTransform.parent = TfModule.FixedFrame.Transform;
             mTransform.localRotation = rotation * tableRosToUnity;
-            mTransform.localPosition = position + rotation * (UnityEngine.Vector3.up * 0.01f);
-            mTransform.localScale = markerSizeInM * UnityEngine.Vector3.one;
+            mTransform.localPosition = position + rotation * (Vector3.up * 0.01f);
+            mTransform.localScale = markerSizeInM * Vector3.one;
 
-            var scale = new UnityEngine.Vector3(2, 2, 1) * 0.25f;
+            var scale = new Vector3(2, 2, 1) * 0.25f;
             highlighter.TopLeft.localScale = scale;
             highlighter.TopRight.localScale = scale;
             highlighter.BottomRight.localScale = scale;
             highlighter.BottomLeft.localScale = scale;
-            highlighter.Text.transform.localScale = 0.025f * UnityEngine.Vector3.one;
+            highlighter.Text.transform.localScale = 0.025f * Vector3.one;
 
             highlighter.Text.text = code;
 

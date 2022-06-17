@@ -58,16 +58,10 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this T[] array, Range range)
-        {
-            return array.AsSpan(range);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyFrom<T>(this Texture2D dst, ReadOnlySpan<T> srcSpan) where T : unmanaged
         {
             var srcBytes = MemoryMarshal.AsBytes(srcSpan);
-            fixed (byte* srcBytesPtr = srcBytes)
+            fixed (byte* srcBytesPtr = &srcBytes[0])
             {
                 Unsafe.CopyBlock(dst.GetUnsafePtr(), srcBytesPtr, (uint)srcBytes.Length);
             }
@@ -76,8 +70,8 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BlockCopyTo(this ReadOnlySpan<byte> src, Span<byte> dst)
         {
-            fixed (byte* srcPtr = src)
-            fixed (byte* dstPtr = dst)
+            fixed (byte* srcPtr = &src[0])
+            fixed (byte* dstPtr = &dst[0])
             {
                 Unsafe.CopyBlock(dstPtr, srcPtr, (uint)src.Length);
             }
@@ -124,5 +118,30 @@ namespace Iviz.Core
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<byte> AsSpan(this IntPtr ptr, int size) => new(ptr.ToPointer(), size);
+
+        
+        /*
+        [StructLayout(LayoutKind.Explicit)]
+        ref struct GetLengthHelper
+        {
+            [FieldOffset(0)] public Span<byte> span;
+            [FieldOffset(0)] public OpenSpan open;
+            
+            public readonly struct OpenSpan
+            {
+                readonly IntPtr ptr;
+                public readonly int length;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int GetLength(this Span<byte> span)
+        {
+            GetLengthHelper h;
+            h.open = default;
+            h.span = span;
+            return h.open.length;
+        }
+        */
     }
 }

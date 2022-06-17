@@ -258,7 +258,7 @@ namespace Iviz.Controllers
             if (info.Width > maxGridSize || info.Height > maxGridSize)
             {
                 RosLogger.Error($"{this}: Gridmap is too large! Iviz only supports gridmap sizes " +
-                               $"up to {maxGridSize.ToString()}");
+                                $"up to {maxGridSize.ToString()}");
                 return;
             }
 
@@ -279,7 +279,7 @@ namespace Iviz.Controllers
 
             cubeNode.AttachTo(msg.Header);
             textureNode.AttachTo(msg.Header);
-            
+
             numCellsX = (int)info.Width;
             numCellsY = (int)info.Height;
             cellSize = info.Resolution;
@@ -311,7 +311,7 @@ namespace Iviz.Controllers
             }
         }
 
-        IEnumerable<Task> SetCubes(Memory<sbyte> data, Pose pose)
+        IEnumerable<Task> SetCubes(sbyte[] data, Pose pose)
         {
             var tasks = new List<Task>();
 
@@ -349,17 +349,19 @@ namespace Iviz.Controllers
                         yMax = (v + 1) * numCellsY / 4
                     };
 
-                    tasks.Add(Task.Run(() =>
+                    tasks.Add(Task.Run(ProcessCube));
+
+                    void ProcessCube()
                     {
                         try
                         {
-                            grid.SetOccupancy(data.Span, rect, pose);
+                            grid.SetOccupancy(data, rect, pose);
                         }
                         catch (Exception e)
                         {
                             RosLogger.Error($"{this}: Error processing occupancy grid cube", e);
-                        }
-                    }));
+                        }                        
+                    }
                 }
             }
 
@@ -368,7 +370,7 @@ namespace Iviz.Controllers
             return tasks;
         }
 
-        IEnumerable<Task> SetTextures(Memory<sbyte> data, Pose pose)
+        IEnumerable<Task> SetTextures(sbyte[] data, Pose pose)
         {
             var tasks = new List<Task>();
 
@@ -421,17 +423,19 @@ namespace Iviz.Controllers
                     };
 
                     var texture = textureTiles[i++];
-                    tasks.Add(Task.Run(() =>
+                    tasks.Add(Task.Run(ProcessTexture));
+
+                    void ProcessTexture()
                     {
                         try
                         {
-                            texture.Set(data.Span, cellSize, numCellsX, rect, pose);
+                            texture.Set(data, cellSize, numCellsX, rect, pose);
                         }
                         catch (Exception e)
                         {
                             RosLogger.Error($"{this}: Error processing occupancy grid texture", e);
                         }
-                    }));
+                    }
                 }
             }
 

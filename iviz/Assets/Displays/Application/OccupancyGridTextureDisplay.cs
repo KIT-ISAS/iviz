@@ -43,7 +43,6 @@ namespace Iviz.Displays
         Texture2D AtlasLarge => atlasLarge.AssertNotNull(nameof(atlasLarge));
         Texture2D AtlasLargeFlipped => atlasLargeFlipped.AssertNotNull(nameof(atlasLargeFlipped));
 
-        bool IsProcessing { get; set; }
         public int NumValidValues { get; private set; }
         public string Title { get; set; } = "";
 
@@ -62,6 +61,8 @@ namespace Iviz.Displays
                 Material.SetTexture(AtlasTex, value ? AtlasLargeFlipped : AtlasLarge);
             }
         }
+
+        public bool IsAlive => Visible && cellSize != 0;
 
         public OccupancyGridTextureDisplay()
         {
@@ -101,10 +102,8 @@ namespace Iviz.Displays
             return texture;
         }
 
-        public void Set(ReadOnlySpan<sbyte> values, float newCellSize, int numCellsX, in RectInt newBounds, Pose pose)
+        public void Set(sbyte[] values, float newCellSize, int numCellsX, in RectInt newBounds, Pose pose)
         {
-            IsProcessing = true;
-
             cellSize = newCellSize;
             bounds = newBounds;
 
@@ -129,7 +128,6 @@ namespace Iviz.Displays
             }
             else if (hash == previousHash)
             {
-                IsProcessing = false;
                 return;
             }
 
@@ -139,7 +137,6 @@ namespace Iviz.Displays
                 GameThread.PostImmediate(() =>
                 {
                     MeshRenderer.enabled = false;
-                    IsProcessing = false;
                 });
 
                 return;
@@ -166,12 +163,10 @@ namespace Iviz.Displays
                 var validatedTexture = EnsureSize(segmentWidth, segmentHeight);
                 validatedTexture.GetRawTextureData<sbyte>().CopyFrom(buffer);
                 validatedTexture.Apply(false);
-
-                IsProcessing = false;
             });
         }
 
-        static (uint hash, int numValidValues) Process(ReadOnlySpan<sbyte> src, RectInt bounds,
+        static (uint hash, int numValidValues) Process(sbyte[] src, RectInt bounds,
             int pitch, Span<sbyte> dest)
         {
             uint hash = HashCalculator.DefaultSeed;
@@ -183,25 +178,13 @@ namespace Iviz.Displays
                 int srcOffset = (v + bounds.y) * pitch + bounds.x;
                 int dstOffset = v * rowSize;
 
-                var srcSpan = src.Slice(srcOffset, rowSize);
+                var srcSpan = (ReadOnlySpan<sbyte>)src.AsSpan(srcOffset, rowSize);
                 var dstSpan = dest.Slice(dstOffset, rowSize);
 
                 srcSpan.CopyTo(dstSpan);
-                
+
                 hash = HashCalculator.Compute(srcSpan, hash);
                 numValidValues += OccupancyGridUtils.CountValidValues(srcSpan);
-                /*
-
-                ref sbyte uPtr = ref srcSpan.GetReference();
-                //foreach (sbyte u in srcSpan)
-                for (int i = rowSize; i > 0; i--)
-                {
-                    //numValidValues += (u < 0) ? 1 : 0;
-                    //numValidValues += (u >> 8) + 1;
-                    numValidValues += (uPtr >> 8) + 1;
-                    uPtr = ref uPtr.Plus(1);
-                }
-                */
             }
 
             return (hash, numValidValues);
@@ -254,26 +237,6 @@ namespace Iviz.Displays
                 width /= 2;
                 height /= 2;
             }
-            /*
-            fixed (sbyte* srcPtr = array)
-            {
-                sbyte* maxPtr = srcPtr + array.Length;
-                sbyte* srcMipmap = srcPtr;
-                while (width > 1 && height > 1)
-                {
-                    sbyte* dstPtr = srcMipmap + width * height;
-                    if (dstPtr > maxPtr)
-                    {
-                        throw new InvalidOperationException("Possible Buffer Overflow!");
-                    }
-
-                    Reduce(srcMipmap, width, height, dstPtr);
-                    srcMipmap += width * height;
-                    width /= 2;
-                    height /= 2;
-                }
-            }
-            */
         }
 
         static int CalculateAllMipmapsSize(int width, int height)
@@ -289,7 +252,7 @@ namespace Iviz.Displays
             return size + 1;
         }
 
-        static void Reduce(Span<sbyte> srcSpan, int width, int height, Span<sbyte> dstSpan)
+        static void Reduce(ReadOnlySpan<sbyte> srcSpan, int width, int height, Span<sbyte> dstSpan)
         {
             if (width < 2 || height < 2)
             {
@@ -306,137 +269,7 @@ namespace Iviz.Displays
                 var rowDst = dstSpan.Slice(halfWidth * vDst, halfWidth);
 
                 OccupancyGridUtils.ReduceRows(row0, row1, rowDst);
-                
-                #if false
-                ref sbyte row0Ptr = ref row0[0];
-                ref sbyte row1Ptr = ref row1[0];
-                ref sbyte rowDstPtr = ref rowDst[0];
-
-                //for (int uSrc = 0, uDst = 0; uDst < halfWidth; uSrc += 2, uDst++)
-                //int uSrc = 0;
-                //foreach (ref sbyte dst in rowDst)
-                for (int i = halfWidth; i > 0; i--)
-                {
-                    /*
-                    int a = row0[uSrc + 0];
-                    int b = row0[uSrc + 1];
-                    int c = row1[uSrc + 0];
-                    int d = row1[uSrc + 1];
-                    dst = (sbyte)Fuse(a, b, c, d);
-                    uSrc += 2;
-                    */
-                    int a = row0Ptr;
-                    int b = row0Ptr.Plus(1);
-                    int c = row1Ptr;
-                    int d = row1Ptr.Plus(1);
-                    
-                    rowDstPtr = (sbyte)Fuse(a, b, c, d);
-                    
-                    row0Ptr = ref row0Ptr.Plus(2);
-                    row1Ptr = ref row1Ptr.Plus(2);
-                    rowDstPtr = ref rowDstPtr.Plus(1);
-                }
-#endif
             }
-        }
-
-        /*
-        static unsafe void Reduce(Span<sbyte> srcSpan, int width, int height, Span<sbyte> dstSpan)
-        {
-            fixed (sbyte* src = srcSpan)
-            fixed (sbyte* dst = dstSpan)
-            {
-                if (width < 2 || height < 2)
-                {
-                    throw new InvalidOperationException("NYI!");
-                }
-
-                for (int v = 0; v < height; v += 2)
-                {
-                    sbyte* row0 = src + width * v;
-                    sbyte* row1 = row0 + width;
-                    for (int u = 0; u < width; u += 2, row0 += 2, row1 += 2, dst++)
-                    {
-                        int a = row0[0];
-                        int b = row0[1];
-                        int c = row1[0];
-                        int d = row1[1];
-                        *dst = (sbyte)Fuse(a, b, c, d);
-                    }
-                }
-            }
-        }
-        */
-
-        static int Fuse(int a, int b, int c, int d)
-        {
-            /*
-            int4 abcd = new int4(a, b, c, d);
-            int4 sign = ~abcd >> 8;
-            int numValid = -(sign.x + sign.y + sign.z + sign.w);
-            if (numValid <= 1)
-            {
-                return -1;
-            }
-
-            int4 value = abcd & sign;
-            int sum = value.x + value.y + value.z + value.w;
-            */
-
-/*
-            int signA = ~a >> 8; // a >= 0 ? -1 : 0
-            int signB = ~b >> 8; // b >= 0 ? -1 : 0
-            int signC = ~c >> 8; // c >= 0 ? -1 : 0
-            int signD = ~d >> 8; // d >= 0 ? -1 : 0
-
-            int numValid = -(signA + signB + signC + signD);
-
-            if (numValid <= 1)
-            {
-                return -1;
-            }
-
-            int valueA = a & signA; // a >= 0 ? a : 0
-            int valueB = b & signB; // b >= 0 ? b : 0
-            int valueC = c & signC; // c >= 0 ? c : 0
-            int valueD = d & signD; // d >= 0 ? d : 0
-
-            int sum = valueA + valueB + valueC + valueD;
-            return numValid switch
-            {
-                2 => sum >> 1, // sum / 2
-                3 => (sum * 21845) >> 16, // sum * (65536/3) / 65536
-                _ => sum >> 2
-            };
-            */
-
-            int signA = ~a >> 8; // a >= 0 ? -1 : 0
-            int valueA = a & signA; // a >= 0 ? a : 0
-            int numValid = -signA;
-            int sum = valueA;
-
-            int signB = ~b >> 8; // b >= 0 ? -1 : 0
-            int valueB = b & signB; // b >= 0 ? b : 0
-            numValid -= signB;
-            sum += valueB;
-
-            int signC = ~c >> 8; // c >= 0 ? -1 : 0
-            int valueC = c & signC; // c >= 0 ? c : 0
-            numValid -= signC;
-            sum += valueC;
-
-            int signD = ~d >> 8; // d >= 0 ? -1 : 0
-            int valueD = d & signD; // d >= 0 ? d : 0
-            numValid -= signD;
-            sum += valueD;
-
-            return numValid switch
-            {
-                < 2 => -1,
-                2 => sum >> 1, // sum / 2
-                3 => (sum * 21845) >> 16, // sum * (65536/3) / 65536
-                _ => sum >> 2
-            };
         }
 
         public void Highlight(in Vector3 hitPoint)
@@ -474,7 +307,5 @@ namespace Iviz.Displays
 
             FAnimator.Start(new ClickedPoseHighlighter(unityPose, caption, 2, tokenSource.Token));
         }
-
-        public bool IsAlive => Visible && cellSize != 0;
     }
 }

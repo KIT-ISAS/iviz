@@ -397,7 +397,7 @@ namespace Iviz.App
                     Transform.localPosition += Transform.localRotation * velocity;
                 }
 
-                Settings.MainCameraPose = Transform.AsPose();
+                UpdateSettingsCameraPose();
                 return;
             }
 
@@ -421,7 +421,7 @@ namespace Iviz.App
                 var rotation = OrbitRotation;
                 Transform.SetLocalPose(-orbitRadius * rotation.Forward() + orbitCenter + rotation * velocity, rotation);
                 
-                Settings.MainCameraPose = Transform.AsPose();
+                UpdateSettingsCameraPose();
                 return;
             }
 
@@ -443,7 +443,12 @@ namespace Iviz.App
                 Transform.localPosition += rotation * velocity;
             }
             
-            Settings.MainCameraPose = Transform.AsPose();
+            UpdateSettingsCameraPose();
+        }
+
+        static void UpdateSettingsCameraPose()
+        {
+            Settings.MainCameraPose = Settings.MainCameraTransform.AsPose();
         }
 
         void OnEnable()

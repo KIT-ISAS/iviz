@@ -622,5 +622,7 @@ namespace Iviz.Controllers
 
             Object.Destroy(arContents.gameObject);
         }
+
+        public override string ToString() => $"[{nameof(ARFoundationController)}]";
     }
 }

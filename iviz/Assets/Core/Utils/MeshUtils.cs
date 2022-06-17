@@ -12,7 +12,7 @@ namespace Iviz.Core
     {
         public static void SetVertices(this Mesh mesh, ReadOnlySpan<Vector3> ps)
         {
-            fixed (Vector3* psPtr = ps)
+            fixed (Vector3* psPtr = &ps[0])
             {
                 mesh.SetVertices(NativeArrayUtils.CreateWrapper(psPtr, ps.Length));
             }
@@ -25,7 +25,7 @@ namespace Iviz.Core
 
         public static void SetNormals(this Mesh mesh, ReadOnlySpan<Vector3> ps)
         {
-            fixed (Vector3* psPtr = ps)
+            fixed (Vector3* psPtr = &ps[0])
             {
                 mesh.SetNormals(NativeArrayUtils.CreateWrapper(psPtr, ps.Length));
             }
@@ -33,7 +33,7 @@ namespace Iviz.Core
 
         public static void SetTangents(this Mesh mesh, ReadOnlySpan<Vector4> ps)
         {
-            fixed (Vector4* psPtr = ps)
+            fixed (Vector4* psPtr = &ps[0])
             {
                 mesh.SetTangents(NativeArrayUtils.CreateWrapper(psPtr, ps.Length));
             }
@@ -41,7 +41,7 @@ namespace Iviz.Core
 
         public static void SetColors(this Mesh mesh, ReadOnlySpan<Color> ps)
         {
-            fixed (Color* psPtr = ps)
+            fixed (Color* psPtr = &ps[0])
             {
                 mesh.SetColors(NativeArrayUtils.CreateWrapper(psPtr, ps.Length));
             }
@@ -49,7 +49,7 @@ namespace Iviz.Core
 
         public static void SetColors(this Mesh mesh, ReadOnlySpan<Color32> ps)
         {
-            fixed (Color32* psPtr = ps)
+            fixed (Color32* psPtr = &ps[0])
             {
                 mesh.SetColors(NativeArrayUtils.CreateWrapper(psPtr, ps.Length));
             }
@@ -72,7 +72,7 @@ namespace Iviz.Core
 
         public static void SetUVs(this Mesh mesh, ReadOnlySpan<Vector3> ps, int channel = 0)
         {
-            fixed (Vector3* psPtr = ps)
+            fixed (Vector3* psPtr = &ps[0])
             {
                 mesh.SetUVs(channel, NativeArrayUtils.CreateWrapper(psPtr, ps.Length));
             }
@@ -83,7 +83,7 @@ namespace Iviz.Core
             mesh.indexFormat = ps.Length < ushort.MaxValue
                 ? IndexFormat.UInt16
                 : IndexFormat.UInt32;
-            fixed (int* psPtr = ps)
+            fixed (int* psPtr = &ps[0])
             {
                 mesh.SetIndices(NativeArrayUtils.CreateWrapper(psPtr, ps.Length), MeshTopology.Triangles, 0);
             }
