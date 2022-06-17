@@ -61,7 +61,11 @@ namespace Iviz.Msgs
                 return;
             }
 
-            val = BuiltIns.UTF8.GetString(ptr.Slice(offset, count));
+            var span = ptr.Slice(offset, count);
+            val = count <= 64 
+                ? BuiltIns.GetStringSimple(span, count) 
+                : BuiltIns.UTF8.GetString(span);
+
             Advance(count);
         }
 
@@ -141,22 +145,28 @@ namespace Iviz.Msgs
             }
         }
 
-        public void DeserializeStructArray<T>(int count, out T[] val) where T : unmanaged
+        public unsafe void DeserializeStructArray<T>(int count, out T[] val) where T : unmanaged
         {
-            int sizeOfT = Unsafe.SizeOf<T>();
+            int sizeOfT = sizeof(T);
             int size = count * sizeOfT;
-            var src = ptr.Slice(offset, size);
+            ThrowIfOutOfRange(size);
 
 #if NET5_0_OR_GREATER
             val = GC.AllocateUninitializedArray<T>(count);
 #else
             val = new T[count];
 #endif
-            src.CopyTo(MemoryMarshal.AsBytes(val.AsSpan()));
+            //src.CopyTo(MemoryMarshal.AsBytes(val.AsSpan()));
+            fixed (T* valPtr = val)
+            fixed (byte* srcPtr = &ptr[offset])
+            {
+                Unsafe.CopyBlock(valPtr, srcPtr, (uint)size);
+            }
+
             Advance(size);
         }
 
-        public void DeserializeStructRent(out SharedRent<byte> val)
+        public unsafe void DeserializeStructRent(out SharedRent<byte> val)
         {
             int count = ReadInt();
             if (count == 0)
@@ -165,14 +175,18 @@ namespace Iviz.Msgs
                 return;
             }
 
-            const int sizeOfT = sizeof(byte);
-            int size = count * sizeOfT;
-            var src = ptr.Slice(offset, size);
+            ThrowIfOutOfRange(count);
 
             val = new SharedRent<byte>(count);
-            src.CopyTo(MemoryMarshal.AsBytes(val.AsSpan()));
 
-            Advance(size);
+            fixed (byte* valPtr = val.Array)
+            fixed (byte* srcPtr = &ptr[offset])
+            {
+                Unsafe.CopyBlock(valPtr, srcPtr, (uint)count);
+            }
+
+            //src.CopyTo(MemoryMarshal.AsBytes(val.AsSpan()));
+            Advance(count);
         }
 
         public T[] SkipStructArray<T>() where T : unmanaged

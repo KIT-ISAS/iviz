@@ -235,6 +235,38 @@ namespace Iviz.Msgs
         {
             return s == null ? 0 : UTF8.GetByteCount(s);
         }
+        
+        // we use here the fact that 99% of the strings we get are ascii and with length <= 64 (i.e., frames in headers)
+        // so we do a simple check and if it's ascii, we do a quick conversion that gets auto-vectorized
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static unsafe string GetStringSimple(ReadOnlySpan<byte> span, int length)
+        {
+            fixed (byte* spanPtr = &span[0])
+            {
+                if (!CheckIfAllAscii(spanPtr, length))
+                {
+                    return UTF8.GetString(span);
+                }
+                
+                char* buffer = stackalloc char[64];
+                ConvertToChar(spanPtr, (ushort*)buffer, length);
+                return new string(buffer, 0, length);
+            }
+        }        
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static unsafe bool CheckIfAllAscii(byte* ptr, int size)
+        {
+            int result = 0;
+            for (int i = 0; i < size; i++) result |= ptr[i];
+            return (result & 0x80) == 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static unsafe void ConvertToChar(byte* src, ushort* dst, int size)
+        {
+            for (int i = 0; i < size; i++) dst[i] = src[i];
+        }        
 
         [DoesNotReturn, AssertionMethod]
         public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);
