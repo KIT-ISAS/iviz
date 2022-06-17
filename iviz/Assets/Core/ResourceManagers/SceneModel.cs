@@ -217,6 +217,16 @@ namespace Iviz.Displays
                     }
                 }
             }
+            
+            /*
+            for (int i = 0; i < meshIsBeingUsed.Length; i++)
+            {
+                if (!meshIsBeingUsed[i])
+                {
+                    templateMeshes[i].Visible = false;
+                }
+            }
+            */
 
             marker.Children = children.ToArray();
             marker.UpdateBounds();

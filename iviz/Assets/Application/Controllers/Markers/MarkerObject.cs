@@ -875,7 +875,7 @@ namespace Iviz.Controllers
 
                 if (msg.Type() == MarkerType.MeshResource)
                 {
-                    description.Append(WarnStr).Append("Unknown mesh resource '").Append(msg.MeshResource).Append("'")
+                    description.Append(ErrorStr).Append("Unknown mesh resource '").Append(msg.MeshResource).Append("'")
                         .AppendLine();
                 }
             }
