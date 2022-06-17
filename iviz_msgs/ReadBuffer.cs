@@ -51,20 +51,25 @@ namespace Iviz.Msgs
             return i;
         }
 
+        static string EmptyString => "";
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void DeserializeString(out string val)
+        public unsafe void DeserializeString(out string val)
         {
             int count = ReadInt();
             if (count == 0)
             {
-                val = "";
+                val = EmptyString;
                 return;
             }
 
-            var span = ptr.Slice(offset, count);
-            val = count <= 64 
-                ? BuiltIns.GetStringSimple(span, count) 
-                : BuiltIns.UTF8.GetString(span);
+            ThrowIfOutOfRange(count);
+            fixed (byte* srcPtr = &ptr[offset])
+            {
+                val = count <= 64
+                    ? BuiltIns.GetStringSimple(srcPtr, count)
+                    : BuiltIns.UTF8.GetString(srcPtr, count);
+            }
 
             Advance(count);
         }
@@ -73,8 +78,9 @@ namespace Iviz.Msgs
         public void SkipString(out string val)
         {
             int count = ReadInt();
+            ThrowIfOutOfRange(count);
             Advance(count);
-            val = "";
+            val = EmptyString;
         }
 
         public void DeserializeStringArray(out string[] val)
