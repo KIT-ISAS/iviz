@@ -212,7 +212,7 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
             return -1;
         }
 
-        int length = readBuffer.AsSpan().ReadInt();
+        int length = readBuffer.ReadInt();
         if (length == 0)
         {
             return 0;

@@ -284,7 +284,9 @@ namespace Iviz.Displays
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
             if (fileType is ".SDF" or ".WORLD")
             {
-                return await GetSceneAsync(uriString, provider, tokenSource.Token);
+                //return await GetSceneAsync(uriString, provider, tokenSource.Token);
+                RosLogger.Error($"{this}: SDF parsing is disabled");
+                return null;
             }
 
 
@@ -558,7 +560,10 @@ namespace Iviz.Displays
                 return null;
             }
 
-            texture.Compress(true);
+            if (texture.width % 4 == 0 && texture.height % 4 == 0)
+            {
+                texture.Compress(true);
+            }
 
             texture.name = uriString;
 

@@ -9,9 +9,6 @@ using Iviz.Tools;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
-#if !NETSTANDARD2_0
-#endif
-
 namespace Iviz.Msgs
 {
     public static class BuiltIns
@@ -194,7 +191,7 @@ namespace Iviz.Msgs
 
             return size;
         }
-        
+
         /// Returns the size in bytes of a message array when deserialized in ROS
         public static int GetArraySize(IMessage[]? array)
         {
@@ -235,25 +232,23 @@ namespace Iviz.Msgs
         {
             return s == null ? 0 : UTF8.GetByteCount(s);
         }
-        
+
         // we use here the fact that 99% of the strings we get are ascii and with length <= 64 (i.e., frames in headers)
         // so we do a simple check and if it's ascii, we do a quick conversion that gets auto-vectorized
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe string GetStringSimple(ReadOnlySpan<byte> span, int length)
+        [SkipLocalsInit]
+        internal static unsafe string GetStringSimple(byte* spanPtr, int length)
         {
-            fixed (byte* spanPtr = &span[0])
+            if (!CheckIfAllAscii(spanPtr, length))
             {
-                if (!CheckIfAllAscii(spanPtr, length))
-                {
-                    return UTF8.GetString(span);
-                }
-                
-                char* buffer = stackalloc char[64];
-                ConvertToChar(spanPtr, (ushort*)buffer, length);
-                return new string(buffer, 0, length);
+                return UTF8.GetString(spanPtr, length);
             }
-        }        
-        
+
+            char* buffer = stackalloc char[64];
+            ConvertToChar(spanPtr, (ushort*)buffer, length);
+            return new string(buffer, 0, length);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static unsafe bool CheckIfAllAscii(byte* ptr, int size)
         {
@@ -266,7 +261,7 @@ namespace Iviz.Msgs
         static unsafe void ConvertToChar(byte* src, ushort* dst, int size)
         {
             for (int i = 0; i < size; i++) dst[i] = src[i];
-        }        
+        }
 
         [DoesNotReturn, AssertionMethod]
         public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);

@@ -69,7 +69,7 @@ namespace Iviz.ModelService
                 return;
             }
 
-            Console.WriteLine($"** Found {modelServer.NumPackages} ROS packages. Trying to connect...");
+            Console.WriteLine($"** Found {modelServer.NumPackages} ROS packages. Starting node...");
 
             var myUri = RosClient.TryGetCallerUriFor(masterUri) ?? RosClient.TryGetCallerUri();
             await using RosClient client = await RosClient.CreateAsync(masterUri, "iviz_model_service", myUri);
