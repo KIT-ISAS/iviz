@@ -90,5 +90,4 @@
             ENDCG
         }
     }
-    FallBack "Mobile/VertexLit"
 }

@@ -517,6 +517,12 @@ namespace Iviz.Controllers
                     float y = dataOff[yOffset..].Read<float>();
                     float z = dataOff[zOffset..].Read<float>();
 
+                    if (IsInvalid(x) || IsInvalid(y) || IsInvalid(z))
+                    {
+                        dataOff = dataOff[pointStep..]; 
+                        continue;
+                    }
+                    
                     ref var f = ref pointBuffer[dstOff++];
                     (f.x, f.y, f.z, f.w) = (-y, z, x, intensityFn(dataOff[iOffset..]));
                     dataOff = dataOff[pointStep..]; 
@@ -538,11 +544,14 @@ namespace Iviz.Controllers
 
             switch (iType)
             {
-                case PointField.FLOAT32 when iOffset == 8 && pointStep == 12: // xyzz
+                case PointField.FLOAT32 when iOffset == 8 && pointStep == 12: // xyz
                     ParseFloatAligned3();
                     break;
                 case PointField.FLOAT32 when iOffset == 12 && pointStep == 16: // xyzw
                     ParseFloatAligned();
+                    break;
+                case PointField.FLOAT32 when iOffset == 8 && pointStep == 16: // xyzz
+                    ParseFloatAlignedZ();
                     break;
                 case PointField.FLOAT32:
                     ParseFloat();
@@ -585,6 +594,21 @@ namespace Iviz.Controllers
                     fixed (float4* dstPtr = &dst[0])
                     {
                         dstOff += Utils.ParseFloat4(srcPtr, dstPtr, width);
+                    }
+                }
+            }
+            
+            void ParseFloatAlignedZ()
+            {
+                var dataRow = msg.Data.AsSpan();
+                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
+                {
+                    var src = dataRow.Cast<float4>()[..width];
+                    var dst = dstBuffer.AsSpan(dstOff, width);
+                    fixed (float4* srcPtr = &src[0])
+                    fixed (float4* dstPtr = &dst[0])
+                    {
+                        dstOff += Utils.ParseFloat4Z(srcPtr, dstPtr, width);
                     }
                 }
             }
@@ -784,11 +808,11 @@ namespace Iviz.Controllers
         const float MaxPositionMagnitude = PointListDisplay.MaxPositionMagnitude;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe int4 AsInt(float4 point) => *(int4*)&point;
+        static unsafe int4 AsInt4(float4 point) => *(int4*)&point;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool IsPointInvalid4(in float4 point) =>
-            math.any(point.xyz > MaxPositionMagnitude) || math.any((AsInt(point).xyz & 0x7FFFFFFF) == 0x7F800000);
+            math.any(math.abs(point).xyz > MaxPositionMagnitude) || math.any((AsInt4(point).xyz & 0x7FFFFFFF) == 0x7F800000);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool IsPointInvalid3(in float3 point) =>
@@ -846,6 +870,30 @@ namespace Iviz.Controllers
                     f.x = -point.y;
                     f.y = point.z;
                     f.w = point.w;
+                    output[o++] = f;
+                }
+
+                return o;
+            }
+            
+            [BurstCompile(CompileSynchronously = true)]
+            public static int ParseFloat4Z([NoAlias] float4* input, [NoAlias] float4* output, int inputLength)
+            {
+                int o = 0;
+                for (int i = 0; i < inputLength; i++)
+                {
+                    float4 point = input[i];
+
+                    if (Hint.Unlikely(IsPointInvalid4(point)))
+                    {
+                        continue;
+                    }
+
+                    float4 f;
+                    f.z = point.x;
+                    f.x = -point.y;
+                    f.y = point.z;
+                    f.w = point.z;
                     output[o++] = f;
                 }
 

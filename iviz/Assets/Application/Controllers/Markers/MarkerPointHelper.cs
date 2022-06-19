@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Runtime.CompilerServices;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
@@ -52,7 +53,7 @@ namespace Iviz.Controllers.Markers
 
             for (int i = 0; i < mPoints.Length; i++)
             {
-                if (!PointListDisplay.IsElementValid(mPoints[i]))
+                if (IsInvalid(mPoints[i]))
                 {
                     continue;
                 }
@@ -72,7 +73,7 @@ namespace Iviz.Controllers.Markers
             
             for (int i = 0; i < mPoints.Length; i++)
             {
-                if (!PointListDisplay.IsElementValid(mPoints[i]))
+                if (IsInvalid(mPoints[i]))
                 {
                     continue;
                 }
@@ -94,7 +95,7 @@ namespace Iviz.Controllers.Markers
             
             for (int i = 0; i < mPoints.Length; i++)
             {
-                if (!PointListDisplay.IsElementValid(mPoints[i]))
+                if (IsInvalid(mPoints[i]))
                 {
                     continue;
                 }
@@ -103,6 +104,12 @@ namespace Iviz.Controllers.Markers
                 mPoints[i].Ros2Unity(w, out var f);
                 pointBuffer.AddUnsafe(f);
             }
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsInvalid(in Point t)
+        {
+            return t.IsInvalid() || t.MaxAbsCoeff() > PointListDisplay.MaxPositionMagnitude;
         }
     }
 }

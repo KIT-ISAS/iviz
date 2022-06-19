@@ -58,19 +58,15 @@
             o.squareTextureUV = uv * _SquareCoeff.xy;
         }
 
-        //void surf(Input IN, inout SurfaceOutput o)
         void surf(Input IN, inout SurfaceOutputStandard o)
         {
             o.Albedo =
                 tex2D(_IntensityTex, IN.intensityUV) *
                 tex2D(_SquareTex, IN.squareTextureUV) *
                 _Tint;
-            //o.Albedo = float4(1,1,1,1);
             o.Metallic = _Metallic;
             o.Smoothness = _Smoothness;
         }
         ENDCG
     }
-
-    FallBack "Standard"
 }

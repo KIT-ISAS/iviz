@@ -160,74 +160,26 @@ namespace Iviz.Displays
             
             using (var vertices = new Rent<Vector3>(pointsLength))
             {
-                //ref float4 pPtr = ref pointBuffer.GetReference();
-                //ref Vector3 vPtr = ref vertices.Array[0];
+                IndicesUtils.FillVector3(pointBuffer, vertices);
+                mesh.SetVertices(vertices);
 
                 if (UseColormap)
                 {
                     using var uvs = new Rent<Vector2>(pointsLength);
-                    /*
-                    ref Vector2 uvsPtr = ref uvs.Array[0];
-                    for (int i = pointsLength; i > 0; i--)
-                    {
-                        //ref readonly var p = ref points[i];
-                        //ref var v = ref vArray[i];
-                        vPtr.x = pPtr.x;
-                        vPtr.y = pPtr.y;
-                        vPtr.z = pPtr.z;
-                        uvsPtr.x = pPtr.w;
-
-                        pPtr = ref pPtr.Plus(1);
-                        vPtr = ref vPtr.Plus(1);
-                        uvsPtr = ref uvsPtr.Plus(1);
-                    }
-                    */
-                    IndicesUtils.FillVector3(pointBuffer, vertices);
                     IndicesUtils.FillUV(pointBuffer, uvs);
-
-                    mesh.SetVertices(vertices);
                     mesh.SetUVs(uvs);
                 }
                 else
                 {
                     using var colors = new Rent<Color32>(pointsLength);
-                    /*
-                    ref float cPtr = ref Unsafe.As<Color32, float>(ref colors[0]);
-                    for (int i = pointsLength; i > 0; i--)
-                    {
-                        //ref readonly var p = ref points[i];
-                        //ref var v = ref vArray[i];
-                        vPtr.x = pPtr.x;
-                        vPtr.y = pPtr.y;
-                        vPtr.z = pPtr.z;
-                        cPtr = pPtr.w;
-                        
-                        pPtr = ref pPtr.Plus(1);
-                        vPtr = ref vPtr.Plus(1);
-                        cPtr = ref cPtr.Plus(1);
-                    }
-                    */
-                    IndicesUtils.FillVector3(pointBuffer, vertices);
                     IndicesUtils.FillColor(pointBuffer, colors);
-
-                    mesh.SetVertices(vertices);
                     mesh.SetColors(colors);
                 }
             }
 
             using (var indices = new Rent<int>(pointsLength))
             {
-                /*
-                ref int iPtr = ref indices.Array[0];
-                for (int i = 0; i < pointsLength; i++)
-                {
-                    iPtr = i;
-                    iPtr = ref iPtr.Plus(1);
-                    //iArray[i] = i;
-                }
-                */
                 IndicesUtils.FillIndices(indices);
-
                 mesh.SetIndices(indices, MeshTopology.Points);
             }
 
@@ -268,12 +220,6 @@ namespace Iviz.Displays
             pointBuffer.Clear();
             pointBuffer.AddRange(points);
             isDirty = true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsElementValid(in Point t)
-        {
-            return !(t.IsInvalid() || t.MaxAbsCoeff() > MaxPositionMagnitude);
         }
 
         public void Set(Action<NativeList<float4>> callback, int reserve)

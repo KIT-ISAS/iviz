@@ -48,11 +48,10 @@ namespace Iviz.Displays
         {
             set => transform.localScale = Vector3.one * value;
         }
-
         
         public bool AlwaysVisible
         {
-            set => MeshRenderer.sharedMaterial = value 
+            set => TextMesh.fontMaterial = value 
                 ? Resource.Materials.FontMaterialAlwaysVisible.Object 
                 : Resource.Materials.FontMaterial.Object;
         }

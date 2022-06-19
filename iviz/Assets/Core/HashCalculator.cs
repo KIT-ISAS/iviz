@@ -25,7 +25,7 @@ namespace Iviz.Core
         {
             fixed (T* valuePtr = &value)
             {
-                return Xx32Hash.Hash(ref *(byte*)valuePtr, sizeof(T), startHash);
+                return Xx32Hash.Hash((byte*)valuePtr, sizeof(T), startHash);
             }
         }
 
@@ -55,7 +55,7 @@ namespace Iviz.Core
 
             fixed (T* spanPtr = array)
             {
-                return Xx32Hash.Hash(ref *(byte*)spanPtr, array.Length * sizeof(T), startHash);
+                return Xx32Hash.Hash((byte*)spanPtr, array.Length * sizeof(T), startHash);
             }
         }
 
@@ -69,7 +69,7 @@ namespace Iviz.Core
 
             fixed (T* spanPtr = &span[0])
             {
-                return Xx32Hash.Hash(ref *(byte*)spanPtr, span.Length * sizeof(T), startHash);
+                return Xx32Hash.Hash((byte*)spanPtr, span.Length * sizeof(T), startHash);
             }
         }
 
@@ -85,7 +85,7 @@ namespace Iviz.Core
 
             const int MinForBurst = 8;
 
-            public static uint Hash(ref byte data, int length, uint seed)
+            public static unsafe uint Hash(byte* data, int length, uint seed)
             {
                 if (length <= 0)
                 {
@@ -97,47 +97,47 @@ namespace Iviz.Core
                 uint h32 = lengthInBulk switch
                 {
                     0 => seed + Prime32_5,
-                    < MinForBurst * 16 => ExecuteDirect(seed, ref data, lengthInBulk / 16),
-                    _ => ExecuteBurst(seed, ref data, lengthInBulk / 16)
+                    < MinForBurst * 16 => ExecuteDirect(seed, data, lengthInBulk / 16),
+                    _ => ExecuteBurst(seed, data, lengthInBulk / 16)
                 };
 
                 //Profile(seed, ref data, lengthInBulk);
 
                 h32 += (uint)length;
 
-                ref uint remainingInt = ref Unsafe.As<byte, uint>(ref data.Plus(lengthInBulk));
+                uint* remainingInt = (uint*)(data + lengthInBulk);
                 int remainingLength = length - lengthInBulk;
 
                 switch (remainingLength >> 2)
                 {
                     case 3:
-                        h32 = RotateLeft(h32 + remainingInt * Prime32_3, 17) * Prime32_4;
-                        remainingInt = ref remainingInt.Plus(1);
+                        h32 = RotateLeft(h32 + *remainingInt * Prime32_3, 17) * Prime32_4;
+                        remainingInt++;
                         goto case 2;
                     case 2:
-                        h32 = RotateLeft(h32 + remainingInt * Prime32_3, 17) * Prime32_4;
-                        remainingInt = ref remainingInt.Plus(1);
+                        h32 = RotateLeft(h32 + *remainingInt * Prime32_3, 17) * Prime32_4;
+                        remainingInt++;
                         goto case 1;
                     case 1:
-                        h32 = RotateLeft(h32 + remainingInt * Prime32_3, 17) * Prime32_4;
-                        remainingInt = ref remainingInt.Plus(1);
+                        h32 = RotateLeft(h32 + *remainingInt * Prime32_3, 17) * Prime32_4;
+                        remainingInt++;
                         break;
                 }
 
-                ref byte remaining = ref Unsafe.As<uint, byte>(ref remainingInt);
+                byte* remaining = (byte*)remainingInt;
 
                 switch (remainingLength % 4)
                 {
                     case 3:
-                        h32 = RotateLeft(h32 + remaining * Prime32_5, 11) * Prime32_1;
-                        remaining = ref remaining.Plus(1);
+                        h32 = RotateLeft(h32 + *remaining * Prime32_5, 11) * Prime32_1;
+                        remaining++;
                         goto case 2;
                     case 2:
-                        h32 = RotateLeft(h32 + remaining * Prime32_5, 11) * Prime32_1;
-                        remaining = ref remaining.Plus(1);
+                        h32 = RotateLeft(h32 + *remaining * Prime32_5, 11) * Prime32_1;
+                        remaining++;
                         goto case 1;
                     case 1:
-                        h32 = RotateLeft(h32 + remaining * Prime32_5, 11) * Prime32_1;
+                        h32 = RotateLeft(h32 + *remaining * Prime32_5, 11) * Prime32_1;
                         break;
                 }
 
@@ -151,16 +151,19 @@ namespace Iviz.Core
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static uint ExecuteDirect(uint seed, ref byte data, int length)
+            static unsafe uint ExecuteDirect(uint seed, byte* data, int length)
             {
                 uint v1 = seed + Prime32_1 + Prime32_2;
                 uint v2 = seed + Prime32_2;
                 uint v3 = seed;
                 uint v4 = seed - Prime32_1;
 
-                ref uint4 val = ref Unsafe.As<byte, uint4>(ref data);
-                for (int i = length; i > 0; i--)
+                uint4* data4 = (uint4*)data;
+
+                for (int i = 0; i < length; i++)
                 {
+                    ref uint4 val = ref data4[i];
+
                     v1 += val.x * Prime32_2;
                     v2 += val.y * Prime32_2;
                     v3 += val.z * Prime32_2;
@@ -175,17 +178,15 @@ namespace Iviz.Core
                     v2 *= Prime32_1;
                     v3 *= Prime32_1;
                     v4 *= Prime32_1;
-
-                    val = ref val.Plus(1);
                 }
 
                 return MergeValues(v1, v2, v3, v4);
             }
 
-            static unsafe uint ExecuteBurst(uint seed, ref byte data, int lengthInBulk)
+            static unsafe uint ExecuteBurst(uint seed, byte* data, int lengthInBulk)
             {
                 uint4 output;
-                uint4* pointer = (uint4*)Unsafe.AsPointer(ref data); // data is already fixed
+                uint4* pointer = (uint4*)data;
                 Hash32Job.Execute(seed, pointer, &output, lengthInBulk);
                 return MergeValues(output.x, output.y, output.z, output.w);
             }
@@ -227,14 +228,14 @@ namespace Iviz.Core
                 }
             }
 
-            static void Profile(uint seed, ref byte data, int lengthInBulk)
+            static unsafe void Profile(uint seed, byte* data, int lengthInBulk)
             {
                 var stopWatch = new Stopwatch();
 
                 stopWatch.Restart();
                 for (int i = 0; i < 128; i++)
                 {
-                    ExecuteDirect(seed, ref data, lengthInBulk / 16);
+                    ExecuteDirect(seed, data, lengthInBulk / 16);
                 }
 
                 stopWatch.Stop();
@@ -243,7 +244,7 @@ namespace Iviz.Core
 
                 for (int i = 0; i < 128; i++)
                 {
-                    ExecuteBurst(seed, ref data, lengthInBulk / 16);
+                    ExecuteBurst(seed, data, lengthInBulk / 16);
                 }
 
                 stopWatch.Stop();

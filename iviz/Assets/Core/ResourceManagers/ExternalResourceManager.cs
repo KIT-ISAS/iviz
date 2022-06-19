@@ -282,11 +282,12 @@ namespace Iviz.Displays
             string fileType = Path.GetExtension(uriPath).ToUpperInvariant();
 
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
+            
             if (fileType is ".SDF" or ".WORLD")
             {
-                //return await GetSceneAsync(uriString, provider, tokenSource.Token);
-                RosLogger.Error($"{this}: SDF parsing is disabled");
-                return null;
+                return await GetSceneAsync(uriString, provider, tokenSource.Token);
+                //RosLogger.Error($"{this}: SDF parsing is disabled");
+                //return null;
             }
 
 
@@ -560,11 +561,6 @@ namespace Iviz.Displays
                 return null;
             }
 
-            if (texture.width % 4 == 0 && texture.height % 4 == 0)
-            {
-                texture.Compress(true);
-            }
-
             texture.name = uriString;
 
             var resource = new ResourceKey<Texture2D>(texture);
@@ -622,7 +618,7 @@ namespace Iviz.Displays
 
                 using (var buffer = new Rent<byte>(msg.Model.RosMessageLength + Md5SumLength))
                 {
-                    BuiltIns.UTF8.GetBytes(Model.Md5Sum, 0, Md5SumLength, buffer.Array, 0);
+                    BuiltIns.UTF8.GetBytes(Model.Md5Sum.AsSpan(), buffer[..Md5SumLength]);
                     msg.Model.SerializeTo(buffer[Md5SumLength..]);
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                 }
@@ -687,7 +683,7 @@ namespace Iviz.Displays
 
                 using (var buffer = new Rent<byte>(msg.Scene.RosMessageLength + Md5SumLength))
                 {
-                    BuiltIns.UTF8.GetBytes(Scene.Md5Sum, 0, Md5SumLength, buffer.Array, 0);
+                    BuiltIns.UTF8.GetBytes(Scene.Md5Sum.AsSpan(), buffer[..Md5SumLength]);
                     msg.Scene.SerializeTo(buffer[Md5SumLength..]);
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                     RosLogger.Debug($"{this}: Saving to {Settings.ResourcesPath}/{localPath}");

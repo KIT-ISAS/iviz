@@ -216,17 +216,17 @@ namespace Iviz.Ros
 
         void CallHandlerOnGameThread()
         {
-            if (!Subscribed)
+            if (!Subscribed || handlerOnGameThread == null)
             {
                 return;
             }
 
             int messageCount = messageQueue.Count;
-            if (messageCount == 0 || handlerOnGameThread == null)
+            if (messageCount == 0)
             {
                 return;
             }
-
+            
             messageHelper.Clear();
 
             foreach (int _ in ..messageCount) // copy a fixed amount, in case messages are still being added
