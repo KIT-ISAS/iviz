@@ -143,7 +143,11 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
     {
         Logger.LogDebugFormat("{0}: Trying to connect!", this);
 
-        var newTcpClient = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } };
+        var newTcpClient = new TcpClient(AddressFamily.InterNetworkV6)
+        {
+            Client = { DualMode = true },
+            NoDelay = requestNoDelay
+        };
         (string hostname, int port) = RemoteEndpoint;
 
         try

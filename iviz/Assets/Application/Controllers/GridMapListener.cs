@@ -203,7 +203,7 @@ namespace Iviz.Controllers
 
         void Handle(GridMap msg)
         {
-            static bool IsInvalidSize(double x) => x.IsInvalid() || x <= 0;
+            static bool IsInvalidSize(double x) => x.IsInvalid() || x < 0;
 
             var info = msg.Info;
             if (IsInvalidSize(info.LengthX) ||
@@ -211,6 +211,12 @@ namespace Iviz.Controllers
                 IsInvalidSize(info.Resolution))
             {
                 RosLogger.Error($"{this}: {nameof(GridMapInfo)} has invalid values!");
+                return;
+            }
+
+            if (info.Resolution.ApproximatelyZero())
+            {
+                RosLogger.Error($"{this}: Resolution cannot be 0");
                 return;
             }
 
@@ -274,6 +280,11 @@ namespace Iviz.Controllers
                 return;
             }
 
+            if (widthByResolution != width || heightByResolution != height)
+            {
+                RosLogger.Warn($"{this}: GridMapInfo sizes do not match array sizes. Display extent may not be correct.");
+            }
+            
             uint numElements = width * height;
             uint expectedLength;
             checked
@@ -294,7 +305,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (layout.Dim[0].Stride > width * height || layout.Dim[1].Stride > width)
+            if (layout.Dim[0].Stride > numElements || layout.Dim[1].Stride > width)
             {
                 RosLogger.Error($"{this}: Padded strides are not supported");
                 return;
@@ -328,13 +339,12 @@ namespace Iviz.Controllers
             node.Transform.SetLocalPose(validatedOrigin);
 
             int offset = (int)layout.DataOffset;
-            int size = (int)(width * height);
 
-            if (size != 0)
+            if (numElements != 0)
             {
                 resource.Set((int)width, (int)height,
                     (float)info.LengthX, (float)info.LengthY,
-                    multiArray.Data.AsSpan().Slice(offset, size));
+                    multiArray.Data.AsSpan().Slice(offset, (int)numElements));
             }
             else
             {

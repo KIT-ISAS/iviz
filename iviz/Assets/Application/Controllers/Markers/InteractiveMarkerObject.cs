@@ -65,7 +65,7 @@ namespace Iviz.Controllers
                         text.BillboardEnabled = true;
                         text.BillboardOffset = Vector3.up * 0.1f;
                         text.ElementSize = 0.1f;
-                        text.Visible = true;
+                        text.Visible = Visible;
                         text.AlwaysVisible = true;
                     }
 
@@ -100,6 +100,11 @@ namespace Iviz.Controllers
             set
             {
                 visible = value;
+                if (text != null)
+                {
+                    text.Visible = value;
+                }
+
                 foreach (var control in controls.Values)
                 {
                     control.Visible = value;
@@ -319,7 +324,7 @@ namespace Iviz.Controllers
                 totalWarnings += newNumWarnings;
             }
         }
-        
+
         public override string ToString() => $"[{nameof(InteractiveMarkerObject)} '{rosId}']";
 
         internal IEnumerable<MarkerObject> GetAllMarkers() =>

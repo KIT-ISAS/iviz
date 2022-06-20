@@ -24,6 +24,13 @@ namespace Iviz.Displays
         public static async ValueTask<MeshMarkerHolderDisplay> CreateAsync(string uriString,
             Model msg, IServiceProvider? provider, CancellationToken token)
         {
+            Debug.LogWarning(uriString);
+            if (uriString ==
+                "package://aws-robomaker-hospital-world//models/aws_robomaker_residential_Sofa_01/meshes/aws_Sofa_01_visual.DAE")
+            {
+                Debug.LogWarning("lol");
+            }
+            
             ThrowHelper.ThrowIfNull(uriString, nameof(uriString));
             ThrowHelper.ThrowIfNull(msg, nameof(msg));
 
@@ -101,26 +108,23 @@ namespace Iviz.Displays
                     var meshTangents = mesh.Tangents;
                     using var tangents = new Rent<Vector4>(meshTangents.Length);
 
-                    void CopyTangents()
+                    var tangentsArray = tangents.Array;
+                    for (int i = 0; i < meshTangents.Length; i++)
                     {
-                        var tangentsArray = tangents.AsSpan();
-                        var v = new Vector4(0, 0, 0, -1);
-                        for (int i = 0; i < meshTangents.Length; i++)
-                        {
-                            (v.x, v.y, v.z) = meshTangents[i];
-                            tangentsArray[i] = v;
-                        }
+                        Vector4 v;
+                        (v.x, v.y, v.z) = meshTangents[i];
+                        v.w = -1;
+                        tangentsArray[i] = v;
                     }
 
-                    CopyTangents();
                     SetMesh(tangents);
                 }
                 else
                 {
-                    SetMesh(ReadOnlySpan<Vector4>.Empty);
+                    SetMesh(Rent.Empty<Vector4>());
                 }
 
-                void SetMesh(ReadOnlySpan<Vector4> tangents)
+                void SetMesh(Rent<Vector4> tangents)
                 {
                     try
                     {
@@ -177,7 +181,9 @@ namespace Iviz.Displays
             }
 
             var nodes = new List<GameObject>();
+
             using var meshIsBeingUsed = new Rent<bool>(templateMeshes.Count);
+            meshIsBeingUsed.AsSpan().Fill(false);
 
             foreach (var node in msg.Nodes)
             {
@@ -190,11 +196,12 @@ namespace Iviz.Displays
                     node.Parent == -1 ? root.transform : nodes[node.Parent].transform,
                     false);
 
-                var m = new Matrix4x4();
-                foreach (int i in ..16)
+                if (node.Transform.M.Length * sizeof(float) != Unsafe.SizeOf<Matrix4x4>())
                 {
-                    m[i] = node.Transform.M[i];
+                    throw new IndexOutOfRangeException("Invalid array size!");
                 }
+                
+                Matrix4x4 m = Unsafe.As<float, Matrix4x4>(ref node.Transform.M[0]);
 
                 nodeObjectTransform.localRotation = m.rotation;
                 nodeObjectTransform.localPosition = m.GetColumn(3);
@@ -217,8 +224,7 @@ namespace Iviz.Displays
                     }
                 }
             }
-            
-            /*
+
             for (int i = 0; i < meshIsBeingUsed.Length; i++)
             {
                 if (!meshIsBeingUsed[i])
@@ -226,7 +232,6 @@ namespace Iviz.Displays
                     templateMeshes[i].Visible = false;
                 }
             }
-            */
 
             marker.Children = children.ToArray();
             marker.UpdateBounds();

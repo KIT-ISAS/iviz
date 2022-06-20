@@ -95,5 +95,4 @@ Shader "iviz/MultiplyMeshOcclusionOnly"
         }
         ENDCG
     }
-    FallBack "Diffuse"
 }

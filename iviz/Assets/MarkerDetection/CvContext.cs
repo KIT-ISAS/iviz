@@ -52,7 +52,7 @@ namespace Iviz.MarkerDetection
 
             if (height <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(width));
+                ThrowHelper.ThrowArgumentOutOfRange(nameof(width));
             }
 
             // these functions will fail if the OpenCV library is not present
@@ -75,11 +75,7 @@ namespace Iviz.MarkerDetection
                 imageSize = width * height * 3;
                 imagePtr = CvNative.IvizGetImagePtr(ContextPtr);
             }
-            catch (EntryPointNotFoundException e)
-            {
-                throw new CvNotAvailableException(e);
-            }
-            catch (DllNotFoundException e)
+            catch (Exception e) when (e is EntryPointNotFoundException or DllNotFoundException)
             {
                 throw new CvNotAvailableException(e);
             }
@@ -92,7 +88,7 @@ namespace Iviz.MarkerDetection
             var span = ImageSpan;
             if (span.Length > image.Length)
             {
-                throw new ArgumentOutOfRangeException(nameof(image), "Image size is too small");
+                ThrowHelper.ThrowArgument("Image size is too small", nameof(image));
             }
 
             image.CopyTo(span);
@@ -102,7 +98,7 @@ namespace Iviz.MarkerDetection
         {
             if (imageSize > image.Length)
             {
-                throw new ArgumentException("Image size is too small", nameof(image));
+                ThrowHelper.ThrowArgument("Image size is too small", nameof(image));
             }
 
             if (disposed)
@@ -141,7 +137,8 @@ namespace Iviz.MarkerDetection
             using var pointerLengths = new Rent<int>(numDetected);
             using var corners = new Rent<float>(8 * numDetected);
 
-            if (!CvNative.IvizGetQrMarkerCodes(ContextPtr, ref pointers.Array[0], ref pointerLengths.Array[0], numDetected)
+            if (!CvNative.IvizGetQrMarkerCodes(ContextPtr, ref pointers.Array[0], ref pointerLengths.Array[0],
+                    numDetected)
                 || !CvNative.IvizGetMarkerCorners(ContextPtr, ref corners.Array[0], corners.Length))
             {
                 throw new CvMarkerException();
@@ -248,7 +245,7 @@ namespace Iviz.MarkerDetection
             ReleaseUnmanagedResources();
             GC.SuppressFinalize(this);
         }
-        
+
         ~CvContext()
         {
             ReleaseUnmanagedResources();

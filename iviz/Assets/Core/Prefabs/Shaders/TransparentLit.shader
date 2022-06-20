@@ -38,5 +38,4 @@
         }
         ENDCG
     }
-    FallBack "Standard"
 }

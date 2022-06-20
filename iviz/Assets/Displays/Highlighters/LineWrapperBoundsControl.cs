@@ -108,17 +108,29 @@ namespace Iviz.Displays.Highlighters
                 bool anyHovering = leftDraggable.IsHovering || rightDraggable.IsHovering;
                 if (anyDragging || anyHovering)
                 {
-                    left.EmissiveColor = right.EmissiveColor = anyDragging
+                    var emissiveColor = anyDragging
                         ? Resource.Colors.DraggableSelectedEmissive
                         : Color.black;
-                    left.Color = right.Color = anyDragging
+                    left.EmissiveColor = emissiveColor;
+                    right.EmissiveColor = emissiveColor;
+
+                    var diffuseColor = anyDragging
                         ? Resource.Colors.DraggableSelectedColor
                         : Resource.Colors.DraggableHoverColor;
+                    left.Color = diffuseColor;
+                    right.Color = diffuseColor;
+                    Debug.Log(anyDragging + " -- " + anyHovering);
                 }
                 else
                 {
-                    left.EmissiveColor = right.EmissiveColor = Color.black;
-                    left.Color = right.Color = Resource.Colors.DraggableDefaultColor;
+                    Debug.Log("off");
+                    var emissiveColor = Color.black;
+                    left.EmissiveColor = emissiveColor;
+                    right.EmissiveColor = emissiveColor;
+
+                    var diffuseColor = Resource.Colors.DraggableDefaultColor;
+                    left.Color = diffuseColor;
+                    right.Color = diffuseColor;
                 }
             }
 

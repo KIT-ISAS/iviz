@@ -293,7 +293,7 @@ namespace Iviz.Controllers
                 meshResource.Clear();
                 return;
             }
-            
+
             if (msg.Color.A.ApproximatelyZero())
             {
                 numWarnings++;
@@ -336,15 +336,15 @@ namespace Iviz.Controllers
             {
                 ref readonly Point srcPtr = ref srcPoints[i];
                 ref Vector3 dstPtr = ref dstPoints[i];
-                
+
                 srcPtr.Ros2Unity(out dstPtr);
                 if (dstPtr.IsInvalid()) // unlikely but needed!
                 {
                     mesh.Clear();
                     return pointsLength - i;
                 }
-            }            
-            
+            }
+
             var colors = MemoryMarshal.Cast<ColorRGBA, Color>(srcColors);
             mesh.Set(points, colors);
             return null;
@@ -684,7 +684,8 @@ namespace Iviz.Controllers
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
-                RosLogger.Error($"{this}: LoadResourceAsync failed for '{meshResource}'", e);
+                RosLogger.Error($"{this}: {nameof(Resource.GetGameObjectResourceAsync)} failed for '{meshResource}'",
+                    e);
                 return null;
             }
         }
@@ -702,9 +703,9 @@ namespace Iviz.Controllers
             totalWarnings = numWarnings;
         }
 
-        bool HasSameHash(Marker msg, bool useScale = false)
+        bool HasSameHash(Marker msg)
         {
-            uint currentHash = CalculateMarkerHash(msg, useScale);
+            uint currentHash = CalculateMarkerHash(msg);
             if (previousHash == currentHash)
             {
                 return true;
@@ -714,15 +715,13 @@ namespace Iviz.Controllers
             return false;
         }
 
-        static uint CalculateMarkerHash(Marker msg, bool useScale)
+        static uint CalculateMarkerHash(Marker msg)
         {
             uint hash = HashCalculator.Compute(msg.Type);
             hash = HashCalculator.Compute(msg.Color, hash);
             hash = HashCalculator.Compute(msg.Points, hash);
             hash = HashCalculator.Compute(msg.Colors, hash);
-            return useScale
-                ? HashCalculator.Compute(msg.Scale, hash)
-                : hash;
+            return hash;
         }
 
         public void Dispose()
@@ -793,12 +792,16 @@ namespace Iviz.Controllers
                 return;
             }
 
-            UpdateResourceAsyncLog();
-
             if (resource == null)
             {
                 if (msg.Type() != MarkerType.MeshResource)
                 {
+                    return;
+                }
+
+                if (runningTs is { IsCancellationRequested: false })
+                {
+                    description.Append("Mesh resource is loading...").AppendLine();
                     return;
                 }
 
@@ -844,7 +847,6 @@ namespace Iviz.Controllers
                 if (string.IsNullOrWhiteSpace(msg.Header.FrameId))
                 {
                     description.Append("Frame Locked to: <i>(none)</i>").AppendLine();
-                    
                 }
                 else
                 {
@@ -866,6 +868,7 @@ namespace Iviz.Controllers
                 }
             }
 
+            /*
             void UpdateResourceAsyncLog()
             {
                 if (resourceKey != null)
@@ -879,6 +882,7 @@ namespace Iviz.Controllers
                         .AppendLine();
                 }
             }
+            */
 
             void CreateArrowLog()
             {
@@ -1043,7 +1047,7 @@ namespace Iviz.Controllers
                 {
                     description.Append(WarnStr).Append("Color field has alpha 0").AppendLine();
                 }
-                
+
                 if (msg.Color.IsInvalid())
                 {
                     description.Append(ErrorStr).Append("Color field is invalid").AppendLine();

@@ -94,7 +94,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-                billboard.Visible = value && config.EnableBillboard;
+                billboard.Visible = value && EnableBillboard;
             }
         }
 
@@ -164,7 +164,7 @@ namespace Iviz.Controllers
             set
             {
                 config.EnableBillboard = value;
-                billboard.Visible = value && config.Visible;
+                billboard.Visible = value && Visible;
             }
         }
 

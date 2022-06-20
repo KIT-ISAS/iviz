@@ -261,11 +261,8 @@ namespace Iviz.Core
 
         public static IScreenCaptureManager? ScreenCaptureManager { get; set; }
 
-        public static bool SupportsComputeBuffers =>
-            supportsComputeBuffersHelper ??=
-                !IsHololens &&
-                SystemInfo.supportsComputeShaders &&
-                SystemInfo.maxComputeBufferInputsVertex > 0;
+        public static bool SupportsComputeBuffers => supportsComputeBuffersHelper ??=
+            !IsHololens && SystemInfo.supportsComputeShaders && SystemInfo.maxComputeBufferInputsVertex > 0;
 
         public static bool SupportsR16 => supportsR16 ??= SystemInfo.SupportsTextureFormat(TextureFormat.R16);
         public static bool SupportsRGB24 => supportsRGB24 ??= SystemInfo.SupportsTextureFormat(TextureFormat.RGB24);
