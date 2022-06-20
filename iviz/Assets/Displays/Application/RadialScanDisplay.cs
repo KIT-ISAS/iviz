@@ -202,7 +202,7 @@ namespace Iviz.Displays
 
             if (rangeMax.IsInvalid())
             {
-                throw new ArgumentException("rangeMax is nan!", nameof(rangeMax));
+                throw new ArgumentException("rangeMax is nan or invalid!", nameof(rangeMax));
             }
 
             if (intensities.Length != 0 && intensities.Length != ranges.Length)
@@ -239,9 +239,10 @@ namespace Iviz.Displays
             bool useIntensity = UseIntensityNotRange && intensities.Length != 0;
             var mCache = cache;
 
+            int length = ranges.Length;
             if (!UseLines)
             {
-                foreach (int i in ..ranges.Length)
+                for (int i = 0; i < length; i++)
                 {
                     float range = ranges[i];
                     if (range.IsInvalid() || range > rangeMax || range < rangeMin)
@@ -267,7 +268,7 @@ namespace Iviz.Displays
                 float4? prevF = null;
                 float prevRange = 0;
 
-                foreach (int i in ..ranges.Length)
+                for (int i = 0; i < length; i++)
                 {
                     float range = ranges[i];
                     if (range.IsInvalid() || range > rangeMax || range < rangeMin)

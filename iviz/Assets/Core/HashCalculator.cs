@@ -75,7 +75,7 @@ namespace Iviz.Core
 
         /// Implementation of the xxHash32 algorithm, using Zhent_xxHash32 as the starting point.
         /// Stolen from https://github.com/Zhentar/xxHash3.NET
-        static class Xx32Hash
+        static unsafe class Xx32Hash
         {
             const uint Prime32_1 = 2654435761U;
             const uint Prime32_2 = 2246822519U;
@@ -85,7 +85,7 @@ namespace Iviz.Core
 
             const int MinForBurst = 8;
 
-            public static unsafe uint Hash(byte* data, int length, uint seed)
+            public static uint Hash(byte* data, int length, uint seed)
             {
                 if (length <= 0)
                 {
@@ -151,7 +151,7 @@ namespace Iviz.Core
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static unsafe uint ExecuteDirect(uint seed, byte* data, int length)
+            static uint ExecuteDirect(uint seed, byte* data, int length)
             {
                 uint v1 = seed + Prime32_1 + Prime32_2;
                 uint v2 = seed + Prime32_2;
@@ -183,7 +183,7 @@ namespace Iviz.Core
                 return MergeValues(v1, v2, v3, v4);
             }
 
-            static unsafe uint ExecuteBurst(uint seed, byte* data, int lengthInBulk)
+            static uint ExecuteBurst(uint seed, byte* data, int lengthInBulk)
             {
                 uint4 output;
                 uint4* pointer = (uint4*)data;
@@ -199,7 +199,7 @@ namespace Iviz.Core
                 RotateLeft(v1, 1) + RotateLeft(v2, 7) + RotateLeft(v3, 12) + RotateLeft(v4, 18);
 
             [BurstCompile]
-            static unsafe class Hash32Job
+            static class Hash32Job
             {
                 [BurstCompile(CompileSynchronously = true)]
                 public static void Execute(uint seed, [NoAlias] uint4* input, [NoAlias] uint4* output, int length)
@@ -228,7 +228,7 @@ namespace Iviz.Core
                 }
             }
 
-            static unsafe void Profile(uint seed, byte* data, int lengthInBulk)
+            static void Profile(uint seed, byte* data, int lengthInBulk)
             {
                 var stopWatch = new Stopwatch();
 

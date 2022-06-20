@@ -24,6 +24,8 @@ namespace Iviz.ImageDecoders
 
         public unsafe JpegDecoder(byte[] readBuffer)
         {
+            ThrowHelper.ThrowIfNull(readBuffer, nameof(readBuffer));
+            
             this.readBuffer = readBuffer;
 
             jpegPtr = TurboJpegNative.InitDecompressorInstance();

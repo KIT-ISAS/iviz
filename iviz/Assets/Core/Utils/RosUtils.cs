@@ -458,6 +458,13 @@ namespace Iviz.Core
             description.Append("p: ").Append(rYStr).Append(", y: ").Append(rZStr);
         }
 
+        public static void FormatTimestamp(DateTime dateTime, StringBuilder description)
+        {
+            time ts = new time(dateTime);
+            description.Append(ts.Secs).Append('.').Append(ts.Nsecs / 1000000);
+        }
+
+
         public static string GetCameraInfoTopic(string imageTopic)
         {
             int lastSlash = imageTopic.LastIndexOf('/');

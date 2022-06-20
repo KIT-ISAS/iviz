@@ -56,6 +56,8 @@ namespace Iviz.App
         FromIdCode idCode = FromIdCode.All;
         string id = AllString;
 
+        bool UseUnixTimestamps => false;
+
         public override IDialogPanel Panel => dialog;
 
         public ConsoleDialogData()
@@ -75,7 +77,7 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             ResetPanelPosition();
-            
+
             dialog.Close.Clicked += Close;
             dialog.Reset.Clicked += Reset;
             ProcessLog();
@@ -268,14 +270,19 @@ namespace Iviz.App
                     {
                         description.Append("<b>[] ");
                     }
-                    else
+                    else if (!UseUnixTimestamps)
                     {
                         string dateAsStr = message.Stamp.ToString(
                             message.Stamp.Date == GameThread.Now.Date
                                 ? "HH:mm:ss.fff"
                                 : "yy-MM-dd HH:mm:ss.fff");
-
                         description.Append("<b>[").Append(dateAsStr).Append("] ");
+                    }
+                    else
+                    {
+                        description.Append("<b>[");
+                        RosUtils.FormatTimestamp(message.Stamp, description);
+                        description.Append("] ");
                     }
 
                     string levelColor = ColorFromLevel(messageLevel);
@@ -284,13 +291,7 @@ namespace Iviz.App
 
                     description.Append(message.SourceId ?? "Me");
 
-                    description.Append(messageLevel switch
-                    {
-                        //LogLevel.Warn => " [W]: </color></b>",
-                        //LogLevel.Error => " [E]: </color></b>",
-                        LogLevel.Fatal => " [F]: </color></b>",
-                        _ => ": </color></b>",
-                    });
+                    description.Append(messageLevel == LogLevel.Fatal ? " [F]: </color></b>" : ": </color></b>");
 
                     if (message.SourceId == null || message.Message.Length < MaxMessageLength)
                     {

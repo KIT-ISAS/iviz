@@ -98,7 +98,7 @@ namespace Iviz.App
             get => numberOfSteps;
             set
             {
-                if (value == 0)
+                if (value < 1)
                 {
                     ThrowHelper.ThrowArgumentOutOfRange(nameof(value));
                 }

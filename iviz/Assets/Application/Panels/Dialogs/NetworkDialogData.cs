@@ -211,8 +211,14 @@ namespace Iviz.App
                         builder.Append("unknown]</b> ");
                     }
 
+                    string remoteHostname = sender.RemoteEndpoint.Hostname;
+                    if (remoteHostname.StartsWith("::ffff:")) // remove ipv6 prefix of ipv4
+                    {
+                        remoteHostname = remoteHostname[7..];
+                    }
+                    
                     builder.Append(sender.RemoteEndpoint != default
-                        ? sender.RemoteEndpoint.Hostname
+                        ? remoteHostname
                         : "(Unknown address)");
 
                     if (sender.TransportType == TransportType.Udp)

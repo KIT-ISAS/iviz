@@ -3,6 +3,7 @@
 using System;
 using External;
 using Iviz.Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,6 +22,7 @@ namespace Iviz.App
         [SerializeField] Joystick? joystickA;
         [SerializeField] Joystick? joystickS;
         [SerializeField] Button? resetScale;
+        [SerializeField] TMP_Text? globalButtonText;
 
         Button CloseButton => closeButton.AssertNotNull(nameof(closeButton));
         Button GlobalButton => globalButton.AssertNotNull(nameof(globalButton));
@@ -30,6 +32,7 @@ namespace Iviz.App
         Joystick JoystickA => joystickA.AssertNotNull(nameof(joystickA));
         Joystick JoystickS => joystickS.AssertNotNull(nameof(joystickS));
         Button ResetScaleButton => resetScale.AssertNotNull(nameof(resetScale));
+        TMP_Text GlobalButtonText => globalButtonText.AssertNotNull(nameof(globalButtonText));
 
         public bool IsGlobal { get; private set; }
         public event Action<Vector3>? ChangedPosition;
@@ -71,7 +74,7 @@ namespace Iviz.App
         void OnButtonClick()
         {
             IsGlobal = !IsGlobal;
-            GlobalButton.GetComponentInChildren<Text>().text = IsGlobal ? "Global" : "Screen";
+            GlobalButtonText.text = IsGlobal ? "Global" : "Screen";
         }
 
         void OnChangedPosition(Vector2 _)

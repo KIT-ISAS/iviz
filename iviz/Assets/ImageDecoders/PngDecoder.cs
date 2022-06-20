@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using AOT;
 using Iviz.Core;
@@ -38,18 +39,18 @@ namespace Iviz.ImageDecoders
 
         public unsafe PngDecoder(byte[] readBuffer)
         {
+            ThrowHelper.ThrowIfNull(readBuffer, nameof(readBuffer));
+
             this.readBuffer = readBuffer;
 
             Span<byte> header = stackalloc byte[8];
             readBuffer.AsSpan(0, 8).CopyTo(header);
             position = 8;
 
-            fixed (byte* headerPtr = header)
+            IntPtr headerPtr = (IntPtr)Unsafe.AsPointer(ref header[0]);
+            if (PngNative.png_sig_cmp(headerPtr, 0, 8) != 0)
             {
-                if (PngNative.png_sig_cmp((IntPtr)headerPtr, 0, 8) != 0)
-                {
-                    throw new DecoderException("Data is not a PNG file!");
-                }
+                throw new DecoderException("Data is not a PNG file!");
             }
 
             version = PngNative.png_get_libpng_ver(IntPtr.Zero);
@@ -113,7 +114,7 @@ namespace Iviz.ImageDecoders
             {
                 throw new ObjectDisposedException(nameof(JpegDecoder));
             }
-            
+
             int requiredLength = PngInfo.DecompressedSize;
             if (requiredLength == 0)
             {
@@ -158,7 +159,7 @@ namespace Iviz.ImageDecoders
             var ioPtr = PngNative.png_get_io_ptr(pngPtr);
             var handle = (GCHandle)ioPtr;
             var self = (PngDecoder)handle.Target;
-            
+
             int countToRead = (int)byteCountToRead;
             var targetBuffer = new Span<byte>(outBytes.ToPointer(), countToRead);
             if (self.position + countToRead > self.readBuffer.Length)
