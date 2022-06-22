@@ -219,6 +219,8 @@ public sealed class ModelServer : IDisposable
             LogError($"Failed to resolve uri '{msg.Request.Uri}'. Reason: Invalid uri.");
             return;
         }
+        
+        LogUp(uri);
 
         string? modelPath;
         switch (uri.Scheme)
@@ -285,8 +287,6 @@ public sealed class ModelServer : IDisposable
         msg.Response.Success = true;
         msg.Response.Message = "";
         msg.Response.Model = model;
-
-        LogUp(uri);
     }
 
     public void TextureCallback(GetModelTexture msg)
@@ -295,7 +295,7 @@ public sealed class ModelServer : IDisposable
         {
             BuiltIns.ThrowArgumentNull(nameof(msg));
         }
-
+        
         // TODO: force conversion to either png or jpg
 
         if (!Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out var uri))
@@ -305,6 +305,8 @@ public sealed class ModelServer : IDisposable
             LogError($"Failed to resolve uri '{msg.Request.Uri}'. Reason: Invalid uri.");
             return;
         }
+
+        LogUp(uri);
 
         string? texturePath;
         switch (uri.Scheme)
@@ -367,8 +369,6 @@ public sealed class ModelServer : IDisposable
             Format = Path.GetExtension(texturePath).Replace(".", ""),
             Data = data
         };
-
-        LogUp(uri);
     }
 
     Model LoadModel(string fileName)
