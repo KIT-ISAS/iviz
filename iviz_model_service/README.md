@@ -5,18 +5,6 @@ This program should be run on the PC that has a ROS installation and has the ass
 
 ## Getting Started
 
-You can either:
-* Open the .csproj file in your favorite C# editor, and hit Run.
-* Open a console, go to the folder containing this README, and run the following command:
-```bash
-dotnet run -c Release
-```
-* Run the dll directly
-```bash
-dotnet Publish/Iviz.ModelService.dll
-```
-Make sure that ROS_MASTER_URI and ROS_PACKAGE_PATH are both set.
+To start the program, go to the Binaries folder and look for the executable that corresponds to your platform.
 
-By default, this will provide access to models that start with the URI schema 'package://'.
-If you want to enable URIs that start with 'file://', use the _--enable-file-schema_ argument.
-Note that this will give all the ROS network access to every file. 
+Make sure that ROS_MASTER_URI and ROS_PACKAGE_PATH are both set.

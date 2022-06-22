@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>Iviz.ModelService</RootNamespace>
@@ -7,6 +6,10 @@
     <LangVersion>default</LangVersion>
     <Nullable>enable</Nullable>
     <TargetFramework>net6.0</TargetFramework>
+
+    <PublishTrimmed>true</PublishTrimmed>
+    <PublishSingleFile>true</PublishSingleFile>
+    <TrimMode>link</TrimMode>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\iviz_model_service_lib\iviz_model_service_lib.csproj" />
