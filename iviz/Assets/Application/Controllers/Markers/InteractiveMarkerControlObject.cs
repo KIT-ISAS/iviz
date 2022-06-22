@@ -290,6 +290,11 @@ namespace Iviz.Controllers
 
         void DisposeAllMarkers()
         {
+            foreach (var (control, _) in boundsControls)
+            {
+                control.Dispose();
+            }
+
             foreach (var markerObject in markers.Values)
             {
                 markerObject.Dispose();

@@ -9,7 +9,7 @@
     SubShader
     {
         CGPROGRAM
-        #pragma surface surf Standard fullforwardshadows
+        #pragma surface surf Standard fullforwardshadows addshadow
 
         struct Input
         {

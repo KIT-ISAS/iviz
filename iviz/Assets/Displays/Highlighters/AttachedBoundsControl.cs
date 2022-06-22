@@ -16,6 +16,7 @@ namespace Iviz.Displays.Highlighters
         SelectionFrame? frame;
         IHasBounds? source;
         ScreenDraggable? draggable;
+        bool useTransformFromSource;
 
         public float FrameColumnWidth { get; set; } = 0.005f;
         public event Action? PointerDown;
@@ -65,12 +66,24 @@ namespace Iviz.Displays.Highlighters
                 nodeTransform.SetLocalPose(boundsTransform.AsLocalPose());
                 nodeTransform.localScale = boundsTransform.localScale;
             }
+            else
+            {
+                nodeTransform.localScale = Vector3.zero;
+            }
 
             draggable = nodeTransform.gameObject.AddComponent<T>();
             draggable.RayCollider = collider;
-            draggable.TargetTransform = target.CheckedNull() ??
-                                        source.BoundsTransform.CheckedNull() ??
-                                        throw new ArgumentNullException(nameof(target));
+
+            useTransformFromSource = target == null;
+            if (target != null)
+            {
+                draggable.TargetTransform = target;
+            }
+            else if (source.BoundsTransform != null)
+            {
+                draggable.TargetTransform = source.BoundsTransform;
+            }
+
             draggable.PointerDown += () => PointerDown?.Invoke();
             draggable.PointerUp += () => PointerUp?.Invoke();
             draggable.Moved += () => Moved?.Invoke();
@@ -124,6 +137,14 @@ namespace Iviz.Displays.Highlighters
                 nodeTransform.SetParentLocal(validTransform.parent);
                 nodeTransform.SetLocalPose(validTransform.AsLocalPose());
                 nodeTransform.localScale = validTransform.localScale;
+                if (useTransformFromSource)
+                {
+                    draggable.TargetTransform = validTransform;
+                }
+            }
+            else
+            {
+                nodeTransform.localScale = Vector3.zero;
             }
 
             if (source.Bounds is { } validBounds)

@@ -11,6 +11,7 @@ using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Tools;
 using UnityEngine;
@@ -148,6 +149,7 @@ namespace Iviz.Controllers
                 {
                     arContents.Camera.cullingMask = (1 << LayerType.ARSetupMode) | (1 << LayerType.UI);
                     ARMoveDevicePanel.SetActive(true);
+                    markerDetector.DelayBetweenCapturesInMs = 1000;
                 }
                 else
                 {
@@ -158,6 +160,8 @@ namespace Iviz.Controllers
                     pose.position = sourcePosition;
                     pose.rotation = Quaternion.Euler(0, sourceRotation.eulerAngles.y - 90, 0);
                     SetWorldPose(pose, RootMover.Setup);
+                    
+                    markerDetector.DelayBetweenCapturesInMs = 3000;
                 }
             }
         }
@@ -204,7 +208,6 @@ namespace Iviz.Controllers
         }
 
         public bool ProvidesMesh { get; }
-        public bool ProvidesOcclusion { get; }
 
         public ARFoundationController(ARConfiguration? config)
         {
@@ -251,6 +254,8 @@ namespace Iviz.Controllers
                 arContents.CameraManager, arContents.Camera.transform, arContents.OcclusionManager);
 
             RaiseARStateChanged();
+            
+            PostInitialize();
         }
 
         void ArStartSessionOnClicked()
@@ -324,7 +329,7 @@ namespace Iviz.Controllers
             var ray = new Ray(cameraTransform.position, cameraTransform.forward);
             if (TryGetRaycastHit(ray, out Pose hit))
             {
-                var projectedPose = MarkerManager.TryGetMarkerNearby(hit.position, out var markerPose)
+                var projectedPose = markerManager.TryGetMarkerNearby(hit.position, out var markerPose)
                     ? markerPose
                     : new Pose(hit.position, worldRotation);
                 setupModeFrame.Transform.SetPose(projectedPose);
