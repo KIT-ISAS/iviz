@@ -13,7 +13,6 @@
         #pragma surface surf Standard vertex:vert addshadow fullforwardshadows
 
         #pragma multi_compile _ USE_NORMALS
-        #pragma multi_compile_instancing
 
         float _AtlasRow;
         sampler2D _SquareTex;
@@ -34,23 +33,29 @@
             float2 intensityUV : TEXCOORD1;
         };
 
-        void vert(inout appdata_full v, out Input o)
+        void vert(inout appdata_base v, out Input o)
         {
             UNITY_INITIALIZE_OUTPUT(Input, o);
 
-            float2 uv = v.texcoord;
-            const float input = tex2Dlod(_InputTex, float4(uv, 0, 0));
-            v.vertex.y += input;
+            float2 uv = 1 - v.texcoord;
+            float input = tex2Dlod(_InputTex, float4(uv, 0, 0));
+
+            v.vertex.y = input;
 
 #if USE_NORMALS
             const float2 normalCoeff = _SquareCoeff.xy;
             const float2 normalOffset = _SquareCoeff.zw;
-            const float px = tex2Dlod(_InputTex, float4(uv.x + normalOffset.x, uv.y, 0, 0));
-            const float py = tex2Dlod(_InputTex, float4(uv.x, uv.y + normalOffset.y, 0, 0));
+            float px = tex2Dlod(_InputTex, float4(uv.x + normalOffset.x, uv.y, 0, 0));
+            float py = tex2Dlod(_InputTex, float4(uv.x, uv.y + normalOffset.y, 0, 0));
+
             float3 f;
             f.x = (py - input) * normalCoeff.x;
             f.y = 1;
             f.z = -(px -  input) * normalCoeff.y;
+
+            if (isnan(f.x)) f.x = 0;
+            if (isnan(f.z)) f.z = 0;
+
             v.normal = normalize(f);
 #endif
 

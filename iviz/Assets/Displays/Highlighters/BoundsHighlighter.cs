@@ -37,6 +37,7 @@ namespace Iviz.Displays.Highlighters
             frame.EnableShadows = false;
             frame.EmissiveColor = Color.blue;
             frame.Color = Color.white;
+            frame.UpdateColumnWidth();
 
             tokenSource = new CancellationTokenSource();
 
@@ -80,6 +81,7 @@ namespace Iviz.Displays.Highlighters
             nodeTransform.SetParentLocal(transform);
             
             frame.SetBounds(bounds);
+            frame.UpdateColumnWidth();
 
             if (tooltip == null)
             {

@@ -77,6 +77,16 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 InvCoeffs(this in Vector3 v)
+        {
+            Vector3 i;
+            i.x = 1f / v.x;
+            i.y = 1f / v.y;
+            i.z = 1f / v.z;
+            return i;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Cross(this in Vector3 lhs, in Vector3 rhs)
         {
             Vector3 r;

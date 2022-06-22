@@ -20,7 +20,7 @@ namespace Iviz.Displays.XR
 
         static Mesh CreateMesh(float r0, float r1)
         {
-            var mesh = new Mesh();
+            var mesh = new Mesh { name = "Ring Mesh" };
             var vertices = new List<Vector3>();
             var indices = new List<int>();
             var colors = new List<Color>();

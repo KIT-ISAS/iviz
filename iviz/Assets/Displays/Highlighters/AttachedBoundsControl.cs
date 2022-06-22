@@ -18,7 +18,7 @@ namespace Iviz.Displays.Highlighters
         ScreenDraggable? draggable;
         bool useTransformFromSource;
 
-        public float FrameColumnWidth { get; set; } = 0.005f;
+        public float FrameColumnWidth { get; set; } = 0.001f;
         public event Action? PointerDown;
         public event Action? PointerUp;
         public event Action? Moved;
@@ -109,6 +109,8 @@ namespace Iviz.Displays.Highlighters
                     frame.Color = draggable.IsDragging
                         ? Resource.Colors.DraggableSelectedColor
                         : Resource.Colors.DraggableHoverColor;
+                    
+                    frame.UpdateColumnWidth();
                 }
                 else if (frame != null)
                 {
@@ -154,6 +156,7 @@ namespace Iviz.Displays.Highlighters
                     frame.Size = validBounds.size;
                     frame.Transform.localPosition = validBounds.center;
                     frame.Visible = draggable.IsDragging || draggable.IsHovering;
+                    frame.UpdateColumnWidth();
                 }
 
                 collider.SetLocalBounds(validBounds);

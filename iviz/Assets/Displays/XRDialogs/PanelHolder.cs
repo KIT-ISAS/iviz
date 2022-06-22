@@ -91,7 +91,7 @@ namespace Iviz.Displays.XR
 
                     frame.Color = Draggable.IsDragging ? Color.cyan : Color.white;
                     frame.EmissiveColor = Draggable.IsDragging ? Color.blue : Color.black;
-                    frame.ColumnWidth = Draggable.IsDragging ? 0.005f : 0.0025f;
+                    frame.ColumnWidth = Draggable.IsDragging ? 0.002f : 0.001f;
                 }
                 else
                 {

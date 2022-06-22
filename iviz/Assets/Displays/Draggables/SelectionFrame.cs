@@ -10,7 +10,7 @@ namespace Iviz.Displays
 {
     public sealed class SelectionFrame : MeshMarkerHolderDisplay, IRecyclable
     {
-        float columnWidth = 0.005f;
+        float columnWidth = 0.002f;
         Vector3 size = Vector3.one;
 
         public Vector3 Size
@@ -35,10 +35,10 @@ namespace Iviz.Displays
             set
             {
                 columnWidth = value;
-                UpdateColumnWidth();
+                RebuildColumnWidth();
             }
         }
-
+        
         float AdjustedColumnWidth => columnWidth / Mathf.Min(Transform.lossyScale.MaxAbsCoeff(), 0.5f);
 
         static MeshMarkerDisplay[] CreateObjects(Transform transform)
@@ -95,7 +95,7 @@ namespace Iviz.Displays
             }
         }
 
-        void UpdateColumnWidth()
+        void RebuildColumnWidth()
         {
             if (children.Length == 0)
             {
@@ -148,6 +148,18 @@ namespace Iviz.Displays
             {
                 resource.ReturnToPool(Resource.Displays.Cube);
             }
+        }
+
+        public override void Suspend()
+        {
+            base.Suspend();
+            columnWidth = 0.002f;
+            Transform.localScale = Vector3.one;
+        }
+
+        public void UpdateColumnWidth()
+        {
+            RebuildColumnWidth();
         }
     }
 }

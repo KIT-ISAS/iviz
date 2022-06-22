@@ -28,7 +28,7 @@ namespace Iviz.Displays.XR
         {
             Color = color;
             Tooltip.Scale = 0.03f;
-            Frame.ColumnWidth = 0.02f;
+            Frame.ColumnWidth = 0.001f;
 
             if (startCollider != null && endCollider != null)
             {

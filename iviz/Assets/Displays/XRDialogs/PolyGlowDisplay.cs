@@ -81,7 +81,7 @@ namespace Iviz.Displays.XR
                 colors.Add(outerColor);
             }
 
-            var mesh = new Mesh();
+            var mesh = new Mesh { name = "PolyGlow" };
             mesh.SetVertices(vertices);
             mesh.SetIndices(indices, MeshTopology.Quads, 0);
             mesh.SetColors(colors);
