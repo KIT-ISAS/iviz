@@ -25,7 +25,7 @@ public sealed class ModelServer : IDisposable
 
     readonly bool verbose;
     readonly AssimpContext importer = new();
-    readonly Dictionary<string, List<string>> packagePaths = new();
+    readonly Dictionary<string, HashSet<string>> packagePaths = new();
     bool disposed;
 
     public int NumPackages => packagePaths.Count;
@@ -142,7 +142,7 @@ public sealed class ModelServer : IDisposable
     {
         if (!packagePaths.TryGetValue(package, out var paths))
         {
-            paths = new List<string>();
+            paths = new HashSet<string>();
             packagePaths[package] = paths;
         }
 
@@ -176,7 +176,7 @@ public sealed class ModelServer : IDisposable
         foreach (string packagePath in paths)
         {
             string path = packagePath + "/" + subPath;
-
+            
             if (!File.Exists(path))
             {
                 LogError($"Failed to resolve uri '{uri}'. Reason: File '{path}' does not exist.");
