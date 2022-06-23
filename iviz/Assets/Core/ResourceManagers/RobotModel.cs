@@ -56,7 +56,7 @@ namespace Iviz.Displays
         public string Description { get; }
         public IReadOnlyDictionary<string, string> LinkParents => linkParents;
 
-        public GameObject BaseLinkObject => 
+        public GameObject BaseLinkObject =>
             !disposed ? baseLinkObject : throw new ObjectDisposedException("this");
 
         public IReadOnlyDictionary<string, GameObject> LinkObjects =>
@@ -356,8 +356,7 @@ namespace Iviz.Displays
 
                 if (info == null)
                 {
-                    RosLogger.Error($"{this}: Failed to retrieve collision '{meshUri}'. Reason: Resource not in cache " +
-                                    "and model loader failed.");
+                    RosLogger.Error($"{this}: Failed to retrieve collision '{meshUri}'.");
                     Object.Destroy(collisionObject);
                     numErrors++;
                     return;
@@ -374,7 +373,7 @@ namespace Iviz.Displays
                     child.layer = LayerType.Collider;
 
                     var collider = child.TryAddComponent<MeshCollider>();
-                    collider.sharedMesh = meshFilter.sharedMesh;
+                    collider.sharedMesh = meshFilter.sharedMesh; // note: may modify
                     collider.convex = true;
                 }
 
@@ -420,17 +419,9 @@ namespace Iviz.Displays
             var (name, origin, geometry, material) = visual;
             var (box, cylinder, sphere, mesh) = geometry;
 
-            GameObject visualObject;
-            if (origin == Origin.Identity)
-            {
-                visualObject = linkObject;
-            }
-            else
-            {
-                visualObject = new GameObject(name != null ? $"[Visual:{name}]" : "[Visual]");
-                visualObject.transform.SetParent(linkObject.transform, false);
-                visualObject.transform.SetLocalPose(origin.ToPose());
-            }
+            var visualObject = new GameObject(name != null ? $"[Visual:{name}]" : "[Visual]");
+            visualObject.transform.SetParent(linkObject.transform, false);
+            visualObject.transform.SetLocalPose(origin.ToPose());
 
             GameObject resourceObject;
             if (mesh is var (meshUri, meshScale))
@@ -449,8 +440,7 @@ namespace Iviz.Displays
 
                 if (info == null)
                 {
-                    RosLogger.Error($"{this}: Failed to retrieve visual '{meshUri}'. Reason: Resource not in cache " +
-                                    "and model loader failed.");
+                    RosLogger.Error($"{this}: Failed to retrieve visual '{meshUri}'.");
                     numErrors++;
                     return;
                 }

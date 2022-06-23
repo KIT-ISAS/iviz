@@ -66,27 +66,31 @@ namespace Iviz.Controllers
         public static bool IsXRVisible => Settings.IsHololens || Instance is { Visible: true };
 
         readonly ARConfiguration config = new();
-        readonly MarkerDetector detector = new();
 
         readonly IPublishedFrame headFrame;
+
         protected readonly IPublishedFrame cameraFrame;
-        protected readonly Sender<CameraInfo>? colorInfoSender;
-        protected readonly Sender<CameraInfo>? depthInfoSender;
+        protected readonly Sender<CameraInfo> colorInfoSender;
         protected readonly PulseManager pulseManager;
+        protected Sender<CameraInfo>? depthInfoSender;
+
+        protected readonly ARMarkerManager markerManager = new();
+        protected readonly MarkerDetector markerDetector = new();
 
         float? joyVelocityAngle;
         Vector3? joyVelocityPos;
         float? joyVelocityScale;
         uint markerSeq;
 
-        protected ARMarkerManager MarkerManager { get; } = new();
 
-        public Sender<ARMarkerArray>? MarkerSender { get; }
-        public Sender<Image>? ColorSender { get; }
-        public Sender<Image>? DepthSender { get; }
-        public Sender<Image>? DepthConfidenceSender { get; }
+        public bool ProvidesOcclusion { get; protected set; }
 
         public static bool IsPulseActive => Instance != null && Instance.pulseManager.HasPulse;
+
+        public Sender<ARMarkerArray>? MarkerSender { get; private set; }
+        public Sender<Image> ColorSender { get; }
+        public Sender<Image>? DepthSender { get; private set; }
+        public Sender<Image>? DepthConfidenceSender { get; private set; }
 
         public ARConfiguration Config
         {
@@ -156,7 +160,7 @@ namespace Iviz.Controllers
             set
             {
                 config.EnableQrDetection = value;
-                detector.EnableQr = value;
+                markerDetector.EnableQr = value;
             }
         }
 
@@ -166,7 +170,7 @@ namespace Iviz.Controllers
             set => config.EnableMeshing = value;
         }
 
-        public virtual bool EnablePlaneDetection
+        public bool EnablePlaneDetection
         {
             get => config.EnablePlaneDetection;
             set => config.EnablePlaneDetection = value;
@@ -178,7 +182,7 @@ namespace Iviz.Controllers
             set
             {
                 config.EnableArucoDetection = value;
-                detector.EnableAruco = value;
+                markerDetector.EnableAruco = value;
             }
         }
 
@@ -240,19 +244,29 @@ namespace Iviz.Controllers
 
             Settings.SettingsManager.UpdateQualityLevel();
 
-            MarkerSender = new Sender<ARMarkerArray>("~xr/markers");
             ColorSender = new Sender<Image>("~xr/color/image_color");
-            DepthSender = new Sender<Image>("~xr/depth/image");
-            DepthConfidenceSender = new Sender<Image>("~xr/depth/image_confidence");
             colorInfoSender = new Sender<CameraInfo>("~xr/color/camera_info");
-            depthInfoSender = new Sender<CameraInfo>("~xr/depth/camera_info");
 
             headFrame = TfPublisher.Instance.GetOrCreate(HeadFrameId, isInternal: true);
             cameraFrame = TfPublisher.Instance.GetOrCreate(CameraFrameId, isInternal: true);
 
-            detector.MarkerDetected += OnMarkerDetected;
-
+            markerDetector.MarkerDetected += OnMarkerDetected;
             pulseManager = new PulseManager();
+        }
+
+        protected void PostInitialize()
+        {
+            if (ProvidesOcclusion)
+            {
+                DepthSender = new Sender<Image>("~xr/depth/image");
+                DepthConfidenceSender = new Sender<Image>("~xr/depth/image_confidence");
+                depthInfoSender = new Sender<CameraInfo>("~xr/depth/camera_info");
+            }
+
+            if (MarkerDetector.IsEnabled)
+            {
+                MarkerSender = new Sender<ARMarkerArray>("~xr/markers");
+            }
         }
 
         protected static void RaiseARStateChanged()
@@ -379,7 +393,7 @@ namespace Iviz.Controllers
             return UnityUtils.RegularizeAngle(unityPose.rotation.eulerAngles.y);
         }
 
-        public void SetWorldPose(in Pose unityPose, RootMover mover)
+        protected void SetWorldPose(in Pose unityPose, RootMover mover)
         {
             float angle = AngleFromPose(unityPose);
             WorldPosition = unityPose.position;
@@ -451,8 +465,8 @@ namespace Iviz.Controllers
             var array = markers.Select(ToMarker).ToArray();
             foreach (var marker in array)
             {
-                MarkerManager.Process(marker);
-                MarkerManager.Highlight(marker);
+                markerManager.Process(marker);
+                markerManager.Highlight(marker);
             }
 
             MarkerSender?.Publish(new ARMarkerArray(array));
@@ -485,7 +499,7 @@ namespace Iviz.Controllers
             Settings.SettingsManager.UpdateQualityLevel();
 
             MarkerSender?.Dispose();
-            detector.Dispose();
+            markerDetector.Dispose();
 
             colorInfoSender?.Dispose();
             ColorSender?.Dispose();

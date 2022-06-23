@@ -25,7 +25,7 @@ public sealed class ModelServer : IDisposable
 
     readonly bool verbose;
     readonly AssimpContext importer = new();
-    readonly Dictionary<string, List<string>> packagePaths = new();
+    readonly Dictionary<string, HashSet<string>> packagePaths = new();
     bool disposed;
 
     public int NumPackages => packagePaths.Count;
@@ -142,7 +142,7 @@ public sealed class ModelServer : IDisposable
     {
         if (!packagePaths.TryGetValue(package, out var paths))
         {
-            paths = new List<string>();
+            paths = new HashSet<string>();
             packagePaths[package] = paths;
         }
 
@@ -172,13 +172,15 @@ public sealed class ModelServer : IDisposable
 
         string subPath = Uri.UnescapeDataString(uri.AbsolutePath);
 
+        bool errorMessageShown = false;
         foreach (string packagePath in paths)
         {
             string path = packagePath + "/" + subPath;
-
+            
             if (!File.Exists(path))
             {
                 LogError($"Failed to resolve uri '{uri}'. Reason: File '{path}' does not exist.");
+                errorMessageShown = true;
                 continue;
             }
 
@@ -194,7 +196,11 @@ public sealed class ModelServer : IDisposable
             return null;
         }
 
-        LogError($"Failed to resolve uri '{uri}'.");
+        if (!errorMessageShown)
+        {
+            LogError($"Failed to resolve uri '{uri}'.");
+        }
+
         outPackagePath = null;
         return null;
     }
@@ -213,6 +219,8 @@ public sealed class ModelServer : IDisposable
             LogError($"Failed to resolve uri '{msg.Request.Uri}'. Reason: Invalid uri.");
             return;
         }
+        
+        LogUp(uri);
 
         string? modelPath;
         switch (uri.Scheme)
@@ -279,8 +287,6 @@ public sealed class ModelServer : IDisposable
         msg.Response.Success = true;
         msg.Response.Message = "";
         msg.Response.Model = model;
-
-        LogUp(uri);
     }
 
     public void TextureCallback(GetModelTexture msg)
@@ -289,7 +295,7 @@ public sealed class ModelServer : IDisposable
         {
             BuiltIns.ThrowArgumentNull(nameof(msg));
         }
-
+        
         // TODO: force conversion to either png or jpg
 
         if (!Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out var uri))
@@ -299,6 +305,8 @@ public sealed class ModelServer : IDisposable
             LogError($"Failed to resolve uri '{msg.Request.Uri}'. Reason: Invalid uri.");
             return;
         }
+
+        LogUp(uri);
 
         string? texturePath;
         switch (uri.Scheme)
@@ -361,8 +369,6 @@ public sealed class ModelServer : IDisposable
             Format = Path.GetExtension(texturePath).Replace(".", ""),
             Data = data
         };
-
-        LogUp(uri);
     }
 
     Model LoadModel(string fileName)

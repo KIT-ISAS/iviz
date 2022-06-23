@@ -18,7 +18,6 @@ namespace Iviz.MarkerDetection
 {
     public sealed class MarkerDetector
     {
-        const int DelayBetweenCapturesInMs = 3000;
         const int DelayBetweenCapturesFastInMs = 500;
 
         bool enableQr;
@@ -28,6 +27,8 @@ namespace Iviz.MarkerDetection
         readonly CancellationTokenSource tokenSource = new();
 
         public event Action<Screenshot, IReadOnlyList<IDetectedMarker>>? MarkerDetected;
+
+        public int DelayBetweenCapturesInMs { get; set; } = 3000;
 
         public bool EnableQr
         {
@@ -54,6 +55,8 @@ namespace Iviz.MarkerDetection
                 }
             }
         }
+
+        public static bool IsEnabled => CvNative.IsEnabled;
 
         public MarkerDetector()
         {
@@ -156,7 +159,7 @@ namespace Iviz.MarkerDetection
 
             var newArucoMarkers = context.DetectArucoMarkers();
             var newQrMarkers = context.DetectQrMarkers();
-            
+
             switch (newArucoMarkers.Length != 0, newQrMarkers.Length != 0)
             {
                 case (true, false):
@@ -196,7 +199,7 @@ namespace Iviz.MarkerDetection
             {
                 return default;
             }
-            
+
             ReadOnlySpan<Vector3f> objectCorners = stackalloc[]
             {
                 new Vector3f(-sizeInM / 2, sizeInM / 2, 0),

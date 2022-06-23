@@ -24,13 +24,6 @@ namespace Iviz.Displays
         public static async ValueTask<MeshMarkerHolderDisplay> CreateAsync(string uriString,
             Model msg, IServiceProvider? provider, CancellationToken token)
         {
-            Debug.LogWarning(uriString);
-            if (uriString ==
-                "package://aws-robomaker-hospital-world//models/aws_robomaker_residential_Sofa_01/meshes/aws_Sofa_01_visual.DAE")
-            {
-                Debug.LogWarning("lol");
-            }
-            
             ThrowHelper.ThrowIfNull(uriString, nameof(uriString));
             ThrowHelper.ThrowIfNull(msg, nameof(msg));
 

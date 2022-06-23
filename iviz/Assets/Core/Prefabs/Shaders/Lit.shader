@@ -9,7 +9,7 @@
 		LOD 200
 
 		CGPROGRAM
-		#pragma surface surf Standard fullforwardshadows
+		#pragma surface surf Standard fullforwardshadows addshadow
 
 		struct Input {
 			fixed4 color : COLOR;

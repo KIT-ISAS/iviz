@@ -1,5 +1,4 @@
 {
   "[Franka Emika] Panda": "panda",
   "[Fraunhofer IOSB] BoB": "e1_oilquick_bucket_raedlinger",
-  "[UR] UR16e": "ur",
 }

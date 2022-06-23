@@ -21,7 +21,6 @@ Shader "iviz/MultiplyMeshOcclusionOnly"
         #pragma surface surf Standard vertex:vert
         #pragma instancing_options procedural:setup 
 		#pragma multi_compile _ USE_TEXTURE_SCALE USE_TEXTURE_SCALE_ALL
-        #pragma multi_compile_instancing
         #pragma target 4.5
 
         struct PointWithColor {

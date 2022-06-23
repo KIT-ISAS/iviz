@@ -16,8 +16,9 @@ namespace Iviz.Displays.Highlighters
         SelectionFrame? frame;
         IHasBounds? source;
         ScreenDraggable? draggable;
+        bool useTransformFromSource;
 
-        public float FrameColumnWidth { get; set; } = 0.005f;
+        public float FrameColumnWidth { get; set; } = 0.001f;
         public event Action? PointerDown;
         public event Action? PointerUp;
         public event Action? Moved;
@@ -65,12 +66,24 @@ namespace Iviz.Displays.Highlighters
                 nodeTransform.SetLocalPose(boundsTransform.AsLocalPose());
                 nodeTransform.localScale = boundsTransform.localScale;
             }
+            else
+            {
+                nodeTransform.localScale = Vector3.zero;
+            }
 
             draggable = nodeTransform.gameObject.AddComponent<T>();
             draggable.RayCollider = collider;
-            draggable.TargetTransform = target.CheckedNull() ??
-                                        source.BoundsTransform.CheckedNull() ??
-                                        throw new ArgumentNullException(nameof(target));
+
+            useTransformFromSource = target == null;
+            if (target != null)
+            {
+                draggable.TargetTransform = target;
+            }
+            else if (source.BoundsTransform != null)
+            {
+                draggable.TargetTransform = source.BoundsTransform;
+            }
+
             draggable.PointerDown += () => PointerDown?.Invoke();
             draggable.PointerUp += () => PointerUp?.Invoke();
             draggable.Moved += () => Moved?.Invoke();
@@ -96,6 +109,8 @@ namespace Iviz.Displays.Highlighters
                     frame.Color = draggable.IsDragging
                         ? Resource.Colors.DraggableSelectedColor
                         : Resource.Colors.DraggableHoverColor;
+                    
+                    frame.UpdateColumnWidth();
                 }
                 else if (frame != null)
                 {
@@ -124,6 +139,14 @@ namespace Iviz.Displays.Highlighters
                 nodeTransform.SetParentLocal(validTransform.parent);
                 nodeTransform.SetLocalPose(validTransform.AsLocalPose());
                 nodeTransform.localScale = validTransform.localScale;
+                if (useTransformFromSource)
+                {
+                    draggable.TargetTransform = validTransform;
+                }
+            }
+            else
+            {
+                nodeTransform.localScale = Vector3.zero;
             }
 
             if (source.Bounds is { } validBounds)
@@ -133,6 +156,7 @@ namespace Iviz.Displays.Highlighters
                     frame.Size = validBounds.size;
                     frame.Transform.localPosition = validBounds.center;
                     frame.Visible = draggable.IsDragging || draggable.IsHovering;
+                    frame.UpdateColumnWidth();
                 }
 
                 collider.SetLocalBounds(validBounds);

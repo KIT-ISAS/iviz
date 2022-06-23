@@ -688,6 +688,10 @@ namespace Iviz.Controllers
                     e);
                 return null;
             }
+            finally
+            {
+                runningTs.Cancel();
+            }
         }
 
 
@@ -805,7 +809,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                description.Append(ErrorStr).Append("Failed to load mesh resource. See Log.").AppendLine();
+                description.Append(ErrorStr).Append("Failed to load mesh resource. Check out the Log messages from [Me].").AppendLine();
                 return;
             }
 
@@ -867,22 +871,6 @@ namespace Iviz.Controllers
                         "Values too large.");
                 }
             }
-
-            /*
-            void UpdateResourceAsyncLog()
-            {
-                if (resourceKey != null)
-                {
-                    return;
-                }
-
-                if (msg.Type() == MarkerType.MeshResource)
-                {
-                    description.Append(ErrorStr).Append("Unknown mesh resource '").Append(msg.MeshResource).Append("'")
-                        .AppendLine();
-                }
-            }
-            */
 
             void CreateArrowLog()
             {

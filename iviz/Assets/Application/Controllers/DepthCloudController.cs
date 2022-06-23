@@ -190,7 +190,9 @@ namespace Iviz.Controllers
                 ColorListener = type switch
                 {
                     Image.MessageType => new Listener<Image>(colorTopic, ColorHandler),
+#if !UNITY_ANDROID
                     CompressedImage.MessageType => new Listener<CompressedImage>(colorTopic, ColorHandlerCompressed),
+#endif
                     _ => null
                 };
 
@@ -237,7 +239,9 @@ namespace Iviz.Controllers
                 DepthListener = type switch
                 {
                     Image.MessageType => new Listener<Image>(depthTopic, DepthHandler),
+#if !UNITY_ANDROID
                     CompressedImage.MessageType => new Listener<CompressedImage>(depthTopic, DepthHandlerCompressed),
+#endif
                     _ => null
                 };
 

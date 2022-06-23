@@ -94,7 +94,9 @@ namespace Iviz.Resources
             {
                 { PointCloud2.MessageType, ModuleType.PointCloud },
                 { Image.MessageType, ModuleType.Image },
+#if !UNITY_ANDROID
                 { CompressedImage.MessageType, ModuleType.Image },
+#endif
                 { Marker.MessageType, ModuleType.Marker },
                 { MarkerArray.MessageType, ModuleType.Marker },
                 { InteractiveMarkerUpdate.MessageType, ModuleType.InteractiveMarker },
@@ -111,7 +113,7 @@ namespace Iviz.Resources
                 { OccupancyGrid.MessageType, ModuleType.OccupancyGrid },
                 { GridMap.MessageType, ModuleType.GridMap },
                 { WidgetArray.MessageType, ModuleType.GuiWidget },
-                
+
                 // these are already implemented, but need refinement
                 //{ JointState.MessageType, ModuleType.JointState },
                 //{ Path.MessageType, ModuleType.Path },

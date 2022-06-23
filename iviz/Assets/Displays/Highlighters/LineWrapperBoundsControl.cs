@@ -119,11 +119,9 @@ namespace Iviz.Displays.Highlighters
                         : Resource.Colors.DraggableHoverColor;
                     left.Color = diffuseColor;
                     right.Color = diffuseColor;
-                    Debug.Log(anyDragging + " -- " + anyHovering);
                 }
                 else
                 {
-                    Debug.Log("off");
                     var emissiveColor = Color.black;
                     left.EmissiveColor = emissiveColor;
                     right.EmissiveColor = emissiveColor;

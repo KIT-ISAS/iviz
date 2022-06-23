@@ -30,7 +30,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public DepthCloudModuleData(ModuleDataConstructor constructor) 
+        public DepthCloudModuleData(ModuleDataConstructor constructor)
         {
             panel = ModulePanelManager.GetPanelByResourceType<DepthCloudModulePanel>(ModuleType.DepthCloud);
             controller = new DepthCloudController((DepthCloudConfiguration?)constructor.Configuration);
@@ -49,7 +49,7 @@ namespace Iviz.App
             catch (Exception e)
             {
                 RosLogger.Error($"{this}: Failed to dispose controller", e);
-            }            
+            }
         }
 
         public override void SetupPanel()
@@ -145,7 +145,7 @@ namespace Iviz.App
                     panel.Min.Value = min;
                     panel.Max.Value = max;
                 }
-                
+
                 panel.Min.Interactable = f;
                 panel.Max.Interactable = f;
             };
@@ -175,7 +175,11 @@ namespace Iviz.App
         {
             var topics = new List<string> { NoneStr };
             topics.AddRange(RosManager.Connection.GetSystemPublishedTopicTypes()
+#if !UNITY_ANDROID
                 .Where(topicInfo => topicInfo.Type is Image.MessageType or CompressedImage.MessageType)
+#else
+                .Where(topicInfo => topicInfo.Type is Image.MessageType)
+#endif
                 .Select(topicInfo => topicInfo.Topic)
             );
             return topics;
