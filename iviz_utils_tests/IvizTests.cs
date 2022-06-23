@@ -28,12 +28,14 @@ namespace Iviz.UtilsTests;
 [Category("Iviz")]
 public class IvizTests
 {
-    //static readonly Uri CallerUri = new Uri("http://localhost:7616");
+    static readonly Uri CallerUri = new Uri("http://localhost:7616");
+    static readonly Uri MasterUri = new Uri("http://localhost:11311");
 
-    //static readonly Uri MasterUri = new Uri("http://localhost:11311");
+    //static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
+    //static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
 
-    static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
-    static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
+    //static readonly Uri CallerUri = new Uri("http://192.168.0.157:7616");
+    //static readonly Uri MasterUri = new Uri("http://192.168.0.220:11311");
 
     const string CallerId = "/iviz_util_tests";
 
@@ -528,7 +530,7 @@ public class IvizTests
         writer.Write(msg);
         Thread.Sleep(2000);
     }
-
+    
     [NotNull]
     static GridMap CreateGridmap(uint w, uint h)
     {
@@ -567,6 +569,59 @@ public class IvizTests
                 }
             }
         };
+    }
+
+    [Test]
+    public void TestGridmap3()
+    {
+        using var writer = client.CreateWriter<GridMap>("/gridmap");
+        
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.AddModuleFromTopic("/gridmap");
+
+        writer.WaitForAnySubscriber();
+        Thread.Sleep(100);
+
+        uint w = 600, h = 600;
+        
+        var msg = new GridMap
+        {
+            Info = new GridMapInfo
+            {
+                LengthX = h * 0.05f,
+                LengthY = w * 0.05f,
+                Pose = Pose.Identity,
+                Resolution = 0.01f,
+                Header = new Header(0, time.Now(), ""),
+            },
+            Data = new Float32MultiArray[]
+            {
+                new Float32MultiArray
+                {
+                    Layout = new MultiArrayLayout
+                    {
+                        Dim = new MultiArrayDimension[]
+                        {
+                            new MultiArrayDimension
+                            {
+                                Label = "column_index",
+                                Size = h,
+                                Stride = w * h
+                            },
+                            new MultiArrayDimension
+                            {
+                                Label = "row_index",
+                                Size = w,
+                                Stride = w
+                            }
+                        }
+                    },
+                }
+            }
+        };
+        
+        writer.Write(msg);
+        Thread.Sleep(2000);
     }
 
     [Test]
@@ -770,11 +825,27 @@ public class IvizTests
         Thread.Sleep(2000);  
     }
 
+    [Test]
+    public void TestSdf()
+    {
+        using var writer = client.CreateWriter<Marker>("/markers", latchingEnabled: true);
+
+        //var ivizController = new IvizController(client, IvizId);
+        //ivizController.AddModuleFromTopic("/markers");
+
+        var marker = RosMarkerHelper.CreateResource("package://aws-robomaker-hospital-world/worlds/hospital.world");
+        writer.Write(marker);
+        Thread.Sleep(5000);
+    }
+
+
+    [StructLayout(LayoutKind.Sequential)]
     struct Float4
     {
         public float x, y, z, w;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     struct Float3
     {
         public float x, y, z;
