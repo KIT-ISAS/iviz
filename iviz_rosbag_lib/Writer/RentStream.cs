@@ -5,88 +5,87 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Tools;
 
-namespace Iviz.Rosbag.Writer
+namespace Iviz.Rosbag.Writer;
+
+internal struct RentStream : IDisposable
 {
-    internal struct RentStream : IDisposable
+    readonly Rent<byte> bytes;
+    int p;
+
+    public RentStream(int size) => (bytes, p) = (new Rent<byte>(size), 0);
+
+    public void Dispose()
     {
-        readonly Rent<byte> bytes;
-        int p;
+        bytes.Dispose();
+    }
 
-        public RentStream(int size) => (bytes, p) = (new Rent<byte>(size), 0);
-
-        public void Dispose()
+    readonly void ThrowIfOutOfRange(int off)
+    {
+        int remaining = bytes.Length - off;
+        if (off > remaining)
         {
-            bytes.Dispose();
+            BuiltIns.ThrowBufferOverflow(off, remaining);
         }
-
-        readonly void ThrowIfOutOfRange(int off)
-        {
-            int remaining = bytes.Length - off;
-            if (off > remaining)
-            {
-                BuiltIns.ThrowBufferOverflow(off, remaining);
-            }
-        }        
+    }        
         
-        void WriteValue<T>(T t)
-        {
-            ThrowIfOutOfRange(Unsafe.SizeOf<T>());
-            ref byte dstPtr = ref bytes.Array[p];
-            Unsafe.WriteUnaligned(ref dstPtr, t);
-            p += Unsafe.SizeOf<T>();
-        }
+    void WriteValue<T>(T t)
+    {
+        ThrowIfOutOfRange(Unsafe.SizeOf<T>());
+        ref byte dstPtr = ref bytes.Array[p];
+        Unsafe.WriteUnaligned(ref dstPtr, t);
+        p += Unsafe.SizeOf<T>();
+    }
 
-        public void Write(int value)
-        {
-            WriteValue(value);
-        }
+    public void Write(int value)
+    {
+        WriteValue(value);
+    }
 
-        public void Write(in time value)
-        {
-            WriteValue(value);
-        }
+    public void Write(in time value)
+    {
+        WriteValue(value);
+    }
 
-        public void Write(OpCode value)
-        {
-            WriteValue((byte)value);
-        }
+    public void Write(OpCode value)
+    {
+        WriteValue((byte)value);
+    }
 
-        public void Write(long value)
-        {
-            WriteValue(value);
-        }
+    public void Write(long value)
+    {
+        WriteValue(value);
+    }
 
-        public void Write(string value)
+    public void Write(string value)
+    {
+        byte[] array = bytes.Array;
+        foreach (char t in value)
         {
-            byte[] array = bytes.Array;
-            foreach (char t in value)
-            {
-                array[p++] = (byte)t;
-            }
+            array[p++] = (byte)t;
         }
+    }
 
-        public void WriteUtf8(string value)
-        {
-            byte[] array = bytes.Array;
-            int length = BuiltIns.UTF8.GetByteCount(value);
-            BuiltIns.UTF8.GetBytes(value, 0, value.Length, array, p);
-            p += length;
-        }
+    public void WriteUtf8(string value)
+    {
+        byte[] array = bytes.Array;
+        int length = BuiltIns.UTF8.GetByteCount(value);
+        BuiltIns.UTF8.GetBytes(value, 0, value.Length, array, p);
+        p += length;
+    }
 
-        public void Write(char value)
-        {
-            WriteValue((byte)value);
-        }
+    public void Write(char value)
+    {
+        WriteValue((byte)value);
+    }
 
-        public readonly Stream WriteTo(Stream stream)
-        {
-            stream.Write(bytes);
-            return stream;
-        }
+    public readonly Stream WriteTo(Stream stream)
+    {
+        stream.Write(bytes);
+        return stream;
+    }
 
-        public readonly ValueTask WriteToAsync(Stream stream)
-        {
-            return stream.WriteAsync(bytes);
-        }
+    public readonly ValueTask WriteToAsync(Stream stream)
+    {
+        return stream.WriteAsync(bytes);
     }
 }

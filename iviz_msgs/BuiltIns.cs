@@ -264,6 +264,9 @@ namespace Iviz.Msgs
         }
 
         [DoesNotReturn, AssertionMethod]
+        public static void ThrowArgument(string arg, string message) => throw new ArgumentNullException(arg);
+
+        [DoesNotReturn, AssertionMethod]
         public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);
 
         [DoesNotReturn, AssertionMethod]
