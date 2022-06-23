@@ -150,7 +150,7 @@ namespace Iviz.App
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
-            var config = JsonConvert.DeserializeObject<JoystickConfiguration>(configAsJson);
+            var config = JsonUtils.DeserializeObject<JoystickConfiguration>(configAsJson);
 
             foreach (string field in fields)
             {

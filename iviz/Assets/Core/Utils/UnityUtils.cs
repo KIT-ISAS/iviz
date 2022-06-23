@@ -16,6 +16,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Tools;
 using Iviz.Urdf;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using TMPro;
 using Unity.Collections;
 using Unity.IL2CPP.CompilerServices;
@@ -42,32 +43,34 @@ namespace Iviz.Core
         public static float MaxAbsCoeff3(this in float4 p) => MaxAbsCoeff(p.x, p.y, p.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float MaxAbsCoeff(this in Point p) => MaxAbsCoeff(p.X, p.Y, p.Z);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float MaxAbsCoeff(this in Msgs.GeometryMsgs.Vector3 p) => MaxAbsCoeff(p.X, p.Y, p.Z);
+        public static float MaxAbsCoeff(this in Point p) => p.ToUnity().MaxAbsCoeff();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MaxAbsCoeff(this in Vector3 p) => MaxAbsCoeff(p.x, p.y, p.z);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float MaxAbsCoeff(this in Msgs.GeometryMsgs.Vector3 p) => p.ToUnity().MaxAbsCoeff();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float MaxAbsCoeff(float x, float y, float z) =>
             Mathf.Max(Mathf.Max(Mathf.Abs(x), Mathf.Abs(y)), Mathf.Abs(z));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float MaxAbsCoeff(double x, double y, double z) =>
-            Mathf.Max(Mathf.Max(Mathf.Abs((float)x), Mathf.Abs((float)y)), Mathf.Abs((float)z));
+        public static float MaxAbsCoeff(this Vector4 p)
+        {
+            return Unsafe.As<Vector4, Quaternion>(ref p).MaxAbsCoeff();
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float MaxAbsCoeff(this in Vector4 p)
+        public static float MaxAbsCoeff(this in Quaternion p)
         {
             return Mathf.Max(Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z)), Mathf.Abs(p.w));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 ToVector(this in Quaternion p)
+        public static Vector4 ToVector(this Quaternion p)
         {
-            return new Vector4(p.x, p.y, p.z, p.w);
+            return Unsafe.As<Quaternion, Vector4>(ref p);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -643,8 +646,7 @@ namespace Iviz.Core
         public static bool ApproximatelyZero(this in Vector3 f) => f.MaxAbsCoeff() < 8 * float.Epsilon;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ApproximatelyZero(this in Msgs.GeometryMsgs.Vector3 f) =>
-            f.MaxAbsCoeff() < 8 * double.Epsilon;
+        public static bool ApproximatelyZero(this in Msgs.GeometryMsgs.Vector3 f) => f.ToUnity().ApproximatelyZero();
 
         public static ReadOnlyDictionary<T, TU> AsReadOnly<T, TU>(this Dictionary<T, TU> t)
         {
@@ -814,6 +816,14 @@ namespace Iviz.Core
             }
 
             return array;
+        }
+    }
+
+    public static class JsonUtils
+    {
+        public static T DeserializeObject<T>(string value)
+        {
+            return JsonConvert.DeserializeObject<T>(value) ?? throw new JsonException("Object could not be deserialized");
         }
     }
 }

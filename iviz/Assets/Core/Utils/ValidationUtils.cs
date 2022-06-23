@@ -37,20 +37,17 @@ namespace Iviz.Core
             v.R.IsInvalid() || v.G.IsInvalid() || v.B.IsInvalid() || v.A.IsInvalid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInvalid(this in Msgs.GeometryMsgs.Vector3 v) =>
-            v.X.IsInvalid() || v.Y.IsInvalid() || v.Z.IsInvalid();
+        public static bool IsInvalid(this in Msgs.GeometryMsgs.Vector3 v) => v.ToUnity().IsInvalid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInvalid(this in Point v) =>
-            v.X.IsInvalid() || v.Y.IsInvalid() || v.Z.IsInvalid();
+        public static bool IsInvalid(this in Point v) => v.ToUnity().IsInvalid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this in Point32 v) =>
             v.X.IsInvalid() || v.Y.IsInvalid() || v.Z.IsInvalid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsInvalid(this in Quaternion v) =>
-            v.X.IsInvalid() || v.Y.IsInvalid() || v.Z.IsInvalid() || v.W.IsInvalid();
+        static bool IsInvalid(this in Quaternion v) => v.ToUnity().IsInvalid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this in UnityEngine.Quaternion v) =>
@@ -61,7 +58,7 @@ namespace Iviz.Core
             IsInvalid(transform.Translation) || IsInvalid(transform.Rotation);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInvalid(this in Pose pose) => IsInvalid(pose.Position) || IsInvalid(pose.Orientation);
+        public static bool IsInvalid(this in Pose pose) => IsInvalid(pose.Position.ToUnity()) || IsInvalid(pose.Orientation.ToUnity());
      
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this in Bounds v) => v.center.IsInvalid() || v.size.IsInvalid();

@@ -96,6 +96,16 @@ namespace Iviz.Core
             q.z = (float)p.Z;
             return q;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 ToUnity(this in Point p)
+        {
+            Vector3 q;
+            q.x = (float)p.X;
+            q.y = (float)p.Y;
+            q.z = (float)p.Z;
+            return q;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UnityEngine.Quaternion ToUnity(this in Quaternion p)

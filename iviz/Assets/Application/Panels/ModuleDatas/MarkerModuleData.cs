@@ -102,7 +102,7 @@ namespace Iviz.App
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
-            var config = JsonConvert.DeserializeObject<MarkerConfiguration>(configAsJson);
+            var config = JsonUtils.DeserializeObject<MarkerConfiguration>(configAsJson);
 
             foreach (string field in fields)
             {

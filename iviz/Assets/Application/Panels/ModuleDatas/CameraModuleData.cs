@@ -123,7 +123,7 @@ namespace Iviz.App
 
         public void UpdateConfiguration(string configAsJson, string[] fields)
         {
-            var config = JsonConvert.DeserializeObject<CameraConfiguration>(configAsJson);
+            var config = JsonUtils.DeserializeObject<CameraConfiguration>(configAsJson);
 
             foreach (string field in fields)
             {

@@ -108,7 +108,7 @@ namespace Iviz.App
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
-            var config = JsonConvert.DeserializeObject<GridMapConfiguration>(configAsJson);
+            var config = JsonUtils.DeserializeObject<GridMapConfiguration>(configAsJson);
 
             foreach (string field in fields)
             {

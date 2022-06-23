@@ -94,7 +94,7 @@ namespace Iviz.Displays
             try
             {
                 string text = File.ReadAllText(Settings.ResourcesFilePath);
-                resourceFiles = JsonConvert.DeserializeObject<ResourceFiles>(text);
+                resourceFiles = JsonUtils.DeserializeObject<ResourceFiles>(text);
             }
             catch (Exception e)
             {

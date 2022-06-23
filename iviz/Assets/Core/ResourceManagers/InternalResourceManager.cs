@@ -39,7 +39,7 @@ namespace Iviz.Resources
                 return;
             }
 
-            var robots = JsonConvert.DeserializeObject<Dictionary<string, string>>(robotsFile);
+            var robots = JsonUtils.DeserializeObject<Dictionary<string, string>>(robotsFile);
             var newRobotDescriptions = new Dictionary<string, string>();
             foreach (var (key, value) in robots)
             {

@@ -15,9 +15,9 @@ https://doi.org/10.1016/j.simpa.2021.100057) (open access!).
 To run iviz, you need the following:
 * For mobile: iOS (> 11.0) or Android (> 7.0)
 * For the standalone package: Windows, Linux, or macOS
-* For running from the editor: Unity 2021.3
+* For running from the editor: Unity 2021.3 (make sure to select the scene at 'Scenes/UI AR')
 
-The Unity project has no external dependencies (all required libraries are included), so installing it is just a matter of cloning the repository, launching Unity, and selecting the scene at 'Scenes/UI AR'.
+The Unity project has no external dependencies (all required libraries are included), so installing it is just a matter of cloning the repository and launching Unity.
 
 ## 2. Getting Started
 

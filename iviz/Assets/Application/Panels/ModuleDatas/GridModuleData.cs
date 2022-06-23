@@ -92,7 +92,7 @@ namespace Iviz.App
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
-            GridConfiguration config = JsonConvert.DeserializeObject<GridConfiguration>(configAsJson);
+            var config = JsonUtils.DeserializeObject<GridConfiguration>(configAsJson);
 
             foreach (string field in fields)
             {
