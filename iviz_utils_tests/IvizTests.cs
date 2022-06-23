@@ -28,12 +28,12 @@ namespace Iviz.UtilsTests;
 [Category("Iviz")]
 public class IvizTests
 {
-    //static readonly Uri CallerUri = new Uri("http://localhost:7616");
+    static readonly Uri CallerUri = new Uri("http://localhost:7616");
 
-    //static readonly Uri MasterUri = new Uri("http://localhost:11311");
+    static readonly Uri MasterUri = new Uri("http://localhost:11311");
 
-    static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
-    static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
+    //static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
+    //static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
 
     const string CallerId = "/iviz_util_tests";
 
@@ -86,7 +86,7 @@ public class IvizTests
                 int i = Random.Shared.Next(0, 10000);
                 var p = new Vector3(Random.Shared.NextDouble(), Random.Shared.NextDouble(), 0);
                 var transform = new TransformStamped(
-                    new Header(s++, time.Now(), ""), "frame_" + i, Transform.Identity.WithTranslation(p)
+                    new Header(s++, time.Now(), ""), "frame_" + i + "äää", Transform.Identity.WithTranslation(p)
                 );
                 var message = new TFMessage(new[] { transform });
                 writer.Write(message);
@@ -508,8 +508,8 @@ public class IvizTests
     [Test]
     public void TestGridmap2()
     {
-        using var writer = client.CreateWriter<GridMap>("/gridmap");
-
+        using var writer = client.CreateWriter<GridMap>("/gridmap", true);
+ 
         var ivizController = new IvizController(client, IvizId);
         ivizController.AddModuleFromTopic("/gridmap");
 
@@ -522,11 +522,12 @@ public class IvizTests
         float[] data = new float[w * h];
 
         var msg = CreateGridmap(w, h);
+        msg.Layers = new[] { "elevation" };
         msg.Data[0].Data = data;
 
         data[0] = 10;
         writer.Write(msg);
-        Thread.Sleep(2000);
+        Thread.Sleep(3600 * 1000);
     }
 
     [NotNull]
@@ -540,7 +541,7 @@ public class IvizTests
                 LengthY = w * 0.05f,
                 Pose = Pose.Identity,
                 Resolution = 0.05f,
-                Header = new Header(0, time.Now(), ""),
+                Header = new Header(0, time.Now(), "map"),
             },
             Data = new Float32MultiArray[]
             {
@@ -708,7 +709,7 @@ public class IvizTests
         Console.WriteLine("Sending!");
         writer.Write(msg);
         Thread.Sleep(2000);
-        
+
         msg = new PointCloud2
         {
             Data = data,
@@ -727,8 +728,8 @@ public class IvizTests
 
         Console.WriteLine("Sending!");
         writer.Write(msg);
-        Thread.Sleep(2000);        
-        
+        Thread.Sleep(2000);
+
         msg = new PointCloud2
         {
             Data = data,
@@ -747,8 +748,8 @@ public class IvizTests
 
         Console.WriteLine("Sending!");
         writer.Write(msg);
-        Thread.Sleep(2000);   
-        
+        Thread.Sleep(2000);
+
         msg = new PointCloud2
         {
             Data = data,
@@ -767,8 +768,41 @@ public class IvizTests
 
         Console.WriteLine("Sending!");
         writer.Write(msg);
-        Thread.Sleep(2000);  
+        Thread.Sleep(2000);
     }
+
+    [Test]
+    public void TestImage()
+    {
+        using var writer = client.CreateWriter<Image>("/image", true);
+
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.AddModuleFromTopic("/image");
+
+        var image = new Image();
+        image.Encoding = "rgb";
+        image.Height = 0;
+        image.Width = 240;
+        image.Step = 240;
+
+        writer.Write(image);
+        Thread.Sleep(2000);
+    }
+    
+    [Test, Ignore("SDF is disabled")]
+    public void TestWorld()
+    {
+        using var writer = client.CreateWriter<Marker>("/markers", true);
+
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.AddModuleFromTopic("/markers");
+
+        var marker = RosMarkerHelper.CreateResource("package://aws-robomaker-hospital-world/worlds/hospital.world");
+
+        writer.Write(marker);
+        Thread.Sleep(2000);
+    }
+
 
     struct Float4
     {
