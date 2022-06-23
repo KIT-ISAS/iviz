@@ -325,8 +325,6 @@ public sealed class RosbagFileWriter : IDisposable
             return;
         }
 
-        //Console.WriteLine("** Index start " + writer.Position);
-
         var op = new OpCodeHeaderEntry(OpCode.IndexData);
         var ver = new IntHeaderEntry("ver", 1);
         var conn = new IntHeaderEntry("conn", connectionId);
@@ -382,8 +380,6 @@ public sealed class RosbagFileWriter : IDisposable
 
     async ValueTask WriteChunkInfoRecordAsync(ChunkInfoRecord record)
     {
-        //Console.WriteLine("** Chunk start " + writer.Position);
-
         var op = new OpCodeHeaderEntry(OpCode.ChunkInfo);
         var ver = new IntHeaderEntry("ver", 1);
         var chunkPos = new LongHeaderEntry("chunk_pos", record.ChunkPos);
@@ -410,8 +406,6 @@ public sealed class RosbagFileWriter : IDisposable
             await writer.WriteValueAsync(connId);
             await writer.WriteValueAsync(connCount);
         }
-
-        //Console.WriteLine("** End position: " + writer.Position);
     }
 
     void TryOpenChunk(in time timestamp)

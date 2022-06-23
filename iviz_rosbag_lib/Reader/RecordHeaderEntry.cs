@@ -59,21 +59,18 @@ public readonly struct RecordHeaderEntry
                 return "";
             }
 
+            reader.Seek(valueStart, SeekOrigin.Begin);
+
             int msgSize = valueSize;
             var rent = Rent.Empty<byte>();
             Span<byte> span = msgSize < 256
                 ? stackalloc byte[msgSize]
                 : (rent = new Rent<byte>(msgSize)).AsSpan();
 
-            try
+            using (rent)
             {
-                reader.Seek(valueStart, SeekOrigin.Begin);
                 reader.ReadAll(span);
                 return Encoding.ASCII.GetString(span);
-            }
-            finally
-            {
-                rent.Dispose();
             }
         }
     }
@@ -108,7 +105,6 @@ public readonly struct RecordHeaderEntry
                 valueStart = equalsPosition + 1;
                 valueSize = (int)(nextStart - valueStart);
                 nameSize = (int)(equalsPosition - nameStart);
-                //Console.WriteLine("  ** Start " + start + " valueSize " + (nextStart - valueStart) +  " next " + nextStart);
                 return;
             }
 

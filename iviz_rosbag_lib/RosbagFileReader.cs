@@ -106,48 +106,88 @@ public sealed class RosbagFileReader : IDisposable
     /// <returns>An enumerable that iterates through the messages.</returns>
     public IEnumerable<MessageData> ReadAllMessages()
     {
-        const int smallBufferSize = 512;
-        using var smallConnections = new RentAndClear<Connection>(smallBufferSize);
-        var bigConnections = new Dictionary<int, Connection>();
+        if (!TryGetNumConnections(out int numConnections))
+        {
+            yield break;
+        }
+
+        using var connections = new RentAndClear<Connection>(numConnections);
 
         foreach (var record in ReadAllRecords())
         {
             switch (record.OpCode)
             {
                 case OpCode.Connection:
-                    if (record.Connection is { } newConnection)
+                    if (record.Connection is { } newConnection
+                        && newConnection.ConnectionId < numConnections)
                     {
-                        if (newConnection.ConnectionId < smallBufferSize)
-                        {
-                            smallConnections[newConnection.ConnectionId] = newConnection;
-                        }
-                        else
-                        {
-                            bigConnections[newConnection.ConnectionId] = newConnection;
-                        }
+                        connections[newConnection.ConnectionId] = newConnection;
                     }
 
                     break;
                 case OpCode.MessageData:
-                    if (record.ConnectionId is not { } connectionId)
+                    if (record.ConnectionId is { } connectionId
+                        && connectionId < numConnections
+                        && connections[connectionId] is { } connection)
                     {
-                        continue;
+                        yield return record.GetMessageData(connection);
                     }
 
-                    var msgConnection = connectionId < smallBufferSize
-                        ? smallConnections[connectionId]
-                        : bigConnections.TryGetValue(connectionId, out var existingConnection)
-                            ? existingConnection
-                            : null;
-
-                    if (msgConnection == null)
-                    {
-                        continue;
-                    }
-
-                    yield return record.GetMessageData(msgConnection);
                     break;
             }
         }
+    }
+
+    bool TryGetNumConnections(out int numConnections)
+    {
+        var enumerator = Records.GetEnumerator();
+        if (!enumerator.MoveNext())
+        {
+            numConnections = default;
+            return false;
+        }
+
+        var record = enumerator.Current;
+        if (record.OpCode == OpCode.BagHeader
+            && record.TryGetHeaderEntry("conn_count", out var entry))
+        {
+            numConnections = entry.ValueAsInt;
+            return true;
+        }
+
+        numConnections = default;
+        return false;
+    }
+
+    public IEnumerable<Connection> GetAllConnections()
+    {
+        var enumerator = Records.GetEnumerator();
+        if (!enumerator.MoveNext())
+        {
+            return Array.Empty<Connection>();
+        }
+
+        var firstRecord = enumerator.Current;
+        if (firstRecord.OpCode != OpCode.BagHeader
+            || !firstRecord.TryGetHeaderEntry("conn_count", out var connEntry)
+            || !firstRecord.TryGetHeaderEntry("index_pos", out var indexEntry))
+        {
+            return Array.Empty<Connection>();
+        }
+
+        int numConnections = connEntry.ValueAsInt;
+        int indexPos = indexEntry.ValueAsInt;
+
+        var connections = new List<Connection>(numConnections);
+        var connectionRecords = new RecordEnumerable(new Record(reader, indexPos), reader.Length);
+        foreach (var record in connectionRecords)
+        {
+            if (record.Connection is { } connection)
+            {
+                connections.Add(connection);
+            }
+        }
+
+        return connections;
     }
 }

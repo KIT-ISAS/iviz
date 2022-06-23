@@ -45,8 +45,10 @@ public readonly struct Record
     /// <summary>
     /// If this is a Connection record, generates a wrapper containing the connection info.
     /// </summary>
-    public Connection? Connection => OpCode == OpCode.Connection && ConnectionId is { } connectionId
-        ? new Connection(reader, DataStart, NextStart, connectionId, Topic)
+    public Connection? Connection => OpCode == OpCode.Connection
+                                     && ConnectionId is { } connectionId
+                                     && TryGetHeaderEntry("topic", out var topicEntry)
+        ? new Connection(reader, DataStart, NextStart, connectionId, topicEntry.ValueAsString)
         : null;
 
     bool IsCompressed => TryGetHeaderEntry("compression", out var entry) && entry.ValueEquals("bz2");
@@ -54,8 +56,6 @@ public readonly struct Record
     internal int? ConnectionId => TryGetHeaderEntry("conn", out var entry) ? entry.ValueAsInt : null;
 
     time Time => TryGetHeaderEntry("time", out var entry) ? entry.ValueAsTime : default;
-
-    string? Topic => TryGetHeaderEntry("topic", out var entry) ? entry.ValueAsString : null;
 
     internal Record(Stream reader, long start)
     {
@@ -70,36 +70,22 @@ public readonly struct Record
     {
         this.reader = reader;
 
-        //Console.WriteLine("** start " + start);
-
-        //using var intBytes = new Rent<byte>(4);
         Span<byte> intBytes = stackalloc byte[4];
         reader.Seek(start, SeekOrigin.Begin);
         reader.ReadAll(intBytes);
 
-        //Console.WriteLine("** Start " + start);
-
         headerStart = start + 4;
         int headerLength = intBytes.ReadInt();
 
-        //Console.WriteLine("** header_len " + headerLength);
-
         reader.Seek(headerStart + headerLength, SeekOrigin.Begin);
-        //Console.WriteLine("** data_len pos " + reader.Position);
 
         reader.ReadAll(intBytes);
         int dataLength = intBytes.ReadInt();
 
-        //Console.WriteLine("** data_len " + dataLength);
-
-        //dataStart = headerStart + headerLength + 4;
-        //nextStart = dataStart + dataLength;
         dataOffset = headerLength + 4;
         nextOffset = dataLength + dataOffset;
 
-        //Console.WriteLine("** end " + end);
-
-        OpCode = OpCode.Unknown;
+        OpCode = OpCode.Unknown; // won't let me call TryGetHeaderEntry before all fields are initialized
         OpCode = TryGetHeaderEntry("op", out var entry)
             ? (OpCode)entry.ValueAsByte
             : OpCode.Unknown;
@@ -118,7 +104,7 @@ public readonly struct Record
         return false;
     }
 
-    bool TryGetHeaderEntry(string name, out RecordHeaderEntry result)
+    public bool TryGetHeaderEntry(string name, out RecordHeaderEntry result)
     {
         foreach (var entry in RecordHeaders)
         {
