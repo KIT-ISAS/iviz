@@ -37,7 +37,7 @@ public readonly struct MessageData
     /// <summary>
     /// ROS topic from which the message originated.
     /// </summary>
-    public string? Topic => Connection.Topic;
+    public string Topic => Connection.Topic;
 
     /// <summary>
     /// ROS message type.

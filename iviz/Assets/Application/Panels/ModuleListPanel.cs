@@ -597,7 +597,7 @@ namespace Iviz.App
 
             RemoveAllModules();
 
-            var stateConfig = JsonConvert.DeserializeObject<StateConfiguration>(text);
+            var stateConfig = JsonUtils.DeserializeObject<StateConfiguration>(text);
 
             // TF, AR and XR are treated specially
             // TF cannot be destroyed, resetting AR and XR loses world info
@@ -649,7 +649,7 @@ namespace Iviz.App
                 RosLogger.Debug($"{this}: Using settings from {path}");
 
                 string text = File.ReadAllText(path);
-                var config = JsonConvert.DeserializeObject<ConnectionConfiguration?>(text);
+                var config = JsonUtils.DeserializeObject<ConnectionConfiguration?>(text);
                 if (config == null)
                 {
                     return; // empty text
@@ -732,7 +732,7 @@ namespace Iviz.App
             try
             {
                 string inText = File.ReadAllText(path);
-                ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
+                var config = JsonUtils.DeserializeObject<ConnectionConfiguration>(inText);
                 config.Settings = Settings.SettingsManager.Config;
                 config.HostAliases = Dialogs.SystemData.HostAliases;
                 string outText = BuiltIns.ToJsonString(config);
@@ -766,7 +766,7 @@ namespace Iviz.App
                 }
 
                 string text = File.ReadAllText(path);
-                var config = JsonConvert.DeserializeObject<XRStartConfiguration?>(text);
+                var config = JsonUtils.DeserializeObject<XRStartConfiguration?>(text);
                 if (config == null)
                 {
                     unityPose = Pose.identity;
@@ -831,7 +831,7 @@ namespace Iviz.App
             try
             {
                 string inText = await FileUtils.ReadAllTextAsync(path, token);
-                var config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
+                var config = JsonUtils.DeserializeObject<ConnectionConfiguration>(inText);
                 config.LastMasterUris.Clear();
 
                 string outText = BuiltIns.ToJsonString(config);

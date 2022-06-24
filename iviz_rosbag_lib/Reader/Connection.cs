@@ -15,7 +15,7 @@ public sealed class Connection
     /// The ROS topic.
     /// </summary>
     [DataMember]
-    public string? Topic { get; }
+    public string Topic { get; }
 
     /// <summary>
     /// The ROS message type.
@@ -39,7 +39,7 @@ public sealed class Connection
     [DataMember]
     public string? CallerId { get; }
 
-    internal Connection(Stream reader, long dataStart, long dataEnd, int connectionId, string? topic)
+    internal Connection(Stream reader, long dataStart, long dataEnd, int connectionId, string topic)
     {
         ConnectionId = connectionId;
         Topic = topic;
@@ -60,11 +60,7 @@ public sealed class Connection
             {
                 MessageDefinition = entry.ValueAsString;
             }
-            else if (Topic == null && entry.NameEquals("topic"))
-            {
-                Topic = entry.ValueAsString;
-            }
-            else if (CallerId == null && entry.NameEquals("caller_id"))
+            else if (CallerId == null && entry.NameEquals("callerid"))
             {
                 CallerId = entry.ValueAsString;
             }

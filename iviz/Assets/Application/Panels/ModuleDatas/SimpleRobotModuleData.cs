@@ -219,7 +219,7 @@ namespace Iviz.App
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
-            var config = JsonConvert.DeserializeObject<RobotConfiguration>(configAsJson);
+            var config = JsonUtils.DeserializeObject<RobotConfiguration>(configAsJson);
             UpdateConfiguration(config, fields);
         }
 

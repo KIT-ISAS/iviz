@@ -262,7 +262,7 @@ namespace Iviz.Controllers.TF
         {
             ref readonly var rosTransform = ref transform.Transform;
 
-            if (!CheckIfWithinThreshold(rosTransform.Translation))
+            if (!CheckIfWithinThreshold(rosTransform.Translation) || !CheckIfWithinThreshold(rosTransform.Rotation))
             {
                 SetFailedForThreshold(transform.ChildFrameId);
                 return;
@@ -342,7 +342,15 @@ namespace Iviz.Controllers.TF
         {
             // unity cannot deal with very large floats, so we have to limit translation sizes
             const int maxPoseMagnitude = 10000;
-            return t.MaxAbsCoeff() < maxPoseMagnitude;
+            return t.ToUnity().MaxAbsCoeff() < maxPoseMagnitude;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool CheckIfWithinThreshold(in Msgs.GeometryMsgs.Quaternion t)
+        {
+            // quick sanity check
+            const int maxQuaternionMagnitude = 2;
+            return t.ToUnity().MaxAbsCoeff() < maxQuaternionMagnitude;
         }
 
         void SetFailedForThreshold(string childId)

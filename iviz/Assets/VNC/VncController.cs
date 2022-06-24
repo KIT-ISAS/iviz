@@ -427,7 +427,7 @@ namespace VNC
                 RosLogger.Debug($"{this}: Reading VNC config from {path}");
 
                 string text = File.ReadAllText(path);
-                var config = JsonConvert.DeserializeObject<VncConfiguration?>(text);
+                var config = JsonUtils.DeserializeObject<VncConfiguration?>(text);
                 if (config == null)
                 {
                     return; // empty text

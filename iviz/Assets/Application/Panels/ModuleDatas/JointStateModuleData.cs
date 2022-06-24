@@ -82,7 +82,7 @@ namespace Iviz.App
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
-            var config = JsonConvert.DeserializeObject<JointStateConfiguration>(configAsJson);
+            var config = JsonUtils.DeserializeObject<JointStateConfiguration>(configAsJson);
 
             foreach (string field in fields)
             {

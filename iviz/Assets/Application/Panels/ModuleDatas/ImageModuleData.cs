@@ -133,7 +133,7 @@ namespace Iviz.App
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
-            var config = JsonConvert.DeserializeObject<ImageConfiguration>(configAsJson);
+            var config = JsonUtils.DeserializeObject<ImageConfiguration>(configAsJson);
 
             foreach (string field in fields)
             {

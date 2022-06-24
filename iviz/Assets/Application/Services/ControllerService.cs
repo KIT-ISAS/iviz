@@ -339,7 +339,7 @@ namespace Iviz.Controllers
             string[] validatedFields;
             try
             {
-                var moduleInfo = JsonConvert.DeserializeObject<GenericConfiguration>(config);
+                var moduleInfo = JsonUtils.DeserializeObject<GenericConfiguration>(config);
 
                 if (moduleInfo.ModuleType is not { } type)
                 {

@@ -28,6 +28,8 @@
     &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf3&lt;/TestId&gt;
     &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMarkers&lt;/TestId&gt;
     &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.NetworkTests.TestChannelAsync&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestImage&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestWorld&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e3adf1f9_002D6f13_002D431e_002Da944_002Db6b703a80cb5/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestChannelsAsync" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
@@ -46,6 +48,8 @@
       &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMagnitude&lt;/TestId&gt;
       &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestOccupancyGrid&lt;/TestId&gt;
       &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.BagTests.TestTopics&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.BagTests.TestMessages&lt;/TestId&gt;
     &lt;/TestAncestor&gt;
     &lt;ProjectFile&gt;D426E606-432C-4314-B451-285C6AEA44F2/f:MessageTests.cs&lt;/ProjectFile&gt;
   &lt;/Or&gt;

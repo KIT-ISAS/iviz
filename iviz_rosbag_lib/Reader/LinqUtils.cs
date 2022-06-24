@@ -32,7 +32,7 @@ public static class LinqUtils
         }
 
         var messageData = enumerator.Current;
-        if (messageData.Type == null || messageData.MessageDefinition == null)
+        if (messageData is { Type: null } or { MessageDefinition: null })
         {
             throw new InvalidOperationException($"Failed to create message of type '{messageData.Type}'");
         }

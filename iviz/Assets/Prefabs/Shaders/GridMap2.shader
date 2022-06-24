@@ -33,7 +33,7 @@
             float2 intensityUV : TEXCOORD1;
         };
 
-        void vert(inout appdata_base v, out Input o)
+        void vert(inout appdata_full v, out Input o)
         {
             UNITY_INITIALIZE_OUTPUT(Input, o);
 
