@@ -12,4 +12,4 @@ We will not disclose your information to any third party except if you expressly
 
 **Contacting Us**
 
-If you have any questions feel free to [contact me](akzeac@gmail.com).
+If you have any questions feel free to [contact me](mailto:akzeac@gmail.com).
