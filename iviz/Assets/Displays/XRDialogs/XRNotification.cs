@@ -55,7 +55,7 @@ namespace Iviz.Displays.XR
             Tooltip.PaddingX = 10;
             Tooltip.PaddingY = 10;
             Tooltip.FixedWidth = true;
-            Tooltip.Caption = "Connected to 141.3.59.5";
+            Tooltip.Caption = "Connected";
             var color = Color.Lerp(Color.blue, Color.cyan, 0.5f).WithSaturation(0.5f).WithValue(0.4f);
             var marginColor = Color.Lerp(Color.blue, Color.cyan, 0.5f).WithValue(1.0f).WithSaturation(0.3f);
             

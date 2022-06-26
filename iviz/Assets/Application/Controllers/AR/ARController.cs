@@ -83,15 +83,15 @@ namespace Iviz.Controllers
         uint markerSeq;
 
 
-        public bool ProvidesOcclusion { get; protected set; }
-
         public static bool IsPulseActive => Instance != null && Instance.pulseManager.HasPulse;
 
         public Sender<ARMarkerArray>? MarkerSender { get; private set; }
         public Sender<Image> ColorSender { get; }
         public Sender<Image>? DepthSender { get; private set; }
         public Sender<Image>? DepthConfidenceSender { get; private set; }
-
+        public bool ProvidesOcclusion { get; protected set; }
+        public PublicationFrequency PublicationFrequency { get; set; } = PublicationFrequency.Off;
+        
         public ARConfiguration Config
         {
             get => config;
@@ -105,8 +105,6 @@ namespace Iviz.Controllers
                 EnablePlaneDetection = value.EnablePlaneDetection;
                 EnableArucoDetection = value.EnableArucoDetection;
                 EnableQrDetection = value.EnableQrDetection;
-
-                PublicationFrequency = value.PublicationFrequency;
             }
         }
 
@@ -184,12 +182,6 @@ namespace Iviz.Controllers
                 config.EnableArucoDetection = value;
                 markerDetector.EnableAruco = value;
             }
-        }
-
-        public PublicationFrequency PublicationFrequency
-        {
-            get => config.PublicationFrequency;
-            set => config.PublicationFrequency = value;
         }
 
         static float TfRootScale
