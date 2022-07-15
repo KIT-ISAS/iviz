@@ -170,13 +170,26 @@ namespace Iviz.Msgs
             return ReadBuffer.Deserialize(generator, bytes);
         }
 
+        public static T DeserializeFromRos2<T>(this T generator, ReadOnlySpan<byte> bytes)
+            where T : ISerializable, IDeserializable<T>
+        {
+            return ReadBuffer2.Deserialize(generator, bytes);
+        }
+
         public static T DeserializeMessage<T>(ReadOnlySpan<byte> bytes)
             where T : ISerializable, IDeserializable<T>, new()
         {
             return ReadBuffer.Deserialize(new T(), bytes);
         }
+        
+        public static T DeserializeMessageRos2<T>(ReadOnlySpan<byte> bytes)
+            where T : ISerializable, IDeserializable<T>, new()
+        {
+            return ReadBuffer2.Deserialize(new T(), bytes);
+        }
 
-        public static int GetArraySize(GeometryMsgs.TransformStamped[]? array)
+        /// Returns the size in bytes of a message array when deserialized in ROS
+        public static int GetArraySize<T>(T[]? array) where T : struct, IMessage
         {
             if (array == null)
             {
@@ -233,8 +246,12 @@ namespace Iviz.Msgs
             return s == null ? 0 : UTF8.GetByteCount(s);
         }
 
+        public static bool IsRos1<T>() => typeof(IMessageRos1).IsAssignableFrom(typeof(T)); 
+
+        public static bool IsRos2<T>() => typeof(IMessageRos2).IsAssignableFrom(typeof(T)); 
+
         // we use here the fact that 99% of the strings we get are ascii and with length <= 64 (i.e., frames in headers)
-        // so we do a simple check and if it's ascii, we do a quick conversion that gets auto-vectorized
+        // so we do a simple check and if it's ascii, we do a quick conversion that gets auto-vectorized in il2cpp
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [SkipLocalsInit]
         internal static unsafe string GetStringSimple(byte* spanPtr, int length)
@@ -264,7 +281,7 @@ namespace Iviz.Msgs
         }
 
         [DoesNotReturn, AssertionMethod]
-        public static void ThrowArgument(string arg, string message) => throw new ArgumentNullException(arg);
+        public static void ThrowArgument(string arg, string message) => throw new ArgumentNullException(arg, message);
 
         [DoesNotReturn, AssertionMethod]
         public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);
@@ -273,7 +290,8 @@ namespace Iviz.Msgs
         public static void ThrowNullReference(string name) => throw new NullReferenceException(name);
 
         [DoesNotReturn, AssertionMethod]
-        public static void ThrowNullReference(string name, int i) => throw new NullReferenceException($"{name}[{i}]");
+        public static void ThrowNullReference(string name, int i) =>
+            throw new NullReferenceException($"{name}[{i}] cannot be null");
 
         [DoesNotReturn, AssertionMethod]
         public static void ThrowNullReference() => throw new NullReferenceException("Message fields cannot be null.");

@@ -312,10 +312,71 @@ namespace Iviz.MsgsGen
             return FixedSize;
         }
 
+        internal static IEnumerable<string> CreateLengthProperty2(IReadOnlyCollection<VariableElement> variables,
+            int fixedSize, bool forceStruct, bool isBlittable)
+        {
+            string readOnlyId = forceStruct ? "readonly " : "";
 
-        internal static IEnumerable<string> CreateLengthProperty(IReadOnlyCollection<VariableElement> variables,
-            int fixedSize,
-            bool forceStruct)
+            if (variables.Count == 0)
+            {
+                return new[]
+                {
+                    $"public {readOnlyId}void GetRosMessageLength(ref int c) {{ }}"
+                };
+            }
+
+            if (isBlittable)
+            {
+                return new[]
+                {
+                    "/// <summary> Constant size of this message. </summary> ",
+                    $"public const int RosFixedMessageLength = {fixedSize};",
+                    "",
+                    $"public {readOnlyId}void GetRosMessageLength(ref int c) => WriteBuffer2.Advance(ref c, this);"
+                };
+            }
+
+            var fields = new List<string>();
+            if (fixedSize != UnknownSizeAtCompileTime)
+            {
+                fields.Add("/// <summary> Constant size of this message. </summary> ");
+                fields.Add($"public const int RosFixedMessageLength = {fixedSize};");
+                fields.Add("");
+            }
+
+            fields.Add($"public {readOnlyId}void GetRosMessageLength(ref int c)");
+            fields.Add("{");
+            foreach (var variable in variables)
+            {
+                if (BuiltInTypes.Contains(variable.RosClassType) || variable.ClassIsBlittable)
+                {
+                    if (!variable.IsFixedSizeArray)
+                    {
+                        fields.Add($"    WriteBuffer2.Advance(ref c, {variable.CsFieldName});");
+                    }
+                    else
+                    {
+                        fields.Add(
+                            $"    WriteBuffer2.Advance(ref c, {variable.CsFieldName}, {variable.FixedArraySize});");
+                    }
+                }
+                else if (variable.IsArray)
+                {
+                    fields.Add($"    WriteBuffer2.Advance(ref c, {variable.CsFieldName});");
+                }
+                else
+                {
+                    fields.Add($"    {variable.CsFieldName}.GetRosMessageLength(ref c);");
+                }
+            }
+
+            fields.Add("}");
+
+            return fields;
+        }
+
+        internal static IEnumerable<string> CreateLengthProperty1(IReadOnlyCollection<VariableElement> variables,
+            int fixedSize, bool forceStruct)
         {
             string readOnlyId = forceStruct ? "readonly " : "";
             if (fixedSize != UnknownSizeAtCompileTime)
@@ -339,7 +400,7 @@ namespace Iviz.MsgsGen
 
             var fieldsWithSize = new List<string>();
             int fieldSize = 0;
-            foreach (VariableElement variable in variables)
+            foreach (var variable in variables)
             {
                 if (BuiltInsSizes.TryGetValue(variable.RosClassType, out int size))
                 {
@@ -452,7 +513,7 @@ namespace Iviz.MsgsGen
         }
 
         internal static IEnumerable<string> CreateConstructors(IReadOnlyCollection<VariableElement> variables,
-            string name, bool forceStruct, bool structIsBlittable, bool isAction)
+            string name, bool forceStruct, bool structIsBlittable, bool isAction, bool isRos2)
         {
             var lines = new List<string>();
 
@@ -545,13 +606,55 @@ namespace Iviz.MsgsGen
                 lines.Add("");
             }
 
+            CreateConstructor(lines, variables, name, forceStruct, structIsBlittable, isAction, isRos2);
+
+            lines.Add("");
+
+            string readOnlyId = forceStruct ? "readonly " : "";
+
+            if (!isRos2)
+            {
+                lines.Add(variables.Any()
+                    ? $"{readOnlyId}ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new {name}(ref b);"
+                    : $"{readOnlyId}ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;");
+                lines.Add("");
+            }
+
+            if (!isRos2)
+            {
+                lines.Add(variables.Any()
+                    ? $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer b) => new {name}(ref b);"
+                    : $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer b) => Singleton;");
+            }
+            else
+            {
+                lines.Add(variables.Any()
+                    ? $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer2 b) => new {name}(ref b);"
+                    : $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer2 b) => Singleton;");
+            }
+
+            if (!variables.Any())
+            {
+                lines.Add("");
+                lines.Add($"static {name}? singleton;");
+                lines.Add($"public static {name} Singleton => singleton ??= new {name}();");
+            }
+
+            return lines;
+        }
+
+        static void CreateConstructor(List<string> lines, IEnumerable<VariableElement> variables, string name,
+            bool forceStruct, bool structIsBlittable, bool isAction, bool isRos2)
+        {
             lines.Add("/// Constructor with buffer.");
             if (forceStruct)
             {
                 lines.Add("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
             }
 
-            lines.Add($"public {name}(ref ReadBuffer b)");
+            string ros2Suffix = isRos2 ? "2" : "";
+
+            lines.Add($"public {name}(ref ReadBuffer{ros2Suffix} b)");
             lines.Add("{");
             if (structIsBlittable)
             {
@@ -567,7 +670,7 @@ namespace Iviz.MsgsGen
                     lines.Add("    Deserialize(ref b, out this);");
                     lines.Add("}");
                     lines.Add("");
-                    lines.Add($"public static void Deserialize(ref ReadBuffer b, out {name} h)");
+                    lines.Add($"public static void Deserialize(ref ReadBuffer{ros2Suffix} b, out {name} h)");
                     lines.Add("{");
                 }
 
@@ -631,7 +734,7 @@ namespace Iviz.MsgsGen
                         switch (variable.ArraySize)
                         {
                             case VariableElement.NotAnArray:
-                                if (variable.ClassInfo != null && variable.ClassInfo.FixedSize == 0)
+                                if (variable.ClassInfo is { FixedSize: 0 })
                                 {
                                     lines.Add(
                                         $"    {prefix}{variable.CsFieldName} = {variable.CsClassType}.Singleton;");
@@ -694,64 +797,35 @@ namespace Iviz.MsgsGen
             }
 
             lines.Add("}");
+        }
+
+        internal static IEnumerable<string> CreateSerializers(IReadOnlyCollection<VariableElement> variables,
+            bool forceStruct, bool isBlittable, bool isRos2)
+        {
+            var lines = new List<string>();
+
+            CreateSerializer(lines, variables, forceStruct, isBlittable, isRos2);
             lines.Add("");
 
-            string readOnlyId = forceStruct ? "readonly " : "";
-            lines.Add(variables.Any()
-                ? $"{readOnlyId}ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new {name}(ref b);"
-                : $"{readOnlyId}ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;");
-
-            lines.Add("");
-
-            lines.Add(variables.Any()
-                ? $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer b) => new {name}(ref b);"
-                : $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer b) => Singleton;");
-
-            if (forceStruct)
-            {
-                string myVars = string.Join(", ", variables.Select(x => x.CsFieldName));
-
-                if (myVars.Length == 0)
-                {
-                    lines.Add("");
-                    //lines.Add("public readonly override int GetHashCode() => 0;");
-                    //lines.Add($"public readonly override bool Equals(object? o) => o is {name};");
-                    //lines.Add($"public readonly bool Equals({name} o) => true;");
-                    //lines.Add($"public static bool operator==(in {name} _, in {name} __) => true;");
-                    //lines.Add($"public static bool operator!=(in {name} _, in {name} __) => false;");
-                }
-                else
-                {
-                    lines.Add("");
-                    //lines.Add($"public readonly override int GetHashCode() => ({myVars}).GetHashCode();");
-                    //lines.Add($"public readonly override bool Equals(object? o) => o is {name} s && Equals(s);");
-
-                    //string oVars = string.Join(", ", variables.Select(x => $"o.{x.CsFieldName}"));
-
-                    //lines.Add($"public readonly bool Equals({name} o) => ({myVars}) == ({oVars});");
-                    //lines.Add($"public static bool operator==(in {name} a, in {name} b) => a.Equals(b);");
-                    //lines.Add($"public static bool operator!=(in {name} a, in {name} b) => !a.Equals(b);");
-                }
-            }
-
-            if (!variables.Any())
-            {
-                lines.Add("");
-                lines.Add($"static {name}? singleton;");
-                lines.Add($"public static {name} Singleton => singleton ??= new {name}();");
-            }
+            CreateValidator(lines, variables, forceStruct, isBlittable);
 
             return lines;
         }
 
-        internal static IEnumerable<string> CreateSerializers(IReadOnlyCollection<VariableElement> variables,
-            bool forceStruct, bool isBlittable)
+        static void CreateSerializer(List<string> lines, IEnumerable<VariableElement> variables, bool forceStruct,
+            bool isBlittable, bool isRos2)
         {
-            var lines = new List<string>();
-
             string readOnlyId = forceStruct ? "readonly " : "";
 
-            lines.Add($"public {readOnlyId}void RosSerialize(ref WriteBuffer b)");
+            if (!isRos2)
+            {
+                lines.Add($"public {readOnlyId}void RosSerialize(ref WriteBuffer b)");
+            }
+            else
+            {
+                lines.Add($"public {readOnlyId}void RosSerialize(ref WriteBuffer2 b)");
+            }
+
             lines.Add("{");
             if (isBlittable)
             {
@@ -836,14 +910,19 @@ namespace Iviz.MsgsGen
             }
 
             lines.Add("}");
+        }
 
-            lines.Add("");
+        static void CreateValidator(List<string> lines, IEnumerable<VariableElement> variables, bool forceStruct,
+            bool isBlittable)
+        {
+            string readOnlyId = forceStruct ? "readonly " : "";
+
             lines.Add($"public {readOnlyId}void RosValidate()");
             lines.Add("{");
             if (isBlittable)
             {
                 lines.Add("}");
-                return lines;
+                return;
             }
 
             foreach (VariableElement variable in variables)
@@ -920,37 +999,6 @@ namespace Iviz.MsgsGen
             }
 
             lines.Add("}");
-
-            return lines;
-        }
-
-        public string ToCsString()
-        {
-            var str = new StringBuilder(200);
-
-            str.AppendNewLine("/* This file was created automatically, do not edit! */");
-            str.AppendNewLine();
-
-            if (ForceStruct)
-            {
-                str.AppendNewLine("using System.Runtime.InteropServices;");
-                str.AppendNewLine("using System.Runtime.CompilerServices;");
-            }
-
-            str.AppendNewLine("using System.Runtime.Serialization;");
-            str.AppendNewLine();
-
-            str.AppendNewLine($"namespace Iviz.Msgs.{CsPackage}");
-            str.AppendNewLine("{");
-
-            foreach (string entry in CreateClassContent())
-            {
-                str.Append("    ").AppendNewLine(entry);
-            }
-
-            str.AppendNewLine("}");
-
-            return str.ToString();
         }
 
         static string Compress(string catDependencies)
@@ -1003,33 +1051,34 @@ namespace Iviz.MsgsGen
             return lines;
         }
 
-        IEnumerable<string> CreateClassContent()
+        IEnumerable<string> CreateClassContent(bool isRos2)
         {
             var lines = new List<string>();
-            //lines.Add($"[Preserve, DataContract (Name = RosMessageType)]");
             lines.Add($"[DataContract]");
+
+            string messageType = isRos2 ? "IMessageRos2" : "IMessageRos1";
+
             if (ForceStruct)
             {
                 lines.Add("[StructLayout(LayoutKind.Sequential)]");
                 lines.Add(variables.Any(element => element.IsFixedSizeArray)
-                    ? $"public unsafe struct {Name} : IMessage, IDeserializable<{Name}>"
-                    //: $"public struct {Name} : IMessage, IDeserializable<{Name}>, System.IEquatable<{Name}>");
-                    : $"public struct {Name} : IMessage, IDeserializable<{Name}>");
+                    ? $"public unsafe struct {Name} : {messageType}, IDeserializable<{Name}>"
+                    : $"public struct {Name} : {messageType}, IDeserializable<{Name}>");
             }
             else
             {
                 string line = $"public sealed class {Name} : IDeserializable<{Name}>";
                 string fullLine = actionMessageType switch
                 {
-                    ActionMessageType.None => $"{line}, IMessage",
-                    ActionMessageType.Goal => $"{line}, IGoal<{actionRoot}ActionGoal>",
-                    ActionMessageType.Feedback => $"{line}, IFeedback<{actionRoot}ActionFeedback>",
-                    ActionMessageType.Result => $"{line}, IResult<{actionRoot}ActionResult>",
-                    ActionMessageType.ActionGoal => $"{line}, IActionGoal<{actionRoot}Goal>",
-                    ActionMessageType.ActionFeedback => $"{line}, IActionFeedback<{actionRoot}Feedback>",
-                    ActionMessageType.ActionResult => $"{line}, IActionResult<{actionRoot}Result>",
+                    ActionMessageType.None => $"{line}, {messageType}",
+                    ActionMessageType.Goal => $"{line}, {messageType}, IGoal<{actionRoot}ActionGoal>",
+                    ActionMessageType.Feedback => $"{line}, {messageType}, IFeedback<{actionRoot}ActionFeedback>",
+                    ActionMessageType.Result => $"{line}, {messageType}, IResult<{actionRoot}ActionResult>",
+                    ActionMessageType.ActionGoal => $"{line}, {messageType}, IActionGoal<{actionRoot}Goal>",
+                    ActionMessageType.ActionFeedback => $"{line}, {messageType}, IActionFeedback<{actionRoot}Feedback>",
+                    ActionMessageType.ActionResult => $"{line}, {messageType}, IActionResult<{actionRoot}Result>",
                     ActionMessageType.Action =>
-                        $"{line},\n\t\tIAction<{actionRoot}ActionGoal, {actionRoot}ActionFeedback, {actionRoot}ActionResult>",
+                        $"{line}, {messageType},\n\t\tIAction<{actionRoot}ActionGoal, {actionRoot}ActionFeedback, {actionRoot}ActionResult>",
                     _ => throw new MessageParseException($"Unknown action message type {actionMessageType}")
                 };
                 lines.Add(fullLine);
@@ -1049,14 +1098,14 @@ namespace Iviz.MsgsGen
             }
 
             var constructors = CreateConstructors(variables, Name, ForceStruct, IsBlittable,
-                actionMessageType != ActionMessageType.None);
+                actionMessageType != ActionMessageType.None, isRos2);
             foreach (string entry in constructors)
             {
                 lines.Add($"    {entry}");
             }
 
             lines.Add("");
-            var serializer = CreateSerializers(variables, ForceStruct, IsBlittable);
+            var serializer = CreateSerializers(variables, ForceStruct, IsBlittable, isRos2);
             foreach (string entry in serializer)
             {
                 lines.Add($"    {entry}");
@@ -1065,7 +1114,10 @@ namespace Iviz.MsgsGen
             lines.Add("");
 
             CheckFixedSize();
-            var lengthProperty = CreateLengthProperty(variables, FixedSize, ForceStruct);
+            var lengthProperty = isRos2
+                ? CreateLengthProperty2(variables, FixedSize, ForceStruct, IsBlittable)
+                : CreateLengthProperty1(variables, FixedSize, ForceStruct);
+
             foreach (string entry in lengthProperty)
             {
                 lines.Add($"    {entry}");
@@ -1078,49 +1130,48 @@ namespace Iviz.MsgsGen
             string readOnlyId = ForceStruct ? "readonly " : "";
             lines.Add($"    public {readOnlyId}string RosMessageType => MessageType;");
 
-            //lines.Add("");
-
-
             lines.Add("");
 
-            const string emptyMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
-            const string emptyDependenciesBase64 = "H4sIAAAAAAAAE+MCAJMG1zIBAAAA";
-
-            lines.Add("    /// <summary> MD5 hash of a compact representation of the message. </summary>");
-
-            string md5Hash = Md5Hash switch
+            if (!isRos2)
             {
-                "" => "null",
-                emptyMd5Sum => "BuiltIns.EmptyMd5Sum",
-                _ => $"\"{Md5Hash}\""
-            };
-            lines.Add($"    public const string Md5Sum = {md5Hash};");
-            lines.Add("");
-            lines.Add($"    public {readOnlyId}string RosMd5Sum => Md5Sum;");
-            //lines.Add($"    public string RosMd5Sum => {md5Hash};");
+                const string emptyMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
+                const string emptyDependenciesBase64 = "H4sIAAAAAAAAE+MCAJMG1zIBAAAA";
 
-            lines.Add("");
+                lines.Add("    /// <summary> MD5 hash of a compact representation of the message. </summary>");
 
-            lines.Add(
-                "    /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
-
-            string catDependencies = CreateCatDependencies();
-            string compressedDeps = Compress(catDependencies);
-            if (compressedDeps == emptyDependenciesBase64)
-            {
-                //lines.Add(
-                //    "    [Preserve] public const string RosDependenciesBase64 = BuiltIns.EmptyDependenciesBase64;");
-                lines.Add($"    public {readOnlyId}string RosDependenciesBase64 => BuiltIns.EmptyDependenciesBase64;");
-                lines.Add("");
-            }
-            else
-            {
-                //lines.Add("    [Preserve] public const string RosDependenciesBase64 =");
-                lines.Add($"    public {readOnlyId}string RosDependenciesBase64 =>");
-                var splitDeps = Split(compressedDeps);
-                foreach (string entry in splitDeps)
+                string md5Hash = Md5Hash switch
                 {
-                    lines.Add($"            {entry}");
+                    "" => "null",
+                    emptyMd5Sum => "BuiltIns.EmptyMd5Sum",
+                    _ => $"\"{Md5Hash}\""
+                };
+
+                lines.Add($"    public const string Md5Sum = {md5Hash};");
+                lines.Add("");
+                lines.Add($"    public {readOnlyId}string RosMd5Sum => Md5Sum;");
+
+                lines.Add("");
+
+                lines.Add(
+                    "    /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
+
+                string catDependencies = CreateCatDependencies();
+                string compressedDeps = Compress(catDependencies);
+                if (compressedDeps == emptyDependenciesBase64)
+                {
+                    lines.Add(
+                        $"    public {readOnlyId}string RosDependenciesBase64 => BuiltIns.EmptyDependenciesBase64;");
+                    lines.Add("");
+                }
+                else
+                {
+                    //lines.Add("    [Preserve] public const string RosDependenciesBase64 =");
+                    lines.Add($"    public {readOnlyId}string RosDependenciesBase64 =>");
+                    var splitDeps = Split(compressedDeps);
+                    foreach (string entry in splitDeps)
+                    {
+                        lines.Add($"            {entry}");
+                    }
                 }
             }
 
@@ -1147,7 +1198,7 @@ namespace Iviz.MsgsGen
                 lines.Add("    }");
             }
 
-            if (Additions.Contents.TryGetValue($"{RosPackage}/{Name}", out var extraLines))
+            if (!isRos2 && Additions.Contents.TryGetValue($"{RosPackage}/{Name}", out var extraLines))
             {
                 lines.Add("");
                 lines.Add("    /// Custom iviz code");
@@ -1160,6 +1211,45 @@ namespace Iviz.MsgsGen
             lines.Add("}");
 
             return lines;
+        }
+
+        public string ToCsString(bool isRos2 = false)
+        {
+            var str = new StringBuilder(200);
+
+            str.AppendNewLine("/* This file was created automatically, do not edit! */");
+            str.AppendNewLine();
+
+            if (ForceStruct)
+            {
+                str.AppendNewLine("using System.Runtime.InteropServices;");
+                str.AppendNewLine("using System.Runtime.CompilerServices;");
+            }
+
+            str.AppendNewLine("using System.Runtime.Serialization;");
+
+
+            if (isRos2)
+            {
+                str.AppendNewLine("using Iviz.Msgs;");
+                str.AppendNewLine("using ISerializable = Iviz.Msgs.ISerializable;");
+            }
+
+            string @namespace = isRos2 ? "Msgs2" : "Msgs";
+
+            str.AppendNewLine();
+
+            str.AppendNewLine($"namespace Iviz.{@namespace}.{CsPackage}");
+            str.AppendNewLine("{");
+
+            foreach (string entry in CreateClassContent(isRos2))
+            {
+                str.Append("    ").AppendNewLine(entry);
+            }
+
+            str.AppendNewLine("}");
+
+            return str.ToString();
         }
 
         static bool ElementRequiresDispose(IElement element) =>

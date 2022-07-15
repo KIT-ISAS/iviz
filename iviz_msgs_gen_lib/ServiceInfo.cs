@@ -109,14 +109,14 @@ namespace Iviz.MsgsGen
 
             lines.Add("");
 
-            IEnumerable<string> deserializer = ClassInfo.CreateConstructors(variables, name, false, false, false);
+            IEnumerable<string> deserializer = ClassInfo.CreateConstructors(variables, name, false, false, false, false);
             foreach (string entry in deserializer)
             {
                 lines.Add($"    {entry}");
             }
 
             lines.Add("");
-            IEnumerable<string> serializer = ClassInfo.CreateSerializers(variables, false, false);
+            IEnumerable<string> serializer = ClassInfo.CreateSerializers(variables, false, false, false);
             foreach (string entry in serializer)
             {
                 lines.Add($"    {entry}");
@@ -124,7 +124,7 @@ namespace Iviz.MsgsGen
 
 
             lines.Add("");
-            IEnumerable<string> lengthProperty = ClassInfo.CreateLengthProperty(variables, fixedSize, false);
+            IEnumerable<string> lengthProperty = ClassInfo.CreateLengthProperty1(variables, fixedSize, false);
             foreach (string entry in lengthProperty)
             {
                 lines.Add($"    {entry}");

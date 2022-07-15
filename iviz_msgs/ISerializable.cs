@@ -23,7 +23,9 @@ namespace Iviz.Msgs
         /// <param name="b">
         /// Buffer object.
         /// </param>
-        void RosSerialize(ref WriteBuffer b);
+        void RosSerialize(ref WriteBuffer b) => throw new RosInvalidMessageForVersion();
+
+        void RosSerialize(ref WriteBuffer2 b) => throw new RosInvalidMessageForVersion();
 
         /// <summary>
         /// Length of this message in bytes after serialization.
@@ -42,7 +44,9 @@ namespace Iviz.Msgs
         /// <param name="b">
         /// Buffer object.
         /// </param>
-        ISerializable RosDeserializeBase(ref ReadBuffer b);
+        ISerializable RosDeserializeBase(ref ReadBuffer b) => throw new RosInvalidMessageForVersion();
+
+        ISerializable RosDeserializeBase(ref ReadBuffer2 b) => throw new RosInvalidMessageForVersion();
     }
 
     public interface IDeserializable<out T> where T : ISerializable
@@ -53,6 +57,8 @@ namespace Iviz.Msgs
         /// <param name="b">
         /// Buffer object.
         /// </param>
-        T RosDeserialize(ref ReadBuffer b);
+        T RosDeserialize(ref ReadBuffer b) => throw new RosInvalidMessageForVersion();
+
+        T RosDeserialize(ref ReadBuffer2 b) => throw new RosInvalidMessageForVersion();
     }
 }

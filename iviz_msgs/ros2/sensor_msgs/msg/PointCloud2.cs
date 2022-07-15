@@ -1,0 +1,110 @@
+/* This file was created automatically, do not edit! */
+
+using System.Runtime.Serialization;
+using Iviz.Msgs;
+using ISerializable = Iviz.Msgs.ISerializable;
+
+namespace Iviz.Msgs2.SensorMsgs
+{
+    [DataContract]
+    public sealed class PointCloud2 : IDeserializable<PointCloud2>, IMessageRos2
+    {
+        // This message holds a collection of N-dimensional points, which may
+        // contain additional information such as normals, intensity, etc. The
+        // point data is stored as a binary blob, its layout described by the
+        // contents of the "fields" array.
+        //
+        // The point cloud data may be organized 2d (image-like) or 1d (unordered).
+        // Point clouds organized as 2d images may be produced by camera depth sensors
+        // such as stereo or time-of-flight.
+        // Time of sensor data acquisition, and the coordinate frame ID (for 3d points).
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        // 2D structure of the point cloud. If the cloud is unordered, height is
+        // 1 and width is the length of the point cloud.
+        [DataMember (Name = "height")] public uint Height;
+        [DataMember (Name = "width")] public uint Width;
+        // Describes the channels and their layout in the binary data blob.
+        [DataMember (Name = "fields")] public PointField[] Fields;
+        /// <summary> Is this data bigendian? </summary>
+        [DataMember (Name = "is_bigendian")] public bool IsBigendian;
+        /// <summary> Length of a point in bytes </summary>
+        [DataMember (Name = "point_step")] public uint PointStep;
+        /// <summary> Length of a row in bytes </summary>
+        [DataMember (Name = "row_step")] public uint RowStep;
+        /// <summary> Actual point data, size is (row_step*height) </summary>
+        [DataMember (Name = "data")] public byte[] Data;
+        /// <summary> True if there are no invalid points </summary>
+        [DataMember (Name = "is_dense")] public bool IsDense;
+    
+        /// Constructor for empty message.
+        public PointCloud2()
+        {
+            Fields = System.Array.Empty<PointField>();
+            Data = System.Array.Empty<byte>();
+        }
+        
+        /// Constructor with buffer.
+        public PointCloud2(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Height);
+            b.Deserialize(out Width);
+            b.DeserializeArray(out Fields);
+            for (int i = 0; i < Fields.Length; i++)
+            {
+                Fields[i] = new PointField(ref b);
+            }
+            b.Deserialize(out IsBigendian);
+            b.Deserialize(out PointStep);
+            b.Deserialize(out RowStep);
+            b.DeserializeStructArray(out Data);
+            b.Deserialize(out IsDense);
+        }
+        
+        public PointCloud2 RosDeserialize(ref ReadBuffer2 b) => new PointCloud2(ref b);
+    
+        public void RosSerialize(ref WriteBuffer2 b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Height);
+            b.Serialize(Width);
+            b.SerializeArray(Fields);
+            b.Serialize(IsBigendian);
+            b.Serialize(PointStep);
+            b.Serialize(RowStep);
+            b.SerializeStructArray(Data);
+            b.Serialize(IsDense);
+        }
+        
+        public void RosValidate()
+        {
+            if (Fields is null) BuiltIns.ThrowNullReference();
+            for (int i = 0; i < Fields.Length; i++)
+            {
+                if (Fields[i] is null) BuiltIns.ThrowNullReference(nameof(Fields), i);
+                Fields[i].RosValidate();
+            }
+            if (Data is null) BuiltIns.ThrowNullReference();
+        }
+    
+        public void GetRosMessageLength(ref int c)
+        {
+            Header.GetRosMessageLength(ref c);
+            WriteBuffer2.Advance(ref c, Height);
+            WriteBuffer2.Advance(ref c, Width);
+            WriteBuffer2.Advance(ref c, Fields);
+            WriteBuffer2.Advance(ref c, IsBigendian);
+            WriteBuffer2.Advance(ref c, PointStep);
+            WriteBuffer2.Advance(ref c, RowStep);
+            WriteBuffer2.Advance(ref c, Data);
+            WriteBuffer2.Advance(ref c, IsDense);
+        }
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "sensor_msgs/PointCloud2";
+    
+        public string RosMessageType => MessageType;
+    
+        public override string ToString() => Extensions.ToString(this);
+    }
+}

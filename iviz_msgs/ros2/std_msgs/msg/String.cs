@@ -1,0 +1,60 @@
+/* This file was created automatically, do not edit! */
+
+using System.Runtime.Serialization;
+using Iviz.Msgs;
+using ISerializable = Iviz.Msgs.ISerializable;
+
+namespace Iviz.Msgs2.StdMsgs
+{
+    [DataContract]
+    public sealed class String : IDeserializable<String>, IMessageRos2
+    {
+        // This was originally provided as an example message.
+        // It is deprecated as of Foxy
+        // It is recommended to create your own semantically meaningful message.
+        // However if you would like to continue using this please use the equivalent in example_msgs.
+        [DataMember (Name = "data")] public string Data;
+    
+        /// Constructor for empty message.
+        public String()
+        {
+            Data = "";
+        }
+        
+        /// Explicit constructor.
+        public String(string Data)
+        {
+            this.Data = Data;
+        }
+        
+        /// Constructor with buffer.
+        public String(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Data);
+        }
+        
+        public String RosDeserialize(ref ReadBuffer2 b) => new String(ref b);
+    
+        public void RosSerialize(ref WriteBuffer2 b)
+        {
+            b.Serialize(Data);
+        }
+        
+        public void RosValidate()
+        {
+            if (Data is null) BuiltIns.ThrowNullReference();
+        }
+    
+        public void GetRosMessageLength(ref int c)
+        {
+            WriteBuffer2.Advance(ref c, Data);
+        }
+    
+        /// <summary> Full ROS name of this message. </summary>
+        public const string MessageType = "std_msgs/String";
+    
+        public string RosMessageType => MessageType;
+    
+        public override string ToString() => Extensions.ToString(this);
+    }
+}

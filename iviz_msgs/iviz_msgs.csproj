@@ -22,4 +22,8 @@
   <ItemGroup>
     <ProjectReference Include="..\iviz_tools\iviz_tools.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ros1" />
+    <Folder Include="ros2" />
+  </ItemGroup>
 </Project>

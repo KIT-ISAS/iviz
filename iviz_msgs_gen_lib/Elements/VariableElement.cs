@@ -105,25 +105,43 @@ namespace Iviz.MsgsGen
                 ArraySize = NotAnArray;
             }
 
-            int slashIndex;
-            if (RosClassType == "Header")
+            switch (RosClassType)
             {
-                RosClassType = "std_msgs/Header";
-                CsClassType = "StdMsgs.Header";
-            }
-            else if (MsgParser.BuiltInsMaps.TryGetValue(RosClassType, out string? className))
-            {
-                CsClassType = className;
-            }
-            else if ((slashIndex = RosClassType.IndexOf('/')) != -1)
-            {
-                string packageName = RosClassType.Substring(0, slashIndex);
-                string classProper = RosClassType.Substring(slashIndex + 1);
-                CsClassType = $"{MsgParser.CsIfy(packageName)}.{classProper}";
-            }
-            else
-            {
-                CsClassType = RosClassType;
+                case "Header":
+                    RosClassType = "std_msgs/Header";
+                    CsClassType = "StdMsgs.Header";
+                    break;
+                case "builtin_interfaces/Time":
+                    RosClassType = "time";
+                    CsClassType = "time";
+                    break;
+                case "builtin_interfaces/Duration":
+                    RosClassType = "duration";
+                    CsClassType = "duration";
+                    break;
+                default:
+                {
+                    if (MsgParser.BuiltInsMaps.TryGetValue(RosClassType, out string? className))
+                    {
+                        CsClassType = className;
+                    }
+                    else
+                    {
+                        int slashIndex;
+                        if ((slashIndex = RosClassType.IndexOf('/')) != -1)
+                        {
+                            string packageName = RosClassType.Substring(0, slashIndex);
+                            string classProper = RosClassType.Substring(slashIndex + 1);
+                            CsClassType = $"{MsgParser.CsIfy(packageName)}.{classProper}";
+                        }
+                        else
+                        {
+                            CsClassType = RosClassType;
+                        }
+                    }
+
+                    break;
+                }
             }
 
             ClassInfo = classInfo;
