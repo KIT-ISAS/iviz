@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapGoal : IDeserializable<GetMapGoal>, IMessageRos1, IGoal<GetMapActionGoal>
+    public sealed class GetMapGoal : IDeserializableRos1<GetMapGoal>, IMessageRos1, IGoal<GetMapActionGoal>
     {
         // Get the map as a nav_msgs/OccupancyGrid
     

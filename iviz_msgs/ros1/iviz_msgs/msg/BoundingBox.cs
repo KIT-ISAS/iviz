@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class BoundingBox : IDeserializable<BoundingBox>, IMessageRos1
+    public sealed class BoundingBox : IDeserializableRos1<BoundingBox>, IMessageRos1
     {
         [DataMember (Name = "center")] public GeometryMsgs.Pose Center;
         [DataMember (Name = "size")] public GeometryMsgs.Vector3 Size;

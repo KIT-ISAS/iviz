@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
-    public sealed class TwistWithCovarianceStamped : IDeserializable<TwistWithCovarianceStamped>, IMessageRos2
+    public sealed class TwistWithCovarianceStamped : IDeserializableRos2<TwistWithCovarianceStamped>, IMessageRos2
     {
         // This represents an estimated twist with reference coordinate frame and timestamp.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -47,10 +47,12 @@ namespace Iviz.Msgs2.GeometryMsgs
             Twist.RosValidate();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            Twist.GetRosMessageLength(ref c);
+            Header.AddRosMessageLength(ref c);
+            Twist.AddRosMessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

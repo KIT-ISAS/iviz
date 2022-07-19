@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class ResetModuleRequest : IRequest<ResetModule, ResetModuleResponse>, IDeserializable<ResetModuleRequest>
+    public sealed class ResetModuleRequest : IRequest<ResetModule, ResetModuleResponse>, IDeserializableRos1<ResetModuleRequest>
     {
         // Resets a module. What this entails depends on the specific module.
         /// <summary> Id of the module </summary>
@@ -84,13 +84,13 @@ namespace Iviz.Msgs.IvizMsgs
             if (Id is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Id);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Id);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class ResetModuleResponse : IResponse, IDeserializable<ResetModuleResponse>
+    public sealed class ResetModuleResponse : IResponse, IDeserializableRos1<ResetModuleResponse>
     {
         /// <summary> Whether the operation succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -132,7 +132,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);
+        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

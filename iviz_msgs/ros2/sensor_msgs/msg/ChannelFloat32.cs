@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class ChannelFloat32 : IDeserializable<ChannelFloat32>, IMessageRos2
+    public sealed class ChannelFloat32 : IDeserializableRos2<ChannelFloat32>, IMessageRos2
     {
         // This message is used by the PointCloud message to hold optional data
         // associated with each point in the cloud. The length of the values
@@ -67,10 +67,12 @@ namespace Iviz.Msgs2.SensorMsgs
             if (Values is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Name);
-            WriteBuffer2.Advance(ref c, Values);
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Values);
         }
     
         /// <summary> Full ROS name of this message. </summary>

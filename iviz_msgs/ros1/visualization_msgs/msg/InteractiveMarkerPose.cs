@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerPose : IDeserializable<InteractiveMarkerPose>, IMessageRos1
+    public sealed class InteractiveMarkerPose : IDeserializableRos1<InteractiveMarkerPose>, IMessageRos1
     {
         // Time/frame info.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             if (Name is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 60 + Header.RosMessageLength + BuiltIns.GetStringSize(Name);
+        public int RosMessageLength => 60 + Header.RosMessageLength + WriteBuffer.GetStringSize(Name);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "visualization_msgs/InteractiveMarkerPose";

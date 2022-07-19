@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class CameraInfo : IDeserializable<CameraInfo>, IMessageRos1
+    public sealed class CameraInfo : IDeserializableRos1<CameraInfo>, IMessageRos1
     {
         // This message defines meta information for a camera. It should be in a
         // camera namespace on topic "camera_info" and accompanied by up to five
@@ -194,7 +194,7 @@ namespace Iviz.Msgs.SensorMsgs
             get {
                 int size = 281;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetStringSize(DistortionModel);
+                size += WriteBuffer.GetStringSize(DistortionModel);
                 size += 8 * D.Length;
                 return size;
             }

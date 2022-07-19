@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class CaptureScreenshotRequest : IRequest<CaptureScreenshot, CaptureScreenshotResponse>, IDeserializable<CaptureScreenshotRequest>
+    public sealed class CaptureScreenshotRequest : IRequest<CaptureScreenshot, CaptureScreenshotResponse>, IDeserializableRos1<CaptureScreenshotRequest>
     {
         [DataMember (Name = "compress")] public bool Compress;
     
@@ -89,7 +89,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class CaptureScreenshotResponse : IResponse, IDeserializable<CaptureScreenshotResponse>
+    public sealed class CaptureScreenshotResponse : IResponse, IDeserializableRos1<CaptureScreenshotResponse>
     {
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "message")] public string Message;
@@ -152,7 +152,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 149;
-                size += BuiltIns.GetStringSize(Message);
+                size += WriteBuffer.GetStringSize(Message);
                 size += Header.RosMessageLength;
                 size += Data.Length;
                 return size;

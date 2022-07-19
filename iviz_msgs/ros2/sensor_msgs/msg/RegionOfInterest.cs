@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class RegionOfInterest : IDeserializable<RegionOfInterest>, IMessageRos2
+    public sealed class RegionOfInterest : IDeserializableRos2<RegionOfInterest>, IMessageRos2
     {
         // This message is used to specify a region of interest within an image.
         //
@@ -64,13 +64,15 @@ namespace Iviz.Msgs2.SensorMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 17;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, XOffset);
-            WriteBuffer2.Advance(ref c, YOffset);
-            WriteBuffer2.Advance(ref c, Height);
-            WriteBuffer2.Advance(ref c, Width);
-            WriteBuffer2.Advance(ref c, DoRectify);
+            WriteBuffer2.AddLength(ref c, XOffset);
+            WriteBuffer2.AddLength(ref c, YOffset);
+            WriteBuffer2.AddLength(ref c, Height);
+            WriteBuffer2.AddLength(ref c, Width);
+            WriteBuffer2.AddLength(ref c, DoRectify);
         }
     
         /// <summary> Full ROS name of this message. </summary>

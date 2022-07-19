@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetMaterialsRequest : IRequest<GetMaterials, GetMaterialsResponse>, IDeserializable<GetMaterialsRequest>
+    public sealed class GetMaterialsRequest : IRequest<GetMaterials, GetMaterialsResponse>, IDeserializableRos1<GetMaterialsRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
@@ -82,13 +82,13 @@ namespace Iviz.Msgs.MeshMsgs
             if (Uuid is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uuid);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uuid);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetMaterialsResponse : IResponse, IDeserializable<GetMaterialsResponse>
+    public sealed class GetMaterialsResponse : IResponse, IDeserializableRos1<GetMaterialsResponse>
     {
         [DataMember (Name = "mesh_materials_stamped")] public MeshMsgs.MeshMaterialsStamped MeshMaterialsStamped;
     

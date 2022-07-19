@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibMsgs
 {
     [DataContract]
-    public sealed class GoalStatus : IDeserializable<GoalStatus>, IMessageRos1
+    public sealed class GoalStatus : IDeserializableRos1<GoalStatus>, IMessageRos1
     {
         [DataMember (Name = "goal_id")] public GoalID GoalId;
         [DataMember (Name = "status")] public byte Status;
@@ -80,7 +80,7 @@ namespace Iviz.Msgs.ActionlibMsgs
             if (Text is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + GoalId.RosMessageLength + BuiltIns.GetStringSize(Text);
+        public int RosMessageLength => 5 + GoalId.RosMessageLength + WriteBuffer.GetStringSize(Text);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_msgs/GoalStatus";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class TimeReference : IDeserializable<TimeReference>, IMessageRos1
+    public sealed class TimeReference : IDeserializableRos1<TimeReference>, IMessageRos1
     {
         // Measurement from an external time source not actively synchronized with the system clock.
         /// <summary> Stamp is system time for which measurement was valid </summary>
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (Source is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 12 + Header.RosMessageLength + BuiltIns.GetStringSize(Source);
+        public int RosMessageLength => 12 + Header.RosMessageLength + WriteBuffer.GetStringSize(Source);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/TimeReference";

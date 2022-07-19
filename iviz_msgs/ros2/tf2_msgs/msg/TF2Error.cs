@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.Tf2Msgs
 {
     [DataContract]
-    public sealed class TF2Error : IDeserializable<TF2Error>, IMessageRos2
+    public sealed class TF2Error : IDeserializableRos2<TF2Error>, IMessageRos2
     {
         public const byte NO_ERROR = 0;
         public const byte LOOKUP_ERROR = 1;
@@ -52,10 +52,12 @@ namespace Iviz.Msgs2.Tf2Msgs
             if (ErrorString is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Error);
-            WriteBuffer2.Advance(ref c, ErrorString);
+            WriteBuffer2.AddLength(ref c, Error);
+            WriteBuffer2.AddLength(ref c, ErrorString);
         }
     
         /// <summary> Full ROS name of this message. </summary>

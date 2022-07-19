@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Scene : IDeserializable<Scene>, IMessageRos1
+    public sealed class Scene : IDeserializableRos1<Scene>, IMessageRos1
     {
         // A complete scene 
         /// <summary> Name of the scene </summary>
@@ -86,10 +86,10 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 16;
-                size += BuiltIns.GetStringSize(Name);
-                size += BuiltIns.GetStringSize(Filename);
-                size += BuiltIns.GetArraySize(Includes);
-                size += BuiltIns.GetArraySize(Lights);
+                size += WriteBuffer.GetStringSize(Name);
+                size += WriteBuffer.GetStringSize(Filename);
+                size += WriteBuffer.GetArraySize(Includes);
+                size += WriteBuffer.GetArraySize(Lights);
                 return size;
             }
         }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformGoal : IDeserializable<LookupTransformGoal>, IMessageRos1, IGoal<LookupTransformActionGoal>
+    public sealed class LookupTransformGoal : IDeserializableRos1<LookupTransformGoal>, IMessageRos1, IGoal<LookupTransformActionGoal>
     {
         //Simple API
         [DataMember (Name = "target_frame")] public string TargetFrame;
@@ -64,9 +64,9 @@ namespace Iviz.Msgs.Tf2Msgs
         {
             get {
                 int size = 37;
-                size += BuiltIns.GetStringSize(TargetFrame);
-                size += BuiltIns.GetStringSize(SourceFrame);
-                size += BuiltIns.GetStringSize(FixedFrame);
+                size += WriteBuffer.GetStringSize(TargetFrame);
+                size += WriteBuffer.GetStringSize(SourceFrame);
+                size += WriteBuffer.GetStringSize(FixedFrame);
                 return size;
             }
         }

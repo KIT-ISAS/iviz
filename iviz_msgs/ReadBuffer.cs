@@ -405,7 +405,7 @@ public unsafe struct ReadBuffer
         return Array.Empty<T>();
     }
 
-    public void DeserializeArray<T>(out T[] val) where T : IMessage, new()
+    public void DeserializeArray<T>(out T[] val) where T : IMessageRos1, new()
     {
         int count = ReadInt();
         if (count == 0)
@@ -458,7 +458,7 @@ public unsafe struct ReadBuffer
     /// </param>
     /// <typeparam name="T">Message type.</typeparam>
     /// <returns>The deserialized message.</returns>
-    public static T Deserialize<T>(IDeserializable<T> generator, ReadOnlySpan<byte> buffer)
+    public static T Deserialize<T>(IDeserializableRos1<T> generator, ReadOnlySpan<byte> buffer)
         where T : ISerializable
     {
         fixed (byte* bufferPtr = buffer)
@@ -469,7 +469,7 @@ public unsafe struct ReadBuffer
     }
 
     public static T Deserialize<T>(in T generator, ReadOnlySpan<byte> buffer)
-        where T : ISerializable, IDeserializable<T>
+        where T : ISerializable, IDeserializableRos1<T>
     {
         fixed (byte* bufferPtr = buffer)
         {

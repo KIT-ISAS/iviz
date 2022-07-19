@@ -46,7 +46,7 @@ namespace Iviz.Msgs.Roscpp
     }
 
     [DataContract]
-    public sealed class GetLoggersRequest : IRequest<GetLoggers, GetLoggersResponse>, IDeserializable<GetLoggersRequest>
+    public sealed class GetLoggersRequest : IRequest<GetLoggers, GetLoggersResponse>, IDeserializableRos1<GetLoggersRequest>
     {
     
         /// Constructor for empty message.
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.Roscpp
     }
 
     [DataContract]
-    public sealed class GetLoggersResponse : IResponse, IDeserializable<GetLoggersResponse>
+    public sealed class GetLoggersResponse : IResponse, IDeserializableRos1<GetLoggersResponse>
     {
         [DataMember (Name = "loggers")] public Logger[] Loggers;
     
@@ -128,7 +128,7 @@ namespace Iviz.Msgs.Roscpp
             }
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Loggers);
+        public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Loggers);
     
         public override string ToString() => Extensions.ToString(this);
     }

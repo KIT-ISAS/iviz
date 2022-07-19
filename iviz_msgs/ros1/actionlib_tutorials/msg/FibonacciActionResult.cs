@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class FibonacciActionResult : IDeserializable<FibonacciActionResult>, IMessageRos1, IActionResult<FibonacciResult>
+    public sealed class FibonacciActionResult : IDeserializableRos1<FibonacciActionResult>, IMessageRos1, IActionResult<FibonacciResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }

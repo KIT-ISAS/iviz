@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.RosgraphMsgs
 {
     [DataContract]
-    public sealed class Clock : IDeserializable<Clock>, IMessageRos2
+    public sealed class Clock : IDeserializableRos2<Clock>, IMessageRos2
     {
         // This message communicates the current time.
         //
@@ -45,9 +45,11 @@ namespace Iviz.Msgs2.RosgraphMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 8;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Clock_);
+            WriteBuffer2.AddLength(ref c, Clock_);
         }
     
         /// <summary> Full ROS name of this message. </summary>

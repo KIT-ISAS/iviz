@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class LaserEcho : IDeserializable<LaserEcho>, IMessageRos2
+    public sealed class LaserEcho : IDeserializableRos2<LaserEcho>, IMessageRos2
     {
         // This message is a submessage of MultiEchoLaserScan and is not intended
         // to be used separately.
@@ -45,9 +45,11 @@ namespace Iviz.Msgs2.SensorMsgs
             if (Echoes is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Echoes);
+            WriteBuffer2.AddLength(ref c, Echoes);
         }
     
         /// <summary> Full ROS name of this message. </summary>

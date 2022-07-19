@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class CompressedImage : IDeserializable<CompressedImage>, IMessageRos2
+    public sealed class CompressedImage : IDeserializableRos2<CompressedImage>, IMessageRos2
     {
         // This message contains a compressed image.
         /// <summary> Header timestamp should be acquisition time of image </summary>
@@ -62,11 +62,13 @@ namespace Iviz.Msgs2.SensorMsgs
             if (Data is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Format);
-            WriteBuffer2.Advance(ref c, Data);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Format);
+            WriteBuffer2.AddLength(ref c, Data);
         }
     
         /// <summary> Full ROS name of this message. </summary>

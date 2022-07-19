@@ -46,7 +46,7 @@ namespace Iviz.Msgs.PclMsgs
     }
 
     [DataContract]
-    public sealed class UpdateFilenameRequest : IRequest<UpdateFilename, UpdateFilenameResponse>, IDeserializable<UpdateFilenameRequest>
+    public sealed class UpdateFilenameRequest : IRequest<UpdateFilename, UpdateFilenameResponse>, IDeserializableRos1<UpdateFilenameRequest>
     {
         [DataMember (Name = "filename")] public string Filename;
     
@@ -82,13 +82,13 @@ namespace Iviz.Msgs.PclMsgs
             if (Filename is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Filename);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Filename);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class UpdateFilenameResponse : IResponse, IDeserializable<UpdateFilenameResponse>
+    public sealed class UpdateFilenameResponse : IResponse, IDeserializableRos1<UpdateFilenameResponse>
     {
         [DataMember (Name = "success")] public bool Success;
     

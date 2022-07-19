@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
-    public sealed class PoseWithCovariance : IDeserializable<PoseWithCovariance>, IMessageRos2
+    public sealed class PoseWithCovariance : IDeserializableRos2<PoseWithCovariance>, IMessageRos2
     {
         // This represents a pose in free space with uncertainty.
         [DataMember (Name = "pose")] public Pose Pose;
@@ -54,10 +54,12 @@ namespace Iviz.Msgs2.GeometryMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 344;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Pose);
-            WriteBuffer2.Advance(ref c, Covariance, 36);
+            WriteBuffer2.AddLength(ref c, Pose);
+            WriteBuffer2.AddLength(ref c, Covariance, 36);
         }
     
         /// <summary> Full ROS name of this message. </summary>

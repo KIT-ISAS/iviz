@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class SetFixedFrameRequest : IRequest<SetFixedFrame, SetFixedFrameResponse>, IDeserializable<SetFixedFrameRequest>
+    public sealed class SetFixedFrameRequest : IRequest<SetFixedFrame, SetFixedFrameResponse>, IDeserializableRos1<SetFixedFrameRequest>
     {
         // Sets the fixed frame
         /// <summary> Id of the frame </summary>
@@ -84,13 +84,13 @@ namespace Iviz.Msgs.IvizMsgs
             if (Id is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Id);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Id);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class SetFixedFrameResponse : IResponse, IDeserializable<SetFixedFrameResponse>
+    public sealed class SetFixedFrameResponse : IResponse, IDeserializableRos1<SetFixedFrameResponse>
     {
         /// <summary> Whether the operation succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -132,7 +132,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);
+        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

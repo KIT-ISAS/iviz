@@ -10,7 +10,7 @@ namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct TransformStamped : IMessageRos2, IDeserializable<TransformStamped>
+    public struct TransformStamped : IMessageRos2, IDeserializableRos2<TransformStamped>
     {
         // This expresses a transform from coordinate frame header.frame_id
         // to the coordinate frame child_frame_id at the time of header.stamp
@@ -64,11 +64,13 @@ namespace Iviz.Msgs2.GeometryMsgs
         {
         }
     
-        public readonly void GetRosMessageLength(ref int c)
+        public readonly int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public readonly void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, ChildFrameId);
-            WriteBuffer2.Advance(ref c, Transform);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, ChildFrameId);
+            WriteBuffer2.AddLength(ref c, Transform);
         }
     
         /// <summary> Full ROS name of this message. </summary>

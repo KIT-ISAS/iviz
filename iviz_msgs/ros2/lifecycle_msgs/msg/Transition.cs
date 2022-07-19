@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.LifecycleMsgs
 {
     [DataContract]
-    public sealed class Transition : IDeserializable<Transition>, IMessageRos2
+    public sealed class Transition : IDeserializableRos2<Transition>, IMessageRos2
     {
         // Default values for transitions as described in:
         // http://design.ros2.org/articles/node_lifecycle.html
@@ -114,10 +114,12 @@ namespace Iviz.Msgs2.LifecycleMsgs
             if (Label is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Id);
-            WriteBuffer2.Advance(ref c, Label);
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, Label);
         }
     
         /// <summary> Full ROS name of this message. </summary>

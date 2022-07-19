@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibMsgs
 {
     [DataContract]
-    public sealed class GoalStatusArray : IDeserializable<GoalStatusArray>, IMessageRos1
+    public sealed class GoalStatusArray : IDeserializableRos1<GoalStatusArray>, IMessageRos1
     {
         // Stores the statuses for goals that are currently being tracked
         // by an action server
@@ -56,7 +56,7 @@ namespace Iviz.Msgs.ActionlibMsgs
             }
         }
     
-        public int RosMessageLength => 4 + Header.RosMessageLength + BuiltIns.GetArraySize(StatusList);
+        public int RosMessageLength => 4 + Header.RosMessageLength + WriteBuffer.GetArraySize(StatusList);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_msgs/GoalStatusArray";

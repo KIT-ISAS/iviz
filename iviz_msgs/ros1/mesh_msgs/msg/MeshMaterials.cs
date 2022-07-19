@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshMaterials : IDeserializable<MeshMaterials>, IMessageRos1
+    public sealed class MeshMaterials : IDeserializableRos1<MeshMaterials>, IMessageRos1
     {
         // Mesh Attribute Message
         [DataMember (Name = "clusters")] public MeshMsgs.MeshFaceCluster[] Clusters;
@@ -91,7 +91,7 @@ namespace Iviz.Msgs.MeshMsgs
         {
             get {
                 int size = 16;
-                size += BuiltIns.GetArraySize(Clusters);
+                size += WriteBuffer.GetArraySize(Clusters);
                 size += 21 * Materials.Length;
                 size += 4 * ClusterMaterials.Length;
                 size += 8 * VertexTexCoords.Length;

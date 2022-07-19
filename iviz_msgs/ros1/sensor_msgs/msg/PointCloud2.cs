@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class PointCloud2 : IDeserializable<PointCloud2>, IMessageRos1
+    public sealed class PointCloud2 : IDeserializableRos1<PointCloud2>, IMessageRos1
     {
         // This message holds a collection of N-dimensional points, which may
         // contain additional information such as normals, intensity, etc. The
@@ -92,7 +92,7 @@ namespace Iviz.Msgs.SensorMsgs
             get {
                 int size = 26;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetArraySize(Fields);
+                size += WriteBuffer.GetArraySize(Fields);
                 size += Data.Length;
                 return size;
             }

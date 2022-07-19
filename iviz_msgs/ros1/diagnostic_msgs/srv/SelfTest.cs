@@ -46,7 +46,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
     }
 
     [DataContract]
-    public sealed class SelfTestRequest : IRequest<SelfTest, SelfTestResponse>, IDeserializable<SelfTestRequest>
+    public sealed class SelfTestRequest : IRequest<SelfTest, SelfTestResponse>, IDeserializableRos1<SelfTestRequest>
     {
     
         /// Constructor for empty message.
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
     }
 
     [DataContract]
-    public sealed class SelfTestResponse : IResponse, IDeserializable<SelfTestResponse>
+    public sealed class SelfTestResponse : IResponse, IDeserializableRos1<SelfTestResponse>
     {
         [DataMember (Name = "id")] public string Id;
         [DataMember (Name = "passed")] public byte Passed;
@@ -138,7 +138,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
     
-        public int RosMessageLength => 9 + BuiltIns.GetStringSize(Id) + BuiltIns.GetArraySize(Status);
+        public int RosMessageLength => 9 + WriteBuffer.GetStringSize(Id) + WriteBuffer.GetArraySize(Status);
     
         public override string ToString() => Extensions.ToString(this);
     }

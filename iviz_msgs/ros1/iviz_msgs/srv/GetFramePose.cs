@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetFramePoseRequest : IRequest<GetFramePose, GetFramePoseResponse>, IDeserializable<GetFramePoseRequest>
+    public sealed class GetFramePoseRequest : IRequest<GetFramePose, GetFramePoseResponse>, IDeserializableRos1<GetFramePoseRequest>
     {
         // Gets the absolute pose of a TF frame w.r.t. the map frame
         /// <summary> Frame ids </summary>
@@ -88,13 +88,13 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Frames);
+        public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Frames);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetFramePoseResponse : IResponse, IDeserializable<GetFramePoseResponse>
+    public sealed class GetFramePoseResponse : IResponse, IDeserializableRos1<GetFramePoseResponse>
     {
         /// <summary> Whether the entry is valid </summary>
         [DataMember (Name = "is_valid")] public bool[] IsValid;

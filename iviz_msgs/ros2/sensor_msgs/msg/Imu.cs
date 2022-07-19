@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class Imu : IDeserializable<Imu>, IMessageRos2
+    public sealed class Imu : IDeserializableRos2<Imu>, IMessageRos2
     {
         // This is a message to hold data from an IMU (Inertial Measurement Unit)
         //
@@ -76,15 +76,17 @@ namespace Iviz.Msgs2.SensorMsgs
             if (LinearAccelerationCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(LinearAccelerationCovariance.Length, 9);
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Orientation);
-            WriteBuffer2.Advance(ref c, OrientationCovariance, 9);
-            WriteBuffer2.Advance(ref c, AngularVelocity);
-            WriteBuffer2.Advance(ref c, AngularVelocityCovariance, 9);
-            WriteBuffer2.Advance(ref c, LinearAcceleration);
-            WriteBuffer2.Advance(ref c, LinearAccelerationCovariance, 9);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Orientation);
+            WriteBuffer2.AddLength(ref c, OrientationCovariance, 9);
+            WriteBuffer2.AddLength(ref c, AngularVelocity);
+            WriteBuffer2.AddLength(ref c, AngularVelocityCovariance, 9);
+            WriteBuffer2.AddLength(ref c, LinearAcceleration);
+            WriteBuffer2.AddLength(ref c, LinearAccelerationCovariance, 9);
         }
     
         /// <summary> Full ROS name of this message. </summary>

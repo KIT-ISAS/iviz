@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetVertexCostsRequest : IRequest<GetVertexCosts, GetVertexCostsResponse>, IDeserializable<GetVertexCostsRequest>
+    public sealed class GetVertexCostsRequest : IRequest<GetVertexCosts, GetVertexCostsResponse>, IDeserializableRos1<GetVertexCostsRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
@@ -82,13 +82,13 @@ namespace Iviz.Msgs.MeshMsgs
             if (Uuid is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uuid);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uuid);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetVertexCostsResponse : IResponse, IDeserializable<GetVertexCostsResponse>
+    public sealed class GetVertexCostsResponse : IResponse, IDeserializableRos1<GetVertexCostsResponse>
     {
         [DataMember (Name = "mesh_vertex_costs_stamped")] public MeshMsgs.MeshVertexCostsStamped MeshVertexCostsStamped;
     

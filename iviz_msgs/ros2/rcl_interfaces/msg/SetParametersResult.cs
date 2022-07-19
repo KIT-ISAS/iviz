@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.RclInterfaces
 {
     [DataContract]
-    public sealed class SetParametersResult : IDeserializable<SetParametersResult>, IMessageRos2
+    public sealed class SetParametersResult : IDeserializableRos2<SetParametersResult>, IMessageRos2
     {
         // A true value of the same index indicates that the parameter was set
         // successfully. A false value indicates the change was rejected.
@@ -49,10 +49,12 @@ namespace Iviz.Msgs2.RclInterfaces
             if (Reason is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Successful);
-            WriteBuffer2.Advance(ref c, Reason);
+            WriteBuffer2.AddLength(ref c, Successful);
+            WriteBuffer2.AddLength(ref c, Reason);
         }
     
         /// <summary> Full ROS name of this message. </summary>

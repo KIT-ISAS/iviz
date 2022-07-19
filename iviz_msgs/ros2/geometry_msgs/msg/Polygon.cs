@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
-    public sealed class Polygon : IDeserializable<Polygon>, IMessageRos2
+    public sealed class Polygon : IDeserializableRos2<Polygon>, IMessageRos2
     {
         // A specification of a polygon where the first and last points are assumed to be connected
         [DataMember (Name = "points")] public Point32[] Points;
@@ -42,9 +42,11 @@ namespace Iviz.Msgs2.GeometryMsgs
             if (Points is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Points);
+            WriteBuffer2.AddLength(ref c, Points);
         }
     
         /// <summary> Full ROS name of this message. </summary>

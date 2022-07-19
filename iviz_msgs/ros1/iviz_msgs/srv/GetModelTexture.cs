@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetModelTextureRequest : IRequest<GetModelTexture, GetModelTextureResponse>, IDeserializable<GetModelTextureRequest>
+    public sealed class GetModelTextureRequest : IRequest<GetModelTexture, GetModelTextureResponse>, IDeserializableRos1<GetModelTextureRequest>
     {
         [DataMember (Name = "uri")] public string Uri;
     
@@ -82,13 +82,13 @@ namespace Iviz.Msgs.IvizMsgs
             if (Uri is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uri);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uri);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetModelTextureResponse : IResponse, IDeserializable<GetModelTextureResponse>
+    public sealed class GetModelTextureResponse : IResponse, IDeserializableRos1<GetModelTextureResponse>
     {
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "image")] public SensorMsgs.CompressedImage Image;
@@ -135,7 +135,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + Image.RosMessageLength + BuiltIns.GetStringSize(Message);
+        public int RosMessageLength => 5 + Image.RosMessageLength + WriteBuffer.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

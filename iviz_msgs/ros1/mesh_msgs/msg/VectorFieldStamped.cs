@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class VectorFieldStamped : IDeserializable<VectorFieldStamped>, IMessageRos1
+    public sealed class VectorFieldStamped : IDeserializableRos1<VectorFieldStamped>, IMessageRos1
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "vector_field")] public MeshMsgs.VectorField VectorField;

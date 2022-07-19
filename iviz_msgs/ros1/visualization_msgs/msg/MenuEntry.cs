@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class MenuEntry : IDeserializable<MenuEntry>, IMessageRos1
+    public sealed class MenuEntry : IDeserializableRos1<MenuEntry>, IMessageRos1
     {
         // MenuEntry message.
         // Each InteractiveMarker message has an array of MenuEntry messages.
@@ -91,7 +91,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             if (Command is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 17 + BuiltIns.GetStringSize(Title) + BuiltIns.GetStringSize(Command);
+        public int RosMessageLength => 17 + WriteBuffer.GetStringSize(Title) + WriteBuffer.GetStringSize(Command);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "visualization_msgs/MenuEntry";

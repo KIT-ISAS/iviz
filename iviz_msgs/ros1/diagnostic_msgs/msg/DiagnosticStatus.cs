@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.DiagnosticMsgs
 {
     [DataContract]
-    public sealed class DiagnosticStatus : IDeserializable<DiagnosticStatus>, IMessageRos1
+    public sealed class DiagnosticStatus : IDeserializableRos1<DiagnosticStatus>, IMessageRos1
     {
         // This message holds the status of an individual component of the robot.
         // 
@@ -78,10 +78,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
             get {
                 int size = 17;
-                size += BuiltIns.GetStringSize(Name);
-                size += BuiltIns.GetStringSize(Message);
-                size += BuiltIns.GetStringSize(HardwareId);
-                size += BuiltIns.GetArraySize(Values);
+                size += WriteBuffer.GetStringSize(Name);
+                size += WriteBuffer.GetStringSize(Message);
+                size += WriteBuffer.GetStringSize(HardwareId);
+                size += WriteBuffer.GetArraySize(Values);
                 return size;
             }
         }

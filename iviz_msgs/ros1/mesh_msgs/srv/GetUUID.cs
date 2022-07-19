@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetUUIDRequest : IRequest<GetUUID, GetUUIDResponse>, IDeserializable<GetUUIDRequest>
+    public sealed class GetUUIDRequest : IRequest<GetUUID, GetUUIDResponse>, IDeserializableRos1<GetUUIDRequest>
     {
     
         /// Constructor for empty message.
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetUUIDResponse : IResponse, IDeserializable<GetUUIDResponse>
+    public sealed class GetUUIDResponse : IResponse, IDeserializableRos1<GetUUIDResponse>
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
@@ -119,7 +119,7 @@ namespace Iviz.Msgs.MeshMsgs
             if (Uuid is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uuid);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uuid);
     
         public override string ToString() => Extensions.ToString(this);
     }

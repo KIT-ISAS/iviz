@@ -10,7 +10,7 @@ namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Point : IMessageRos2, IDeserializable<Point>
+    public struct Point : IMessageRos2, IDeserializableRos2<Point>
     {
         // This contains the position of a point in free space
         [DataMember (Name = "x")] public double X;
@@ -46,7 +46,9 @@ namespace Iviz.Msgs2.GeometryMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 24;
         
-        public readonly void GetRosMessageLength(ref int c) => WriteBuffer2.Advance(ref c, this);
+        public readonly int RosMessageLength => RosFixedMessageLength;
+        
+        public readonly void AddRosMessageLength(ref int c) => WriteBuffer2.AddLength(ref c, this);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/Point";

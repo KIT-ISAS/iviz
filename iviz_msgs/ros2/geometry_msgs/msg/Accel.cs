@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
-    public sealed class Accel : IDeserializable<Accel>, IMessageRos2
+    public sealed class Accel : IDeserializableRos2<Accel>, IMessageRos2
     {
         // This expresses acceleration in free space broken into its linear and angular parts.
         [DataMember (Name = "linear")] public Vector3 Linear;
@@ -47,10 +47,12 @@ namespace Iviz.Msgs2.GeometryMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 48;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Linear);
-            WriteBuffer2.Advance(ref c, Angular);
+            WriteBuffer2.AddLength(ref c, Linear);
+            WriteBuffer2.AddLength(ref c, Angular);
         }
     
         /// <summary> Full ROS name of this message. </summary>

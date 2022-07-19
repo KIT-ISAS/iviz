@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestResult : IDeserializable<TestResult>, IMessageRos1, IResult<TestActionResult>
+    public sealed class TestResult : IDeserializableRos1<TestResult>, IMessageRos1, IResult<TestActionResult>
     {
         [DataMember (Name = "result")] public int Result;
     

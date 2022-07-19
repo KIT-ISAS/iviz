@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using Iviz.Msgs2.GeometryMsgs;
 using Iviz.Msgs2.StdMsgs;
-using Iviz.Msgs2.GeometryMsgs;
 using Iviz.Tools;
 
 namespace Iviz.Msgs;
@@ -76,205 +75,214 @@ public unsafe partial struct WriteBuffer2
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, bool _) => AdvanceAlign1(ref c);
+    public static void AddLength(ref int c, bool _) => AdvanceAlign1(ref c);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, sbyte _) => AdvanceAlign1(ref c);
+    public static void AddLength(ref int c, sbyte _) => AdvanceAlign1(ref c);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, byte _) => AdvanceAlign1(ref c);
+    public static void AddLength(ref int c, byte _) => AdvanceAlign1(ref c);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, short _) => AdvanceAlign2(ref c);
+    public static void AddLength(ref int c, short _) => AdvanceAlign2(ref c);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, ushort _) => AdvanceAlign2(ref c);
+    public static void AddLength(ref int c, ushort _) => AdvanceAlign2(ref c);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, int _) => AdvanceAlign4(ref c);
+    public static void AddLength(ref int c, int _) => AdvanceAlign4(ref c);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, uint _) => AdvanceAlign4(ref c);
+    public static void AddLength(ref int c, uint _) => AdvanceAlign4(ref c);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, float _) => AdvanceAlign4(ref c);
+    public static void AddLength(ref int c, float _) => AdvanceAlign4(ref c);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, double _) => AdvanceAlign8(ref c);
+    public static void AddLength(ref int c, double _) => AdvanceAlign8(ref c);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, long _) => AdvanceAlign8(ref c);
+    public static void AddLength(ref int c, long _) => AdvanceAlign8(ref c);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, ulong _) => AdvanceAlign8(ref c);
+    public static void AddLength(ref int c, ulong _) => AdvanceAlign8(ref c);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, in time _) => AdvanceAlign4T(ref c, 2 * sizeof(int));
+    public static void AddLength(ref int c, in time _) => AdvanceAlign4Type(ref c, 2 * sizeof(int));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, in duration _) => AdvanceAlign4T(ref c, 2 * sizeof(int));
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, byte[] b) => AdvanceAlign1(ref c, b.Length);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, byte[] _, int l) => AdvanceAlign1(ref c, l);
+    public static void AddLength(ref int c, in duration _) => AdvanceAlign4Type(ref c, 2 * sizeof(int));
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, sbyte[] b) => AdvanceAlign1(ref c, b.Length);
+    public static void AddLength(ref int c, byte[] b) => AdvanceAlign1Array(ref c, b.Length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, sbyte[] _, int l) => AdvanceAlign1(ref c, l);
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, bool[] b) => AdvanceAlign1(ref c, b.Length);
+    public static void AddLength(ref int c, byte[] _, int l) => AdvanceAlign1ArrayFixed(ref c, l);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, short[] b) => AdvanceAlign2(ref c, b.Length);
+    public static void AddLength(ref int c, sbyte[] b) => AdvanceAlign1Array(ref c, b.Length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, short[] _, int l) => AdvanceAlign2(ref c, l);
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, ushort[] b) => AdvanceAlign2(ref c, b.Length);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, ushort[] _, int l) => AdvanceAlign2(ref c, l);
+    public static void AddLength(ref int c, sbyte[] _, int l) => AdvanceAlign1ArrayFixed(ref c, l);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, int[] b) => AdvanceAlign4(ref c, b.Length);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, int[] _, int l) => AdvanceAlign4(ref c, l);
+    public static void AddLength(ref int c, bool[] b) => AdvanceAlign1Array(ref c, b.Length);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, uint[] b) => AdvanceAlign4(ref c, b.Length);
+    public static void AddLength(ref int c, short[] b) => AdvanceAlign2Array(ref c, b.Length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, uint[] _, int l) => AdvanceAlign4(ref c, l);
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, float[] b) => AdvanceAlign4(ref c, b.Length);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, float[] _, int l) => AdvanceAlign4(ref c, l);
+    public static void AddLength(ref int c, short[] _, int l) => AdvanceAlign2ArrayFixed(ref c, l);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, double[] b) => AdvanceAlign8(ref c, b.Length);
+    public static void AddLength(ref int c, ushort[] b) => AdvanceAlign2Array(ref c, b.Length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, double[] _, int l) => AdvanceAlign8(ref c, l);
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, long[] b) => AdvanceAlign8(ref c, b.Length);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, long[] _, int l) => AdvanceAlign8(ref c, l);
+    public static void AddLength(ref int c, ushort[] _, int l) => AdvanceAlign2ArrayFixed(ref c, l);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, ulong[] b) => AdvanceAlign8(ref c, b.Length);
+    public static void AddLength(ref int c, int[] b) => AdvanceAlign4Array(ref c, b.Length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, ulong[] _, int l) => AdvanceAlign8(ref c, l);
+    public static void AddLength(ref int c, int[] _, int l) => AdvanceAlign4ArrayFixed(ref c, l);
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddLength(ref int c, uint[] b) => AdvanceAlign4Array(ref c, b.Length);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddLength(ref int c, uint[] _, int l) => AdvanceAlign4ArrayFixed(ref c, l);
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddLength(ref int c, float[] b) => AdvanceAlign4Array(ref c, b.Length);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddLength(ref int c, float[] _, int l) => AdvanceAlign4ArrayFixed(ref c, l);
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddLength(ref int c, double[] b) => AdvanceAlign8Array(ref c, b.Length);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddLength(ref int c, double[] _, int l) => AdvanceAlign8ArrayFixed(ref c, l);
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddLength(ref int c, long[] b) => AdvanceAlign8Array(ref c, b.Length);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddLength(ref int c, long[] _, int l) => AdvanceAlign8ArrayFixed(ref c, l);
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddLength(ref int c, ulong[] b) => AdvanceAlign8Array(ref c, b.Length);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddLength(ref int c, ulong[] _, int l) => AdvanceAlign8ArrayFixed(ref c, l);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static void AdvanceAlign1(ref int c) => c++;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void AdvanceAlign1(ref int c, int length)
-    {
-        c = DoAlign4(c) + 4 + length;
-    }
+    static void AdvanceAlign1Array(ref int c, int length) => c = DoAlign4(c) + 4 + length;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static void AdvanceAlign1ArrayFixed(ref int c, int size) => c += size;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static void AdvanceAlign2(ref int c) => c = DoAlign2(c) + 2;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void AdvanceAlign2(ref int c, int length)
-    {
-        c = DoAlign4(c) + 4 + 2 * length;
-    }
+    static void AdvanceAlign2Array(ref int c, int length) => c = DoAlign4(c) + 4 + 2 * length;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static void AdvanceAlign2ArrayFixed(ref int c, int length) => c = DoAlign2(c) + 2 * length;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static void AdvanceAlign4(ref int c) => c = DoAlign4(c) + 4;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void AdvanceAlign4(ref int c, int length)
+    static void AdvanceAlign4Array(ref int c, int length) => c = DoAlign4(c) + 4 + 4 * length;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static void AdvanceAlign4ArrayFixed(ref int c, int length) => c = DoAlign4(c) + 4 * length;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static void AdvanceAlign4Type(ref int c, int size) => c = DoAlign4(c) + size;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static void AdvanceAlign4TypeArray(ref int c, int length) => AdvanceAlign4Array(ref c, length);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static void AdvanceAlign8(ref int c)
     {
-        c = DoAlign4(c) + 4 + 4 * length;
+        c = DoAlign8(c) + 8;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void AdvanceAlign4T(ref int c, int size)
-    {
-        c = DoAlign4(c) + size;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void AdvanceAlign4Ts(ref int c, int length) => AdvanceAlign4(ref c, length);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void AdvanceAlign8(ref int c) => c = DoAlign8(c) + 8;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void AdvanceAlign8(ref int c, int length)
+    static void AdvanceAlign8Array(ref int c, int length)
     {
         c = DoAlign4(c) + 4;
         c = DoAlign8(c) + 8 * length;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void AdvanceAlign8T(ref int c, int length)
+    static void AdvanceAlign8ArrayFixed(ref int c, int length)
+    {
+        c = DoAlign8(c) + 8 * length;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static void AdvanceAlign8Type(ref int c, int length)
     {
         c = DoAlign8(c) + length;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void AdvanceAlign8Ts(ref int c, int length)
+    static void AdvanceAlign8TypeArray(ref int c, int length)
     {
         c = DoAlign4(c) + 4;
         c = DoAlign8(c) + length;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, IMessageRos2[] array)
+    public static void AddLength(ref int c, IMessageRos2[] array)
     {
         c = DoAlign4(c) + sizeof(int);
         foreach (var message in array)
         {
-            message.GetRosMessageLength(ref c);
-        }
-    }
-
-    public static void Advance(ref int c, string s)
-    {
-        c = DoAlign4(c) + sizeof(int);
-        int length = BuiltIns.UTF8.GetByteCount(s);
-        if (length != 0)
-        {
-            c += length + 1;
+            message.AddRosMessageLength(ref c);
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, string[] bs)
+    public static void AddLength(ref int c, string? s)
+    {
+        c = DoAlign4(c) + sizeof(int);
+        if (s == null)
+        {
+            c++;
+            return;
+        }
+
+        c += BuiltIns.UTF8.GetByteCount(s) + 1;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddLength(ref int c, string[] bs)
     {
         c = DoAlign4(c) + sizeof(int);
         foreach (string b in bs)
         {
-            Advance(ref c, b);
+            AddLength(ref c, b);
         }
     }
 
@@ -333,7 +341,7 @@ public unsafe partial struct WriteBuffer2
     public void Serialize(in time val)
     {
         Align4();
-        const int size = 2 * sizeof(int);
+        const int size = 2 * sizeof(uint);
         ThrowIfOutOfRange(size);
         *(time*)(ptr + offset) = val;
         Advance(size);
@@ -419,16 +427,19 @@ public unsafe partial struct WriteBuffer2
     {
         if (val.Length == 0)
         {
-            WriteInt(0);
+            ThrowIfOutOfRange(5);
+            WriteInt(1);
+            ptr[offset] = 0;
+            Advance(1);
             return;
         }
 
         int count = BuiltIns.UTF8.GetByteCount(val);
         ThrowIfOutOfRange(4 + count + 1);
-        WriteInt(count);
+        WriteInt(count + 1);
         fixed (char* valPtr = val)
         {
-            BuiltIns.UTF8.GetBytes(valPtr, val.Length, ptr, remaining);
+            BuiltIns.UTF8.GetBytes(valPtr, val.Length, ptr + offset, remaining);
         }
 
         ptr[offset + count] = 0;
@@ -701,6 +712,7 @@ public unsafe partial struct WriteBuffer2
 
     #endregion
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     void SerializeStructArrayCore<T>(T[] val) where T : unmanaged
     {
         int size = val.Length * sizeof(T);
@@ -747,13 +759,21 @@ public unsafe partial struct WriteBuffer2
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int GetRosMessageLength<T>(in T msg) where T : IMessageRos2
+    {
+        int s = 0;
+        msg.AddRosMessageLength(ref s);
+        return s;
+    }
+
     /// <summary>
     /// Serializes the given message into the buffer array.
     /// </summary>
     /// <param name="message">The ROS message.</param>
     /// <param name="buffer">The destination byte array.</param>
     /// <returns>The number of bytes written.</returns>
-    internal static uint Serialize<T>(in T message, Span<byte> buffer) where T : ISerializable
+    public static uint Serialize<T>(in T message, Span<byte> buffer) where T : ISerializable
     {
         fixed (byte* bufferPtr = buffer)
         {
@@ -771,65 +791,66 @@ public unsafe partial struct WriteBuffer2
 public unsafe partial struct WriteBuffer2
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, in Vector3 _) => AdvanceAlign8T(ref c, Vector3.RosFixedMessageLength);
+    public static void AddLength(ref int c, in Vector3 _) => AdvanceAlign8Type(ref c, Vector3.RosFixedMessageLength);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, in Point _) => AdvanceAlign8T(ref c, Point.RosFixedMessageLength);
+    public static void AddLength(ref int c, in Point _) => AdvanceAlign8Type(ref c, Point.RosFixedMessageLength);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, in Quaternion _) => AdvanceAlign8T(ref c, Quaternion.RosFixedMessageLength);
+    public static void AddLength(ref int c, in Quaternion _) =>
+        AdvanceAlign8Type(ref c, Quaternion.RosFixedMessageLength);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, in Pose _) => AdvanceAlign8T(ref c, Pose.RosFixedMessageLength);
+    public static void AddLength(ref int c, in Pose _) => AdvanceAlign8Type(ref c, Pose.RosFixedMessageLength);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, in Transform _) => AdvanceAlign8T(ref c, Transform.RosFixedMessageLength);
+    public static void AddLength(ref int c, in Transform _) =>
+        AdvanceAlign8Type(ref c, Transform.RosFixedMessageLength);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, in ColorRGBA _) => AdvanceAlign4T(ref c, ColorRGBA.RosFixedMessageLength);
+    public static void AddLength(ref int c, in ColorRGBA _) =>
+        AdvanceAlign4Type(ref c, ColorRGBA.RosFixedMessageLength);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, in Point32 _) => AdvanceAlign4T(ref c, Point32.RosFixedMessageLength);
+    public static void AddLength(ref int c, in Point32 _) => AdvanceAlign4Type(ref c, Point32.RosFixedMessageLength);
 
-    
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, Vector3[] b) =>
-        AdvanceAlign8Ts(ref c, Vector3.RosFixedMessageLength * b.Length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, Point[] b) =>
-        AdvanceAlign8Ts(ref c, Point.RosFixedMessageLength * b.Length);
+    public static void AddLength(ref int c, Vector3[] b) =>
+        AdvanceAlign8TypeArray(ref c, Vector3.RosFixedMessageLength * b.Length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, Quaternion[] b) =>
-        AdvanceAlign8Ts(ref c, Quaternion.RosFixedMessageLength * b.Length);
+    public static void AddLength(ref int c, Point[] b) =>
+        AdvanceAlign8TypeArray(ref c, Point.RosFixedMessageLength * b.Length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, Pose[] b) => 
-        AdvanceAlign8Ts(ref c, Pose.RosFixedMessageLength * b.Length);
+    public static void AddLength(ref int c, Quaternion[] b) =>
+        AdvanceAlign8TypeArray(ref c, Quaternion.RosFixedMessageLength * b.Length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, Transform[] b) =>
-        AdvanceAlign8Ts(ref c, Transform.RosFixedMessageLength * b.Length);
+    public static void AddLength(ref int c, Pose[] b) =>
+        AdvanceAlign8TypeArray(ref c, Pose.RosFixedMessageLength * b.Length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, ColorRGBA[] b) =>
-        AdvanceAlign4Ts(ref c, ColorRGBA.RosFixedMessageLength * b.Length);
+    public static void AddLength(ref int c, Transform[] b) =>
+        AdvanceAlign8TypeArray(ref c, Transform.RosFixedMessageLength * b.Length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, Point32[] b) => 
-        AdvanceAlign4Ts(ref c, sizeof(Point32) * b.Length);
-
-    
+    public static void AddLength(ref int c, ColorRGBA[] b) =>
+        AdvanceAlign4TypeArray(ref c, ColorRGBA.RosFixedMessageLength * b.Length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Advance(ref int c, TransformStamped[] array)
+    public static void AddLength(ref int c, Point32[] b) =>
+        AdvanceAlign4TypeArray(ref c, sizeof(Point32) * b.Length);
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddLength(ref int c, TransformStamped[] b)
     {
         c = DoAlign4(c) + sizeof(int);
-        foreach (var message in array)
+        foreach (var message in b)
         {
-            message.GetRosMessageLength(ref c);
+            message.AddRosMessageLength(ref c);
         }
     }
 

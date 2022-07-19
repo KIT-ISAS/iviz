@@ -46,7 +46,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class SetGridMapRequest : IRequest<SetGridMap, SetGridMapResponse>, IDeserializable<SetGridMapRequest>
+    public sealed class SetGridMapRequest : IRequest<SetGridMap, SetGridMapResponse>, IDeserializableRos1<SetGridMapRequest>
     {
         // map
         [DataMember (Name = "map")] public GridMapMsgs.GridMap Map;
@@ -90,7 +90,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class SetGridMapResponse : IResponse, IDeserializable<SetGridMapResponse>
+    public sealed class SetGridMapResponse : IResponse, IDeserializableRos1<SetGridMapResponse>
     {
     
         /// Constructor for empty message.

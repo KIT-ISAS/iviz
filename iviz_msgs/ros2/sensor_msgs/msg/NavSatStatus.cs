@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class NavSatStatus : IDeserializable<NavSatStatus>, IMessageRos2
+    public sealed class NavSatStatus : IDeserializableRos2<NavSatStatus>, IMessageRos2
     {
         // Navigation Satellite fix status for any Global Navigation Satellite System.
         //
@@ -66,10 +66,12 @@ namespace Iviz.Msgs2.SensorMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 3;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Status);
-            WriteBuffer2.Advance(ref c, Service);
+            WriteBuffer2.AddLength(ref c, Status);
+            WriteBuffer2.AddLength(ref c, Service);
         }
     
         /// <summary> Full ROS name of this message. </summary>

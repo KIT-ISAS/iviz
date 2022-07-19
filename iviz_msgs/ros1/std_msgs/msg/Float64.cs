@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class Float64 : IDeserializable<Float64>, IMessageRos1
+    public sealed class Float64 : IDeserializableRos1<Float64>, IMessageRos1
     {
         [DataMember (Name = "data")] public double Data;
     

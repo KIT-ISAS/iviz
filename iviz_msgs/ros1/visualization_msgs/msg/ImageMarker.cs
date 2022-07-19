@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class ImageMarker : IDeserializable<ImageMarker>, IMessageRos1
+    public sealed class ImageMarker : IDeserializableRos1<ImageMarker>, IMessageRos1
     {
         public const byte CIRCLE = 0;
         public const byte LINE_STRIP = 1;
@@ -98,7 +98,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             get {
                 int size = 93;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetStringSize(Ns);
+                size += WriteBuffer.GetStringSize(Ns);
                 size += 24 * Points.Length;
                 size += 16 * OutlineColors.Length;
                 return size;

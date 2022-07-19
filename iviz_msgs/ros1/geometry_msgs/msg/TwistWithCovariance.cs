@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class TwistWithCovariance : IDeserializable<TwistWithCovariance>, IMessageRos1
+    public sealed class TwistWithCovariance : IDeserializableRos1<TwistWithCovariance>, IMessageRos1
     {
         // This expresses velocity in free space with uncertainty.
         [DataMember (Name = "twist")] public Twist Twist;

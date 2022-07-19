@@ -10,7 +10,7 @@ namespace Iviz.Msgs2.StdMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Header : IMessageRos2, IDeserializable<Header>
+    public struct Header : IMessageRos2, IDeserializableRos2<Header>
     {
         // Standard metadata for higher-level stamped data types.
         // This is generally used to communicate timestamped data
@@ -52,10 +52,12 @@ namespace Iviz.Msgs2.StdMsgs
         {
         }
     
-        public readonly void GetRosMessageLength(ref int c)
+        public readonly int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public readonly void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Stamp);
-            WriteBuffer2.Advance(ref c, FrameId);
+            WriteBuffer2.AddLength(ref c, Stamp);
+            WriteBuffer2.AddLength(ref c, FrameId);
         }
     
         /// <summary> Full ROS name of this message. </summary>

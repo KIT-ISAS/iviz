@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class PolygonMesh : IDeserializable<PolygonMesh>, IMessageRos1
+    public sealed class PolygonMesh : IDeserializableRos1<PolygonMesh>, IMessageRos1
     {
         // Separate header for the polygonal surface
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -70,7 +70,7 @@ namespace Iviz.Msgs.PclMsgs
                 int size = 4;
                 size += Header.RosMessageLength;
                 size += Cloud.RosMessageLength;
-                size += BuiltIns.GetArraySize(Polygons);
+                size += WriteBuffer.GetArraySize(Polygons);
                 return size;
             }
         }

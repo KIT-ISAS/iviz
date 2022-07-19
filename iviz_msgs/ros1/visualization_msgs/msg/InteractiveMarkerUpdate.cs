@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerUpdate : IDeserializable<InteractiveMarkerUpdate>, IMessageRos1
+    public sealed class InteractiveMarkerUpdate : IDeserializableRos1<InteractiveMarkerUpdate>, IMessageRos1
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
@@ -100,10 +100,10 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             get {
                 int size = 25;
-                size += BuiltIns.GetStringSize(ServerId);
-                size += BuiltIns.GetArraySize(Markers);
-                size += BuiltIns.GetArraySize(Poses);
-                size += BuiltIns.GetArraySize(Erases);
+                size += WriteBuffer.GetStringSize(ServerId);
+                size += WriteBuffer.GetArraySize(Markers);
+                size += WriteBuffer.GetArraySize(Poses);
+                size += WriteBuffer.GetArraySize(Erases);
                 return size;
             }
         }

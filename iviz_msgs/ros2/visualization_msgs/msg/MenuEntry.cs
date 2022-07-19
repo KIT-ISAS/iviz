@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.VisualizationMsgs
 {
     [DataContract]
-    public sealed class MenuEntry : IDeserializable<MenuEntry>, IMessageRos2
+    public sealed class MenuEntry : IDeserializableRos2<MenuEntry>, IMessageRos2
     {
         // MenuEntry message.
         //
@@ -93,13 +93,15 @@ namespace Iviz.Msgs2.VisualizationMsgs
             if (Command is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Id);
-            WriteBuffer2.Advance(ref c, ParentId);
-            WriteBuffer2.Advance(ref c, Title);
-            WriteBuffer2.Advance(ref c, Command);
-            WriteBuffer2.Advance(ref c, CommandType);
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, ParentId);
+            WriteBuffer2.AddLength(ref c, Title);
+            WriteBuffer2.AddLength(ref c, Command);
+            WriteBuffer2.AddLength(ref c, CommandType);
         }
     
         /// <summary> Full ROS name of this message. </summary>

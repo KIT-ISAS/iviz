@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector2f : IMessageRos1, IDeserializable<Vector2f>
+    public struct Vector2f : IMessageRos1, IDeserializableRos1<Vector2f>
     {
         [DataMember (Name = "x")] public float X;
         [DataMember (Name = "y")] public float Y;

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Feedback : IDeserializable<Feedback>, IMessageRos1
+    public sealed class Feedback : IDeserializableRos1<Feedback>, IMessageRos1
     {
         public const byte TYPE_EXPIRED = 0;
         public const byte TYPE_BUTTON_CLICK = 1;
@@ -79,8 +79,8 @@ namespace Iviz.Msgs.IvizMsgs
             get {
                 int size = 101;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetStringSize(VizId);
-                size += BuiltIns.GetStringSize(Id);
+                size += WriteBuffer.GetStringSize(VizId);
+                size += WriteBuffer.GetStringSize(Id);
                 size += Trajectory.RosMessageLength;
                 return size;
             }

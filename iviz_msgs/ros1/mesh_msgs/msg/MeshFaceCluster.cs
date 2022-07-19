@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshFaceCluster : IDeserializable<MeshFaceCluster>, IMessageRos1
+    public sealed class MeshFaceCluster : IDeserializableRos1<MeshFaceCluster>, IMessageRos1
     {
         //Cluster
         [DataMember (Name = "face_indices")] public uint[] FaceIndices;
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MeshMsgs
             if (Label is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 8 + 4 * FaceIndices.Length + BuiltIns.GetStringSize(Label);
+        public int RosMessageLength => 8 + 4 * FaceIndices.Length + WriteBuffer.GetStringSize(Label);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshFaceCluster";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibMsgs
 {
     [DataContract]
-    public sealed class GoalID : IDeserializable<GoalID>, IMessageRos1
+    public sealed class GoalID : IDeserializableRos1<GoalID>, IMessageRos1
     {
         // The stamp should store the time at which this goal was requested.
         // It is used by an action server when it tries to preempt all
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.ActionlibMsgs
             if (Id is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 12 + BuiltIns.GetStringSize(Id);
+        public int RosMessageLength => 12 + WriteBuffer.GetStringSize(Id);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_msgs/GoalID";

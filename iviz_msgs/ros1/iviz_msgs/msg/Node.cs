@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Node : IDeserializable<Node>, IMessageRos1
+    public sealed class Node : IDeserializableRos1<Node>, IMessageRos1
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "parent")] public int Parent;
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Meshes is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 76 + BuiltIns.GetStringSize(Name) + 4 * Meshes.Length;
+        public int RosMessageLength => 76 + WriteBuffer.GetStringSize(Name) + 4 * Meshes.Length;
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Node";

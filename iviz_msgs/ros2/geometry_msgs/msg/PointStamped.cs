@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
-    public sealed class PointStamped : IDeserializable<PointStamped>, IMessageRos2
+    public sealed class PointStamped : IDeserializableRos2<PointStamped>, IMessageRos2
     {
         // This represents a Point with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -44,10 +44,12 @@ namespace Iviz.Msgs2.GeometryMsgs
         {
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Point);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Point);
         }
     
         /// <summary> Full ROS name of this message. </summary>

@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
-    public sealed class PoseWithCovarianceStamped : IDeserializable<PoseWithCovarianceStamped>, IMessageRos2
+    public sealed class PoseWithCovarianceStamped : IDeserializableRos2<PoseWithCovarianceStamped>, IMessageRos2
     {
         // This expresses an estimated pose with a reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -47,10 +47,12 @@ namespace Iviz.Msgs2.GeometryMsgs
             Pose.RosValidate();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            Pose.GetRosMessageLength(ref c);
+            Header.AddRosMessageLength(ref c);
+            Pose.AddRosMessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

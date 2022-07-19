@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.DiagnosticMsgs
 {
     [DataContract]
-    public sealed class DiagnosticArray : IDeserializable<DiagnosticArray>, IMessageRos1
+    public sealed class DiagnosticArray : IDeserializableRos1<DiagnosticArray>, IMessageRos1
     {
         // This message is used to send diagnostic information about the state of the robot
         /// <summary> For timestamp </summary>
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
     
-        public int RosMessageLength => 4 + Header.RosMessageLength + BuiltIns.GetArraySize(Status);
+        public int RosMessageLength => 4 + Header.RosMessageLength + WriteBuffer.GetArraySize(Status);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "diagnostic_msgs/DiagnosticArray";

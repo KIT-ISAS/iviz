@@ -10,7 +10,7 @@ namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Quaternion : IMessageRos2, IDeserializable<Quaternion>
+    public struct Quaternion : IMessageRos2, IDeserializableRos2<Quaternion>
     {
         // This represents an orientation in free space in quaternion form.
         [DataMember (Name = "x")] public double X;
@@ -48,7 +48,9 @@ namespace Iviz.Msgs2.GeometryMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 32;
         
-        public readonly void GetRosMessageLength(ref int c) => WriteBuffer2.Advance(ref c, this);
+        public readonly int RosMessageLength => RosFixedMessageLength;
+        
+        public readonly void AddRosMessageLength(ref int c) => WriteBuffer2.AddLength(ref c, this);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/Quaternion";

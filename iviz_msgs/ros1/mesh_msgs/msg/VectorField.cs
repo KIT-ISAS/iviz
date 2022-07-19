@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class VectorField : IDeserializable<VectorField>, IMessageRos1
+    public sealed class VectorField : IDeserializableRos1<VectorField>, IMessageRos1
     {
         [DataMember (Name = "positions")] public GeometryMsgs.Point[] Positions;
         [DataMember (Name = "vectors")] public GeometryMsgs.Vector3[] Vectors;

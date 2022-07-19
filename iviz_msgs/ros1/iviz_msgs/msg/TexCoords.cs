@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class TexCoords : IDeserializable<TexCoords>, IMessageRos1
+    public sealed class TexCoords : IDeserializableRos1<TexCoords>, IMessageRos1
     {
         [DataMember (Name = "coords")] public Vector3f[] Coords;
     

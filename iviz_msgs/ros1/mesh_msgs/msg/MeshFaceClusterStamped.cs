@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshFaceClusterStamped : IDeserializable<MeshFaceClusterStamped>, IMessageRos1
+    public sealed class MeshFaceClusterStamped : IDeserializableRos1<MeshFaceClusterStamped>, IMessageRos1
     {
         // header
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -65,7 +65,7 @@ namespace Iviz.Msgs.MeshMsgs
             get {
                 int size = 5;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetStringSize(Uuid);
+                size += WriteBuffer.GetStringSize(Uuid);
                 size += Cluster.RosMessageLength;
                 return size;
             }

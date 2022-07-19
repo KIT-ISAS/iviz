@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
-    public sealed class WrenchStamped : IDeserializable<WrenchStamped>, IMessageRos2
+    public sealed class WrenchStamped : IDeserializableRos2<WrenchStamped>, IMessageRos2
     {
         // A wrench with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -47,10 +47,12 @@ namespace Iviz.Msgs2.GeometryMsgs
             Wrench.RosValidate();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            Wrench.GetRosMessageLength(ref c);
+            Header.AddRosMessageLength(ref c);
+            Wrench.AddRosMessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

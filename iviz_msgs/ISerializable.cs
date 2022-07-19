@@ -1,64 +1,68 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
+﻿namespace Iviz.Msgs;
 
-namespace Iviz.Msgs
+/// <summary>
+/// Establishes that the class can be (de-)serialized as a ROS binary stream. 
+/// </summary>
+public interface ISerializable
 {
     /// <summary>
-    /// Attribute that tells the Unity Engine not to strip these fields even if no code accesses them.
+    /// Serializes this message into the buffer.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct |
-                    AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor)]
-    public class PreserveAttribute : Attribute
-    {
-    }
+    /// <param name="b">
+    /// Buffer object.
+    /// </param>
+    void RosSerialize(ref WriteBuffer b) => throw new RosInvalidMessageForVersion();
+
+    void RosSerialize(ref WriteBuffer2 b) => throw new RosInvalidMessageForVersion();
 
     /// <summary>
-    /// Establishes that the class can be (de-)serialized as a ROS binary stream. 
+    /// Length of this message in bytes after serialization.
     /// </summary>
-    public interface ISerializable
-    {
-        /// <summary>
-        /// Serializes this message into the buffer.
-        /// </summary>
-        /// <param name="b">
-        /// Buffer object.
-        /// </param>
-        void RosSerialize(ref WriteBuffer b) => throw new RosInvalidMessageForVersion();
+    int RosMessageLength { get; }
 
-        void RosSerialize(ref WriteBuffer2 b) => throw new RosInvalidMessageForVersion();
+    /// <summary>
+    /// Checks if this message is valid (no null pointers, fixed arrays have the right size, and so on).
+    /// If not, throws an exception.
+    /// </summary>
+    void RosValidate();
 
-        /// <summary>
-        /// Length of this message in bytes after serialization.
-        /// </summary>
-        int RosMessageLength { get; }
+    /// <summary>
+    /// Creates a new message and deserializes into it the information read from the given buffer.
+    /// </summary>
+    /// <param name="b">
+    /// Buffer object.
+    /// </param>
+    ISerializable RosDeserializeBase(ref ReadBuffer b) => throw new RosInvalidMessageForVersion();
 
-        /// <summary>
-        /// Checks if this message is valid (no null pointers, fixed arrays have the right size, and so on).
-        /// If not, throws an exception.
-        /// </summary>
-        void RosValidate();
+    ISerializable RosDeserializeBase(ref ReadBuffer2 b) => throw new RosInvalidMessageForVersion();
+}
 
-        /// <summary>
-        /// Creates a new message and deserializes into it the information read from the given buffer.
-        /// </summary>
-        /// <param name="b">
-        /// Buffer object.
-        /// </param>
-        ISerializable RosDeserializeBase(ref ReadBuffer b) => throw new RosInvalidMessageForVersion();
+public interface IDeserializable<out T> where T : ISerializable
+{
+}
 
-        ISerializable RosDeserializeBase(ref ReadBuffer2 b) => throw new RosInvalidMessageForVersion();
-    }
+public interface IDeserializableRos1<out T> : IDeserializable<T> where T : ISerializable
+{
+    /// <summary>
+    /// Creates a new message an deserializes into it the information read from the given buffer.
+    /// </summary>
+    /// <param name="b">
+    /// Buffer object.
+    /// </param>
+    T RosDeserialize(ref ReadBuffer b) => throw new RosInvalidMessageForVersion();
 
-    public interface IDeserializable<out T> where T : ISerializable
-    {
-        /// <summary>
-        /// Creates a new message an deserializes into it the information read from the given buffer.
-        /// </summary>
-        /// <param name="b">
-        /// Buffer object.
-        /// </param>
-        T RosDeserialize(ref ReadBuffer b) => throw new RosInvalidMessageForVersion();
+    //T RosDeserialize(ref ReadBuffer2 b) => throw new RosInvalidMessageForVersion();
+}
 
-        T RosDeserialize(ref ReadBuffer2 b) => throw new RosInvalidMessageForVersion();
-    }
+public interface IDeserializableRos2<out T> : IDeserializable<T> where T : ISerializable
+{
+    /// <summary>
+    /// Creates a new message an deserializes into it the information read from the given buffer.
+    /// </summary>
+    /// <param name="b">
+    /// Buffer object.
+    /// </param>
+    //T RosDeserialize(ref ReadBuffer b) => throw new RosInvalidMessageForVersion();
+
+    T RosDeserialize(ref ReadBuffer2 b) => throw new RosInvalidMessageForVersion();
 }

@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class JoyFeedback : IDeserializable<JoyFeedback>, IMessageRos2
+    public sealed class JoyFeedback : IDeserializableRos2<JoyFeedback>, IMessageRos2
     {
         // Declare of the type of feedback
         public const byte TYPE_LED = 0;
@@ -58,11 +58,13 @@ namespace Iviz.Msgs2.SensorMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 6;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Type);
-            WriteBuffer2.Advance(ref c, Id);
-            WriteBuffer2.Advance(ref c, Intensity);
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, Intensity);
         }
     
         /// <summary> Full ROS name of this message. </summary>

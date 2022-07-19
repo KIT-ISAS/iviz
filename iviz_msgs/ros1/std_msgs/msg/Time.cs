@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class Time : IDeserializable<Time>, IMessageRos1
+    public sealed class Time : IDeserializableRos1<Time>, IMessageRos1
     {
         [DataMember (Name = "data")] public time Data;
     

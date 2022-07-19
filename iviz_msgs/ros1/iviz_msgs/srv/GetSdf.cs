@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetSdfRequest : IRequest<GetSdf, GetSdfResponse>, IDeserializable<GetSdfRequest>
+    public sealed class GetSdfRequest : IRequest<GetSdf, GetSdfResponse>, IDeserializableRos1<GetSdfRequest>
     {
         // Retrieves a scene, which can contain one or multiple 3D models and lights
         /// <summary> Uri of the file. Example: package://some_package/file.world </summary>
@@ -84,13 +84,13 @@ namespace Iviz.Msgs.IvizMsgs
             if (Uri is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uri);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uri);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetSdfResponse : IResponse, IDeserializable<GetSdfResponse>
+    public sealed class GetSdfResponse : IResponse, IDeserializableRos1<GetSdfResponse>
     {
         /// <summary> Whether the retrieval succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -140,7 +140,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + Scene.RosMessageLength + BuiltIns.GetStringSize(Message);
+        public int RosMessageLength => 5 + Scene.RosMessageLength + WriteBuffer.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

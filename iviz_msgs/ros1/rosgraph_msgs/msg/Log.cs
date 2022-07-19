@@ -8,7 +8,7 @@ namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Log : IMessageRos1, IDeserializable<Log>
+    public struct Log : IMessageRos1, IDeserializableRos1<Log>
     {
         //#
         //# Severity level constants
@@ -106,11 +106,11 @@ namespace Iviz.Msgs.RosgraphMsgs
             get {
                 int size = 25;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetStringSize(Name);
-                size += BuiltIns.GetStringSize(Msg);
-                size += BuiltIns.GetStringSize(File);
-                size += BuiltIns.GetStringSize(Function);
-                size += BuiltIns.GetArraySize(Topics);
+                size += WriteBuffer.GetStringSize(Name);
+                size += WriteBuffer.GetStringSize(Msg);
+                size += WriteBuffer.GetStringSize(File);
+                size += WriteBuffer.GetStringSize(Function);
+                size += WriteBuffer.GetArraySize(Topics);
                 return size;
             }
         }

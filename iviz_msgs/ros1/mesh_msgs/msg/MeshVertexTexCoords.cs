@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshVertexTexCoords : IDeserializable<MeshVertexTexCoords>, IMessageRos1
+    public sealed class MeshVertexTexCoords : IDeserializableRos1<MeshVertexTexCoords>, IMessageRos1
     {
         // Mesh Attribute Type
         [DataMember (Name = "u")] public float U;

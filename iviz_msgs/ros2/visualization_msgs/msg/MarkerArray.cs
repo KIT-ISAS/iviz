@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.VisualizationMsgs
 {
     [DataContract]
-    public sealed class MarkerArray : IDeserializable<MarkerArray>, IMessageRos2
+    public sealed class MarkerArray : IDeserializableRos2<MarkerArray>, IMessageRos2
     {
         [DataMember (Name = "markers")] public Marker[] Markers;
     
@@ -50,9 +50,11 @@ namespace Iviz.Msgs2.VisualizationMsgs
             }
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Markers);
+            WriteBuffer2.AddLength(ref c, Markers);
         }
     
         /// <summary> Full ROS name of this message. </summary>

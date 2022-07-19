@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class TF2Error : IDeserializable<TF2Error>, IMessageRos1
+    public sealed class TF2Error : IDeserializableRos1<TF2Error>, IMessageRos1
     {
         public const byte NO_ERROR = 0;
         public const byte LOOKUP_ERROR = 1;
@@ -52,7 +52,7 @@ namespace Iviz.Msgs.Tf2Msgs
             if (ErrorString is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + BuiltIns.GetStringSize(ErrorString);
+        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(ErrorString);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "tf2_msgs/TF2Error";

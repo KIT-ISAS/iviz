@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Roscpp
 {
     [DataContract]
-    public sealed class Logger : IDeserializable<Logger>, IMessageRos1
+    public sealed class Logger : IDeserializableRos1<Logger>, IMessageRos1
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "level")] public string Level;
@@ -47,7 +47,7 @@ namespace Iviz.Msgs.Roscpp
             if (Level is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name) + BuiltIns.GetStringSize(Level);
+        public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Name) + WriteBuffer.GetStringSize(Level);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "roscpp/Logger";

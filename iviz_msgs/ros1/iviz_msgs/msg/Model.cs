@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Model : IDeserializable<Model>, IMessageRos1
+    public sealed class Model : IDeserializableRos1<Model>, IMessageRos1
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "filename")] public string Filename;
@@ -91,12 +91,12 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 24;
-                size += BuiltIns.GetStringSize(Name);
-                size += BuiltIns.GetStringSize(Filename);
-                size += BuiltIns.GetStringSize(OrientationHint);
-                size += BuiltIns.GetArraySize(Meshes);
-                size += BuiltIns.GetArraySize(Materials);
-                size += BuiltIns.GetArraySize(Nodes);
+                size += WriteBuffer.GetStringSize(Name);
+                size += WriteBuffer.GetStringSize(Filename);
+                size += WriteBuffer.GetStringSize(OrientationHint);
+                size += WriteBuffer.GetArraySize(Meshes);
+                size += WriteBuffer.GetArraySize(Materials);
+                size += WriteBuffer.GetArraySize(Nodes);
                 return size;
             }
         }

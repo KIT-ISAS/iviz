@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.LifecycleMsgs
 {
     [DataContract]
-    public sealed class TransitionEvent : IDeserializable<TransitionEvent>, IMessageRos2
+    public sealed class TransitionEvent : IDeserializableRos2<TransitionEvent>, IMessageRos2
     {
         // The time point at which this event occurred.
         [DataMember (Name = "timestamp")] public ulong Timestamp;
@@ -64,12 +64,14 @@ namespace Iviz.Msgs2.LifecycleMsgs
             GoalState.RosValidate();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Timestamp);
-            Transition.GetRosMessageLength(ref c);
-            StartState.GetRosMessageLength(ref c);
-            GoalState.GetRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Timestamp);
+            Transition.AddRosMessageLength(ref c);
+            StartState.AddRosMessageLength(ref c);
+            GoalState.AddRosMessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

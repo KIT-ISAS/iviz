@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
-    public sealed class AccelWithCovariance : IDeserializable<AccelWithCovariance>, IMessageRos2
+    public sealed class AccelWithCovariance : IDeserializableRos2<AccelWithCovariance>, IMessageRos2
     {
         // This expresses acceleration in free space with uncertainty.
         [DataMember (Name = "accel")] public Accel Accel;
@@ -57,10 +57,12 @@ namespace Iviz.Msgs2.GeometryMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 336;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Accel.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Covariance, 36);
+            Accel.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Covariance, 36);
         }
     
         /// <summary> Full ROS name of this message. </summary>

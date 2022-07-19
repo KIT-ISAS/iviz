@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshGeometryStamped : IDeserializable<MeshGeometryStamped>, IMessageRos1
+    public sealed class MeshGeometryStamped : IDeserializableRos1<MeshGeometryStamped>, IMessageRos1
     {
         // Mesh Geometry Message
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.MeshMsgs
             get {
                 int size = 4;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetStringSize(Uuid);
+                size += WriteBuffer.GetStringSize(Uuid);
                 size += MeshGeometry.RosMessageLength;
                 return size;
             }

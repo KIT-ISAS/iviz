@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetModulesRequest : IRequest<GetModules, GetModulesResponse>, IDeserializable<GetModulesRequest>
+    public sealed class GetModulesRequest : IRequest<GetModules, GetModulesResponse>, IDeserializableRos1<GetModulesRequest>
     {
         // Gets a list of modules
     
@@ -84,7 +84,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetModulesResponse : IResponse, IDeserializable<GetModulesResponse>
+    public sealed class GetModulesResponse : IResponse, IDeserializableRos1<GetModulesResponse>
     {
         /// <summary> List of module configurations in JSON encoding </summary>
         [DataMember (Name = "configs")] public string[] Configs;
@@ -125,7 +125,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Configs);
+        public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Configs);
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Dialog : IDeserializable<Dialog>, IMessageRos1
+    public sealed class Dialog : IDeserializableRos1<Dialog>, IMessageRos1
     {
         public const byte ACTION_ADD = 0;
         public const byte ACTION_REMOVE = 1;
@@ -143,10 +143,10 @@ namespace Iviz.Msgs.IvizMsgs
             get {
                 int size = 127;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetStringSize(Id);
-                size += BuiltIns.GetStringSize(Title);
-                size += BuiltIns.GetStringSize(Caption);
-                size += BuiltIns.GetArraySize(MenuEntries);
+                size += WriteBuffer.GetStringSize(Id);
+                size += WriteBuffer.GetStringSize(Title);
+                size += WriteBuffer.GetStringSize(Caption);
+                size += WriteBuffer.GetArraySize(MenuEntries);
                 return size;
             }
         }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Light : IDeserializable<Light>, IMessageRos1
+    public sealed class Light : IDeserializableRos1<Light>, IMessageRos1
     {
         public const byte POINT = 0;
         public const byte DIRECTIONAL = 1;
@@ -62,7 +62,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Name is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 46 + BuiltIns.GetStringSize(Name);
+        public int RosMessageLength => 46 + WriteBuffer.GetStringSize(Name);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Light";

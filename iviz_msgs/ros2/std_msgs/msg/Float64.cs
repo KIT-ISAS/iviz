@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.StdMsgs
 {
     [DataContract]
-    public sealed class Float64 : IDeserializable<Float64>, IMessageRos2
+    public sealed class Float64 : IDeserializableRos2<Float64>, IMessageRos2
     {
         // This was originally provided as an example message.
         // It is deprecated as of Foxy
@@ -46,9 +46,11 @@ namespace Iviz.Msgs2.StdMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 8;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Data);
+            WriteBuffer2.AddLength(ref c, Data);
         }
     
         /// <summary> Full ROS name of this message. </summary>

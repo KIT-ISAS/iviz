@@ -46,7 +46,7 @@ namespace Iviz.Msgs.StdSrvs
     }
 
     [DataContract]
-    public sealed class TriggerRequest : IRequest<Trigger, TriggerResponse>, IDeserializable<TriggerRequest>
+    public sealed class TriggerRequest : IRequest<Trigger, TriggerResponse>, IDeserializableRos1<TriggerRequest>
     {
     
         /// Constructor for empty message.
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.StdSrvs
     }
 
     [DataContract]
-    public sealed class TriggerResponse : IResponse, IDeserializable<TriggerResponse>
+    public sealed class TriggerResponse : IResponse, IDeserializableRos1<TriggerResponse>
     {
         /// <summary> Indicate successful run of triggered service </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -125,7 +125,7 @@ namespace Iviz.Msgs.StdSrvs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);
+        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

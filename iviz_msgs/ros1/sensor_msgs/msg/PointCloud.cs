@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class PointCloud : IDeserializable<PointCloud>, IMessageRos1
+    public sealed class PointCloud : IDeserializableRos1<PointCloud>, IMessageRos1
     {
         // This message holds a collection of 3d points, plus optional additional
         // information about each point.
@@ -74,7 +74,7 @@ namespace Iviz.Msgs.SensorMsgs
                 int size = 8;
                 size += Header.RosMessageLength;
                 size += 12 * Points.Length;
-                size += BuiltIns.GetArraySize(Channels);
+                size += WriteBuffer.GetArraySize(Channels);
                 return size;
             }
         }

@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.UniqueIdentifierMsgs
 {
     [DataContract]
-    public sealed class UUID : IDeserializable<UUID>, IMessageRos2
+    public sealed class UUID : IDeserializableRos2<UUID>, IMessageRos2
     {
         // A universally unique identifier (UUID).
         //
@@ -49,9 +49,11 @@ namespace Iviz.Msgs2.UniqueIdentifierMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 16;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Uuid, 16);
+            WriteBuffer2.AddLength(ref c, Uuid, 16);
         }
     
         /// <summary> Full ROS name of this message. </summary>

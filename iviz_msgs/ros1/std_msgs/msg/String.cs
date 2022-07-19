@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class String : IDeserializable<String>, IMessageRos1
+    public sealed class String : IDeserializableRos1<String>, IMessageRos1
     {
         [DataMember (Name = "data")] public string Data;
     
@@ -41,7 +41,7 @@ namespace Iviz.Msgs.StdMsgs
             if (Data is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Data);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Data);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/String";

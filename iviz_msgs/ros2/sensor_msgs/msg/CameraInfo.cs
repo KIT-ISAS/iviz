@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class CameraInfo : IDeserializable<CameraInfo>, IMessageRos2
+    public sealed class CameraInfo : IDeserializableRos2<CameraInfo>, IMessageRos2
     {
         // This message defines meta information for a camera. It should be in a
         // camera namespace on topic "camera_info" and accompanied by up to five
@@ -189,19 +189,21 @@ namespace Iviz.Msgs2.SensorMsgs
             Roi.RosValidate();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Height);
-            WriteBuffer2.Advance(ref c, Width);
-            WriteBuffer2.Advance(ref c, DistortionModel);
-            WriteBuffer2.Advance(ref c, D);
-            WriteBuffer2.Advance(ref c, K, 9);
-            WriteBuffer2.Advance(ref c, R, 9);
-            WriteBuffer2.Advance(ref c, P, 12);
-            WriteBuffer2.Advance(ref c, BinningX);
-            WriteBuffer2.Advance(ref c, BinningY);
-            Roi.GetRosMessageLength(ref c);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Height);
+            WriteBuffer2.AddLength(ref c, Width);
+            WriteBuffer2.AddLength(ref c, DistortionModel);
+            WriteBuffer2.AddLength(ref c, D);
+            WriteBuffer2.AddLength(ref c, K, 9);
+            WriteBuffer2.AddLength(ref c, R, 9);
+            WriteBuffer2.AddLength(ref c, P, 12);
+            WriteBuffer2.AddLength(ref c, BinningX);
+            WriteBuffer2.AddLength(ref c, BinningY);
+            Roi.AddRosMessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

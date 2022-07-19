@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetModelResourceRequest : IRequest<GetModelResource, GetModelResourceResponse>, IDeserializable<GetModelResourceRequest>
+    public sealed class GetModelResourceRequest : IRequest<GetModelResource, GetModelResourceResponse>, IDeserializableRos1<GetModelResourceRequest>
     {
         // Retrieves a 3D model, and converts it into a format that can be used in iviz
         /// <summary> Uri of the file. Example: package://some_package/file.dae </summary>
@@ -84,13 +84,13 @@ namespace Iviz.Msgs.IvizMsgs
             if (Uri is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uri);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uri);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetModelResourceResponse : IResponse, IDeserializable<GetModelResourceResponse>
+    public sealed class GetModelResourceResponse : IResponse, IDeserializableRos1<GetModelResourceResponse>
     {
         /// <summary> Whether the retrieval succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -140,7 +140,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + Model.RosMessageLength + BuiltIns.GetStringSize(Message);
+        public int RosMessageLength => 5 + Model.RosMessageLength + WriteBuffer.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -46,7 +46,7 @@ namespace Iviz.Msgs.NavMsgs
     }
 
     [DataContract]
-    public sealed class GetMapRequest : IRequest<GetMap, GetMapResponse>, IDeserializable<GetMapRequest>
+    public sealed class GetMapRequest : IRequest<GetMap, GetMapResponse>, IDeserializableRos1<GetMapRequest>
     {
         // Get the map as a nav_msgs/OccupancyGrid
     
@@ -84,7 +84,7 @@ namespace Iviz.Msgs.NavMsgs
     }
 
     [DataContract]
-    public sealed class GetMapResponse : IResponse, IDeserializable<GetMapResponse>
+    public sealed class GetMapResponse : IResponse, IDeserializableRos1<GetMapResponse>
     {
         [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map;
     

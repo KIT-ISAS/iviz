@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.RclInterfaces
 {
     [DataContract]
-    public sealed class Parameter : IDeserializable<Parameter>, IMessageRos2
+    public sealed class Parameter : IDeserializableRos2<Parameter>, IMessageRos2
     {
         // This is the message to communicate a parameter. It is an open struct with an enum in
         // the descriptor to select which value is active.
@@ -53,10 +53,12 @@ namespace Iviz.Msgs2.RclInterfaces
             Value.RosValidate();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Name);
-            Value.GetRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Name);
+            Value.AddRosMessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

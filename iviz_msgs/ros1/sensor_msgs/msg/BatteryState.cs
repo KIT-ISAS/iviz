@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class BatteryState : IDeserializable<BatteryState>, IMessageRos1
+    public sealed class BatteryState : IDeserializableRos1<BatteryState>, IMessageRos1
     {
         // Constants are chosen to match the enums in the linux kernel
         // defined in include/linux/power_supply.h as of version 3.7
@@ -138,8 +138,8 @@ namespace Iviz.Msgs.SensorMsgs
                 size += Header.RosMessageLength;
                 size += 4 * CellVoltage.Length;
                 size += 4 * CellTemperature.Length;
-                size += BuiltIns.GetStringSize(Location);
-                size += BuiltIns.GetStringSize(SerialNumber);
+                size += WriteBuffer.GetStringSize(Location);
+                size += WriteBuffer.GetStringSize(SerialNumber);
                 return size;
             }
         }

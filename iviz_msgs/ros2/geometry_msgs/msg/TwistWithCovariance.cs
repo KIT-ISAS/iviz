@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
-    public sealed class TwistWithCovariance : IDeserializable<TwistWithCovariance>, IMessageRos2
+    public sealed class TwistWithCovariance : IDeserializableRos2<TwistWithCovariance>, IMessageRos2
     {
         // This expresses velocity in free space with uncertainty.
         [DataMember (Name = "twist")] public Twist Twist;
@@ -57,10 +57,12 @@ namespace Iviz.Msgs2.GeometryMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 336;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Twist.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Covariance, 36);
+            Twist.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Covariance, 36);
         }
     
         /// <summary> Full ROS name of this message. </summary>

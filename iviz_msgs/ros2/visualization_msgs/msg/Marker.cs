@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.VisualizationMsgs
 {
     [DataContract]
-    public sealed class Marker : IDeserializable<Marker>, IMessageRos2
+    public sealed class Marker : IDeserializableRos2<Marker>, IMessageRos2
     {
         // See:
         //  - http://www.ros.org/wiki/rviz/DisplayTypes/Marker
@@ -128,23 +128,25 @@ namespace Iviz.Msgs2.VisualizationMsgs
             if (MeshResource is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Ns);
-            WriteBuffer2.Advance(ref c, Id);
-            WriteBuffer2.Advance(ref c, Type);
-            WriteBuffer2.Advance(ref c, Action);
-            WriteBuffer2.Advance(ref c, Pose);
-            WriteBuffer2.Advance(ref c, Scale);
-            WriteBuffer2.Advance(ref c, Color);
-            WriteBuffer2.Advance(ref c, Lifetime);
-            WriteBuffer2.Advance(ref c, FrameLocked);
-            WriteBuffer2.Advance(ref c, Points);
-            WriteBuffer2.Advance(ref c, Colors);
-            WriteBuffer2.Advance(ref c, Text);
-            WriteBuffer2.Advance(ref c, MeshResource);
-            WriteBuffer2.Advance(ref c, MeshUseEmbeddedMaterials);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Ns);
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, Action);
+            WriteBuffer2.AddLength(ref c, Pose);
+            WriteBuffer2.AddLength(ref c, Scale);
+            WriteBuffer2.AddLength(ref c, Color);
+            WriteBuffer2.AddLength(ref c, Lifetime);
+            WriteBuffer2.AddLength(ref c, FrameLocked);
+            WriteBuffer2.AddLength(ref c, Points);
+            WriteBuffer2.AddLength(ref c, Colors);
+            WriteBuffer2.AddLength(ref c, Text);
+            WriteBuffer2.AddLength(ref c, MeshResource);
+            WriteBuffer2.AddLength(ref c, MeshUseEmbeddedMaterials);
         }
     
         /// <summary> Full ROS name of this message. </summary>

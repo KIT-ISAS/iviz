@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.OctomapMsgs
 {
     [DataContract]
-    public sealed class Octomap : IDeserializable<Octomap>, IMessageRos1
+    public sealed class Octomap : IDeserializableRos1<Octomap>, IMessageRos1
     {
         // A 3D map in binary format, as Octree
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.OctomapMsgs
             get {
                 int size = 17;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetStringSize(Id);
+                size += WriteBuffer.GetStringSize(Id);
                 size += Data.Length;
                 return size;
             }

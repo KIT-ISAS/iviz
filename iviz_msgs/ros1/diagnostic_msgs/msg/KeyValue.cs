@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.DiagnosticMsgs
 {
     [DataContract]
-    public sealed class KeyValue : IDeserializable<KeyValue>, IMessageRos1
+    public sealed class KeyValue : IDeserializableRos1<KeyValue>, IMessageRos1
     {
         /// <summary> What to label this value when viewing </summary>
         [DataMember (Name = "key")] public string Key;
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             if (Value is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Key) + BuiltIns.GetStringSize(Value);
+        public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Key) + WriteBuffer.GetStringSize(Value);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "diagnostic_msgs/KeyValue";

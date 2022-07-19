@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Pose : IMessageRos1, IDeserializable<Pose>
+    public struct Pose : IMessageRos1, IDeserializableRos1<Pose>
     {
         // A representation of pose in free space, composed of position and orientation. 
         [DataMember (Name = "position")] public Point Position;

@@ -46,7 +46,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class GetGridMapRequest : IRequest<GetGridMap, GetGridMapResponse>, IDeserializable<GetGridMapRequest>
+    public sealed class GetGridMapRequest : IRequest<GetGridMap, GetGridMapResponse>, IDeserializableRos1<GetGridMapRequest>
     {
         // Frame id of the submap position request.
         [DataMember (Name = "frame_id")] public string FrameId;
@@ -103,13 +103,13 @@ namespace Iviz.Msgs.GridMapMsgs
             }
         }
     
-        public int RosMessageLength => 40 + BuiltIns.GetStringSize(FrameId) + BuiltIns.GetArraySize(Layers);
+        public int RosMessageLength => 40 + WriteBuffer.GetStringSize(FrameId) + WriteBuffer.GetArraySize(Layers);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetGridMapResponse : IResponse, IDeserializable<GetGridMapResponse>
+    public sealed class GetGridMapResponse : IResponse, IDeserializableRos1<GetGridMapResponse>
     {
         // Submap
         [DataMember (Name = "map")] public GridMapMsgs.GridMap Map;

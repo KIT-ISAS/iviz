@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
-    public sealed class InertiaStamped : IDeserializable<InertiaStamped>, IMessageRos2
+    public sealed class InertiaStamped : IDeserializableRos2<InertiaStamped>, IMessageRos2
     {
         // An Inertia with a time stamp and reference frame.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -47,10 +47,12 @@ namespace Iviz.Msgs2.GeometryMsgs
             Inertia.RosValidate();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            Inertia.GetRosMessageLength(ref c);
+            Header.AddRosMessageLength(ref c);
+            Inertia.AddRosMessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

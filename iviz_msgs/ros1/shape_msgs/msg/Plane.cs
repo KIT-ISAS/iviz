@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract]
-    public sealed class Plane : IDeserializable<Plane>, IMessageRos1
+    public sealed class Plane : IDeserializableRos1<Plane>, IMessageRos1
     {
         // Representation of a plane, using the plane equation ax + by + cz + d = 0
         // a := coef[0]

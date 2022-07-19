@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Color32 : IMessageRos1, IDeserializable<Color32>
+    public struct Color32 : IMessageRos1, IDeserializableRos1<Color32>
     {
         [DataMember (Name = "r")] public byte R;
         [DataMember (Name = "g")] public byte G;

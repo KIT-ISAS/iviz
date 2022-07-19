@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Include : IDeserializable<Include>, IMessageRos1
+    public sealed class Include : IDeserializableRos1<Include>, IMessageRos1
     {
         // Reference to an external asset
         /// <summary> Uri of the asset </summary>
@@ -69,9 +69,9 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 72;
-                size += BuiltIns.GetStringSize(Uri);
+                size += WriteBuffer.GetStringSize(Uri);
                 size += Material.RosMessageLength;
-                size += BuiltIns.GetStringSize(Package);
+                size += WriteBuffer.GetStringSize(Package);
                 return size;
             }
         }

@@ -10,7 +10,7 @@ namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3 : IMessageRos2, IDeserializable<Vector3>
+    public struct Vector3 : IMessageRos2, IDeserializableRos2<Vector3>
     {
         // This represents a vector in free space.
         // This is semantically different than a point.
@@ -49,7 +49,9 @@ namespace Iviz.Msgs2.GeometryMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 24;
         
-        public readonly void GetRosMessageLength(ref int c) => WriteBuffer2.Advance(ref c, this);
+        public readonly int RosMessageLength => RosFixedMessageLength;
+        
+        public readonly void AddRosMessageLength(ref int c) => WriteBuffer2.AddLength(ref c, this);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/Vector3";

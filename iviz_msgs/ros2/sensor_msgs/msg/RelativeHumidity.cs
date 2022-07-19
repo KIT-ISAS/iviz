@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class RelativeHumidity : IDeserializable<RelativeHumidity>, IMessageRos2
+    public sealed class RelativeHumidity : IDeserializableRos2<RelativeHumidity>, IMessageRos2
     {
         // Single reading from a relative humidity sensor.
         // Defines the ratio of partial pressure of water vapor to the saturated vapor
@@ -57,11 +57,13 @@ namespace Iviz.Msgs2.SensorMsgs
         {
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, RelativeHumidity_);
-            WriteBuffer2.Advance(ref c, Variance);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, RelativeHumidity_);
+            WriteBuffer2.AddLength(ref c, Variance);
         }
     
         /// <summary> Full ROS name of this message. </summary>

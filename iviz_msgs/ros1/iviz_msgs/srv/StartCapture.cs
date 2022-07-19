@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class StartCaptureRequest : IRequest<StartCapture, StartCaptureResponse>, IDeserializable<StartCaptureRequest>
+    public sealed class StartCaptureRequest : IRequest<StartCapture, StartCaptureResponse>, IDeserializableRos1<StartCaptureRequest>
     {
         [DataMember (Name = "resolution_x")] public int ResolutionX;
         [DataMember (Name = "resolution_y")] public int ResolutionY;
@@ -97,7 +97,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class StartCaptureResponse : IResponse, IDeserializable<StartCaptureResponse>
+    public sealed class StartCaptureResponse : IResponse, IDeserializableRos1<StartCaptureResponse>
     {
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "message")] public string Message;
@@ -137,7 +137,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);
+        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

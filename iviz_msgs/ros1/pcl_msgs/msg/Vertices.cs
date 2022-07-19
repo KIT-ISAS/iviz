@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class Vertices : IDeserializable<Vertices>, IMessageRos1
+    public sealed class Vertices : IDeserializableRos1<Vertices>, IMessageRos1
     {
         // List of point indices
         [DataMember (Name = "vertices")] public uint[] Vertices_;

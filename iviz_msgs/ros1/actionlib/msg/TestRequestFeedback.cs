@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestRequestFeedback : IDeserializable<TestRequestFeedback>, IMessageRos1, IFeedback<TestRequestActionFeedback>
+    public sealed class TestRequestFeedback : IDeserializableRos1<TestRequestFeedback>, IMessageRos1, IFeedback<TestRequestActionFeedback>
     {
     
         /// Constructor for empty message.

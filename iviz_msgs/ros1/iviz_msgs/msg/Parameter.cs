@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Parameter : IDeserializable<Parameter>, IMessageRos1
+    public sealed class Parameter : IDeserializableRos1<Parameter>, IMessageRos1
     {
         [DataMember (Name = "type")] public byte Type;
         [DataMember (Name = "bool")] public bool @bool;
@@ -75,11 +75,11 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 34;
-                size += BuiltIns.GetStringSize(@string);
+                size += WriteBuffer.GetStringSize(@string);
                 size += Bytes.Length;
                 size += 4 * Int32s.Length;
                 size += 8 * Float64s.Length;
-                size += BuiltIns.GetArraySize(Strings);
+                size += WriteBuffer.GetArraySize(Strings);
                 return size;
             }
         }

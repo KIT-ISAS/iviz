@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerFeedback : IDeserializable<InteractiveMarkerFeedback>, IMessageRos2
+    public sealed class InteractiveMarkerFeedback : IDeserializableRos2<InteractiveMarkerFeedback>, IMessageRos2
     {
         // Time/frame info.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -87,17 +87,19 @@ namespace Iviz.Msgs2.VisualizationMsgs
             if (ControlName is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, ClientId);
-            WriteBuffer2.Advance(ref c, MarkerName);
-            WriteBuffer2.Advance(ref c, ControlName);
-            WriteBuffer2.Advance(ref c, EventType);
-            WriteBuffer2.Advance(ref c, Pose);
-            WriteBuffer2.Advance(ref c, MenuEntryId);
-            WriteBuffer2.Advance(ref c, MousePoint);
-            WriteBuffer2.Advance(ref c, MousePointValid);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, ClientId);
+            WriteBuffer2.AddLength(ref c, MarkerName);
+            WriteBuffer2.AddLength(ref c, ControlName);
+            WriteBuffer2.AddLength(ref c, EventType);
+            WriteBuffer2.AddLength(ref c, Pose);
+            WriteBuffer2.AddLength(ref c, MenuEntryId);
+            WriteBuffer2.AddLength(ref c, MousePoint);
+            WriteBuffer2.AddLength(ref c, MousePointValid);
         }
     
         /// <summary> Full ROS name of this message. </summary>

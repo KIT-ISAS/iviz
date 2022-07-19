@@ -46,7 +46,7 @@ namespace Iviz.Msgs.OctomapMsgs
     }
 
     [DataContract]
-    public sealed class GetOctomapRequest : IRequest<GetOctomap, GetOctomapResponse>, IDeserializable<GetOctomapRequest>
+    public sealed class GetOctomapRequest : IRequest<GetOctomap, GetOctomapResponse>, IDeserializableRos1<GetOctomapRequest>
     {
         // Get the map as a octomap
     
@@ -84,7 +84,7 @@ namespace Iviz.Msgs.OctomapMsgs
     }
 
     [DataContract]
-    public sealed class GetOctomapResponse : IResponse, IDeserializable<GetOctomapResponse>
+    public sealed class GetOctomapResponse : IResponse, IDeserializableRos1<GetOctomapResponse>
     {
         [DataMember (Name = "map")] public OctomapMsgs.Octomap Map;
     

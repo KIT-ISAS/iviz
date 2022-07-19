@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class PointCloud : IDeserializable<PointCloud>, IMessageRos2
+    public sealed class PointCloud : IDeserializableRos2<PointCloud>, IMessageRos2
     {
         //# THIS MESSAGE IS DEPRECATED AS OF FOXY
         //# Please use sensor_msgs/PointCloud2
@@ -70,11 +70,13 @@ namespace Iviz.Msgs2.SensorMsgs
             }
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Points);
-            WriteBuffer2.Advance(ref c, Channels);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Points);
+            WriteBuffer2.AddLength(ref c, Channels);
         }
     
         /// <summary> Full ROS name of this message. </summary>

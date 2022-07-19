@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.VisualizationMsgs
 {
     [DataContract]
-    public sealed class ImageMarker : IDeserializable<ImageMarker>, IMessageRos2
+    public sealed class ImageMarker : IDeserializableRos2<ImageMarker>, IMessageRos2
     {
         public const int CIRCLE = 0;
         public const int LINE_STRIP = 1;
@@ -95,21 +95,23 @@ namespace Iviz.Msgs2.VisualizationMsgs
             if (OutlineColors is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Ns);
-            WriteBuffer2.Advance(ref c, Id);
-            WriteBuffer2.Advance(ref c, Type);
-            WriteBuffer2.Advance(ref c, Action);
-            WriteBuffer2.Advance(ref c, Position);
-            WriteBuffer2.Advance(ref c, Scale);
-            WriteBuffer2.Advance(ref c, OutlineColor);
-            WriteBuffer2.Advance(ref c, Filled);
-            WriteBuffer2.Advance(ref c, FillColor);
-            WriteBuffer2.Advance(ref c, Lifetime);
-            WriteBuffer2.Advance(ref c, Points);
-            WriteBuffer2.Advance(ref c, OutlineColors);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Ns);
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, Action);
+            WriteBuffer2.AddLength(ref c, Position);
+            WriteBuffer2.AddLength(ref c, Scale);
+            WriteBuffer2.AddLength(ref c, OutlineColor);
+            WriteBuffer2.AddLength(ref c, Filled);
+            WriteBuffer2.AddLength(ref c, FillColor);
+            WriteBuffer2.AddLength(ref c, Lifetime);
+            WriteBuffer2.AddLength(ref c, Points);
+            WriteBuffer2.AddLength(ref c, OutlineColors);
         }
     
         /// <summary> Full ROS name of this message. </summary>

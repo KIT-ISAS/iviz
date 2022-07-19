@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.ActionMsgs
 {
     [DataContract]
-    public sealed class GoalInfo : IDeserializable<GoalInfo>, IMessageRos2
+    public sealed class GoalInfo : IDeserializableRos2<GoalInfo>, IMessageRos2
     {
         // Goal ID
         [DataMember (Name = "goal_id")] public UniqueIdentifierMsgs.UUID GoalId;
@@ -51,10 +51,12 @@ namespace Iviz.Msgs2.ActionMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 24;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            GoalId.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Stamp);
+            GoalId.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Stamp);
         }
     
         /// <summary> Full ROS name of this message. </summary>

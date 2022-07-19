@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class CompressedImage : IDeserializable<CompressedImage>, IMessageRos1
+    public sealed class CompressedImage : IDeserializableRos1<CompressedImage>, IMessageRos1
     {
         // This message contains a compressed image
         /// <summary> Header timestamp should be acquisition time of image </summary>
@@ -67,7 +67,7 @@ namespace Iviz.Msgs.SensorMsgs
             get {
                 int size = 8;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetStringSize(Format);
+                size += WriteBuffer.GetStringSize(Format);
                 size += Data.Length;
                 return size;
             }

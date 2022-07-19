@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class Range : IDeserializable<Range>, IMessageRos2
+    public sealed class Range : IDeserializableRos2<Range>, IMessageRos2
     {
         // Single range reading from an active ranger that emits energy and reports
         // one range reading that is valid along an arc at the distance measured.
@@ -81,14 +81,16 @@ namespace Iviz.Msgs2.SensorMsgs
         {
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, RadiationType);
-            WriteBuffer2.Advance(ref c, FieldOfView);
-            WriteBuffer2.Advance(ref c, MinRange);
-            WriteBuffer2.Advance(ref c, MaxRange);
-            WriteBuffer2.Advance(ref c, Range_);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, RadiationType);
+            WriteBuffer2.AddLength(ref c, FieldOfView);
+            WriteBuffer2.AddLength(ref c, MinRange);
+            WriteBuffer2.AddLength(ref c, MaxRange);
+            WriteBuffer2.AddLength(ref c, Range_);
         }
     
         /// <summary> Full ROS name of this message. </summary>

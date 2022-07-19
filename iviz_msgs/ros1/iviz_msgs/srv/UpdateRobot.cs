@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class UpdateRobotRequest : IRequest<UpdateRobot, UpdateRobotResponse>, IDeserializable<UpdateRobotRequest>
+    public sealed class UpdateRobotRequest : IRequest<UpdateRobot, UpdateRobotResponse>, IDeserializableRos1<UpdateRobotRequest>
     {
         [DataMember (Name = "operation")] public int Operation;
         [DataMember (Name = "id")] public string Id;
@@ -107,9 +107,9 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 12;
-                size += BuiltIns.GetStringSize(Id);
+                size += WriteBuffer.GetStringSize(Id);
                 size += Configuration.RosMessageLength;
-                size += BuiltIns.GetArraySize(ValidFields);
+                size += WriteBuffer.GetArraySize(ValidFields);
                 return size;
             }
         }
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class UpdateRobotResponse : IResponse, IDeserializable<UpdateRobotResponse>
+    public sealed class UpdateRobotResponse : IResponse, IDeserializableRos1<UpdateRobotResponse>
     {
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "message")] public string Message;
@@ -158,7 +158,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);
+        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct TransformStamped : IMessageRos1, IDeserializable<TransformStamped>
+    public struct TransformStamped : IMessageRos1, IDeserializableRos1<TransformStamped>
     {
         // This expresses a transform from coordinate frame header.frame_id
         // to the coordinate frame child_frame_id
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        public readonly int RosMessageLength => 60 + Header.RosMessageLength + BuiltIns.GetStringSize(ChildFrameId);
+        public readonly int RosMessageLength => 60 + Header.RosMessageLength + WriteBuffer.GetStringSize(ChildFrameId);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/TransformStamped";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class PointField : IDeserializable<PointField>, IMessageRos1
+    public sealed class PointField : IDeserializableRos1<PointField>, IMessageRos1
     {
         // This message holds the description of one point entry in the
         // PointCloud2 message format.
@@ -67,7 +67,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (Name is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 13 + BuiltIns.GetStringSize(Name);
+        public int RosMessageLength => 13 + WriteBuffer.GetStringSize(Name);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/PointField";

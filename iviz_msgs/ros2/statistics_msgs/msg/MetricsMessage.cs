@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.StatisticsMsgs
 {
     [DataContract]
-    public sealed class MetricsMessage : IDeserializable<MetricsMessage>, IMessageRos2
+    public sealed class MetricsMessage : IDeserializableRos2<MetricsMessage>, IMessageRos2
     {
         //############################################
         // A generic metrics message providing statistics for measurements from different sources. For example,
@@ -83,14 +83,16 @@ namespace Iviz.Msgs2.StatisticsMsgs
             }
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, MeasurementSourceName);
-            WriteBuffer2.Advance(ref c, MetricsSource);
-            WriteBuffer2.Advance(ref c, Unit);
-            WriteBuffer2.Advance(ref c, WindowStart);
-            WriteBuffer2.Advance(ref c, WindowStop);
-            WriteBuffer2.Advance(ref c, Statistics);
+            WriteBuffer2.AddLength(ref c, MeasurementSourceName);
+            WriteBuffer2.AddLength(ref c, MetricsSource);
+            WriteBuffer2.AddLength(ref c, Unit);
+            WriteBuffer2.AddLength(ref c, WindowStart);
+            WriteBuffer2.AddLength(ref c, WindowStop);
+            WriteBuffer2.AddLength(ref c, Statistics);
         }
     
         /// <summary> Full ROS name of this message. </summary>

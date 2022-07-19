@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Illuminance : IDeserializable<Illuminance>, IMessageRos1
+    public sealed class Illuminance : IDeserializableRos1<Illuminance>, IMessageRos1
     {
         // Single photometric illuminance measurement.  Light should be assumed to be
         // measured along the sensor's x-axis (the area of detection is the y-z plane).

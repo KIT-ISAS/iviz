@@ -46,7 +46,7 @@ namespace Iviz.Msgs.Tf
     }
 
     [DataContract]
-    public sealed class FrameGraphRequest : IRequest<FrameGraph, FrameGraphResponse>, IDeserializable<FrameGraphRequest>
+    public sealed class FrameGraphRequest : IRequest<FrameGraph, FrameGraphResponse>, IDeserializableRos1<FrameGraphRequest>
     {
     
         /// Constructor for empty message.
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.Tf
     }
 
     [DataContract]
-    public sealed class FrameGraphResponse : IResponse, IDeserializable<FrameGraphResponse>
+    public sealed class FrameGraphResponse : IResponse, IDeserializableRos1<FrameGraphResponse>
     {
         [DataMember (Name = "dot_graph")] public string DotGraph;
     
@@ -119,7 +119,7 @@ namespace Iviz.Msgs.Tf
             if (DotGraph is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(DotGraph);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(DotGraph);
     
         public override string ToString() => Extensions.ToString(this);
     }

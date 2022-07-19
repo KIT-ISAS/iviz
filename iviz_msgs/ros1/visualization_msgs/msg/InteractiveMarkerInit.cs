@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerInit : IDeserializable<InteractiveMarkerInit>, IMessageRos1
+    public sealed class InteractiveMarkerInit : IDeserializableRos1<InteractiveMarkerInit>, IMessageRos1
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
@@ -69,7 +69,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        public int RosMessageLength => 16 + BuiltIns.GetStringSize(ServerId) + BuiltIns.GetArraySize(Markers);
+        public int RosMessageLength => 16 + WriteBuffer.GetStringSize(ServerId) + WriteBuffer.GetArraySize(Markers);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "visualization_msgs/InteractiveMarkerInit";

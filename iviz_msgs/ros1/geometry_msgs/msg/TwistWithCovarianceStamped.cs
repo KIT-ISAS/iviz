@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class TwistWithCovarianceStamped : IDeserializable<TwistWithCovarianceStamped>, IMessageRos1
+    public sealed class TwistWithCovarianceStamped : IDeserializableRos1<TwistWithCovarianceStamped>, IMessageRos1
     {
         // This represents an estimated twist with reference coordinate frame and timestamp.
         [DataMember (Name = "header")] public StdMsgs.Header Header;

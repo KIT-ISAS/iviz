@@ -46,7 +46,7 @@ namespace Iviz.Msgs.Roscpp
     }
 
     [DataContract]
-    public sealed class SetLoggerLevelRequest : IRequest<SetLoggerLevel, SetLoggerLevelResponse>, IDeserializable<SetLoggerLevelRequest>
+    public sealed class SetLoggerLevelRequest : IRequest<SetLoggerLevel, SetLoggerLevelResponse>, IDeserializableRos1<SetLoggerLevelRequest>
     {
         [DataMember (Name = "logger")] public string Logger;
         [DataMember (Name = "level")] public string Level;
@@ -88,13 +88,13 @@ namespace Iviz.Msgs.Roscpp
             if (Level is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Logger) + BuiltIns.GetStringSize(Level);
+        public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Logger) + WriteBuffer.GetStringSize(Level);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class SetLoggerLevelResponse : IResponse, IDeserializable<SetLoggerLevelResponse>
+    public sealed class SetLoggerLevelResponse : IResponse, IDeserializableRos1<SetLoggerLevelResponse>
     {
     
         /// Constructor for empty message.

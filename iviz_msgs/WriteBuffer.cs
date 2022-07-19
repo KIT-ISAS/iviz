@@ -163,6 +163,64 @@ namespace Iviz.Msgs
                 val[i].RosSerialize(ref this);
             }
         }
+        
+        /// Returns the size in bytes of a message array when deserialized in ROS
+        public static int GetArraySize<T>(T[]? array) where T : struct, IMessage
+        {
+            if (array == null)
+            {
+                return 0;
+            }
+
+            int size = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                size += array[i].RosMessageLength;
+            }
+
+            return size;
+        }
+
+        /// Returns the size in bytes of a message array when serialized in ROS
+        public static int GetArraySize(IMessageRos1[]? array)
+        {
+            if (array == null)
+            {
+                return 0;
+            }
+
+            int size = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                size += array[i].RosMessageLength;
+            }
+
+            return size;
+        }
+
+        /// Returns the size in bytes of a string array when serialized in ROS
+        public static int GetArraySize(string[]? array)
+        {
+            if (array == null)
+            {
+                return 0;
+            }
+
+            int size = 4 * array.Length;
+            for (int i = 0; i < array.Length; i++)
+            {
+                size += BuiltIns.UTF8.GetByteCount(array[i]);
+            }
+
+            return size;
+        }
+
+        /// Returns the size in bytes of a string when deserialized in ROS
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int GetStringSize(string? s)
+        {
+            return s == null ? 0 : BuiltIns.UTF8.GetByteCount(s);
+        }        
 
         /// <summary>
         /// Serializes the given message into the buffer array.
@@ -170,7 +228,7 @@ namespace Iviz.Msgs
         /// <param name="message">The ROS message.</param>
         /// <param name="buffer">The destination byte array.</param>
         /// <returns>The number of bytes written.</returns>
-        internal static uint Serialize<T>(in T message, Span<byte> buffer) where T : ISerializable
+        public static uint Serialize<T>(in T message, Span<byte> buffer) where T : ISerializable
         {
             fixed (byte* bufferPtr = buffer)
             {

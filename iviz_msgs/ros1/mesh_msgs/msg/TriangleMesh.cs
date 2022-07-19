@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class TriangleMesh : IDeserializable<TriangleMesh>, IMessageRos1
+    public sealed class TriangleMesh : IDeserializableRos1<TriangleMesh>, IMessageRos1
     {
         //# Definition of a triangle mesh
         /// <summary> List of triangles; the index values refer to positions in vertices (and vertex_normals, if given) </summary>
@@ -126,8 +126,8 @@ namespace Iviz.Msgs.MeshMsgs
                 size += 16 * TriangleColors.Length;
                 size += 24 * VertexTextureCoords.Length;
                 size += 21 * FaceMaterials.Length;
-                size += BuiltIns.GetArraySize(Textures);
-                size += BuiltIns.GetArraySize(Clusters);
+                size += WriteBuffer.GetArraySize(Textures);
+                size += WriteBuffer.GetArraySize(Clusters);
                 return size;
             }
         }

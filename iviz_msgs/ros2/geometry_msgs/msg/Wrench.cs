@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
-    public sealed class Wrench : IDeserializable<Wrench>, IMessageRos2
+    public sealed class Wrench : IDeserializableRos2<Wrench>, IMessageRos2
     {
         // This represents force in free space, separated into its linear and angular parts.
         [DataMember (Name = "force")] public Vector3 Force;
@@ -47,10 +47,12 @@ namespace Iviz.Msgs2.GeometryMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 48;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Force);
-            WriteBuffer2.Advance(ref c, Torque);
+            WriteBuffer2.AddLength(ref c, Force);
+            WriteBuffer2.AddLength(ref c, Torque);
         }
     
         /// <summary> Full ROS name of this message. </summary>

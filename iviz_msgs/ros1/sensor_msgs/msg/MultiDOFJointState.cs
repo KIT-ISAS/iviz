@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class MultiDOFJointState : IDeserializable<MultiDOFJointState>, IMessageRos1
+    public sealed class MultiDOFJointState : IDeserializableRos1<MultiDOFJointState>, IMessageRos1
     {
         // Representation of state for joints with multiple degrees of freedom, 
         // following the structure of JointState.
@@ -99,7 +99,7 @@ namespace Iviz.Msgs.SensorMsgs
             get {
                 int size = 16;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetArraySize(JointNames);
+                size += WriteBuffer.GetArraySize(JointNames);
                 size += 56 * Transforms.Length;
                 size += 48 * Twist.Length;
                 size += 48 * Wrench.Length;

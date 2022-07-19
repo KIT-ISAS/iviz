@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class Marker : IDeserializable<Marker>, IMessageRos1
+    public sealed class Marker : IDeserializableRos1<Marker>, IMessageRos1
     {
         // See http://www.ros.org/wiki/rviz/DisplayTypes/Marker and http://www.ros.org/wiki/rviz/Tutorials/Markers%3A%20Basic%20Shapes for more information on using this message with rviz
         public const byte ARROW = 0;
@@ -123,11 +123,11 @@ namespace Iviz.Msgs.VisualizationMsgs
             get {
                 int size = 138;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetStringSize(Ns);
+                size += WriteBuffer.GetStringSize(Ns);
                 size += 24 * Points.Length;
                 size += 16 * Colors.Length;
-                size += BuiltIns.GetStringSize(Text);
-                size += BuiltIns.GetStringSize(MeshResource);
+                size += WriteBuffer.GetStringSize(Text);
+                size += WriteBuffer.GetStringSize(MeshResource);
                 return size;
             }
         }

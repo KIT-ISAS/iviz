@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class MarkerArray : IDeserializable<MarkerArray>, IMessageRos1
+    public sealed class MarkerArray : IDeserializableRos1<MarkerArray>, IMessageRos1
     {
         [DataMember (Name = "markers")] public Marker[] Markers;
     
@@ -50,7 +50,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Markers);
+        public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Markers);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "visualization_msgs/MarkerArray";

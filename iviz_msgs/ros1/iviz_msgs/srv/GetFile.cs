@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetFileRequest : IRequest<GetFile, GetFileResponse>, IDeserializable<GetFileRequest>
+    public sealed class GetFileRequest : IRequest<GetFile, GetFileResponse>, IDeserializableRos1<GetFileRequest>
     {
         // Retrieves a file
         /// <summary> Uri of the file. Example: package://some_package/file.dae </summary>
@@ -84,13 +84,13 @@ namespace Iviz.Msgs.IvizMsgs
             if (Uri is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uri);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uri);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetFileResponse : IResponse, IDeserializable<GetFileResponse>
+    public sealed class GetFileResponse : IResponse, IDeserializableRos1<GetFileResponse>
     {
         /// <summary> Whether the retrieval succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -139,7 +139,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 9 + Bytes.Length + BuiltIns.GetStringSize(Message);
+        public int RosMessageLength => 9 + Bytes.Length + WriteBuffer.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

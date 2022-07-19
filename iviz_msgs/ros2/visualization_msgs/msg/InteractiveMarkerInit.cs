@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerInit : IDeserializable<InteractiveMarkerInit>, IMessageRos2
+    public sealed class InteractiveMarkerInit : IDeserializableRos2<InteractiveMarkerInit>, IMessageRos2
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
@@ -69,11 +69,13 @@ namespace Iviz.Msgs2.VisualizationMsgs
             }
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, ServerId);
-            WriteBuffer2.Advance(ref c, SeqNum);
-            WriteBuffer2.Advance(ref c, Markers);
+            WriteBuffer2.AddLength(ref c, ServerId);
+            WriteBuffer2.AddLength(ref c, SeqNum);
+            WriteBuffer2.AddLength(ref c, Markers);
         }
     
         /// <summary> Full ROS name of this message. </summary>

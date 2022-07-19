@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract]
-    public sealed class TopicStatistics : IDeserializable<TopicStatistics>, IMessageRos1
+    public sealed class TopicStatistics : IDeserializableRos1<TopicStatistics>, IMessageRos1
     {
         // name of the topic
         [DataMember (Name = "topic")] public string Topic;
@@ -93,9 +93,9 @@ namespace Iviz.Msgs.RosgraphMsgs
         {
             get {
                 int size = 88;
-                size += BuiltIns.GetStringSize(Topic);
-                size += BuiltIns.GetStringSize(NodePub);
-                size += BuiltIns.GetStringSize(NodeSub);
+                size += WriteBuffer.GetStringSize(Topic);
+                size += WriteBuffer.GetStringSize(NodePub);
+                size += WriteBuffer.GetStringSize(NodeSub);
                 return size;
             }
         }

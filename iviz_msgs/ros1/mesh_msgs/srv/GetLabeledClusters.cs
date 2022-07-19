@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetLabeledClustersRequest : IRequest<GetLabeledClusters, GetLabeledClustersResponse>, IDeserializable<GetLabeledClustersRequest>
+    public sealed class GetLabeledClustersRequest : IRequest<GetLabeledClusters, GetLabeledClustersResponse>, IDeserializableRos1<GetLabeledClustersRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
@@ -82,13 +82,13 @@ namespace Iviz.Msgs.MeshMsgs
             if (Uuid is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uuid);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uuid);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetLabeledClustersResponse : IResponse, IDeserializable<GetLabeledClustersResponse>
+    public sealed class GetLabeledClustersResponse : IResponse, IDeserializableRos1<GetLabeledClustersResponse>
     {
         [DataMember (Name = "clusters")] public MeshFaceCluster[] Clusters;
     
@@ -133,7 +133,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Clusters);
+        public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Clusters);
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class BatteryState : IDeserializable<BatteryState>, IMessageRos2
+    public sealed class BatteryState : IDeserializableRos2<BatteryState>, IMessageRos2
     {
         // Constants are chosen to match the enums in the linux kernel
         // defined in include/linux/power_supply.h as of version 3.7
@@ -131,24 +131,26 @@ namespace Iviz.Msgs2.SensorMsgs
             if (SerialNumber is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Voltage);
-            WriteBuffer2.Advance(ref c, Temperature);
-            WriteBuffer2.Advance(ref c, Current);
-            WriteBuffer2.Advance(ref c, Charge);
-            WriteBuffer2.Advance(ref c, Capacity);
-            WriteBuffer2.Advance(ref c, DesignCapacity);
-            WriteBuffer2.Advance(ref c, Percentage);
-            WriteBuffer2.Advance(ref c, PowerSupplyStatus);
-            WriteBuffer2.Advance(ref c, PowerSupplyHealth);
-            WriteBuffer2.Advance(ref c, PowerSupplyTechnology);
-            WriteBuffer2.Advance(ref c, Present);
-            WriteBuffer2.Advance(ref c, CellVoltage);
-            WriteBuffer2.Advance(ref c, CellTemperature);
-            WriteBuffer2.Advance(ref c, Location);
-            WriteBuffer2.Advance(ref c, SerialNumber);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Voltage);
+            WriteBuffer2.AddLength(ref c, Temperature);
+            WriteBuffer2.AddLength(ref c, Current);
+            WriteBuffer2.AddLength(ref c, Charge);
+            WriteBuffer2.AddLength(ref c, Capacity);
+            WriteBuffer2.AddLength(ref c, DesignCapacity);
+            WriteBuffer2.AddLength(ref c, Percentage);
+            WriteBuffer2.AddLength(ref c, PowerSupplyStatus);
+            WriteBuffer2.AddLength(ref c, PowerSupplyHealth);
+            WriteBuffer2.AddLength(ref c, PowerSupplyTechnology);
+            WriteBuffer2.AddLength(ref c, Present);
+            WriteBuffer2.AddLength(ref c, CellVoltage);
+            WriteBuffer2.AddLength(ref c, CellTemperature);
+            WriteBuffer2.AddLength(ref c, Location);
+            WriteBuffer2.AddLength(ref c, SerialNumber);
         }
     
         /// <summary> Full ROS name of this message. </summary>

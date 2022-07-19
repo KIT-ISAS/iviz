@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.RclInterfaces
 {
     [DataContract]
-    public sealed class ParameterEvent : IDeserializable<ParameterEvent>, IMessageRos2
+    public sealed class ParameterEvent : IDeserializableRos2<ParameterEvent>, IMessageRos2
     {
         // This message contains a parameter event.
         // Because the parameter event was an atomic update, a specific parameter name
@@ -88,13 +88,15 @@ namespace Iviz.Msgs2.RclInterfaces
             }
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Stamp);
-            WriteBuffer2.Advance(ref c, Node);
-            WriteBuffer2.Advance(ref c, NewParameters);
-            WriteBuffer2.Advance(ref c, ChangedParameters);
-            WriteBuffer2.Advance(ref c, DeletedParameters);
+            WriteBuffer2.AddLength(ref c, Stamp);
+            WriteBuffer2.AddLength(ref c, Node);
+            WriteBuffer2.AddLength(ref c, NewParameters);
+            WriteBuffer2.AddLength(ref c, ChangedParameters);
+            WriteBuffer2.AddLength(ref c, DeletedParameters);
         }
     
         /// <summary> Full ROS name of this message. </summary>

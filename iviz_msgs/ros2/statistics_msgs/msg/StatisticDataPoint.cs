@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.StatisticsMsgs
 {
     [DataContract]
-    public sealed class StatisticDataPoint : IDeserializable<StatisticDataPoint>, IMessageRos2
+    public sealed class StatisticDataPoint : IDeserializableRos2<StatisticDataPoint>, IMessageRos2
     {
         //############################################
         // This holds the structure of a single data point of a StatisticDataType.
@@ -65,10 +65,12 @@ namespace Iviz.Msgs2.StatisticsMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 9;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, DataType);
-            WriteBuffer2.Advance(ref c, Data);
+            WriteBuffer2.AddLength(ref c, DataType);
+            WriteBuffer2.AddLength(ref c, Data);
         }
     
         /// <summary> Full ROS name of this message. </summary>

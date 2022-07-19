@@ -46,7 +46,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
     }
 
     [DataContract]
-    public sealed class AddDiagnosticsRequest : IRequest<AddDiagnostics, AddDiagnosticsResponse>, IDeserializable<AddDiagnosticsRequest>
+    public sealed class AddDiagnosticsRequest : IRequest<AddDiagnostics, AddDiagnosticsResponse>, IDeserializableRos1<AddDiagnosticsRequest>
     {
         // This service is used as part of the process for loading analyzers at runtime,
         // and should be used by a loader script or program, not as a standalone service.
@@ -97,13 +97,13 @@ namespace Iviz.Msgs.DiagnosticMsgs
             if (LoadNamespace is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(LoadNamespace);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(LoadNamespace);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class AddDiagnosticsResponse : IResponse, IDeserializable<AddDiagnosticsResponse>
+    public sealed class AddDiagnosticsResponse : IResponse, IDeserializableRos1<AddDiagnosticsResponse>
     {
         // True if diagnostic aggregator was updated with new diagnostics, False
         // otherwise. A false return value means that either there is a bond in the
@@ -148,7 +148,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);
+        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

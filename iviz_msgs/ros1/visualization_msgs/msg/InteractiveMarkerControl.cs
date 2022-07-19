@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerControl : IDeserializable<InteractiveMarkerControl>, IMessageRos1
+    public sealed class InteractiveMarkerControl : IDeserializableRos1<InteractiveMarkerControl>, IMessageRos1
     {
         // Represents a control that is to be displayed together with an interactive marker
         // Identifying string for this control.
@@ -126,9 +126,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             get {
                 int size = 48;
-                size += BuiltIns.GetStringSize(Name);
-                size += BuiltIns.GetArraySize(Markers);
-                size += BuiltIns.GetStringSize(Description);
+                size += WriteBuffer.GetStringSize(Name);
+                size += WriteBuffer.GetArraySize(Markers);
+                size += WriteBuffer.GetStringSize(Description);
                 return size;
             }
         }

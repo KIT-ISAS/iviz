@@ -46,7 +46,7 @@ namespace Iviz.Msgs.Tf2Msgs
     }
 
     [DataContract]
-    public sealed class FrameGraphRequest : IRequest<FrameGraph, FrameGraphResponse>, IDeserializable<FrameGraphRequest>
+    public sealed class FrameGraphRequest : IRequest<FrameGraph, FrameGraphResponse>, IDeserializableRos1<FrameGraphRequest>
     {
     
         /// Constructor for empty message.
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.Tf2Msgs
     }
 
     [DataContract]
-    public sealed class FrameGraphResponse : IResponse, IDeserializable<FrameGraphResponse>
+    public sealed class FrameGraphResponse : IResponse, IDeserializableRos1<FrameGraphResponse>
     {
         [DataMember (Name = "frame_yaml")] public string FrameYaml;
     
@@ -119,7 +119,7 @@ namespace Iviz.Msgs.Tf2Msgs
             if (FrameYaml is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(FrameYaml);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(FrameYaml);
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class JoyFeedbackArray : IDeserializable<JoyFeedbackArray>, IMessageRos2
+    public sealed class JoyFeedbackArray : IDeserializableRos2<JoyFeedbackArray>, IMessageRos2
     {
         // This message publishes values for multiple feedback at once.
         [DataMember (Name = "array")] public JoyFeedback[] Array;
@@ -51,9 +51,11 @@ namespace Iviz.Msgs2.SensorMsgs
             }
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Array);
+            WriteBuffer2.AddLength(ref c, Array);
         }
     
         /// <summary> Full ROS name of this message. </summary>

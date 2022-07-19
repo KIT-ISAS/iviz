@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Image : IDeserializable<Image>, IMessageRos1
+    public sealed class Image : IDeserializableRos1<Image>, IMessageRos1
     {
         // This message contains an uncompressed image
         // (0, 0) is at top-left corner of image
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.SensorMsgs
             get {
                 int size = 21;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetStringSize(Encoding);
+                size += WriteBuffer.GetStringSize(Encoding);
                 size += Data.Length;
                 return size;
             }

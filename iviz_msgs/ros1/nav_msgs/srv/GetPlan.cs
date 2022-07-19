@@ -46,7 +46,7 @@ namespace Iviz.Msgs.NavMsgs
     }
 
     [DataContract]
-    public sealed class GetPlanRequest : IRequest<GetPlan, GetPlanResponse>, IDeserializable<GetPlanRequest>
+    public sealed class GetPlanRequest : IRequest<GetPlan, GetPlanResponse>, IDeserializableRos1<GetPlanRequest>
     {
         // Get a plan from the current position to the goal Pose 
         // The start pose for the plan
@@ -105,7 +105,7 @@ namespace Iviz.Msgs.NavMsgs
     }
 
     [DataContract]
-    public sealed class GetPlanResponse : IResponse, IDeserializable<GetPlanResponse>
+    public sealed class GetPlanResponse : IResponse, IDeserializableRos1<GetPlanResponse>
     {
         [DataMember (Name = "plan")] public NavMsgs.Path Plan;
     

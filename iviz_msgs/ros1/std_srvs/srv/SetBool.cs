@@ -46,7 +46,7 @@ namespace Iviz.Msgs.StdSrvs
     }
 
     [DataContract]
-    public sealed class SetBoolRequest : IRequest<SetBool, SetBoolResponse>, IDeserializable<SetBoolRequest>
+    public sealed class SetBoolRequest : IRequest<SetBool, SetBoolResponse>, IDeserializableRos1<SetBoolRequest>
     {
         /// <summary> E.g. for hardware enabling / disabling </summary>
         [DataMember (Name = "data")] public bool Data;
@@ -90,7 +90,7 @@ namespace Iviz.Msgs.StdSrvs
     }
 
     [DataContract]
-    public sealed class SetBoolResponse : IResponse, IDeserializable<SetBoolResponse>
+    public sealed class SetBoolResponse : IResponse, IDeserializableRos1<SetBoolResponse>
     {
         /// <summary> Indicate successful run of triggered service </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -132,7 +132,7 @@ namespace Iviz.Msgs.StdSrvs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);
+        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

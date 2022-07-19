@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarker : IDeserializable<InteractiveMarker>, IMessageRos1
+    public sealed class InteractiveMarker : IDeserializableRos1<InteractiveMarker>, IMessageRos1
     {
         // Time/frame info.
         // If header.time is set to 0, the marker will be retransformed into
@@ -95,10 +95,10 @@ namespace Iviz.Msgs.VisualizationMsgs
             get {
                 int size = 76;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetStringSize(Name);
-                size += BuiltIns.GetStringSize(Description);
-                size += BuiltIns.GetArraySize(MenuEntries);
-                size += BuiltIns.GetArraySize(Controls);
+                size += WriteBuffer.GetStringSize(Name);
+                size += WriteBuffer.GetStringSize(Description);
+                size += WriteBuffer.GetArraySize(MenuEntries);
+                size += WriteBuffer.GetArraySize(Controls);
                 return size;
             }
         }

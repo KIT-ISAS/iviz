@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
-    public sealed class Pose2D : IDeserializable<Pose2D>, IMessageRos2
+    public sealed class Pose2D : IDeserializableRos2<Pose2D>, IMessageRos2
     {
         // Deprecated as of Foxy and will potentially be removed in any following release.
         // Please use the full 3D pose.
@@ -54,11 +54,13 @@ namespace Iviz.Msgs2.GeometryMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 24;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, X);
-            WriteBuffer2.Advance(ref c, Y);
-            WriteBuffer2.Advance(ref c, Theta);
+            WriteBuffer2.AddLength(ref c, X);
+            WriteBuffer2.AddLength(ref c, Y);
+            WriteBuffer2.AddLength(ref c, Theta);
         }
     
         /// <summary> Full ROS name of this message. </summary>

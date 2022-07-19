@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class PointCloud2 : IDeserializable<PointCloud2>, IMessageRos2
+    public sealed class PointCloud2 : IDeserializableRos2<PointCloud2>, IMessageRos2
     {
         // This message holds a collection of N-dimensional points, which may
         // contain additional information such as normals, intensity, etc. The
@@ -87,17 +87,19 @@ namespace Iviz.Msgs2.SensorMsgs
             if (Data is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Height);
-            WriteBuffer2.Advance(ref c, Width);
-            WriteBuffer2.Advance(ref c, Fields);
-            WriteBuffer2.Advance(ref c, IsBigendian);
-            WriteBuffer2.Advance(ref c, PointStep);
-            WriteBuffer2.Advance(ref c, RowStep);
-            WriteBuffer2.Advance(ref c, Data);
-            WriteBuffer2.Advance(ref c, IsDense);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Height);
+            WriteBuffer2.AddLength(ref c, Width);
+            WriteBuffer2.AddLength(ref c, Fields);
+            WriteBuffer2.AddLength(ref c, IsBigendian);
+            WriteBuffer2.AddLength(ref c, PointStep);
+            WriteBuffer2.AddLength(ref c, RowStep);
+            WriteBuffer2.AddLength(ref c, Data);
+            WriteBuffer2.AddLength(ref c, IsDense);
         }
     
         /// <summary> Full ROS name of this message. </summary>

@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class StopCaptureRequest : IRequest<StopCapture, StopCaptureResponse>, IDeserializable<StopCaptureRequest>
+    public sealed class StopCaptureRequest : IRequest<StopCapture, StopCaptureResponse>, IDeserializableRos1<StopCaptureRequest>
     {
     
         /// Constructor for empty message.
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class StopCaptureResponse : IResponse, IDeserializable<StopCaptureResponse>
+    public sealed class StopCaptureResponse : IResponse, IDeserializableRos1<StopCaptureResponse>
     {
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "message")] public string Message;
@@ -123,7 +123,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);
+        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class LaserScan : IDeserializable<LaserScan>, IMessageRos2
+    public sealed class LaserScan : IDeserializableRos2<LaserScan>, IMessageRos2
     {
         // Single scan from a planar laser range-finder
         //
@@ -89,18 +89,20 @@ namespace Iviz.Msgs2.SensorMsgs
             if (Intensities is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, AngleMin);
-            WriteBuffer2.Advance(ref c, AngleMax);
-            WriteBuffer2.Advance(ref c, AngleIncrement);
-            WriteBuffer2.Advance(ref c, TimeIncrement);
-            WriteBuffer2.Advance(ref c, ScanTime);
-            WriteBuffer2.Advance(ref c, RangeMin);
-            WriteBuffer2.Advance(ref c, RangeMax);
-            WriteBuffer2.Advance(ref c, Ranges);
-            WriteBuffer2.Advance(ref c, Intensities);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, AngleMin);
+            WriteBuffer2.AddLength(ref c, AngleMax);
+            WriteBuffer2.AddLength(ref c, AngleIncrement);
+            WriteBuffer2.AddLength(ref c, TimeIncrement);
+            WriteBuffer2.AddLength(ref c, ScanTime);
+            WriteBuffer2.AddLength(ref c, RangeMin);
+            WriteBuffer2.AddLength(ref c, RangeMax);
+            WriteBuffer2.AddLength(ref c, Ranges);
+            WriteBuffer2.AddLength(ref c, Intensities);
         }
     
         /// <summary> Full ROS name of this message. </summary>

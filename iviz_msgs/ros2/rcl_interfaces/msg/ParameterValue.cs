@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.RclInterfaces
 {
     [DataContract]
-    public sealed class ParameterValue : IDeserializable<ParameterValue>, IMessageRos2
+    public sealed class ParameterValue : IDeserializableRos2<ParameterValue>, IMessageRos2
     {
         // Used to determine which of the next *_value fields are set.
         // ParameterType.PARAMETER_NOT_SET indicates that the parameter was not set
@@ -93,18 +93,20 @@ namespace Iviz.Msgs2.RclInterfaces
             }
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Type);
-            WriteBuffer2.Advance(ref c, BoolValue);
-            WriteBuffer2.Advance(ref c, IntegerValue);
-            WriteBuffer2.Advance(ref c, DoubleValue);
-            WriteBuffer2.Advance(ref c, StringValue);
-            WriteBuffer2.Advance(ref c, ByteArrayValue);
-            WriteBuffer2.Advance(ref c, BoolArrayValue);
-            WriteBuffer2.Advance(ref c, IntegerArrayValue);
-            WriteBuffer2.Advance(ref c, DoubleArrayValue);
-            WriteBuffer2.Advance(ref c, StringArrayValue);
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, BoolValue);
+            WriteBuffer2.AddLength(ref c, IntegerValue);
+            WriteBuffer2.AddLength(ref c, DoubleValue);
+            WriteBuffer2.AddLength(ref c, StringValue);
+            WriteBuffer2.AddLength(ref c, ByteArrayValue);
+            WriteBuffer2.AddLength(ref c, BoolArrayValue);
+            WriteBuffer2.AddLength(ref c, IntegerArrayValue);
+            WriteBuffer2.AddLength(ref c, DoubleArrayValue);
+            WriteBuffer2.AddLength(ref c, StringArrayValue);
         }
     
         /// <summary> Full ROS name of this message. </summary>

@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.RclInterfaces
 {
     [DataContract]
-    public sealed class FloatingPointRange : IDeserializable<FloatingPointRange>, IMessageRos2
+    public sealed class FloatingPointRange : IDeserializableRos2<FloatingPointRange>, IMessageRos2
     {
         // Represents bounds and a step value for a floating point typed parameter.
         // Start value for valid values, inclusive.
@@ -72,11 +72,13 @@ namespace Iviz.Msgs2.RclInterfaces
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 24;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, FromValue);
-            WriteBuffer2.Advance(ref c, ToValue);
-            WriteBuffer2.Advance(ref c, Step);
+            WriteBuffer2.AddLength(ref c, FromValue);
+            WriteBuffer2.AddLength(ref c, ToValue);
+            WriteBuffer2.AddLength(ref c, Step);
         }
     
         /// <summary> Full ROS name of this message. </summary>

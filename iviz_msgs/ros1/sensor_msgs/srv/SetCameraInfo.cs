@@ -46,7 +46,7 @@ namespace Iviz.Msgs.SensorMsgs
     }
 
     [DataContract]
-    public sealed class SetCameraInfoRequest : IRequest<SetCameraInfo, SetCameraInfoResponse>, IDeserializable<SetCameraInfoRequest>
+    public sealed class SetCameraInfoRequest : IRequest<SetCameraInfo, SetCameraInfoResponse>, IDeserializableRos1<SetCameraInfoRequest>
     {
         // This service requests that a camera stores the given CameraInfo 
         // as that camera's calibration information.
@@ -97,7 +97,7 @@ namespace Iviz.Msgs.SensorMsgs
     }
 
     [DataContract]
-    public sealed class SetCameraInfoResponse : IResponse, IDeserializable<SetCameraInfoResponse>
+    public sealed class SetCameraInfoResponse : IResponse, IDeserializableRos1<SetCameraInfoResponse>
     {
         /// <summary> True if the call succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -139,7 +139,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (StatusMessage is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + BuiltIns.GetStringSize(StatusMessage);
+        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(StatusMessage);
     
         public override string ToString() => Extensions.ToString(this);
     }

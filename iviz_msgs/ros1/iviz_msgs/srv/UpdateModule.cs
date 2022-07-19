@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class UpdateModuleRequest : IRequest<UpdateModule, UpdateModuleResponse>, IDeserializable<UpdateModuleRequest>
+    public sealed class UpdateModuleRequest : IRequest<UpdateModule, UpdateModuleResponse>, IDeserializableRos1<UpdateModuleRequest>
     {
         // Updates a module
         /// <summary> Id of the module </summary>
@@ -106,9 +106,9 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 12;
-                size += BuiltIns.GetStringSize(Id);
-                size += BuiltIns.GetArraySize(Fields);
-                size += BuiltIns.GetStringSize(Config);
+                size += WriteBuffer.GetStringSize(Id);
+                size += WriteBuffer.GetArraySize(Fields);
+                size += WriteBuffer.GetStringSize(Config);
                 return size;
             }
         }
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class UpdateModuleResponse : IResponse, IDeserializable<UpdateModuleResponse>
+    public sealed class UpdateModuleResponse : IResponse, IDeserializableRos1<UpdateModuleResponse>
     {
         /// <summary> Whether the retrieval succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -159,7 +159,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);
+        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class Joy : IDeserializable<Joy>, IMessageRos2
+    public sealed class Joy : IDeserializableRos2<Joy>, IMessageRos2
     {
         // Reports the state of a joystick's axes and buttons.
         // The timestamp is the time at which data is received from the joystick.
@@ -55,11 +55,13 @@ namespace Iviz.Msgs2.SensorMsgs
             if (Buttons is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Axes);
-            WriteBuffer2.Advance(ref c, Buttons);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Axes);
+            WriteBuffer2.AddLength(ref c, Buttons);
         }
     
         /// <summary> Full ROS name of this message. </summary>

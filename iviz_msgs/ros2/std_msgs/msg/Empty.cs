@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.StdMsgs
 {
     [DataContract]
-    public sealed class Empty : IDeserializable<Empty>, IMessageRos2
+    public sealed class Empty : IDeserializableRos2<Empty>, IMessageRos2
     {
         /// Constructor for empty message.
         public Empty()
@@ -32,7 +32,9 @@ namespace Iviz.Msgs2.StdMsgs
         {
         }
     
-        public void GetRosMessageLength(ref int c) { }
+        public int RosMessageLength => 0;
+        
+        public void AddRosMessageLength(ref int c) { }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/Empty";

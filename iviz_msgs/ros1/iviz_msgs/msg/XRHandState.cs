@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class XRHandState : IDeserializable<XRHandState>, IMessageRos1
+    public sealed class XRHandState : IDeserializableRos1<XRHandState>, IMessageRos1
     {
         [DataMember (Name = "is_valid")] public bool IsValid;
         [DataMember (Name = "header")] public StdMsgs.Header Header;

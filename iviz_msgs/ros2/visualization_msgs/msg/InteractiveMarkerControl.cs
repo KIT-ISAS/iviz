@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerControl : IDeserializable<InteractiveMarkerControl>, IMessageRos2
+    public sealed class InteractiveMarkerControl : IDeserializableRos2<InteractiveMarkerControl>, IMessageRos2
     {
         // Represents a control that is to be displayed together with an interactive marker
         // Identifying string for this control.
@@ -122,16 +122,18 @@ namespace Iviz.Msgs2.VisualizationMsgs
             if (Description is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Name);
-            WriteBuffer2.Advance(ref c, Orientation);
-            WriteBuffer2.Advance(ref c, OrientationMode);
-            WriteBuffer2.Advance(ref c, InteractionMode);
-            WriteBuffer2.Advance(ref c, AlwaysVisible);
-            WriteBuffer2.Advance(ref c, Markers);
-            WriteBuffer2.Advance(ref c, IndependentMarkerOrientation);
-            WriteBuffer2.Advance(ref c, Description);
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Orientation);
+            WriteBuffer2.AddLength(ref c, OrientationMode);
+            WriteBuffer2.AddLength(ref c, InteractionMode);
+            WriteBuffer2.AddLength(ref c, AlwaysVisible);
+            WriteBuffer2.AddLength(ref c, Markers);
+            WriteBuffer2.AddLength(ref c, IndependentMarkerOrientation);
+            WriteBuffer2.AddLength(ref c, Description);
         }
     
         /// <summary> Full ROS name of this message. </summary>

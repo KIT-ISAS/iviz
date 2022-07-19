@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetVertexColorsRequest : IRequest<GetVertexColors, GetVertexColorsResponse>, IDeserializable<GetVertexColorsRequest>
+    public sealed class GetVertexColorsRequest : IRequest<GetVertexColors, GetVertexColorsResponse>, IDeserializableRos1<GetVertexColorsRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
@@ -82,13 +82,13 @@ namespace Iviz.Msgs.MeshMsgs
             if (Uuid is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uuid);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uuid);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetVertexColorsResponse : IResponse, IDeserializable<GetVertexColorsResponse>
+    public sealed class GetVertexColorsResponse : IResponse, IDeserializableRos1<GetVertexColorsResponse>
     {
         [DataMember (Name = "mesh_vertex_colors_stamped")] public MeshMsgs.MeshVertexColorsStamped MeshVertexColorsStamped;
     

@@ -46,7 +46,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class ProcessFileRequest : IRequest<ProcessFile, ProcessFileResponse>, IDeserializable<ProcessFileRequest>
+    public sealed class ProcessFileRequest : IRequest<ProcessFile, ProcessFileResponse>, IDeserializableRos1<ProcessFileRequest>
     {
         // Absolute file path.
         [DataMember (Name = "file_path")] public string FilePath;
@@ -90,13 +90,13 @@ namespace Iviz.Msgs.GridMapMsgs
             if (TopicName is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 8 + BuiltIns.GetStringSize(FilePath) + BuiltIns.GetStringSize(TopicName);
+        public int RosMessageLength => 8 + WriteBuffer.GetStringSize(FilePath) + WriteBuffer.GetStringSize(TopicName);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class ProcessFileResponse : IResponse, IDeserializable<ProcessFileResponse>
+    public sealed class ProcessFileResponse : IResponse, IDeserializableRos1<ProcessFileResponse>
     {
         // True if file processing was successful.
         [DataMember (Name = "success")] public bool Success;

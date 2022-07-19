@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.StatisticsMsgs
 {
     [DataContract]
-    public sealed class StatisticDataType : IDeserializable<StatisticDataType>, IMessageRos2
+    public sealed class StatisticDataType : IDeserializableRos2<StatisticDataType>, IMessageRos2
     {
         //############################################
         // This file contains the commonly used constants for the statistics data type.
@@ -49,7 +49,9 @@ namespace Iviz.Msgs2.StatisticsMsgs
         {
         }
     
-        public void GetRosMessageLength(ref int c) { }
+        public int RosMessageLength => 0;
+        
+        public void AddRosMessageLength(ref int c) { }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "statistics_msgs/StatisticDataType";

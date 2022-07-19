@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.RclInterfaces
 {
     [DataContract]
-    public sealed class ParameterType : IDeserializable<ParameterType>, IMessageRos2
+    public sealed class ParameterType : IDeserializableRos2<ParameterType>, IMessageRos2
     {
         // These types correspond to the value that is set in the ParameterValue message.
         // Default value, which implies this is not a valid parameter.
@@ -45,7 +45,9 @@ namespace Iviz.Msgs2.RclInterfaces
         {
         }
     
-        public void GetRosMessageLength(ref int c) { }
+        public int RosMessageLength => 0;
+        
+        public void AddRosMessageLength(ref int c) { }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "rcl_interfaces/ParameterType";

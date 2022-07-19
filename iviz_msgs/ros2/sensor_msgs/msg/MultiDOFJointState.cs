@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class MultiDOFJointState : IDeserializable<MultiDOFJointState>, IMessageRos2
+    public sealed class MultiDOFJointState : IDeserializableRos2<MultiDOFJointState>, IMessageRos2
     {
         // Representation of state for joints with multiple degrees of freedom,
         // following the structure of JointState which can only represent a single degree of freedom.
@@ -94,13 +94,15 @@ namespace Iviz.Msgs2.SensorMsgs
             }
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, JointNames);
-            WriteBuffer2.Advance(ref c, Transforms);
-            WriteBuffer2.Advance(ref c, Twist);
-            WriteBuffer2.Advance(ref c, Wrench);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, JointNames);
+            WriteBuffer2.AddLength(ref c, Transforms);
+            WriteBuffer2.AddLength(ref c, Twist);
+            WriteBuffer2.AddLength(ref c, Wrench);
         }
     
         /// <summary> Full ROS name of this message. </summary>

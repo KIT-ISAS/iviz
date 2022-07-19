@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class Temperature : IDeserializable<Temperature>, IMessageRos2
+    public sealed class Temperature : IDeserializableRos2<Temperature>, IMessageRos2
     {
         // Single temperature reading.
         /// <summary> Timestamp is the time the temperature was measured </summary>
@@ -52,11 +52,13 @@ namespace Iviz.Msgs2.SensorMsgs
         {
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Temperature_);
-            WriteBuffer2.Advance(ref c, Variance);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Temperature_);
+            WriteBuffer2.AddLength(ref c, Variance);
         }
     
         /// <summary> Full ROS name of this message. </summary>

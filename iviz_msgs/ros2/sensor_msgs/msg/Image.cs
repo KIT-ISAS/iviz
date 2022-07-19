@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class Image : IDeserializable<Image>, IMessageRos2
+    public sealed class Image : IDeserializableRos2<Image>, IMessageRos2
     {
         // This message contains an uncompressed image
         // (0, 0) is at top-left corner of image
@@ -76,15 +76,17 @@ namespace Iviz.Msgs2.SensorMsgs
             if (Data is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Height);
-            WriteBuffer2.Advance(ref c, Width);
-            WriteBuffer2.Advance(ref c, Encoding);
-            WriteBuffer2.Advance(ref c, IsBigendian);
-            WriteBuffer2.Advance(ref c, Step);
-            WriteBuffer2.Advance(ref c, Data);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Height);
+            WriteBuffer2.AddLength(ref c, Width);
+            WriteBuffer2.AddLength(ref c, Encoding);
+            WriteBuffer2.AddLength(ref c, IsBigendian);
+            WriteBuffer2.AddLength(ref c, Step);
+            WriteBuffer2.AddLength(ref c, Data);
         }
     
         /// <summary> Full ROS name of this message. </summary>

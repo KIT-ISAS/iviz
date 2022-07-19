@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class MapMetaData : IDeserializable<MapMetaData>, IMessageRos1
+    public sealed class MapMetaData : IDeserializableRos1<MapMetaData>, IMessageRos1
     {
         // This hold basic information about the characterists of the OccupancyGrid
         // The time at which the map was loaded

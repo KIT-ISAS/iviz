@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class RobotConfiguration : IDeserializable<RobotConfiguration>, IMessageRos1
+    public sealed class RobotConfiguration : IDeserializableRos1<RobotConfiguration>, IMessageRos1
     {
         [DataMember (Name = "source_parameter")] public string SourceParameter;
         [DataMember (Name = "saved_robot_name")] public string SavedRobotName;
@@ -77,11 +77,11 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 47;
-                size += BuiltIns.GetStringSize(SourceParameter);
-                size += BuiltIns.GetStringSize(SavedRobotName);
-                size += BuiltIns.GetStringSize(FramePrefix);
-                size += BuiltIns.GetStringSize(FrameSuffix);
-                size += BuiltIns.GetStringSize(Id);
+                size += WriteBuffer.GetStringSize(SourceParameter);
+                size += WriteBuffer.GetStringSize(SavedRobotName);
+                size += WriteBuffer.GetStringSize(FramePrefix);
+                size += WriteBuffer.GetStringSize(FrameSuffix);
+                size += WriteBuffer.GetStringSize(Id);
                 return size;
             }
         }

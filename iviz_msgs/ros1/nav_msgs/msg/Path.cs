@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class Path : IDeserializable<Path>, IMessageRos1
+    public sealed class Path : IDeserializableRos1<Path>, IMessageRos1
     {
         //An array of poses that represents a Path for a robot to follow
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -55,7 +55,7 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
     
-        public int RosMessageLength => 4 + Header.RosMessageLength + BuiltIns.GetArraySize(Poses);
+        public int RosMessageLength => 4 + Header.RosMessageLength + WriteBuffer.GetArraySize(Poses);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "nav_msgs/Path";

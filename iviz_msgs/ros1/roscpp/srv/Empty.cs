@@ -46,7 +46,7 @@ namespace Iviz.Msgs.Roscpp
     }
 
     [DataContract]
-    public sealed class EmptyRequest : IRequest<Empty, EmptyResponse>, IDeserializable<EmptyRequest>
+    public sealed class EmptyRequest : IRequest<Empty, EmptyResponse>, IDeserializableRos1<EmptyRequest>
     {
     
         /// Constructor for empty message.
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.Roscpp
     }
 
     [DataContract]
-    public sealed class EmptyResponse : IResponse, IDeserializable<EmptyResponse>
+    public sealed class EmptyResponse : IResponse, IDeserializableRos1<EmptyResponse>
     {
     
         /// Constructor for empty message.

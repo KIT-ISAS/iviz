@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.ActionMsgs
 {
     [DataContract]
-    public sealed class GoalStatusArray : IDeserializable<GoalStatusArray>, IMessageRos2
+    public sealed class GoalStatusArray : IDeserializableRos2<GoalStatusArray>, IMessageRos2
     {
         // An array of goal statuses.
         [DataMember (Name = "status_list")] public GoalStatus[] StatusList;
@@ -51,9 +51,11 @@ namespace Iviz.Msgs2.ActionMsgs
             }
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, StatusList);
+            WriteBuffer2.AddLength(ref c, StatusList);
         }
     
         /// <summary> Full ROS name of this message. </summary>

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Texture : IDeserializable<Texture>, IMessageRos1
+    public sealed class Texture : IDeserializableRos1<Texture>, IMessageRos1
     {
         public const byte TYPE_NONE = 0;
         public const byte TYPE_DIFFUSE = 1;
@@ -88,7 +88,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Path is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 21 + BuiltIns.GetStringSize(Path);
+        public int RosMessageLength => 21 + WriteBuffer.GetStringSize(Path);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Texture";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Mesh : IDeserializable<Mesh>, IMessageRos1
+    public sealed class Mesh : IDeserializableRos1<Mesh>, IMessageRos1
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "vertices")] public Vector3f[] Vertices;
@@ -95,13 +95,13 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 36;
-                size += BuiltIns.GetStringSize(Name);
+                size += WriteBuffer.GetStringSize(Name);
                 size += 12 * Vertices.Length;
                 size += 12 * Normals.Length;
                 size += 12 * Tangents.Length;
                 size += 12 * BiTangents.Length;
-                size += BuiltIns.GetArraySize(TexCoords);
-                size += BuiltIns.GetArraySize(ColorChannels);
+                size += WriteBuffer.GetArraySize(TexCoords);
+                size += WriteBuffer.GetArraySize(ColorChannels);
                 size += 12 * Faces.Length;
                 return size;
             }

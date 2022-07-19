@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class JointState : IDeserializable<JointState>, IMessageRos1
+    public sealed class JointState : IDeserializableRos1<JointState>, IMessageRos1
     {
         // This is a message that holds data to describe the state of a set of torque controlled joints. 
         //
@@ -80,7 +80,7 @@ namespace Iviz.Msgs.SensorMsgs
             get {
                 int size = 16;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetArraySize(Name);
+                size += WriteBuffer.GetArraySize(Name);
                 size += 8 * Position.Length;
                 size += 8 * Velocity.Length;
                 size += 8 * Effort.Length;

@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class NavSatFix : IDeserializable<NavSatFix>, IMessageRos2
+    public sealed class NavSatFix : IDeserializableRos2<NavSatFix>, IMessageRos2
     {
         // Navigation Satellite fix for any Global Navigation Satellite System
         //
@@ -86,15 +86,17 @@ namespace Iviz.Msgs2.SensorMsgs
             if (PositionCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(PositionCovariance.Length, 9);
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            Status.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Latitude);
-            WriteBuffer2.Advance(ref c, Longitude);
-            WriteBuffer2.Advance(ref c, Altitude);
-            WriteBuffer2.Advance(ref c, PositionCovariance, 9);
-            WriteBuffer2.Advance(ref c, PositionCovarianceType);
+            Header.AddRosMessageLength(ref c);
+            Status.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Latitude);
+            WriteBuffer2.AddLength(ref c, Longitude);
+            WriteBuffer2.AddLength(ref c, Altitude);
+            WriteBuffer2.AddLength(ref c, PositionCovariance, 9);
+            WriteBuffer2.AddLength(ref c, PositionCovarianceType);
         }
     
         /// <summary> Full ROS name of this message. </summary>

@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.RclInterfaces
 {
     [DataContract]
-    public sealed class ListParametersResult : IDeserializable<ListParametersResult>, IMessageRos2
+    public sealed class ListParametersResult : IDeserializableRos2<ListParametersResult>, IMessageRos2
     {
         // The resulting parameters under the given prefixes.
         [DataMember (Name = "names")] public string[] Names;
@@ -58,10 +58,12 @@ namespace Iviz.Msgs2.RclInterfaces
             }
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Names);
-            WriteBuffer2.Advance(ref c, Prefixes);
+            WriteBuffer2.AddLength(ref c, Names);
+            WriteBuffer2.AddLength(ref c, Prefixes);
         }
     
         /// <summary> Full ROS name of this message. </summary>

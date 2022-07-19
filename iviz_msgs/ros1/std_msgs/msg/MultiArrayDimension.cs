@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class MultiArrayDimension : IDeserializable<MultiArrayDimension>, IMessageRos1
+    public sealed class MultiArrayDimension : IDeserializableRos1<MultiArrayDimension>, IMessageRos1
     {
         /// <summary> Label of given dimension </summary>
         [DataMember (Name = "label")] public string Label;
@@ -52,7 +52,7 @@ namespace Iviz.Msgs.StdMsgs
             if (Label is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 12 + BuiltIns.GetStringSize(Label);
+        public int RosMessageLength => 12 + WriteBuffer.GetStringSize(Label);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/MultiArrayDimension";

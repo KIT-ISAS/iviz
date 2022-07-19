@@ -46,7 +46,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class GetGridMapInfoRequest : IRequest<GetGridMapInfo, GetGridMapInfoResponse>, IDeserializable<GetGridMapInfoRequest>
+    public sealed class GetGridMapInfoRequest : IRequest<GetGridMapInfo, GetGridMapInfoResponse>, IDeserializableRos1<GetGridMapInfoRequest>
     {
     
         /// Constructor for empty message.
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class GetGridMapInfoResponse : IResponse, IDeserializable<GetGridMapInfoResponse>
+    public sealed class GetGridMapInfoResponse : IResponse, IDeserializableRos1<GetGridMapInfoResponse>
     {
         // Grid map info
         [DataMember (Name = "info")] public GridMapMsgs.GridMapInfo Info;

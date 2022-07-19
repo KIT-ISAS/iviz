@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestRequestGoal : IDeserializable<TestRequestGoal>, IMessageRos1, IGoal<TestRequestActionGoal>
+    public sealed class TestRequestGoal : IDeserializableRos1<TestRequestGoal>, IMessageRos1, IGoal<TestRequestActionGoal>
     {
         public const int TERMINATE_SUCCESS = 0;
         public const int TERMINATE_ABORTED = 1;
@@ -67,7 +67,7 @@ namespace Iviz.Msgs.Actionlib
             if (ResultText is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 38 + BuiltIns.GetStringSize(ResultText);
+        public int RosMessageLength => 38 + WriteBuffer.GetStringSize(ResultText);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib/TestRequestGoal";

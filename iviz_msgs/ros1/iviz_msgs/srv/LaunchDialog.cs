@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class LaunchDialogRequest : IRequest<LaunchDialog, LaunchDialogResponse>, IDeserializable<LaunchDialogRequest>
+    public sealed class LaunchDialogRequest : IRequest<LaunchDialog, LaunchDialogResponse>, IDeserializableRos1<LaunchDialogRequest>
     {
         [DataMember (Name = "dialog")] public IvizMsgs.Dialog Dialog;
     
@@ -89,7 +89,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class LaunchDialogResponse : IResponse, IDeserializable<LaunchDialogResponse>
+    public sealed class LaunchDialogResponse : IResponse, IDeserializableRos1<LaunchDialogResponse>
     {
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "message")] public string Message;
@@ -136,7 +136,7 @@ namespace Iviz.Msgs.IvizMsgs
             Feedback.RosValidate();
         }
     
-        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message) + Feedback.RosMessageLength;
+        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message) + Feedback.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.SensorMsgs
 {
     [DataContract]
-    public sealed class JointState : IDeserializable<JointState>, IMessageRos2
+    public sealed class JointState : IDeserializableRos2<JointState>, IMessageRos2
     {
         // This is a message that holds data to describe the state of a set of torque controlled joints.
         //
@@ -75,13 +75,15 @@ namespace Iviz.Msgs2.SensorMsgs
             if (Effort is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Name);
-            WriteBuffer2.Advance(ref c, Position);
-            WriteBuffer2.Advance(ref c, Velocity);
-            WriteBuffer2.Advance(ref c, Effort);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Position);
+            WriteBuffer2.AddLength(ref c, Velocity);
+            WriteBuffer2.AddLength(ref c, Effort);
         }
     
         /// <summary> Full ROS name of this message. </summary>

@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.RclInterfaces
 {
     [DataContract]
-    public sealed class Log : IDeserializable<Log>, IMessageRos2
+    public sealed class Log : IDeserializableRos2<Log>, IMessageRos2
     {
         //#
         //# Severity level constants
@@ -93,15 +93,17 @@ namespace Iviz.Msgs2.RclInterfaces
             if (Function is null) BuiltIns.ThrowNullReference();
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, Stamp);
-            WriteBuffer2.Advance(ref c, Level);
-            WriteBuffer2.Advance(ref c, Name);
-            WriteBuffer2.Advance(ref c, Msg);
-            WriteBuffer2.Advance(ref c, File);
-            WriteBuffer2.Advance(ref c, Function);
-            WriteBuffer2.Advance(ref c, Line);
+            WriteBuffer2.AddLength(ref c, Stamp);
+            WriteBuffer2.AddLength(ref c, Level);
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Msg);
+            WriteBuffer2.AddLength(ref c, File);
+            WriteBuffer2.AddLength(ref c, Function);
+            WriteBuffer2.AddLength(ref c, Line);
         }
     
         /// <summary> Full ROS name of this message. </summary>

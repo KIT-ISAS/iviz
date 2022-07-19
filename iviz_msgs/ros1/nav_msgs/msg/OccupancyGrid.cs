@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class OccupancyGrid : IDeserializable<OccupancyGrid>, IMessageRos1
+    public sealed class OccupancyGrid : IDeserializableRos1<OccupancyGrid>, IMessageRos1
     {
         // This represents a 2-D grid map, in which each cell represents the probability of
         // occupancy.

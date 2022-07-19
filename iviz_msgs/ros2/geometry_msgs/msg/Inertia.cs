@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.GeometryMsgs
 {
     [DataContract]
-    public sealed class Inertia : IDeserializable<Inertia>, IMessageRos2
+    public sealed class Inertia : IDeserializableRos2<Inertia>, IMessageRos2
     {
         // Mass [kg]
         [DataMember (Name = "m")] public double M;
@@ -63,16 +63,18 @@ namespace Iviz.Msgs2.GeometryMsgs
         /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 80;
         
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => RosFixedMessageLength;
+        
+        public void AddRosMessageLength(ref int c)
         {
-            WriteBuffer2.Advance(ref c, M);
-            WriteBuffer2.Advance(ref c, Com);
-            WriteBuffer2.Advance(ref c, Ixx);
-            WriteBuffer2.Advance(ref c, Ixy);
-            WriteBuffer2.Advance(ref c, Ixz);
-            WriteBuffer2.Advance(ref c, Iyy);
-            WriteBuffer2.Advance(ref c, Iyz);
-            WriteBuffer2.Advance(ref c, Izz);
+            WriteBuffer2.AddLength(ref c, M);
+            WriteBuffer2.AddLength(ref c, Com);
+            WriteBuffer2.AddLength(ref c, Ixx);
+            WriteBuffer2.AddLength(ref c, Ixy);
+            WriteBuffer2.AddLength(ref c, Ixz);
+            WriteBuffer2.AddLength(ref c, Iyy);
+            WriteBuffer2.AddLength(ref c, Iyz);
+            WriteBuffer2.AddLength(ref c, Izz);
         }
     
         /// <summary> Full ROS name of this message. </summary>

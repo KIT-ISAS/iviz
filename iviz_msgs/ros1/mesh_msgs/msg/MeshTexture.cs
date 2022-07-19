@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshTexture : IDeserializable<MeshTexture>, IMessageRos1
+    public sealed class MeshTexture : IDeserializableRos1<MeshTexture>, IMessageRos1
     {
         // Mesh Attribute Message
         [DataMember (Name = "uuid")] public string Uuid;
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.MeshMsgs
             Image.RosValidate();
         }
     
-        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Uuid) + Image.RosMessageLength;
+        public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Uuid) + Image.RosMessageLength;
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshTexture";

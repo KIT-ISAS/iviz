@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TwoIntsResult : IDeserializable<TwoIntsResult>, IMessageRos1, IResult<TwoIntsActionResult>
+    public sealed class TwoIntsResult : IDeserializableRos1<TwoIntsResult>, IMessageRos1, IResult<TwoIntsActionResult>
     {
         [DataMember (Name = "sum")] public long Sum;
     

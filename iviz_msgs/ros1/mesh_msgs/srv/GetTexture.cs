@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetTextureRequest : IRequest<GetTexture, GetTextureResponse>, IDeserializable<GetTextureRequest>
+    public sealed class GetTextureRequest : IRequest<GetTexture, GetTextureResponse>, IDeserializableRos1<GetTextureRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid;
         [DataMember (Name = "texture_index")] public uint TextureIndex;
@@ -86,13 +86,13 @@ namespace Iviz.Msgs.MeshMsgs
             if (Uuid is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Uuid);
+        public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Uuid);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetTextureResponse : IResponse, IDeserializable<GetTextureResponse>
+    public sealed class GetTextureResponse : IResponse, IDeserializableRos1<GetTextureResponse>
     {
         [DataMember (Name = "texture")] public MeshMsgs.MeshTexture Texture;
     

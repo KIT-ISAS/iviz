@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Twist : IDeserializable<Twist>, IMessageRos1
+    public sealed class Twist : IDeserializableRos1<Twist>, IMessageRos1
     {
         // This expresses velocity in free space broken into its linear and angular parts.
         [DataMember (Name = "linear")] public Vector3 Linear;

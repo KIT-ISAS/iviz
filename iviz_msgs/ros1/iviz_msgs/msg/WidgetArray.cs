@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class WidgetArray : IDeserializable<WidgetArray>, IMessageRos1
+    public sealed class WidgetArray : IDeserializableRos1<WidgetArray>, IMessageRos1
     {
         [DataMember (Name = "dialogs")] public IvizMsgs.Dialog[] Dialogs;
         [DataMember (Name = "widgets")] public IvizMsgs.Widget[] Widgets;
@@ -65,7 +65,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public int RosMessageLength => 8 + BuiltIns.GetArraySize(Dialogs) + BuiltIns.GetArraySize(Widgets);
+        public int RosMessageLength => 8 + WriteBuffer.GetArraySize(Dialogs) + WriteBuffer.GetArraySize(Widgets);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/WidgetArray";

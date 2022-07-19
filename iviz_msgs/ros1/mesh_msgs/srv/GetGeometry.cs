@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetGeometryRequest : IRequest<GetGeometry, GetGeometryResponse>, IDeserializable<GetGeometryRequest>
+    public sealed class GetGeometryRequest : IRequest<GetGeometry, GetGeometryResponse>, IDeserializableRos1<GetGeometryRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
@@ -82,13 +82,13 @@ namespace Iviz.Msgs.MeshMsgs
             if (Uuid is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uuid);
+        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uuid);
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetGeometryResponse : IResponse, IDeserializable<GetGeometryResponse>
+    public sealed class GetGeometryResponse : IResponse, IDeserializableRos1<GetGeometryResponse>
     {
         [DataMember (Name = "mesh_geometry_stamped")] public MeshMsgs.MeshGeometryStamped MeshGeometryStamped;
     

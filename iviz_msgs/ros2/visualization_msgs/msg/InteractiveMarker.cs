@@ -7,7 +7,7 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.Msgs2.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarker : IDeserializable<InteractiveMarker>, IMessageRos2
+    public sealed class InteractiveMarker : IDeserializableRos2<InteractiveMarker>, IMessageRos2
     {
         // Time/frame info.
         // If header.time is set to 0, the marker will be retransformed into
@@ -90,15 +90,17 @@ namespace Iviz.Msgs2.VisualizationMsgs
             }
         }
     
-        public void GetRosMessageLength(ref int c)
+        public int RosMessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRosMessageLength(ref int c)
         {
-            Header.GetRosMessageLength(ref c);
-            WriteBuffer2.Advance(ref c, Pose);
-            WriteBuffer2.Advance(ref c, Name);
-            WriteBuffer2.Advance(ref c, Description);
-            WriteBuffer2.Advance(ref c, Scale);
-            WriteBuffer2.Advance(ref c, MenuEntries);
-            WriteBuffer2.Advance(ref c, Controls);
+            Header.AddRosMessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Pose);
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Description);
+            WriteBuffer2.AddLength(ref c, Scale);
+            WriteBuffer2.AddLength(ref c, MenuEntries);
+            WriteBuffer2.AddLength(ref c, Controls);
         }
     
         /// <summary> Full ROS name of this message. </summary>

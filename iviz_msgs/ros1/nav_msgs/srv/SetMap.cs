@@ -46,7 +46,7 @@ namespace Iviz.Msgs.NavMsgs
     }
 
     [DataContract]
-    public sealed class SetMapRequest : IRequest<SetMap, SetMapResponse>, IDeserializable<SetMapRequest>
+    public sealed class SetMapRequest : IRequest<SetMap, SetMapResponse>, IDeserializableRos1<SetMapRequest>
     {
         // Set a new map together with an initial pose
         [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map;
@@ -97,7 +97,7 @@ namespace Iviz.Msgs.NavMsgs
     }
 
     [DataContract]
-    public sealed class SetMapResponse : IResponse, IDeserializable<SetMapResponse>
+    public sealed class SetMapResponse : IResponse, IDeserializableRos1<SetMapResponse>
     {
         [DataMember (Name = "success")] public bool Success;
     

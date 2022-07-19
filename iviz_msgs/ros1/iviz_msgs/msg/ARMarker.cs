@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ARMarker : IDeserializable<ARMarker>, IMessageRos1
+    public sealed class ARMarker : IDeserializableRos1<ARMarker>, IMessageRos1
     {
         public const byte TYPE_ARUCO = 0;
         public const byte TYPE_QRCODE = 1;
@@ -79,7 +79,7 @@ namespace Iviz.Msgs.IvizMsgs
             get {
                 int size = 198;
                 size += Header.RosMessageLength;
-                size += BuiltIns.GetStringSize(Code);
+                size += WriteBuffer.GetStringSize(Code);
                 size += 24 * Corners.Length;
                 return size;
             }

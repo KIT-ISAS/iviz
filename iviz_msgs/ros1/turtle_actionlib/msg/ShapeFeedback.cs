@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TurtleActionlib
 {
     [DataContract]
-    public sealed class ShapeFeedback : IDeserializable<ShapeFeedback>, IMessageRos1, IFeedback<ShapeActionFeedback>
+    public sealed class ShapeFeedback : IDeserializableRos1<ShapeFeedback>, IMessageRos1, IFeedback<ShapeActionFeedback>
     {
         //feedback
     

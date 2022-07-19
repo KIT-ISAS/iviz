@@ -8,7 +8,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Header : IMessageRos1, IDeserializable<Header>
+    public struct Header : IMessageRos1, IDeserializableRos1<Header>
     {
         // Standard metadata for higher-level stamped data types.
         // This is generally used to communicate timestamped data 
@@ -61,7 +61,7 @@ namespace Iviz.Msgs.StdMsgs
         {
         }
     
-        public readonly int RosMessageLength => 16 + BuiltIns.GetStringSize(FrameId);
+        public readonly int RosMessageLength => 16 + WriteBuffer.GetStringSize(FrameId);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/Header";
