@@ -63,6 +63,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 8 + 56 * Poses.Length + 8 * Timestamps.Length;
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

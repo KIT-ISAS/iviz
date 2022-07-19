@@ -69,6 +69,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 4 + 6 * Array.Length;
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

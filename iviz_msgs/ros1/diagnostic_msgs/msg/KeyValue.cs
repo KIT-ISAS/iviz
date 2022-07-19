@@ -65,6 +65,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
     
         public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Key) + WriteBuffer.GetStringSize(Value);
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

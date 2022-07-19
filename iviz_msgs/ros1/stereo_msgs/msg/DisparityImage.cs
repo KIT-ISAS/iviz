@@ -106,6 +106,7 @@ namespace Iviz.Msgs.StereoMsgs
         }
     
         public int RosMessageLength => 37 + Header.RosMessageLength + Image.RosMessageLength;
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

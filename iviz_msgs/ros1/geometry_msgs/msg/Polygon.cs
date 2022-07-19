@@ -56,6 +56,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         public int RosMessageLength => 4 + 12 * Points.Length;
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

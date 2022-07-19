@@ -89,6 +89,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 8 + WriteBuffer.GetArraySize(Dialogs) + WriteBuffer.GetArraySize(Widgets);
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

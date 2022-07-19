@@ -71,6 +71,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
     
         public int RosMessageLength => 56 + Header.RosMessageLength + Octomap.RosMessageLength;
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

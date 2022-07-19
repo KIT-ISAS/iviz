@@ -62,12 +62,14 @@ namespace Iviz.Msgs.IvizMsgs
         public const int RosFixedMessageLength = 4;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
+        
         /// <summary> Constant size of this message. </summary> 
         public const int Ros2FixedMessageLength = 4;
         
         public readonly int Ros2MessageLength => Ros2FixedMessageLength;
         
         public readonly void AddRos2MessageLength(ref int c) => WriteBuffer2.AddLength(ref c, this);
+        
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Color32";

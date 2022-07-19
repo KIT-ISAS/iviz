@@ -56,6 +56,7 @@ namespace Iviz.Msgs.PclMsgs
         }
     
         public int RosMessageLength => 4 + 4 * Vertices_.Length;
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

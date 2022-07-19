@@ -57,6 +57,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
         /// <summary> Constant size of this message. </summary> 
         public const int Ros2FixedMessageLength = 4;
         

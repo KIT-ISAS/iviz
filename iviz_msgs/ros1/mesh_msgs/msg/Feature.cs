@@ -74,6 +74,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 28 + 4 * Descriptor.Length;
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

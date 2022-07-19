@@ -151,13 +151,12 @@ public static class BuiltIns
     public static byte[] SerializeToArray(this ISerializableRos2 o)
     {
         o.RosValidate();
-        byte[] bytes = new byte[o.RosMessageLength];
+        byte[] bytes = new byte[o.Ros2MessageLength];
         WriteBuffer2.Serialize(o, bytes);
 
         return bytes;
     }
-
-
+    
     public static bool IsRos1<T>() => typeof(IMessageRos1).IsAssignableFrom(typeof(T));
 
     public static bool IsRos2<T>() => typeof(IMessageRos2).IsAssignableFrom(typeof(T));

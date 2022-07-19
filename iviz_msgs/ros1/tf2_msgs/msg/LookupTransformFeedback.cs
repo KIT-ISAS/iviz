@@ -47,6 +47,7 @@ namespace Iviz.Msgs.Tf2Msgs
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
         public int Ros2MessageLength => 0;
         
         public void AddRos2MessageLength(ref int c) { }

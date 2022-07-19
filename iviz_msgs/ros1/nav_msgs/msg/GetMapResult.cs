@@ -56,6 +56,7 @@ namespace Iviz.Msgs.NavMsgs
         }
     
         public int RosMessageLength => 0 + Map.RosMessageLength;
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

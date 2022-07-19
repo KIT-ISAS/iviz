@@ -95,6 +95,7 @@ namespace Iviz.Msgs.Tf2Msgs
                 return size;
             }
         }
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

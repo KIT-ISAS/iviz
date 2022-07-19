@@ -6,7 +6,7 @@ namespace Iviz.Msgs
     /// Interface for all ROS messages.
     /// All classes or structs representing ROS messages derive from this.
     /// </summary>
-    public interface IMessage : IDisposable
+    public interface IMessage : ISerializable, IDisposable
     {
         /// <summary>
         /// Full ROS name of the message.
@@ -27,7 +27,7 @@ namespace Iviz.Msgs
         public string RosDependenciesBase64 => throw new RosInvalidMessageForVersion();
     }
     
-    public interface IMessageRos2 : IMessage, ISerializableRos1
+    public interface IMessageRos2 : IMessage, ISerializableRos2
     {
         void AddRos2MessageLength(ref int c);
     }

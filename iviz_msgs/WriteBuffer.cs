@@ -228,7 +228,7 @@ namespace Iviz.Msgs
         /// <param name="message">The ROS message.</param>
         /// <param name="buffer">The destination byte array.</param>
         /// <returns>The number of bytes written.</returns>
-        public static uint Serialize<T>(in T message, Span<byte> buffer) where T : ISerializable
+        public static uint Serialize<T>(in T message, Span<byte> buffer) where T : ISerializableRos1
         {
             fixed (byte* bufferPtr = buffer)
             {

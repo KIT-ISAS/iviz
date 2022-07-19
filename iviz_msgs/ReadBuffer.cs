@@ -436,7 +436,7 @@ public unsafe struct ReadBuffer
     /// The source byte array. 
     /// </param>
     /// <returns>The deserialized message.</returns>
-    public static ISerializable Deserialize(ISerializable generator, ReadOnlySpan<byte> buffer)
+    public static ISerializable Deserialize(ISerializableRos1 generator, ReadOnlySpan<byte> buffer)
     {
         fixed (byte* bufferPtr = buffer)
         {
@@ -459,7 +459,7 @@ public unsafe struct ReadBuffer
     /// <typeparam name="T">Message type.</typeparam>
     /// <returns>The deserialized message.</returns>
     public static T Deserialize<T>(IDeserializableRos1<T> generator, ReadOnlySpan<byte> buffer)
-        where T : ISerializable
+        where T : ISerializableRos1
     {
         fixed (byte* bufferPtr = buffer)
         {
@@ -469,7 +469,7 @@ public unsafe struct ReadBuffer
     }
 
     public static T Deserialize<T>(in T generator, ReadOnlySpan<byte> buffer)
-        where T : ISerializable, IDeserializableRos1<T>
+        where T : ISerializableRos1, IDeserializableRos1<T>
     {
         fixed (byte* bufferPtr = buffer)
         {

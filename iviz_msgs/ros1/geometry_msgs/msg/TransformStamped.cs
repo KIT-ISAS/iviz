@@ -82,6 +82,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         public readonly int RosMessageLength => 60 + Header.RosMessageLength + WriteBuffer.GetStringSize(ChildFrameId);
+        
         public readonly int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public readonly void AddRos2MessageLength(ref int c)

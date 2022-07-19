@@ -79,6 +79,7 @@ namespace Iviz.Msgs.ShapeMsgs
         }
     
         public int RosMessageLength => 8 + 12 * Triangles.Length + 24 * Vertices.Length;
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

@@ -74,6 +74,7 @@ namespace Iviz.Msgs.NavMsgs
         }
     
         public int RosMessageLength => 12 + Header.RosMessageLength + 24 * Cells.Length;
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

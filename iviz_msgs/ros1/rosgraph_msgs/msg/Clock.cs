@@ -59,6 +59,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
         /// <summary> Constant size of this message. </summary> 
         public const int Ros2FixedMessageLength = 8;
         

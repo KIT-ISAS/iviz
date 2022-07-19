@@ -71,6 +71,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
     
         public int RosMessageLength => 60 + Header.RosMessageLength + WriteBuffer.GetStringSize(Name);
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

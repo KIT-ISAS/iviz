@@ -67,6 +67,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         }
     
         public int RosMessageLength => 12 + WriteBuffer.GetStringSize(Id);
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

@@ -492,7 +492,7 @@ public unsafe partial struct ReadBuffer2
     /// <typeparam name="T">Message type.</typeparam>
     /// <returns>The deserialized message.</returns>
     public static T Deserialize<T>(IDeserializableRos2<T> generator, ReadOnlySpan<byte> buffer)
-        where T : ISerializable
+        where T : ISerializableRos2
     {
         fixed (byte* bufferPtr = buffer)
         {
@@ -502,7 +502,7 @@ public unsafe partial struct ReadBuffer2
     }
 
     public static T Deserialize<T>(in T generator, ReadOnlySpan<byte> buffer)
-        where T : ISerializable, IDeserializableRos2<T>
+        where T : ISerializableRos2, IDeserializableRos2<T>
     {
         fixed (byte* bufferPtr = buffer)
         {

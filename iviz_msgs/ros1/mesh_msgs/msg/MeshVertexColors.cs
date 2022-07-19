@@ -56,6 +56,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 4 + 16 * VertexColors.Length;
+        
         public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)

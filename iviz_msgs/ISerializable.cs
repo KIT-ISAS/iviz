@@ -10,20 +10,6 @@ public interface ISerializable
     /// If not, throws an exception.
     /// </summary>
     void RosValidate();
-
-    /// <summary>
-    /// Creates a new message and deserializes into it the information read from the given buffer.
-    /// </summary>
-    /// <param name="b">
-    /// Buffer object.
-    /// </param>
-    ISerializable RosDeserializeBase(ref ReadBuffer b) => throw new RosInvalidMessageForVersion();
-    
-    void RosSerialize(ref WriteBuffer b) => throw new RosInvalidMessageForVersion();
-
-    void RosSerialize(ref WriteBuffer2 b) => throw new RosInvalidMessageForVersion();
-    
-    int RosMessageLength => throw new RosInvalidMessageForVersion();
 }
 
 public interface ISerializableRos1 : ISerializable
@@ -71,7 +57,7 @@ public interface IDeserializable<out T>
 {
 }
 
-public interface IDeserializableRos1<out T> : IDeserializable<T> where T : ISerializable
+public interface IDeserializableRos1<out T> : IDeserializable<T> where T : ISerializableRos1
 {
     /// <summary>
     /// Creates a new message an deserializes into it the information read from the given buffer.
@@ -82,7 +68,7 @@ public interface IDeserializableRos1<out T> : IDeserializable<T> where T : ISeri
     T RosDeserialize(ref ReadBuffer b) => throw new RosInvalidMessageForVersion();
 }
 
-public interface IDeserializableRos2<out T> : IDeserializable<T> where T : ISerializable
+public interface IDeserializableRos2<out T> : IDeserializable<T> where T : ISerializableRos2
 {
     /// <summary>
     /// Creates a new message an deserializes into it the information read from the given buffer.
