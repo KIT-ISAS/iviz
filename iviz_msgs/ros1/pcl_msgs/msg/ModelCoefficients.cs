@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class ModelCoefficients : IDeserializableRos1<ModelCoefficients>, IMessageRos1
+    public sealed class ModelCoefficients : IDeserializableRos1<ModelCoefficients>, IDeserializableRos2<ModelCoefficients>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "values")] public float[] Values;
@@ -30,11 +30,26 @@ namespace Iviz.Msgs.PclMsgs
             b.DeserializeStructArray(out Values);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ModelCoefficients(ref b);
+        /// Constructor with buffer.
+        public ModelCoefficients(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeStructArray(out Values);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ModelCoefficients(ref b);
         
         public ModelCoefficients RosDeserialize(ref ReadBuffer b) => new ModelCoefficients(ref b);
+        
+        public ModelCoefficients RosDeserialize(ref ReadBuffer2 b) => new ModelCoefficients(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.SerializeStructArray(Values);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.SerializeStructArray(Values);
@@ -46,6 +61,13 @@ namespace Iviz.Msgs.PclMsgs
         }
     
         public int RosMessageLength => 4 + Header.RosMessageLength + 4 * Values.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Values);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "pcl_msgs/ModelCoefficients";

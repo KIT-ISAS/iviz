@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.OctomapMsgs
 {
     [DataContract]
-    public sealed class OctomapWithPose : IDeserializableRos1<OctomapWithPose>, IMessageRos1
+    public sealed class OctomapWithPose : IDeserializableRos1<OctomapWithPose>, IDeserializableRos2<OctomapWithPose>, IMessageRos1, IMessageRos2
     {
         // A 3D map in binary format, as Octree
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -36,11 +36,28 @@ namespace Iviz.Msgs.OctomapMsgs
             Octomap = new OctomapMsgs.Octomap(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new OctomapWithPose(ref b);
+        /// Constructor with buffer.
+        public OctomapWithPose(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Origin);
+            Octomap = new OctomapMsgs.Octomap(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new OctomapWithPose(ref b);
         
         public OctomapWithPose RosDeserialize(ref ReadBuffer b) => new OctomapWithPose(ref b);
+        
+        public OctomapWithPose RosDeserialize(ref ReadBuffer2 b) => new OctomapWithPose(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(in Origin);
+            Octomap.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(in Origin);
@@ -54,6 +71,14 @@ namespace Iviz.Msgs.OctomapMsgs
         }
     
         public int RosMessageLength => 56 + Header.RosMessageLength + Octomap.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Origin);
+            Octomap.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "octomap_msgs/OctomapWithPose";

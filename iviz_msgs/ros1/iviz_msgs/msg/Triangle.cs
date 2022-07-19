@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Triangle : IMessageRos1, IDeserializableRos1<Triangle>
+    public struct Triangle : IMessageRos1, IMessageRos2, IDeserializableRos1<Triangle>, IDeserializableRos2<Triangle>
     {
         [DataMember (Name = "a")] public uint A;
         [DataMember (Name = "b")] public uint B;
@@ -29,11 +29,25 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out this);
         }
         
-        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Triangle(ref b);
+        /// Constructor with buffer.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Triangle(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out this);
+        }
+        
+        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Triangle(ref b);
         
         public readonly Triangle RosDeserialize(ref ReadBuffer b) => new Triangle(ref b);
+        
+        public readonly Triangle RosDeserialize(ref ReadBuffer2 b) => new Triangle(ref b);
     
         public readonly void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(in this);
+        }
+        
+        public readonly void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(in this);
         }
@@ -46,6 +60,12 @@ namespace Iviz.Msgs.IvizMsgs
         public const int RosFixedMessageLength = 12;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 12;
+        
+        public readonly int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public readonly void AddRos2MessageLength(ref int c) => WriteBuffer2.AddLength(ref c, this);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Triangle";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.DiagnosticMsgs
 {
     [DataContract]
-    public sealed class KeyValue : IDeserializableRos1<KeyValue>, IMessageRos1
+    public sealed class KeyValue : IDeserializableRos1<KeyValue>, IDeserializableRos2<KeyValue>, IMessageRos1, IMessageRos2
     {
         /// <summary> What to label this value when viewing </summary>
         [DataMember (Name = "key")] public string Key;
@@ -33,11 +33,26 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.DeserializeString(out Value);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new KeyValue(ref b);
+        /// Constructor with buffer.
+        public KeyValue(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Key);
+            b.DeserializeString(out Value);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new KeyValue(ref b);
         
         public KeyValue RosDeserialize(ref ReadBuffer b) => new KeyValue(ref b);
+        
+        public KeyValue RosDeserialize(ref ReadBuffer2 b) => new KeyValue(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Key);
+            b.Serialize(Value);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Key);
             b.Serialize(Value);
@@ -50,6 +65,13 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
     
         public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Key) + WriteBuffer.GetStringSize(Value);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Key);
+            WriteBuffer2.AddLength(ref c, Value);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "diagnostic_msgs/KeyValue";

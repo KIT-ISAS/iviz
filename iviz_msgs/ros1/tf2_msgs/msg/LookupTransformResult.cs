@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformResult : IDeserializableRos1<LookupTransformResult>, IMessageRos1, IResult<LookupTransformActionResult>
+    public sealed class LookupTransformResult : IDeserializableRos1<LookupTransformResult>, IDeserializableRos2<LookupTransformResult>, IMessageRos1, IMessageRos2, IResult<LookupTransformActionResult>
     {
         [DataMember (Name = "transform")] public GeometryMsgs.TransformStamped Transform;
         [DataMember (Name = "error")] public Tf2Msgs.TF2Error Error;
@@ -30,11 +30,26 @@ namespace Iviz.Msgs.Tf2Msgs
             Error = new Tf2Msgs.TF2Error(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformResult(ref b);
+        /// Constructor with buffer.
+        public LookupTransformResult(ref ReadBuffer2 b)
+        {
+            Transform = new GeometryMsgs.TransformStamped(ref b);
+            Error = new Tf2Msgs.TF2Error(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformResult(ref b);
         
         public LookupTransformResult RosDeserialize(ref ReadBuffer b) => new LookupTransformResult(ref b);
+        
+        public LookupTransformResult RosDeserialize(ref ReadBuffer2 b) => new LookupTransformResult(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Transform.RosSerialize(ref b);
+            Error.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Transform.RosSerialize(ref b);
             Error.RosSerialize(ref b);
@@ -47,6 +62,13 @@ namespace Iviz.Msgs.Tf2Msgs
         }
     
         public int RosMessageLength => 0 + Transform.RosMessageLength + Error.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Transform.AddRos2MessageLength(ref c);
+            Error.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "tf2_msgs/LookupTransformResult";

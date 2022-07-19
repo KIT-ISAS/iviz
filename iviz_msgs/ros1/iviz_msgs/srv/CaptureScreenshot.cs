@@ -67,7 +67,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Compress);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CaptureScreenshotRequest(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new CaptureScreenshotRequest(ref b);
         
         public CaptureScreenshotRequest RosDeserialize(ref ReadBuffer b) => new CaptureScreenshotRequest(ref b);
     
@@ -123,7 +123,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Data);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CaptureScreenshotResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new CaptureScreenshotResponse(ref b);
         
         public CaptureScreenshotResponse RosDeserialize(ref ReadBuffer b) => new CaptureScreenshotResponse(ref b);
     

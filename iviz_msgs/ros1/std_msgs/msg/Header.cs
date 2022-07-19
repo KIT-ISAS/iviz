@@ -8,7 +8,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Header : IMessageRos1, IDeserializableRos1<Header>
+    public struct Header : IMessageRos1, IMessageRos2, IDeserializableRos1<Header>, IDeserializableRos2<Header>
     {
         // Standard metadata for higher-level stamped data types.
         // This is generally used to communicate timestamped data 
@@ -46,11 +46,34 @@ namespace Iviz.Msgs.StdMsgs
             b.DeserializeString(out h.FrameId);
         }
         
-        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Header(ref b);
+        /// Constructor with buffer.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Header(ref ReadBuffer2 b)
+        {
+            Deserialize(ref b, out this);
+        }
+        
+        public static void Deserialize(ref ReadBuffer2 b, out Header h)
+        {
+            b.Deserialize(out h.Seq);
+            b.Deserialize(out h.Stamp);
+            b.DeserializeString(out h.FrameId);
+        }
+        
+        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Header(ref b);
         
         public readonly Header RosDeserialize(ref ReadBuffer b) => new Header(ref b);
+        
+        public readonly Header RosDeserialize(ref ReadBuffer2 b) => new Header(ref b);
     
         public readonly void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Seq);
+            b.Serialize(Stamp);
+            b.Serialize(FrameId ?? "");
+        }
+        
+        public readonly void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Seq);
             b.Serialize(Stamp);
@@ -62,6 +85,14 @@ namespace Iviz.Msgs.StdMsgs
         }
     
         public readonly int RosMessageLength => 16 + WriteBuffer.GetStringSize(FrameId);
+        public readonly int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public readonly void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Seq);
+            WriteBuffer2.AddLength(ref c, Stamp);
+            WriteBuffer2.AddLength(ref c, FrameId);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/Header";

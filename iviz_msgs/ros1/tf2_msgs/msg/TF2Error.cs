@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class TF2Error : IDeserializableRos1<TF2Error>, IMessageRos1
+    public sealed class TF2Error : IDeserializableRos1<TF2Error>, IDeserializableRos2<TF2Error>, IMessageRos1, IMessageRos2
     {
         public const byte NO_ERROR = 0;
         public const byte LOOKUP_ERROR = 1;
@@ -37,11 +37,26 @@ namespace Iviz.Msgs.Tf2Msgs
             b.DeserializeString(out ErrorString);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TF2Error(ref b);
+        /// Constructor with buffer.
+        public TF2Error(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Error);
+            b.DeserializeString(out ErrorString);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TF2Error(ref b);
         
         public TF2Error RosDeserialize(ref ReadBuffer b) => new TF2Error(ref b);
+        
+        public TF2Error RosDeserialize(ref ReadBuffer2 b) => new TF2Error(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Error);
+            b.Serialize(ErrorString);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Error);
             b.Serialize(ErrorString);
@@ -53,6 +68,13 @@ namespace Iviz.Msgs.Tf2Msgs
         }
     
         public int RosMessageLength => 5 + WriteBuffer.GetStringSize(ErrorString);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Error);
+            WriteBuffer2.AddLength(ref c, ErrorString);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "tf2_msgs/TF2Error";

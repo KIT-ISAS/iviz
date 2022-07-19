@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class AveragingFeedback : IDeserializableRos1<AveragingFeedback>, IMessageRos1, IFeedback<AveragingActionFeedback>
+    public sealed class AveragingFeedback : IDeserializableRos1<AveragingFeedback>, IDeserializableRos2<AveragingFeedback>, IMessageRos1, IMessageRos2, IFeedback<AveragingActionFeedback>
     {
         //feedback
     
@@ -19,14 +19,25 @@ namespace Iviz.Msgs.ActionlibTutorials
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        /// Constructor with buffer.
+        public AveragingFeedback(ref ReadBuffer2 b)
+        {
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public AveragingFeedback RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public AveragingFeedback RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static AveragingFeedback? singleton;
         public static AveragingFeedback Singleton => singleton ??= new AveragingFeedback();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -38,6 +49,9 @@ namespace Iviz.Msgs.ActionlibTutorials
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_tutorials/AveragingFeedback";

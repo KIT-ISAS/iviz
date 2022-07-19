@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshMaterialsStamped : IDeserializableRos1<MeshMaterialsStamped>, IMessageRos1
+    public sealed class MeshMaterialsStamped : IDeserializableRos1<MeshMaterialsStamped>, IDeserializableRos2<MeshMaterialsStamped>, IMessageRos1, IMessageRos2
     {
         // Mesh Attribute Message
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -35,11 +35,28 @@ namespace Iviz.Msgs.MeshMsgs
             MeshMaterials = new MeshMsgs.MeshMaterials(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshMaterialsStamped(ref b);
+        /// Constructor with buffer.
+        public MeshMaterialsStamped(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeString(out Uuid);
+            MeshMaterials = new MeshMsgs.MeshMaterials(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshMaterialsStamped(ref b);
         
         public MeshMaterialsStamped RosDeserialize(ref ReadBuffer b) => new MeshMaterialsStamped(ref b);
+        
+        public MeshMaterialsStamped RosDeserialize(ref ReadBuffer2 b) => new MeshMaterialsStamped(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Uuid);
+            MeshMaterials.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Uuid);
@@ -62,6 +79,14 @@ namespace Iviz.Msgs.MeshMsgs
                 size += MeshMaterials.RosMessageLength;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Uuid);
+            MeshMaterials.AddRos2MessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

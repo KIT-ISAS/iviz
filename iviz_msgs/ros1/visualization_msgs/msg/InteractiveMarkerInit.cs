@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerInit : IDeserializableRos1<InteractiveMarkerInit>, IMessageRos1
+    public sealed class InteractiveMarkerInit : IDeserializableRos1<InteractiveMarkerInit>, IDeserializableRos2<InteractiveMarkerInit>, IMessageRos1, IMessageRos2
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
@@ -47,11 +47,32 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerInit(ref b);
+        /// Constructor with buffer.
+        public InteractiveMarkerInit(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out ServerId);
+            b.Deserialize(out SeqNum);
+            b.DeserializeArray(out Markers);
+            for (int i = 0; i < Markers.Length; i++)
+            {
+                Markers[i] = new InteractiveMarker(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerInit(ref b);
         
         public InteractiveMarkerInit RosDeserialize(ref ReadBuffer b) => new InteractiveMarkerInit(ref b);
+        
+        public InteractiveMarkerInit RosDeserialize(ref ReadBuffer2 b) => new InteractiveMarkerInit(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(ServerId);
+            b.Serialize(SeqNum);
+            b.SerializeArray(Markers);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(ServerId);
             b.Serialize(SeqNum);
@@ -70,6 +91,14 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
     
         public int RosMessageLength => 16 + WriteBuffer.GetStringSize(ServerId) + WriteBuffer.GetArraySize(Markers);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, ServerId);
+            WriteBuffer2.AddLength(ref c, SeqNum);
+            WriteBuffer2.AddLength(ref c, Markers);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "visualization_msgs/InteractiveMarkerInit";

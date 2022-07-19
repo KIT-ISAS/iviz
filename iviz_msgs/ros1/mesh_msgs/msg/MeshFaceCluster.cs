@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshFaceCluster : IDeserializableRos1<MeshFaceCluster>, IMessageRos1
+    public sealed class MeshFaceCluster : IDeserializableRos1<MeshFaceCluster>, IDeserializableRos2<MeshFaceCluster>, IMessageRos1, IMessageRos2
     {
         //Cluster
         [DataMember (Name = "face_indices")] public uint[] FaceIndices;
@@ -33,11 +33,26 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeString(out Label);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshFaceCluster(ref b);
+        /// Constructor with buffer.
+        public MeshFaceCluster(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out FaceIndices);
+            b.DeserializeString(out Label);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshFaceCluster(ref b);
         
         public MeshFaceCluster RosDeserialize(ref ReadBuffer b) => new MeshFaceCluster(ref b);
+        
+        public MeshFaceCluster RosDeserialize(ref ReadBuffer2 b) => new MeshFaceCluster(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(FaceIndices);
+            b.Serialize(Label);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(FaceIndices);
             b.Serialize(Label);
@@ -50,6 +65,13 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 8 + 4 * FaceIndices.Length + WriteBuffer.GetStringSize(Label);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, FaceIndices);
+            WriteBuffer2.AddLength(ref c, Label);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshFaceCluster";

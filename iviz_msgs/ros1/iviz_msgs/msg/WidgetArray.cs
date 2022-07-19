@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class WidgetArray : IDeserializableRos1<WidgetArray>, IMessageRos1
+    public sealed class WidgetArray : IDeserializableRos1<WidgetArray>, IDeserializableRos2<WidgetArray>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "dialogs")] public IvizMsgs.Dialog[] Dialogs;
         [DataMember (Name = "widgets")] public IvizMsgs.Widget[] Widgets;
@@ -39,11 +39,34 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new WidgetArray(ref b);
+        /// Constructor with buffer.
+        public WidgetArray(ref ReadBuffer2 b)
+        {
+            b.DeserializeArray(out Dialogs);
+            for (int i = 0; i < Dialogs.Length; i++)
+            {
+                Dialogs[i] = new IvizMsgs.Dialog(ref b);
+            }
+            b.DeserializeArray(out Widgets);
+            for (int i = 0; i < Widgets.Length; i++)
+            {
+                Widgets[i] = new IvizMsgs.Widget(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new WidgetArray(ref b);
         
         public WidgetArray RosDeserialize(ref ReadBuffer b) => new WidgetArray(ref b);
+        
+        public WidgetArray RosDeserialize(ref ReadBuffer2 b) => new WidgetArray(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeArray(Dialogs);
+            b.SerializeArray(Widgets);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeArray(Dialogs);
             b.SerializeArray(Widgets);
@@ -66,6 +89,13 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 8 + WriteBuffer.GetArraySize(Dialogs) + WriteBuffer.GetArraySize(Widgets);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Dialogs);
+            WriteBuffer2.AddLength(ref c, Widgets);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/WidgetArray";

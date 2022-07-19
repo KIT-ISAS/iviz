@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerUpdate : IDeserializableRos1<InteractiveMarkerUpdate>, IMessageRos1
+    public sealed class InteractiveMarkerUpdate : IDeserializableRos1<InteractiveMarkerUpdate>, IDeserializableRos2<InteractiveMarkerUpdate>, IMessageRos1, IMessageRos2
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
@@ -60,11 +60,42 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.DeserializeStringArray(out Erases);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerUpdate(ref b);
+        /// Constructor with buffer.
+        public InteractiveMarkerUpdate(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out ServerId);
+            b.Deserialize(out SeqNum);
+            b.Deserialize(out Type);
+            b.DeserializeArray(out Markers);
+            for (int i = 0; i < Markers.Length; i++)
+            {
+                Markers[i] = new InteractiveMarker(ref b);
+            }
+            b.DeserializeArray(out Poses);
+            for (int i = 0; i < Poses.Length; i++)
+            {
+                Poses[i] = new InteractiveMarkerPose(ref b);
+            }
+            b.DeserializeStringArray(out Erases);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerUpdate(ref b);
         
         public InteractiveMarkerUpdate RosDeserialize(ref ReadBuffer b) => new InteractiveMarkerUpdate(ref b);
+        
+        public InteractiveMarkerUpdate RosDeserialize(ref ReadBuffer2 b) => new InteractiveMarkerUpdate(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(ServerId);
+            b.Serialize(SeqNum);
+            b.Serialize(Type);
+            b.SerializeArray(Markers);
+            b.SerializeArray(Poses);
+            b.SerializeArray(Erases);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(ServerId);
             b.Serialize(SeqNum);
@@ -106,6 +137,17 @@ namespace Iviz.Msgs.VisualizationMsgs
                 size += WriteBuffer.GetArraySize(Erases);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, ServerId);
+            WriteBuffer2.AddLength(ref c, SeqNum);
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, Markers);
+            WriteBuffer2.AddLength(ref c, Poses);
+            WriteBuffer2.AddLength(ref c, Erases);
         }
     
         /// <summary> Full ROS name of this message. </summary>

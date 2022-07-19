@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class JoyFeedback : IDeserializableRos1<JoyFeedback>, IMessageRos1
+    public sealed class JoyFeedback : IDeserializableRos1<JoyFeedback>, IDeserializableRos2<JoyFeedback>, IMessageRos1, IMessageRos2
     {
         // Declare of the type of feedback
         public const byte TYPE_LED = 0;
@@ -40,11 +40,28 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Intensity);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new JoyFeedback(ref b);
+        /// Constructor with buffer.
+        public JoyFeedback(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Type);
+            b.Deserialize(out Id);
+            b.Deserialize(out Intensity);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new JoyFeedback(ref b);
         
         public JoyFeedback RosDeserialize(ref ReadBuffer b) => new JoyFeedback(ref b);
+        
+        public JoyFeedback RosDeserialize(ref ReadBuffer2 b) => new JoyFeedback(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Type);
+            b.Serialize(Id);
+            b.Serialize(Intensity);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Type);
             b.Serialize(Id);
@@ -59,6 +76,17 @@ namespace Iviz.Msgs.SensorMsgs
         public const int RosFixedMessageLength = 6;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 6;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, Intensity);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/JoyFeedback";

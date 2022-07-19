@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapActionFeedback : IDeserializableRos1<GetMapActionFeedback>, IMessageRos1, IActionFeedback<GetMapFeedback>
+    public sealed class GetMapActionFeedback : IDeserializableRos1<GetMapActionFeedback>, IDeserializableRos2<GetMapActionFeedback>, IMessageRos1, IMessageRos2, IActionFeedback<GetMapFeedback>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -34,11 +34,28 @@ namespace Iviz.Msgs.NavMsgs
             Feedback = GetMapFeedback.Singleton;
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetMapActionFeedback(ref b);
+        /// Constructor with buffer.
+        public GetMapActionFeedback(ref ReadBuffer2 b)
+        {
+            Header = new StdMsgs.Header(ref b);
+            Status = new ActionlibMsgs.GoalStatus(ref b);
+            Feedback = GetMapFeedback.Singleton;
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetMapActionFeedback(ref b);
         
         public GetMapActionFeedback RosDeserialize(ref ReadBuffer b) => new GetMapActionFeedback(ref b);
+        
+        public GetMapActionFeedback RosDeserialize(ref ReadBuffer2 b) => new GetMapActionFeedback(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Status.RosSerialize(ref b);
+            Feedback.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Status.RosSerialize(ref b);
@@ -54,6 +71,14 @@ namespace Iviz.Msgs.NavMsgs
         }
     
         public int RosMessageLength => 0 + Header.RosMessageLength + Status.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Status.AddRos2MessageLength(ref c);
+            Feedback.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "nav_msgs/GetMapActionFeedback";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class BatteryState : IDeserializableRos1<BatteryState>, IMessageRos1
+    public sealed class BatteryState : IDeserializableRos1<BatteryState>, IDeserializableRos2<BatteryState>, IMessageRos1, IMessageRos2
     {
         // Constants are chosen to match the enums in the linux kernel
         // defined in include/linux/power_supply.h as of version 3.7
@@ -99,11 +99,54 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeString(out SerialNumber);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new BatteryState(ref b);
+        /// Constructor with buffer.
+        public BatteryState(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Voltage);
+            b.Deserialize(out Temperature);
+            b.Deserialize(out Current);
+            b.Deserialize(out Charge);
+            b.Deserialize(out Capacity);
+            b.Deserialize(out DesignCapacity);
+            b.Deserialize(out Percentage);
+            b.Deserialize(out PowerSupplyStatus);
+            b.Deserialize(out PowerSupplyHealth);
+            b.Deserialize(out PowerSupplyTechnology);
+            b.Deserialize(out Present);
+            b.DeserializeStructArray(out CellVoltage);
+            b.DeserializeStructArray(out CellTemperature);
+            b.DeserializeString(out Location);
+            b.DeserializeString(out SerialNumber);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new BatteryState(ref b);
         
         public BatteryState RosDeserialize(ref ReadBuffer b) => new BatteryState(ref b);
+        
+        public BatteryState RosDeserialize(ref ReadBuffer2 b) => new BatteryState(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Voltage);
+            b.Serialize(Temperature);
+            b.Serialize(Current);
+            b.Serialize(Charge);
+            b.Serialize(Capacity);
+            b.Serialize(DesignCapacity);
+            b.Serialize(Percentage);
+            b.Serialize(PowerSupplyStatus);
+            b.Serialize(PowerSupplyHealth);
+            b.Serialize(PowerSupplyTechnology);
+            b.Serialize(Present);
+            b.SerializeStructArray(CellVoltage);
+            b.SerializeStructArray(CellTemperature);
+            b.Serialize(Location);
+            b.Serialize(SerialNumber);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Voltage);
@@ -142,6 +185,27 @@ namespace Iviz.Msgs.SensorMsgs
                 size += WriteBuffer.GetStringSize(SerialNumber);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Voltage);
+            WriteBuffer2.AddLength(ref c, Temperature);
+            WriteBuffer2.AddLength(ref c, Current);
+            WriteBuffer2.AddLength(ref c, Charge);
+            WriteBuffer2.AddLength(ref c, Capacity);
+            WriteBuffer2.AddLength(ref c, DesignCapacity);
+            WriteBuffer2.AddLength(ref c, Percentage);
+            WriteBuffer2.AddLength(ref c, PowerSupplyStatus);
+            WriteBuffer2.AddLength(ref c, PowerSupplyHealth);
+            WriteBuffer2.AddLength(ref c, PowerSupplyTechnology);
+            WriteBuffer2.AddLength(ref c, Present);
+            WriteBuffer2.AddLength(ref c, CellVoltage);
+            WriteBuffer2.AddLength(ref c, CellTemperature);
+            WriteBuffer2.AddLength(ref c, Location);
+            WriteBuffer2.AddLength(ref c, SerialNumber);
         }
     
         /// <summary> Full ROS name of this message. </summary>

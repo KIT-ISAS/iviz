@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Parameter : IDeserializableRos1<Parameter>, IMessageRos1
+    public sealed class Parameter : IDeserializableRos1<Parameter>, IDeserializableRos2<Parameter>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "type")] public byte Type;
         [DataMember (Name = "bool")] public bool @bool;
@@ -41,11 +41,40 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStringArray(out Strings);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Parameter(ref b);
+        /// Constructor with buffer.
+        public Parameter(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Type);
+            b.Deserialize(out @bool);
+            b.Deserialize(out Int32);
+            b.Deserialize(out Float64);
+            b.DeserializeString(out @string);
+            b.DeserializeStructArray(out Bytes);
+            b.DeserializeStructArray(out Int32s);
+            b.DeserializeStructArray(out Float64s);
+            b.DeserializeStringArray(out Strings);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Parameter(ref b);
         
         public Parameter RosDeserialize(ref ReadBuffer b) => new Parameter(ref b);
+        
+        public Parameter RosDeserialize(ref ReadBuffer2 b) => new Parameter(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Type);
+            b.Serialize(@bool);
+            b.Serialize(Int32);
+            b.Serialize(Float64);
+            b.Serialize(@string);
+            b.SerializeStructArray(Bytes);
+            b.SerializeStructArray(Int32s);
+            b.SerializeStructArray(Float64s);
+            b.SerializeArray(Strings);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Type);
             b.Serialize(@bool);
@@ -82,6 +111,20 @@ namespace Iviz.Msgs.IvizMsgs
                 size += WriteBuffer.GetArraySize(Strings);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, @bool);
+            WriteBuffer2.AddLength(ref c, Int32);
+            WriteBuffer2.AddLength(ref c, Float64);
+            WriteBuffer2.AddLength(ref c, @string);
+            WriteBuffer2.AddLength(ref c, Bytes);
+            WriteBuffer2.AddLength(ref c, Int32s);
+            WriteBuffer2.AddLength(ref c, Float64s);
+            WriteBuffer2.AddLength(ref c, Strings);
         }
     
         /// <summary> Full ROS name of this message. </summary>

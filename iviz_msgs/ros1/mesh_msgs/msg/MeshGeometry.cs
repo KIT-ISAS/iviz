@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshGeometry : IDeserializableRos1<MeshGeometry>, IMessageRos1
+    public sealed class MeshGeometry : IDeserializableRos1<MeshGeometry>, IDeserializableRos2<MeshGeometry>, IMessageRos1, IMessageRos2
     {
         // Mesh Geometry Message
         [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices;
@@ -40,11 +40,32 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshGeometry(ref b);
+        /// Constructor with buffer.
+        public MeshGeometry(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out Vertices);
+            b.DeserializeStructArray(out VertexNormals);
+            b.DeserializeArray(out Faces);
+            for (int i = 0; i < Faces.Length; i++)
+            {
+                Faces[i] = new MeshMsgs.TriangleIndices(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshGeometry(ref b);
         
         public MeshGeometry RosDeserialize(ref ReadBuffer b) => new MeshGeometry(ref b);
+        
+        public MeshGeometry RosDeserialize(ref ReadBuffer2 b) => new MeshGeometry(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(Vertices);
+            b.SerializeStructArray(VertexNormals);
+            b.SerializeArray(Faces);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Vertices);
             b.SerializeStructArray(VertexNormals);
@@ -72,6 +93,14 @@ namespace Iviz.Msgs.MeshMsgs
                 size += 12 * Faces.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Vertices);
+            WriteBuffer2.AddLength(ref c, VertexNormals);
+            WriteBuffer2.AddLength(ref c, Faces);
         }
     
         /// <summary> Full ROS name of this message. </summary>

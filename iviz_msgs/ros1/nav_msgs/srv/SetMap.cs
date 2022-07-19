@@ -73,7 +73,7 @@ namespace Iviz.Msgs.NavMsgs
             InitialPose = new GeometryMsgs.PoseWithCovarianceStamped(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetMapRequest(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetMapRequest(ref b);
         
         public SetMapRequest RosDeserialize(ref ReadBuffer b) => new SetMapRequest(ref b);
     
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.NavMsgs
             b.Deserialize(out Success);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetMapResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetMapResponse(ref b);
         
         public SetMapResponse RosDeserialize(ref ReadBuffer b) => new SetMapResponse(ref b);
     

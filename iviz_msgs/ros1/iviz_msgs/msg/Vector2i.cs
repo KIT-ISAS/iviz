@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Vector2i : IDeserializableRos1<Vector2i>, IMessageRos1
+    public sealed class Vector2i : IDeserializableRos1<Vector2i>, IDeserializableRos2<Vector2i>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "x")] public int X;
         [DataMember (Name = "y")] public int Y;
@@ -29,11 +29,26 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Y);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Vector2i(ref b);
+        /// Constructor with buffer.
+        public Vector2i(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out X);
+            b.Deserialize(out Y);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Vector2i(ref b);
         
         public Vector2i RosDeserialize(ref ReadBuffer b) => new Vector2i(ref b);
+        
+        public Vector2i RosDeserialize(ref ReadBuffer2 b) => new Vector2i(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(X);
+            b.Serialize(Y);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(X);
             b.Serialize(Y);
@@ -47,6 +62,16 @@ namespace Iviz.Msgs.IvizMsgs
         public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 8;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, X);
+            WriteBuffer2.AddLength(ref c, Y);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Vector2i";

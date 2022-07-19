@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.DiagnosticMsgs
 {
     [DataContract]
-    public sealed class DiagnosticStatus : IDeserializableRos1<DiagnosticStatus>, IMessageRos1
+    public sealed class DiagnosticStatus : IDeserializableRos1<DiagnosticStatus>, IDeserializableRos2<DiagnosticStatus>, IMessageRos1, IMessageRos2
     {
         // This message holds the status of an individual component of the robot.
         // 
@@ -48,11 +48,36 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new DiagnosticStatus(ref b);
+        /// Constructor with buffer.
+        public DiagnosticStatus(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Level);
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Message);
+            b.DeserializeString(out HardwareId);
+            b.DeserializeArray(out Values);
+            for (int i = 0; i < Values.Length; i++)
+            {
+                Values[i] = new KeyValue(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new DiagnosticStatus(ref b);
         
         public DiagnosticStatus RosDeserialize(ref ReadBuffer b) => new DiagnosticStatus(ref b);
+        
+        public DiagnosticStatus RosDeserialize(ref ReadBuffer2 b) => new DiagnosticStatus(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Level);
+            b.Serialize(Name);
+            b.Serialize(Message);
+            b.Serialize(HardwareId);
+            b.SerializeArray(Values);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Level);
             b.Serialize(Name);
@@ -84,6 +109,16 @@ namespace Iviz.Msgs.DiagnosticMsgs
                 size += WriteBuffer.GetArraySize(Values);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Level);
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Message);
+            WriteBuffer2.AddLength(ref c, HardwareId);
+            WriteBuffer2.AddLength(ref c, Values);
         }
     
         /// <summary> Full ROS name of this message. </summary>

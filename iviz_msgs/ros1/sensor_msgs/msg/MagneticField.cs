@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class MagneticField : IDeserializableRos1<MagneticField>, IMessageRos1
+    public sealed class MagneticField : IDeserializableRos1<MagneticField>, IDeserializableRos2<MagneticField>, IMessageRos1, IMessageRos2
     {
         // Measurement of the Magnetic Field vector at a specific location.
         // If the covariance of the measurement is known, it should be filled in
@@ -50,11 +50,28 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructArray(9, out MagneticFieldCovariance);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MagneticField(ref b);
+        /// Constructor with buffer.
+        public MagneticField(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out MagneticField_);
+            b.DeserializeStructArray(9, out MagneticFieldCovariance);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MagneticField(ref b);
         
         public MagneticField RosDeserialize(ref ReadBuffer b) => new MagneticField(ref b);
+        
+        public MagneticField RosDeserialize(ref ReadBuffer2 b) => new MagneticField(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(in MagneticField_);
+            b.SerializeStructArray(MagneticFieldCovariance, 9);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(in MagneticField_);
@@ -68,6 +85,14 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 96 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, MagneticField_);
+            WriteBuffer2.AddLength(ref c, MagneticFieldCovariance, 9);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/MagneticField";

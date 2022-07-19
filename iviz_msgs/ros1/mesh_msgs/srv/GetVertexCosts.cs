@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeString(out Uuid);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetVertexCostsRequest(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetVertexCostsRequest(ref b);
         
         public GetVertexCostsRequest RosDeserialize(ref ReadBuffer b) => new GetVertexCostsRequest(ref b);
     
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexCostsStamped = new MeshMsgs.MeshVertexCostsStamped(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetVertexCostsResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetVertexCostsResponse(ref b);
         
         public GetVertexCostsResponse RosDeserialize(ref ReadBuffer b) => new GetVertexCostsResponse(ref b);
     

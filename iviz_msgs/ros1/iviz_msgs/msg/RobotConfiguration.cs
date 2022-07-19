@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class RobotConfiguration : IDeserializableRos1<RobotConfiguration>, IMessageRos1
+    public sealed class RobotConfiguration : IDeserializableRos1<RobotConfiguration>, IDeserializableRos2<RobotConfiguration>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "source_parameter")] public string SourceParameter;
         [DataMember (Name = "saved_robot_name")] public string SavedRobotName;
@@ -45,11 +45,44 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Visible);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new RobotConfiguration(ref b);
+        /// Constructor with buffer.
+        public RobotConfiguration(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out SourceParameter);
+            b.DeserializeString(out SavedRobotName);
+            b.DeserializeString(out FramePrefix);
+            b.DeserializeString(out FrameSuffix);
+            b.Deserialize(out AttachedToTf);
+            b.Deserialize(out RenderAsOcclusionOnly);
+            b.Deserialize(out Tint);
+            b.Deserialize(out Metallic);
+            b.Deserialize(out Smoothness);
+            b.DeserializeString(out Id);
+            b.Deserialize(out Visible);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new RobotConfiguration(ref b);
         
         public RobotConfiguration RosDeserialize(ref ReadBuffer b) => new RobotConfiguration(ref b);
+        
+        public RobotConfiguration RosDeserialize(ref ReadBuffer2 b) => new RobotConfiguration(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(SourceParameter);
+            b.Serialize(SavedRobotName);
+            b.Serialize(FramePrefix);
+            b.Serialize(FrameSuffix);
+            b.Serialize(AttachedToTf);
+            b.Serialize(RenderAsOcclusionOnly);
+            b.Serialize(in Tint);
+            b.Serialize(Metallic);
+            b.Serialize(Smoothness);
+            b.Serialize(Id);
+            b.Serialize(Visible);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(SourceParameter);
             b.Serialize(SavedRobotName);
@@ -84,6 +117,22 @@ namespace Iviz.Msgs.IvizMsgs
                 size += WriteBuffer.GetStringSize(Id);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, SourceParameter);
+            WriteBuffer2.AddLength(ref c, SavedRobotName);
+            WriteBuffer2.AddLength(ref c, FramePrefix);
+            WriteBuffer2.AddLength(ref c, FrameSuffix);
+            WriteBuffer2.AddLength(ref c, AttachedToTf);
+            WriteBuffer2.AddLength(ref c, RenderAsOcclusionOnly);
+            WriteBuffer2.AddLength(ref c, Tint);
+            WriteBuffer2.AddLength(ref c, Metallic);
+            WriteBuffer2.AddLength(ref c, Smoothness);
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, Visible);
         }
     
         /// <summary> Full ROS name of this message. </summary>

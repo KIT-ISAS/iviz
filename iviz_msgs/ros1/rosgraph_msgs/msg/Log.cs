@@ -8,7 +8,7 @@ namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Log : IMessageRos1, IDeserializableRos1<Log>
+    public struct Log : IMessageRos1, IMessageRos2, IDeserializableRos1<Log>, IDeserializableRos2<Log>
     {
         //#
         //# Severity level constants
@@ -74,11 +74,44 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.SkipStringArray(out h.Topics);
         }
         
-        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Log(ref b);
+        /// Constructor with buffer.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Log(ref ReadBuffer2 b)
+        {
+            Deserialize(ref b, out this);
+        }
+        
+        public static void Deserialize(ref ReadBuffer2 b, out Log h)
+        {
+            StdMsgs.Header.Deserialize(ref b, out h.Header);
+            b.Deserialize(out h.Level);
+            b.DeserializeString(out h.Name);
+            b.DeserializeString(out h.Msg);
+            b.SkipString(out h.File);
+            b.SkipString(out h.Function);
+            b.Deserialize(out h.Line);
+            b.SkipStringArray(out h.Topics);
+        }
+        
+        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Log(ref b);
         
         public readonly Log RosDeserialize(ref ReadBuffer b) => new Log(ref b);
+        
+        public readonly Log RosDeserialize(ref ReadBuffer2 b) => new Log(ref b);
     
         public readonly void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Level);
+            b.Serialize(Name ?? "");
+            b.Serialize(Msg ?? "");
+            b.Serialize(File ?? "");
+            b.Serialize(Function ?? "");
+            b.Serialize(Line);
+            b.SerializeArray(Topics ?? System.Array.Empty<string>());
+        }
+        
+        public readonly void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Level);
@@ -113,6 +146,19 @@ namespace Iviz.Msgs.RosgraphMsgs
                 size += WriteBuffer.GetArraySize(Topics);
                 return size;
             }
+        }
+        public readonly int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public readonly void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Level);
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Msg);
+            WriteBuffer2.AddLength(ref c, File);
+            WriteBuffer2.AddLength(ref c, Function);
+            WriteBuffer2.AddLength(ref c, Line);
+            WriteBuffer2.AddLength(ref c, Topics);
         }
     
         /// <summary> Full ROS name of this message. </summary>

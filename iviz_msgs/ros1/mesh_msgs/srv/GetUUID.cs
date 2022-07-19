@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MeshMsgs
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public GetUUIDRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
@@ -105,7 +105,7 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeString(out Uuid);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetUUIDResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetUUIDResponse(ref b);
         
         public GetUUIDResponse RosDeserialize(ref ReadBuffer b) => new GetUUIDResponse(ref b);
     

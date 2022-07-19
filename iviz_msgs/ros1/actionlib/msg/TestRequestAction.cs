@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestRequestAction : IDeserializableRos1<TestRequestAction>, IMessageRos1,
+    public sealed class TestRequestAction : IDeserializableRos1<TestRequestAction>, IDeserializableRos2<TestRequestAction>, IMessageRos1, IMessageRos2,
 		IAction<TestRequestActionGoal, TestRequestActionFeedback, TestRequestActionResult>
     {
         [DataMember (Name = "action_goal")] public TestRequestActionGoal ActionGoal { get; set; }
@@ -36,11 +36,28 @@ namespace Iviz.Msgs.Actionlib
             ActionFeedback = new TestRequestActionFeedback(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestRequestAction(ref b);
+        /// Constructor with buffer.
+        public TestRequestAction(ref ReadBuffer2 b)
+        {
+            ActionGoal = new TestRequestActionGoal(ref b);
+            ActionResult = new TestRequestActionResult(ref b);
+            ActionFeedback = new TestRequestActionFeedback(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TestRequestAction(ref b);
         
         public TestRequestAction RosDeserialize(ref ReadBuffer b) => new TestRequestAction(ref b);
+        
+        public TestRequestAction RosDeserialize(ref ReadBuffer2 b) => new TestRequestAction(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            ActionGoal.RosSerialize(ref b);
+            ActionResult.RosSerialize(ref b);
+            ActionFeedback.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             ActionGoal.RosSerialize(ref b);
             ActionResult.RosSerialize(ref b);
@@ -66,6 +83,14 @@ namespace Iviz.Msgs.Actionlib
                 size += ActionFeedback.RosMessageLength;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            ActionGoal.AddRos2MessageLength(ref c);
+            ActionResult.AddRos2MessageLength(ref c);
+            ActionFeedback.AddRos2MessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

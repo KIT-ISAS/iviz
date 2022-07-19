@@ -8,7 +8,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct ColorRGBA : IMessageRos1, IDeserializableRos1<ColorRGBA>
+    public struct ColorRGBA : IMessageRos1, IMessageRos2, IDeserializableRos1<ColorRGBA>, IDeserializableRos2<ColorRGBA>
     {
         [DataMember (Name = "r")] public float R;
         [DataMember (Name = "g")] public float G;
@@ -31,11 +31,25 @@ namespace Iviz.Msgs.StdMsgs
             b.Deserialize(out this);
         }
         
-        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ColorRGBA(ref b);
+        /// Constructor with buffer.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ColorRGBA(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out this);
+        }
+        
+        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ColorRGBA(ref b);
         
         public readonly ColorRGBA RosDeserialize(ref ReadBuffer b) => new ColorRGBA(ref b);
+        
+        public readonly ColorRGBA RosDeserialize(ref ReadBuffer2 b) => new ColorRGBA(ref b);
     
         public readonly void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(in this);
+        }
+        
+        public readonly void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(in this);
         }
@@ -48,6 +62,12 @@ namespace Iviz.Msgs.StdMsgs
         public const int RosFixedMessageLength = 16;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 16;
+        
+        public readonly int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public readonly void AddRos2MessageLength(ref int c) => WriteBuffer2.AddLength(ref c, this);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/ColorRGBA";

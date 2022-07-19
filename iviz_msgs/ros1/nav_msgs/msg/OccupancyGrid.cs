@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class OccupancyGrid : IDeserializableRos1<OccupancyGrid>, IMessageRos1
+    public sealed class OccupancyGrid : IDeserializableRos1<OccupancyGrid>, IDeserializableRos2<OccupancyGrid>, IMessageRos1, IMessageRos2
     {
         // This represents a 2-D grid map, in which each cell represents the probability of
         // occupancy.
@@ -39,11 +39,28 @@ namespace Iviz.Msgs.NavMsgs
             b.DeserializeStructArray(out Data);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new OccupancyGrid(ref b);
+        /// Constructor with buffer.
+        public OccupancyGrid(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            Info = new MapMetaData(ref b);
+            b.DeserializeStructArray(out Data);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new OccupancyGrid(ref b);
         
         public OccupancyGrid RosDeserialize(ref ReadBuffer b) => new OccupancyGrid(ref b);
+        
+        public OccupancyGrid RosDeserialize(ref ReadBuffer2 b) => new OccupancyGrid(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Info.RosSerialize(ref b);
+            b.SerializeStructArray(Data);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Info.RosSerialize(ref b);
@@ -58,6 +75,14 @@ namespace Iviz.Msgs.NavMsgs
         }
     
         public int RosMessageLength => 80 + Header.RosMessageLength + Data.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Info.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Data);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "nav_msgs/OccupancyGrid";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Vector3Stamped : IDeserializableRos1<Vector3Stamped>, IMessageRos1
+    public sealed class Vector3Stamped : IDeserializableRos1<Vector3Stamped>, IDeserializableRos2<Vector3Stamped>, IMessageRos1, IMessageRos2
     {
         // This represents a Vector3 with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -30,11 +30,26 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out Vector);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Vector3Stamped(ref b);
+        /// Constructor with buffer.
+        public Vector3Stamped(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Vector);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Vector3Stamped(ref b);
         
         public Vector3Stamped RosDeserialize(ref ReadBuffer b) => new Vector3Stamped(ref b);
+        
+        public Vector3Stamped RosDeserialize(ref ReadBuffer2 b) => new Vector3Stamped(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(in Vector);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(in Vector);
@@ -45,6 +60,13 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         public int RosMessageLength => 24 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Vector);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/Vector3Stamped";

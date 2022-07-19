@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Pose2D : IDeserializableRos1<Pose2D>, IMessageRos1
+    public sealed class Pose2D : IDeserializableRos1<Pose2D>, IDeserializableRos2<Pose2D>, IMessageRos1, IMessageRos2
     {
         // Deprecated
         // Please use the full 3D pose.
@@ -37,11 +37,28 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out Theta);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Pose2D(ref b);
+        /// Constructor with buffer.
+        public Pose2D(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out X);
+            b.Deserialize(out Y);
+            b.Deserialize(out Theta);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Pose2D(ref b);
         
         public Pose2D RosDeserialize(ref ReadBuffer b) => new Pose2D(ref b);
+        
+        public Pose2D RosDeserialize(ref ReadBuffer2 b) => new Pose2D(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(X);
+            b.Serialize(Y);
+            b.Serialize(Theta);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(X);
             b.Serialize(Y);
@@ -56,6 +73,17 @@ namespace Iviz.Msgs.GeometryMsgs
         public const int RosFixedMessageLength = 24;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 24;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, X);
+            WriteBuffer2.AddLength(ref c, Y);
+            WriteBuffer2.AddLength(ref c, Theta);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/Pose2D";

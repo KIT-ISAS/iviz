@@ -59,7 +59,7 @@ namespace Iviz.Msgs.StdSrvs
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public TriggerRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.StdSrvs
             b.DeserializeString(out Message);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TriggerResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TriggerResponse(ref b);
         
         public TriggerResponse RosDeserialize(ref ReadBuffer b) => new TriggerResponse(ref b);
     

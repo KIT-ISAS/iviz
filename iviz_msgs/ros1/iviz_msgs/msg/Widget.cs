@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Widget : IDeserializableRos1<Widget>, IMessageRos1
+    public sealed class Widget : IDeserializableRos1<Widget>, IDeserializableRos2<Widget>, IMessageRos1, IMessageRos2
     {
         public const byte ACTION_ADD = 0;
         public const byte ACTION_REMOVE = 1;
@@ -63,11 +63,50 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Widget(ref b);
+        /// Constructor with buffer.
+        public Widget(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Action);
+            b.DeserializeString(out Id);
+            b.Deserialize(out Type);
+            b.Deserialize(out Pose);
+            b.Deserialize(out Color);
+            b.Deserialize(out SecondaryColor);
+            b.Deserialize(out Scale);
+            b.Deserialize(out SecondaryScale);
+            b.DeserializeString(out Caption);
+            Boundary = new BoundingBox(ref b);
+            b.DeserializeArray(out SecondaryBoundaries);
+            for (int i = 0; i < SecondaryBoundaries.Length; i++)
+            {
+                SecondaryBoundaries[i] = new BoundingBoxStamped(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Widget(ref b);
         
         public Widget RosDeserialize(ref ReadBuffer b) => new Widget(ref b);
+        
+        public Widget RosDeserialize(ref ReadBuffer2 b) => new Widget(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Action);
+            b.Serialize(Id);
+            b.Serialize(Type);
+            b.Serialize(in Pose);
+            b.Serialize(in Color);
+            b.Serialize(in SecondaryColor);
+            b.Serialize(Scale);
+            b.Serialize(SecondaryScale);
+            b.Serialize(Caption);
+            Boundary.RosSerialize(ref b);
+            b.SerializeArray(SecondaryBoundaries);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Action);
@@ -107,6 +146,23 @@ namespace Iviz.Msgs.IvizMsgs
                 size += WriteBuffer.GetArraySize(SecondaryBoundaries);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Action);
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, Pose);
+            WriteBuffer2.AddLength(ref c, Color);
+            WriteBuffer2.AddLength(ref c, SecondaryColor);
+            WriteBuffer2.AddLength(ref c, Scale);
+            WriteBuffer2.AddLength(ref c, SecondaryScale);
+            WriteBuffer2.AddLength(ref c, Caption);
+            Boundary.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, SecondaryBoundaries);
         }
     
         /// <summary> Full ROS name of this message. </summary>

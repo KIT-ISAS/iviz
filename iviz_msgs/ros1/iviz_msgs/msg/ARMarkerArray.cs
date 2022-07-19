@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ARMarkerArray : IDeserializableRos1<ARMarkerArray>, IMessageRos1
+    public sealed class ARMarkerArray : IDeserializableRos1<ARMarkerArray>, IDeserializableRos2<ARMarkerArray>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "markers")] public ARMarker[] Markers;
     
@@ -31,11 +31,28 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ARMarkerArray(ref b);
+        /// Constructor with buffer.
+        public ARMarkerArray(ref ReadBuffer2 b)
+        {
+            b.DeserializeArray(out Markers);
+            for (int i = 0; i < Markers.Length; i++)
+            {
+                Markers[i] = new ARMarker(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ARMarkerArray(ref b);
         
         public ARMarkerArray RosDeserialize(ref ReadBuffer b) => new ARMarkerArray(ref b);
+        
+        public ARMarkerArray RosDeserialize(ref ReadBuffer2 b) => new ARMarkerArray(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeArray(Markers);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeArray(Markers);
         }
@@ -51,6 +68,12 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Markers);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Markers);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/ARMarkerArray";

@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3f : IMessageRos1, IDeserializableRos1<Vector3f>
+    public struct Vector3f : IMessageRos1, IMessageRos2, IDeserializableRos1<Vector3f>, IDeserializableRos2<Vector3f>
     {
         [DataMember (Name = "x")] public float X;
         [DataMember (Name = "y")] public float Y;
@@ -29,11 +29,25 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out this);
         }
         
-        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Vector3f(ref b);
+        /// Constructor with buffer.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector3f(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out this);
+        }
+        
+        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Vector3f(ref b);
         
         public readonly Vector3f RosDeserialize(ref ReadBuffer b) => new Vector3f(ref b);
+        
+        public readonly Vector3f RosDeserialize(ref ReadBuffer2 b) => new Vector3f(ref b);
     
         public readonly void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(in this);
+        }
+        
+        public readonly void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(in this);
         }
@@ -46,6 +60,12 @@ namespace Iviz.Msgs.IvizMsgs
         public const int RosFixedMessageLength = 12;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 12;
+        
+        public readonly int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public readonly void AddRos2MessageLength(ref int c) => WriteBuffer2.AddLength(ref c, this);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Vector3f";

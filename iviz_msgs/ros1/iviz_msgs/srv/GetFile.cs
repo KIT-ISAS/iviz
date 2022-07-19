@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Uri);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetFileRequest(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetFileRequest(ref b);
         
         public GetFileRequest RosDeserialize(ref ReadBuffer b) => new GetFileRequest(ref b);
     
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Message);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetFileResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetFileResponse(ref b);
         
         public GetFileResponse RosDeserialize(ref ReadBuffer b) => new GetFileResponse(ref b);
     

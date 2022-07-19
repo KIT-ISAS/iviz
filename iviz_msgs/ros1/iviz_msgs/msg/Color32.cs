@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Color32 : IMessageRos1, IDeserializableRos1<Color32>
+    public struct Color32 : IMessageRos1, IMessageRos2, IDeserializableRos1<Color32>, IDeserializableRos2<Color32>
     {
         [DataMember (Name = "r")] public byte R;
         [DataMember (Name = "g")] public byte G;
@@ -31,11 +31,25 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out this);
         }
         
-        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Color32(ref b);
+        /// Constructor with buffer.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Color32(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out this);
+        }
+        
+        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Color32(ref b);
         
         public readonly Color32 RosDeserialize(ref ReadBuffer b) => new Color32(ref b);
+        
+        public readonly Color32 RosDeserialize(ref ReadBuffer2 b) => new Color32(ref b);
     
         public readonly void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(in this);
+        }
+        
+        public readonly void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(in this);
         }
@@ -48,6 +62,12 @@ namespace Iviz.Msgs.IvizMsgs
         public const int RosFixedMessageLength = 4;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 4;
+        
+        public readonly int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public readonly void AddRos2MessageLength(ref int c) => WriteBuffer2.AddLength(ref c, this);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Color32";

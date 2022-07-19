@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class NavSatFix : IDeserializableRos1<NavSatFix>, IMessageRos1
+    public sealed class NavSatFix : IDeserializableRos1<NavSatFix>, IDeserializableRos2<NavSatFix>, IMessageRos1, IMessageRos2
     {
         // Navigation Satellite fix for any Global Navigation Satellite System
         //
@@ -63,11 +63,36 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out PositionCovarianceType);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new NavSatFix(ref b);
+        /// Constructor with buffer.
+        public NavSatFix(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            Status = new NavSatStatus(ref b);
+            b.Deserialize(out Latitude);
+            b.Deserialize(out Longitude);
+            b.Deserialize(out Altitude);
+            b.DeserializeStructArray(9, out PositionCovariance);
+            b.Deserialize(out PositionCovarianceType);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new NavSatFix(ref b);
         
         public NavSatFix RosDeserialize(ref ReadBuffer b) => new NavSatFix(ref b);
+        
+        public NavSatFix RosDeserialize(ref ReadBuffer2 b) => new NavSatFix(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Status.RosSerialize(ref b);
+            b.Serialize(Latitude);
+            b.Serialize(Longitude);
+            b.Serialize(Altitude);
+            b.SerializeStructArray(PositionCovariance, 9);
+            b.Serialize(PositionCovarianceType);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Status.RosSerialize(ref b);
@@ -87,6 +112,18 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 100 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Status.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Latitude);
+            WriteBuffer2.AddLength(ref c, Longitude);
+            WriteBuffer2.AddLength(ref c, Altitude);
+            WriteBuffer2.AddLength(ref c, PositionCovariance, 9);
+            WriteBuffer2.AddLength(ref c, PositionCovarianceType);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/NavSatFix";

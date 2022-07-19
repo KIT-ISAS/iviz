@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class Marker : IDeserializableRos1<Marker>, IMessageRos1
+    public sealed class Marker : IDeserializableRos1<Marker>, IDeserializableRos2<Marker>, IMessageRos1, IMessageRos2
     {
         // See http://www.ros.org/wiki/rviz/DisplayTypes/Marker and http://www.ros.org/wiki/rviz/Tutorials/Markers%3A%20Basic%20Shapes for more information on using this message with rviz
         public const byte ARROW = 0;
@@ -86,11 +86,52 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out MeshUseEmbeddedMaterials);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Marker(ref b);
+        /// Constructor with buffer.
+        public Marker(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeString(out Ns);
+            b.Deserialize(out Id);
+            b.Deserialize(out Type);
+            b.Deserialize(out Action);
+            b.Deserialize(out Pose);
+            b.Deserialize(out Scale);
+            b.Deserialize(out Color);
+            b.Deserialize(out Lifetime);
+            b.Deserialize(out FrameLocked);
+            b.DeserializeStructArray(out Points);
+            b.DeserializeStructArray(out Colors);
+            b.DeserializeString(out Text);
+            b.DeserializeString(out MeshResource);
+            b.Deserialize(out MeshUseEmbeddedMaterials);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Marker(ref b);
         
         public Marker RosDeserialize(ref ReadBuffer b) => new Marker(ref b);
+        
+        public Marker RosDeserialize(ref ReadBuffer2 b) => new Marker(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Ns);
+            b.Serialize(Id);
+            b.Serialize(Type);
+            b.Serialize(Action);
+            b.Serialize(in Pose);
+            b.Serialize(in Scale);
+            b.Serialize(in Color);
+            b.Serialize(Lifetime);
+            b.Serialize(FrameLocked);
+            b.SerializeStructArray(Points);
+            b.SerializeStructArray(Colors);
+            b.Serialize(Text);
+            b.Serialize(MeshResource);
+            b.Serialize(MeshUseEmbeddedMaterials);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Ns);
@@ -130,6 +171,26 @@ namespace Iviz.Msgs.VisualizationMsgs
                 size += WriteBuffer.GetStringSize(MeshResource);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Ns);
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, Action);
+            WriteBuffer2.AddLength(ref c, Pose);
+            WriteBuffer2.AddLength(ref c, Scale);
+            WriteBuffer2.AddLength(ref c, Color);
+            WriteBuffer2.AddLength(ref c, Lifetime);
+            WriteBuffer2.AddLength(ref c, FrameLocked);
+            WriteBuffer2.AddLength(ref c, Points);
+            WriteBuffer2.AddLength(ref c, Colors);
+            WriteBuffer2.AddLength(ref c, Text);
+            WriteBuffer2.AddLength(ref c, MeshResource);
+            WriteBuffer2.AddLength(ref c, MeshUseEmbeddedMaterials);
         }
     
         /// <summary> Full ROS name of this message. </summary>

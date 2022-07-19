@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestActionFeedback : IDeserializableRos1<TestActionFeedback>, IMessageRos1, IActionFeedback<TestFeedback>
+    public sealed class TestActionFeedback : IDeserializableRos1<TestActionFeedback>, IDeserializableRos2<TestActionFeedback>, IMessageRos1, IMessageRos2, IActionFeedback<TestFeedback>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -34,11 +34,28 @@ namespace Iviz.Msgs.Actionlib
             Feedback = new TestFeedback(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestActionFeedback(ref b);
+        /// Constructor with buffer.
+        public TestActionFeedback(ref ReadBuffer2 b)
+        {
+            Header = new StdMsgs.Header(ref b);
+            Status = new ActionlibMsgs.GoalStatus(ref b);
+            Feedback = new TestFeedback(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TestActionFeedback(ref b);
         
         public TestActionFeedback RosDeserialize(ref ReadBuffer b) => new TestActionFeedback(ref b);
+        
+        public TestActionFeedback RosDeserialize(ref ReadBuffer2 b) => new TestActionFeedback(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Status.RosSerialize(ref b);
+            Feedback.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Status.RosSerialize(ref b);
@@ -54,6 +71,14 @@ namespace Iviz.Msgs.Actionlib
         }
     
         public int RosMessageLength => 4 + Header.RosMessageLength + Status.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Status.AddRos2MessageLength(ref c);
+            Feedback.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib/TestActionFeedback";

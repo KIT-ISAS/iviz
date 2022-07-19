@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Include : IDeserializableRos1<Include>, IMessageRos1
+    public sealed class Include : IDeserializableRos1<Include>, IDeserializableRos2<Include>, IMessageRos1, IMessageRos2
     {
         // Reference to an external asset
         /// <summary> Uri of the asset </summary>
@@ -43,11 +43,30 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Package);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Include(ref b);
+        /// Constructor with buffer.
+        public Include(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Uri);
+            Pose = new Matrix4(ref b);
+            Material = new Material(ref b);
+            b.DeserializeString(out Package);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Include(ref b);
         
         public Include RosDeserialize(ref ReadBuffer b) => new Include(ref b);
+        
+        public Include RosDeserialize(ref ReadBuffer2 b) => new Include(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Uri);
+            Pose.RosSerialize(ref b);
+            Material.RosSerialize(ref b);
+            b.Serialize(Package);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Uri);
             Pose.RosSerialize(ref b);
@@ -74,6 +93,15 @@ namespace Iviz.Msgs.IvizMsgs
                 size += WriteBuffer.GetStringSize(Package);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Uri);
+            Pose.AddRos2MessageLength(ref c);
+            Material.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Package);
         }
     
         /// <summary> Full ROS name of this message. </summary>

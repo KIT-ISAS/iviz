@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class AccelWithCovarianceStamped : IDeserializableRos1<AccelWithCovarianceStamped>, IMessageRos1
+    public sealed class AccelWithCovarianceStamped : IDeserializableRos1<AccelWithCovarianceStamped>, IDeserializableRos2<AccelWithCovarianceStamped>, IMessageRos1, IMessageRos2
     {
         // This represents an estimated accel with reference coordinate frame and timestamp.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -31,11 +31,26 @@ namespace Iviz.Msgs.GeometryMsgs
             Accel = new AccelWithCovariance(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AccelWithCovarianceStamped(ref b);
+        /// Constructor with buffer.
+        public AccelWithCovarianceStamped(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            Accel = new AccelWithCovariance(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AccelWithCovarianceStamped(ref b);
         
         public AccelWithCovarianceStamped RosDeserialize(ref ReadBuffer b) => new AccelWithCovarianceStamped(ref b);
+        
+        public AccelWithCovarianceStamped RosDeserialize(ref ReadBuffer2 b) => new AccelWithCovarianceStamped(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Accel.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Accel.RosSerialize(ref b);
@@ -48,6 +63,13 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         public int RosMessageLength => 336 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Accel.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/AccelWithCovarianceStamped";

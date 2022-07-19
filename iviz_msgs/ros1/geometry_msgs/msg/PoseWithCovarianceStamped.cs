@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PoseWithCovarianceStamped : IDeserializableRos1<PoseWithCovarianceStamped>, IMessageRos1
+    public sealed class PoseWithCovarianceStamped : IDeserializableRos1<PoseWithCovarianceStamped>, IDeserializableRos2<PoseWithCovarianceStamped>, IMessageRos1, IMessageRos2
     {
         // This expresses an estimated pose with a reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -31,11 +31,26 @@ namespace Iviz.Msgs.GeometryMsgs
             Pose = new PoseWithCovariance(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PoseWithCovarianceStamped(ref b);
+        /// Constructor with buffer.
+        public PoseWithCovarianceStamped(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            Pose = new PoseWithCovariance(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PoseWithCovarianceStamped(ref b);
         
         public PoseWithCovarianceStamped RosDeserialize(ref ReadBuffer b) => new PoseWithCovarianceStamped(ref b);
+        
+        public PoseWithCovarianceStamped RosDeserialize(ref ReadBuffer2 b) => new PoseWithCovarianceStamped(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Pose.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Pose.RosSerialize(ref b);
@@ -48,6 +63,13 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         public int RosMessageLength => 344 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Pose.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/PoseWithCovarianceStamped";

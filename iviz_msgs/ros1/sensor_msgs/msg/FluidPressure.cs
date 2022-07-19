@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class FluidPressure : IDeserializableRos1<FluidPressure>, IMessageRos1
+    public sealed class FluidPressure : IDeserializableRos1<FluidPressure>, IDeserializableRos2<FluidPressure>, IMessageRos1, IMessageRos2
     {
         // Single pressure reading.  This message is appropriate for measuring the
         // pressure inside of a fluid (air, water, etc).  This also includes
@@ -40,11 +40,28 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Variance);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FluidPressure(ref b);
+        /// Constructor with buffer.
+        public FluidPressure(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out FluidPressure_);
+            b.Deserialize(out Variance);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new FluidPressure(ref b);
         
         public FluidPressure RosDeserialize(ref ReadBuffer b) => new FluidPressure(ref b);
+        
+        public FluidPressure RosDeserialize(ref ReadBuffer2 b) => new FluidPressure(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(FluidPressure_);
+            b.Serialize(Variance);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(FluidPressure_);
@@ -56,6 +73,14 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 16 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, FluidPressure_);
+            WriteBuffer2.AddLength(ref c, Variance);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/FluidPressure";

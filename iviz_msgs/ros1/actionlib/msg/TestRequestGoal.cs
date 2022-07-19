@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestRequestGoal : IDeserializableRos1<TestRequestGoal>, IMessageRos1, IGoal<TestRequestActionGoal>
+    public sealed class TestRequestGoal : IDeserializableRos1<TestRequestGoal>, IDeserializableRos2<TestRequestGoal>, IMessageRos1, IMessageRos2, IGoal<TestRequestActionGoal>
     {
         public const int TERMINATE_SUCCESS = 0;
         public const int TERMINATE_ABORTED = 1;
@@ -46,11 +46,38 @@ namespace Iviz.Msgs.Actionlib
             b.Deserialize(out PauseStatus);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestRequestGoal(ref b);
+        /// Constructor with buffer.
+        public TestRequestGoal(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out TerminateStatus);
+            b.Deserialize(out IgnoreCancel);
+            b.DeserializeString(out ResultText);
+            b.Deserialize(out TheResult);
+            b.Deserialize(out IsSimpleClient);
+            b.Deserialize(out DelayAccept);
+            b.Deserialize(out DelayTerminate);
+            b.Deserialize(out PauseStatus);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TestRequestGoal(ref b);
         
         public TestRequestGoal RosDeserialize(ref ReadBuffer b) => new TestRequestGoal(ref b);
+        
+        public TestRequestGoal RosDeserialize(ref ReadBuffer2 b) => new TestRequestGoal(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(TerminateStatus);
+            b.Serialize(IgnoreCancel);
+            b.Serialize(ResultText);
+            b.Serialize(TheResult);
+            b.Serialize(IsSimpleClient);
+            b.Serialize(DelayAccept);
+            b.Serialize(DelayTerminate);
+            b.Serialize(PauseStatus);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(TerminateStatus);
             b.Serialize(IgnoreCancel);
@@ -68,6 +95,19 @@ namespace Iviz.Msgs.Actionlib
         }
     
         public int RosMessageLength => 38 + WriteBuffer.GetStringSize(ResultText);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, TerminateStatus);
+            WriteBuffer2.AddLength(ref c, IgnoreCancel);
+            WriteBuffer2.AddLength(ref c, ResultText);
+            WriteBuffer2.AddLength(ref c, TheResult);
+            WriteBuffer2.AddLength(ref c, IsSimpleClient);
+            WriteBuffer2.AddLength(ref c, DelayAccept);
+            WriteBuffer2.AddLength(ref c, DelayTerminate);
+            WriteBuffer2.AddLength(ref c, PauseStatus);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib/TestRequestGoal";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GridMapMsgs
 {
     [DataContract]
-    public sealed class GridMapInfo : IDeserializableRos1<GridMapInfo>, IMessageRos1
+    public sealed class GridMapInfo : IDeserializableRos1<GridMapInfo>, IDeserializableRos2<GridMapInfo>, IMessageRos1, IMessageRos2
     {
         // Header (time and frame)
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -33,11 +33,32 @@ namespace Iviz.Msgs.GridMapMsgs
             b.Deserialize(out Pose);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GridMapInfo(ref b);
+        /// Constructor with buffer.
+        public GridMapInfo(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Resolution);
+            b.Deserialize(out LengthX);
+            b.Deserialize(out LengthY);
+            b.Deserialize(out Pose);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GridMapInfo(ref b);
         
         public GridMapInfo RosDeserialize(ref ReadBuffer b) => new GridMapInfo(ref b);
+        
+        public GridMapInfo RosDeserialize(ref ReadBuffer2 b) => new GridMapInfo(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Resolution);
+            b.Serialize(LengthX);
+            b.Serialize(LengthY);
+            b.Serialize(in Pose);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Resolution);
@@ -51,6 +72,16 @@ namespace Iviz.Msgs.GridMapMsgs
         }
     
         public int RosMessageLength => 80 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Resolution);
+            WriteBuffer2.AddLength(ref c, LengthX);
+            WriteBuffer2.AddLength(ref c, LengthY);
+            WriteBuffer2.AddLength(ref c, Pose);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "grid_map_msgs/GridMapInfo";

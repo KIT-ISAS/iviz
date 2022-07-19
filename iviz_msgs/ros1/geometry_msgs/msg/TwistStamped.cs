@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class TwistStamped : IDeserializableRos1<TwistStamped>, IMessageRos1
+    public sealed class TwistStamped : IDeserializableRos1<TwistStamped>, IDeserializableRos2<TwistStamped>, IMessageRos1, IMessageRos2
     {
         // A twist with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -31,11 +31,26 @@ namespace Iviz.Msgs.GeometryMsgs
             Twist = new Twist(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TwistStamped(ref b);
+        /// Constructor with buffer.
+        public TwistStamped(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            Twist = new Twist(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TwistStamped(ref b);
         
         public TwistStamped RosDeserialize(ref ReadBuffer b) => new TwistStamped(ref b);
+        
+        public TwistStamped RosDeserialize(ref ReadBuffer2 b) => new TwistStamped(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Twist.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Twist.RosSerialize(ref b);
@@ -48,6 +63,13 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         public int RosMessageLength => 48 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Twist.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/TwistStamped";

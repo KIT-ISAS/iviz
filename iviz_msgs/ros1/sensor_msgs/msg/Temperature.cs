@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Temperature : IDeserializableRos1<Temperature>, IMessageRos1
+    public sealed class Temperature : IDeserializableRos1<Temperature>, IDeserializableRos2<Temperature>, IMessageRos1, IMessageRos2
     {
         // Single temperature reading.
         /// <summary> Timestamp is the time the temperature was measured </summary>
@@ -37,11 +37,28 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Variance);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Temperature(ref b);
+        /// Constructor with buffer.
+        public Temperature(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Temperature_);
+            b.Deserialize(out Variance);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Temperature(ref b);
         
         public Temperature RosDeserialize(ref ReadBuffer b) => new Temperature(ref b);
+        
+        public Temperature RosDeserialize(ref ReadBuffer2 b) => new Temperature(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Temperature_);
+            b.Serialize(Variance);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Temperature_);
@@ -53,6 +70,14 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 16 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Temperature_);
+            WriteBuffer2.AddLength(ref c, Variance);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/Temperature";

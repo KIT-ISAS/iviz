@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class FibonacciActionGoal : IDeserializableRos1<FibonacciActionGoal>, IMessageRos1, IActionGoal<FibonacciGoal>
+    public sealed class FibonacciActionGoal : IDeserializableRos1<FibonacciActionGoal>, IDeserializableRos2<FibonacciActionGoal>, IMessageRos1, IMessageRos2, IActionGoal<FibonacciGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
@@ -34,11 +34,28 @@ namespace Iviz.Msgs.ActionlibTutorials
             Goal = new FibonacciGoal(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FibonacciActionGoal(ref b);
+        /// Constructor with buffer.
+        public FibonacciActionGoal(ref ReadBuffer2 b)
+        {
+            Header = new StdMsgs.Header(ref b);
+            GoalId = new ActionlibMsgs.GoalID(ref b);
+            Goal = new FibonacciGoal(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new FibonacciActionGoal(ref b);
         
         public FibonacciActionGoal RosDeserialize(ref ReadBuffer b) => new FibonacciActionGoal(ref b);
+        
+        public FibonacciActionGoal RosDeserialize(ref ReadBuffer2 b) => new FibonacciActionGoal(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            GoalId.RosSerialize(ref b);
+            Goal.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             GoalId.RosSerialize(ref b);
@@ -54,6 +71,14 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
     
         public int RosMessageLength => 4 + Header.RosMessageLength + GoalId.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            GoalId.AddRos2MessageLength(ref c);
+            Goal.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_tutorials/FibonacciActionGoal";

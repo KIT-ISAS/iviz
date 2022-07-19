@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct TransformStamped : IMessageRos1, IDeserializableRos1<TransformStamped>
+    public struct TransformStamped : IMessageRos1, IMessageRos2, IDeserializableRos1<TransformStamped>, IDeserializableRos2<TransformStamped>
     {
         // This expresses a transform from coordinate frame header.frame_id
         // to the coordinate frame child_frame_id
@@ -43,11 +43,34 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out h.Transform);
         }
         
-        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TransformStamped(ref b);
+        /// Constructor with buffer.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TransformStamped(ref ReadBuffer2 b)
+        {
+            Deserialize(ref b, out this);
+        }
+        
+        public static void Deserialize(ref ReadBuffer2 b, out TransformStamped h)
+        {
+            StdMsgs.Header.Deserialize(ref b, out h.Header);
+            b.DeserializeString(out h.ChildFrameId);
+            b.Deserialize(out h.Transform);
+        }
+        
+        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TransformStamped(ref b);
         
         public readonly TransformStamped RosDeserialize(ref ReadBuffer b) => new TransformStamped(ref b);
+        
+        public readonly TransformStamped RosDeserialize(ref ReadBuffer2 b) => new TransformStamped(ref b);
     
         public readonly void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(ChildFrameId ?? "");
+            b.Serialize(in Transform);
+        }
+        
+        public readonly void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(ChildFrameId ?? "");
@@ -59,6 +82,14 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         public readonly int RosMessageLength => 60 + Header.RosMessageLength + WriteBuffer.GetStringSize(ChildFrameId);
+        public readonly int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public readonly void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, ChildFrameId);
+            WriteBuffer2.AddLength(ref c, Transform);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/TransformStamped";

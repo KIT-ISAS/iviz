@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class AveragingActionFeedback : IDeserializableRos1<AveragingActionFeedback>, IMessageRos1, IActionFeedback<AveragingFeedback>
+    public sealed class AveragingActionFeedback : IDeserializableRos1<AveragingActionFeedback>, IDeserializableRos2<AveragingActionFeedback>, IMessageRos1, IMessageRos2, IActionFeedback<AveragingFeedback>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -34,11 +34,28 @@ namespace Iviz.Msgs.ActionlibTutorials
             Feedback = AveragingFeedback.Singleton;
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AveragingActionFeedback(ref b);
+        /// Constructor with buffer.
+        public AveragingActionFeedback(ref ReadBuffer2 b)
+        {
+            Header = new StdMsgs.Header(ref b);
+            Status = new ActionlibMsgs.GoalStatus(ref b);
+            Feedback = AveragingFeedback.Singleton;
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AveragingActionFeedback(ref b);
         
         public AveragingActionFeedback RosDeserialize(ref ReadBuffer b) => new AveragingActionFeedback(ref b);
+        
+        public AveragingActionFeedback RosDeserialize(ref ReadBuffer2 b) => new AveragingActionFeedback(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Status.RosSerialize(ref b);
+            Feedback.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Status.RosSerialize(ref b);
@@ -54,6 +71,14 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
     
         public int RosMessageLength => 0 + Header.RosMessageLength + Status.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Status.AddRos2MessageLength(ref c);
+            Feedback.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_tutorials/AveragingActionFeedback";

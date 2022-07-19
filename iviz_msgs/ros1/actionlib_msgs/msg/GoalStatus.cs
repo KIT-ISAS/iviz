@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibMsgs
 {
     [DataContract]
-    public sealed class GoalStatus : IDeserializableRos1<GoalStatus>, IMessageRos1
+    public sealed class GoalStatus : IDeserializableRos1<GoalStatus>, IDeserializableRos2<GoalStatus>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "goal_id")] public GoalID GoalId;
         [DataMember (Name = "status")] public byte Status;
@@ -62,11 +62,28 @@ namespace Iviz.Msgs.ActionlibMsgs
             b.DeserializeString(out Text);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GoalStatus(ref b);
+        /// Constructor with buffer.
+        public GoalStatus(ref ReadBuffer2 b)
+        {
+            GoalId = new GoalID(ref b);
+            b.Deserialize(out Status);
+            b.DeserializeString(out Text);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GoalStatus(ref b);
         
         public GoalStatus RosDeserialize(ref ReadBuffer b) => new GoalStatus(ref b);
+        
+        public GoalStatus RosDeserialize(ref ReadBuffer2 b) => new GoalStatus(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            GoalId.RosSerialize(ref b);
+            b.Serialize(Status);
+            b.Serialize(Text);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             GoalId.RosSerialize(ref b);
             b.Serialize(Status);
@@ -81,6 +98,14 @@ namespace Iviz.Msgs.ActionlibMsgs
         }
     
         public int RosMessageLength => 5 + GoalId.RosMessageLength + WriteBuffer.GetStringSize(Text);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            GoalId.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Status);
+            WriteBuffer2.AddLength(ref c, Text);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_msgs/GoalStatus";

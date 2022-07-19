@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestFeedback : IDeserializableRos1<TestFeedback>, IMessageRos1, IFeedback<TestActionFeedback>
+    public sealed class TestFeedback : IDeserializableRos1<TestFeedback>, IDeserializableRos2<TestFeedback>, IMessageRos1, IMessageRos2, IFeedback<TestActionFeedback>
     {
         [DataMember (Name = "feedback")] public int Feedback;
     
@@ -26,11 +26,24 @@ namespace Iviz.Msgs.Actionlib
             b.Deserialize(out Feedback);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestFeedback(ref b);
+        /// Constructor with buffer.
+        public TestFeedback(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Feedback);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TestFeedback(ref b);
         
         public TestFeedback RosDeserialize(ref ReadBuffer b) => new TestFeedback(ref b);
+        
+        public TestFeedback RosDeserialize(ref ReadBuffer2 b) => new TestFeedback(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Feedback);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Feedback);
         }
@@ -43,6 +56,15 @@ namespace Iviz.Msgs.Actionlib
         public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 4;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Feedback);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib/TestFeedback";

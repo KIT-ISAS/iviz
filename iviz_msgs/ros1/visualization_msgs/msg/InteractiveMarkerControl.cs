@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerControl : IDeserializableRos1<InteractiveMarkerControl>, IMessageRos1
+    public sealed class InteractiveMarkerControl : IDeserializableRos1<InteractiveMarkerControl>, IDeserializableRos2<InteractiveMarkerControl>, IMessageRos1, IMessageRos2
     {
         // Represents a control that is to be displayed together with an interactive marker
         // Identifying string for this control.
@@ -94,11 +94,42 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.DeserializeString(out Description);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerControl(ref b);
+        /// Constructor with buffer.
+        public InteractiveMarkerControl(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Name);
+            b.Deserialize(out Orientation);
+            b.Deserialize(out OrientationMode);
+            b.Deserialize(out InteractionMode);
+            b.Deserialize(out AlwaysVisible);
+            b.DeserializeArray(out Markers);
+            for (int i = 0; i < Markers.Length; i++)
+            {
+                Markers[i] = new Marker(ref b);
+            }
+            b.Deserialize(out IndependentMarkerOrientation);
+            b.DeserializeString(out Description);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerControl(ref b);
         
         public InteractiveMarkerControl RosDeserialize(ref ReadBuffer b) => new InteractiveMarkerControl(ref b);
+        
+        public InteractiveMarkerControl RosDeserialize(ref ReadBuffer2 b) => new InteractiveMarkerControl(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Name);
+            b.Serialize(in Orientation);
+            b.Serialize(OrientationMode);
+            b.Serialize(InteractionMode);
+            b.Serialize(AlwaysVisible);
+            b.SerializeArray(Markers);
+            b.Serialize(IndependentMarkerOrientation);
+            b.Serialize(Description);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Name);
             b.Serialize(in Orientation);
@@ -131,6 +162,19 @@ namespace Iviz.Msgs.VisualizationMsgs
                 size += WriteBuffer.GetStringSize(Description);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Orientation);
+            WriteBuffer2.AddLength(ref c, OrientationMode);
+            WriteBuffer2.AddLength(ref c, InteractionMode);
+            WriteBuffer2.AddLength(ref c, AlwaysVisible);
+            WriteBuffer2.AddLength(ref c, Markers);
+            WriteBuffer2.AddLength(ref c, IndependentMarkerOrientation);
+            WriteBuffer2.AddLength(ref c, Description);
         }
     
         /// <summary> Full ROS name of this message. </summary>

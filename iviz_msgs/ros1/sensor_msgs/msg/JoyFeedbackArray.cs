@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class JoyFeedbackArray : IDeserializableRos1<JoyFeedbackArray>, IMessageRos1
+    public sealed class JoyFeedbackArray : IDeserializableRos1<JoyFeedbackArray>, IDeserializableRos2<JoyFeedbackArray>, IMessageRos1, IMessageRos2
     {
         // This message publishes values for multiple feedback at once. 
         [DataMember (Name = "array")] public JoyFeedback[] Array;
@@ -32,11 +32,28 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new JoyFeedbackArray(ref b);
+        /// Constructor with buffer.
+        public JoyFeedbackArray(ref ReadBuffer2 b)
+        {
+            b.DeserializeArray(out Array);
+            for (int i = 0; i < Array.Length; i++)
+            {
+                Array[i] = new JoyFeedback(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new JoyFeedbackArray(ref b);
         
         public JoyFeedbackArray RosDeserialize(ref ReadBuffer b) => new JoyFeedbackArray(ref b);
+        
+        public JoyFeedbackArray RosDeserialize(ref ReadBuffer2 b) => new JoyFeedbackArray(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeArray(Array);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeArray(Array);
         }
@@ -52,6 +69,12 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 4 + 6 * Array.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Array);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/JoyFeedbackArray";

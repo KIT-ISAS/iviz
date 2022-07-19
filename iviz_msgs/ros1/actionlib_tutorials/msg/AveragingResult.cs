@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class AveragingResult : IDeserializableRos1<AveragingResult>, IMessageRos1, IResult<AveragingActionResult>
+    public sealed class AveragingResult : IDeserializableRos1<AveragingResult>, IDeserializableRos2<AveragingResult>, IMessageRos1, IMessageRos2, IResult<AveragingActionResult>
     {
         //result definition
         [DataMember (Name = "interior_angle")] public float InteriorAngle;
@@ -30,11 +30,26 @@ namespace Iviz.Msgs.ActionlibTutorials
             b.Deserialize(out Apothem);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AveragingResult(ref b);
+        /// Constructor with buffer.
+        public AveragingResult(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out InteriorAngle);
+            b.Deserialize(out Apothem);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AveragingResult(ref b);
         
         public AveragingResult RosDeserialize(ref ReadBuffer b) => new AveragingResult(ref b);
+        
+        public AveragingResult RosDeserialize(ref ReadBuffer2 b) => new AveragingResult(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(InteriorAngle);
+            b.Serialize(Apothem);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(InteriorAngle);
             b.Serialize(Apothem);
@@ -48,6 +63,16 @@ namespace Iviz.Msgs.ActionlibTutorials
         public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 8;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, InteriorAngle);
+            WriteBuffer2.AddLength(ref c, Apothem);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_tutorials/AveragingResult";

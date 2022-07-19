@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class AccelStamped : IDeserializableRos1<AccelStamped>, IMessageRos1
+    public sealed class AccelStamped : IDeserializableRos1<AccelStamped>, IDeserializableRos2<AccelStamped>, IMessageRos1, IMessageRos2
     {
         // An accel with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -31,11 +31,26 @@ namespace Iviz.Msgs.GeometryMsgs
             Accel = new Accel(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AccelStamped(ref b);
+        /// Constructor with buffer.
+        public AccelStamped(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            Accel = new Accel(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AccelStamped(ref b);
         
         public AccelStamped RosDeserialize(ref ReadBuffer b) => new AccelStamped(ref b);
+        
+        public AccelStamped RosDeserialize(ref ReadBuffer2 b) => new AccelStamped(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Accel.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Accel.RosSerialize(ref b);
@@ -48,6 +63,13 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         public int RosMessageLength => 48 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Accel.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/AccelStamped";

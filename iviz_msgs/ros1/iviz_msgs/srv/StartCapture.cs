@@ -73,7 +73,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out WithHolograms);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new StartCaptureRequest(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new StartCaptureRequest(ref b);
         
         public StartCaptureRequest RosDeserialize(ref ReadBuffer b) => new StartCaptureRequest(ref b);
     
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Message);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new StartCaptureResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new StartCaptureResponse(ref b);
         
         public StartCaptureResponse RosDeserialize(ref ReadBuffer b) => new StartCaptureResponse(ref b);
     

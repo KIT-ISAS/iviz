@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3 : IMessageRos1, IDeserializableRos1<Vector3>
+    public struct Vector3 : IMessageRos1, IMessageRos2, IDeserializableRos1<Vector3>, IDeserializableRos2<Vector3>
     {
         // This represents a vector in free space. 
         // It is only meant to represent a direction. Therefore, it does not
@@ -35,11 +35,25 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out this);
         }
         
-        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Vector3(ref b);
+        /// Constructor with buffer.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector3(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out this);
+        }
+        
+        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Vector3(ref b);
         
         public readonly Vector3 RosDeserialize(ref ReadBuffer b) => new Vector3(ref b);
+        
+        public readonly Vector3 RosDeserialize(ref ReadBuffer2 b) => new Vector3(ref b);
     
         public readonly void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(in this);
+        }
+        
+        public readonly void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(in this);
         }
@@ -52,6 +66,12 @@ namespace Iviz.Msgs.GeometryMsgs
         public const int RosFixedMessageLength = 24;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 24;
+        
+        public readonly int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public readonly void AddRos2MessageLength(ref int c) => WriteBuffer2.AddLength(ref c, this);
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/Vector3";

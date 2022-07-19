@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class TriangleMesh : IDeserializableRos1<TriangleMesh>, IMessageRos1
+    public sealed class TriangleMesh : IDeserializableRos1<TriangleMesh>, IDeserializableRos2<TriangleMesh>, IMessageRos1, IMessageRos2
     {
         //# Definition of a triangle mesh
         /// <summary> List of triangles; the index values refer to positions in vertices (and vertex_normals, if given) </summary>
@@ -65,11 +65,56 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TriangleMesh(ref b);
+        /// Constructor with buffer.
+        public TriangleMesh(ref ReadBuffer2 b)
+        {
+            b.DeserializeArray(out Triangles);
+            for (int i = 0; i < Triangles.Length; i++)
+            {
+                Triangles[i] = new TriangleIndices(ref b);
+            }
+            b.DeserializeStructArray(out Vertices);
+            b.DeserializeStructArray(out VertexNormals);
+            b.DeserializeStructArray(out VertexColors);
+            b.DeserializeStructArray(out TriangleColors);
+            b.DeserializeStructArray(out VertexTextureCoords);
+            b.DeserializeArray(out FaceMaterials);
+            for (int i = 0; i < FaceMaterials.Length; i++)
+            {
+                FaceMaterials[i] = new MeshMsgs.MeshMaterial(ref b);
+            }
+            b.DeserializeArray(out Textures);
+            for (int i = 0; i < Textures.Length; i++)
+            {
+                Textures[i] = new SensorMsgs.Image(ref b);
+            }
+            b.DeserializeArray(out Clusters);
+            for (int i = 0; i < Clusters.Length; i++)
+            {
+                Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TriangleMesh(ref b);
         
         public TriangleMesh RosDeserialize(ref ReadBuffer b) => new TriangleMesh(ref b);
+        
+        public TriangleMesh RosDeserialize(ref ReadBuffer2 b) => new TriangleMesh(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeArray(Triangles);
+            b.SerializeStructArray(Vertices);
+            b.SerializeStructArray(VertexNormals);
+            b.SerializeStructArray(VertexColors);
+            b.SerializeStructArray(TriangleColors);
+            b.SerializeStructArray(VertexTextureCoords);
+            b.SerializeArray(FaceMaterials);
+            b.SerializeArray(Textures);
+            b.SerializeArray(Clusters);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeArray(Triangles);
             b.SerializeStructArray(Vertices);
@@ -130,6 +175,20 @@ namespace Iviz.Msgs.MeshMsgs
                 size += WriteBuffer.GetArraySize(Clusters);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Triangles);
+            WriteBuffer2.AddLength(ref c, Vertices);
+            WriteBuffer2.AddLength(ref c, VertexNormals);
+            WriteBuffer2.AddLength(ref c, VertexColors);
+            WriteBuffer2.AddLength(ref c, TriangleColors);
+            WriteBuffer2.AddLength(ref c, VertexTextureCoords);
+            WriteBuffer2.AddLength(ref c, FaceMaterials);
+            WriteBuffer2.AddLength(ref c, Textures);
+            WriteBuffer2.AddLength(ref c, Clusters);
         }
     
         /// <summary> Full ROS name of this message. </summary>

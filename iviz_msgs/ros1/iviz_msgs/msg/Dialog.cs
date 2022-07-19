@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Dialog : IDeserializableRos1<Dialog>, IMessageRos1
+    public sealed class Dialog : IDeserializableRos1<Dialog>, IDeserializableRos2<Dialog>, IMessageRos1, IMessageRos2
     {
         public const byte ACTION_ADD = 0;
         public const byte ACTION_REMOVE = 1;
@@ -101,11 +101,56 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out TfDisplacement);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Dialog(ref b);
+        /// Constructor with buffer.
+        public Dialog(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Action);
+            b.DeserializeString(out Id);
+            b.Deserialize(out Lifetime);
+            b.Deserialize(out Scale);
+            b.Deserialize(out Type);
+            b.Deserialize(out Buttons);
+            b.Deserialize(out Icon);
+            b.Deserialize(out BackgroundColor);
+            b.DeserializeString(out Title);
+            b.DeserializeString(out Caption);
+            b.Deserialize(out CaptionAlignment);
+            b.DeserializeStringArray(out MenuEntries);
+            b.Deserialize(out BindingType);
+            b.Deserialize(out TfOffset);
+            b.Deserialize(out DialogDisplacement);
+            b.Deserialize(out TfDisplacement);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Dialog(ref b);
         
         public Dialog RosDeserialize(ref ReadBuffer b) => new Dialog(ref b);
+        
+        public Dialog RosDeserialize(ref ReadBuffer2 b) => new Dialog(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Action);
+            b.Serialize(Id);
+            b.Serialize(Lifetime);
+            b.Serialize(Scale);
+            b.Serialize(Type);
+            b.Serialize(Buttons);
+            b.Serialize(Icon);
+            b.Serialize(in BackgroundColor);
+            b.Serialize(Title);
+            b.Serialize(Caption);
+            b.Serialize(CaptionAlignment);
+            b.SerializeArray(MenuEntries);
+            b.Serialize(BindingType);
+            b.Serialize(in TfOffset);
+            b.Serialize(in DialogDisplacement);
+            b.Serialize(in TfDisplacement);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Action);
@@ -149,6 +194,28 @@ namespace Iviz.Msgs.IvizMsgs
                 size += WriteBuffer.GetArraySize(MenuEntries);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Action);
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, Lifetime);
+            WriteBuffer2.AddLength(ref c, Scale);
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, Buttons);
+            WriteBuffer2.AddLength(ref c, Icon);
+            WriteBuffer2.AddLength(ref c, BackgroundColor);
+            WriteBuffer2.AddLength(ref c, Title);
+            WriteBuffer2.AddLength(ref c, Caption);
+            WriteBuffer2.AddLength(ref c, CaptionAlignment);
+            WriteBuffer2.AddLength(ref c, MenuEntries);
+            WriteBuffer2.AddLength(ref c, BindingType);
+            WriteBuffer2.AddLength(ref c, TfOffset);
+            WriteBuffer2.AddLength(ref c, DialogDisplacement);
+            WriteBuffer2.AddLength(ref c, TfDisplacement);
         }
     
         /// <summary> Full ROS name of this message. </summary>

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class LaserEcho : IDeserializableRos1<LaserEcho>, IMessageRos1
+    public sealed class LaserEcho : IDeserializableRos1<LaserEcho>, IDeserializableRos2<LaserEcho>, IMessageRos1, IMessageRos2
     {
         // This message is a submessage of MultiEchoLaserScan and is not intended
         // to be used separately.
@@ -31,11 +31,24 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructArray(out Echoes);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LaserEcho(ref b);
+        /// Constructor with buffer.
+        public LaserEcho(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out Echoes);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LaserEcho(ref b);
         
         public LaserEcho RosDeserialize(ref ReadBuffer b) => new LaserEcho(ref b);
+        
+        public LaserEcho RosDeserialize(ref ReadBuffer2 b) => new LaserEcho(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(Echoes);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Echoes);
         }
@@ -46,6 +59,12 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 4 + 4 * Echoes.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Echoes);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/LaserEcho";

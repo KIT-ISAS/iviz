@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarker : IDeserializableRos1<InteractiveMarker>, IMessageRos1
+    public sealed class InteractiveMarker : IDeserializableRos1<InteractiveMarker>, IDeserializableRos2<InteractiveMarker>, IMessageRos1, IMessageRos2
     {
         // Time/frame info.
         // If header.time is set to 0, the marker will be retransformed into
@@ -57,11 +57,44 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarker(ref b);
+        /// Constructor with buffer.
+        public InteractiveMarker(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Pose);
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Description);
+            b.Deserialize(out Scale);
+            b.DeserializeArray(out MenuEntries);
+            for (int i = 0; i < MenuEntries.Length; i++)
+            {
+                MenuEntries[i] = new MenuEntry(ref b);
+            }
+            b.DeserializeArray(out Controls);
+            for (int i = 0; i < Controls.Length; i++)
+            {
+                Controls[i] = new InteractiveMarkerControl(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarker(ref b);
         
         public InteractiveMarker RosDeserialize(ref ReadBuffer b) => new InteractiveMarker(ref b);
+        
+        public InteractiveMarker RosDeserialize(ref ReadBuffer2 b) => new InteractiveMarker(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(in Pose);
+            b.Serialize(Name);
+            b.Serialize(Description);
+            b.Serialize(Scale);
+            b.SerializeArray(MenuEntries);
+            b.SerializeArray(Controls);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(in Pose);
@@ -101,6 +134,18 @@ namespace Iviz.Msgs.VisualizationMsgs
                 size += WriteBuffer.GetArraySize(Controls);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Pose);
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Description);
+            WriteBuffer2.AddLength(ref c, Scale);
+            WriteBuffer2.AddLength(ref c, MenuEntries);
+            WriteBuffer2.AddLength(ref c, Controls);
         }
     
         /// <summary> Full ROS name of this message. </summary>

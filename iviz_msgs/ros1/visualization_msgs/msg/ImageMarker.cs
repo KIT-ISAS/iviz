@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class ImageMarker : IDeserializableRos1<ImageMarker>, IMessageRos1
+    public sealed class ImageMarker : IDeserializableRos1<ImageMarker>, IDeserializableRos2<ImageMarker>, IMessageRos1, IMessageRos2
     {
         public const byte CIRCLE = 0;
         public const byte LINE_STRIP = 1;
@@ -65,11 +65,48 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.DeserializeStructArray(out OutlineColors);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ImageMarker(ref b);
+        /// Constructor with buffer.
+        public ImageMarker(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeString(out Ns);
+            b.Deserialize(out Id);
+            b.Deserialize(out Type);
+            b.Deserialize(out Action);
+            b.Deserialize(out Position);
+            b.Deserialize(out Scale);
+            b.Deserialize(out OutlineColor);
+            b.Deserialize(out Filled);
+            b.Deserialize(out FillColor);
+            b.Deserialize(out Lifetime);
+            b.DeserializeStructArray(out Points);
+            b.DeserializeStructArray(out OutlineColors);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ImageMarker(ref b);
         
         public ImageMarker RosDeserialize(ref ReadBuffer b) => new ImageMarker(ref b);
+        
+        public ImageMarker RosDeserialize(ref ReadBuffer2 b) => new ImageMarker(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Ns);
+            b.Serialize(Id);
+            b.Serialize(Type);
+            b.Serialize(Action);
+            b.Serialize(in Position);
+            b.Serialize(Scale);
+            b.Serialize(in OutlineColor);
+            b.Serialize(Filled);
+            b.Serialize(in FillColor);
+            b.Serialize(Lifetime);
+            b.SerializeStructArray(Points);
+            b.SerializeStructArray(OutlineColors);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Ns);
@@ -103,6 +140,24 @@ namespace Iviz.Msgs.VisualizationMsgs
                 size += 16 * OutlineColors.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Ns);
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, Action);
+            WriteBuffer2.AddLength(ref c, Position);
+            WriteBuffer2.AddLength(ref c, Scale);
+            WriteBuffer2.AddLength(ref c, OutlineColor);
+            WriteBuffer2.AddLength(ref c, Filled);
+            WriteBuffer2.AddLength(ref c, FillColor);
+            WriteBuffer2.AddLength(ref c, Lifetime);
+            WriteBuffer2.AddLength(ref c, Points);
+            WriteBuffer2.AddLength(ref c, OutlineColors);
         }
     
         /// <summary> Full ROS name of this message. </summary>

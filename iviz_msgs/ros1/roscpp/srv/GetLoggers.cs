@@ -59,7 +59,7 @@ namespace Iviz.Msgs.Roscpp
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public GetLoggersRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.Roscpp
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetLoggersResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetLoggersResponse(ref b);
         
         public GetLoggersResponse RosDeserialize(ref ReadBuffer b) => new GetLoggersResponse(ref b);
     

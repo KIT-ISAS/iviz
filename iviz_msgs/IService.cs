@@ -32,7 +32,7 @@
     /// Interface for all ROS service requests.
     /// All classes representing ROS requests derive from this.
     /// </summary>
-    public interface IRequest : ISerializable
+    public interface IRequest : ISerializableRos1
     {
     }
 
@@ -44,7 +44,7 @@
     /// Interface for all ROS service responses.
     /// All classes representing ROS responses derive from this.
     /// </summary>
-    public interface IResponse : ISerializable
+    public interface IResponse : ISerializableRos1
     {
     }
 }

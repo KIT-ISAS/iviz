@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Model : IDeserializableRos1<Model>, IMessageRos1
+    public sealed class Model : IDeserializableRos1<Model>, IDeserializableRos2<Model>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "filename")] public string Filename;
@@ -48,11 +48,46 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Model(ref b);
+        /// Constructor with buffer.
+        public Model(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Filename);
+            b.DeserializeString(out OrientationHint);
+            b.DeserializeArray(out Meshes);
+            for (int i = 0; i < Meshes.Length; i++)
+            {
+                Meshes[i] = new Mesh(ref b);
+            }
+            b.DeserializeArray(out Materials);
+            for (int i = 0; i < Materials.Length; i++)
+            {
+                Materials[i] = new Material(ref b);
+            }
+            b.DeserializeArray(out Nodes);
+            for (int i = 0; i < Nodes.Length; i++)
+            {
+                Nodes[i] = new Node(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Model(ref b);
         
         public Model RosDeserialize(ref ReadBuffer b) => new Model(ref b);
+        
+        public Model RosDeserialize(ref ReadBuffer2 b) => new Model(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Name);
+            b.Serialize(Filename);
+            b.Serialize(OrientationHint);
+            b.SerializeArray(Meshes);
+            b.SerializeArray(Materials);
+            b.SerializeArray(Nodes);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Name);
             b.Serialize(Filename);
@@ -99,6 +134,17 @@ namespace Iviz.Msgs.IvizMsgs
                 size += WriteBuffer.GetArraySize(Nodes);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Filename);
+            WriteBuffer2.AddLength(ref c, OrientationHint);
+            WriteBuffer2.AddLength(ref c, Meshes);
+            WriteBuffer2.AddLength(ref c, Materials);
+            WriteBuffer2.AddLength(ref c, Nodes);
         }
     
         /// <summary> Full ROS name of this message. </summary>

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract]
-    public sealed class SolidPrimitive : IDeserializableRos1<SolidPrimitive>, IMessageRos1
+    public sealed class SolidPrimitive : IDeserializableRos1<SolidPrimitive>, IDeserializableRos2<SolidPrimitive>, IMessageRos1, IMessageRos2
     {
         // Define box, sphere, cylinder, cone 
         // All shapes are defined to have their bounding boxes centered around 0,0,0.
@@ -58,11 +58,26 @@ namespace Iviz.Msgs.ShapeMsgs
             b.DeserializeStructArray(out Dimensions);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SolidPrimitive(ref b);
+        /// Constructor with buffer.
+        public SolidPrimitive(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Type);
+            b.DeserializeStructArray(out Dimensions);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SolidPrimitive(ref b);
         
         public SolidPrimitive RosDeserialize(ref ReadBuffer b) => new SolidPrimitive(ref b);
+        
+        public SolidPrimitive RosDeserialize(ref ReadBuffer2 b) => new SolidPrimitive(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Type);
+            b.SerializeStructArray(Dimensions);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Type);
             b.SerializeStructArray(Dimensions);
@@ -74,6 +89,13 @@ namespace Iviz.Msgs.ShapeMsgs
         }
     
         public int RosMessageLength => 5 + 8 * Dimensions.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, Dimensions);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "shape_msgs/SolidPrimitive";

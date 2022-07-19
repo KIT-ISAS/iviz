@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract]
-    public sealed class Mesh : IDeserializableRos1<Mesh>, IMessageRos1
+    public sealed class Mesh : IDeserializableRos1<Mesh>, IDeserializableRos2<Mesh>, IMessageRos1, IMessageRos2
     {
         // Definition of a mesh
         // list of triangles; the index values refer to positions in vertices[]
@@ -38,11 +38,30 @@ namespace Iviz.Msgs.ShapeMsgs
             b.DeserializeStructArray(out Vertices);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Mesh(ref b);
+        /// Constructor with buffer.
+        public Mesh(ref ReadBuffer2 b)
+        {
+            b.DeserializeArray(out Triangles);
+            for (int i = 0; i < Triangles.Length; i++)
+            {
+                Triangles[i] = new MeshTriangle(ref b);
+            }
+            b.DeserializeStructArray(out Vertices);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Mesh(ref b);
         
         public Mesh RosDeserialize(ref ReadBuffer b) => new Mesh(ref b);
+        
+        public Mesh RosDeserialize(ref ReadBuffer2 b) => new Mesh(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeArray(Triangles);
+            b.SerializeStructArray(Vertices);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeArray(Triangles);
             b.SerializeStructArray(Vertices);
@@ -60,6 +79,13 @@ namespace Iviz.Msgs.ShapeMsgs
         }
     
         public int RosMessageLength => 8 + 12 * Triangles.Length + 24 * Vertices.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Triangles);
+            WriteBuffer2.AddLength(ref c, Vertices);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "shape_msgs/Mesh";

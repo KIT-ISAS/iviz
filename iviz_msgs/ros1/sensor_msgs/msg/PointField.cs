@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class PointField : IDeserializableRos1<PointField>, IMessageRos1
+    public sealed class PointField : IDeserializableRos1<PointField>, IDeserializableRos2<PointField>, IMessageRos1, IMessageRos2
     {
         // This message holds the description of one point entry in the
         // PointCloud2 message format.
@@ -50,11 +50,30 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Count);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PointField(ref b);
+        /// Constructor with buffer.
+        public PointField(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Name);
+            b.Deserialize(out Offset);
+            b.Deserialize(out Datatype);
+            b.Deserialize(out Count);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PointField(ref b);
         
         public PointField RosDeserialize(ref ReadBuffer b) => new PointField(ref b);
+        
+        public PointField RosDeserialize(ref ReadBuffer2 b) => new PointField(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Name);
+            b.Serialize(Offset);
+            b.Serialize(Datatype);
+            b.Serialize(Count);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Name);
             b.Serialize(Offset);
@@ -68,6 +87,15 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 13 + WriteBuffer.GetStringSize(Name);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Offset);
+            WriteBuffer2.AddLength(ref c, Datatype);
+            WriteBuffer2.AddLength(ref c, Count);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/PointField";

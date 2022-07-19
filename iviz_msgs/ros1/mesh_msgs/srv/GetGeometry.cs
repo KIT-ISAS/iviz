@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeString(out Uuid);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetGeometryRequest(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetGeometryRequest(ref b);
         
         public GetGeometryRequest RosDeserialize(ref ReadBuffer b) => new GetGeometryRequest(ref b);
     
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.MeshMsgs
             MeshGeometryStamped = new MeshMsgs.MeshGeometryStamped(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetGeometryResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetGeometryResponse(ref b);
         
         public GetGeometryResponse RosDeserialize(ref ReadBuffer b) => new GetGeometryResponse(ref b);
     

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class PolygonMesh : IDeserializableRos1<PolygonMesh>, IMessageRos1
+    public sealed class PolygonMesh : IDeserializableRos1<PolygonMesh>, IDeserializableRos2<PolygonMesh>, IMessageRos1, IMessageRos2
     {
         // Separate header for the polygonal surface
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -41,11 +41,32 @@ namespace Iviz.Msgs.PclMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PolygonMesh(ref b);
+        /// Constructor with buffer.
+        public PolygonMesh(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            Cloud = new SensorMsgs.PointCloud2(ref b);
+            b.DeserializeArray(out Polygons);
+            for (int i = 0; i < Polygons.Length; i++)
+            {
+                Polygons[i] = new Vertices(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PolygonMesh(ref b);
         
         public PolygonMesh RosDeserialize(ref ReadBuffer b) => new PolygonMesh(ref b);
+        
+        public PolygonMesh RosDeserialize(ref ReadBuffer2 b) => new PolygonMesh(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Cloud.RosSerialize(ref b);
+            b.SerializeArray(Polygons);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Cloud.RosSerialize(ref b);
@@ -73,6 +94,14 @@ namespace Iviz.Msgs.PclMsgs
                 size += WriteBuffer.GetArraySize(Polygons);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Cloud.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Polygons);
         }
     
         /// <summary> Full ROS name of this message. </summary>

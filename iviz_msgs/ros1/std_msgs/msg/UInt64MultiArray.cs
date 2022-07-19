@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class UInt64MultiArray : IDeserializableRos1<UInt64MultiArray>, IMessageRos1
+    public sealed class UInt64MultiArray : IDeserializableRos1<UInt64MultiArray>, IDeserializableRos2<UInt64MultiArray>, IMessageRos1, IMessageRos2
     {
         // Please look at the MultiArrayLayout message definition for
         // documentation on all multiarrays.
@@ -35,11 +35,26 @@ namespace Iviz.Msgs.StdMsgs
             b.DeserializeStructArray(out Data);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UInt64MultiArray(ref b);
+        /// Constructor with buffer.
+        public UInt64MultiArray(ref ReadBuffer2 b)
+        {
+            Layout = new MultiArrayLayout(ref b);
+            b.DeserializeStructArray(out Data);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new UInt64MultiArray(ref b);
         
         public UInt64MultiArray RosDeserialize(ref ReadBuffer b) => new UInt64MultiArray(ref b);
+        
+        public UInt64MultiArray RosDeserialize(ref ReadBuffer2 b) => new UInt64MultiArray(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Layout.RosSerialize(ref b);
+            b.SerializeStructArray(Data);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Layout.RosSerialize(ref b);
             b.SerializeStructArray(Data);
@@ -53,6 +68,13 @@ namespace Iviz.Msgs.StdMsgs
         }
     
         public int RosMessageLength => 4 + Layout.RosMessageLength + 8 * Data.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Layout.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Data);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/UInt64MultiArray";

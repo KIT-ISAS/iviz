@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshTexture : IDeserializableRos1<MeshTexture>, IMessageRos1
+    public sealed class MeshTexture : IDeserializableRos1<MeshTexture>, IDeserializableRos2<MeshTexture>, IMessageRos1, IMessageRos2
     {
         // Mesh Attribute Message
         [DataMember (Name = "uuid")] public string Uuid;
@@ -35,11 +35,28 @@ namespace Iviz.Msgs.MeshMsgs
             Image = new SensorMsgs.Image(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshTexture(ref b);
+        /// Constructor with buffer.
+        public MeshTexture(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Uuid);
+            b.Deserialize(out TextureIndex);
+            Image = new SensorMsgs.Image(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshTexture(ref b);
         
         public MeshTexture RosDeserialize(ref ReadBuffer b) => new MeshTexture(ref b);
+        
+        public MeshTexture RosDeserialize(ref ReadBuffer2 b) => new MeshTexture(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Uuid);
+            b.Serialize(TextureIndex);
+            Image.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Uuid);
             b.Serialize(TextureIndex);
@@ -54,6 +71,14 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Uuid) + Image.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Uuid);
+            WriteBuffer2.AddLength(ref c, TextureIndex);
+            Image.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshTexture";

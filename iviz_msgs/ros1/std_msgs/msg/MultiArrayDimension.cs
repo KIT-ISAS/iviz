@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class MultiArrayDimension : IDeserializableRos1<MultiArrayDimension>, IMessageRos1
+    public sealed class MultiArrayDimension : IDeserializableRos1<MultiArrayDimension>, IDeserializableRos2<MultiArrayDimension>, IMessageRos1, IMessageRos2
     {
         /// <summary> Label of given dimension </summary>
         [DataMember (Name = "label")] public string Label;
@@ -36,11 +36,28 @@ namespace Iviz.Msgs.StdMsgs
             b.Deserialize(out Stride);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MultiArrayDimension(ref b);
+        /// Constructor with buffer.
+        public MultiArrayDimension(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Label);
+            b.Deserialize(out Size);
+            b.Deserialize(out Stride);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MultiArrayDimension(ref b);
         
         public MultiArrayDimension RosDeserialize(ref ReadBuffer b) => new MultiArrayDimension(ref b);
+        
+        public MultiArrayDimension RosDeserialize(ref ReadBuffer2 b) => new MultiArrayDimension(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Label);
+            b.Serialize(Size);
+            b.Serialize(Stride);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Label);
             b.Serialize(Size);
@@ -53,6 +70,14 @@ namespace Iviz.Msgs.StdMsgs
         }
     
         public int RosMessageLength => 12 + WriteBuffer.GetStringSize(Label);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Label);
+            WriteBuffer2.AddLength(ref c, Size);
+            WriteBuffer2.AddLength(ref c, Stride);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/MultiArrayDimension";

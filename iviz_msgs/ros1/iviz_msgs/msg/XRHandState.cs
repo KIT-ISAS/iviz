@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class XRHandState : IDeserializableRos1<XRHandState>, IMessageRos1
+    public sealed class XRHandState : IDeserializableRos1<XRHandState>, IDeserializableRos2<XRHandState>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "is_valid")] public bool IsValid;
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -39,11 +39,38 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Little);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new XRHandState(ref b);
+        /// Constructor with buffer.
+        public XRHandState(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out IsValid);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Palm);
+            b.DeserializeStructArray(out Thumb);
+            b.DeserializeStructArray(out Index);
+            b.DeserializeStructArray(out Middle);
+            b.DeserializeStructArray(out Ring);
+            b.DeserializeStructArray(out Little);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new XRHandState(ref b);
         
         public XRHandState RosDeserialize(ref ReadBuffer b) => new XRHandState(ref b);
+        
+        public XRHandState RosDeserialize(ref ReadBuffer2 b) => new XRHandState(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(IsValid);
+            Header.RosSerialize(ref b);
+            b.Serialize(in Palm);
+            b.SerializeStructArray(Thumb);
+            b.SerializeStructArray(Index);
+            b.SerializeStructArray(Middle);
+            b.SerializeStructArray(Ring);
+            b.SerializeStructArray(Little);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(IsValid);
             Header.RosSerialize(ref b);
@@ -76,6 +103,19 @@ namespace Iviz.Msgs.IvizMsgs
                 size += 56 * Little.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, IsValid);
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Palm);
+            WriteBuffer2.AddLength(ref c, Thumb);
+            WriteBuffer2.AddLength(ref c, Index);
+            WriteBuffer2.AddLength(ref c, Middle);
+            WriteBuffer2.AddLength(ref c, Ring);
+            WriteBuffer2.AddLength(ref c, Little);
         }
     
         /// <summary> Full ROS name of this message. </summary>

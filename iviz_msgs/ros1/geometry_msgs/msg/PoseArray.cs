@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PoseArray : IDeserializableRos1<PoseArray>, IMessageRos1
+    public sealed class PoseArray : IDeserializableRos1<PoseArray>, IDeserializableRos2<PoseArray>, IMessageRos1, IMessageRos2
     {
         // An array of poses with a header for global reference.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -31,11 +31,26 @@ namespace Iviz.Msgs.GeometryMsgs
             b.DeserializeStructArray(out Poses);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PoseArray(ref b);
+        /// Constructor with buffer.
+        public PoseArray(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeStructArray(out Poses);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PoseArray(ref b);
         
         public PoseArray RosDeserialize(ref ReadBuffer b) => new PoseArray(ref b);
+        
+        public PoseArray RosDeserialize(ref ReadBuffer2 b) => new PoseArray(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.SerializeStructArray(Poses);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.SerializeStructArray(Poses);
@@ -47,6 +62,13 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         public int RosMessageLength => 4 + Header.RosMessageLength + 56 * Poses.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Poses);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/PoseArray";

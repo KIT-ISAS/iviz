@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class ChannelFloat32 : IDeserializableRos1<ChannelFloat32>, IMessageRos1
+    public sealed class ChannelFloat32 : IDeserializableRos1<ChannelFloat32>, IDeserializableRos2<ChannelFloat32>, IMessageRos1, IMessageRos2
     {
         // This message is used by the PointCloud message to hold optional data
         // associated with each point in the cloud. The length of the values
@@ -50,11 +50,26 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructArray(out Values);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ChannelFloat32(ref b);
+        /// Constructor with buffer.
+        public ChannelFloat32(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Name);
+            b.DeserializeStructArray(out Values);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ChannelFloat32(ref b);
         
         public ChannelFloat32 RosDeserialize(ref ReadBuffer b) => new ChannelFloat32(ref b);
+        
+        public ChannelFloat32 RosDeserialize(ref ReadBuffer2 b) => new ChannelFloat32(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Name);
+            b.SerializeStructArray(Values);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Name);
             b.SerializeStructArray(Values);
@@ -67,6 +82,13 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Name) + 4 * Values.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Values);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/ChannelFloat32";

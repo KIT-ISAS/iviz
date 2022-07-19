@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract]
-    public sealed class Clock : IDeserializableRos1<Clock>, IMessageRos1
+    public sealed class Clock : IDeserializableRos1<Clock>, IDeserializableRos2<Clock>, IMessageRos1, IMessageRos2
     {
         // roslib/Clock is used for publishing simulated time in ROS. 
         // This message simply communicates the current time.
@@ -29,11 +29,24 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.Deserialize(out Clock_);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Clock(ref b);
+        /// Constructor with buffer.
+        public Clock(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Clock_);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Clock(ref b);
         
         public Clock RosDeserialize(ref ReadBuffer b) => new Clock(ref b);
+        
+        public Clock RosDeserialize(ref ReadBuffer2 b) => new Clock(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Clock_);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Clock_);
         }
@@ -46,6 +59,15 @@ namespace Iviz.Msgs.RosgraphMsgs
         public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 8;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Clock_);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "rosgraph_msgs/Clock";

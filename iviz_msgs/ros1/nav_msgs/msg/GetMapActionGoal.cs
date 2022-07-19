@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapActionGoal : IDeserializableRos1<GetMapActionGoal>, IMessageRos1, IActionGoal<GetMapGoal>
+    public sealed class GetMapActionGoal : IDeserializableRos1<GetMapActionGoal>, IDeserializableRos2<GetMapActionGoal>, IMessageRos1, IMessageRos2, IActionGoal<GetMapGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
@@ -34,11 +34,28 @@ namespace Iviz.Msgs.NavMsgs
             Goal = GetMapGoal.Singleton;
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetMapActionGoal(ref b);
+        /// Constructor with buffer.
+        public GetMapActionGoal(ref ReadBuffer2 b)
+        {
+            Header = new StdMsgs.Header(ref b);
+            GoalId = new ActionlibMsgs.GoalID(ref b);
+            Goal = GetMapGoal.Singleton;
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetMapActionGoal(ref b);
         
         public GetMapActionGoal RosDeserialize(ref ReadBuffer b) => new GetMapActionGoal(ref b);
+        
+        public GetMapActionGoal RosDeserialize(ref ReadBuffer2 b) => new GetMapActionGoal(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            GoalId.RosSerialize(ref b);
+            Goal.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             GoalId.RosSerialize(ref b);
@@ -54,6 +71,14 @@ namespace Iviz.Msgs.NavMsgs
         }
     
         public int RosMessageLength => 0 + Header.RosMessageLength + GoalId.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            GoalId.AddRos2MessageLength(ref c);
+            Goal.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "nav_msgs/GetMapActionGoal";

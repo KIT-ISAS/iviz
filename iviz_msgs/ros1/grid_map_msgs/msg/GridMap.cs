@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GridMapMsgs
 {
     [DataContract]
-    public sealed class GridMap : IDeserializableRos1<GridMap>, IMessageRos1
+    public sealed class GridMap : IDeserializableRos1<GridMap>, IDeserializableRos2<GridMap>, IMessageRos1, IMessageRos2
     {
         // Grid map header
         [DataMember (Name = "info")] public GridMapInfo Info;
@@ -46,11 +46,38 @@ namespace Iviz.Msgs.GridMapMsgs
             b.Deserialize(out InnerStartIndex);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GridMap(ref b);
+        /// Constructor with buffer.
+        public GridMap(ref ReadBuffer2 b)
+        {
+            Info = new GridMapInfo(ref b);
+            b.DeserializeStringArray(out Layers);
+            b.DeserializeStringArray(out BasicLayers);
+            b.DeserializeArray(out Data);
+            for (int i = 0; i < Data.Length; i++)
+            {
+                Data[i] = new StdMsgs.Float32MultiArray(ref b);
+            }
+            b.Deserialize(out OuterStartIndex);
+            b.Deserialize(out InnerStartIndex);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GridMap(ref b);
         
         public GridMap RosDeserialize(ref ReadBuffer b) => new GridMap(ref b);
+        
+        public GridMap RosDeserialize(ref ReadBuffer2 b) => new GridMap(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Info.RosSerialize(ref b);
+            b.SerializeArray(Layers);
+            b.SerializeArray(BasicLayers);
+            b.SerializeArray(Data);
+            b.Serialize(OuterStartIndex);
+            b.Serialize(InnerStartIndex);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Info.RosSerialize(ref b);
             b.SerializeArray(Layers);
@@ -92,6 +119,17 @@ namespace Iviz.Msgs.GridMapMsgs
                 size += WriteBuffer.GetArraySize(Data);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Info.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Layers);
+            WriteBuffer2.AddLength(ref c, BasicLayers);
+            WriteBuffer2.AddLength(ref c, Data);
+            WriteBuffer2.AddLength(ref c, OuterStartIndex);
+            WriteBuffer2.AddLength(ref c, InnerStartIndex);
         }
     
         /// <summary> Full ROS name of this message. </summary>

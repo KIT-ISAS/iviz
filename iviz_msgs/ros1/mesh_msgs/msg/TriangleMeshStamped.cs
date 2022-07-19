@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class TriangleMeshStamped : IDeserializableRos1<TriangleMeshStamped>, IMessageRos1
+    public sealed class TriangleMeshStamped : IDeserializableRos1<TriangleMeshStamped>, IDeserializableRos2<TriangleMeshStamped>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "mesh")] public MeshMsgs.TriangleMesh Mesh;
@@ -30,11 +30,26 @@ namespace Iviz.Msgs.MeshMsgs
             Mesh = new MeshMsgs.TriangleMesh(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TriangleMeshStamped(ref b);
+        /// Constructor with buffer.
+        public TriangleMeshStamped(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            Mesh = new MeshMsgs.TriangleMesh(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TriangleMeshStamped(ref b);
         
         public TriangleMeshStamped RosDeserialize(ref ReadBuffer b) => new TriangleMeshStamped(ref b);
+        
+        public TriangleMeshStamped RosDeserialize(ref ReadBuffer2 b) => new TriangleMeshStamped(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Mesh.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Mesh.RosSerialize(ref b);
@@ -47,6 +62,13 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 0 + Header.RosMessageLength + Mesh.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Mesh.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/TriangleMeshStamped";

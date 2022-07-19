@@ -68,7 +68,7 @@ namespace Iviz.Msgs.PclMsgs
             b.DeserializeString(out Filename);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UpdateFilenameRequest(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new UpdateFilenameRequest(ref b);
         
         public UpdateFilenameRequest RosDeserialize(ref ReadBuffer b) => new UpdateFilenameRequest(ref b);
     
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.PclMsgs
             b.Deserialize(out Success);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UpdateFilenameResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new UpdateFilenameResponse(ref b);
         
         public UpdateFilenameResponse RosDeserialize(ref ReadBuffer b) => new UpdateFilenameResponse(ref b);
     

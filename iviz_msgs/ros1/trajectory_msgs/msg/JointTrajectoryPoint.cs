@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract]
-    public sealed class JointTrajectoryPoint : IDeserializableRos1<JointTrajectoryPoint>, IMessageRos1
+    public sealed class JointTrajectoryPoint : IDeserializableRos1<JointTrajectoryPoint>, IDeserializableRos2<JointTrajectoryPoint>, IMessageRos1, IMessageRos2
     {
         // Each trajectory point specifies either positions[, velocities[, accelerations]]
         // or positions[, effort] for the trajectory to be executed.
@@ -35,11 +35,32 @@ namespace Iviz.Msgs.TrajectoryMsgs
             b.Deserialize(out TimeFromStart);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new JointTrajectoryPoint(ref b);
+        /// Constructor with buffer.
+        public JointTrajectoryPoint(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out Positions);
+            b.DeserializeStructArray(out Velocities);
+            b.DeserializeStructArray(out Accelerations);
+            b.DeserializeStructArray(out Effort);
+            b.Deserialize(out TimeFromStart);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new JointTrajectoryPoint(ref b);
         
         public JointTrajectoryPoint RosDeserialize(ref ReadBuffer b) => new JointTrajectoryPoint(ref b);
+        
+        public JointTrajectoryPoint RosDeserialize(ref ReadBuffer2 b) => new JointTrajectoryPoint(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(Positions);
+            b.SerializeStructArray(Velocities);
+            b.SerializeStructArray(Accelerations);
+            b.SerializeStructArray(Effort);
+            b.Serialize(TimeFromStart);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Positions);
             b.SerializeStructArray(Velocities);
@@ -66,6 +87,16 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 size += 8 * Effort.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Positions);
+            WriteBuffer2.AddLength(ref c, Velocities);
+            WriteBuffer2.AddLength(ref c, Accelerations);
+            WriteBuffer2.AddLength(ref c, Effort);
+            WriteBuffer2.AddLength(ref c, TimeFromStart);
         }
     
         /// <summary> Full ROS name of this message. </summary>

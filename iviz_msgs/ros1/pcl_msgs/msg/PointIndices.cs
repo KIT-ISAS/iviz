@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class PointIndices : IDeserializableRos1<PointIndices>, IMessageRos1
+    public sealed class PointIndices : IDeserializableRos1<PointIndices>, IDeserializableRos2<PointIndices>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "indices")] public int[] Indices;
@@ -30,11 +30,26 @@ namespace Iviz.Msgs.PclMsgs
             b.DeserializeStructArray(out Indices);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PointIndices(ref b);
+        /// Constructor with buffer.
+        public PointIndices(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeStructArray(out Indices);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PointIndices(ref b);
         
         public PointIndices RosDeserialize(ref ReadBuffer b) => new PointIndices(ref b);
+        
+        public PointIndices RosDeserialize(ref ReadBuffer2 b) => new PointIndices(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.SerializeStructArray(Indices);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.SerializeStructArray(Indices);
@@ -46,6 +61,13 @@ namespace Iviz.Msgs.PclMsgs
         }
     
         public int RosMessageLength => 4 + Header.RosMessageLength + 4 * Indices.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Indices);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "pcl_msgs/PointIndices";

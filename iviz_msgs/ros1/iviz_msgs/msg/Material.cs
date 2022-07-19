@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Material : IDeserializableRos1<Material>, IMessageRos1
+    public sealed class Material : IDeserializableRos1<Material>, IDeserializableRos2<Material>, IMessageRos1, IMessageRos2
     {
         public const byte BLEND_DEFAULT = 0;
         public const byte BLEND_ADDITIVE = 1;
@@ -48,11 +48,48 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Material(ref b);
+        /// Constructor with buffer.
+        public Material(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Name);
+            b.Deserialize(out Ambient);
+            b.Deserialize(out Diffuse);
+            b.Deserialize(out Emissive);
+            b.Deserialize(out Opacity);
+            b.Deserialize(out BumpScaling);
+            b.Deserialize(out Shininess);
+            b.Deserialize(out ShininessStrength);
+            b.Deserialize(out Reflectivity);
+            b.Deserialize(out BlendMode);
+            b.DeserializeArray(out Textures);
+            for (int i = 0; i < Textures.Length; i++)
+            {
+                Textures[i] = new Texture(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Material(ref b);
         
         public Material RosDeserialize(ref ReadBuffer b) => new Material(ref b);
+        
+        public Material RosDeserialize(ref ReadBuffer2 b) => new Material(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Name);
+            b.Serialize(in Ambient);
+            b.Serialize(in Diffuse);
+            b.Serialize(in Emissive);
+            b.Serialize(Opacity);
+            b.Serialize(BumpScaling);
+            b.Serialize(Shininess);
+            b.Serialize(ShininessStrength);
+            b.Serialize(Reflectivity);
+            b.Serialize(BlendMode);
+            b.SerializeArray(Textures);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Name);
             b.Serialize(in Ambient);
@@ -79,6 +116,22 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 41 + WriteBuffer.GetStringSize(Name) + WriteBuffer.GetArraySize(Textures);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Ambient);
+            WriteBuffer2.AddLength(ref c, Diffuse);
+            WriteBuffer2.AddLength(ref c, Emissive);
+            WriteBuffer2.AddLength(ref c, Opacity);
+            WriteBuffer2.AddLength(ref c, BumpScaling);
+            WriteBuffer2.AddLength(ref c, Shininess);
+            WriteBuffer2.AddLength(ref c, ShininessStrength);
+            WriteBuffer2.AddLength(ref c, Reflectivity);
+            WriteBuffer2.AddLength(ref c, BlendMode);
+            WriteBuffer2.AddLength(ref c, Textures);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Material";

@@ -74,7 +74,7 @@ namespace Iviz.Msgs.GridMapMsgs
             b.DeserializeString(out TopicName);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ProcessFileRequest(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ProcessFileRequest(ref b);
         
         public ProcessFileRequest RosDeserialize(ref ReadBuffer b) => new ProcessFileRequest(ref b);
     
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.GridMapMsgs
             b.Deserialize(out Success);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ProcessFileResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ProcessFileResponse(ref b);
         
         public ProcessFileResponse RosDeserialize(ref ReadBuffer b) => new ProcessFileResponse(ref b);
     

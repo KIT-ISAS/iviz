@@ -59,7 +59,7 @@ namespace Iviz.Msgs.Tf
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public FrameGraphRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
@@ -105,7 +105,7 @@ namespace Iviz.Msgs.Tf
             b.DeserializeString(out DotGraph);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FrameGraphResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new FrameGraphResponse(ref b);
         
         public FrameGraphResponse RosDeserialize(ref ReadBuffer b) => new FrameGraphResponse(ref b);
     

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class CameraInfo : IDeserializableRos1<CameraInfo>, IMessageRos1
+    public sealed class CameraInfo : IDeserializableRos1<CameraInfo>, IDeserializableRos2<CameraInfo>, IMessageRos1, IMessageRos2
     {
         // This message defines meta information for a camera. It should be in a
         // camera namespace on topic "camera_info" and accompanied by up to five
@@ -156,11 +156,44 @@ namespace Iviz.Msgs.SensorMsgs
             Roi = new RegionOfInterest(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CameraInfo(ref b);
+        /// Constructor with buffer.
+        public CameraInfo(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Height);
+            b.Deserialize(out Width);
+            b.DeserializeString(out DistortionModel);
+            b.DeserializeStructArray(out D);
+            b.DeserializeStructArray(9, out K);
+            b.DeserializeStructArray(9, out R);
+            b.DeserializeStructArray(12, out P);
+            b.Deserialize(out BinningX);
+            b.Deserialize(out BinningY);
+            Roi = new RegionOfInterest(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new CameraInfo(ref b);
         
         public CameraInfo RosDeserialize(ref ReadBuffer b) => new CameraInfo(ref b);
+        
+        public CameraInfo RosDeserialize(ref ReadBuffer2 b) => new CameraInfo(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Height);
+            b.Serialize(Width);
+            b.Serialize(DistortionModel);
+            b.SerializeStructArray(D);
+            b.SerializeStructArray(K, 9);
+            b.SerializeStructArray(R, 9);
+            b.SerializeStructArray(P, 12);
+            b.Serialize(BinningX);
+            b.Serialize(BinningY);
+            Roi.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Height);
@@ -198,6 +231,22 @@ namespace Iviz.Msgs.SensorMsgs
                 size += 8 * D.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Height);
+            WriteBuffer2.AddLength(ref c, Width);
+            WriteBuffer2.AddLength(ref c, DistortionModel);
+            WriteBuffer2.AddLength(ref c, D);
+            WriteBuffer2.AddLength(ref c, K, 9);
+            WriteBuffer2.AddLength(ref c, R, 9);
+            WriteBuffer2.AddLength(ref c, P, 12);
+            WriteBuffer2.AddLength(ref c, BinningX);
+            WriteBuffer2.AddLength(ref c, BinningY);
+            Roi.AddRos2MessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

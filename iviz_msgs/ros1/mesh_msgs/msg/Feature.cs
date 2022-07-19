@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class Feature : IDeserializableRos1<Feature>, IMessageRos1
+    public sealed class Feature : IDeserializableRos1<Feature>, IDeserializableRos2<Feature>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "location")] public GeometryMsgs.Point Location;
         [DataMember (Name = "descriptor")] public StdMsgs.Float32[] Descriptor;
@@ -34,11 +34,30 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Feature(ref b);
+        /// Constructor with buffer.
+        public Feature(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Location);
+            b.DeserializeArray(out Descriptor);
+            for (int i = 0; i < Descriptor.Length; i++)
+            {
+                Descriptor[i] = new StdMsgs.Float32(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Feature(ref b);
         
         public Feature RosDeserialize(ref ReadBuffer b) => new Feature(ref b);
+        
+        public Feature RosDeserialize(ref ReadBuffer2 b) => new Feature(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(in Location);
+            b.SerializeArray(Descriptor);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(in Location);
             b.SerializeArray(Descriptor);
@@ -55,6 +74,13 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 28 + 4 * Descriptor.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Location);
+            WriteBuffer2.AddLength(ref c, Descriptor);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/Feature";

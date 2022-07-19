@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerPose : IDeserializableRos1<InteractiveMarkerPose>, IMessageRos1
+    public sealed class InteractiveMarkerPose : IDeserializableRos1<InteractiveMarkerPose>, IDeserializableRos2<InteractiveMarkerPose>, IMessageRos1, IMessageRos2
     {
         // Time/frame info.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -37,11 +37,28 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.DeserializeString(out Name);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerPose(ref b);
+        /// Constructor with buffer.
+        public InteractiveMarkerPose(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Pose);
+            b.DeserializeString(out Name);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerPose(ref b);
         
         public InteractiveMarkerPose RosDeserialize(ref ReadBuffer b) => new InteractiveMarkerPose(ref b);
+        
+        public InteractiveMarkerPose RosDeserialize(ref ReadBuffer2 b) => new InteractiveMarkerPose(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(in Pose);
+            b.Serialize(Name);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(in Pose);
@@ -54,6 +71,14 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
     
         public int RosMessageLength => 60 + Header.RosMessageLength + WriteBuffer.GetStringSize(Name);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Pose);
+            WriteBuffer2.AddLength(ref c, Name);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "visualization_msgs/InteractiveMarkerPose";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Inertia : IDeserializableRos1<Inertia>, IMessageRos1
+    public sealed class Inertia : IDeserializableRos1<Inertia>, IDeserializableRos2<Inertia>, IMessageRos1, IMessageRos2
     {
         // Mass [kg]
         [DataMember (Name = "m")] public double M;
@@ -40,11 +40,38 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out Izz);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Inertia(ref b);
+        /// Constructor with buffer.
+        public Inertia(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out M);
+            b.Deserialize(out Com);
+            b.Deserialize(out Ixx);
+            b.Deserialize(out Ixy);
+            b.Deserialize(out Ixz);
+            b.Deserialize(out Iyy);
+            b.Deserialize(out Iyz);
+            b.Deserialize(out Izz);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Inertia(ref b);
         
         public Inertia RosDeserialize(ref ReadBuffer b) => new Inertia(ref b);
+        
+        public Inertia RosDeserialize(ref ReadBuffer2 b) => new Inertia(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(M);
+            b.Serialize(in Com);
+            b.Serialize(Ixx);
+            b.Serialize(Ixy);
+            b.Serialize(Ixz);
+            b.Serialize(Iyy);
+            b.Serialize(Iyz);
+            b.Serialize(Izz);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(M);
             b.Serialize(in Com);
@@ -64,6 +91,22 @@ namespace Iviz.Msgs.GeometryMsgs
         public const int RosFixedMessageLength = 80;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 80;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, M);
+            WriteBuffer2.AddLength(ref c, Com);
+            WriteBuffer2.AddLength(ref c, Ixx);
+            WriteBuffer2.AddLength(ref c, Ixy);
+            WriteBuffer2.AddLength(ref c, Ixz);
+            WriteBuffer2.AddLength(ref c, Iyy);
+            WriteBuffer2.AddLength(ref c, Iyz);
+            WriteBuffer2.AddLength(ref c, Izz);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/Inertia";

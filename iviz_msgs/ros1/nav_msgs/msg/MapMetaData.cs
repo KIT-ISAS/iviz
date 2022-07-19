@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class MapMetaData : IDeserializableRos1<MapMetaData>, IMessageRos1
+    public sealed class MapMetaData : IDeserializableRos1<MapMetaData>, IDeserializableRos2<MapMetaData>, IMessageRos1, IMessageRos2
     {
         // This hold basic information about the characterists of the OccupancyGrid
         // The time at which the map was loaded
@@ -35,11 +35,32 @@ namespace Iviz.Msgs.NavMsgs
             b.Deserialize(out Origin);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MapMetaData(ref b);
+        /// Constructor with buffer.
+        public MapMetaData(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out MapLoadTime);
+            b.Deserialize(out Resolution);
+            b.Deserialize(out Width);
+            b.Deserialize(out Height);
+            b.Deserialize(out Origin);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MapMetaData(ref b);
         
         public MapMetaData RosDeserialize(ref ReadBuffer b) => new MapMetaData(ref b);
+        
+        public MapMetaData RosDeserialize(ref ReadBuffer2 b) => new MapMetaData(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(MapLoadTime);
+            b.Serialize(Resolution);
+            b.Serialize(Width);
+            b.Serialize(Height);
+            b.Serialize(in Origin);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(MapLoadTime);
             b.Serialize(Resolution);
@@ -56,6 +77,19 @@ namespace Iviz.Msgs.NavMsgs
         public const int RosFixedMessageLength = 76;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 76;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, MapLoadTime);
+            WriteBuffer2.AddLength(ref c, Resolution);
+            WriteBuffer2.AddLength(ref c, Width);
+            WriteBuffer2.AddLength(ref c, Height);
+            WriteBuffer2.AddLength(ref c, Origin);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "nav_msgs/MapMetaData";

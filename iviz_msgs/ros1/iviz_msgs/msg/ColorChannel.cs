@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ColorChannel : IDeserializableRos1<ColorChannel>, IMessageRos1
+    public sealed class ColorChannel : IDeserializableRos1<ColorChannel>, IDeserializableRos2<ColorChannel>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "colors")] public Color32[] Colors;
     
@@ -27,11 +27,24 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Colors);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ColorChannel(ref b);
+        /// Constructor with buffer.
+        public ColorChannel(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out Colors);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ColorChannel(ref b);
         
         public ColorChannel RosDeserialize(ref ReadBuffer b) => new ColorChannel(ref b);
+        
+        public ColorChannel RosDeserialize(ref ReadBuffer2 b) => new ColorChannel(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(Colors);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Colors);
         }
@@ -42,6 +55,12 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 4 + 4 * Colors.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Colors);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/ColorChannel";

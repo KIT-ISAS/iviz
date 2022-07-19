@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshGeometryStamped : IDeserializableRos1<MeshGeometryStamped>, IMessageRos1
+    public sealed class MeshGeometryStamped : IDeserializableRos1<MeshGeometryStamped>, IDeserializableRos2<MeshGeometryStamped>, IMessageRos1, IMessageRos2
     {
         // Mesh Geometry Message
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -35,11 +35,28 @@ namespace Iviz.Msgs.MeshMsgs
             MeshGeometry = new MeshMsgs.MeshGeometry(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshGeometryStamped(ref b);
+        /// Constructor with buffer.
+        public MeshGeometryStamped(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeString(out Uuid);
+            MeshGeometry = new MeshMsgs.MeshGeometry(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshGeometryStamped(ref b);
         
         public MeshGeometryStamped RosDeserialize(ref ReadBuffer b) => new MeshGeometryStamped(ref b);
+        
+        public MeshGeometryStamped RosDeserialize(ref ReadBuffer2 b) => new MeshGeometryStamped(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Uuid);
+            MeshGeometry.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Uuid);
@@ -62,6 +79,14 @@ namespace Iviz.Msgs.MeshMsgs
                 size += MeshGeometry.RosMessageLength;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Uuid);
+            MeshGeometry.AddRos2MessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

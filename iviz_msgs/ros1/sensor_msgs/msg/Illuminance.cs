@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Illuminance : IDeserializableRos1<Illuminance>, IMessageRos1
+    public sealed class Illuminance : IDeserializableRos1<Illuminance>, IDeserializableRos2<Illuminance>, IMessageRos1, IMessageRos2
     {
         // Single photometric illuminance measurement.  Light should be assumed to be
         // measured along the sensor's x-axis (the area of detection is the y-z plane).
@@ -48,11 +48,28 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Variance);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Illuminance(ref b);
+        /// Constructor with buffer.
+        public Illuminance(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Illuminance_);
+            b.Deserialize(out Variance);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Illuminance(ref b);
         
         public Illuminance RosDeserialize(ref ReadBuffer b) => new Illuminance(ref b);
+        
+        public Illuminance RosDeserialize(ref ReadBuffer2 b) => new Illuminance(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Illuminance_);
+            b.Serialize(Variance);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Illuminance_);
@@ -64,6 +81,14 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 16 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Illuminance_);
+            WriteBuffer2.AddLength(ref c, Variance);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/Illuminance";

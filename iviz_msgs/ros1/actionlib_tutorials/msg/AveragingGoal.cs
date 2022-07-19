@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class AveragingGoal : IDeserializableRos1<AveragingGoal>, IMessageRos1, IGoal<AveragingActionGoal>
+    public sealed class AveragingGoal : IDeserializableRos1<AveragingGoal>, IDeserializableRos2<AveragingGoal>, IMessageRos1, IMessageRos2, IGoal<AveragingActionGoal>
     {
         //goal definition
         [DataMember (Name = "edges")] public int Edges;
@@ -30,11 +30,26 @@ namespace Iviz.Msgs.ActionlibTutorials
             b.Deserialize(out Radius);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AveragingGoal(ref b);
+        /// Constructor with buffer.
+        public AveragingGoal(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Edges);
+            b.Deserialize(out Radius);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AveragingGoal(ref b);
         
         public AveragingGoal RosDeserialize(ref ReadBuffer b) => new AveragingGoal(ref b);
+        
+        public AveragingGoal RosDeserialize(ref ReadBuffer2 b) => new AveragingGoal(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Edges);
+            b.Serialize(Radius);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Edges);
             b.Serialize(Radius);
@@ -48,6 +63,16 @@ namespace Iviz.Msgs.ActionlibTutorials
         public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 8;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Edges);
+            WriteBuffer2.AddLength(ref c, Radius);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_tutorials/AveragingGoal";

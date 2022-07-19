@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Image : IDeserializableRos1<Image>, IMessageRos1
+    public sealed class Image : IDeserializableRos1<Image>, IDeserializableRos2<Image>, IMessageRos1, IMessageRos2
     {
         // This message contains an uncompressed image
         // (0, 0) is at top-left corner of image
@@ -56,11 +56,36 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructRent(out Data);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Image(ref b);
+        /// Constructor with buffer.
+        public Image(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Height);
+            b.Deserialize(out Width);
+            b.DeserializeString(out Encoding);
+            b.Deserialize(out IsBigendian);
+            b.Deserialize(out Step);
+            b.DeserializeStructRent(out Data);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Image(ref b);
         
         public Image RosDeserialize(ref ReadBuffer b) => new Image(ref b);
+        
+        public Image RosDeserialize(ref ReadBuffer2 b) => new Image(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Height);
+            b.Serialize(Width);
+            b.Serialize(Encoding);
+            b.Serialize(IsBigendian);
+            b.Serialize(Step);
+            b.SerializeStructArray(Data);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Height);
@@ -86,6 +111,18 @@ namespace Iviz.Msgs.SensorMsgs
                 size += Data.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Height);
+            WriteBuffer2.AddLength(ref c, Width);
+            WriteBuffer2.AddLength(ref c, Encoding);
+            WriteBuffer2.AddLength(ref c, IsBigendian);
+            WriteBuffer2.AddLength(ref c, Step);
+            WriteBuffer2.AddLength(ref c, Data);
         }
     
         /// <summary> Full ROS name of this message. </summary>

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class TriangleIndices : IDeserializableRos1<TriangleIndices>, IMessageRos1
+    public sealed class TriangleIndices : IDeserializableRos1<TriangleIndices>, IDeserializableRos2<TriangleIndices>, IMessageRos1, IMessageRos2
     {
         // Definition of a triangle's vertices
         [DataMember (Name = "vertex_indices")] public uint[/*3*/] VertexIndices;
@@ -28,11 +28,24 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeStructArray(3, out VertexIndices);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TriangleIndices(ref b);
+        /// Constructor with buffer.
+        public TriangleIndices(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(3, out VertexIndices);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TriangleIndices(ref b);
         
         public TriangleIndices RosDeserialize(ref ReadBuffer b) => new TriangleIndices(ref b);
+        
+        public TriangleIndices RosDeserialize(ref ReadBuffer2 b) => new TriangleIndices(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(VertexIndices, 3);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(VertexIndices, 3);
         }
@@ -47,6 +60,15 @@ namespace Iviz.Msgs.MeshMsgs
         public const int RosFixedMessageLength = 12;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 12;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, VertexIndices, 3);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/TriangleIndices";

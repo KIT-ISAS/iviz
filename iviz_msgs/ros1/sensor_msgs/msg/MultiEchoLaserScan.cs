@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class MultiEchoLaserScan : IDeserializableRos1<MultiEchoLaserScan>, IMessageRos1
+    public sealed class MultiEchoLaserScan : IDeserializableRos1<MultiEchoLaserScan>, IDeserializableRos2<MultiEchoLaserScan>, IMessageRos1, IMessageRos2
     {
         // Single scan from a multi-echo planar laser range-finder
         //
@@ -74,11 +74,50 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MultiEchoLaserScan(ref b);
+        /// Constructor with buffer.
+        public MultiEchoLaserScan(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out AngleMin);
+            b.Deserialize(out AngleMax);
+            b.Deserialize(out AngleIncrement);
+            b.Deserialize(out TimeIncrement);
+            b.Deserialize(out ScanTime);
+            b.Deserialize(out RangeMin);
+            b.Deserialize(out RangeMax);
+            b.DeserializeArray(out Ranges);
+            for (int i = 0; i < Ranges.Length; i++)
+            {
+                Ranges[i] = new LaserEcho(ref b);
+            }
+            b.DeserializeArray(out Intensities);
+            for (int i = 0; i < Intensities.Length; i++)
+            {
+                Intensities[i] = new LaserEcho(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MultiEchoLaserScan(ref b);
         
         public MultiEchoLaserScan RosDeserialize(ref ReadBuffer b) => new MultiEchoLaserScan(ref b);
+        
+        public MultiEchoLaserScan RosDeserialize(ref ReadBuffer2 b) => new MultiEchoLaserScan(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(AngleMin);
+            b.Serialize(AngleMax);
+            b.Serialize(AngleIncrement);
+            b.Serialize(TimeIncrement);
+            b.Serialize(ScanTime);
+            b.Serialize(RangeMin);
+            b.Serialize(RangeMax);
+            b.SerializeArray(Ranges);
+            b.SerializeArray(Intensities);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(AngleMin);
@@ -117,6 +156,21 @@ namespace Iviz.Msgs.SensorMsgs
                 size += WriteBuffer.GetArraySize(Intensities);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, AngleMin);
+            WriteBuffer2.AddLength(ref c, AngleMax);
+            WriteBuffer2.AddLength(ref c, AngleIncrement);
+            WriteBuffer2.AddLength(ref c, TimeIncrement);
+            WriteBuffer2.AddLength(ref c, ScanTime);
+            WriteBuffer2.AddLength(ref c, RangeMin);
+            WriteBuffer2.AddLength(ref c, RangeMax);
+            WriteBuffer2.AddLength(ref c, Ranges);
+            WriteBuffer2.AddLength(ref c, Intensities);
         }
     
         /// <summary> Full ROS name of this message. </summary>

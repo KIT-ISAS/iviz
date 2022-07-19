@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapGoal : IDeserializableRos1<GetMapGoal>, IMessageRos1, IGoal<GetMapActionGoal>
+    public sealed class GetMapGoal : IDeserializableRos1<GetMapGoal>, IDeserializableRos2<GetMapGoal>, IMessageRos1, IMessageRos2, IGoal<GetMapActionGoal>
     {
         // Get the map as a nav_msgs/OccupancyGrid
     
@@ -19,14 +19,25 @@ namespace Iviz.Msgs.NavMsgs
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        /// Constructor with buffer.
+        public GetMapGoal(ref ReadBuffer2 b)
+        {
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public GetMapGoal RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public GetMapGoal RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static GetMapGoal? singleton;
         public static GetMapGoal Singleton => singleton ??= new GetMapGoal();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -38,6 +49,9 @@ namespace Iviz.Msgs.NavMsgs
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "nav_msgs/GetMapGoal";

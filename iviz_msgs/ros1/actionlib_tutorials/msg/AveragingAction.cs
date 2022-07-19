@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class AveragingAction : IDeserializableRos1<AveragingAction>, IMessageRos1,
+    public sealed class AveragingAction : IDeserializableRos1<AveragingAction>, IDeserializableRos2<AveragingAction>, IMessageRos1, IMessageRos2,
 		IAction<AveragingActionGoal, AveragingActionFeedback, AveragingActionResult>
     {
         [DataMember (Name = "action_goal")] public AveragingActionGoal ActionGoal { get; set; }
@@ -36,11 +36,28 @@ namespace Iviz.Msgs.ActionlibTutorials
             ActionFeedback = new AveragingActionFeedback(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AveragingAction(ref b);
+        /// Constructor with buffer.
+        public AveragingAction(ref ReadBuffer2 b)
+        {
+            ActionGoal = new AveragingActionGoal(ref b);
+            ActionResult = new AveragingActionResult(ref b);
+            ActionFeedback = new AveragingActionFeedback(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AveragingAction(ref b);
         
         public AveragingAction RosDeserialize(ref ReadBuffer b) => new AveragingAction(ref b);
+        
+        public AveragingAction RosDeserialize(ref ReadBuffer2 b) => new AveragingAction(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            ActionGoal.RosSerialize(ref b);
+            ActionResult.RosSerialize(ref b);
+            ActionFeedback.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             ActionGoal.RosSerialize(ref b);
             ActionResult.RosSerialize(ref b);
@@ -66,6 +83,14 @@ namespace Iviz.Msgs.ActionlibTutorials
                 size += ActionFeedback.RosMessageLength;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            ActionGoal.AddRos2MessageLength(ref c);
+            ActionResult.AddRos2MessageLength(ref c);
+            ActionFeedback.AddRos2MessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

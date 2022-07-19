@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TurtleActionlib
 {
     [DataContract]
-    public sealed class ShapeActionResult : IDeserializableRos1<ShapeActionResult>, IMessageRos1, IActionResult<ShapeResult>
+    public sealed class ShapeActionResult : IDeserializableRos1<ShapeActionResult>, IDeserializableRos2<ShapeActionResult>, IMessageRos1, IMessageRos2, IActionResult<ShapeResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -34,11 +34,28 @@ namespace Iviz.Msgs.TurtleActionlib
             Result = new ShapeResult(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ShapeActionResult(ref b);
+        /// Constructor with buffer.
+        public ShapeActionResult(ref ReadBuffer2 b)
+        {
+            Header = new StdMsgs.Header(ref b);
+            Status = new ActionlibMsgs.GoalStatus(ref b);
+            Result = new ShapeResult(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ShapeActionResult(ref b);
         
         public ShapeActionResult RosDeserialize(ref ReadBuffer b) => new ShapeActionResult(ref b);
+        
+        public ShapeActionResult RosDeserialize(ref ReadBuffer2 b) => new ShapeActionResult(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Status.RosSerialize(ref b);
+            Result.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Status.RosSerialize(ref b);
@@ -54,6 +71,14 @@ namespace Iviz.Msgs.TurtleActionlib
         }
     
         public int RosMessageLength => 8 + Header.RosMessageLength + Status.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Status.AddRos2MessageLength(ref c);
+            Result.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "turtle_actionlib/ShapeActionResult";

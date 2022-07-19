@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Wrench : IDeserializableRos1<Wrench>, IMessageRos1
+    public sealed class Wrench : IDeserializableRos1<Wrench>, IDeserializableRos2<Wrench>, IMessageRos1, IMessageRos2
     {
         // This represents force in free space, separated into
         // its linear and angular parts.
@@ -31,11 +31,26 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out Torque);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Wrench(ref b);
+        /// Constructor with buffer.
+        public Wrench(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Force);
+            b.Deserialize(out Torque);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Wrench(ref b);
         
         public Wrench RosDeserialize(ref ReadBuffer b) => new Wrench(ref b);
+        
+        public Wrench RosDeserialize(ref ReadBuffer2 b) => new Wrench(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(in Force);
+            b.Serialize(in Torque);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(in Force);
             b.Serialize(in Torque);
@@ -49,6 +64,16 @@ namespace Iviz.Msgs.GeometryMsgs
         public const int RosFixedMessageLength = 48;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 48;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Force);
+            WriteBuffer2.AddLength(ref c, Torque);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/Wrench";

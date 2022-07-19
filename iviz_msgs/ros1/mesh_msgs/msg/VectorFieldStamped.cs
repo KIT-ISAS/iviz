@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class VectorFieldStamped : IDeserializableRos1<VectorFieldStamped>, IMessageRos1
+    public sealed class VectorFieldStamped : IDeserializableRos1<VectorFieldStamped>, IDeserializableRos2<VectorFieldStamped>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "vector_field")] public MeshMsgs.VectorField VectorField;
@@ -30,11 +30,26 @@ namespace Iviz.Msgs.MeshMsgs
             VectorField = new MeshMsgs.VectorField(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new VectorFieldStamped(ref b);
+        /// Constructor with buffer.
+        public VectorFieldStamped(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            VectorField = new MeshMsgs.VectorField(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new VectorFieldStamped(ref b);
         
         public VectorFieldStamped RosDeserialize(ref ReadBuffer b) => new VectorFieldStamped(ref b);
+        
+        public VectorFieldStamped RosDeserialize(ref ReadBuffer2 b) => new VectorFieldStamped(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            VectorField.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             VectorField.RosSerialize(ref b);
@@ -47,6 +62,13 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 0 + Header.RosMessageLength + VectorField.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            VectorField.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/VectorFieldStamped";

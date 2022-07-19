@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Light : IDeserializableRos1<Light>, IMessageRos1
+    public sealed class Light : IDeserializableRos1<Light>, IDeserializableRos2<Light>, IMessageRos1, IMessageRos2
     {
         public const byte POINT = 0;
         public const byte DIRECTIONAL = 1;
@@ -40,11 +40,40 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out OuterAngle);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Light(ref b);
+        /// Constructor with buffer.
+        public Light(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Name);
+            b.Deserialize(out Type);
+            b.Deserialize(out CastShadows);
+            b.Deserialize(out Diffuse);
+            b.Deserialize(out Range);
+            b.Deserialize(out Position);
+            b.Deserialize(out Direction);
+            b.Deserialize(out InnerAngle);
+            b.Deserialize(out OuterAngle);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Light(ref b);
         
         public Light RosDeserialize(ref ReadBuffer b) => new Light(ref b);
+        
+        public Light RosDeserialize(ref ReadBuffer2 b) => new Light(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Name);
+            b.Serialize(Type);
+            b.Serialize(CastShadows);
+            b.Serialize(in Diffuse);
+            b.Serialize(Range);
+            b.Serialize(in Position);
+            b.Serialize(in Direction);
+            b.Serialize(InnerAngle);
+            b.Serialize(OuterAngle);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Name);
             b.Serialize(Type);
@@ -63,6 +92,20 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 46 + WriteBuffer.GetStringSize(Name);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, CastShadows);
+            WriteBuffer2.AddLength(ref c, Diffuse);
+            WriteBuffer2.AddLength(ref c, Range);
+            WriteBuffer2.AddLength(ref c, Position);
+            WriteBuffer2.AddLength(ref c, Direction);
+            WriteBuffer2.AddLength(ref c, InnerAngle);
+            WriteBuffer2.AddLength(ref c, OuterAngle);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Light";

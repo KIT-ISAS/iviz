@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TwoIntsResult : IDeserializableRos1<TwoIntsResult>, IMessageRos1, IResult<TwoIntsActionResult>
+    public sealed class TwoIntsResult : IDeserializableRos1<TwoIntsResult>, IDeserializableRos2<TwoIntsResult>, IMessageRos1, IMessageRos2, IResult<TwoIntsActionResult>
     {
         [DataMember (Name = "sum")] public long Sum;
     
@@ -26,11 +26,24 @@ namespace Iviz.Msgs.Actionlib
             b.Deserialize(out Sum);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TwoIntsResult(ref b);
+        /// Constructor with buffer.
+        public TwoIntsResult(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Sum);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TwoIntsResult(ref b);
         
         public TwoIntsResult RosDeserialize(ref ReadBuffer b) => new TwoIntsResult(ref b);
+        
+        public TwoIntsResult RosDeserialize(ref ReadBuffer2 b) => new TwoIntsResult(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Sum);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Sum);
         }
@@ -43,6 +56,15 @@ namespace Iviz.Msgs.Actionlib
         public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 8;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Sum);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib/TwoIntsResult";

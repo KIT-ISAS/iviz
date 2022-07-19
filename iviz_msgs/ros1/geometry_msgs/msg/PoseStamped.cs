@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PoseStamped : IDeserializableRos1<PoseStamped>, IMessageRos1
+    public sealed class PoseStamped : IDeserializableRos1<PoseStamped>, IDeserializableRos2<PoseStamped>, IMessageRos1, IMessageRos2
     {
         // A Pose with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -30,11 +30,26 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out Pose);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PoseStamped(ref b);
+        /// Constructor with buffer.
+        public PoseStamped(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Pose);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PoseStamped(ref b);
         
         public PoseStamped RosDeserialize(ref ReadBuffer b) => new PoseStamped(ref b);
+        
+        public PoseStamped RosDeserialize(ref ReadBuffer2 b) => new PoseStamped(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(in Pose);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(in Pose);
@@ -45,6 +60,13 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         public int RosMessageLength => 56 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Pose);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/PoseStamped";

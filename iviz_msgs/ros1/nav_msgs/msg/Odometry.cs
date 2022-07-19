@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class Odometry : IDeserializableRos1<Odometry>, IMessageRos1
+    public sealed class Odometry : IDeserializableRos1<Odometry>, IDeserializableRos2<Odometry>, IMessageRos1, IMessageRos2
     {
         // This represents an estimate of a position and velocity in free space.  
         // The pose in this message should be specified in the coordinate frame given by header.frame_id.
@@ -41,11 +41,30 @@ namespace Iviz.Msgs.NavMsgs
             Twist = new GeometryMsgs.TwistWithCovariance(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Odometry(ref b);
+        /// Constructor with buffer.
+        public Odometry(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeString(out ChildFrameId);
+            Pose = new GeometryMsgs.PoseWithCovariance(ref b);
+            Twist = new GeometryMsgs.TwistWithCovariance(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Odometry(ref b);
         
         public Odometry RosDeserialize(ref ReadBuffer b) => new Odometry(ref b);
+        
+        public Odometry RosDeserialize(ref ReadBuffer2 b) => new Odometry(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(ChildFrameId);
+            Pose.RosSerialize(ref b);
+            Twist.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(ChildFrameId);
@@ -63,6 +82,15 @@ namespace Iviz.Msgs.NavMsgs
         }
     
         public int RosMessageLength => 684 + Header.RosMessageLength + WriteBuffer.GetStringSize(ChildFrameId);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, ChildFrameId);
+            Pose.AddRos2MessageLength(ref c);
+            Twist.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "nav_msgs/Odometry";

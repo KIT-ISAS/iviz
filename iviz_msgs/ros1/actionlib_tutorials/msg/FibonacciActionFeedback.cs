@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class FibonacciActionFeedback : IDeserializableRos1<FibonacciActionFeedback>, IMessageRos1, IActionFeedback<FibonacciFeedback>
+    public sealed class FibonacciActionFeedback : IDeserializableRos1<FibonacciActionFeedback>, IDeserializableRos2<FibonacciActionFeedback>, IMessageRos1, IMessageRos2, IActionFeedback<FibonacciFeedback>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -34,11 +34,28 @@ namespace Iviz.Msgs.ActionlibTutorials
             Feedback = new FibonacciFeedback(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FibonacciActionFeedback(ref b);
+        /// Constructor with buffer.
+        public FibonacciActionFeedback(ref ReadBuffer2 b)
+        {
+            Header = new StdMsgs.Header(ref b);
+            Status = new ActionlibMsgs.GoalStatus(ref b);
+            Feedback = new FibonacciFeedback(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new FibonacciActionFeedback(ref b);
         
         public FibonacciActionFeedback RosDeserialize(ref ReadBuffer b) => new FibonacciActionFeedback(ref b);
+        
+        public FibonacciActionFeedback RosDeserialize(ref ReadBuffer2 b) => new FibonacciActionFeedback(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Status.RosSerialize(ref b);
+            Feedback.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Status.RosSerialize(ref b);
@@ -62,6 +79,14 @@ namespace Iviz.Msgs.ActionlibTutorials
                 size += Feedback.RosMessageLength;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Status.AddRos2MessageLength(ref c);
+            Feedback.AddRos2MessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

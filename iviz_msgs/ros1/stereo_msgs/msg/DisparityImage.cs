@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StereoMsgs
 {
     [DataContract]
-    public sealed class DisparityImage : IDeserializableRos1<DisparityImage>, IMessageRos1
+    public sealed class DisparityImage : IDeserializableRos1<DisparityImage>, IDeserializableRos2<DisparityImage>, IMessageRos1, IMessageRos2
     {
         // Separate header for compatibility with current TimeSynchronizer.
         // Likely to be removed in a later release, use image.header instead.
@@ -54,11 +54,38 @@ namespace Iviz.Msgs.StereoMsgs
             b.Deserialize(out DeltaD);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new DisparityImage(ref b);
+        /// Constructor with buffer.
+        public DisparityImage(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            Image = new SensorMsgs.Image(ref b);
+            b.Deserialize(out F);
+            b.Deserialize(out T);
+            ValidWindow = new SensorMsgs.RegionOfInterest(ref b);
+            b.Deserialize(out MinDisparity);
+            b.Deserialize(out MaxDisparity);
+            b.Deserialize(out DeltaD);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new DisparityImage(ref b);
         
         public DisparityImage RosDeserialize(ref ReadBuffer b) => new DisparityImage(ref b);
+        
+        public DisparityImage RosDeserialize(ref ReadBuffer2 b) => new DisparityImage(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Image.RosSerialize(ref b);
+            b.Serialize(F);
+            b.Serialize(T);
+            ValidWindow.RosSerialize(ref b);
+            b.Serialize(MinDisparity);
+            b.Serialize(MaxDisparity);
+            b.Serialize(DeltaD);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Image.RosSerialize(ref b);
@@ -79,6 +106,19 @@ namespace Iviz.Msgs.StereoMsgs
         }
     
         public int RosMessageLength => 37 + Header.RosMessageLength + Image.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Image.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, F);
+            WriteBuffer2.AddLength(ref c, T);
+            ValidWindow.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, MinDisparity);
+            WriteBuffer2.AddLength(ref c, MaxDisparity);
+            WriteBuffer2.AddLength(ref c, DeltaD);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "stereo_msgs/DisparityImage";

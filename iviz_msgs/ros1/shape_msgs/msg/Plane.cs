@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract]
-    public sealed class Plane : IDeserializableRos1<Plane>, IMessageRos1
+    public sealed class Plane : IDeserializableRos1<Plane>, IDeserializableRos2<Plane>, IMessageRos1, IMessageRos2
     {
         // Representation of a plane, using the plane equation ax + by + cz + d = 0
         // a := coef[0]
@@ -32,11 +32,24 @@ namespace Iviz.Msgs.ShapeMsgs
             b.DeserializeStructArray(4, out Coef);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Plane(ref b);
+        /// Constructor with buffer.
+        public Plane(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(4, out Coef);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Plane(ref b);
         
         public Plane RosDeserialize(ref ReadBuffer b) => new Plane(ref b);
+        
+        public Plane RosDeserialize(ref ReadBuffer2 b) => new Plane(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(Coef, 4);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Coef, 4);
         }
@@ -51,6 +64,15 @@ namespace Iviz.Msgs.ShapeMsgs
         public const int RosFixedMessageLength = 32;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 32;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Coef, 4);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "shape_msgs/Plane";

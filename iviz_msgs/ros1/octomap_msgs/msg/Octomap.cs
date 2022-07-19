@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.OctomapMsgs
 {
     [DataContract]
-    public sealed class Octomap : IDeserializableRos1<Octomap>, IMessageRos1
+    public sealed class Octomap : IDeserializableRos1<Octomap>, IDeserializableRos2<Octomap>, IMessageRos1, IMessageRos2
     {
         // A 3D map in binary format, as Octree
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -35,11 +35,32 @@ namespace Iviz.Msgs.OctomapMsgs
             b.DeserializeStructArray(out Data);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Octomap(ref b);
+        /// Constructor with buffer.
+        public Octomap(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Binary);
+            b.DeserializeString(out Id);
+            b.Deserialize(out Resolution);
+            b.DeserializeStructArray(out Data);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Octomap(ref b);
         
         public Octomap RosDeserialize(ref ReadBuffer b) => new Octomap(ref b);
+        
+        public Octomap RosDeserialize(ref ReadBuffer2 b) => new Octomap(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Binary);
+            b.Serialize(Id);
+            b.Serialize(Resolution);
+            b.SerializeStructArray(Data);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Binary);
@@ -63,6 +84,16 @@ namespace Iviz.Msgs.OctomapMsgs
                 size += Data.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Binary);
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, Resolution);
+            WriteBuffer2.AddLength(ref c, Data);
         }
     
         /// <summary> Full ROS name of this message. </summary>

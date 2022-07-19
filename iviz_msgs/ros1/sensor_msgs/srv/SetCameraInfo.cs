@@ -76,7 +76,7 @@ namespace Iviz.Msgs.SensorMsgs
             CameraInfo = new SensorMsgs.CameraInfo(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetCameraInfoRequest(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetCameraInfoRequest(ref b);
         
         public SetCameraInfoRequest RosDeserialize(ref ReadBuffer b) => new SetCameraInfoRequest(ref b);
     
@@ -124,7 +124,7 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeString(out StatusMessage);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetCameraInfoResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetCameraInfoResponse(ref b);
         
         public SetCameraInfoResponse RosDeserialize(ref ReadBuffer b) => new SetCameraInfoResponse(ref b);
     

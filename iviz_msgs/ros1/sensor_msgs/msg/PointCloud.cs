@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class PointCloud : IDeserializableRos1<PointCloud>, IMessageRos1
+    public sealed class PointCloud : IDeserializableRos1<PointCloud>, IDeserializableRos2<PointCloud>, IMessageRos1, IMessageRos2
     {
         // This message holds a collection of 3d points, plus optional additional
         // information about each point.
@@ -46,11 +46,32 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PointCloud(ref b);
+        /// Constructor with buffer.
+        public PointCloud(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeStructArray(out Points);
+            b.DeserializeArray(out Channels);
+            for (int i = 0; i < Channels.Length; i++)
+            {
+                Channels[i] = new ChannelFloat32(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PointCloud(ref b);
         
         public PointCloud RosDeserialize(ref ReadBuffer b) => new PointCloud(ref b);
+        
+        public PointCloud RosDeserialize(ref ReadBuffer2 b) => new PointCloud(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.SerializeStructArray(Points);
+            b.SerializeArray(Channels);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.SerializeStructArray(Points);
@@ -77,6 +98,14 @@ namespace Iviz.Msgs.SensorMsgs
                 size += WriteBuffer.GetArraySize(Channels);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Points);
+            WriteBuffer2.AddLength(ref c, Channels);
         }
     
         /// <summary> Full ROS name of this message. </summary>

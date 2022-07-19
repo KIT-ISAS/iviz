@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class BoundingBoxStamped : IDeserializableRos1<BoundingBoxStamped>, IMessageRos1
+    public sealed class BoundingBoxStamped : IDeserializableRos1<BoundingBoxStamped>, IDeserializableRos2<BoundingBoxStamped>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "boundary")] public BoundingBox Boundary;
@@ -30,11 +30,26 @@ namespace Iviz.Msgs.IvizMsgs
             Boundary = new BoundingBox(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new BoundingBoxStamped(ref b);
+        /// Constructor with buffer.
+        public BoundingBoxStamped(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            Boundary = new BoundingBox(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new BoundingBoxStamped(ref b);
         
         public BoundingBoxStamped RosDeserialize(ref ReadBuffer b) => new BoundingBoxStamped(ref b);
+        
+        public BoundingBoxStamped RosDeserialize(ref ReadBuffer2 b) => new BoundingBoxStamped(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Boundary.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Boundary.RosSerialize(ref b);
@@ -47,6 +62,13 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 80 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Boundary.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/BoundingBoxStamped";

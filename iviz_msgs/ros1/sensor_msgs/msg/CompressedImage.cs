@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class CompressedImage : IDeserializableRos1<CompressedImage>, IMessageRos1
+    public sealed class CompressedImage : IDeserializableRos1<CompressedImage>, IDeserializableRos2<CompressedImage>, IMessageRos1, IMessageRos2
     {
         // This message contains a compressed image
         /// <summary> Header timestamp should be acquisition time of image </summary>
@@ -45,11 +45,28 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructArray(out Data);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CompressedImage(ref b);
+        /// Constructor with buffer.
+        public CompressedImage(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeString(out Format);
+            b.DeserializeStructArray(out Data);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new CompressedImage(ref b);
         
         public CompressedImage RosDeserialize(ref ReadBuffer b) => new CompressedImage(ref b);
+        
+        public CompressedImage RosDeserialize(ref ReadBuffer2 b) => new CompressedImage(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Format);
+            b.SerializeStructArray(Data);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Format);
@@ -71,6 +88,14 @@ namespace Iviz.Msgs.SensorMsgs
                 size += Data.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Format);
+            WriteBuffer2.AddLength(ref c, Data);
         }
     
         /// <summary> Full ROS name of this message. </summary>

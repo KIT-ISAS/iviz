@@ -139,26 +139,29 @@ public static class BuiltIns
         return JsonConvert.SerializeObject(o, indented ? Formatting.Indented : Formatting.None);
     }
 
-    public static byte[] SerializeToArray<T>(this T o) where T : ISerializable
+    public static byte[] SerializeToArray(this ISerializableRos1 o)
     {
         o.RosValidate();
         byte[] bytes = new byte[o.RosMessageLength];
-        if (o is IMessageRos2)
-        {
-            WriteBuffer2.Serialize(o, bytes);
-        }
-        else
-        {
-            WriteBuffer.Serialize(o, bytes);
-        }
+        WriteBuffer.Serialize(o, bytes);
 
         return bytes;
     }
-    
+
+    public static byte[] SerializeToArray(this ISerializableRos2 o)
+    {
+        o.RosValidate();
+        byte[] bytes = new byte[o.RosMessageLength];
+        WriteBuffer2.Serialize(o, bytes);
+
+        return bytes;
+    }
+
+
     public static bool IsRos1<T>() => typeof(IMessageRos1).IsAssignableFrom(typeof(T));
 
     public static bool IsRos2<T>() => typeof(IMessageRos2).IsAssignableFrom(typeof(T));
-    
+
     public static bool IsRos1<T>(this T msg) where T : ISerializable => msg is IMessageRos1;
 
     public static bool IsRos2<T>(this T msg) where T : ISerializable => msg is IMessageRos2;

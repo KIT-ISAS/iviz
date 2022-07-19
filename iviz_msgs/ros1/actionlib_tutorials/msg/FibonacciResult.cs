@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class FibonacciResult : IDeserializableRos1<FibonacciResult>, IMessageRos1, IResult<FibonacciActionResult>
+    public sealed class FibonacciResult : IDeserializableRos1<FibonacciResult>, IDeserializableRos2<FibonacciResult>, IMessageRos1, IMessageRos2, IResult<FibonacciActionResult>
     {
         //result definition
         [DataMember (Name = "sequence")] public int[] Sequence;
@@ -28,11 +28,24 @@ namespace Iviz.Msgs.ActionlibTutorials
             b.DeserializeStructArray(out Sequence);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FibonacciResult(ref b);
+        /// Constructor with buffer.
+        public FibonacciResult(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out Sequence);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new FibonacciResult(ref b);
         
         public FibonacciResult RosDeserialize(ref ReadBuffer b) => new FibonacciResult(ref b);
+        
+        public FibonacciResult RosDeserialize(ref ReadBuffer2 b) => new FibonacciResult(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(Sequence);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Sequence);
         }
@@ -43,6 +56,12 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
     
         public int RosMessageLength => 4 + 4 * Sequence.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Sequence);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_tutorials/FibonacciResult";

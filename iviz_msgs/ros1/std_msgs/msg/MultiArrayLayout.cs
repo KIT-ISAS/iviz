@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class MultiArrayLayout : IDeserializableRos1<MultiArrayLayout>, IMessageRos1
+    public sealed class MultiArrayLayout : IDeserializableRos1<MultiArrayLayout>, IDeserializableRos2<MultiArrayLayout>, IMessageRos1, IMessageRos2
     {
         // The multiarray declares a generic multi-dimensional array of a
         // particular data type.  Dimensions are ordered from outer most
@@ -58,11 +58,30 @@ namespace Iviz.Msgs.StdMsgs
             b.Deserialize(out DataOffset);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MultiArrayLayout(ref b);
+        /// Constructor with buffer.
+        public MultiArrayLayout(ref ReadBuffer2 b)
+        {
+            b.DeserializeArray(out Dim);
+            for (int i = 0; i < Dim.Length; i++)
+            {
+                Dim[i] = new MultiArrayDimension(ref b);
+            }
+            b.Deserialize(out DataOffset);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MultiArrayLayout(ref b);
         
         public MultiArrayLayout RosDeserialize(ref ReadBuffer b) => new MultiArrayLayout(ref b);
+        
+        public MultiArrayLayout RosDeserialize(ref ReadBuffer2 b) => new MultiArrayLayout(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeArray(Dim);
+            b.Serialize(DataOffset);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeArray(Dim);
             b.Serialize(DataOffset);
@@ -79,6 +98,13 @@ namespace Iviz.Msgs.StdMsgs
         }
     
         public int RosMessageLength => 8 + WriteBuffer.GetArraySize(Dim);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Dim);
+            WriteBuffer2.AddLength(ref c, DataOffset);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/MultiArrayLayout";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshFeatures : IDeserializableRos1<MeshFeatures>, IMessageRos1
+    public sealed class MeshFeatures : IDeserializableRos1<MeshFeatures>, IDeserializableRos2<MeshFeatures>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "map_uuid")] public string MapUuid;
         [DataMember (Name = "features")] public MeshMsgs.Feature[] Features;
@@ -35,11 +35,30 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshFeatures(ref b);
+        /// Constructor with buffer.
+        public MeshFeatures(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out MapUuid);
+            b.DeserializeArray(out Features);
+            for (int i = 0; i < Features.Length; i++)
+            {
+                Features[i] = new MeshMsgs.Feature(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshFeatures(ref b);
         
         public MeshFeatures RosDeserialize(ref ReadBuffer b) => new MeshFeatures(ref b);
+        
+        public MeshFeatures RosDeserialize(ref ReadBuffer2 b) => new MeshFeatures(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(MapUuid);
+            b.SerializeArray(Features);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(MapUuid);
             b.SerializeArray(Features);
@@ -57,6 +76,13 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 8 + WriteBuffer.GetStringSize(MapUuid) + WriteBuffer.GetArraySize(Features);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, MapUuid);
+            WriteBuffer2.AddLength(ref c, Features);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshFeatures";

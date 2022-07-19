@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class AveragingActionGoal : IDeserializableRos1<AveragingActionGoal>, IMessageRos1, IActionGoal<AveragingGoal>
+    public sealed class AveragingActionGoal : IDeserializableRos1<AveragingActionGoal>, IDeserializableRos2<AveragingActionGoal>, IMessageRos1, IMessageRos2, IActionGoal<AveragingGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
@@ -34,11 +34,28 @@ namespace Iviz.Msgs.ActionlibTutorials
             Goal = new AveragingGoal(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AveragingActionGoal(ref b);
+        /// Constructor with buffer.
+        public AveragingActionGoal(ref ReadBuffer2 b)
+        {
+            Header = new StdMsgs.Header(ref b);
+            GoalId = new ActionlibMsgs.GoalID(ref b);
+            Goal = new AveragingGoal(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AveragingActionGoal(ref b);
         
         public AveragingActionGoal RosDeserialize(ref ReadBuffer b) => new AveragingActionGoal(ref b);
+        
+        public AveragingActionGoal RosDeserialize(ref ReadBuffer2 b) => new AveragingActionGoal(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            GoalId.RosSerialize(ref b);
+            Goal.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             GoalId.RosSerialize(ref b);
@@ -54,6 +71,14 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
     
         public int RosMessageLength => 8 + Header.RosMessageLength + GoalId.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            GoalId.AddRos2MessageLength(ref c);
+            Goal.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_tutorials/AveragingActionGoal";

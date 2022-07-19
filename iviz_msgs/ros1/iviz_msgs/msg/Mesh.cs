@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Mesh : IDeserializableRos1<Mesh>, IMessageRos1
+    public sealed class Mesh : IDeserializableRos1<Mesh>, IDeserializableRos2<Mesh>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "vertices")] public Vector3f[] Vertices;
@@ -52,11 +52,48 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out MaterialIndex);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Mesh(ref b);
+        /// Constructor with buffer.
+        public Mesh(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Name);
+            b.DeserializeStructArray(out Vertices);
+            b.DeserializeStructArray(out Normals);
+            b.DeserializeStructArray(out Tangents);
+            b.DeserializeStructArray(out BiTangents);
+            b.DeserializeArray(out TexCoords);
+            for (int i = 0; i < TexCoords.Length; i++)
+            {
+                TexCoords[i] = new TexCoords(ref b);
+            }
+            b.DeserializeArray(out ColorChannels);
+            for (int i = 0; i < ColorChannels.Length; i++)
+            {
+                ColorChannels[i] = new ColorChannel(ref b);
+            }
+            b.DeserializeStructArray(out Faces);
+            b.Deserialize(out MaterialIndex);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Mesh(ref b);
         
         public Mesh RosDeserialize(ref ReadBuffer b) => new Mesh(ref b);
+        
+        public Mesh RosDeserialize(ref ReadBuffer2 b) => new Mesh(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Name);
+            b.SerializeStructArray(Vertices);
+            b.SerializeStructArray(Normals);
+            b.SerializeStructArray(Tangents);
+            b.SerializeStructArray(BiTangents);
+            b.SerializeArray(TexCoords);
+            b.SerializeArray(ColorChannels);
+            b.SerializeStructArray(Faces);
+            b.Serialize(MaterialIndex);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Name);
             b.SerializeStructArray(Vertices);
@@ -105,6 +142,20 @@ namespace Iviz.Msgs.IvizMsgs
                 size += 12 * Faces.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Vertices);
+            WriteBuffer2.AddLength(ref c, Normals);
+            WriteBuffer2.AddLength(ref c, Tangents);
+            WriteBuffer2.AddLength(ref c, BiTangents);
+            WriteBuffer2.AddLength(ref c, TexCoords);
+            WriteBuffer2.AddLength(ref c, ColorChannels);
+            WriteBuffer2.AddLength(ref c, Faces);
+            WriteBuffer2.AddLength(ref c, MaterialIndex);
         }
     
         /// <summary> Full ROS name of this message. </summary>

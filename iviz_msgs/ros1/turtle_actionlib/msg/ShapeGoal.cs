@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TurtleActionlib
 {
     [DataContract]
-    public sealed class ShapeGoal : IDeserializableRos1<ShapeGoal>, IMessageRos1, IGoal<ShapeActionGoal>
+    public sealed class ShapeGoal : IDeserializableRos1<ShapeGoal>, IDeserializableRos2<ShapeGoal>, IMessageRos1, IMessageRos2, IGoal<ShapeActionGoal>
     {
         //goal definition
         [DataMember (Name = "edges")] public int Edges;
@@ -30,11 +30,26 @@ namespace Iviz.Msgs.TurtleActionlib
             b.Deserialize(out Radius);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ShapeGoal(ref b);
+        /// Constructor with buffer.
+        public ShapeGoal(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Edges);
+            b.Deserialize(out Radius);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ShapeGoal(ref b);
         
         public ShapeGoal RosDeserialize(ref ReadBuffer b) => new ShapeGoal(ref b);
+        
+        public ShapeGoal RosDeserialize(ref ReadBuffer2 b) => new ShapeGoal(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Edges);
+            b.Serialize(Radius);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Edges);
             b.Serialize(Radius);
@@ -48,6 +63,16 @@ namespace Iviz.Msgs.TurtleActionlib
         public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 8;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Edges);
+            WriteBuffer2.AddLength(ref c, Radius);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "turtle_actionlib/ShapeGoal";

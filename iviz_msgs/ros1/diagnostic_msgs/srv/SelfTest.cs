@@ -59,7 +59,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public SelfTestRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SelfTestResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SelfTestResponse(ref b);
         
         public SelfTestResponse RosDeserialize(ref ReadBuffer b) => new SelfTestResponse(ref b);
     

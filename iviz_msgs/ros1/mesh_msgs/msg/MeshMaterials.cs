@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshMaterials : IDeserializableRos1<MeshMaterials>, IMessageRos1
+    public sealed class MeshMaterials : IDeserializableRos1<MeshMaterials>, IDeserializableRos2<MeshMaterials>, IMessageRos1, IMessageRos2
     {
         // Mesh Attribute Message
         [DataMember (Name = "clusters")] public MeshMsgs.MeshFaceCluster[] Clusters;
@@ -52,11 +52,42 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshMaterials(ref b);
+        /// Constructor with buffer.
+        public MeshMaterials(ref ReadBuffer2 b)
+        {
+            b.DeserializeArray(out Clusters);
+            for (int i = 0; i < Clusters.Length; i++)
+            {
+                Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
+            }
+            b.DeserializeArray(out Materials);
+            for (int i = 0; i < Materials.Length; i++)
+            {
+                Materials[i] = new MeshMsgs.MeshMaterial(ref b);
+            }
+            b.DeserializeStructArray(out ClusterMaterials);
+            b.DeserializeArray(out VertexTexCoords);
+            for (int i = 0; i < VertexTexCoords.Length; i++)
+            {
+                VertexTexCoords[i] = new MeshMsgs.MeshVertexTexCoords(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshMaterials(ref b);
         
         public MeshMaterials RosDeserialize(ref ReadBuffer b) => new MeshMaterials(ref b);
+        
+        public MeshMaterials RosDeserialize(ref ReadBuffer2 b) => new MeshMaterials(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeArray(Clusters);
+            b.SerializeArray(Materials);
+            b.SerializeStructArray(ClusterMaterials);
+            b.SerializeArray(VertexTexCoords);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeArray(Clusters);
             b.SerializeArray(Materials);
@@ -97,6 +128,15 @@ namespace Iviz.Msgs.MeshMsgs
                 size += 8 * VertexTexCoords.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Clusters);
+            WriteBuffer2.AddLength(ref c, Materials);
+            WriteBuffer2.AddLength(ref c, ClusterMaterials);
+            WriteBuffer2.AddLength(ref c, VertexTexCoords);
         }
     
         /// <summary> Full ROS name of this message. </summary>

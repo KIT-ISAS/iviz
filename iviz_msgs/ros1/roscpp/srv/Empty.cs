@@ -59,7 +59,7 @@ namespace Iviz.Msgs.Roscpp
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public EmptyRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
@@ -96,7 +96,7 @@ namespace Iviz.Msgs.Roscpp
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public EmptyResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         

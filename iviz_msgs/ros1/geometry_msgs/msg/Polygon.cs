@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Polygon : IDeserializableRos1<Polygon>, IMessageRos1
+    public sealed class Polygon : IDeserializableRos1<Polygon>, IDeserializableRos2<Polygon>, IMessageRos1, IMessageRos2
     {
         //A specification of a polygon where the first and last points are assumed to be connected
         [DataMember (Name = "points")] public Point32[] Points;
@@ -28,11 +28,24 @@ namespace Iviz.Msgs.GeometryMsgs
             b.DeserializeStructArray(out Points);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Polygon(ref b);
+        /// Constructor with buffer.
+        public Polygon(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out Points);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Polygon(ref b);
         
         public Polygon RosDeserialize(ref ReadBuffer b) => new Polygon(ref b);
+        
+        public Polygon RosDeserialize(ref ReadBuffer2 b) => new Polygon(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(Points);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Points);
         }
@@ -43,6 +56,12 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         public int RosMessageLength => 4 + 12 * Points.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Points);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/Polygon";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class JointState : IDeserializableRos1<JointState>, IMessageRos1
+    public sealed class JointState : IDeserializableRos1<JointState>, IDeserializableRos2<JointState>, IMessageRos1, IMessageRos2
     {
         // This is a message that holds data to describe the state of a set of torque controlled joints. 
         //
@@ -50,11 +50,32 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructArray(out Effort);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new JointState(ref b);
+        /// Constructor with buffer.
+        public JointState(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeStringArray(out Name);
+            b.DeserializeStructArray(out Position);
+            b.DeserializeStructArray(out Velocity);
+            b.DeserializeStructArray(out Effort);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new JointState(ref b);
         
         public JointState RosDeserialize(ref ReadBuffer b) => new JointState(ref b);
+        
+        public JointState RosDeserialize(ref ReadBuffer2 b) => new JointState(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.SerializeArray(Name);
+            b.SerializeStructArray(Position);
+            b.SerializeStructArray(Velocity);
+            b.SerializeStructArray(Effort);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.SerializeArray(Name);
@@ -86,6 +107,16 @@ namespace Iviz.Msgs.SensorMsgs
                 size += 8 * Effort.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Position);
+            WriteBuffer2.AddLength(ref c, Velocity);
+            WriteBuffer2.AddLength(ref c, Effort);
         }
     
         /// <summary> Full ROS name of this message. </summary>

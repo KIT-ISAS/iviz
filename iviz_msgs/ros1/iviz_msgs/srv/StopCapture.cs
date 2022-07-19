@@ -59,7 +59,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public StopCaptureRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
@@ -108,7 +108,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Message);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new StopCaptureResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new StopCaptureResponse(ref b);
         
         public StopCaptureResponse RosDeserialize(ref ReadBuffer b) => new StopCaptureResponse(ref b);
     

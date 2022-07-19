@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TurtleActionlib
 {
     [DataContract]
-    public sealed class ShapeFeedback : IDeserializableRos1<ShapeFeedback>, IMessageRos1, IFeedback<ShapeActionFeedback>
+    public sealed class ShapeFeedback : IDeserializableRos1<ShapeFeedback>, IDeserializableRos2<ShapeFeedback>, IMessageRos1, IMessageRos2, IFeedback<ShapeActionFeedback>
     {
         //feedback
     
@@ -19,14 +19,25 @@ namespace Iviz.Msgs.TurtleActionlib
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        /// Constructor with buffer.
+        public ShapeFeedback(ref ReadBuffer2 b)
+        {
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public ShapeFeedback RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public ShapeFeedback RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static ShapeFeedback? singleton;
         public static ShapeFeedback Singleton => singleton ??= new ShapeFeedback();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -38,6 +49,9 @@ namespace Iviz.Msgs.TurtleActionlib
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "turtle_actionlib/ShapeFeedback";

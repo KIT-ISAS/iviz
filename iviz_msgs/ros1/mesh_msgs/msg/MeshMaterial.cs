@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshMaterial : IDeserializableRos1<MeshMaterial>, IMessageRos1
+    public sealed class MeshMaterial : IDeserializableRos1<MeshMaterial>, IDeserializableRos2<MeshMaterial>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "texture_index")] public uint TextureIndex;
         [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color;
@@ -32,11 +32,28 @@ namespace Iviz.Msgs.MeshMsgs
             b.Deserialize(out HasTexture);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshMaterial(ref b);
+        /// Constructor with buffer.
+        public MeshMaterial(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out TextureIndex);
+            b.Deserialize(out Color);
+            b.Deserialize(out HasTexture);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshMaterial(ref b);
         
         public MeshMaterial RosDeserialize(ref ReadBuffer b) => new MeshMaterial(ref b);
+        
+        public MeshMaterial RosDeserialize(ref ReadBuffer2 b) => new MeshMaterial(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(TextureIndex);
+            b.Serialize(in Color);
+            b.Serialize(HasTexture);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(TextureIndex);
             b.Serialize(in Color);
@@ -51,6 +68,17 @@ namespace Iviz.Msgs.MeshMsgs
         public const int RosFixedMessageLength = 21;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 21;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, TextureIndex);
+            WriteBuffer2.AddLength(ref c, Color);
+            WriteBuffer2.AddLength(ref c, HasTexture);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshMaterial";

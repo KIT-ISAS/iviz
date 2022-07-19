@@ -73,7 +73,7 @@ namespace Iviz.Msgs.OctomapMsgs
             b.Deserialize(out Max);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new BoundingBoxQueryRequest(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new BoundingBoxQueryRequest(ref b);
         
         public BoundingBoxQueryRequest RosDeserialize(ref ReadBuffer b) => new BoundingBoxQueryRequest(ref b);
     
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.OctomapMsgs
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public BoundingBoxQueryResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         

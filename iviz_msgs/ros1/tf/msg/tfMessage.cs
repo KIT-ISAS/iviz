@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf
 {
     [DataContract]
-    public sealed class tfMessage : IDeserializableRos1<tfMessage>, IMessageRos1
+    public sealed class tfMessage : IDeserializableRos1<tfMessage>, IDeserializableRos2<tfMessage>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "transforms")] public GeometryMsgs.TransformStamped[] Transforms;
     
@@ -31,11 +31,28 @@ namespace Iviz.Msgs.Tf
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new tfMessage(ref b);
+        /// Constructor with buffer.
+        public tfMessage(ref ReadBuffer2 b)
+        {
+            b.DeserializeArray(out Transforms);
+            for (int i = 0; i < Transforms.Length; i++)
+            {
+                GeometryMsgs.TransformStamped.Deserialize(ref b, out Transforms[i]);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new tfMessage(ref b);
         
         public tfMessage RosDeserialize(ref ReadBuffer b) => new tfMessage(ref b);
+        
+        public tfMessage RosDeserialize(ref ReadBuffer2 b) => new tfMessage(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeArray(Transforms);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeArray(Transforms);
         }
@@ -46,6 +63,12 @@ namespace Iviz.Msgs.Tf
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Transforms);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Transforms);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "tf/tfMessage";

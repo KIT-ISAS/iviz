@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestRequestResult : IDeserializableRos1<TestRequestResult>, IMessageRos1, IResult<TestRequestActionResult>
+    public sealed class TestRequestResult : IDeserializableRos1<TestRequestResult>, IDeserializableRos2<TestRequestResult>, IMessageRos1, IMessageRos2, IResult<TestRequestActionResult>
     {
         [DataMember (Name = "the_result")] public int TheResult;
         [DataMember (Name = "is_simple_server")] public bool IsSimpleServer;
@@ -29,11 +29,26 @@ namespace Iviz.Msgs.Actionlib
             b.Deserialize(out IsSimpleServer);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestRequestResult(ref b);
+        /// Constructor with buffer.
+        public TestRequestResult(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out TheResult);
+            b.Deserialize(out IsSimpleServer);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TestRequestResult(ref b);
         
         public TestRequestResult RosDeserialize(ref ReadBuffer b) => new TestRequestResult(ref b);
+        
+        public TestRequestResult RosDeserialize(ref ReadBuffer2 b) => new TestRequestResult(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(TheResult);
+            b.Serialize(IsSimpleServer);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(TheResult);
             b.Serialize(IsSimpleServer);
@@ -47,6 +62,16 @@ namespace Iviz.Msgs.Actionlib
         public const int RosFixedMessageLength = 5;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 5;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, TheResult);
+            WriteBuffer2.AddLength(ref c, IsSimpleServer);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib/TestRequestResult";

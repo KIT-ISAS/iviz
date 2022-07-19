@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class Empty : IDeserializableRos1<Empty>, IMessageRos1
+    public sealed class Empty : IDeserializableRos1<Empty>, IDeserializableRos2<Empty>, IMessageRos1, IMessageRos2
     {
         /// Constructor for empty message.
         public Empty()
@@ -17,14 +17,25 @@ namespace Iviz.Msgs.StdMsgs
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        /// Constructor with buffer.
+        public Empty(ref ReadBuffer2 b)
+        {
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public Empty RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public Empty RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static Empty? singleton;
         public static Empty Singleton => singleton ??= new Empty();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -36,6 +47,9 @@ namespace Iviz.Msgs.StdMsgs
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/Empty";

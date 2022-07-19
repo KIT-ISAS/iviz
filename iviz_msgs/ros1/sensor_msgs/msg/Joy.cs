@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Joy : IDeserializableRos1<Joy>, IMessageRos1
+    public sealed class Joy : IDeserializableRos1<Joy>, IDeserializableRos2<Joy>, IMessageRos1, IMessageRos2
     {
         // Reports the state of a joysticks axes and buttons.
         /// <summary> Timestamp in the header is the time the data is received from the joystick </summary>
@@ -38,11 +38,28 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructArray(out Buttons);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Joy(ref b);
+        /// Constructor with buffer.
+        public Joy(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeStructArray(out Axes);
+            b.DeserializeStructArray(out Buttons);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Joy(ref b);
         
         public Joy RosDeserialize(ref ReadBuffer b) => new Joy(ref b);
+        
+        public Joy RosDeserialize(ref ReadBuffer2 b) => new Joy(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.SerializeStructArray(Axes);
+            b.SerializeStructArray(Buttons);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.SerializeStructArray(Axes);
@@ -64,6 +81,14 @@ namespace Iviz.Msgs.SensorMsgs
                 size += 4 * Buttons.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Axes);
+            WriteBuffer2.AddLength(ref c, Buttons);
         }
     
         /// <summary> Full ROS name of this message. </summary>

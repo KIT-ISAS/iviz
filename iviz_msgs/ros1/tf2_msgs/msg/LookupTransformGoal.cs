@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformGoal : IDeserializableRos1<LookupTransformGoal>, IMessageRos1, IGoal<LookupTransformActionGoal>
+    public sealed class LookupTransformGoal : IDeserializableRos1<LookupTransformGoal>, IDeserializableRos2<LookupTransformGoal>, IMessageRos1, IMessageRos2, IGoal<LookupTransformActionGoal>
     {
         //Simple API
         [DataMember (Name = "target_frame")] public string TargetFrame;
@@ -38,11 +38,36 @@ namespace Iviz.Msgs.Tf2Msgs
             b.Deserialize(out Advanced);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformGoal(ref b);
+        /// Constructor with buffer.
+        public LookupTransformGoal(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out TargetFrame);
+            b.DeserializeString(out SourceFrame);
+            b.Deserialize(out SourceTime);
+            b.Deserialize(out Timeout);
+            b.Deserialize(out TargetTime);
+            b.DeserializeString(out FixedFrame);
+            b.Deserialize(out Advanced);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformGoal(ref b);
         
         public LookupTransformGoal RosDeserialize(ref ReadBuffer b) => new LookupTransformGoal(ref b);
+        
+        public LookupTransformGoal RosDeserialize(ref ReadBuffer2 b) => new LookupTransformGoal(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(TargetFrame);
+            b.Serialize(SourceFrame);
+            b.Serialize(SourceTime);
+            b.Serialize(Timeout);
+            b.Serialize(TargetTime);
+            b.Serialize(FixedFrame);
+            b.Serialize(Advanced);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(TargetFrame);
             b.Serialize(SourceFrame);
@@ -69,6 +94,18 @@ namespace Iviz.Msgs.Tf2Msgs
                 size += WriteBuffer.GetStringSize(FixedFrame);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, TargetFrame);
+            WriteBuffer2.AddLength(ref c, SourceFrame);
+            WriteBuffer2.AddLength(ref c, SourceTime);
+            WriteBuffer2.AddLength(ref c, Timeout);
+            WriteBuffer2.AddLength(ref c, TargetTime);
+            WriteBuffer2.AddLength(ref c, FixedFrame);
+            WriteBuffer2.AddLength(ref c, Advanced);
         }
     
         /// <summary> Full ROS name of this message. </summary>

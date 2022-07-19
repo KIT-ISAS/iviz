@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GridCells : IDeserializableRos1<GridCells>, IMessageRos1
+    public sealed class GridCells : IDeserializableRos1<GridCells>, IDeserializableRos2<GridCells>, IMessageRos1, IMessageRos2
     {
         //an array of cells in a 2D grid
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -37,11 +37,30 @@ namespace Iviz.Msgs.NavMsgs
             b.DeserializeStructArray(out Cells);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GridCells(ref b);
+        /// Constructor with buffer.
+        public GridCells(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out CellWidth);
+            b.Deserialize(out CellHeight);
+            b.DeserializeStructArray(out Cells);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GridCells(ref b);
         
         public GridCells RosDeserialize(ref ReadBuffer b) => new GridCells(ref b);
+        
+        public GridCells RosDeserialize(ref ReadBuffer2 b) => new GridCells(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(CellWidth);
+            b.Serialize(CellHeight);
+            b.SerializeStructArray(Cells);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(CellWidth);
@@ -55,6 +74,15 @@ namespace Iviz.Msgs.NavMsgs
         }
     
         public int RosMessageLength => 12 + Header.RosMessageLength + 24 * Cells.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, CellWidth);
+            WriteBuffer2.AddLength(ref c, CellHeight);
+            WriteBuffer2.AddLength(ref c, Cells);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "nav_msgs/GridCells";

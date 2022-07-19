@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class RegionOfInterest : IDeserializableRos1<RegionOfInterest>, IMessageRos1
+    public sealed class RegionOfInterest : IDeserializableRos1<RegionOfInterest>, IDeserializableRos2<RegionOfInterest>, IMessageRos1, IMessageRos2
     {
         // This message is used to specify a region of interest within an image.
         //
@@ -44,11 +44,32 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out DoRectify);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new RegionOfInterest(ref b);
+        /// Constructor with buffer.
+        public RegionOfInterest(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out XOffset);
+            b.Deserialize(out YOffset);
+            b.Deserialize(out Height);
+            b.Deserialize(out Width);
+            b.Deserialize(out DoRectify);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new RegionOfInterest(ref b);
         
         public RegionOfInterest RosDeserialize(ref ReadBuffer b) => new RegionOfInterest(ref b);
+        
+        public RegionOfInterest RosDeserialize(ref ReadBuffer2 b) => new RegionOfInterest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(XOffset);
+            b.Serialize(YOffset);
+            b.Serialize(Height);
+            b.Serialize(Width);
+            b.Serialize(DoRectify);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(XOffset);
             b.Serialize(YOffset);
@@ -65,6 +86,19 @@ namespace Iviz.Msgs.SensorMsgs
         public const int RosFixedMessageLength = 17;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 17;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, XOffset);
+            WriteBuffer2.AddLength(ref c, YOffset);
+            WriteBuffer2.AddLength(ref c, Height);
+            WriteBuffer2.AddLength(ref c, Width);
+            WriteBuffer2.AddLength(ref c, DoRectify);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/RegionOfInterest";

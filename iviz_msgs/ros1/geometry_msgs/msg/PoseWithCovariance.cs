@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PoseWithCovariance : IDeserializableRos1<PoseWithCovariance>, IMessageRos1
+    public sealed class PoseWithCovariance : IDeserializableRos1<PoseWithCovariance>, IDeserializableRos2<PoseWithCovariance>, IMessageRos1, IMessageRos2
     {
         // This represents a pose in free space with uncertainty.
         [DataMember (Name = "pose")] public Pose Pose;
@@ -35,11 +35,26 @@ namespace Iviz.Msgs.GeometryMsgs
             b.DeserializeStructArray(36, out Covariance);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PoseWithCovariance(ref b);
+        /// Constructor with buffer.
+        public PoseWithCovariance(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Pose);
+            b.DeserializeStructArray(36, out Covariance);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PoseWithCovariance(ref b);
         
         public PoseWithCovariance RosDeserialize(ref ReadBuffer b) => new PoseWithCovariance(ref b);
+        
+        public PoseWithCovariance RosDeserialize(ref ReadBuffer2 b) => new PoseWithCovariance(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(in Pose);
+            b.SerializeStructArray(Covariance, 36);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(in Pose);
             b.SerializeStructArray(Covariance, 36);
@@ -55,6 +70,16 @@ namespace Iviz.Msgs.GeometryMsgs
         public const int RosFixedMessageLength = 344;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 344;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Pose);
+            WriteBuffer2.AddLength(ref c, Covariance, 36);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/PoseWithCovariance";

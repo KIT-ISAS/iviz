@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TurtleActionlib
 {
     [DataContract]
-    public sealed class ShapeAction : IDeserializableRos1<ShapeAction>, IMessageRos1,
+    public sealed class ShapeAction : IDeserializableRos1<ShapeAction>, IDeserializableRos2<ShapeAction>, IMessageRos1, IMessageRos2,
 		IAction<ShapeActionGoal, ShapeActionFeedback, ShapeActionResult>
     {
         [DataMember (Name = "action_goal")] public ShapeActionGoal ActionGoal { get; set; }
@@ -36,11 +36,28 @@ namespace Iviz.Msgs.TurtleActionlib
             ActionFeedback = new ShapeActionFeedback(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ShapeAction(ref b);
+        /// Constructor with buffer.
+        public ShapeAction(ref ReadBuffer2 b)
+        {
+            ActionGoal = new ShapeActionGoal(ref b);
+            ActionResult = new ShapeActionResult(ref b);
+            ActionFeedback = new ShapeActionFeedback(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ShapeAction(ref b);
         
         public ShapeAction RosDeserialize(ref ReadBuffer b) => new ShapeAction(ref b);
+        
+        public ShapeAction RosDeserialize(ref ReadBuffer2 b) => new ShapeAction(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            ActionGoal.RosSerialize(ref b);
+            ActionResult.RosSerialize(ref b);
+            ActionFeedback.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             ActionGoal.RosSerialize(ref b);
             ActionResult.RosSerialize(ref b);
@@ -66,6 +83,14 @@ namespace Iviz.Msgs.TurtleActionlib
                 size += ActionFeedback.RosMessageLength;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            ActionGoal.AddRos2MessageLength(ref c);
+            ActionResult.AddRos2MessageLength(ref c);
+            ActionFeedback.AddRos2MessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

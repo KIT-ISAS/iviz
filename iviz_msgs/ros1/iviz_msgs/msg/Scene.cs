@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Scene : IDeserializableRos1<Scene>, IMessageRos1
+    public sealed class Scene : IDeserializableRos1<Scene>, IDeserializableRos2<Scene>, IMessageRos1, IMessageRos2
     {
         // A complete scene 
         /// <summary> Name of the scene </summary>
@@ -52,11 +52,38 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Scene(ref b);
+        /// Constructor with buffer.
+        public Scene(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Filename);
+            b.DeserializeArray(out Includes);
+            for (int i = 0; i < Includes.Length; i++)
+            {
+                Includes[i] = new Include(ref b);
+            }
+            b.DeserializeArray(out Lights);
+            for (int i = 0; i < Lights.Length; i++)
+            {
+                Lights[i] = new Light(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Scene(ref b);
         
         public Scene RosDeserialize(ref ReadBuffer b) => new Scene(ref b);
+        
+        public Scene RosDeserialize(ref ReadBuffer2 b) => new Scene(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Name);
+            b.Serialize(Filename);
+            b.SerializeArray(Includes);
+            b.SerializeArray(Lights);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Name);
             b.Serialize(Filename);
@@ -92,6 +119,15 @@ namespace Iviz.Msgs.IvizMsgs
                 size += WriteBuffer.GetArraySize(Lights);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Filename);
+            WriteBuffer2.AddLength(ref c, Includes);
+            WriteBuffer2.AddLength(ref c, Lights);
         }
     
         /// <summary> Full ROS name of this message. </summary>

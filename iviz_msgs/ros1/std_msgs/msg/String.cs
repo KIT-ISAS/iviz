@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class String : IDeserializableRos1<String>, IMessageRos1
+    public sealed class String : IDeserializableRos1<String>, IDeserializableRos2<String>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "data")] public string Data;
     
@@ -27,11 +27,24 @@ namespace Iviz.Msgs.StdMsgs
             b.DeserializeString(out Data);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new String(ref b);
+        /// Constructor with buffer.
+        public String(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Data);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new String(ref b);
         
         public String RosDeserialize(ref ReadBuffer b) => new String(ref b);
+        
+        public String RosDeserialize(ref ReadBuffer2 b) => new String(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Data);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Data);
         }
@@ -42,6 +55,12 @@ namespace Iviz.Msgs.StdMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Data);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Data);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/String";

@@ -1,7 +1,8 @@
 using System;
 using System.Runtime.CompilerServices;
-using Iviz.Msgs2.GeometryMsgs;
-using Iviz.Msgs2.StdMsgs;
+using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.IvizMsgs;
+using Iviz.Msgs.StdMsgs;
 using Iviz.Tools;
 
 namespace Iviz.Msgs;
@@ -517,7 +518,7 @@ public unsafe partial struct ReadBuffer2
     public void Deserialize(out Vector3 t)
     {
         Align8();
-        const int size = Vector3.RosFixedMessageLength;
+        const int size = Vector3.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
         t = *(Vector3*)(ptr + offset);
         Advance(size);
@@ -527,7 +528,7 @@ public unsafe partial struct ReadBuffer2
     public void Deserialize(out Point t)
     {
         Align8();
-        const int size = Point.RosFixedMessageLength;
+        const int size = Point.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
         t = *(Point*)(ptr + offset);
         Advance(size);
@@ -537,7 +538,7 @@ public unsafe partial struct ReadBuffer2
     public void Deserialize(out Quaternion t)
     {
         Align8();
-        const int size = Quaternion.RosFixedMessageLength;
+        const int size = Quaternion.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
         t = *(Quaternion*)(ptr + offset);
         Advance(size);
@@ -547,7 +548,7 @@ public unsafe partial struct ReadBuffer2
     public void Deserialize(out Pose t)
     {
         Align8();
-        const int size = Pose.RosFixedMessageLength;
+        const int size = Pose.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
         t = *(Pose*)(ptr + offset);
         Advance(size);
@@ -557,7 +558,7 @@ public unsafe partial struct ReadBuffer2
     public void Deserialize(out Transform t)
     {
         Align8();
-        const int size = Transform.RosFixedMessageLength;
+        const int size = Transform.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
         t = *(Transform*)(ptr + offset);
         Advance(size);
@@ -567,9 +568,48 @@ public unsafe partial struct ReadBuffer2
     public void Deserialize(out Point32 t)
     {
         Align4();
-        const int size = Point32.RosFixedMessageLength;
+        const int size = Point32.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
         t = *(Point32*)(ptr + offset);
+        Advance(size);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize(out Color32 t)
+    {
+        const int size = Color32.Ros2FixedMessageLength;
+        ThrowIfOutOfRange(size);
+        t = *(Color32*)(ptr + offset);
+        Advance(size);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize(out Vector3f t)
+    {
+        Align4();
+        const int size = Vector3f.Ros2FixedMessageLength;
+        ThrowIfOutOfRange(size);
+        t = *(Vector3f*)(ptr + offset);
+        Advance(size);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize(out Vector2f t)
+    {
+        Align4();
+        const int size = Vector2f.Ros2FixedMessageLength;
+        ThrowIfOutOfRange(size);
+        t = *(Vector2f*)(ptr + offset);
+        Advance(size);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize(out Triangle t)
+    {
+        Align4();
+        const int size = Triangle.Ros2FixedMessageLength;
+        ThrowIfOutOfRange(size);
+        t = *(Triangle*)(ptr + offset);
         Advance(size);
     }
 
@@ -577,7 +617,7 @@ public unsafe partial struct ReadBuffer2
     public void Deserialize(out ColorRGBA t)
     {
         Align4();
-        const int size = ColorRGBA.RosFixedMessageLength;
+        const int size = ColorRGBA.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
         t = *(ColorRGBA*)(ptr + offset);
         Advance(size);

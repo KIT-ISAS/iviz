@@ -59,7 +59,7 @@ namespace Iviz.Msgs.GridMapMsgs
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public GetGridMapInfoRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
@@ -106,7 +106,7 @@ namespace Iviz.Msgs.GridMapMsgs
             Info = new GridMapMsgs.GridMapInfo(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetGridMapInfoResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetGridMapInfoResponse(ref b);
         
         public GetGridMapInfoResponse RosDeserialize(ref ReadBuffer b) => new GetGridMapInfoResponse(ref b);
     

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract]
-    public sealed class MultiDOFJointTrajectoryPoint : IDeserializableRos1<MultiDOFJointTrajectoryPoint>, IMessageRos1
+    public sealed class MultiDOFJointTrajectoryPoint : IDeserializableRos1<MultiDOFJointTrajectoryPoint>, IDeserializableRos2<MultiDOFJointTrajectoryPoint>, IMessageRos1, IMessageRos2
     {
         // Each multi-dof joint can specify a transform (up to 6 DOF)
         [DataMember (Name = "transforms")] public GeometryMsgs.Transform[] Transforms;
@@ -49,11 +49,38 @@ namespace Iviz.Msgs.TrajectoryMsgs
             b.Deserialize(out TimeFromStart);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MultiDOFJointTrajectoryPoint(ref b);
+        /// Constructor with buffer.
+        public MultiDOFJointTrajectoryPoint(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out Transforms);
+            b.DeserializeArray(out Velocities);
+            for (int i = 0; i < Velocities.Length; i++)
+            {
+                Velocities[i] = new GeometryMsgs.Twist(ref b);
+            }
+            b.DeserializeArray(out Accelerations);
+            for (int i = 0; i < Accelerations.Length; i++)
+            {
+                Accelerations[i] = new GeometryMsgs.Twist(ref b);
+            }
+            b.Deserialize(out TimeFromStart);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MultiDOFJointTrajectoryPoint(ref b);
         
         public MultiDOFJointTrajectoryPoint RosDeserialize(ref ReadBuffer b) => new MultiDOFJointTrajectoryPoint(ref b);
+        
+        public MultiDOFJointTrajectoryPoint RosDeserialize(ref ReadBuffer2 b) => new MultiDOFJointTrajectoryPoint(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(Transforms);
+            b.SerializeArray(Velocities);
+            b.SerializeArray(Accelerations);
+            b.Serialize(TimeFromStart);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Transforms);
             b.SerializeArray(Velocities);
@@ -87,6 +114,15 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 size += 48 * Accelerations.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Transforms);
+            WriteBuffer2.AddLength(ref c, Velocities);
+            WriteBuffer2.AddLength(ref c, Accelerations);
+            WriteBuffer2.AddLength(ref c, TimeFromStart);
         }
     
         /// <summary> Full ROS name of this message. </summary>

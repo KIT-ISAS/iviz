@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class MultiDOFJointState : IDeserializableRos1<MultiDOFJointState>, IMessageRos1
+    public sealed class MultiDOFJointState : IDeserializableRos1<MultiDOFJointState>, IDeserializableRos2<MultiDOFJointState>, IMessageRos1, IMessageRos2
     {
         // Representation of state for joints with multiple degrees of freedom, 
         // following the structure of JointState.
@@ -59,11 +59,40 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MultiDOFJointState(ref b);
+        /// Constructor with buffer.
+        public MultiDOFJointState(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeStringArray(out JointNames);
+            b.DeserializeStructArray(out Transforms);
+            b.DeserializeArray(out Twist);
+            for (int i = 0; i < Twist.Length; i++)
+            {
+                Twist[i] = new GeometryMsgs.Twist(ref b);
+            }
+            b.DeserializeArray(out Wrench);
+            for (int i = 0; i < Wrench.Length; i++)
+            {
+                Wrench[i] = new GeometryMsgs.Wrench(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MultiDOFJointState(ref b);
         
         public MultiDOFJointState RosDeserialize(ref ReadBuffer b) => new MultiDOFJointState(ref b);
+        
+        public MultiDOFJointState RosDeserialize(ref ReadBuffer2 b) => new MultiDOFJointState(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.SerializeArray(JointNames);
+            b.SerializeStructArray(Transforms);
+            b.SerializeArray(Twist);
+            b.SerializeArray(Wrench);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.SerializeArray(JointNames);
@@ -105,6 +134,16 @@ namespace Iviz.Msgs.SensorMsgs
                 size += 48 * Wrench.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, JointNames);
+            WriteBuffer2.AddLength(ref c, Transforms);
+            WriteBuffer2.AddLength(ref c, Twist);
+            WriteBuffer2.AddLength(ref c, Wrench);
         }
     
         /// <summary> Full ROS name of this message. </summary>

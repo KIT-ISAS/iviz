@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class XRGazeState : IDeserializableRos1<XRGazeState>, IMessageRos1
+    public sealed class XRGazeState : IDeserializableRos1<XRGazeState>, IDeserializableRos2<XRGazeState>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "is_valid")] public bool IsValid;
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -32,11 +32,28 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Transform);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new XRGazeState(ref b);
+        /// Constructor with buffer.
+        public XRGazeState(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out IsValid);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Transform);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new XRGazeState(ref b);
         
         public XRGazeState RosDeserialize(ref ReadBuffer b) => new XRGazeState(ref b);
+        
+        public XRGazeState RosDeserialize(ref ReadBuffer2 b) => new XRGazeState(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(IsValid);
+            Header.RosSerialize(ref b);
+            b.Serialize(in Transform);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(IsValid);
             Header.RosSerialize(ref b);
@@ -48,6 +65,14 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 57 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, IsValid);
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Transform);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/XRGazeState";

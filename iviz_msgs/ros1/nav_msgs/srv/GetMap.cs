@@ -60,7 +60,7 @@ namespace Iviz.Msgs.NavMsgs
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public GetMapRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
@@ -106,7 +106,7 @@ namespace Iviz.Msgs.NavMsgs
             Map = new NavMsgs.OccupancyGrid(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetMapResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetMapResponse(ref b);
         
         public GetMapResponse RosDeserialize(ref ReadBuffer b) => new GetMapResponse(ref b);
     

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class Int64 : IDeserializableRos1<Int64>, IMessageRos1
+    public sealed class Int64 : IDeserializableRos1<Int64>, IDeserializableRos2<Int64>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "data")] public long Data;
     
@@ -26,11 +26,24 @@ namespace Iviz.Msgs.StdMsgs
             b.Deserialize(out Data);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Int64(ref b);
+        /// Constructor with buffer.
+        public Int64(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Data);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Int64(ref b);
         
         public Int64 RosDeserialize(ref ReadBuffer b) => new Int64(ref b);
+        
+        public Int64 RosDeserialize(ref ReadBuffer2 b) => new Int64(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Data);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Data);
         }
@@ -43,6 +56,15 @@ namespace Iviz.Msgs.StdMsgs
         public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 8;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Data);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/Int64";

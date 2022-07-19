@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class FibonacciGoal : IDeserializableRos1<FibonacciGoal>, IMessageRos1, IGoal<FibonacciActionGoal>
+    public sealed class FibonacciGoal : IDeserializableRos1<FibonacciGoal>, IDeserializableRos2<FibonacciGoal>, IMessageRos1, IMessageRos2, IGoal<FibonacciActionGoal>
     {
         //goal definition
         [DataMember (Name = "order")] public int Order;
@@ -27,11 +27,24 @@ namespace Iviz.Msgs.ActionlibTutorials
             b.Deserialize(out Order);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FibonacciGoal(ref b);
+        /// Constructor with buffer.
+        public FibonacciGoal(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Order);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new FibonacciGoal(ref b);
         
         public FibonacciGoal RosDeserialize(ref ReadBuffer b) => new FibonacciGoal(ref b);
+        
+        public FibonacciGoal RosDeserialize(ref ReadBuffer2 b) => new FibonacciGoal(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Order);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Order);
         }
@@ -44,6 +57,15 @@ namespace Iviz.Msgs.ActionlibTutorials
         public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 4;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Order);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_tutorials/FibonacciGoal";

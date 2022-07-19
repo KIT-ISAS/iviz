@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract]
-    public sealed class TopicStatistics : IDeserializableRos1<TopicStatistics>, IMessageRos1
+    public sealed class TopicStatistics : IDeserializableRos1<TopicStatistics>, IDeserializableRos2<TopicStatistics>, IMessageRos1, IMessageRos2
     {
         // name of the topic
         [DataMember (Name = "topic")] public string Topic;
@@ -60,11 +60,50 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.Deserialize(out StampAgeMax);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TopicStatistics(ref b);
+        /// Constructor with buffer.
+        public TopicStatistics(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Topic);
+            b.DeserializeString(out NodePub);
+            b.DeserializeString(out NodeSub);
+            b.Deserialize(out WindowStart);
+            b.Deserialize(out WindowStop);
+            b.Deserialize(out DeliveredMsgs);
+            b.Deserialize(out DroppedMsgs);
+            b.Deserialize(out Traffic);
+            b.Deserialize(out PeriodMean);
+            b.Deserialize(out PeriodStddev);
+            b.Deserialize(out PeriodMax);
+            b.Deserialize(out StampAgeMean);
+            b.Deserialize(out StampAgeStddev);
+            b.Deserialize(out StampAgeMax);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TopicStatistics(ref b);
         
         public TopicStatistics RosDeserialize(ref ReadBuffer b) => new TopicStatistics(ref b);
+        
+        public TopicStatistics RosDeserialize(ref ReadBuffer2 b) => new TopicStatistics(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Topic);
+            b.Serialize(NodePub);
+            b.Serialize(NodeSub);
+            b.Serialize(WindowStart);
+            b.Serialize(WindowStop);
+            b.Serialize(DeliveredMsgs);
+            b.Serialize(DroppedMsgs);
+            b.Serialize(Traffic);
+            b.Serialize(PeriodMean);
+            b.Serialize(PeriodStddev);
+            b.Serialize(PeriodMax);
+            b.Serialize(StampAgeMean);
+            b.Serialize(StampAgeStddev);
+            b.Serialize(StampAgeMax);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Topic);
             b.Serialize(NodePub);
@@ -98,6 +137,25 @@ namespace Iviz.Msgs.RosgraphMsgs
                 size += WriteBuffer.GetStringSize(NodeSub);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Topic);
+            WriteBuffer2.AddLength(ref c, NodePub);
+            WriteBuffer2.AddLength(ref c, NodeSub);
+            WriteBuffer2.AddLength(ref c, WindowStart);
+            WriteBuffer2.AddLength(ref c, WindowStop);
+            WriteBuffer2.AddLength(ref c, DeliveredMsgs);
+            WriteBuffer2.AddLength(ref c, DroppedMsgs);
+            WriteBuffer2.AddLength(ref c, Traffic);
+            WriteBuffer2.AddLength(ref c, PeriodMean);
+            WriteBuffer2.AddLength(ref c, PeriodStddev);
+            WriteBuffer2.AddLength(ref c, PeriodMax);
+            WriteBuffer2.AddLength(ref c, StampAgeMean);
+            WriteBuffer2.AddLength(ref c, StampAgeStddev);
+            WriteBuffer2.AddLength(ref c, StampAgeMax);
         }
     
         /// <summary> Full ROS name of this message. </summary>

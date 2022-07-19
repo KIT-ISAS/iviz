@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshVertexCosts : IDeserializableRos1<MeshVertexCosts>, IMessageRos1
+    public sealed class MeshVertexCosts : IDeserializableRos1<MeshVertexCosts>, IDeserializableRos2<MeshVertexCosts>, IMessageRos1, IMessageRos2
     {
         // Mesh Attribute Message
         [DataMember (Name = "costs")] public float[] Costs;
@@ -28,11 +28,24 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeStructArray(out Costs);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexCosts(ref b);
+        /// Constructor with buffer.
+        public MeshVertexCosts(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out Costs);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexCosts(ref b);
         
         public MeshVertexCosts RosDeserialize(ref ReadBuffer b) => new MeshVertexCosts(ref b);
+        
+        public MeshVertexCosts RosDeserialize(ref ReadBuffer2 b) => new MeshVertexCosts(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(Costs);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Costs);
         }
@@ -43,6 +56,12 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 4 + 4 * Costs.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Costs);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshVertexCosts";

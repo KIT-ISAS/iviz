@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TurtleActionlib
 {
     [DataContract]
-    public sealed class ShapeActionFeedback : IDeserializableRos1<ShapeActionFeedback>, IMessageRos1, IActionFeedback<ShapeFeedback>
+    public sealed class ShapeActionFeedback : IDeserializableRos1<ShapeActionFeedback>, IDeserializableRos2<ShapeActionFeedback>, IMessageRos1, IMessageRos2, IActionFeedback<ShapeFeedback>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -34,11 +34,28 @@ namespace Iviz.Msgs.TurtleActionlib
             Feedback = ShapeFeedback.Singleton;
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ShapeActionFeedback(ref b);
+        /// Constructor with buffer.
+        public ShapeActionFeedback(ref ReadBuffer2 b)
+        {
+            Header = new StdMsgs.Header(ref b);
+            Status = new ActionlibMsgs.GoalStatus(ref b);
+            Feedback = ShapeFeedback.Singleton;
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ShapeActionFeedback(ref b);
         
         public ShapeActionFeedback RosDeserialize(ref ReadBuffer b) => new ShapeActionFeedback(ref b);
+        
+        public ShapeActionFeedback RosDeserialize(ref ReadBuffer2 b) => new ShapeActionFeedback(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Status.RosSerialize(ref b);
+            Feedback.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Status.RosSerialize(ref b);
@@ -54,6 +71,14 @@ namespace Iviz.Msgs.TurtleActionlib
         }
     
         public int RosMessageLength => 0 + Header.RosMessageLength + Status.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Status.AddRos2MessageLength(ref c);
+            Feedback.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "turtle_actionlib/ShapeActionFeedback";

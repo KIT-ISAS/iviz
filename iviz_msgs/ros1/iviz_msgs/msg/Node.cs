@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Node : IDeserializableRos1<Node>, IMessageRos1
+    public sealed class Node : IDeserializableRos1<Node>, IDeserializableRos2<Node>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "parent")] public int Parent;
@@ -38,11 +38,30 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Meshes);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Node(ref b);
+        /// Constructor with buffer.
+        public Node(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Name);
+            b.Deserialize(out Parent);
+            Transform = new Matrix4(ref b);
+            b.DeserializeStructArray(out Meshes);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Node(ref b);
         
         public Node RosDeserialize(ref ReadBuffer b) => new Node(ref b);
+        
+        public Node RosDeserialize(ref ReadBuffer2 b) => new Node(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Name);
+            b.Serialize(Parent);
+            Transform.RosSerialize(ref b);
+            b.SerializeStructArray(Meshes);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Name);
             b.Serialize(Parent);
@@ -59,6 +78,15 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 76 + WriteBuffer.GetStringSize(Name) + 4 * Meshes.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Name);
+            WriteBuffer2.AddLength(ref c, Parent);
+            Transform.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Meshes);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Node";

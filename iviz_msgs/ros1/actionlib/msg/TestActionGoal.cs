@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestActionGoal : IDeserializableRos1<TestActionGoal>, IMessageRos1, IActionGoal<TestGoal>
+    public sealed class TestActionGoal : IDeserializableRos1<TestActionGoal>, IDeserializableRos2<TestActionGoal>, IMessageRos1, IMessageRos2, IActionGoal<TestGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
@@ -34,11 +34,28 @@ namespace Iviz.Msgs.Actionlib
             Goal = new TestGoal(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestActionGoal(ref b);
+        /// Constructor with buffer.
+        public TestActionGoal(ref ReadBuffer2 b)
+        {
+            Header = new StdMsgs.Header(ref b);
+            GoalId = new ActionlibMsgs.GoalID(ref b);
+            Goal = new TestGoal(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TestActionGoal(ref b);
         
         public TestActionGoal RosDeserialize(ref ReadBuffer b) => new TestActionGoal(ref b);
+        
+        public TestActionGoal RosDeserialize(ref ReadBuffer2 b) => new TestActionGoal(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            GoalId.RosSerialize(ref b);
+            Goal.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             GoalId.RosSerialize(ref b);
@@ -54,6 +71,14 @@ namespace Iviz.Msgs.Actionlib
         }
     
         public int RosMessageLength => 4 + Header.RosMessageLength + GoalId.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            GoalId.AddRos2MessageLength(ref c);
+            Goal.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib/TestActionGoal";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class NavSatStatus : IDeserializableRos1<NavSatStatus>, IMessageRos1
+    public sealed class NavSatStatus : IDeserializableRos1<NavSatStatus>, IDeserializableRos2<NavSatStatus>, IMessageRos1, IMessageRos2
     {
         // Navigation Satellite fix status for any Global Navigation Satellite System
         // Whether to output an augmented fix is determined by both the fix
@@ -48,11 +48,26 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Service);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new NavSatStatus(ref b);
+        /// Constructor with buffer.
+        public NavSatStatus(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Status);
+            b.Deserialize(out Service);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new NavSatStatus(ref b);
         
         public NavSatStatus RosDeserialize(ref ReadBuffer b) => new NavSatStatus(ref b);
+        
+        public NavSatStatus RosDeserialize(ref ReadBuffer2 b) => new NavSatStatus(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Status);
+            b.Serialize(Service);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Status);
             b.Serialize(Service);
@@ -66,6 +81,16 @@ namespace Iviz.Msgs.SensorMsgs
         public const int RosFixedMessageLength = 3;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 3;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Status);
+            WriteBuffer2.AddLength(ref c, Service);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/NavSatStatus";

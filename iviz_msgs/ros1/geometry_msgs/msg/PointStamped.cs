@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PointStamped : IDeserializableRos1<PointStamped>, IMessageRos1
+    public sealed class PointStamped : IDeserializableRos1<PointStamped>, IDeserializableRos2<PointStamped>, IMessageRos1, IMessageRos2
     {
         // This represents a Point with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -30,11 +30,26 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out Point);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PointStamped(ref b);
+        /// Constructor with buffer.
+        public PointStamped(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Point);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PointStamped(ref b);
         
         public PointStamped RosDeserialize(ref ReadBuffer b) => new PointStamped(ref b);
+        
+        public PointStamped RosDeserialize(ref ReadBuffer2 b) => new PointStamped(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(in Point);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(in Point);
@@ -45,6 +60,13 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         public int RosMessageLength => 24 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Point);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/PointStamped";

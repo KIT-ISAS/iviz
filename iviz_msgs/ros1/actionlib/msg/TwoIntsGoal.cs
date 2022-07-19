@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TwoIntsGoal : IDeserializableRos1<TwoIntsGoal>, IMessageRos1, IGoal<TwoIntsActionGoal>
+    public sealed class TwoIntsGoal : IDeserializableRos1<TwoIntsGoal>, IDeserializableRos2<TwoIntsGoal>, IMessageRos1, IMessageRos2, IGoal<TwoIntsActionGoal>
     {
         [DataMember (Name = "a")] public long A;
         [DataMember (Name = "b")] public long B;
@@ -29,11 +29,26 @@ namespace Iviz.Msgs.Actionlib
             b.Deserialize(out B);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TwoIntsGoal(ref b);
+        /// Constructor with buffer.
+        public TwoIntsGoal(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out A);
+            b.Deserialize(out B);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TwoIntsGoal(ref b);
         
         public TwoIntsGoal RosDeserialize(ref ReadBuffer b) => new TwoIntsGoal(ref b);
+        
+        public TwoIntsGoal RosDeserialize(ref ReadBuffer2 b) => new TwoIntsGoal(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(A);
+            b.Serialize(B);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(A);
             b.Serialize(B);
@@ -47,6 +62,16 @@ namespace Iviz.Msgs.Actionlib
         public const int RosFixedMessageLength = 16;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 16;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, A);
+            WriteBuffer2.AddLength(ref c, B);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib/TwoIntsGoal";

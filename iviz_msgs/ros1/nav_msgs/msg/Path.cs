@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class Path : IDeserializableRos1<Path>, IMessageRos1
+    public sealed class Path : IDeserializableRos1<Path>, IDeserializableRos2<Path>, IMessageRos1, IMessageRos2
     {
         //An array of poses that represents a Path for a robot to follow
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -35,11 +35,30 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Path(ref b);
+        /// Constructor with buffer.
+        public Path(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeArray(out Poses);
+            for (int i = 0; i < Poses.Length; i++)
+            {
+                Poses[i] = new GeometryMsgs.PoseStamped(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Path(ref b);
         
         public Path RosDeserialize(ref ReadBuffer b) => new Path(ref b);
+        
+        public Path RosDeserialize(ref ReadBuffer2 b) => new Path(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.SerializeArray(Poses);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.SerializeArray(Poses);
@@ -56,6 +75,13 @@ namespace Iviz.Msgs.NavMsgs
         }
     
         public int RosMessageLength => 4 + Header.RosMessageLength + WriteBuffer.GetArraySize(Poses);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Poses);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "nav_msgs/Path";

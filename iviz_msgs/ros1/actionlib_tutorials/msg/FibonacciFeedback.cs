@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class FibonacciFeedback : IDeserializableRos1<FibonacciFeedback>, IMessageRos1, IFeedback<FibonacciActionFeedback>
+    public sealed class FibonacciFeedback : IDeserializableRos1<FibonacciFeedback>, IDeserializableRos2<FibonacciFeedback>, IMessageRos1, IMessageRos2, IFeedback<FibonacciActionFeedback>
     {
         //feedback
         [DataMember (Name = "sequence")] public int[] Sequence;
@@ -28,11 +28,24 @@ namespace Iviz.Msgs.ActionlibTutorials
             b.DeserializeStructArray(out Sequence);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FibonacciFeedback(ref b);
+        /// Constructor with buffer.
+        public FibonacciFeedback(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out Sequence);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new FibonacciFeedback(ref b);
         
         public FibonacciFeedback RosDeserialize(ref ReadBuffer b) => new FibonacciFeedback(ref b);
+        
+        public FibonacciFeedback RosDeserialize(ref ReadBuffer2 b) => new FibonacciFeedback(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(Sequence);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Sequence);
         }
@@ -43,6 +56,12 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
     
         public int RosMessageLength => 4 + 4 * Sequence.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Sequence);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_tutorials/FibonacciFeedback";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Imu : IDeserializableRos1<Imu>, IMessageRos1
+    public sealed class Imu : IDeserializableRos1<Imu>, IDeserializableRos2<Imu>, IMessageRos1, IMessageRos2
     {
         // This is a message to hold data from an IMU (Inertial Measurement Unit)
         //
@@ -51,11 +51,36 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructArray(9, out LinearAccelerationCovariance);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Imu(ref b);
+        /// Constructor with buffer.
+        public Imu(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Orientation);
+            b.DeserializeStructArray(9, out OrientationCovariance);
+            b.Deserialize(out AngularVelocity);
+            b.DeserializeStructArray(9, out AngularVelocityCovariance);
+            b.Deserialize(out LinearAcceleration);
+            b.DeserializeStructArray(9, out LinearAccelerationCovariance);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Imu(ref b);
         
         public Imu RosDeserialize(ref ReadBuffer b) => new Imu(ref b);
+        
+        public Imu RosDeserialize(ref ReadBuffer2 b) => new Imu(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(in Orientation);
+            b.SerializeStructArray(OrientationCovariance, 9);
+            b.Serialize(in AngularVelocity);
+            b.SerializeStructArray(AngularVelocityCovariance, 9);
+            b.Serialize(in LinearAcceleration);
+            b.SerializeStructArray(LinearAccelerationCovariance, 9);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(in Orientation);
@@ -77,6 +102,18 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 296 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Orientation);
+            WriteBuffer2.AddLength(ref c, OrientationCovariance, 9);
+            WriteBuffer2.AddLength(ref c, AngularVelocity);
+            WriteBuffer2.AddLength(ref c, AngularVelocityCovariance, 9);
+            WriteBuffer2.AddLength(ref c, LinearAcceleration);
+            WriteBuffer2.AddLength(ref c, LinearAccelerationCovariance, 9);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/Imu";

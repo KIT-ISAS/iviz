@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshVertexTexCoords : IDeserializableRos1<MeshVertexTexCoords>, IMessageRos1
+    public sealed class MeshVertexTexCoords : IDeserializableRos1<MeshVertexTexCoords>, IDeserializableRos2<MeshVertexTexCoords>, IMessageRos1, IMessageRos2
     {
         // Mesh Attribute Type
         [DataMember (Name = "u")] public float U;
@@ -30,11 +30,26 @@ namespace Iviz.Msgs.MeshMsgs
             b.Deserialize(out V);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexTexCoords(ref b);
+        /// Constructor with buffer.
+        public MeshVertexTexCoords(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out U);
+            b.Deserialize(out V);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexTexCoords(ref b);
         
         public MeshVertexTexCoords RosDeserialize(ref ReadBuffer b) => new MeshVertexTexCoords(ref b);
+        
+        public MeshVertexTexCoords RosDeserialize(ref ReadBuffer2 b) => new MeshVertexTexCoords(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(U);
+            b.Serialize(V);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(U);
             b.Serialize(V);
@@ -48,6 +63,16 @@ namespace Iviz.Msgs.MeshMsgs
         public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 8;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, U);
+            WriteBuffer2.AddLength(ref c, V);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshVertexTexCoords";

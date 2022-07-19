@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Trajectory : IDeserializableRos1<Trajectory>, IMessageRos1
+    public sealed class Trajectory : IDeserializableRos1<Trajectory>, IDeserializableRos2<Trajectory>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "poses")] public GeometryMsgs.Pose[] Poses;
         [DataMember (Name = "timestamps")] public time[] Timestamps;
@@ -31,11 +31,26 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Timestamps);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Trajectory(ref b);
+        /// Constructor with buffer.
+        public Trajectory(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out Poses);
+            b.DeserializeStructArray(out Timestamps);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Trajectory(ref b);
         
         public Trajectory RosDeserialize(ref ReadBuffer b) => new Trajectory(ref b);
+        
+        public Trajectory RosDeserialize(ref ReadBuffer2 b) => new Trajectory(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(Poses);
+            b.SerializeStructArray(Timestamps);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Poses);
             b.SerializeStructArray(Timestamps);
@@ -48,6 +63,13 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 8 + 56 * Poses.Length + 8 * Timestamps.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Poses);
+            WriteBuffer2.AddLength(ref c, Timestamps);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Trajectory";

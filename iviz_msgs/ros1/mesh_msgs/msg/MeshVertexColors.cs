@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshVertexColors : IDeserializableRos1<MeshVertexColors>, IMessageRos1
+    public sealed class MeshVertexColors : IDeserializableRos1<MeshVertexColors>, IDeserializableRos2<MeshVertexColors>, IMessageRos1, IMessageRos2
     {
         // Mesh Attribute Message
         [DataMember (Name = "vertex_colors")] public StdMsgs.ColorRGBA[] VertexColors;
@@ -28,11 +28,24 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeStructArray(out VertexColors);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexColors(ref b);
+        /// Constructor with buffer.
+        public MeshVertexColors(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out VertexColors);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexColors(ref b);
         
         public MeshVertexColors RosDeserialize(ref ReadBuffer b) => new MeshVertexColors(ref b);
+        
+        public MeshVertexColors RosDeserialize(ref ReadBuffer2 b) => new MeshVertexColors(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(VertexColors);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(VertexColors);
         }
@@ -43,6 +56,12 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 4 + 16 * VertexColors.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, VertexColors);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshVertexColors";

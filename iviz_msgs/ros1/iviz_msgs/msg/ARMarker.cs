@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ARMarker : IDeserializableRos1<ARMarker>, IMessageRos1
+    public sealed class ARMarker : IDeserializableRos1<ARMarker>, IDeserializableRos2<ARMarker>, IMessageRos1, IMessageRos2
     {
         public const byte TYPE_ARUCO = 0;
         public const byte TYPE_QRCODE = 1;
@@ -48,11 +48,40 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out PoseRelativeToCamera);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ARMarker(ref b);
+        /// Constructor with buffer.
+        public ARMarker(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Type);
+            b.DeserializeString(out Code);
+            b.DeserializeStructArray(4, out Corners);
+            b.DeserializeStructArray(9, out CameraIntrinsic);
+            b.Deserialize(out CameraPose);
+            b.Deserialize(out HasReliablePose);
+            b.Deserialize(out MarkerSizeInMm);
+            b.Deserialize(out PoseRelativeToCamera);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ARMarker(ref b);
         
         public ARMarker RosDeserialize(ref ReadBuffer b) => new ARMarker(ref b);
+        
+        public ARMarker RosDeserialize(ref ReadBuffer2 b) => new ARMarker(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Type);
+            b.Serialize(Code);
+            b.SerializeStructArray(Corners, 4);
+            b.SerializeStructArray(CameraIntrinsic, 9);
+            b.Serialize(in CameraPose);
+            b.Serialize(HasReliablePose);
+            b.Serialize(MarkerSizeInMm);
+            b.Serialize(in PoseRelativeToCamera);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Type);
@@ -83,6 +112,20 @@ namespace Iviz.Msgs.IvizMsgs
                 size += 24 * Corners.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, Code);
+            WriteBuffer2.AddLength(ref c, Corners, 4);
+            WriteBuffer2.AddLength(ref c, CameraIntrinsic, 9);
+            WriteBuffer2.AddLength(ref c, CameraPose);
+            WriteBuffer2.AddLength(ref c, HasReliablePose);
+            WriteBuffer2.AddLength(ref c, MarkerSizeInMm);
+            WriteBuffer2.AddLength(ref c, PoseRelativeToCamera);
         }
     
         /// <summary> Full ROS name of this message. </summary>

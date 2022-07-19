@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class VectorField : IDeserializableRos1<VectorField>, IMessageRos1
+    public sealed class VectorField : IDeserializableRos1<VectorField>, IDeserializableRos2<VectorField>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "positions")] public GeometryMsgs.Point[] Positions;
         [DataMember (Name = "vectors")] public GeometryMsgs.Vector3[] Vectors;
@@ -31,11 +31,26 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeStructArray(out Vectors);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new VectorField(ref b);
+        /// Constructor with buffer.
+        public VectorField(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out Positions);
+            b.DeserializeStructArray(out Vectors);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new VectorField(ref b);
         
         public VectorField RosDeserialize(ref ReadBuffer b) => new VectorField(ref b);
+        
+        public VectorField RosDeserialize(ref ReadBuffer2 b) => new VectorField(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(Positions);
+            b.SerializeStructArray(Vectors);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Positions);
             b.SerializeStructArray(Vectors);
@@ -48,6 +63,13 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 8 + 24 * Positions.Length + 24 * Vectors.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Positions);
+            WriteBuffer2.AddLength(ref c, Vectors);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/VectorField";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Feedback : IDeserializableRos1<Feedback>, IMessageRos1
+    public sealed class Feedback : IDeserializableRos1<Feedback>, IDeserializableRos2<Feedback>, IMessageRos1, IMessageRos2
     {
         public const byte TYPE_EXPIRED = 0;
         public const byte TYPE_BUTTON_CLICK = 1;
@@ -48,11 +48,42 @@ namespace Iviz.Msgs.IvizMsgs
             Trajectory = new IvizMsgs.Trajectory(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Feedback(ref b);
+        /// Constructor with buffer.
+        public Feedback(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeString(out VizId);
+            b.DeserializeString(out Id);
+            b.Deserialize(out Type);
+            b.Deserialize(out EntryId);
+            b.Deserialize(out Angle);
+            b.Deserialize(out Position);
+            b.Deserialize(out Orientation);
+            b.Deserialize(out Scale);
+            Trajectory = new IvizMsgs.Trajectory(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Feedback(ref b);
         
         public Feedback RosDeserialize(ref ReadBuffer b) => new Feedback(ref b);
+        
+        public Feedback RosDeserialize(ref ReadBuffer2 b) => new Feedback(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(VizId);
+            b.Serialize(Id);
+            b.Serialize(Type);
+            b.Serialize(EntryId);
+            b.Serialize(Angle);
+            b.Serialize(in Position);
+            b.Serialize(in Orientation);
+            b.Serialize(in Scale);
+            Trajectory.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(VizId);
@@ -84,6 +115,21 @@ namespace Iviz.Msgs.IvizMsgs
                 size += Trajectory.RosMessageLength;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, VizId);
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, EntryId);
+            WriteBuffer2.AddLength(ref c, Angle);
+            WriteBuffer2.AddLength(ref c, Position);
+            WriteBuffer2.AddLength(ref c, Orientation);
+            WriteBuffer2.AddLength(ref c, Scale);
+            Trajectory.AddRos2MessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

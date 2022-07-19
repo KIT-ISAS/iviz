@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class Time : IDeserializableRos1<Time>, IMessageRos1
+    public sealed class Time : IDeserializableRos1<Time>, IDeserializableRos2<Time>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "data")] public time Data;
     
@@ -26,11 +26,24 @@ namespace Iviz.Msgs.StdMsgs
             b.Deserialize(out Data);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Time(ref b);
+        /// Constructor with buffer.
+        public Time(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Data);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Time(ref b);
         
         public Time RosDeserialize(ref ReadBuffer b) => new Time(ref b);
+        
+        public Time RosDeserialize(ref ReadBuffer2 b) => new Time(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Data);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Data);
         }
@@ -43,6 +56,15 @@ namespace Iviz.Msgs.StdMsgs
         public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 8;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Data);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/Time";

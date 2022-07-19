@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformActionFeedback : IDeserializableRos1<LookupTransformActionFeedback>, IMessageRos1, IActionFeedback<LookupTransformFeedback>
+    public sealed class LookupTransformActionFeedback : IDeserializableRos1<LookupTransformActionFeedback>, IDeserializableRos2<LookupTransformActionFeedback>, IMessageRos1, IMessageRos2, IActionFeedback<LookupTransformFeedback>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -34,11 +34,28 @@ namespace Iviz.Msgs.Tf2Msgs
             Feedback = LookupTransformFeedback.Singleton;
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformActionFeedback(ref b);
+        /// Constructor with buffer.
+        public LookupTransformActionFeedback(ref ReadBuffer2 b)
+        {
+            Header = new StdMsgs.Header(ref b);
+            Status = new ActionlibMsgs.GoalStatus(ref b);
+            Feedback = LookupTransformFeedback.Singleton;
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformActionFeedback(ref b);
         
         public LookupTransformActionFeedback RosDeserialize(ref ReadBuffer b) => new LookupTransformActionFeedback(ref b);
+        
+        public LookupTransformActionFeedback RosDeserialize(ref ReadBuffer2 b) => new LookupTransformActionFeedback(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            Status.RosSerialize(ref b);
+            Feedback.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Status.RosSerialize(ref b);
@@ -54,6 +71,14 @@ namespace Iviz.Msgs.Tf2Msgs
         }
     
         public int RosMessageLength => 0 + Header.RosMessageLength + Status.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            Status.AddRos2MessageLength(ref c);
+            Feedback.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "tf2_msgs/LookupTransformActionFeedback";

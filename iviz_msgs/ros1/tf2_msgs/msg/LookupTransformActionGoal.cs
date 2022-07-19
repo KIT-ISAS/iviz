@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformActionGoal : IDeserializableRos1<LookupTransformActionGoal>, IMessageRos1, IActionGoal<LookupTransformGoal>
+    public sealed class LookupTransformActionGoal : IDeserializableRos1<LookupTransformActionGoal>, IDeserializableRos2<LookupTransformActionGoal>, IMessageRos1, IMessageRos2, IActionGoal<LookupTransformGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
@@ -34,11 +34,28 @@ namespace Iviz.Msgs.Tf2Msgs
             Goal = new LookupTransformGoal(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformActionGoal(ref b);
+        /// Constructor with buffer.
+        public LookupTransformActionGoal(ref ReadBuffer2 b)
+        {
+            Header = new StdMsgs.Header(ref b);
+            GoalId = new ActionlibMsgs.GoalID(ref b);
+            Goal = new LookupTransformGoal(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformActionGoal(ref b);
         
         public LookupTransformActionGoal RosDeserialize(ref ReadBuffer b) => new LookupTransformActionGoal(ref b);
+        
+        public LookupTransformActionGoal RosDeserialize(ref ReadBuffer2 b) => new LookupTransformActionGoal(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            GoalId.RosSerialize(ref b);
+            Goal.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             GoalId.RosSerialize(ref b);
@@ -62,6 +79,14 @@ namespace Iviz.Msgs.Tf2Msgs
                 size += Goal.RosMessageLength;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            GoalId.AddRos2MessageLength(ref c);
+            Goal.AddRos2MessageLength(ref c);
         }
     
         /// <summary> Full ROS name of this message. </summary>

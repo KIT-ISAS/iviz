@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapResult : IDeserializableRos1<GetMapResult>, IMessageRos1, IResult<GetMapActionResult>
+    public sealed class GetMapResult : IDeserializableRos1<GetMapResult>, IDeserializableRos2<GetMapResult>, IMessageRos1, IMessageRos2, IResult<GetMapActionResult>
     {
         [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map;
     
@@ -27,11 +27,24 @@ namespace Iviz.Msgs.NavMsgs
             Map = new NavMsgs.OccupancyGrid(ref b);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetMapResult(ref b);
+        /// Constructor with buffer.
+        public GetMapResult(ref ReadBuffer2 b)
+        {
+            Map = new NavMsgs.OccupancyGrid(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetMapResult(ref b);
         
         public GetMapResult RosDeserialize(ref ReadBuffer b) => new GetMapResult(ref b);
+        
+        public GetMapResult RosDeserialize(ref ReadBuffer2 b) => new GetMapResult(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Map.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Map.RosSerialize(ref b);
         }
@@ -43,6 +56,12 @@ namespace Iviz.Msgs.NavMsgs
         }
     
         public int RosMessageLength => 0 + Map.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Map.AddRos2MessageLength(ref c);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "nav_msgs/GetMapResult";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshFaceClusterStamped : IDeserializableRos1<MeshFaceClusterStamped>, IMessageRos1
+    public sealed class MeshFaceClusterStamped : IDeserializableRos1<MeshFaceClusterStamped>, IDeserializableRos2<MeshFaceClusterStamped>, IMessageRos1, IMessageRos2
     {
         // header
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -41,11 +41,30 @@ namespace Iviz.Msgs.MeshMsgs
             b.Deserialize(out @override);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshFaceClusterStamped(ref b);
+        /// Constructor with buffer.
+        public MeshFaceClusterStamped(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeString(out Uuid);
+            Cluster = new MeshFaceCluster(ref b);
+            b.Deserialize(out @override);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshFaceClusterStamped(ref b);
         
         public MeshFaceClusterStamped RosDeserialize(ref ReadBuffer b) => new MeshFaceClusterStamped(ref b);
+        
+        public MeshFaceClusterStamped RosDeserialize(ref ReadBuffer2 b) => new MeshFaceClusterStamped(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Uuid);
+            Cluster.RosSerialize(ref b);
+            b.Serialize(@override);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Uuid);
@@ -69,6 +88,15 @@ namespace Iviz.Msgs.MeshMsgs
                 size += Cluster.RosMessageLength;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Uuid);
+            Cluster.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, @override);
         }
     
         /// <summary> Full ROS name of this message. </summary>

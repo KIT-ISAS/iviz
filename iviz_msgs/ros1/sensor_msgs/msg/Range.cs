@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Range : IDeserializableRos1<Range>, IMessageRos1
+    public sealed class Range : IDeserializableRos1<Range>, IDeserializableRos2<Range>, IMessageRos1, IMessageRos2
     {
         // Single range reading from an active ranger that emits energy and reports
         // one range reading that is valid along an arc at the distance measured. 
@@ -63,11 +63,34 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Range_);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Range(ref b);
+        /// Constructor with buffer.
+        public Range(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out RadiationType);
+            b.Deserialize(out FieldOfView);
+            b.Deserialize(out MinRange);
+            b.Deserialize(out MaxRange);
+            b.Deserialize(out Range_);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Range(ref b);
         
         public Range RosDeserialize(ref ReadBuffer b) => new Range(ref b);
+        
+        public Range RosDeserialize(ref ReadBuffer2 b) => new Range(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(RadiationType);
+            b.Serialize(FieldOfView);
+            b.Serialize(MinRange);
+            b.Serialize(MaxRange);
+            b.Serialize(Range_);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(RadiationType);
@@ -82,6 +105,17 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 17 + Header.RosMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, RadiationType);
+            WriteBuffer2.AddLength(ref c, FieldOfView);
+            WriteBuffer2.AddLength(ref c, MinRange);
+            WriteBuffer2.AddLength(ref c, MaxRange);
+            WriteBuffer2.AddLength(ref c, Range_);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/Range";

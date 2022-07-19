@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class PointCloud2 : IDeserializableRos1<PointCloud2>, IMessageRos1
+    public sealed class PointCloud2 : IDeserializableRos1<PointCloud2>, IDeserializableRos2<PointCloud2>, IMessageRos1, IMessageRos2
     {
         // This message holds a collection of N-dimensional points, which may
         // contain additional information such as normals, intensity, etc. The
@@ -59,11 +59,44 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out IsDense);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PointCloud2(ref b);
+        /// Constructor with buffer.
+        public PointCloud2(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Height);
+            b.Deserialize(out Width);
+            b.DeserializeArray(out Fields);
+            for (int i = 0; i < Fields.Length; i++)
+            {
+                Fields[i] = new PointField(ref b);
+            }
+            b.Deserialize(out IsBigendian);
+            b.Deserialize(out PointStep);
+            b.Deserialize(out RowStep);
+            b.DeserializeStructRent(out Data);
+            b.Deserialize(out IsDense);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PointCloud2(ref b);
         
         public PointCloud2 RosDeserialize(ref ReadBuffer b) => new PointCloud2(ref b);
+        
+        public PointCloud2 RosDeserialize(ref ReadBuffer2 b) => new PointCloud2(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(Height);
+            b.Serialize(Width);
+            b.SerializeArray(Fields);
+            b.Serialize(IsBigendian);
+            b.Serialize(PointStep);
+            b.Serialize(RowStep);
+            b.SerializeStructArray(Data);
+            b.Serialize(IsDense);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Height);
@@ -96,6 +129,20 @@ namespace Iviz.Msgs.SensorMsgs
                 size += Data.Length;
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Height);
+            WriteBuffer2.AddLength(ref c, Width);
+            WriteBuffer2.AddLength(ref c, Fields);
+            WriteBuffer2.AddLength(ref c, IsBigendian);
+            WriteBuffer2.AddLength(ref c, PointStep);
+            WriteBuffer2.AddLength(ref c, RowStep);
+            WriteBuffer2.AddLength(ref c, Data);
+            WriteBuffer2.AddLength(ref c, IsDense);
         }
     
         /// <summary> Full ROS name of this message. </summary>

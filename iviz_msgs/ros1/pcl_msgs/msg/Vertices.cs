@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class Vertices : IDeserializableRos1<Vertices>, IMessageRos1
+    public sealed class Vertices : IDeserializableRos1<Vertices>, IDeserializableRos2<Vertices>, IMessageRos1, IMessageRos2
     {
         // List of point indices
         [DataMember (Name = "vertices")] public uint[] Vertices_;
@@ -28,11 +28,24 @@ namespace Iviz.Msgs.PclMsgs
             b.DeserializeStructArray(out Vertices_);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Vertices(ref b);
+        /// Constructor with buffer.
+        public Vertices(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out Vertices_);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Vertices(ref b);
         
         public Vertices RosDeserialize(ref ReadBuffer b) => new Vertices(ref b);
+        
+        public Vertices RosDeserialize(ref ReadBuffer2 b) => new Vertices(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(Vertices_);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Vertices_);
         }
@@ -43,6 +56,12 @@ namespace Iviz.Msgs.PclMsgs
         }
     
         public int RosMessageLength => 4 + 4 * Vertices_.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Vertices_);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "pcl_msgs/Vertices";

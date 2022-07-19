@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibMsgs
 {
     [DataContract]
-    public sealed class GoalID : IDeserializableRos1<GoalID>, IMessageRos1
+    public sealed class GoalID : IDeserializableRos1<GoalID>, IDeserializableRos2<GoalID>, IMessageRos1, IMessageRos2
     {
         // The stamp should store the time at which this goal was requested.
         // It is used by an action server when it tries to preempt all
@@ -36,11 +36,26 @@ namespace Iviz.Msgs.ActionlibMsgs
             b.DeserializeString(out Id);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GoalID(ref b);
+        /// Constructor with buffer.
+        public GoalID(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Stamp);
+            b.DeserializeString(out Id);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GoalID(ref b);
         
         public GoalID RosDeserialize(ref ReadBuffer b) => new GoalID(ref b);
+        
+        public GoalID RosDeserialize(ref ReadBuffer2 b) => new GoalID(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Stamp);
+            b.Serialize(Id);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Stamp);
             b.Serialize(Id);
@@ -52,6 +67,13 @@ namespace Iviz.Msgs.ActionlibMsgs
         }
     
         public int RosMessageLength => 12 + WriteBuffer.GetStringSize(Id);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Stamp);
+            WriteBuffer2.AddLength(ref c, Id);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_msgs/GoalID";

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestRequestFeedback : IDeserializableRos1<TestRequestFeedback>, IMessageRos1, IFeedback<TestRequestActionFeedback>
+    public sealed class TestRequestFeedback : IDeserializableRos1<TestRequestFeedback>, IDeserializableRos2<TestRequestFeedback>, IMessageRos1, IMessageRos2, IFeedback<TestRequestActionFeedback>
     {
     
         /// Constructor for empty message.
@@ -18,14 +18,25 @@ namespace Iviz.Msgs.Actionlib
         {
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
+        /// Constructor with buffer.
+        public TestRequestFeedback(ref ReadBuffer2 b)
+        {
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public TestRequestFeedback RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public TestRequestFeedback RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static TestRequestFeedback? singleton;
         public static TestRequestFeedback Singleton => singleton ??= new TestRequestFeedback();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -37,6 +48,9 @@ namespace Iviz.Msgs.Actionlib
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib/TestRequestFeedback";

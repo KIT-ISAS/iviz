@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class TexCoords : IDeserializableRos1<TexCoords>, IMessageRos1
+    public sealed class TexCoords : IDeserializableRos1<TexCoords>, IDeserializableRos2<TexCoords>, IMessageRos1, IMessageRos2
     {
         [DataMember (Name = "coords")] public Vector3f[] Coords;
     
@@ -27,11 +27,24 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Coords);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TexCoords(ref b);
+        /// Constructor with buffer.
+        public TexCoords(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out Coords);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TexCoords(ref b);
         
         public TexCoords RosDeserialize(ref ReadBuffer b) => new TexCoords(ref b);
+        
+        public TexCoords RosDeserialize(ref ReadBuffer2 b) => new TexCoords(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(Coords);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Coords);
         }
@@ -42,6 +55,12 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 4 + 12 * Coords.Length;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Coords);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/TexCoords";

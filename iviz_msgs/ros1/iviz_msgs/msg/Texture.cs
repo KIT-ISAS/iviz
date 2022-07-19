@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Texture : IDeserializableRos1<Texture>, IMessageRos1
+    public sealed class Texture : IDeserializableRos1<Texture>, IDeserializableRos2<Texture>, IMessageRos1, IMessageRos2
     {
         public const byte TYPE_NONE = 0;
         public const byte TYPE_DIFFUSE = 1;
@@ -66,11 +66,40 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out WrapModeV);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Texture(ref b);
+        /// Constructor with buffer.
+        public Texture(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Path);
+            b.Deserialize(out Index);
+            b.Deserialize(out Type);
+            b.Deserialize(out Mapping);
+            b.Deserialize(out UvIndex);
+            b.Deserialize(out BlendFactor);
+            b.Deserialize(out Operation);
+            b.Deserialize(out WrapModeU);
+            b.Deserialize(out WrapModeV);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Texture(ref b);
         
         public Texture RosDeserialize(ref ReadBuffer b) => new Texture(ref b);
+        
+        public Texture RosDeserialize(ref ReadBuffer2 b) => new Texture(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Path);
+            b.Serialize(Index);
+            b.Serialize(Type);
+            b.Serialize(Mapping);
+            b.Serialize(UvIndex);
+            b.Serialize(BlendFactor);
+            b.Serialize(Operation);
+            b.Serialize(WrapModeU);
+            b.Serialize(WrapModeV);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Path);
             b.Serialize(Index);
@@ -89,6 +118,20 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 21 + WriteBuffer.GetStringSize(Path);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Path);
+            WriteBuffer2.AddLength(ref c, Index);
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, Mapping);
+            WriteBuffer2.AddLength(ref c, UvIndex);
+            WriteBuffer2.AddLength(ref c, BlendFactor);
+            WriteBuffer2.AddLength(ref c, Operation);
+            WriteBuffer2.AddLength(ref c, WrapModeU);
+            WriteBuffer2.AddLength(ref c, WrapModeV);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Texture";

@@ -68,7 +68,7 @@ namespace Iviz.Msgs.StdSrvs
             b.Deserialize(out Data);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetBoolRequest(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetBoolRequest(ref b);
         
         public SetBoolRequest RosDeserialize(ref ReadBuffer b) => new SetBoolRequest(ref b);
     
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.StdSrvs
             b.DeserializeString(out Message);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetBoolResponse(ref b);
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetBoolResponse(ref b);
         
         public SetBoolResponse RosDeserialize(ref ReadBuffer b) => new SetBoolResponse(ref b);
     

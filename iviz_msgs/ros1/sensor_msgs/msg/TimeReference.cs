@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class TimeReference : IDeserializableRos1<TimeReference>, IMessageRos1
+    public sealed class TimeReference : IDeserializableRos1<TimeReference>, IDeserializableRos2<TimeReference>, IMessageRos1, IMessageRos2
     {
         // Measurement from an external time source not actively synchronized with the system clock.
         /// <summary> Stamp is system time for which measurement was valid </summary>
@@ -38,11 +38,28 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeString(out Source);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TimeReference(ref b);
+        /// Constructor with buffer.
+        public TimeReference(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out TimeRef);
+            b.DeserializeString(out Source);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TimeReference(ref b);
         
         public TimeReference RosDeserialize(ref ReadBuffer b) => new TimeReference(ref b);
+        
+        public TimeReference RosDeserialize(ref ReadBuffer2 b) => new TimeReference(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(TimeRef);
+            b.Serialize(Source);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(TimeRef);
@@ -55,6 +72,14 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 12 + Header.RosMessageLength + WriteBuffer.GetStringSize(Source);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, TimeRef);
+            WriteBuffer2.AddLength(ref c, Source);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/TimeReference";

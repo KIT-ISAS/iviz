@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.DiagnosticMsgs
 {
     [DataContract]
-    public sealed class DiagnosticArray : IDeserializableRos1<DiagnosticArray>, IMessageRos1
+    public sealed class DiagnosticArray : IDeserializableRos1<DiagnosticArray>, IDeserializableRos2<DiagnosticArray>, IMessageRos1, IMessageRos2
     {
         // This message is used to send diagnostic information about the state of the robot
         /// <summary> For timestamp </summary>
@@ -37,11 +37,30 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new DiagnosticArray(ref b);
+        /// Constructor with buffer.
+        public DiagnosticArray(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeArray(out Status);
+            for (int i = 0; i < Status.Length; i++)
+            {
+                Status[i] = new DiagnosticStatus(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new DiagnosticArray(ref b);
         
         public DiagnosticArray RosDeserialize(ref ReadBuffer b) => new DiagnosticArray(ref b);
+        
+        public DiagnosticArray RosDeserialize(ref ReadBuffer2 b) => new DiagnosticArray(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.SerializeArray(Status);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.SerializeArray(Status);
@@ -58,6 +77,13 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
     
         public int RosMessageLength => 4 + Header.RosMessageLength + WriteBuffer.GetArraySize(Status);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Status);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "diagnostic_msgs/DiagnosticArray";

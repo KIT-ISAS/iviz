@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Twist : IDeserializableRos1<Twist>, IMessageRos1
+    public sealed class Twist : IDeserializableRos1<Twist>, IDeserializableRos2<Twist>, IMessageRos1, IMessageRos2
     {
         // This expresses velocity in free space broken into its linear and angular parts.
         [DataMember (Name = "linear")] public Vector3 Linear;
@@ -30,11 +30,26 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out Angular);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Twist(ref b);
+        /// Constructor with buffer.
+        public Twist(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Linear);
+            b.Deserialize(out Angular);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Twist(ref b);
         
         public Twist RosDeserialize(ref ReadBuffer b) => new Twist(ref b);
+        
+        public Twist RosDeserialize(ref ReadBuffer2 b) => new Twist(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(in Linear);
+            b.Serialize(in Angular);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(in Linear);
             b.Serialize(in Angular);
@@ -48,6 +63,16 @@ namespace Iviz.Msgs.GeometryMsgs
         public const int RosFixedMessageLength = 48;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 48;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Linear);
+            WriteBuffer2.AddLength(ref c, Angular);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/Twist";

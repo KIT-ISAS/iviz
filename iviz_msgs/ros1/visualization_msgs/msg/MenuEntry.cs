@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class MenuEntry : IDeserializableRos1<MenuEntry>, IMessageRos1
+    public sealed class MenuEntry : IDeserializableRos1<MenuEntry>, IDeserializableRos2<MenuEntry>, IMessageRos1, IMessageRos2
     {
         // MenuEntry message.
         // Each InteractiveMarker message has an array of MenuEntry messages.
@@ -72,11 +72,32 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out CommandType);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MenuEntry(ref b);
+        /// Constructor with buffer.
+        public MenuEntry(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Id);
+            b.Deserialize(out ParentId);
+            b.DeserializeString(out Title);
+            b.DeserializeString(out Command);
+            b.Deserialize(out CommandType);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MenuEntry(ref b);
         
         public MenuEntry RosDeserialize(ref ReadBuffer b) => new MenuEntry(ref b);
+        
+        public MenuEntry RosDeserialize(ref ReadBuffer2 b) => new MenuEntry(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Id);
+            b.Serialize(ParentId);
+            b.Serialize(Title);
+            b.Serialize(Command);
+            b.Serialize(CommandType);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Id);
             b.Serialize(ParentId);
@@ -92,6 +113,16 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
     
         public int RosMessageLength => 17 + WriteBuffer.GetStringSize(Title) + WriteBuffer.GetStringSize(Command);
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, ParentId);
+            WriteBuffer2.AddLength(ref c, Title);
+            WriteBuffer2.AddLength(ref c, Command);
+            WriteBuffer2.AddLength(ref c, CommandType);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "visualization_msgs/MenuEntry";

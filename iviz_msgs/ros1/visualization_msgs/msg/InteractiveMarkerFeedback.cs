@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerFeedback : IDeserializableRos1<InteractiveMarkerFeedback>, IMessageRos1
+    public sealed class InteractiveMarkerFeedback : IDeserializableRos1<InteractiveMarkerFeedback>, IDeserializableRos2<InteractiveMarkerFeedback>, IMessageRos1, IMessageRos2
     {
         // Time/frame info.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -63,11 +63,40 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out MousePointValid);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerFeedback(ref b);
+        /// Constructor with buffer.
+        public InteractiveMarkerFeedback(ref ReadBuffer2 b)
+        {
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeString(out ClientId);
+            b.DeserializeString(out MarkerName);
+            b.DeserializeString(out ControlName);
+            b.Deserialize(out EventType);
+            b.Deserialize(out Pose);
+            b.Deserialize(out MenuEntryId);
+            b.Deserialize(out MousePoint);
+            b.Deserialize(out MousePointValid);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerFeedback(ref b);
         
         public InteractiveMarkerFeedback RosDeserialize(ref ReadBuffer b) => new InteractiveMarkerFeedback(ref b);
+        
+        public InteractiveMarkerFeedback RosDeserialize(ref ReadBuffer2 b) => new InteractiveMarkerFeedback(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Header.RosSerialize(ref b);
+            b.Serialize(ClientId);
+            b.Serialize(MarkerName);
+            b.Serialize(ControlName);
+            b.Serialize(EventType);
+            b.Serialize(in Pose);
+            b.Serialize(MenuEntryId);
+            b.Serialize(in MousePoint);
+            b.Serialize(MousePointValid);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(ClientId);
@@ -97,6 +126,20 @@ namespace Iviz.Msgs.VisualizationMsgs
                 size += WriteBuffer.GetStringSize(ControlName);
                 return size;
             }
+        }
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, ClientId);
+            WriteBuffer2.AddLength(ref c, MarkerName);
+            WriteBuffer2.AddLength(ref c, ControlName);
+            WriteBuffer2.AddLength(ref c, EventType);
+            WriteBuffer2.AddLength(ref c, Pose);
+            WriteBuffer2.AddLength(ref c, MenuEntryId);
+            WriteBuffer2.AddLength(ref c, MousePoint);
+            WriteBuffer2.AddLength(ref c, MousePointValid);
         }
     
         /// <summary> Full ROS name of this message. </summary>

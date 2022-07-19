@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class TwistWithCovariance : IDeserializableRos1<TwistWithCovariance>, IMessageRos1
+    public sealed class TwistWithCovariance : IDeserializableRos1<TwistWithCovariance>, IDeserializableRos2<TwistWithCovariance>, IMessageRos1, IMessageRos2
     {
         // This expresses velocity in free space with uncertainty.
         [DataMember (Name = "twist")] public Twist Twist;
@@ -36,11 +36,26 @@ namespace Iviz.Msgs.GeometryMsgs
             b.DeserializeStructArray(36, out Covariance);
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TwistWithCovariance(ref b);
+        /// Constructor with buffer.
+        public TwistWithCovariance(ref ReadBuffer2 b)
+        {
+            Twist = new Twist(ref b);
+            b.DeserializeStructArray(36, out Covariance);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TwistWithCovariance(ref b);
         
         public TwistWithCovariance RosDeserialize(ref ReadBuffer b) => new TwistWithCovariance(ref b);
+        
+        public TwistWithCovariance RosDeserialize(ref ReadBuffer2 b) => new TwistWithCovariance(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Twist.RosSerialize(ref b);
+            b.SerializeStructArray(Covariance, 36);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Twist.RosSerialize(ref b);
             b.SerializeStructArray(Covariance, 36);
@@ -58,6 +73,16 @@ namespace Iviz.Msgs.GeometryMsgs
         public const int RosFixedMessageLength = 336;
         
         public int RosMessageLength => RosFixedMessageLength;
+        /// <summary> Constant size of this message. </summary> 
+        public const int Ros2FixedMessageLength = 336;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Twist.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Covariance, 36);
+        }
     
         /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/TwistWithCovariance";
