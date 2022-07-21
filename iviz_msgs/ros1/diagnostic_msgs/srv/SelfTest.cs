@@ -46,7 +46,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
     }
 
     [DataContract]
-    public sealed class SelfTestRequest : IRequest<SelfTest, SelfTestResponse>, IDeserializableRos1<SelfTestRequest>
+    public sealed class SelfTestRequest : IRequest<SelfTest, SelfTestResponse>, IDeserializable<SelfTestRequest>
     {
     
         public SelfTestRequest()
@@ -57,14 +57,24 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
         }
         
+        public SelfTestRequest(ref ReadBuffer2 b)
+        {
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public SelfTestRequest RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public SelfTestRequest RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static SelfTestRequest? singleton;
         public static SelfTestRequest Singleton => singleton ??= new SelfTestRequest();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -75,12 +85,16 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class SelfTestResponse : IResponse, IDeserializableRos1<SelfTestResponse>
+    public sealed class SelfTestResponse : IResponse, IDeserializable<SelfTestResponse>
     {
         [DataMember (Name = "id")] public string Id;
         [DataMember (Name = "passed")] public byte Passed;
@@ -110,11 +124,31 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
         
+        public SelfTestResponse(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Id);
+            b.Deserialize(out Passed);
+            b.DeserializeArray(out Status);
+            for (int i = 0; i < Status.Length; i++)
+            {
+                Status[i] = new DiagnosticStatus(ref b);
+            }
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SelfTestResponse(ref b);
         
         public SelfTestResponse RosDeserialize(ref ReadBuffer b) => new SelfTestResponse(ref b);
+        
+        public SelfTestResponse RosDeserialize(ref ReadBuffer2 b) => new SelfTestResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Id);
+            b.Serialize(Passed);
+            b.SerializeArray(Status);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Id);
             b.Serialize(Passed);
@@ -133,6 +167,15 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
     
         public int RosMessageLength => 9 + WriteBuffer.GetStringSize(Id) + WriteBuffer.GetArraySize(Status);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Id);
+            WriteBuffer2.AddLength(ref c, Passed);
+            WriteBuffer2.AddLength(ref c, Status);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

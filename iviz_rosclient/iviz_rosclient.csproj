@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
+        <LangVersion>default</LangVersion>
+        <RootNamespace>Iviz.Roslib</RootNamespace>
+        <AssemblyName>Iviz.RosClient</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.2" />
+    </ItemGroup>
+
+</Project>

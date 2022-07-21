@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class StartCaptureRequest : IRequest<StartCapture, StartCaptureResponse>, IDeserializableRos1<StartCaptureRequest>
+    public sealed class StartCaptureRequest : IRequest<StartCapture, StartCaptureResponse>, IDeserializable<StartCaptureRequest>
     {
         [DataMember (Name = "resolution_x")] public int ResolutionX;
         [DataMember (Name = "resolution_y")] public int ResolutionY;
@@ -70,11 +70,27 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out WithHolograms);
         }
         
+        public StartCaptureRequest(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out ResolutionX);
+            b.Deserialize(out ResolutionY);
+            b.Deserialize(out WithHolograms);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new StartCaptureRequest(ref b);
         
         public StartCaptureRequest RosDeserialize(ref ReadBuffer b) => new StartCaptureRequest(ref b);
+        
+        public StartCaptureRequest RosDeserialize(ref ReadBuffer2 b) => new StartCaptureRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(ResolutionX);
+            b.Serialize(ResolutionY);
+            b.Serialize(WithHolograms);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(ResolutionX);
             b.Serialize(ResolutionY);
@@ -88,12 +104,23 @@ namespace Iviz.Msgs.IvizMsgs
         public const int RosFixedMessageLength = 9;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public const int Ros2FixedMessageLength = 9;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, ResolutionX);
+            WriteBuffer2.AddLength(ref c, ResolutionY);
+            WriteBuffer2.AddLength(ref c, WithHolograms);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class StartCaptureResponse : IResponse, IDeserializableRos1<StartCaptureResponse>
+    public sealed class StartCaptureResponse : IResponse, IDeserializable<StartCaptureResponse>
     {
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "message")] public string Message;
@@ -115,11 +142,25 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Message);
         }
         
+        public StartCaptureResponse(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new StartCaptureResponse(ref b);
         
         public StartCaptureResponse RosDeserialize(ref ReadBuffer b) => new StartCaptureResponse(ref b);
+        
+        public StartCaptureResponse RosDeserialize(ref ReadBuffer2 b) => new StartCaptureResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Success);
+            b.Serialize(Message);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
             b.Serialize(Message);
@@ -131,6 +172,14 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Success);
+            WriteBuffer2.AddLength(ref c, Message);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -1,15 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.MsgsGen.Dynamic;
+using Iviz.XmlRpc;
 
 namespace Iviz.Roslib;
 
-public interface IRosClient : IDisposable
-#if !NETSTANDARD2_0
-    , IAsyncDisposable
-#endif
+public interface IRosClient : IDisposable, IAsyncDisposable
 {
     /// <summary>
     /// ID of this node.
@@ -29,19 +27,6 @@ public interface IRosClient : IDisposable
     string Advertise<T>(string topic, out IRosPublisher<T> publisher) where T : IMessage, new();
 
     /// <summary>
-    /// Advertises the given topic with the given dynamic message.
-    /// The dynamic message must have been initialized beforehand.
-    /// </summary>
-    /// <param name="topic">Name of the topic.</param>
-    /// <param name="generator">The dynamic message containing the ROS definition.</param>
-    /// <param name="publisher">
-    /// The shared publisher for this topic, used by all advertisers from this client.
-    /// Use this structure to publish messages to your topic.
-    /// </param>
-    /// <returns>An identifier that can be used to unadvertise from this publisher.</returns>
-    string Advertise(string topic, DynamicMessage generator, out IRosPublisher<DynamicMessage> publisher);
-
-    /// <summary>
     /// Advertises the given topic.
     /// </summary>
     /// <typeparam name="T">Message type.</typeparam>
@@ -53,42 +38,16 @@ public interface IRosClient : IDisposable
         where T : IMessage, new();
 
     /// <summary>
-    /// Advertises the given topic with the given dynamic message.
-    /// The dynamic message must have been initialized beforehand.
-    /// </summary>
-    /// <param name="topic">Name of the topic.</param>
-    /// <param name="generator">The dynamic message containing the ROS definition.</param>
-    /// <param name="token">An optional cancellation token</param>
-    /// <returns>A pair containing an identifier that can be used to unadvertise from this publisher, and the publisher object.</returns>
-    ValueTask<(string id, IRosPublisher<DynamicMessage> publisher)> AdvertiseAsync(string topic,
-        DynamicMessage generator, CancellationToken token = default);
-
-    /// <summary>
     /// Subscribes to the given topic.
     /// </summary>
     /// <typeparam name="T">Message type.</typeparam>
     /// <param name="topic">Name of the topic.</param>
     /// <param name="callback">Function to be called when a message arrives.</param>
     /// <param name="subscriber"> The shared subscriber for this topic, used by all subscribers from this client. </param>
-    /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
-    /// <param name="transportHint">Specifies the policy of which protocol (TCP, UDP) to prefer</param>
     /// <returns>An identifier that can be used to unsubscribe from this topic.</returns>
     string Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
-        bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.PreferTcp)
-        where T : IMessage, IDeserializable<T>, new();
-
-    /// <summary>
-    /// Subscribes to the given topic. The subscriber will try to reconstruct the message based on information
-    /// transmitted during handshake. The message type will be <see cref="DynamicMessage"/> if the message type is not known. 
-    /// </summary>
-    /// <param name="topic">Name of the topic.</param>
-    /// <param name="callback">Function to be called when a message arrives.</param>
-    /// <param name="subscriber"> The shared subscriber for this topic, used by all subscribers from this client. </param>
-    /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
-    /// <param name="transportHint">Specifies the policy of which protocol (TCP, UDP) to prefer</param>
-    /// <returns>A pair containing an identifier that can be used to unsubscribe from this topic, and the subscriber object.</returns>      
-    string Subscribe(string topic, Action<IMessage> callback, out IRosSubscriber subscriber,
-        bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.PreferTcp);
+        RosTransportHint hint = RosTransportHint.PreferTcp)
+        where T : IMessage, new();
 
     /// <summary>
     /// Subscribes to the given topic.
@@ -96,29 +55,12 @@ public interface IRosClient : IDisposable
     /// <typeparam name="T">Message type.</typeparam>
     /// <param name="topic">Name of the topic.</param>
     /// <param name="callback">Function to be called when a message arrives.</param>
-    /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
-    /// <param name="transportHint">Specifies the policy of which protocol (TCP, UDP) to prefer</param>
     /// <param name="token">An optional cancellation token</param>
     /// <returns>A pair containing an identifier that can be used to unsubscribe from this topic, and the subscriber object.</returns>        
     ValueTask<(string id, IRosSubscriber<T> subscriber)>
-        SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = true,
-            RosTransportHint transportHint = RosTransportHint.PreferTcp, CancellationToken token = default)
-        where T : IMessage, IDeserializable<T>, new();
-
-    /// <summary>
-    /// Subscribes to the given topic. The subscriber will try to reconstruct the message based on information
-    /// transmitted during handshake. The message type will be <see cref="DynamicMessage"/> if the message type is not known. 
-    /// </summary>
-    /// <param name="topic">Name of the topic.</param>
-    /// <param name="callback">Function to be called when a message arrives.</param>
-    /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
-    /// <param name="transportHint">Specifies the policy of which protocol (TCP, UDP) to prefer</param>
-    /// <param name="token">An optional cancellation token</param>
-    /// <returns>A pair containing an identifier that can be used to unsubscribe from this topic, and the subscriber object.</returns>        
-    ValueTask<(string id, IRosSubscriber subscriber)>
-        SubscribeAsync(string topic, Action<IMessage> callback, bool requestNoDelay = true,
-            RosTransportHint transportHint = RosTransportHint.PreferTcp,
-            CancellationToken token = default);
+        SubscribeAsync<T>(string topic, Action<T> callback, RosTransportHint hint = RosTransportHint.PreferTcp,
+            CancellationToken token = default)
+        where T : IMessage, new();
 
     /// <summary>
     /// Subscribes to the given topic. This variant uses a callback that includes information about
@@ -127,14 +69,12 @@ public interface IRosClient : IDisposable
     /// <typeparam name="T">Message type.</typeparam>
     /// <param name="topic">Name of the topic.</param>
     /// <param name="callback">Function to be called when a message arrives.</param>
-    /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
-    /// <param name="transportHint">Specifies the policy of which protocol (TCP, UDP) to prefer</param>
     /// <param name="token">An optional cancellation token</param>
     /// <returns>A pair containing an identifier that can be used to unsubscribe from this topic, and the subscriber object.</returns>
     ValueTask<(string id, IRosSubscriber<T> subscriber)> SubscribeAsync<T>(
-        string topic, RosCallback<T> callback, bool requestNoDelay = true,
-        RosTransportHint transportHint = RosTransportHint.PreferTcp, CancellationToken token = default)
-        where T : IMessage, IDeserializable<T>, new();
+        string topic, RosCallback<T> callback, RosTransportHint hint = RosTransportHint.PreferTcp,
+        CancellationToken token = default)
+        where T : IMessage, new();
 
     /// <summary>
     /// Advertises the given service.
@@ -185,4 +125,52 @@ public interface IRosClient : IDisposable
     ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
         CancellationToken token = default)
         where T : IService, new();
+
+    /// <summary>
+    /// Unadvertises the service.
+    /// </summary>
+    /// <param name="name">Name of the service</param>
+    /// <param name="token">An optional cancellation token</param>
+    /// <exception cref="ArgumentException">Thrown if name is null</exception>
+    bool UnadvertiseService(string name, CancellationToken token = default);
+
+    /// <summary>
+    /// Unadvertises the service.
+    /// </summary>
+    /// <param name="name">Name of the service</param>
+    /// <param name="token">An optional cancellation token</param>
+    /// <exception cref="ArgumentException">Thrown if name is null</exception>        
+    ValueTask<bool> UnadvertiseServiceAsync(string name, CancellationToken token = default);
+
+
+    IReadOnlyList<SubscriberState> GetSubscriberStatistics();
+
+    IReadOnlyList<PublisherState> GetPublisherStatistics();
+
+    bool IsServiceAvailable(string service);
+
+    ValueTask<bool> IsServiceAvailableAsync(string service, CancellationToken token = default);
+
+    public TopicNameType[] GetSystemPublishedTopics();
+
+    public ValueTask<TopicNameType[]> GetSystemPublishedTopicsAsync(CancellationToken token = default);
+
+    public TopicNameType[] GetSystemTopics();
+
+    public ValueTask<TopicNameType[]> GetSystemTopicsAsync(CancellationToken token = default);
+
+    ValueTask DisposeAsync(CancellationToken token = default);
+
+    string[] GetParameterNames();
+
+    ValueTask<string[]> GetParameterNamesAsync(CancellationToken token = default);
+
+    bool GetParameter(string key, out XmlRpcValue value);
+
+    ValueTask<(bool success, XmlRpcValue value)>
+        GetParameterAsync(string key, CancellationToken token = default);
+
+    SystemState GetSystemState();
+
+    ValueTask<SystemState> GetSystemStateAsync(CancellationToken token = default);
 }

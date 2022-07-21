@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class CaptureScreenshotRequest : IRequest<CaptureScreenshot, CaptureScreenshotResponse>, IDeserializableRos1<CaptureScreenshotRequest>
+    public sealed class CaptureScreenshotRequest : IRequest<CaptureScreenshot, CaptureScreenshotResponse>, IDeserializable<CaptureScreenshotRequest>
     {
         [DataMember (Name = "compress")] public bool Compress;
     
@@ -64,11 +64,23 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Compress);
         }
         
+        public CaptureScreenshotRequest(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Compress);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new CaptureScreenshotRequest(ref b);
         
         public CaptureScreenshotRequest RosDeserialize(ref ReadBuffer b) => new CaptureScreenshotRequest(ref b);
+        
+        public CaptureScreenshotRequest RosDeserialize(ref ReadBuffer2 b) => new CaptureScreenshotRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Compress);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Compress);
         }
@@ -80,12 +92,21 @@ namespace Iviz.Msgs.IvizMsgs
         public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public const int Ros2FixedMessageLength = 1;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Compress);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class CaptureScreenshotResponse : IResponse, IDeserializableRos1<CaptureScreenshotResponse>
+    public sealed class CaptureScreenshotResponse : IResponse, IDeserializable<CaptureScreenshotResponse>
     {
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "message")] public string Message;
@@ -117,11 +138,39 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Data);
         }
         
+        public CaptureScreenshotResponse(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Width);
+            b.Deserialize(out Height);
+            b.Deserialize(out Bpp);
+            b.DeserializeStructArray(9, out Intrinsics);
+            b.Deserialize(out Pose);
+            b.DeserializeStructArray(out Data);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new CaptureScreenshotResponse(ref b);
         
         public CaptureScreenshotResponse RosDeserialize(ref ReadBuffer b) => new CaptureScreenshotResponse(ref b);
+        
+        public CaptureScreenshotResponse RosDeserialize(ref ReadBuffer2 b) => new CaptureScreenshotResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Success);
+            b.Serialize(Message);
+            Header.RosSerialize(ref b);
+            b.Serialize(Width);
+            b.Serialize(Height);
+            b.Serialize(Bpp);
+            b.SerializeStructArray(Intrinsics, 9);
+            b.Serialize(in Pose);
+            b.SerializeStructArray(Data);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
             b.Serialize(Message);
@@ -151,6 +200,21 @@ namespace Iviz.Msgs.IvizMsgs
                 size += Data.Length;
                 return size;
             }
+        }
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Success);
+            WriteBuffer2.AddLength(ref c, Message);
+            Header.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Width);
+            WriteBuffer2.AddLength(ref c, Height);
+            WriteBuffer2.AddLength(ref c, Bpp);
+            WriteBuffer2.AddLength(ref c, Intrinsics, 9);
+            WriteBuffer2.AddLength(ref c, Pose);
+            WriteBuffer2.AddLength(ref c, Data);
         }
     
         public override string ToString() => Extensions.ToString(this);

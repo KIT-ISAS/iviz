@@ -46,7 +46,7 @@ namespace Iviz.Msgs.PclMsgs
     }
 
     [DataContract]
-    public sealed class UpdateFilenameRequest : IRequest<UpdateFilename, UpdateFilenameResponse>, IDeserializableRos1<UpdateFilenameRequest>
+    public sealed class UpdateFilenameRequest : IRequest<UpdateFilename, UpdateFilenameResponse>, IDeserializable<UpdateFilenameRequest>
     {
         [DataMember (Name = "filename")] public string Filename;
     
@@ -65,11 +65,23 @@ namespace Iviz.Msgs.PclMsgs
             b.DeserializeString(out Filename);
         }
         
+        public UpdateFilenameRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Filename);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new UpdateFilenameRequest(ref b);
         
         public UpdateFilenameRequest RosDeserialize(ref ReadBuffer b) => new UpdateFilenameRequest(ref b);
+        
+        public UpdateFilenameRequest RosDeserialize(ref ReadBuffer2 b) => new UpdateFilenameRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Filename);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Filename);
         }
@@ -80,12 +92,19 @@ namespace Iviz.Msgs.PclMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Filename);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Filename);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class UpdateFilenameResponse : IResponse, IDeserializableRos1<UpdateFilenameResponse>
+    public sealed class UpdateFilenameResponse : IResponse, IDeserializable<UpdateFilenameResponse>
     {
         [DataMember (Name = "success")] public bool Success;
     
@@ -103,11 +122,23 @@ namespace Iviz.Msgs.PclMsgs
             b.Deserialize(out Success);
         }
         
+        public UpdateFilenameResponse(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Success);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new UpdateFilenameResponse(ref b);
         
         public UpdateFilenameResponse RosDeserialize(ref ReadBuffer b) => new UpdateFilenameResponse(ref b);
+        
+        public UpdateFilenameResponse RosDeserialize(ref ReadBuffer2 b) => new UpdateFilenameResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Success);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
         }
@@ -119,6 +150,15 @@ namespace Iviz.Msgs.PclMsgs
         public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public const int Ros2FixedMessageLength = 1;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Success);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

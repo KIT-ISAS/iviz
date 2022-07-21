@@ -593,7 +593,7 @@ public sealed class RosMasterServer : IDisposable
                 }
             }
 
-            var arg = args[2].AsArg();
+            var arg = (XmlRpcArg)args[2];
             if (!arg.IsValid)
             {
                 return ErrorResponse($"Parameter [{key}] could not be parsed'");
@@ -634,7 +634,7 @@ public sealed class RosMasterServer : IDisposable
             }
             else
             {
-                var arg = value.AsArg();
+                var arg = (XmlRpcArg)value;
                 if (!arg.IsValid)
                 {
                     throw new ParseException($"Parameter [{key}] could not be parsed'");

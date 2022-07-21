@@ -27,7 +27,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
     int numDropped;
     long numSent;
 
-    public IReadOnlyCollection<string> RosHeader { get; private set; } = Array.Empty<string>();
+    public IReadOnlyList<string> RosHeader { get; private set; } = Array.Empty<string>();
     public string? RemoteCallerId { get; private set; }
     public Endpoint Endpoint { get; }
     public Endpoint RemoteEndpoint { get; }
@@ -54,7 +54,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         set => senderQueue.MaxQueueSizeInBytes = value;
     }
 
-    public PublisherSenderState State =>
+    public Ros1SenderState State =>
         new()
         {
             IsAlive = IsAlive,
@@ -304,7 +304,8 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
                 writeBuffer.EnsureCapacity(msgLength + 4);
 
                 writeBuffer[..4].WriteInt(msgLength);
-                msg.SerializeTo(writeBuffer[4..]);
+                
+                WriteBuffer.Serialize(msg, writeBuffer[4..]);
                 
                 await TcpClient.WriteChunkAsync(writeBuffer.Array, msgLength + 4, runningTs.Token);
 

@@ -21,7 +21,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
     readonly TopicInfo topicInfo;
     readonly Task task;
 
-    public IReadOnlyCollection<string> RosHeader { get; }
+    public IReadOnlyList<string> RosHeader { get; }
     public string RemoteCallerId { get; }
     public Endpoint RemoteEndpoint { get; }
     public Endpoint Endpoint { get; }
@@ -216,13 +216,13 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
                 if (msgLength + udpPlusSizeHeaders <= MaxPacketSize)
                 {
                     WriteUnfragmented(writeBuffer, msgLength);
-                    msg.SerializeTo(writeBuffer[udpPlusSizeHeaders..]);
+                    WriteBuffer.Serialize(msg, writeBuffer[udpPlusSizeHeaders..]);
                     await WriteChunkAsync(msgLength + udpPlusSizeHeaders);
                 }
                 else
                 {
                     messageBuffer.EnsureCapacity(msgLength);
-                    msg.SerializeTo(messageBuffer);
+                    WriteBuffer.Serialize(msg, messageBuffer);
 
                     int maxPayloadSize = MaxPacketSize - UdpRosParams.HeaderLength;
                     int totalBlocks = (4 + msgLength + maxPayloadSize - 1) / maxPayloadSize;
@@ -356,7 +356,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
         await task.AwaitNoThrow(5000, this, token);
     }
 
-    public PublisherSenderState State =>
+    public Ros1SenderState State =>
         new()
         {
             IsAlive = IsAlive,

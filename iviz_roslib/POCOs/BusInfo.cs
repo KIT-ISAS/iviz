@@ -32,12 +32,12 @@ internal sealed class BusInfo : JsonToString
         Connected = status;
     }
 
-    public BusInfo(int id, string topic, SubscriberReceiverState receiver) :
+    public BusInfo(int id, string topic, Ros1ReceiverState receiver) :
         this(id, receiver.RemoteUri, DirectionType.In, topic, receiver.TransportType!.Value, receiver.IsAlive)
     {
     }
         
-    public BusInfo(int id, string topic, Uri remoteUri, PublisherSenderState sender) :
+    public BusInfo(int id, string topic, Uri remoteUri, Ros1SenderState sender) :
         this(id, remoteUri, DirectionType.Out, topic, sender.TransportType, sender.IsAlive)
     {
     }        

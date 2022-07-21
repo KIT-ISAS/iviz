@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetModelTextureRequest : IRequest<GetModelTexture, GetModelTextureResponse>, IDeserializableRos1<GetModelTextureRequest>
+    public sealed class GetModelTextureRequest : IRequest<GetModelTexture, GetModelTextureResponse>, IDeserializable<GetModelTextureRequest>
     {
         [DataMember (Name = "uri")] public string Uri;
     
@@ -65,11 +65,23 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Uri);
         }
         
+        public GetModelTextureRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Uri);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetModelTextureRequest(ref b);
         
         public GetModelTextureRequest RosDeserialize(ref ReadBuffer b) => new GetModelTextureRequest(ref b);
+        
+        public GetModelTextureRequest RosDeserialize(ref ReadBuffer2 b) => new GetModelTextureRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Uri);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Uri);
         }
@@ -80,12 +92,19 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uri);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Uri);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetModelTextureResponse : IResponse, IDeserializableRos1<GetModelTextureResponse>
+    public sealed class GetModelTextureResponse : IResponse, IDeserializable<GetModelTextureResponse>
     {
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "image")] public SensorMsgs.CompressedImage Image;
@@ -111,11 +130,27 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Message);
         }
         
+        public GetModelTextureResponse(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Success);
+            Image = new SensorMsgs.CompressedImage(ref b);
+            b.DeserializeString(out Message);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetModelTextureResponse(ref b);
         
         public GetModelTextureResponse RosDeserialize(ref ReadBuffer b) => new GetModelTextureResponse(ref b);
+        
+        public GetModelTextureResponse RosDeserialize(ref ReadBuffer2 b) => new GetModelTextureResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Success);
+            Image.RosSerialize(ref b);
+            b.Serialize(Message);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
             Image.RosSerialize(ref b);
@@ -130,6 +165,15 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 5 + Image.RosMessageLength + WriteBuffer.GetStringSize(Message);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Success);
+            Image.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Message);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

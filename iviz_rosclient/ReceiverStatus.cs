@@ -11,7 +11,7 @@ namespace Iviz.Roslib;
 public enum ReceiverStatus
 {
     /// <summary>
-    /// Generic error. Check the contents of <see cref="SubscriberReceiverState.ErrorDescription"/>. 
+    /// Generic error. Check the contents of <see cref="ReceiverState.ErrorDescription"/>. 
     /// </summary>
     UnknownError,
 
@@ -47,7 +47,7 @@ public enum ReceiverStatus
 
     /// <summary>
     /// The publisher closed the connection or an error happened.
-    /// Check the contents of <see cref="SubscriberReceiverState.ErrorDescription"/>. 
+    /// Check the contents of <see cref="ReceiverState.ErrorDescription"/>. 
     /// </summary>
     Dead,
 }

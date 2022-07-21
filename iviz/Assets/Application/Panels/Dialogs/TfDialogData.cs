@@ -53,7 +53,7 @@ namespace Iviz.App
             }
 
             string validatedFrameName = frameName[0] != '/' ? frameName : frameName[1..];
-            if (!RosClient.IsValidResourceName(validatedFrameName))
+            if (!RosNameUtils.IsValidResourceName(validatedFrameName))
             {
                 RosLogger.Info(
                     $"{this}: Created frame's name '{validatedFrameName}' is not a valid ROS resource name. " +

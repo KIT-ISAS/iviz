@@ -26,7 +26,9 @@ public class RosInvalidMessageTypeException : RoslibException
     {
     }
 
-    public RosInvalidMessageTypeException(string message, Exception innerException) : base(message, innerException)
+    public RosInvalidMessageTypeException(string topic, string baseType, string newType)
+        : base($"There is already an entity for '{topic}' with a different type [{baseType}] - " +
+               $"requested type was [{newType}]")
     {
     }
 }

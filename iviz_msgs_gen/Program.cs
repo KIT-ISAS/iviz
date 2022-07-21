@@ -308,7 +308,7 @@ namespace Iviz.MsgsGen
 
                 p.ResolveAll();
 
-                foreach (ClassInfo classInfo in p.Messages.Values)
+                foreach (var classInfo in p.Messages.Values)
                 {
                     string dstPackageDir = $"{ivizMsgPaths}/{classInfo.RosPackage}/msg/";
                     Directory.CreateDirectory(dstPackageDir);
@@ -316,7 +316,7 @@ namespace Iviz.MsgsGen
                     File.WriteAllText($"{dstPackageDir}{classInfo.Name}.cs", text);
                 }
 
-                foreach (ServiceInfo classInfo in p.Services.Values)
+                foreach (var classInfo in p.Services.Values)
                 {
                     string packageDir = $"{ivizMsgPaths}/{classInfo.RosPackage}/srv/";
                     Directory.CreateDirectory(packageDir);
@@ -364,11 +364,11 @@ namespace Iviz.MsgsGen
 
                 p.ResolveAll();
 
-                foreach (ClassInfo classInfo in p.Messages.Values)
+                foreach (var classInfo in p.Messages.Values)
                 {
                     string dstPackageDir = $"{ivizMsgPaths}/{classInfo.RosPackage}/msg/";
                     Directory.CreateDirectory(dstPackageDir);
-                    string text = classInfo.ToCsString(true);
+                    string text = classInfo.ToCsString();
                     File.WriteAllText($"{dstPackageDir}{classInfo.Name}.cs", text);
                 }
 

@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetSdfRequest : IRequest<GetSdf, GetSdfResponse>, IDeserializableRos1<GetSdfRequest>
+    public sealed class GetSdfRequest : IRequest<GetSdf, GetSdfResponse>, IDeserializable<GetSdfRequest>
     {
         // Retrieves a scene, which can contain one or multiple 3D models and lights
         /// <summary> Uri of the file. Example: package://some_package/file.world </summary>
@@ -67,11 +67,23 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Uri);
         }
         
+        public GetSdfRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Uri);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetSdfRequest(ref b);
         
         public GetSdfRequest RosDeserialize(ref ReadBuffer b) => new GetSdfRequest(ref b);
+        
+        public GetSdfRequest RosDeserialize(ref ReadBuffer2 b) => new GetSdfRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Uri);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Uri);
         }
@@ -82,12 +94,19 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uri);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Uri);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetSdfResponse : IResponse, IDeserializableRos1<GetSdfResponse>
+    public sealed class GetSdfResponse : IResponse, IDeserializable<GetSdfResponse>
     {
         /// <summary> Whether the retrieval succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -116,11 +135,27 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Message);
         }
         
+        public GetSdfResponse(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Success);
+            Scene = new Scene(ref b);
+            b.DeserializeString(out Message);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetSdfResponse(ref b);
         
         public GetSdfResponse RosDeserialize(ref ReadBuffer b) => new GetSdfResponse(ref b);
+        
+        public GetSdfResponse RosDeserialize(ref ReadBuffer2 b) => new GetSdfResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Success);
+            Scene.RosSerialize(ref b);
+            b.Serialize(Message);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
             Scene.RosSerialize(ref b);
@@ -135,6 +170,15 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 5 + Scene.RosMessageLength + WriteBuffer.GetStringSize(Message);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Success);
+            Scene.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Message);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

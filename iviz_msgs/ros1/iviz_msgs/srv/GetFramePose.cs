@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetFramePoseRequest : IRequest<GetFramePose, GetFramePoseResponse>, IDeserializableRos1<GetFramePoseRequest>
+    public sealed class GetFramePoseRequest : IRequest<GetFramePose, GetFramePoseResponse>, IDeserializable<GetFramePoseRequest>
     {
         // Gets the absolute pose of a TF frame w.r.t. the map frame
         /// <summary> Frame ids </summary>
@@ -67,11 +67,23 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStringArray(out Frames);
         }
         
+        public GetFramePoseRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeStringArray(out Frames);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetFramePoseRequest(ref b);
         
         public GetFramePoseRequest RosDeserialize(ref ReadBuffer b) => new GetFramePoseRequest(ref b);
+        
+        public GetFramePoseRequest RosDeserialize(ref ReadBuffer2 b) => new GetFramePoseRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeArray(Frames);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeArray(Frames);
         }
@@ -86,12 +98,19 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Frames);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Frames);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetFramePoseResponse : IResponse, IDeserializableRos1<GetFramePoseResponse>
+    public sealed class GetFramePoseResponse : IResponse, IDeserializable<GetFramePoseResponse>
     {
         /// <summary> Whether the entry is valid </summary>
         [DataMember (Name = "is_valid")] public bool[] IsValid;
@@ -116,11 +135,25 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Poses);
         }
         
+        public GetFramePoseResponse(ref ReadBuffer2 b)
+        {
+            b.DeserializeStructArray(out IsValid);
+            b.DeserializeStructArray(out Poses);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetFramePoseResponse(ref b);
         
         public GetFramePoseResponse RosDeserialize(ref ReadBuffer b) => new GetFramePoseResponse(ref b);
+        
+        public GetFramePoseResponse RosDeserialize(ref ReadBuffer2 b) => new GetFramePoseResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeStructArray(IsValid);
+            b.SerializeStructArray(Poses);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(IsValid);
             b.SerializeStructArray(Poses);
@@ -133,6 +166,14 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 8 + IsValid.Length + 56 * Poses.Length;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, IsValid);
+            WriteBuffer2.AddLength(ref c, Poses);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

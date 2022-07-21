@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class AddModuleRequest : IRequest<AddModule, AddModuleResponse>, IDeserializableRos1<AddModuleRequest>
+    public sealed class AddModuleRequest : IRequest<AddModule, AddModuleResponse>, IDeserializable<AddModuleRequest>
     {
         // Adds a module by type
         /// <summary> Module type </summary>
@@ -72,11 +72,25 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Id);
         }
         
+        public AddModuleRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out ModuleType);
+            b.DeserializeString(out Id);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AddModuleRequest(ref b);
         
         public AddModuleRequest RosDeserialize(ref ReadBuffer b) => new AddModuleRequest(ref b);
+        
+        public AddModuleRequest RosDeserialize(ref ReadBuffer2 b) => new AddModuleRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(ModuleType);
+            b.Serialize(Id);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(ModuleType);
             b.Serialize(Id);
@@ -89,12 +103,20 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 8 + WriteBuffer.GetStringSize(ModuleType) + WriteBuffer.GetStringSize(Id);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, ModuleType);
+            WriteBuffer2.AddLength(ref c, Id);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class AddModuleResponse : IResponse, IDeserializableRos1<AddModuleResponse>
+    public sealed class AddModuleResponse : IResponse, IDeserializable<AddModuleResponse>
     {
         /// <summary> Whether the retrieval succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -123,11 +145,27 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Id);
         }
         
+        public AddModuleResponse(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
+            b.DeserializeString(out Id);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AddModuleResponse(ref b);
         
         public AddModuleResponse RosDeserialize(ref ReadBuffer b) => new AddModuleResponse(ref b);
+        
+        public AddModuleResponse RosDeserialize(ref ReadBuffer2 b) => new AddModuleResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Success);
+            b.Serialize(Message);
+            b.Serialize(Id);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
             b.Serialize(Message);
@@ -141,6 +179,15 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 9 + WriteBuffer.GetStringSize(Message) + WriteBuffer.GetStringSize(Id);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Success);
+            WriteBuffer2.AddLength(ref c, Message);
+            WriteBuffer2.AddLength(ref c, Id);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Iviz.Tools;
 
-public readonly struct RangeEnumerable<TA> : IReadOnlyList<TA>
+public readonly struct RangeEnumerable<TA> : IReadOnlyList<TA>, ICollection<TA>
 {
     readonly IReadOnlyList<TA> a;
     readonly int start;
@@ -16,11 +16,19 @@ public readonly struct RangeEnumerable<TA> : IReadOnlyList<TA>
     public Enumerator GetEnumerator() => new(a, start, end);
     IEnumerator<TA> IEnumerable<TA>.GetEnumerator() => GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
     public int Count => end - start;
     public TA this[int index] => a[index];
     public RangeEnumerable<TA> Take(int count) => new(a, start, start + count);
     public RangeEnumerable<TA> Skip(int toSkip) => new(a, start + toSkip, end);
     public SelectEnumerable<RangeEnumerable<TA>, TA, TB> Select<TB>(Func<TA, TB> f) => new(this, f);
+
+    void ICollection<TA>.Add(TA item) => throw new NotSupportedException();
+    void ICollection<TA>.Clear() => throw new NotSupportedException();
+    bool ICollection<TA>.Contains(TA item) => throw new NotSupportedException();
+    void ICollection<TA>.CopyTo(TA[] array, int arrayIndex) => throw new NotSupportedException();
+    bool ICollection<TA>.Remove(TA item) => throw new NotSupportedException();
+    bool ICollection<TA>.IsReadOnly => true;
 
     public struct Enumerator : IEnumerator<TA>
     {

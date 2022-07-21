@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetVertexColorsRequest : IRequest<GetVertexColors, GetVertexColorsResponse>, IDeserializableRos1<GetVertexColorsRequest>
+    public sealed class GetVertexColorsRequest : IRequest<GetVertexColors, GetVertexColorsResponse>, IDeserializable<GetVertexColorsRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
@@ -65,11 +65,23 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeString(out Uuid);
         }
         
+        public GetVertexColorsRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Uuid);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetVertexColorsRequest(ref b);
         
         public GetVertexColorsRequest RosDeserialize(ref ReadBuffer b) => new GetVertexColorsRequest(ref b);
+        
+        public GetVertexColorsRequest RosDeserialize(ref ReadBuffer2 b) => new GetVertexColorsRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Uuid);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Uuid);
         }
@@ -80,12 +92,19 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uuid);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Uuid);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetVertexColorsResponse : IResponse, IDeserializableRos1<GetVertexColorsResponse>
+    public sealed class GetVertexColorsResponse : IResponse, IDeserializable<GetVertexColorsResponse>
     {
         [DataMember (Name = "mesh_vertex_colors_stamped")] public MeshMsgs.MeshVertexColorsStamped MeshVertexColorsStamped;
     
@@ -104,11 +123,23 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexColorsStamped = new MeshMsgs.MeshVertexColorsStamped(ref b);
         }
         
+        public GetVertexColorsResponse(ref ReadBuffer2 b)
+        {
+            MeshVertexColorsStamped = new MeshMsgs.MeshVertexColorsStamped(ref b);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetVertexColorsResponse(ref b);
         
         public GetVertexColorsResponse RosDeserialize(ref ReadBuffer b) => new GetVertexColorsResponse(ref b);
+        
+        public GetVertexColorsResponse RosDeserialize(ref ReadBuffer2 b) => new GetVertexColorsResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            MeshVertexColorsStamped.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             MeshVertexColorsStamped.RosSerialize(ref b);
         }
@@ -120,6 +151,13 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 0 + MeshVertexColorsStamped.RosMessageLength;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            MeshVertexColorsStamped.AddRos2MessageLength(ref c);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

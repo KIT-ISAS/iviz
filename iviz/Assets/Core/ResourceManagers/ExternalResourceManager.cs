@@ -515,7 +515,7 @@ namespace Iviz.Displays
                 return null;
             }
 
-            return BuiltIns.DeserializeMessage<Model>(buffer[Md5SumLength..]);
+            return RosUtils.DeserializeMessage<Model>(buffer[Md5SumLength..]);
         }
 
         async ValueTask<ResourceKey<GameObject>?> LoadLocalModelAsync(string uriString, string localPath,
@@ -587,7 +587,7 @@ namespace Iviz.Displays
                         return null;
                     }
 
-                    msg = BuiltIns.DeserializeMessage<Scene>(buffer[Md5SumLength..]);
+                    msg = RosUtils.DeserializeMessage<Scene>(buffer[Md5SumLength..]);
                 }
 
                 obj = await CreateSceneNodeAsync(msg, provider, token);

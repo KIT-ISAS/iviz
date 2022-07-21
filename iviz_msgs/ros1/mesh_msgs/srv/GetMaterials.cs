@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetMaterialsRequest : IRequest<GetMaterials, GetMaterialsResponse>, IDeserializableRos1<GetMaterialsRequest>
+    public sealed class GetMaterialsRequest : IRequest<GetMaterials, GetMaterialsResponse>, IDeserializable<GetMaterialsRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
@@ -65,11 +65,23 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeString(out Uuid);
         }
         
+        public GetMaterialsRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Uuid);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetMaterialsRequest(ref b);
         
         public GetMaterialsRequest RosDeserialize(ref ReadBuffer b) => new GetMaterialsRequest(ref b);
+        
+        public GetMaterialsRequest RosDeserialize(ref ReadBuffer2 b) => new GetMaterialsRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Uuid);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Uuid);
         }
@@ -80,12 +92,19 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uuid);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Uuid);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetMaterialsResponse : IResponse, IDeserializableRos1<GetMaterialsResponse>
+    public sealed class GetMaterialsResponse : IResponse, IDeserializable<GetMaterialsResponse>
     {
         [DataMember (Name = "mesh_materials_stamped")] public MeshMsgs.MeshMaterialsStamped MeshMaterialsStamped;
     
@@ -104,11 +123,23 @@ namespace Iviz.Msgs.MeshMsgs
             MeshMaterialsStamped = new MeshMsgs.MeshMaterialsStamped(ref b);
         }
         
+        public GetMaterialsResponse(ref ReadBuffer2 b)
+        {
+            MeshMaterialsStamped = new MeshMsgs.MeshMaterialsStamped(ref b);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetMaterialsResponse(ref b);
         
         public GetMaterialsResponse RosDeserialize(ref ReadBuffer b) => new GetMaterialsResponse(ref b);
+        
+        public GetMaterialsResponse RosDeserialize(ref ReadBuffer2 b) => new GetMaterialsResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            MeshMaterialsStamped.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             MeshMaterialsStamped.RosSerialize(ref b);
         }
@@ -120,6 +151,13 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 0 + MeshMaterialsStamped.RosMessageLength;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            MeshMaterialsStamped.AddRos2MessageLength(ref c);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

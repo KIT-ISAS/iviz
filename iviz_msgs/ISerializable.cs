@@ -38,6 +38,12 @@ public interface ISerializableRos2
     /// Length of this message in bytes after serialization.
     /// </summary>
     int Ros2MessageLength { get; }
+    
+    /// <summary>
+    /// Adds the length of the ROS2 message to the offset argument, including padding for alignment depending
+    /// on the current value of the offset. 
+    /// </summary>
+    void AddRos2MessageLength(ref int offset);
 }
 
 /// <summary>

@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.MsgsGen.Dynamic;
 using Iviz.Tools;
 
 namespace Iviz.Roslib;
@@ -16,7 +15,6 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
     string? publisherId;
     bool disposed;
     bool latchingEnabled;
-    bool forceTcpNoDelay = true;
 
     public bool Started => publisher != null;
 
@@ -40,19 +38,6 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
         }
     }
 
-    public bool ForceTcpNoDelay
-    {
-        get => forceTcpNoDelay;
-        set
-        {
-            forceTcpNoDelay = value;
-            if (publisher != null)
-            {
-                Publisher.ForceTcpNoDelay = value;
-            }
-        }
-    }
-
     public string Topic => Publisher.Topic;
 
     public RosChannelWriter()
@@ -71,17 +56,19 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
             BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
+        /*
         if (DynamicMessage.IsDynamic(typeof(TMessage)))
         {
             throw new InvalidOperationException(
                 "This function cannot be used in channels for dynamic messages. Use the overload with the generator.");
         }
+        */
 
         publisherId = client.Advertise(topic, out publisher);
         publisher.LatchingEnabled = LatchingEnabled;
-        publisher.ForceTcpNoDelay = ForceTcpNoDelay;
     }
 
+    /*
     public void Start(IRosClient client, string topic, DynamicMessage generator)
     {
         if (!DynamicMessage.IsDynamic(typeof(TMessage)))
@@ -107,8 +94,8 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
         publisherId = client.Advertise(topic, generator, out var dynamicPublisher);
         publisher = (IRosPublisher<TMessage>) dynamicPublisher;
         publisher.LatchingEnabled = LatchingEnabled;
-        publisher.ForceTcpNoDelay = ForceTcpNoDelay;
     }
+    */
 
     public async ValueTask StartAsync(IRosClient client, string topic, CancellationToken token = default)
     {
@@ -119,9 +106,9 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
 
         (publisherId, publisher) = await client.AdvertiseAsync<TMessage>(topic, token);
         publisher.LatchingEnabled = LatchingEnabled;
-        publisher.ForceTcpNoDelay = ForceTcpNoDelay;
     }
 
+    /*
     public async ValueTask StartAsync(IRosClient client, string topic, DynamicMessage generator,
         CancellationToken token = default)
     {
@@ -147,7 +134,7 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
         publisher.LatchingEnabled = LatchingEnabled;
         publisher.ForceTcpNoDelay = ForceTcpNoDelay;
     }
-
+    */
 
     public void Write(in TMessage msg)
     {
@@ -277,16 +264,18 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
 
 public static class RosChannelWriterUtils
 {
-    public static RosChannelWriter<T> CreateWriter<T>(this IRosClient client, string topic, bool latchingEnabled = false)
+    public static RosChannelWriter<T> CreateWriter<T>(this IRosClient client, string topic,
+        bool latchingEnabled = false)
         where T : IMessage, new()
     {
-        return new RosChannelWriter<T>(client, topic) {LatchingEnabled = latchingEnabled};
+        return new RosChannelWriter<T>(client, topic) { LatchingEnabled = latchingEnabled };
     }
-        
-    public static async ValueTask<RosChannelWriter<T>> CreateWriterAsync<T>(this IRosClient client, string topic, bool latchingEnabled = false, CancellationToken token = default)
+
+    public static async ValueTask<RosChannelWriter<T>> CreateWriterAsync<T>(this IRosClient client, string topic,
+        bool latchingEnabled = false, CancellationToken token = default)
         where T : IMessage, new()
     {
-        var writer = new RosChannelWriter<T> {LatchingEnabled = latchingEnabled};
+        var writer = new RosChannelWriter<T> { LatchingEnabled = latchingEnabled };
         await writer.StartAsync(client, topic, token);
         return writer;
     }
@@ -316,7 +305,7 @@ public static class RosChannelWriterUtils
     {
         return CreateWriterForMessage(msg.GetType());
     }
-    
+
     static IRosChannelWriter CreateWriterForMessage(Type msgType)
     {
         if (!typeof(IMessage).IsAssignableFrom(msgType))
@@ -325,6 +314,6 @@ public static class RosChannelWriterUtils
         }
 
         Type writerType = typeof(RosChannelWriter<>).MakeGenericType(msgType);
-        return (IRosChannelWriter) Activator.CreateInstance(writerType)!;
+        return (IRosChannelWriter)Activator.CreateInstance(writerType)!;
     }
 }

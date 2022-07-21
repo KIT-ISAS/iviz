@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetModelResourceRequest : IRequest<GetModelResource, GetModelResourceResponse>, IDeserializableRos1<GetModelResourceRequest>
+    public sealed class GetModelResourceRequest : IRequest<GetModelResource, GetModelResourceResponse>, IDeserializable<GetModelResourceRequest>
     {
         // Retrieves a 3D model, and converts it into a format that can be used in iviz
         /// <summary> Uri of the file. Example: package://some_package/file.dae </summary>
@@ -67,11 +67,23 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Uri);
         }
         
+        public GetModelResourceRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Uri);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetModelResourceRequest(ref b);
         
         public GetModelResourceRequest RosDeserialize(ref ReadBuffer b) => new GetModelResourceRequest(ref b);
+        
+        public GetModelResourceRequest RosDeserialize(ref ReadBuffer2 b) => new GetModelResourceRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Uri);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Uri);
         }
@@ -82,12 +94,19 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uri);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Uri);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetModelResourceResponse : IResponse, IDeserializableRos1<GetModelResourceResponse>
+    public sealed class GetModelResourceResponse : IResponse, IDeserializable<GetModelResourceResponse>
     {
         /// <summary> Whether the retrieval succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -116,11 +135,27 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Message);
         }
         
+        public GetModelResourceResponse(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Success);
+            Model = new Model(ref b);
+            b.DeserializeString(out Message);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetModelResourceResponse(ref b);
         
         public GetModelResourceResponse RosDeserialize(ref ReadBuffer b) => new GetModelResourceResponse(ref b);
+        
+        public GetModelResourceResponse RosDeserialize(ref ReadBuffer2 b) => new GetModelResourceResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Success);
+            Model.RosSerialize(ref b);
+            b.Serialize(Message);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
             Model.RosSerialize(ref b);
@@ -135,6 +170,15 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 5 + Model.RosMessageLength + WriteBuffer.GetStringSize(Message);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Success);
+            Model.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Message);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

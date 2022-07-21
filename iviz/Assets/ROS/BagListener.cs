@@ -79,7 +79,7 @@ namespace Iviz.Ros
         {
             // keep the writer within this function!
             RosbagFileWriter? writer = null;
-            
+
             try
             {
                 await using (writer = await RosbagFileWriter.CreateAsync(path))

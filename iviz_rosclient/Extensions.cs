@@ -4,13 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Tools;
-using Iviz.XmlRpc;
 
 namespace Iviz.Roslib;
 
 public static class Extensions
 {
-    public static void WaitForService(this RosClient client, string service, int timeoutInMs)
+    public static void WaitForService(this IRosClient client, string service, int timeoutInMs)
     {
         using CancellationTokenSource tokenSource = new(timeoutInMs);
         try
@@ -23,7 +22,7 @@ public static class Extensions
         }
     }
 
-    public static void WaitForService(this RosClient client, string service, CancellationToken token = default)
+    public static void WaitForService(this IRosClient client, string service, CancellationToken token = default)
     {
         if (client == null)
         {
@@ -38,7 +37,7 @@ public static class Extensions
         TaskUtils.Run(() => client.WaitForServiceAsync(service, token).AsTask(), token).WaitAndRethrow();
     }
 
-    public static async ValueTask WaitForServiceAsync(this RosClient client, string service,
+    public static async ValueTask WaitForServiceAsync(this IRosClient client, string service,
         CancellationToken token = default)
     {
         if (client == null)
@@ -53,19 +52,12 @@ public static class Extensions
 
         while (true)
         {
-            try
+            if (await client.IsServiceAvailableAsync(service, token))
             {
-                var result = await client.RosMasterClient.LookupServiceAsync(service, token);
-                if (result.IsValid)
-                {
-                    return;
-                }
+                return;
+            }
 
-                await Task.Delay(200, token);
-            }
-            catch (XmlRpcException)
-            {
-            }
+            await Task.Delay(200, token);
         }
     }
 
@@ -116,7 +108,7 @@ public static class Extensions
             await Task.Delay(200, linkedSource.Token);
         }
     }
-    
+
     public static ValueTask WaitForAnySubscriberAsync(this IRosChannelWriter writer, CancellationToken token = default)
     {
         return writer.Publisher.WaitForAnySubscriberAsync(token);
@@ -153,19 +145,19 @@ public static class Extensions
             throw new ArgumentNullException(nameof(subscriber));
         }
 
-        if (subscriber.NumActivePublishers != 0)
+        if (subscriber.NumPublishers != 0)
         {
             return;
         }
-            
+
         using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, subscriber.CancellationToken);
-        while (subscriber.NumActivePublishers == 0)
+        while (subscriber.NumPublishers == 0)
         {
             await Task.Delay(200, linkedSource.Token);
         }
     }
 
-    public static void WaitForTopic(this RosClient client, string topic, int timeoutInMs)
+    public static void WaitForTopic(this IRosClient client, string topic, int timeoutInMs)
     {
         using CancellationTokenSource tokenSource = new(timeoutInMs);
         try
@@ -178,7 +170,7 @@ public static class Extensions
         }
     }
 
-    public static void WaitForTopic(this RosClient client, string topic, CancellationToken token = default)
+    public static void WaitForTopic(this IRosClient client, string topic, CancellationToken token = default)
     {
         if (client == null)
         {
@@ -193,7 +185,7 @@ public static class Extensions
         TaskUtils.Run(() => client.WaitForTopicAsync(topic, token).AsTask(), token).WaitAndRethrow();
     }
 
-    public static async ValueTask WaitForTopicAsync(this RosClient client, string topic,
+    public static async ValueTask WaitForTopicAsync(this IRosClient client, string topic,
         CancellationToken token = default)
     {
         if (client == null)
@@ -208,19 +200,13 @@ public static class Extensions
 
         while (true)
         {
-            try
+            var result = await client.GetSystemPublishedTopicsAsync(token);
+            if (result.Any(tuple => tuple.Topic == topic))
             {
-                var result = await client.RosMasterClient.GetPublishedTopicsAsync(token: token);
-                if (result.IsValid && result.Topics.Any(tuple => tuple.name == topic))
-                {
-                    return;
-                }
+                return;
+            }
 
-                await Task.Delay(200, token);
-            }
-            catch (XmlRpcException)
-            {
-            }
+            await Task.Delay(200, token);
         }
     }
 }

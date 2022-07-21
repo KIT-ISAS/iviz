@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetUUIDRequest : IRequest<GetUUID, GetUUIDResponse>, IDeserializableRos1<GetUUIDRequest>
+    public sealed class GetUUIDRequest : IRequest<GetUUID, GetUUIDResponse>, IDeserializable<GetUUIDRequest>
     {
     
         public GetUUIDRequest()
@@ -57,14 +57,24 @@ namespace Iviz.Msgs.MeshMsgs
         {
         }
         
+        public GetUUIDRequest(ref ReadBuffer2 b)
+        {
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public GetUUIDRequest RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public GetUUIDRequest RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static GetUUIDRequest? singleton;
         public static GetUUIDRequest Singleton => singleton ??= new GetUUIDRequest();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -75,12 +85,16 @@ namespace Iviz.Msgs.MeshMsgs
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetUUIDResponse : IResponse, IDeserializableRos1<GetUUIDResponse>
+    public sealed class GetUUIDResponse : IResponse, IDeserializable<GetUUIDResponse>
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
@@ -99,11 +113,23 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeString(out Uuid);
         }
         
+        public GetUUIDResponse(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Uuid);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetUUIDResponse(ref b);
         
         public GetUUIDResponse RosDeserialize(ref ReadBuffer b) => new GetUUIDResponse(ref b);
+        
+        public GetUUIDResponse RosDeserialize(ref ReadBuffer2 b) => new GetUUIDResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Uuid);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Uuid);
         }
@@ -114,6 +140,13 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uuid);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Uuid);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

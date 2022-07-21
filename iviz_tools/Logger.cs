@@ -9,7 +9,7 @@ namespace Iviz.Tools;
 /// </summary>
 public static class Logger
 {
-    public static Action<string>? LogDebugCallback { private get; set; }
+    public static Action<string>? LogDebugCallback { get; set; }
 
     public static void LogDebug(string arg1)
     {
@@ -67,7 +67,7 @@ public static class Logger
     /// <summary>
     /// Callback function when a log message of level 'default' is produced. 
     /// </summary>
-    public static Action<string>? LogCallback { private get; set; }
+    public static Action<string>? LogCallback { get; set; }
 
     public static void Log(string arg1)
     {
@@ -119,7 +119,7 @@ public static class Logger
     /// <summary>
     /// Callback function when a log message of level 'error' is produced. 
     /// </summary>
-    public static Action<string>? LogErrorCallback { private get; set; }
+    public static Action<string>? LogErrorCallback { get; set; }
 
     public static void LogError(string arg1)
     {

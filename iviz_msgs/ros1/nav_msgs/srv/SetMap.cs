@@ -46,7 +46,7 @@ namespace Iviz.Msgs.NavMsgs
     }
 
     [DataContract]
-    public sealed class SetMapRequest : IRequest<SetMap, SetMapResponse>, IDeserializableRos1<SetMapRequest>
+    public sealed class SetMapRequest : IRequest<SetMap, SetMapResponse>, IDeserializable<SetMapRequest>
     {
         // Set a new map together with an initial pose
         [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map;
@@ -70,11 +70,25 @@ namespace Iviz.Msgs.NavMsgs
             InitialPose = new GeometryMsgs.PoseWithCovarianceStamped(ref b);
         }
         
+        public SetMapRequest(ref ReadBuffer2 b)
+        {
+            Map = new NavMsgs.OccupancyGrid(ref b);
+            InitialPose = new GeometryMsgs.PoseWithCovarianceStamped(ref b);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetMapRequest(ref b);
         
         public SetMapRequest RosDeserialize(ref ReadBuffer b) => new SetMapRequest(ref b);
+        
+        public SetMapRequest RosDeserialize(ref ReadBuffer2 b) => new SetMapRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Map.RosSerialize(ref b);
+            InitialPose.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Map.RosSerialize(ref b);
             InitialPose.RosSerialize(ref b);
@@ -89,12 +103,20 @@ namespace Iviz.Msgs.NavMsgs
         }
     
         public int RosMessageLength => 0 + Map.RosMessageLength + InitialPose.RosMessageLength;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Map.AddRos2MessageLength(ref c);
+            InitialPose.AddRos2MessageLength(ref c);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class SetMapResponse : IResponse, IDeserializableRos1<SetMapResponse>
+    public sealed class SetMapResponse : IResponse, IDeserializable<SetMapResponse>
     {
         [DataMember (Name = "success")] public bool Success;
     
@@ -112,11 +134,23 @@ namespace Iviz.Msgs.NavMsgs
             b.Deserialize(out Success);
         }
         
+        public SetMapResponse(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Success);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetMapResponse(ref b);
         
         public SetMapResponse RosDeserialize(ref ReadBuffer b) => new SetMapResponse(ref b);
+        
+        public SetMapResponse RosDeserialize(ref ReadBuffer2 b) => new SetMapResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Success);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
         }
@@ -128,6 +162,15 @@ namespace Iviz.Msgs.NavMsgs
         public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public const int Ros2FixedMessageLength = 1;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Success);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

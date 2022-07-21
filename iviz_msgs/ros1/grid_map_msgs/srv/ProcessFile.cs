@@ -46,7 +46,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class ProcessFileRequest : IRequest<ProcessFile, ProcessFileResponse>, IDeserializableRos1<ProcessFileRequest>
+    public sealed class ProcessFileRequest : IRequest<ProcessFile, ProcessFileResponse>, IDeserializable<ProcessFileRequest>
     {
         // Absolute file path.
         [DataMember (Name = "file_path")] public string FilePath;
@@ -71,11 +71,25 @@ namespace Iviz.Msgs.GridMapMsgs
             b.DeserializeString(out TopicName);
         }
         
+        public ProcessFileRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out FilePath);
+            b.DeserializeString(out TopicName);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ProcessFileRequest(ref b);
         
         public ProcessFileRequest RosDeserialize(ref ReadBuffer b) => new ProcessFileRequest(ref b);
+        
+        public ProcessFileRequest RosDeserialize(ref ReadBuffer2 b) => new ProcessFileRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(FilePath);
+            b.Serialize(TopicName);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(FilePath);
             b.Serialize(TopicName);
@@ -88,12 +102,20 @@ namespace Iviz.Msgs.GridMapMsgs
         }
     
         public int RosMessageLength => 8 + WriteBuffer.GetStringSize(FilePath) + WriteBuffer.GetStringSize(TopicName);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, FilePath);
+            WriteBuffer2.AddLength(ref c, TopicName);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class ProcessFileResponse : IResponse, IDeserializableRos1<ProcessFileResponse>
+    public sealed class ProcessFileResponse : IResponse, IDeserializable<ProcessFileResponse>
     {
         // True if file processing was successful.
         [DataMember (Name = "success")] public bool Success;
@@ -112,11 +134,23 @@ namespace Iviz.Msgs.GridMapMsgs
             b.Deserialize(out Success);
         }
         
+        public ProcessFileResponse(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Success);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ProcessFileResponse(ref b);
         
         public ProcessFileResponse RosDeserialize(ref ReadBuffer b) => new ProcessFileResponse(ref b);
+        
+        public ProcessFileResponse RosDeserialize(ref ReadBuffer2 b) => new ProcessFileResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Success);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
         }
@@ -128,6 +162,15 @@ namespace Iviz.Msgs.GridMapMsgs
         public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public const int Ros2FixedMessageLength = 1;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Success);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

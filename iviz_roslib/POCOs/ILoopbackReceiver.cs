@@ -7,7 +7,7 @@ namespace Iviz.Roslib;
 /// if it is part of the same client, to avoid serialization and transmission through a socket. 
 /// </summary>
 /// <typeparam name="T">The message type</typeparam>
-internal interface ILoopbackReceiver<T> where T : IMessage
+internal interface ILoopbackReceiver<T> where T : IMessageRos1
 {
     /// <summary>
     /// Send a message from a publisher directly to a subscriber.

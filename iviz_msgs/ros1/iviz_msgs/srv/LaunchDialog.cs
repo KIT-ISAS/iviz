@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class LaunchDialogRequest : IRequest<LaunchDialog, LaunchDialogResponse>, IDeserializableRos1<LaunchDialogRequest>
+    public sealed class LaunchDialogRequest : IRequest<LaunchDialog, LaunchDialogResponse>, IDeserializable<LaunchDialogRequest>
     {
         [DataMember (Name = "dialog")] public IvizMsgs.Dialog Dialog;
     
@@ -65,11 +65,23 @@ namespace Iviz.Msgs.IvizMsgs
             Dialog = new IvizMsgs.Dialog(ref b);
         }
         
+        public LaunchDialogRequest(ref ReadBuffer2 b)
+        {
+            Dialog = new IvizMsgs.Dialog(ref b);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LaunchDialogRequest(ref b);
         
         public LaunchDialogRequest RosDeserialize(ref ReadBuffer b) => new LaunchDialogRequest(ref b);
+        
+        public LaunchDialogRequest RosDeserialize(ref ReadBuffer2 b) => new LaunchDialogRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Dialog.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Dialog.RosSerialize(ref b);
         }
@@ -81,12 +93,19 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 0 + Dialog.RosMessageLength;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Dialog.AddRos2MessageLength(ref c);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class LaunchDialogResponse : IResponse, IDeserializableRos1<LaunchDialogResponse>
+    public sealed class LaunchDialogResponse : IResponse, IDeserializable<LaunchDialogResponse>
     {
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "message")] public string Message;
@@ -112,11 +131,27 @@ namespace Iviz.Msgs.IvizMsgs
             Feedback = new IvizMsgs.Feedback(ref b);
         }
         
+        public LaunchDialogResponse(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
+            Feedback = new IvizMsgs.Feedback(ref b);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LaunchDialogResponse(ref b);
         
         public LaunchDialogResponse RosDeserialize(ref ReadBuffer b) => new LaunchDialogResponse(ref b);
+        
+        public LaunchDialogResponse RosDeserialize(ref ReadBuffer2 b) => new LaunchDialogResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Success);
+            b.Serialize(Message);
+            Feedback.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
             b.Serialize(Message);
@@ -131,6 +166,15 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message) + Feedback.RosMessageLength;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Success);
+            WriteBuffer2.AddLength(ref c, Message);
+            Feedback.AddRos2MessageLength(ref c);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

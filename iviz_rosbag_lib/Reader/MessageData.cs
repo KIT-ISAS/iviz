@@ -88,7 +88,7 @@ public readonly struct MessageData
     /// Retrieves the enclosed dynamic message. Consider using <see cref="LinqUtils.SelectAnyMessage"/> instead of this.
     /// </summary>
     /// <returns>The enclosed message.</returns>
-    public IMessage GetAnyMessage()
+    public IMessageRos1 GetAnyMessage()
     {
         string? type = Type;
         if (type == null)
@@ -97,7 +97,7 @@ public readonly struct MessageData
         }
 
         ISerializable? generator;
-        if (GeneratorsByMessageType.TryGetValue(type, out ISerializable? serializable))
+        if (GeneratorsByMessageType.TryGetValue(type, out var serializable))
         {
             generator = serializable;
         }
@@ -120,7 +120,7 @@ public readonly struct MessageData
         {
             reader.Seek(dataStart, SeekOrigin.Begin);
             reader.ReadAll(span);
-            return (IMessage)ReadBuffer.Deserialize(generator, span);
+            return (IMessageRos1)ReadBuffer.Deserialize(generator, span);
         }
     }
 

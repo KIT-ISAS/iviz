@@ -262,19 +262,19 @@ namespace Iviz.Controllers.TF
         {
             ref readonly var rosTransform = ref transform.Transform;
 
-            if (!CheckIfWithinThreshold(rosTransform.Translation) || !CheckIfWithinThreshold(rosTransform.Rotation))
-            {
-                SetFailedForThreshold(transform.ChildFrameId);
-                return;
-            }
+            var unityPose = rosTransform.Ros2Unity();
 
-            if (rosTransform.IsInvalid())
+            if (unityPose.IsInvalid())
             {
                 SetFailedForInvalid(transform.ChildFrameId);
                 return;
             }
 
-            var unityPose = rosTransform.Ros2Unity();
+            if (!CheckIfWithinThreshold(unityPose.position) || !CheckIfWithinThreshold(unityPose.rotation))
+            {
+                SetFailedForThreshold(transform.ChildFrameId);
+                return;
+            }
 
             string childIdUnchecked = transform.ChildFrameId;
             if (childIdUnchecked.Length == 0)
@@ -338,19 +338,19 @@ namespace Iviz.Controllers.TF
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool CheckIfWithinThreshold(in Msgs.GeometryMsgs.Vector3 t)
+        static bool CheckIfWithinThreshold(in Vector3 t)
         {
             // unity cannot deal with very large floats, so we have to limit translation sizes
             const int maxPoseMagnitude = 10000;
-            return t.ToUnity().MaxAbsCoeff() < maxPoseMagnitude;
+            return t.MaxAbsCoeff() < maxPoseMagnitude;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool CheckIfWithinThreshold(in Msgs.GeometryMsgs.Quaternion t)
+        static bool CheckIfWithinThreshold(in Quaternion t)
         {
             // quick sanity check
             const int maxQuaternionMagnitude = 2;
-            return t.ToUnity().MaxAbsCoeff() < maxQuaternionMagnitude;
+            return t.MaxAbsCoeff() < maxQuaternionMagnitude;
         }
 
         void SetFailedForThreshold(string childId)

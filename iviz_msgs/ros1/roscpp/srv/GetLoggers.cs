@@ -46,7 +46,7 @@ namespace Iviz.Msgs.Roscpp
     }
 
     [DataContract]
-    public sealed class GetLoggersRequest : IRequest<GetLoggers, GetLoggersResponse>, IDeserializableRos1<GetLoggersRequest>
+    public sealed class GetLoggersRequest : IRequest<GetLoggers, GetLoggersResponse>, IDeserializable<GetLoggersRequest>
     {
     
         public GetLoggersRequest()
@@ -57,14 +57,24 @@ namespace Iviz.Msgs.Roscpp
         {
         }
         
+        public GetLoggersRequest(ref ReadBuffer2 b)
+        {
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public GetLoggersRequest RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public GetLoggersRequest RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static GetLoggersRequest? singleton;
         public static GetLoggersRequest Singleton => singleton ??= new GetLoggersRequest();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -75,12 +85,16 @@ namespace Iviz.Msgs.Roscpp
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetLoggersResponse : IResponse, IDeserializableRos1<GetLoggersResponse>
+    public sealed class GetLoggersResponse : IResponse, IDeserializable<GetLoggersResponse>
     {
         [DataMember (Name = "loggers")] public Logger[] Loggers;
     
@@ -103,11 +117,27 @@ namespace Iviz.Msgs.Roscpp
             }
         }
         
+        public GetLoggersResponse(ref ReadBuffer2 b)
+        {
+            b.DeserializeArray(out Loggers);
+            for (int i = 0; i < Loggers.Length; i++)
+            {
+                Loggers[i] = new Logger(ref b);
+            }
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetLoggersResponse(ref b);
         
         public GetLoggersResponse RosDeserialize(ref ReadBuffer b) => new GetLoggersResponse(ref b);
+        
+        public GetLoggersResponse RosDeserialize(ref ReadBuffer2 b) => new GetLoggersResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeArray(Loggers);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeArray(Loggers);
         }
@@ -123,6 +153,13 @@ namespace Iviz.Msgs.Roscpp
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Loggers);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Loggers);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

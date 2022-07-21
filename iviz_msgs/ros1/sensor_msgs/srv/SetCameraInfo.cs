@@ -46,7 +46,7 @@ namespace Iviz.Msgs.SensorMsgs
     }
 
     [DataContract]
-    public sealed class SetCameraInfoRequest : IRequest<SetCameraInfo, SetCameraInfoResponse>, IDeserializableRos1<SetCameraInfoRequest>
+    public sealed class SetCameraInfoRequest : IRequest<SetCameraInfo, SetCameraInfoResponse>, IDeserializable<SetCameraInfoRequest>
     {
         // This service requests that a camera stores the given CameraInfo 
         // as that camera's calibration information.
@@ -73,11 +73,23 @@ namespace Iviz.Msgs.SensorMsgs
             CameraInfo = new SensorMsgs.CameraInfo(ref b);
         }
         
+        public SetCameraInfoRequest(ref ReadBuffer2 b)
+        {
+            CameraInfo = new SensorMsgs.CameraInfo(ref b);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetCameraInfoRequest(ref b);
         
         public SetCameraInfoRequest RosDeserialize(ref ReadBuffer b) => new SetCameraInfoRequest(ref b);
+        
+        public SetCameraInfoRequest RosDeserialize(ref ReadBuffer2 b) => new SetCameraInfoRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            CameraInfo.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             CameraInfo.RosSerialize(ref b);
         }
@@ -89,12 +101,19 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 0 + CameraInfo.RosMessageLength;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            CameraInfo.AddRos2MessageLength(ref c);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class SetCameraInfoResponse : IResponse, IDeserializableRos1<SetCameraInfoResponse>
+    public sealed class SetCameraInfoResponse : IResponse, IDeserializable<SetCameraInfoResponse>
     {
         /// <summary> True if the call succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -118,11 +137,25 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeString(out StatusMessage);
         }
         
+        public SetCameraInfoResponse(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Success);
+            b.DeserializeString(out StatusMessage);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetCameraInfoResponse(ref b);
         
         public SetCameraInfoResponse RosDeserialize(ref ReadBuffer b) => new SetCameraInfoResponse(ref b);
+        
+        public SetCameraInfoResponse RosDeserialize(ref ReadBuffer2 b) => new SetCameraInfoResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Success);
+            b.Serialize(StatusMessage);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
             b.Serialize(StatusMessage);
@@ -134,6 +167,14 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         public int RosMessageLength => 5 + WriteBuffer.GetStringSize(StatusMessage);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Success);
+            WriteBuffer2.AddLength(ref c, StatusMessage);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

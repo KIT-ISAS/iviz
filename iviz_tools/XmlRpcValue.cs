@@ -183,22 +183,7 @@ public readonly struct XmlRpcValue
         value = Array.Empty<(string, XmlRpcValue)>();
         return false;
     }
-
-    public XmlRpcArg AsArg() => type switch
-    {
-        Type.Integer => (int) l,
-        Type.Empty => throw new InvalidOperationException("Empty object"),
-        Type.Double => DoubleLongReinterpret.ToDouble(l),
-        Type.Boolean => l != 0,
-        Type.DateTime => new DateTime(l),
-        Type.String => (string) o!,
-        Type.Array => ((XmlRpcValue[]) o!).Select(wrapper => wrapper.AsArg()).ToArray(),
-        Type.Base64 => (byte[]) o!,
-        Type.Struct => (((string Key, XmlRpcValue Value)[]) o!)
-            .Select(entry => (entry.Key, entry.Value.AsArg())).ToArray(),
-        _ => throw new ArgumentOutOfRangeException()
-    };
-
+    
     public override string ToString() => type switch
     {
         Type.Integer => $"[int:{((int) l).ToString()}]",

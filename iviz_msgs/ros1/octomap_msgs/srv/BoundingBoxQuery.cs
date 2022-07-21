@@ -46,7 +46,7 @@ namespace Iviz.Msgs.OctomapMsgs
     }
 
     [DataContract]
-    public sealed class BoundingBoxQueryRequest : IRequest<BoundingBoxQuery, BoundingBoxQueryResponse>, IDeserializableRos1<BoundingBoxQueryRequest>
+    public sealed class BoundingBoxQueryRequest : IRequest<BoundingBoxQuery, BoundingBoxQueryResponse>, IDeserializable<BoundingBoxQueryRequest>
     {
         // Clear a region specified by a global axis-aligned bounding box in stored OctoMap
         // minimum corner point of axis-aligned bounding box in global frame
@@ -70,11 +70,25 @@ namespace Iviz.Msgs.OctomapMsgs
             b.Deserialize(out Max);
         }
         
+        public BoundingBoxQueryRequest(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Min);
+            b.Deserialize(out Max);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new BoundingBoxQueryRequest(ref b);
         
         public BoundingBoxQueryRequest RosDeserialize(ref ReadBuffer b) => new BoundingBoxQueryRequest(ref b);
+        
+        public BoundingBoxQueryRequest RosDeserialize(ref ReadBuffer2 b) => new BoundingBoxQueryRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(in Min);
+            b.Serialize(in Max);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(in Min);
             b.Serialize(in Max);
@@ -87,12 +101,22 @@ namespace Iviz.Msgs.OctomapMsgs
         public const int RosFixedMessageLength = 48;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public const int Ros2FixedMessageLength = 48;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Min);
+            WriteBuffer2.AddLength(ref c, Max);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class BoundingBoxQueryResponse : IResponse, IDeserializableRos1<BoundingBoxQueryResponse>
+    public sealed class BoundingBoxQueryResponse : IResponse, IDeserializable<BoundingBoxQueryResponse>
     {
     
         public BoundingBoxQueryResponse()
@@ -103,14 +127,24 @@ namespace Iviz.Msgs.OctomapMsgs
         {
         }
         
+        public BoundingBoxQueryResponse(ref ReadBuffer2 b)
+        {
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public BoundingBoxQueryResponse RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public BoundingBoxQueryResponse RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static BoundingBoxQueryResponse? singleton;
         public static BoundingBoxQueryResponse Singleton => singleton ??= new BoundingBoxQueryResponse();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -121,6 +155,10 @@ namespace Iviz.Msgs.OctomapMsgs
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         public override string ToString() => Extensions.ToString(this);
     }

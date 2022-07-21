@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.Roslib.XmlRpc;
 
 namespace Iviz.Roslib;
 
@@ -15,13 +14,13 @@ public enum RosPublishPolicy
     /// Enqueue the message without waiting. 
     /// </summary>
     DoNotWait,
-        
+
     /// <summary>
     /// Enqueue the message and wait until all connections finish sending it.
     /// </summary>
     WaitUntilSent,
 }
-    
+
 /// <summary>
 /// Interface for all ROS publishers.
 /// </summary>
@@ -30,8 +29,8 @@ public interface IRosPublisher : IDisposable
     /// <summary>
     /// A cancellation token that gets canceled when the publisher is disposed.
     /// </summary>
-    public CancellationToken CancellationToken { get; } 
-        
+    public CancellationToken CancellationToken { get; }
+
     /// <summary>
     /// The name of the topic.
     /// </summary>
@@ -41,11 +40,6 @@ public interface IRosPublisher : IDisposable
     /// The ROS message type of the topic.
     /// </summary>        
     public string TopicType { get; }
-
-    /// <summary>
-    /// Timeout in milliseconds to wait for a subscriber handshake.
-    /// </summary>             
-    public int TimeoutInMs { get; set; }
 
     /// <summary>
     /// The number of publishers in the topic.
@@ -75,7 +69,8 @@ public interface IRosPublisher : IDisposable
     /// <exception cref="ArgumentNullException">The message is null</exception>
     /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
     /// <exception cref="AggregateException">An exception happened in one or multiple connections while sending the message.</exception>          
-    public ValueTask PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
+    public ValueTask PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
+        CancellationToken token = default);
 
     /// <summary>
     /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
@@ -116,33 +111,22 @@ public interface IRosPublisher : IDisposable
     /// <summary>
     /// Returns a structure that represents the internal state of the publisher. 
     /// </summary>        
-    public PublisherTopicState GetState();
+    public PublisherState GetState();
 
     /// <summary>
     /// Whether latching is enabled. When active, new subscribers will automatically receive a copy of the last message sent.
     /// </summary>
     public bool LatchingEnabled { get; set; }
-    
-    /// <summary>
-    /// Whether to force TCP_NODELAY. Usually, it is the job of the subscriber to request this flag.
-    /// When enabling this, the flag is always set regardless of the subscriber request.
-    /// </summary>
-    public bool ForceTcpNoDelay { get; set; }
 
     /// <summary>
     /// Async version of Dispose(), for NET Standard 2.0 where IAsyncDisposable is not available.
     /// </summary>
     /// <returns>The awaitable dispose task.</returns>
     public ValueTask DisposeAsync(CancellationToken token);
-        
-    internal TopicRequestRpcResult RequestTopicRpc(bool requestsTcp, RpcUdpTopicRequest? requestsUdp,
-        out Endpoint? tcpResponse, out RpcUdpTopicResponse? udpResponse);
 }
-    
+
 public interface IRosPublisher<T> : IRosPublisher where T : IMessage
 {
-    public T LatchedMessage { set; }
-
     /// <summary>
     /// Publishes the given message into the topic. 
     /// </summary>
@@ -150,7 +134,7 @@ public interface IRosPublisher<T> : IRosPublisher where T : IMessage
     /// <exception cref="ArgumentNullException">The message is null</exception>
     /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
     public void Publish(in T message);
-        
+
     /// <summary>
     /// Publishes the given message into the topic.  
     /// </summary>
@@ -166,5 +150,6 @@ public interface IRosPublisher<T> : IRosPublisher where T : IMessage
     /// <exception cref="ArgumentNullException">The message is null</exception>
     /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
     /// <exception cref="AggregateException">An exception happened in one or multiple connections while sending the message.</exception>          
-    public ValueTask PublishAsync(in T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
+    public ValueTask PublishAsync(in T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
+        CancellationToken token = default);
 }

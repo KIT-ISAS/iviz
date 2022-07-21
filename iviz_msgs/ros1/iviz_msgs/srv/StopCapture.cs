@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class StopCaptureRequest : IRequest<StopCapture, StopCaptureResponse>, IDeserializableRos1<StopCaptureRequest>
+    public sealed class StopCaptureRequest : IRequest<StopCapture, StopCaptureResponse>, IDeserializable<StopCaptureRequest>
     {
     
         public StopCaptureRequest()
@@ -57,14 +57,24 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
         
+        public StopCaptureRequest(ref ReadBuffer2 b)
+        {
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public StopCaptureRequest RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public StopCaptureRequest RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static StopCaptureRequest? singleton;
         public static StopCaptureRequest Singleton => singleton ??= new StopCaptureRequest();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -75,12 +85,16 @@ namespace Iviz.Msgs.IvizMsgs
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class StopCaptureResponse : IResponse, IDeserializableRos1<StopCaptureResponse>
+    public sealed class StopCaptureResponse : IResponse, IDeserializable<StopCaptureResponse>
     {
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "message")] public string Message;
@@ -102,11 +116,25 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Message);
         }
         
+        public StopCaptureResponse(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new StopCaptureResponse(ref b);
         
         public StopCaptureResponse RosDeserialize(ref ReadBuffer b) => new StopCaptureResponse(ref b);
+        
+        public StopCaptureResponse RosDeserialize(ref ReadBuffer2 b) => new StopCaptureResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Success);
+            b.Serialize(Message);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
             b.Serialize(Message);
@@ -118,6 +146,14 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Success);
+            WriteBuffer2.AddLength(ref c, Message);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

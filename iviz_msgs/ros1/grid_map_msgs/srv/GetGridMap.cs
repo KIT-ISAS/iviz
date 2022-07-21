@@ -46,7 +46,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class GetGridMapRequest : IRequest<GetGridMap, GetGridMapResponse>, IDeserializableRos1<GetGridMapRequest>
+    public sealed class GetGridMapRequest : IRequest<GetGridMap, GetGridMapResponse>, IDeserializable<GetGridMapRequest>
     {
         // Frame id of the submap position request.
         [DataMember (Name = "frame_id")] public string FrameId;
@@ -77,11 +77,33 @@ namespace Iviz.Msgs.GridMapMsgs
             b.DeserializeStringArray(out Layers);
         }
         
+        public GetGridMapRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out FrameId);
+            b.Deserialize(out PositionX);
+            b.Deserialize(out PositionY);
+            b.Deserialize(out LengthX);
+            b.Deserialize(out LengthY);
+            b.DeserializeStringArray(out Layers);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetGridMapRequest(ref b);
         
         public GetGridMapRequest RosDeserialize(ref ReadBuffer b) => new GetGridMapRequest(ref b);
+        
+        public GetGridMapRequest RosDeserialize(ref ReadBuffer2 b) => new GetGridMapRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(FrameId);
+            b.Serialize(PositionX);
+            b.Serialize(PositionY);
+            b.Serialize(LengthX);
+            b.Serialize(LengthY);
+            b.SerializeArray(Layers);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(FrameId);
             b.Serialize(PositionX);
@@ -102,12 +124,24 @@ namespace Iviz.Msgs.GridMapMsgs
         }
     
         public int RosMessageLength => 40 + WriteBuffer.GetStringSize(FrameId) + WriteBuffer.GetArraySize(Layers);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, FrameId);
+            WriteBuffer2.AddLength(ref c, PositionX);
+            WriteBuffer2.AddLength(ref c, PositionY);
+            WriteBuffer2.AddLength(ref c, LengthX);
+            WriteBuffer2.AddLength(ref c, LengthY);
+            WriteBuffer2.AddLength(ref c, Layers);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetGridMapResponse : IResponse, IDeserializableRos1<GetGridMapResponse>
+    public sealed class GetGridMapResponse : IResponse, IDeserializable<GetGridMapResponse>
     {
         // Submap
         [DataMember (Name = "map")] public GridMapMsgs.GridMap Map;
@@ -127,11 +161,23 @@ namespace Iviz.Msgs.GridMapMsgs
             Map = new GridMapMsgs.GridMap(ref b);
         }
         
+        public GetGridMapResponse(ref ReadBuffer2 b)
+        {
+            Map = new GridMapMsgs.GridMap(ref b);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetGridMapResponse(ref b);
         
         public GetGridMapResponse RosDeserialize(ref ReadBuffer b) => new GetGridMapResponse(ref b);
+        
+        public GetGridMapResponse RosDeserialize(ref ReadBuffer2 b) => new GetGridMapResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Map.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Map.RosSerialize(ref b);
         }
@@ -143,6 +189,13 @@ namespace Iviz.Msgs.GridMapMsgs
         }
     
         public int RosMessageLength => 0 + Map.RosMessageLength;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Map.AddRos2MessageLength(ref c);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

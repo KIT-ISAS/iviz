@@ -4,7 +4,7 @@ using Iviz.Roslib.Utils;
 namespace Iviz.Roslib.XmlRpc;
 
 [DataContract]
-public sealed class RpcUdpTopicRequest : JsonToString
+internal sealed class RpcUdpTopicRequest : JsonToString
 {
     public byte[] Header { get; }
     [DataMember] public string Hostname { get; }

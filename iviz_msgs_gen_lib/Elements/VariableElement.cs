@@ -26,6 +26,7 @@ namespace Iviz.MsgsGen
         public int ArraySize { get; }
         public bool RentHint { get; }
         public bool IgnoreHint { get; }
+        public RosVersion Version { get; }
         public bool IsArray => ArraySize != NotAnArray;
         public bool IsDynamicSizeArray => ArraySize == DynamicSizeArray;
         public bool IsFixedSizeArray => ArraySize > 0;
@@ -33,7 +34,7 @@ namespace Iviz.MsgsGen
         public ClassInfo? ClassInfo { get; internal set; }
         public bool ClassIsStruct => ClassInfo?.ForceStruct ?? ClassInfo.IsClassForceStruct(RosClassType);
         public bool ClassIsBlittable => ClassInfo?.IsBlittable ?? ClassInfo.IsClassBlittable(RosClassType);
-        public bool ClassHasFixedSize => ClassInfo != null && ClassInfo.HasFixedSize;
+        public bool ClassHasFixedSize => ClassInfo is { HasFixedSize: true };
 
         static readonly HashSet<string> Keywords = new HashSet<string>
         {
@@ -145,8 +146,12 @@ namespace Iviz.MsgsGen
             }
 
             ClassInfo = classInfo;
-            RentHint = IsDynamicSizeArray && Comment.StartsWith("[Rent]");
-            IgnoreHint = Comment.StartsWith("[Ignore]");
+            RentHint = IsDynamicSizeArray && Comment.Contains("[Rent]");
+            Version =
+                Comment.Contains("[Ros1]") ? RosVersion.Ros1 :
+                Comment.Contains("[Ros2]") ? RosVersion.Ros2 :
+                RosVersion.Common;
+            IgnoreHint = Comment.Contains("[Ignore]");
         }
 
         public override string ToString()

@@ -46,7 +46,7 @@ namespace Iviz.Msgs.NavMsgs
     }
 
     [DataContract]
-    public sealed class GetPlanRequest : IRequest<GetPlan, GetPlanResponse>, IDeserializableRos1<GetPlanRequest>
+    public sealed class GetPlanRequest : IRequest<GetPlan, GetPlanResponse>, IDeserializable<GetPlanRequest>
     {
         // Get a plan from the current position to the goal Pose 
         // The start pose for the plan
@@ -77,11 +77,27 @@ namespace Iviz.Msgs.NavMsgs
             b.Deserialize(out Tolerance);
         }
         
+        public GetPlanRequest(ref ReadBuffer2 b)
+        {
+            Start = new GeometryMsgs.PoseStamped(ref b);
+            Goal = new GeometryMsgs.PoseStamped(ref b);
+            b.Deserialize(out Tolerance);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetPlanRequest(ref b);
         
         public GetPlanRequest RosDeserialize(ref ReadBuffer b) => new GetPlanRequest(ref b);
+        
+        public GetPlanRequest RosDeserialize(ref ReadBuffer2 b) => new GetPlanRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Start.RosSerialize(ref b);
+            Goal.RosSerialize(ref b);
+            b.Serialize(Tolerance);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Start.RosSerialize(ref b);
             Goal.RosSerialize(ref b);
@@ -97,12 +113,21 @@ namespace Iviz.Msgs.NavMsgs
         }
     
         public int RosMessageLength => 4 + Start.RosMessageLength + Goal.RosMessageLength;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Start.AddRos2MessageLength(ref c);
+            Goal.AddRos2MessageLength(ref c);
+            WriteBuffer2.AddLength(ref c, Tolerance);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetPlanResponse : IResponse, IDeserializableRos1<GetPlanResponse>
+    public sealed class GetPlanResponse : IResponse, IDeserializable<GetPlanResponse>
     {
         [DataMember (Name = "plan")] public NavMsgs.Path Plan;
     
@@ -121,11 +146,23 @@ namespace Iviz.Msgs.NavMsgs
             Plan = new NavMsgs.Path(ref b);
         }
         
+        public GetPlanResponse(ref ReadBuffer2 b)
+        {
+            Plan = new NavMsgs.Path(ref b);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetPlanResponse(ref b);
         
         public GetPlanResponse RosDeserialize(ref ReadBuffer b) => new GetPlanResponse(ref b);
+        
+        public GetPlanResponse RosDeserialize(ref ReadBuffer2 b) => new GetPlanResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Plan.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Plan.RosSerialize(ref b);
         }
@@ -137,6 +174,13 @@ namespace Iviz.Msgs.NavMsgs
         }
     
         public int RosMessageLength => 0 + Plan.RosMessageLength;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Plan.AddRos2MessageLength(ref c);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

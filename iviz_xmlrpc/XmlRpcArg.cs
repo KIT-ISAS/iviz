@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Web;
 using Iviz.Tools;
@@ -105,7 +106,7 @@ public readonly struct XmlRpcArg
         }
 
         using var str = BuilderPool.Rent();
-            
+
         str.Append("<value><array><data>");
         foreach (var f in fs)
         {
@@ -192,7 +193,7 @@ public readonly struct XmlRpcArg
             str.Append(arg.content);
             str.Append("</member>");
         }
-            
+
         str.Append("</struct></value>");
         content = str.ToString();
     }
@@ -233,7 +234,7 @@ public readonly struct XmlRpcArg
     public static implicit operator XmlRpcArg(string[][] f) => new(f);
 
     public static implicit operator XmlRpcArg((string, string) f) => new(f);
-        
+
     public static implicit operator XmlRpcArg((string, string)[] f) => new(f);
 
     public static implicit operator XmlRpcArg((string name, XmlRpcArg value)[] f) => new(f);
@@ -247,4 +248,25 @@ public readonly struct XmlRpcArg
     public static implicit operator XmlRpcArg((XmlRpcArg, XmlRpcArg)[] f) => new(f);
 
     public static implicit operator XmlRpcArg((XmlRpcArg, XmlRpcArg, XmlRpcArg) f) => new(f);
+
+    public static implicit operator XmlRpcArg(XmlRpcValue f) => f.ValueType switch
+    {
+        XmlRpcValue.Type.Integer => f.TryGetInteger(out int l) ? l : ThrowCannotHappen(),
+        XmlRpcValue.Type.Empty => throw new InvalidOperationException("Empty object"),
+        XmlRpcValue.Type.Double => f.TryGetDouble(out double l) ? l : ThrowCannotHappen(),
+        XmlRpcValue.Type.Boolean => f.TryGetBoolean(out bool l) ? l : ThrowCannotHappen(),
+        XmlRpcValue.Type.DateTime => f.TryGetDateTime(out DateTime l) ? l : ThrowCannotHappen(),
+        XmlRpcValue.Type.String => f.TryGetString(out string l) ? l : ThrowCannotHappen(),
+        XmlRpcValue.Type.Array => f.TryGetArray(out var l)
+            ? l.Select(wrapper => (XmlRpcArg)wrapper).ToArray()
+            : ThrowCannotHappen(),
+        XmlRpcValue.Type.Base64 => f.TryGetBase64(out byte[] l) ? l : ThrowCannotHappen(),
+        XmlRpcValue.Type.Struct => f.TryGetStruct(out var l)
+            ? l.Select(entry => (entry.Key, (XmlRpcArg)entry.Value)).ToArray()
+            : ThrowCannotHappen(),
+        _ => throw new ArgumentOutOfRangeException()
+    };
+
+    [DoesNotReturn]
+    static XmlRpcArg ThrowCannotHappen() => throw new InvalidOperationException();
 }

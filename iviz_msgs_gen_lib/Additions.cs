@@ -165,7 +165,7 @@ namespace Iviz.MsgsGen
             {
                 "public bool Equals(GoalID? other) => ReferenceEquals(this, other) || (other != null && Stamp == other.Stamp && Id == other.Id);",
                 "public override bool Equals(object? obj) => ReferenceEquals(this, obj) || obj is GoalID other && Equals(other);",
-                "public override int GetHashCode() => (Stamp, Id).GetHashCode();",
+                "public override int GetHashCode() => HashCode.Combine(Stamp, Id);",
                 "public static bool operator ==(GoalID? left, GoalID? right) => ReferenceEquals(left, right) || !ReferenceEquals(left, null) && left.Equals(right);",
                 "public static bool operator !=(GoalID? left, GoalID? right) => !(left == right);"
             },

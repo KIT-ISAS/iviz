@@ -264,7 +264,7 @@ public unsafe partial struct WriteBuffer2
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void AddLength(ref int c, IMessageRos2[] array)
+    public static void AddLength(ref int c, ISerializable[] array)
     {
         c = DoAlign4(c) + sizeof(int);
         foreach (var message in array)
@@ -813,7 +813,7 @@ public unsafe partial struct WriteBuffer2
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetRosMessageLength<T>(in T msg) where T : IMessage
+    public static int GetRosMessageLength<T>(in T msg) where T : ISerializable
     {
         int s = 0;
         msg.AddRos2MessageLength(ref s);

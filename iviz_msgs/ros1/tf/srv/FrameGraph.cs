@@ -46,7 +46,7 @@ namespace Iviz.Msgs.Tf
     }
 
     [DataContract]
-    public sealed class FrameGraphRequest : IRequest<FrameGraph, FrameGraphResponse>, IDeserializableRos1<FrameGraphRequest>
+    public sealed class FrameGraphRequest : IRequest<FrameGraph, FrameGraphResponse>, IDeserializable<FrameGraphRequest>
     {
     
         public FrameGraphRequest()
@@ -57,14 +57,24 @@ namespace Iviz.Msgs.Tf
         {
         }
         
+        public FrameGraphRequest(ref ReadBuffer2 b)
+        {
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public FrameGraphRequest RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public FrameGraphRequest RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static FrameGraphRequest? singleton;
         public static FrameGraphRequest Singleton => singleton ??= new FrameGraphRequest();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -75,12 +85,16 @@ namespace Iviz.Msgs.Tf
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class FrameGraphResponse : IResponse, IDeserializableRos1<FrameGraphResponse>
+    public sealed class FrameGraphResponse : IResponse, IDeserializable<FrameGraphResponse>
     {
         [DataMember (Name = "dot_graph")] public string DotGraph;
     
@@ -99,11 +113,23 @@ namespace Iviz.Msgs.Tf
             b.DeserializeString(out DotGraph);
         }
         
+        public FrameGraphResponse(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out DotGraph);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new FrameGraphResponse(ref b);
         
         public FrameGraphResponse RosDeserialize(ref ReadBuffer b) => new FrameGraphResponse(ref b);
+        
+        public FrameGraphResponse RosDeserialize(ref ReadBuffer2 b) => new FrameGraphResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(DotGraph);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(DotGraph);
         }
@@ -114,6 +140,13 @@ namespace Iviz.Msgs.Tf
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(DotGraph);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, DotGraph);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

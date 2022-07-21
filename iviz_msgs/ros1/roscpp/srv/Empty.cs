@@ -46,7 +46,7 @@ namespace Iviz.Msgs.Roscpp
     }
 
     [DataContract]
-    public sealed class EmptyRequest : IRequest<Empty, EmptyResponse>, IDeserializableRos1<EmptyRequest>
+    public sealed class EmptyRequest : IRequest<Empty, EmptyResponse>, IDeserializable<EmptyRequest>
     {
     
         public EmptyRequest()
@@ -57,14 +57,24 @@ namespace Iviz.Msgs.Roscpp
         {
         }
         
+        public EmptyRequest(ref ReadBuffer2 b)
+        {
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public EmptyRequest RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public EmptyRequest RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static EmptyRequest? singleton;
         public static EmptyRequest Singleton => singleton ??= new EmptyRequest();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -75,12 +85,16 @@ namespace Iviz.Msgs.Roscpp
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class EmptyResponse : IResponse, IDeserializableRos1<EmptyResponse>
+    public sealed class EmptyResponse : IResponse, IDeserializable<EmptyResponse>
     {
     
         public EmptyResponse()
@@ -91,14 +105,24 @@ namespace Iviz.Msgs.Roscpp
         {
         }
         
+        public EmptyResponse(ref ReadBuffer2 b)
+        {
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public EmptyResponse RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public EmptyResponse RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static EmptyResponse? singleton;
         public static EmptyResponse Singleton => singleton ??= new EmptyResponse();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -109,6 +133,10 @@ namespace Iviz.Msgs.Roscpp
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         public override string ToString() => Extensions.ToString(this);
     }

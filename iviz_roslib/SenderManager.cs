@@ -275,7 +275,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
         latchedMessage = default;
     }
 
-    public PublisherSenderState[] GetStates() => cachedSenders.Select(sender => sender.State).ToArray();
+    public Ros1SenderState[] GetStates() => cachedSenders.Select(sender => sender.State).ToArray();
 
     public void UnsetLatch()
     {

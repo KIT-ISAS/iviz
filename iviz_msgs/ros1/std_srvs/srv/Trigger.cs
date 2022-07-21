@@ -46,7 +46,7 @@ namespace Iviz.Msgs.StdSrvs
     }
 
     [DataContract]
-    public sealed class TriggerRequest : IRequest<Trigger, TriggerResponse>, IDeserializableRos1<TriggerRequest>
+    public sealed class TriggerRequest : IRequest<Trigger, TriggerResponse>, IDeserializable<TriggerRequest>
     {
     
         public TriggerRequest()
@@ -57,14 +57,24 @@ namespace Iviz.Msgs.StdSrvs
         {
         }
         
+        public TriggerRequest(ref ReadBuffer2 b)
+        {
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public TriggerRequest RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public TriggerRequest RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static TriggerRequest? singleton;
         public static TriggerRequest Singleton => singleton ??= new TriggerRequest();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -75,12 +85,16 @@ namespace Iviz.Msgs.StdSrvs
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class TriggerResponse : IResponse, IDeserializableRos1<TriggerResponse>
+    public sealed class TriggerResponse : IResponse, IDeserializable<TriggerResponse>
     {
         /// <summary> Indicate successful run of triggered service </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -104,11 +118,25 @@ namespace Iviz.Msgs.StdSrvs
             b.DeserializeString(out Message);
         }
         
+        public TriggerResponse(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TriggerResponse(ref b);
         
         public TriggerResponse RosDeserialize(ref ReadBuffer b) => new TriggerResponse(ref b);
+        
+        public TriggerResponse RosDeserialize(ref ReadBuffer2 b) => new TriggerResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Success);
+            b.Serialize(Message);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
             b.Serialize(Message);
@@ -120,6 +148,14 @@ namespace Iviz.Msgs.StdSrvs
         }
     
         public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Success);
+            WriteBuffer2.AddLength(ref c, Message);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -23,7 +23,7 @@ public sealed class RosNodeClient
     public RosNodeClient(string callerId, Uri callerUri, Uri partnerUri, int timeoutInMs = 2000) =>
         (CallerId, CallerUri, Uri, TimeoutInMs) = (callerId, callerUri, partnerUri, timeoutInMs);
 
-    public RequestTopicResponse RequestTopic(string topic, RosTransportHint transportHint,
+    internal RequestTopicResponse RequestTopic(string topic, RosTransportHint transportHint,
         RpcUdpTopicRequest? udpTopicRequest)
     {
         var args = CreateRequestTopicArgs(CallerId, topic, transportHint, udpTopicRequest);
@@ -31,7 +31,7 @@ public sealed class RosNodeClient
         return new RequestTopicResponse(response);
     }
 
-    public async ValueTask<RequestTopicResponse> RequestTopicAsync(string topic,
+    internal async ValueTask<RequestTopicResponse> RequestTopicAsync(string topic,
         RosTransportHint transportHint, RpcUdpTopicRequest? udpTopicRequest,
         CancellationToken token)
     {

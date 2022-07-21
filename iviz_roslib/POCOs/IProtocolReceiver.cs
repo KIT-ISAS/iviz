@@ -12,7 +12,7 @@ internal interface IProtocolReceiver
     ValueTask DisposeAsync(CancellationToken token);
     Endpoint Endpoint { get; }
     Uri RemoteUri { get; }
-    SubscriberReceiverState State { get; }
+    Ros1ReceiverState State { get; }
     ReceiverStatus Status { get; }
     ErrorMessage? ErrorDescription { get; }
 }

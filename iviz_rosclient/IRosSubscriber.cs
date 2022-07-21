@@ -15,12 +15,7 @@ public interface IRosSubscriber : IDisposable
     /// A cancellation token that gets canceled when the subscriber is disposed.
     /// Used for external wrappers like <see cref="RosChannelReader{T}"/>. 
     /// </summary>
-    public CancellationToken CancellationToken { get; } 
-        
-    /// <summary>
-    /// Timeout in milliseconds to wait for a publisher handshake.
-    /// </summary>
-    public int TimeoutInMs { get; set; }
+    public CancellationToken CancellationToken { get; }
 
     /// <summary>
     /// The name of the topic.
@@ -38,11 +33,6 @@ public interface IRosSubscriber : IDisposable
     public int NumPublishers { get; }
 
     /// <summary>
-    /// The number of publishers in the topic. Only includes established connections.
-    /// </summary>
-    public int NumActivePublishers { get; }
-
-    /// <summary>
     /// Sets whether the subscriber is paused.
     /// When paused, the connections will still receive data, but will not process or parse it.
     /// </summary>
@@ -51,7 +41,7 @@ public interface IRosSubscriber : IDisposable
     /// <summary>
     /// Returns a structure that represents the internal state of the subscriber. 
     /// </summary>           
-    public SubscriberTopicState GetState();
+    public SubscriberState GetState();
 
     /// <summary>
     /// Checks whether this subscriber has provided the given id from a Subscribe() call.
@@ -98,16 +88,9 @@ public interface IRosSubscriber : IDisposable
     /// <returns>Whether the id belonged to the subscriber.</returns>        
     public ValueTask<bool> UnsubscribeAsync(string id, CancellationToken token = default);
 
-    /// <summary>
-    /// Called by the ROS client to notify the subscriber that the list of publishers has changed.
-    /// </summary>
-    /// <param name="publisherUris">The new list of publishers.</param>
-    /// <param name="token">A cancellation token</param>
-    internal ValueTask PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token);
-
     public ValueTask DisposeAsync(CancellationToken token);
 }
-    
+
 public delegate void RosCallback<T>(in T message, IRosReceiver info) where T : IMessage;
 
 public interface IRosSubscriber<T> : IRosSubscriber where T : IMessage
@@ -127,6 +110,4 @@ public interface IRosSubscriber<T> : IRosSubscriber where T : IMessage
     /// <returns>The subscribed id.</returns>
     /// <exception cref="ArgumentNullException">The callback is null.</exception>        
     string Subscribe(RosCallback<T> callback);
-        
-    internal bool TryGetLoopbackReceiver(in Endpoint uri, out ILoopbackReceiver<T>? receiver);
 }

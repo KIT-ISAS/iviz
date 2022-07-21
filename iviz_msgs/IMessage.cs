@@ -13,7 +13,6 @@ public interface IMessageRos1
     
 public interface IMessageRos2
 {
-    void AddRos2MessageLength(ref int c);
 }
 
 /// <summary>
@@ -30,10 +29,4 @@ public interface IMessage : IMessageRos1, IMessageRos2, ISerializable, IDisposab
     void IDisposable.Dispose()
     {
     }
-}
-
-
-
-public interface IMessageCommon : IMessageRos1, IMessageRos2
-{
 }

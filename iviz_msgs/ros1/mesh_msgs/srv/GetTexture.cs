@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetTextureRequest : IRequest<GetTexture, GetTextureResponse>, IDeserializableRos1<GetTextureRequest>
+    public sealed class GetTextureRequest : IRequest<GetTexture, GetTextureResponse>, IDeserializable<GetTextureRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid;
         [DataMember (Name = "texture_index")] public uint TextureIndex;
@@ -68,11 +68,25 @@ namespace Iviz.Msgs.MeshMsgs
             b.Deserialize(out TextureIndex);
         }
         
+        public GetTextureRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Uuid);
+            b.Deserialize(out TextureIndex);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetTextureRequest(ref b);
         
         public GetTextureRequest RosDeserialize(ref ReadBuffer b) => new GetTextureRequest(ref b);
+        
+        public GetTextureRequest RosDeserialize(ref ReadBuffer2 b) => new GetTextureRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Uuid);
+            b.Serialize(TextureIndex);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Uuid);
             b.Serialize(TextureIndex);
@@ -84,12 +98,20 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Uuid);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Uuid);
+            WriteBuffer2.AddLength(ref c, TextureIndex);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetTextureResponse : IResponse, IDeserializableRos1<GetTextureResponse>
+    public sealed class GetTextureResponse : IResponse, IDeserializable<GetTextureResponse>
     {
         [DataMember (Name = "texture")] public MeshMsgs.MeshTexture Texture;
     
@@ -108,11 +130,23 @@ namespace Iviz.Msgs.MeshMsgs
             Texture = new MeshMsgs.MeshTexture(ref b);
         }
         
+        public GetTextureResponse(ref ReadBuffer2 b)
+        {
+            Texture = new MeshMsgs.MeshTexture(ref b);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetTextureResponse(ref b);
         
         public GetTextureResponse RosDeserialize(ref ReadBuffer b) => new GetTextureResponse(ref b);
+        
+        public GetTextureResponse RosDeserialize(ref ReadBuffer2 b) => new GetTextureResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Texture.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Texture.RosSerialize(ref b);
         }
@@ -124,6 +158,13 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 0 + Texture.RosMessageLength;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Texture.AddRos2MessageLength(ref c);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

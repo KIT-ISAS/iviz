@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetModulesRequest : IRequest<GetModules, GetModulesResponse>, IDeserializableRos1<GetModulesRequest>
+    public sealed class GetModulesRequest : IRequest<GetModules, GetModulesResponse>, IDeserializable<GetModulesRequest>
     {
         // Gets a list of modules
     
@@ -58,14 +58,24 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
         
+        public GetModulesRequest(ref ReadBuffer2 b)
+        {
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public GetModulesRequest RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public GetModulesRequest RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static GetModulesRequest? singleton;
         public static GetModulesRequest Singleton => singleton ??= new GetModulesRequest();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -76,12 +86,16 @@ namespace Iviz.Msgs.IvizMsgs
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetModulesResponse : IResponse, IDeserializableRos1<GetModulesResponse>
+    public sealed class GetModulesResponse : IResponse, IDeserializable<GetModulesResponse>
     {
         /// <summary> List of module configurations in JSON encoding </summary>
         [DataMember (Name = "configs")] public string[] Configs;
@@ -101,11 +115,23 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStringArray(out Configs);
         }
         
+        public GetModulesResponse(ref ReadBuffer2 b)
+        {
+            b.DeserializeStringArray(out Configs);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetModulesResponse(ref b);
         
         public GetModulesResponse RosDeserialize(ref ReadBuffer b) => new GetModulesResponse(ref b);
+        
+        public GetModulesResponse RosDeserialize(ref ReadBuffer2 b) => new GetModulesResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeArray(Configs);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeArray(Configs);
         }
@@ -120,6 +146,13 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Configs);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Configs);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

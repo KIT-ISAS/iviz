@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetVertexCostsRequest : IRequest<GetVertexCosts, GetVertexCostsResponse>, IDeserializableRos1<GetVertexCostsRequest>
+    public sealed class GetVertexCostsRequest : IRequest<GetVertexCosts, GetVertexCostsResponse>, IDeserializable<GetVertexCostsRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
@@ -65,11 +65,23 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeString(out Uuid);
         }
         
+        public GetVertexCostsRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Uuid);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetVertexCostsRequest(ref b);
         
         public GetVertexCostsRequest RosDeserialize(ref ReadBuffer b) => new GetVertexCostsRequest(ref b);
+        
+        public GetVertexCostsRequest RosDeserialize(ref ReadBuffer2 b) => new GetVertexCostsRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Uuid);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Uuid);
         }
@@ -80,12 +92,19 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uuid);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Uuid);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetVertexCostsResponse : IResponse, IDeserializableRos1<GetVertexCostsResponse>
+    public sealed class GetVertexCostsResponse : IResponse, IDeserializable<GetVertexCostsResponse>
     {
         [DataMember (Name = "mesh_vertex_costs_stamped")] public MeshMsgs.MeshVertexCostsStamped MeshVertexCostsStamped;
     
@@ -104,11 +123,23 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexCostsStamped = new MeshMsgs.MeshVertexCostsStamped(ref b);
         }
         
+        public GetVertexCostsResponse(ref ReadBuffer2 b)
+        {
+            MeshVertexCostsStamped = new MeshMsgs.MeshVertexCostsStamped(ref b);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetVertexCostsResponse(ref b);
         
         public GetVertexCostsResponse RosDeserialize(ref ReadBuffer b) => new GetVertexCostsResponse(ref b);
+        
+        public GetVertexCostsResponse RosDeserialize(ref ReadBuffer2 b) => new GetVertexCostsResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            MeshVertexCostsStamped.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             MeshVertexCostsStamped.RosSerialize(ref b);
         }
@@ -120,6 +151,13 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 0 + MeshVertexCostsStamped.RosMessageLength;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            MeshVertexCostsStamped.AddRos2MessageLength(ref c);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -12,7 +12,7 @@ namespace Iviz.Ros
         int Count { get; }
         void Add(IListener subscriber);
         void Remove(IListener subscriber);
-        ValueTask SubscribeAsync(RosClient? client, IListener? listener = null, CancellationToken token = default);
+        ValueTask SubscribeAsync(IRosClient? client, IListener? listener = null, CancellationToken token = default);
         ValueTask UnsubscribeAsync(CancellationToken token);
         void Invalidate();
         BagListener? BagListener { set; }

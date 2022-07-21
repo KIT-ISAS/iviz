@@ -39,8 +39,8 @@ public sealed class RosClient : IRosClient
 {
     public const int AnyPort = 0;
 
-    readonly ConcurrentDictionary<string, IRosSubscriber> subscribersByTopic = new();
-    readonly ConcurrentDictionary<string, IRosPublisher> publishersByTopic = new();
+    readonly ConcurrentDictionary<string, IRos1Subscriber> subscribersByTopic = new();
+    readonly ConcurrentDictionary<string, IRos1Publisher> publishersByTopic = new();
     readonly ConcurrentDictionary<string, ServiceCaller> subscribedServicesByName = new();
     readonly ConcurrentDictionary<string, ServiceRequestManager> publishedServicesByName = new();
     readonly string namespacePrefix;
@@ -122,12 +122,12 @@ public sealed class RosClient : IRosClient
 
             tcpRosTimeout = value;
             int valueInMs = (int)value.TotalMilliseconds;
-            foreach (IRosSubscriber subscriber in subscribersByTopic.Values)
+            foreach (var subscriber in subscribersByTopic.Values)
             {
                 subscriber.TimeoutInMs = valueInMs;
             }
 
-            foreach (IRosPublisher publisher in publishersByTopic.Values)
+            foreach (var publisher in publishersByTopic.Values)
             {
                 publisher.TimeoutInMs = valueInMs;
             }
@@ -189,7 +189,7 @@ public sealed class RosClient : IRosClient
             throw new RosInvalidResourceNameException("ROS node names may not start with a '~'");
         }
 
-        ValidateResourceName(ownId);
+        RosNameUtils.ValidateResourceName(ownId);
 
         CallerId = ownId;
         CallerUri = ownUri;
@@ -559,68 +559,10 @@ public sealed class RosClient : IRosClient
                 return null;
             }
 
-            return !IsValidResourceName(ns) ? null : ns;
+            return !RosNameUtils.IsValidResourceName(ns) ? null : ns;
         }
     }
 
-
-    /// <summary>
-    /// Checks if the given name is a valid ROS resource name
-    /// </summary>  
-    public static bool IsValidResourceName(string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return false;
-        }
-
-        char c0 = name[0];
-        if (c0 is not '/' && c0 is not '~' && !char.IsLetter(c0))
-        {
-            return false;
-        }
-
-        foreach (int i in 1..name.Length)
-        {
-            char c = name[i];
-            if (!char.IsLetterOrDigit(c) && c is not '_' && c is not '/')
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// Checks if the given name is a valid ROS resource name, and throws an exception with an error message if not.
-    /// </summary>  
-    public static void ValidateResourceName([NotNull] string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new RosInvalidResourceNameException("Resource name is empty");
-        }
-
-        char c0 = name[0];
-        if (!char.IsLetter(c0) && c0 is not '/' && c0 is not '~')
-        {
-            throw new RosInvalidResourceNameException(
-                $"Resource name '{name}' is not valid. It must start with an alphanumeric character, " +
-                $"'/' or '~'. Current start is '{c0}'");
-        }
-
-        foreach (int i in 1..name.Length)
-        {
-            char c = name[i];
-            if (!char.IsLetterOrDigit(c) && c is not '_' && c is not '/')
-            {
-                throw new RosInvalidResourceNameException(
-                    $"Resource name '{name}' is not valid. It must only contain alphanumeric characters, " +
-                    $"'/' or '_'. Character at position {i} is '{c}'");
-            }
-        }
-    }
 
     /// <summary>
     /// Try to retrieve a valid master uri.
@@ -717,8 +659,8 @@ public sealed class RosClient : IRosClient
         new(CallerId, CallerUri, otherUri, (int)RpcNodeTimeout.TotalMilliseconds);
 
     (string id, RosSubscriber<T> subscriber)
-        CreateSubscriber<T>(string topic, bool requestNoDelay, Action<T> firstCallback,
-            in T generator, RosTransportHint transportHint)
+        CreateSubscriber<T>(string topic, bool requestNoDelay, Action<T> firstCallback, in T generator,
+            RosTransportHint transportHint)
         where T : IMessage
     {
         var topicInfo = new TopicInfo(CallerId, topic, generator);
@@ -742,8 +684,8 @@ public sealed class RosClient : IRosClient
     }
 
     async ValueTask<(string id, RosSubscriber<T> subscriber)>
-        CreateSubscriberAsync<T>(string topic, bool requestNoDelay, RosCallback<T> firstCallback,
-            T generator, RosTransportHint transportHint, CancellationToken token)
+        CreateSubscriberAsync<T>(string topic, bool requestNoDelay, RosCallback<T> firstCallback, T generator,
+            RosTransportHint transportHint, CancellationToken token)
         where T : IMessage
     {
         var topicInfo = new TopicInfo(CallerId, topic, generator);
@@ -786,51 +728,33 @@ public sealed class RosClient : IRosClient
     /// <typeparam name="T">Message type.</typeparam>
     /// <param name="topic">Name of the topic.</param>
     /// <param name="callback">Function to be called when a message arrives.</param>
-    /// <returns>An identifier that can be used to unsubscribe from this topic.</returns>
-    public string Subscribe<T>(string topic, Action<T> callback)
-        where T : IMessage, IDeserializable<T>, new()
-    {
-        return Subscribe(topic, callback, out RosSubscriber<T> _);
-    }
-
-    /// <summary>
-    /// Subscribes to the given topic.
-    /// </summary>
-    /// <typeparam name="T">Message type.</typeparam>
-    /// <param name="topic">Name of the topic.</param>
-    /// <param name="callback">Function to be called when a message arrives.</param>
     /// <param name="subscriber"> The shared subscriber for this topic, used by all subscribers from this client. </param>
     /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
     /// <param name="transportHint">Specifies the policy of which protocol (TCP, UDP) to prefer</param>
     /// <returns>An identifier that can be used to unsubscribe from this topic.</returns>
     public string Subscribe<T>(string topic, Action<T> callback, out RosSubscriber<T> subscriber,
         bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.PreferTcp)
-        where T : IMessage, IDeserializable<T>, new()
+        where T : IMessage, new()
     {
-        if (callback is null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(callback));
-        }
+        if (topic is null) BuiltIns.ThrowArgumentNull(nameof(topic));
+        if (callback is null) BuiltIns.ThrowArgumentNull(nameof(callback));
 
         string resolvedTopic = ResolveResourceName(topic);
-        if (!TryGetSubscriber(resolvedTopic, out IRosSubscriber? baseSubscriber))
+        if (!TryGetSubscriberImpl(resolvedTopic, out var existingSubscriber))
         {
-            string id;
-            (id, subscriber) = CreateSubscriber(resolvedTopic, requestNoDelay, callback, new T(), transportHint);
+            (string id, subscriber) = CreateSubscriber(resolvedTopic, requestNoDelay, callback, new T(), transportHint);
             return id;
         }
 
-        var newSubscriber = baseSubscriber as RosSubscriber<T>;
-        subscriber = newSubscriber ?? throw new RosInvalidMessageTypeException(
-            $"There is already a subscriber for '{topic}' with a different type [{baseSubscriber.TopicType}] - " +
-            $"requested type was [{BuiltIns.GetMessageType<T>()}]");
+        subscriber = existingSubscriber as RosSubscriber<T> ?? throw new RosInvalidMessageTypeException(topic,
+            existingSubscriber.TopicType, BuiltIns.GetMessageType<T>());
         return subscriber.Subscribe(callback);
     }
 
     string IRosClient.Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
-        bool requestNoDelay, RosTransportHint transportHint)
+        RosTransportHint transportHint)
     {
-        string id = Subscribe(topic, callback, out RosSubscriber<T> newSubscriber, requestNoDelay, transportHint);
+        string id = Subscribe(topic, callback, out var newSubscriber, transportHint: transportHint);
         subscriber = newSubscriber;
         return id;
     }
@@ -854,21 +778,20 @@ public sealed class RosClient : IRosClient
         }
 
         string resolvedTopic = ResolveResourceName(topic);
-        if (!TryGetSubscriber(resolvedTopic, out IRosSubscriber? baseSubscriber))
+        if (!TryGetSubscriberImpl(resolvedTopic, out var existingSubscriber))
         {
-            string id;
-            (id, subscriber) =
+            (string id, subscriber) =
                 CreateSubscriber(resolvedTopic, requestNoDelay, callback, new DynamicMessage(), transportHint);
             return id;
         }
 
-        var newSubscriber = baseSubscriber as RosSubscriber<IMessage>;
-        subscriber = newSubscriber ?? throw new RosInvalidMessageTypeException(
-            $"There is already a subscriber for '{topic}' with a different type [{baseSubscriber.TopicType}] - " +
-            $"requested type was [IMessage](generic)");
+        subscriber = existingSubscriber as RosSubscriber<IMessage> ?? throw new RosInvalidMessageTypeException(
+            topic,
+            existingSubscriber.TopicType, "IMessage [generic]");
         return subscriber.Subscribe(callback);
     }
 
+    /*
     string IRosClient.Subscribe(string topic, Action<IMessage> callback, out IRosSubscriber subscriber,
         bool requestNoDelay, RosTransportHint transportHint)
     {
@@ -877,6 +800,7 @@ public sealed class RosClient : IRosClient
         subscriber = newSubscriber;
         return id;
     }
+    */
 
     /// <summary>
     /// Subscribes to the given topic.
@@ -891,17 +815,24 @@ public sealed class RosClient : IRosClient
     public ValueTask<(string id, RosSubscriber<T> subscriber)> SubscribeAsync<T>(
         string topic, Action<T> callback, bool requestNoDelay = true,
         RosTransportHint transportHint = RosTransportHint.PreferTcp, CancellationToken token = default)
-        where T : IMessage, IDeserializable<T>, new()
+        where T : IMessage, new()
+    {
+        return SubscribeAsyncCore(topic, callback, requestNoDelay, transportHint, token);
+    }
+
+    ValueTask<(string id, RosSubscriber<T> subscriber)> SubscribeAsyncCore<T>(
+        string topic, Action<T> callback, bool requestNoDelay = true,
+        RosTransportHint transportHint = RosTransportHint.PreferTcp, CancellationToken token = default)
+        where T : IMessage, new()
     {
         void Callback(in T t, IRosReceiver _) => callback(t);
-        return SubscribeAsync(topic, (RosCallback<T>)Callback, requestNoDelay, transportHint, token);
+        return SubscribeAsyncCore(topic, (RosCallback<T>)Callback, requestNoDelay, transportHint, token);
     }
 
     async ValueTask<(string id, IRosSubscriber<T> subscriber)> IRosClient.SubscribeAsync<T>(
-        string topic, Action<T> callback, bool requestNoDelay,
-        RosTransportHint transportHint, CancellationToken token)
+        string topic, Action<T> callback, RosTransportHint transportHint, CancellationToken token)
     {
-        return await SubscribeAsync(topic, callback, requestNoDelay, transportHint, token);
+        return await SubscribeAsyncCore(topic, callback, transportHint: transportHint, token: token);
     }
 
     /// <summary>
@@ -918,13 +849,10 @@ public sealed class RosClient : IRosClient
         string topic, Action<IMessage> callback, bool requestNoDelay = true,
         RosTransportHint transportHint = RosTransportHint.PreferTcp, CancellationToken token = default)
     {
-        if (callback is null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(callback));
-        }
+        if (callback is null) BuiltIns.ThrowArgumentNull(nameof(callback));
 
         string resolvedTopic = ResolveResourceName(topic);
-        if (!TryGetSubscriberImpl(resolvedTopic, out IRosSubscriber? existingSubscriber))
+        if (!TryGetSubscriberImpl(resolvedTopic, out var existingSubscriber))
         {
             void Callback(in IMessage t, IRosReceiver _) => callback(t);
             return CreateSubscriberAsync(resolvedTopic, requestNoDelay, (RosCallback<IMessage>)Callback,
@@ -933,20 +861,20 @@ public sealed class RosClient : IRosClient
 
         if (existingSubscriber is not RosSubscriber<IMessage> validatedSubscriber)
         {
-            throw new RosInvalidMessageTypeException(
-                $"There is already a subscriber for '{topic}' with a different type [{existingSubscriber.TopicType}] - " +
-                $"requested type was [IMessage](generic)");
+            throw new RosInvalidMessageTypeException(topic, existingSubscriber.TopicType, "[IMessage] (generic)");
         }
 
         return (validatedSubscriber.Subscribe(callback), subscriber: validatedSubscriber).AsTaskResult();
     }
 
+    /*
     async ValueTask<(string id, IRosSubscriber subscriber)> IRosClient.SubscribeAsync(
         string topic, Action<IMessage> callback, bool requestNoDelay, RosTransportHint transportHint,
         CancellationToken token)
     {
         return await SubscribeAsync(topic, callback, requestNoDelay, transportHint, token);
     }
+    */
 
     /// <summary>
     /// Subscribes to the given topic. This variant uses a callback that includes information about
@@ -962,7 +890,15 @@ public sealed class RosClient : IRosClient
     public ValueTask<(string id, RosSubscriber<T> subscriber)> SubscribeAsync<T>(
         string topic, RosCallback<T> callback, bool requestNoDelay = true,
         RosTransportHint transportHint = RosTransportHint.PreferTcp, CancellationToken token = default)
-        where T : IMessage, IDeserializable<T>, new()
+        where T : IMessage, new()
+    {
+        return SubscribeAsyncCore(topic, callback, requestNoDelay, transportHint, token);
+    }
+
+    ValueTask<(string id, RosSubscriber<T> subscriber)> SubscribeAsyncCore<T>(
+        string topic, RosCallback<T> callback, bool requestNoDelay = true,
+        RosTransportHint transportHint = RosTransportHint.PreferTcp, CancellationToken token = default)
+        where T : IMessage, new()
     {
         if (callback is null)
         {
@@ -970,26 +906,23 @@ public sealed class RosClient : IRosClient
         }
 
         string resolvedTopic = ResolveResourceName(topic);
-        if (!TryGetSubscriberImpl(resolvedTopic, out IRosSubscriber? existingSubscriber))
+        if (!TryGetSubscriberImpl(resolvedTopic, out var existingSubscriber))
         {
             return CreateSubscriberAsync(resolvedTopic, requestNoDelay, callback, new T(), transportHint, token);
         }
 
         if (existingSubscriber is not RosSubscriber<T> validatedSubscriber)
         {
-            throw new RosInvalidMessageTypeException(
-                $"There is already a subscriber for '{topic}' with a different type [{existingSubscriber.TopicType}] - " +
-                $"requested type was [{BuiltIns.GetMessageType<T>()}]");
+            throw new RosInvalidMessageTypeException(topic, existingSubscriber.TopicType, BuiltIns.GetMessageType<T>());
         }
 
         return (validatedSubscriber.Subscribe(callback), validatedSubscriber).AsTaskResult();
     }
 
     async ValueTask<(string id, IRosSubscriber<T> subscriber)> IRosClient.SubscribeAsync<T>(
-        string topic, RosCallback<T> callback, bool requestNoDelay,
-        RosTransportHint transportHint, CancellationToken token)
+        string topic, RosCallback<T> callback, RosTransportHint transportHint, CancellationToken token)
     {
-        return await SubscribeAsync(topic, callback, requestNoDelay, transportHint, token);
+        return await SubscribeAsyncCore(topic, callback, transportHint: transportHint, token: token);
     }
 
     /// <summary>
@@ -1042,43 +975,20 @@ public sealed class RosClient : IRosClient
     /// <param name="topic">Name of the topic.</param>
     /// <param name="subscriber">Subscriber for the given topic.</param>
     /// <returns>Whether the subscriber was found.</returns>
-#if NETSTANDARD2_0
-        public bool TryGetSubscriber(string topic, out IRosSubscriber subscriber)
-#else
-    public bool TryGetSubscriber(string topic, [NotNullWhen(true)] out IRosSubscriber? subscriber)
-#endif
+    public bool TryGetSubscriber(string topic, [NotNullWhen(true)] out IRos1Subscriber? subscriber)
     {
         string resolvedTopic = ResolveResourceName(topic);
         return TryGetSubscriberImpl(resolvedTopic, out subscriber);
     }
 
-#if NETSTANDARD2_0
-        bool TryGetSubscriberImpl(string resolvedTopic, out IRosSubscriber subscriber)
-#else
-    bool TryGetSubscriberImpl(string resolvedTopic, [NotNullWhen(true)] out IRosSubscriber? subscriber)
-#endif
+    bool TryGetSubscriberImpl(string resolvedTopic, [NotNullWhen(true)] out IRos1Subscriber? subscriber)
     {
         return subscribersByTopic.TryGetValue(resolvedTopic, out subscriber);
     }
 
-    /// <summary>
-    /// Retrieves the subscriber for the given topic.
-    /// </summary>
-    /// <param name="topic">Name of the topic.</param>
-    /// <returns></returns>
-    public IRosSubscriber GetSubscriber(string topic)
-    {
-        if (TryGetSubscriber(topic, out IRosSubscriber? subscriber))
-        {
-            return subscriber;
-        }
-
-        throw new KeyNotFoundException($"Cannot find subscriber for topic '{topic}'");
-    }
-
     string ResolveResourceName(string name)
     {
-        ValidateResourceName(name);
+        RosNameUtils.ValidateResourceName(name);
 
         return name[0] switch
         {
@@ -1117,8 +1027,8 @@ public sealed class RosClient : IRosClient
         throw new RosRpcException($"Error registering publisher: {response.StatusMessage}");
     }
 
-    async ValueTask<IRosPublisher> CreatePublisherAsync<T>(string topic, CancellationToken token,
-        T generator) where T : IMessage
+    async ValueTask<IRosPublisher> CreatePublisherAsync<T>(string topic, CancellationToken token, T generator)
+        where T : IMessage
     {
         var topicInfo = new TopicInfo(CallerId, topic, generator);
 
@@ -1164,9 +1074,14 @@ public sealed class RosClient : IRosClient
     /// <returns>An identifier that can be used to unadvertise from this publisher.</returns>
     public string Advertise<T>(string topic, out RosPublisher<T> publisher) where T : IMessage, new()
     {
+        return AdvertiseCore(topic, out publisher);
+    }
+
+    string AdvertiseCore<T>(string topic, out RosPublisher<T> publisher) where T : IMessage, new()
+    {
         string resolvedTopic = ResolveResourceName(topic);
 
-        if (!TryGetPublisher(resolvedTopic, out IRosPublisher? existingPublisher))
+        if (!TryGetPublisher(resolvedTopic, out var existingPublisher))
         {
             publisher = CreatePublisher(resolvedTopic, new T());
             return publisher.Advertise();
@@ -1174,9 +1089,7 @@ public sealed class RosClient : IRosClient
 
         if (existingPublisher is not RosPublisher<T> validatedPublisher)
         {
-            throw new RosInvalidMessageTypeException(
-                $"There is already an advertiser for '{topic}' with a different type [{existingPublisher.TopicType}] - " +
-                $"requested type was [{BuiltIns.GetMessageType<T>()}]");
+            throw new RosInvalidMessageTypeException(topic, existingPublisher.TopicType, BuiltIns.GetMessageType<T>());
         }
 
         publisher = validatedPublisher;
@@ -1185,7 +1098,7 @@ public sealed class RosClient : IRosClient
 
     string IRosClient.Advertise<T>(string topic, out IRosPublisher<T> publisher)
     {
-        string id = Advertise<T>(topic, out var newPublisher);
+        string id = AdvertiseCore<T>(topic, out var newPublisher);
         publisher = newPublisher;
         return id;
     }
@@ -1215,7 +1128,7 @@ public sealed class RosClient : IRosClient
 
         string resolvedTopic = ResolveResourceName(topic);
 
-        if (!TryGetPublisher(resolvedTopic, out IRosPublisher? existingPublisher))
+        if (!TryGetPublisher(resolvedTopic, out var existingPublisher))
         {
             publisher = CreatePublisher<DynamicMessage>(resolvedTopic, generator);
             return publisher.Advertise();
@@ -1232,13 +1145,14 @@ public sealed class RosClient : IRosClient
         return publisher.Advertise();
     }
 
-
+    /*
     string IRosClient.Advertise(string topic, DynamicMessage generator, out IRosPublisher<DynamicMessage> publisher)
     {
         string id = Advertise(topic, generator, out var newPublisher);
         publisher = newPublisher;
         return id;
     }
+    */
 
     /// <summary>
     /// Advertises the given topic.
@@ -1247,13 +1161,19 @@ public sealed class RosClient : IRosClient
     /// <param name="topic">Name of the topic.</param>
     /// <param name="token">An optional cancellation token</param>
     /// <returns>A pair containing an identifier that can be used to unadvertise from this publisher, and the publisher object.</returns>
-    public async ValueTask<(string id, RosPublisher<T> publisher)> AdvertiseAsync<T>(string topic,
+    public ValueTask<(string id, RosPublisher<T> publisher)> AdvertiseAsync<T>(string topic,
+        CancellationToken token = default) where T : IMessage, new()
+    {
+        return AdvertiseAsyncCore<T>(topic, token);
+    }
+
+    async ValueTask<(string id, RosPublisher<T> publisher)> AdvertiseAsyncCore<T>(string topic,
         CancellationToken token = default) where T : IMessage, new()
     {
         string resolvedTopic = ResolveResourceName(topic);
 
         RosPublisher<T> publisher;
-        if (!TryGetPublisher(topic, out IRosPublisher? existingPublisher))
+        if (!TryGetPublisher(topic, out var existingPublisher))
         {
             publisher = (RosPublisher<T>)await CreatePublisherAsync(resolvedTopic, token, new T());
             return (publisher.Advertise(), publisher);
@@ -1261,9 +1181,7 @@ public sealed class RosClient : IRosClient
 
         if (existingPublisher is not RosPublisher<T> validatedPublisher)
         {
-            throw new RosInvalidMessageTypeException(
-                $"There is already an advertiser for '{topic}' with a different type [{existingPublisher.TopicType}] - " +
-                $"requested type was [{BuiltIns.GetMessageType<T>()}]");
+            throw new RosInvalidMessageTypeException(topic, existingPublisher.TopicType, BuiltIns.GetMessageType<T>());
         }
 
         publisher = validatedPublisher;
@@ -1273,7 +1191,7 @@ public sealed class RosClient : IRosClient
     async ValueTask<(string id, IRosPublisher<T> publisher)> IRosClient.AdvertiseAsync<T>(string topic,
         CancellationToken token)
     {
-        return await AdvertiseAsync<T>(topic, token);
+        return await AdvertiseAsyncCore<T>(topic, token);
     }
 
     /// <summary>
@@ -1308,19 +1226,20 @@ public sealed class RosClient : IRosClient
         else
         {
             var newPublisher = basePublisher as RosPublisher<DynamicMessage>;
-            publisher = newPublisher ?? throw new RosInvalidMessageTypeException(
-                $"There is already an advertiser for '{topic}' with a different type [{basePublisher.TopicType}] - " +
-                $"requested type was [{generator.RosMessageType}](dynamic)");
+            publisher = newPublisher ?? throw new RosInvalidMessageTypeException(topic, basePublisher.TopicType,
+                $"[{generator.RosMessageType}](dynamic)");
         }
 
         return (publisher.Advertise(), publisher);
     }
 
+    /*
     async ValueTask<(string id, IRosPublisher<DynamicMessage> publisher)> IRosClient.AdvertiseAsync(string topic,
         DynamicMessage generator, CancellationToken token)
     {
         return await AdvertiseAsync(topic, generator, token);
     }
+    */
 
     /// <summary>
     /// Unadvertise the given topic.
@@ -1346,13 +1265,9 @@ public sealed class RosClient : IRosClient
     /// <returns>Whether the unadvertisement succeeded.</returns>
     public ValueTask<bool> UnadvertiseAsync(string topicId)
     {
-        if (topicId == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(topicId));
-        }
+        if (topicId == null) BuiltIns.ThrowArgumentNull(nameof(topicId));
 
-        IRosPublisher? publisher =
-            publishersByTopic.Values.FirstOrDefault(tmpPublisher => tmpPublisher.ContainsId(topicId));
+        var publisher = publishersByTopic.Values.FirstOrDefault(tmpPublisher => tmpPublisher.ContainsId(topicId));
 
         return publisher?.UnadvertiseAsync(topicId) ?? false.AsTaskResult();
     }
@@ -1369,29 +1284,10 @@ public sealed class RosClient : IRosClient
     /// <param name="topic">Name of the topic.</param>
     /// <param name="publisher">Publisher of the given topic.</param>
     /// <returns>Whether the publisher was found.</returns>
-#if NETSTANDARD2_0
-        public bool TryGetPublisher(string topic, out IRosPublisher publisher)
-#else
-    public bool TryGetPublisher(string topic, [NotNullWhen(true)] out IRosPublisher? publisher)
-#endif
+    public bool TryGetPublisher(string topic, [NotNullWhen(true)] out IRos1Publisher? publisher)
     {
         string resolvedTopic = ResolveResourceName(topic);
         return publishersByTopic.TryGetValue(resolvedTopic, out publisher);
-    }
-
-    /// <summary>
-    /// Retrieves the publisher of the given topic.
-    /// </summary>
-    /// <param name="topic">Name of the topic.</param>
-    /// <returns></returns>
-    public IRosPublisher GetPublisher(string topic)
-    {
-        if (TryGetPublisher(topic, out IRosPublisher? publisher))
-        {
-            return publisher;
-        }
-
-        throw new KeyNotFoundException($"Cannot find publisher for topic '{topic}'");
     }
 
     /// <summary>
@@ -1399,7 +1295,7 @@ public sealed class RosClient : IRosClient
     /// Corresponds to the function 'getPublishedTopics' in the ROS Master API.
     /// </summary>
     /// <returns>List of topic names and message types.</returns>
-    public BriefTopicInfo[] GetSystemPublishedTopics()
+    public TopicNameType[] GetSystemPublishedTopics()
     {
         var response = RosMasterClient.GetPublishedTopics();
         if (!response.IsValid)
@@ -1408,7 +1304,7 @@ public sealed class RosClient : IRosClient
         }
 
         return response.Topics
-            .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
+            .Select(tuple => new TopicNameType(tuple.name, tuple.type))
             .ToArray();
     }
 
@@ -1417,7 +1313,7 @@ public sealed class RosClient : IRosClient
     /// Corresponds to the function 'getPublishedTopics' in the ROS Master API.
     /// </summary>
     /// <returns>List of topic names and message types.</returns>
-    public async ValueTask<BriefTopicInfo[]> GetSystemPublishedTopicsAsync(
+    public async ValueTask<TopicNameType[]> GetSystemPublishedTopicsAsync(
         CancellationToken token = default)
     {
         var response = await RosMasterClient.GetPublishedTopicsAsync(token: token);
@@ -1427,7 +1323,7 @@ public sealed class RosClient : IRosClient
         }
 
         return response.Topics
-            .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
+            .Select(tuple => new TopicNameType(tuple.name, tuple.type))
             .ToArray();
     }
 
@@ -1436,13 +1332,13 @@ public sealed class RosClient : IRosClient
     /// Corresponds to the function 'getTopicTypes' in the ROS Master API.
     /// </summary>
     /// <returns>List of topic names and message types.</returns>
-    public BriefTopicInfo[] GetSystemTopicTypes()
+    public TopicNameType[] GetSystemTopics()
     {
         var response = RosMasterClient.GetTopicTypes();
         if (response.IsValid)
         {
             return response.Topics
-                .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
+                .Select(tuple => new TopicNameType(tuple.name, tuple.type))
                 .ToArray();
         }
 
@@ -1454,8 +1350,7 @@ public sealed class RosClient : IRosClient
     /// Corresponds to the function 'getTopicTypes' in the ROS Master API.
     /// </summary>
     /// <returns>List of topic names and message types.</returns>
-    public async ValueTask<BriefTopicInfo[]> GetSystemTopicTypesAsync(
-        CancellationToken token = default)
+    public async ValueTask<TopicNameType[]> GetSystemTopicsAsync(CancellationToken token = default)
     {
         var response = await RosMasterClient.GetTopicTypesAsync(token: token);
         if (!response.IsValid)
@@ -1464,7 +1359,7 @@ public sealed class RosClient : IRosClient
         }
 
         return response.Topics
-            .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
+            .Select(tuple => new TopicNameType(tuple.name, tuple.type))
             .ToArray();
     }
 
@@ -1472,7 +1367,7 @@ public sealed class RosClient : IRosClient
     /// <summary>
     /// Gets the topics published by this node.
     /// </summary>
-    public BriefTopicInfo[] SubscribedTopics => GetSubscriptionsRpc();
+    public TopicNameType[] SubscribedTopics => GetSubscriptionsRpc();
 
     /// <summary>
     /// Asks the master for the nodes and topics in the system.
@@ -1509,27 +1404,27 @@ public sealed class RosClient : IRosClient
     /// <summary>
     /// Gets the topics published by this node.
     /// </summary>
-    public BriefTopicInfo[] PublishedTopics => GetPublicationsRpc();
+    public TopicNameType[] PublishedTopics => GetPublicationsRpc();
 
-    internal BriefTopicInfo[] GetSubscriptionsRpc()
+    internal TopicNameType[] GetSubscriptionsRpc()
     {
         return subscribersByTopic.Values
-            .Select(subscriber => new BriefTopicInfo(subscriber.Topic, subscriber.TopicType))
+            .Select(subscriber => new TopicNameType(subscriber.Topic, subscriber.TopicType))
             .ToArray();
     }
 
-    internal BriefTopicInfo[] GetPublicationsRpc()
+    internal TopicNameType[] GetPublicationsRpc()
     {
         return publishersByTopic.Values
-            .Select(publisher => new BriefTopicInfo(publisher.Topic, publisher.TopicType))
+            .Select(publisher => new TopicNameType(publisher.Topic, publisher.TopicType))
             .ToArray();
     }
 
     internal async ValueTask PublisherUpdateRpcAsync(string topic, IEnumerable<Uri> publishers, CancellationToken token)
     {
-        if (!TryGetSubscriber(topic, out IRosSubscriber? subscriber))
+        if (!TryGetSubscriberImpl(topic, out var subscriber))
         {
-            Logger.LogDebugFormat("{0}: PublisherUpdate called for nonexisting topic '{1}'", this, topic);
+            Logger.LogDebugFormat("{0}: PublisherUpdateRcp called for nonexisting topic '{1}'", this, topic);
             return;
         }
 
@@ -1546,7 +1441,7 @@ public sealed class RosClient : IRosClient
     internal TopicRequestRpcResult TryRequestTopicRpc(string remoteCallerId, string topic, bool requestsTcp,
         RpcUdpTopicRequest? requestsUdp, out Endpoint? tcpResponse, out RpcUdpTopicResponse? udpResponse)
     {
-        if (TryGetPublisher(topic, out IRosPublisher? publisher))
+        if (TryGetPublisher(topic, out var publisher))
         {
             return publisher.RequestTopicRpc(requestsTcp, requestsUdp, out tcpResponse, out udpResponse);
         }
@@ -1558,30 +1453,33 @@ public sealed class RosClient : IRosClient
         return TopicRequestRpcResult.NoSuchTopic;
     }
 
-    public SubscriberState GetSubscriberStatistics() =>
-        new(subscribersByTopic.Values.Select(subscriber => subscriber.GetState()).ToArray());
+    public IReadOnlyList<SubscriberState> GetSubscriberStatistics() =>
+        subscribersByTopic.Values.Select(subscriber => subscriber.GetState()).ToArray();
 
-    public PublisherState GetPublisherStatistics() =>
-        new(publishersByTopic.Values.Select(publisher => publisher.GetState()).ToArray());
+    public IReadOnlyList<PublisherState> GetPublisherStatistics() =>
+        publishersByTopic.Values.Select(publisher => publisher.GetState()).ToArray();
 
     internal List<BusInfo> GetBusInfoRpc()
     {
         var busInfos = new List<BusInfo>();
 
-        var state = GetSubscriberStatistics();
-        foreach (var topic in state.Topics)
+        var subscribers = GetSubscriberStatistics();
+        foreach (var subscriber in subscribers)
         {
-            var receiverStates = topic.Receivers.Where(subscriber => subscriber.TransportType != null);
+            var receiverStates = subscriber.Receivers
+                .Cast<Ros1ReceiverState>()
+                .Where(receiver => receiver.TransportType != null);
             foreach (var receiver in receiverStates)
             {
-                busInfos.Add(new BusInfo(busInfos.Count, topic.Topic, receiver));
+                busInfos.Add(new BusInfo(busInfos.Count, subscriber.Topic, receiver));
             }
         }
 
-        var publisherState = GetPublisherStatistics();
-        foreach (var topic in publisherState.Topics)
+        var publisherStates = GetPublisherStatistics();
+        foreach (var topic in publisherStates)
         {
-            foreach (var sender in topic.Senders)
+            var senderStates = topic.Senders.Cast<Ros1SenderState>();
+            foreach (var sender in senderStates)
             {
                 LookupNodeResponse response;
                 try
@@ -1916,11 +1814,33 @@ public sealed class RosClient : IRosClient
         return true;
     }
 
+    public bool IsServiceAvailable(string service)
+    {
+        string resolvedServiceName = ResolveResourceName(service);
+        return RosMasterClient.LookupService(resolvedServiceName).IsValid;
+    }
+
+    public async ValueTask<bool> IsServiceAvailableAsync(string service, CancellationToken token = default)
+    {
+        string resolvedServiceName = ResolveResourceName(service);
+        return (await RosMasterClient.LookupServiceAsync(resolvedServiceName, token)).IsValid;
+    }
+
+    public string[] GetParameterNames() => Parameters.GetParameterNames();
+
+    public ValueTask<string[]> GetParameterNamesAsync(CancellationToken token = default) =>
+        Parameters.GetParameterNamesAsync(token);
+
+    public bool GetParameter(string key, out XmlRpcValue value) => Parameters.GetParameter(key, out value);
+
+    public ValueTask<(bool success, XmlRpcValue value)>
+        GetParameterAsync(string key, CancellationToken token = default) => Parameters.GetParameterAsync(key, token);
+
     internal bool TryGetLoopbackReceiver<T>(string topic, in Endpoint endpoint, out ILoopbackReceiver<T>? receiver)
         where T : IMessage
     {
         if (subscribersByTopic.TryGetValue(topic, out var existingSubscriber) &&
-            existingSubscriber is IRosSubscriber<T> subscriber)
+            existingSubscriber is RosSubscriber<T> subscriber)
         {
             return subscriber.TryGetLoopbackReceiver(endpoint, out receiver);
         }
@@ -1949,7 +1869,7 @@ public sealed class RosClient : IRosClient
 
         ShutdownAction = null;
         ParamUpdateAction = null;
-        
+
         var tasks = new List<Task>();
 
         if (listener != null)
@@ -2011,7 +1931,9 @@ public sealed class RosClient : IRosClient
         Close();
     }
 
-    public ValueTask DisposeAsync() => CloseAsync();
+    ValueTask IAsyncDisposable.DisposeAsync() => CloseAsync();
+
+    public ValueTask DisposeAsync(CancellationToken token) => CloseAsync(token);
 
     public override string ToString()
     {

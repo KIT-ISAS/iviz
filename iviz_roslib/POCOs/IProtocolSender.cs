@@ -11,5 +11,5 @@ internal interface IProtocolSender<TMessage> where TMessage : IMessage
     ValueTask DisposeAsync(CancellationToken token);
     void Publish(in TMessage msg);
     ValueTask PublishAndWaitAsync(in TMessage message, CancellationToken token);
-    PublisherSenderState State { get; }
+    Ros1SenderState State { get; }
 }

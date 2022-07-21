@@ -46,7 +46,7 @@ namespace Iviz.Msgs.NavMsgs
     }
 
     [DataContract]
-    public sealed class GetMapRequest : IRequest<GetMap, GetMapResponse>, IDeserializableRos1<GetMapRequest>
+    public sealed class GetMapRequest : IRequest<GetMap, GetMapResponse>, IDeserializable<GetMapRequest>
     {
         // Get the map as a nav_msgs/OccupancyGrid
     
@@ -58,14 +58,24 @@ namespace Iviz.Msgs.NavMsgs
         {
         }
         
+        public GetMapRequest(ref ReadBuffer2 b)
+        {
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public GetMapRequest RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public GetMapRequest RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static GetMapRequest? singleton;
         public static GetMapRequest Singleton => singleton ??= new GetMapRequest();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -76,12 +86,16 @@ namespace Iviz.Msgs.NavMsgs
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetMapResponse : IResponse, IDeserializableRos1<GetMapResponse>
+    public sealed class GetMapResponse : IResponse, IDeserializable<GetMapResponse>
     {
         [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map;
     
@@ -100,11 +114,23 @@ namespace Iviz.Msgs.NavMsgs
             Map = new NavMsgs.OccupancyGrid(ref b);
         }
         
+        public GetMapResponse(ref ReadBuffer2 b)
+        {
+            Map = new NavMsgs.OccupancyGrid(ref b);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetMapResponse(ref b);
         
         public GetMapResponse RosDeserialize(ref ReadBuffer b) => new GetMapResponse(ref b);
+        
+        public GetMapResponse RosDeserialize(ref ReadBuffer2 b) => new GetMapResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Map.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Map.RosSerialize(ref b);
         }
@@ -116,6 +142,13 @@ namespace Iviz.Msgs.NavMsgs
         }
     
         public int RosMessageLength => 0 + Map.RosMessageLength;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Map.AddRos2MessageLength(ref c);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

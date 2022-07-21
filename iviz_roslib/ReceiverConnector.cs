@@ -167,7 +167,7 @@ internal class ReceiverConnector
         Logger.LogDebugFormat("{0}: Disposing!", this);
     }
 
-    public SubscriberReceiverState State => new UninitializedReceiverState(RemoteUri)
+    public Ros1ReceiverState State => new UninitializedReceiverState(RemoteUri)
     {
         Status = status,
         ErrorDescription = ErrorDescription

@@ -166,7 +166,16 @@ public static class BuiltIns
 
         return bytes;
     }
-    public static byte[] SerializeToArray(this ISerializable o)
+    public static byte[] SerializeToArrayRos1(this ISerializable o)
+    {
+        o.RosValidate();
+        byte[] bytes = new byte[o.Ros2MessageLength];
+        WriteBuffer.Serialize(o, bytes);
+
+        return bytes;
+    }
+    
+    public static byte[] SerializeToArrayRos2(this ISerializable o)
     {
         o.RosValidate();
         byte[] bytes = new byte[o.Ros2MessageLength];
@@ -174,7 +183,7 @@ public static class BuiltIns
 
         return bytes;
     }
-    
+
     public static bool IsRos1<T>() => typeof(IMessageRos1).IsAssignableFrom(typeof(T));
 
     public static bool IsRos2<T>() => typeof(IMessageRos2).IsAssignableFrom(typeof(T));

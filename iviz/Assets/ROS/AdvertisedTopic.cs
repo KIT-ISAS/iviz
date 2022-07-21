@@ -54,7 +54,7 @@ namespace Iviz.Ros
 
         public int Count => senders.Count;
 
-        public async ValueTask AdvertiseAsync(RosClient? client, CancellationToken token)
+        public async ValueTask AdvertiseAsync(IRosClient? client, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
             if (client != null)

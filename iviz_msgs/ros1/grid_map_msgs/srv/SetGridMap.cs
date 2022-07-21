@@ -46,7 +46,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class SetGridMapRequest : IRequest<SetGridMap, SetGridMapResponse>, IDeserializableRos1<SetGridMapRequest>
+    public sealed class SetGridMapRequest : IRequest<SetGridMap, SetGridMapResponse>, IDeserializable<SetGridMapRequest>
     {
         // map
         [DataMember (Name = "map")] public GridMapMsgs.GridMap Map;
@@ -66,11 +66,23 @@ namespace Iviz.Msgs.GridMapMsgs
             Map = new GridMapMsgs.GridMap(ref b);
         }
         
+        public SetGridMapRequest(ref ReadBuffer2 b)
+        {
+            Map = new GridMapMsgs.GridMap(ref b);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetGridMapRequest(ref b);
         
         public SetGridMapRequest RosDeserialize(ref ReadBuffer b) => new SetGridMapRequest(ref b);
+        
+        public SetGridMapRequest RosDeserialize(ref ReadBuffer2 b) => new SetGridMapRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            Map.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Map.RosSerialize(ref b);
         }
@@ -82,12 +94,19 @@ namespace Iviz.Msgs.GridMapMsgs
         }
     
         public int RosMessageLength => 0 + Map.RosMessageLength;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Map.AddRos2MessageLength(ref c);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class SetGridMapResponse : IResponse, IDeserializableRos1<SetGridMapResponse>
+    public sealed class SetGridMapResponse : IResponse, IDeserializable<SetGridMapResponse>
     {
     
         public SetGridMapResponse()
@@ -98,14 +117,24 @@ namespace Iviz.Msgs.GridMapMsgs
         {
         }
         
+        public SetGridMapResponse(ref ReadBuffer2 b)
+        {
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
         public SetGridMapResponse RosDeserialize(ref ReadBuffer b) => Singleton;
+        
+        public SetGridMapResponse RosDeserialize(ref ReadBuffer2 b) => Singleton;
         
         static SetGridMapResponse? singleton;
         public static SetGridMapResponse Singleton => singleton ??= new SetGridMapResponse();
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
         }
         
@@ -116,6 +145,10 @@ namespace Iviz.Msgs.GridMapMsgs
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+        
+        public int Ros2MessageLength => 0;
+        
+        public void AddRos2MessageLength(ref int c) { }
     
         public override string ToString() => Extensions.ToString(this);
     }

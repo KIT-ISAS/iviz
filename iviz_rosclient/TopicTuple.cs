@@ -1,17 +1,13 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Iviz.Roslib.Utils;
-using Iviz.Tools;
 
-namespace Iviz.Roslib.XmlRpc;
+namespace Iviz.Roslib;
 
 public readonly struct TopicTuple : IComparable<TopicTuple>
 {
     public string Topic { get; }
     public string[] Members { get; }
 
-    internal TopicTuple(string topic, string[] members)
+    public TopicTuple(string topic, string[] members)
     {
         Topic = topic;
         Members = members;

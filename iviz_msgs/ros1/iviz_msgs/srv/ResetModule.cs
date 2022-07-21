@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class ResetModuleRequest : IRequest<ResetModule, ResetModuleResponse>, IDeserializableRos1<ResetModuleRequest>
+    public sealed class ResetModuleRequest : IRequest<ResetModule, ResetModuleResponse>, IDeserializable<ResetModuleRequest>
     {
         // Resets a module. What this entails depends on the specific module.
         /// <summary> Id of the module </summary>
@@ -67,11 +67,23 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Id);
         }
         
+        public ResetModuleRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Id);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ResetModuleRequest(ref b);
         
         public ResetModuleRequest RosDeserialize(ref ReadBuffer b) => new ResetModuleRequest(ref b);
+        
+        public ResetModuleRequest RosDeserialize(ref ReadBuffer2 b) => new ResetModuleRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Id);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Id);
         }
@@ -82,12 +94,19 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Id);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Id);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class ResetModuleResponse : IResponse, IDeserializableRos1<ResetModuleResponse>
+    public sealed class ResetModuleResponse : IResponse, IDeserializable<ResetModuleResponse>
     {
         /// <summary> Whether the operation succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
@@ -111,11 +130,25 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Message);
         }
         
+        public ResetModuleResponse(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ResetModuleResponse(ref b);
         
         public ResetModuleResponse RosDeserialize(ref ReadBuffer b) => new ResetModuleResponse(ref b);
+        
+        public ResetModuleResponse RosDeserialize(ref ReadBuffer2 b) => new ResetModuleResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Success);
+            b.Serialize(Message);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
             b.Serialize(Message);
@@ -127,6 +160,14 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Success);
+            WriteBuffer2.AddLength(ref c, Message);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }

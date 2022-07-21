@@ -5,7 +5,7 @@ namespace Iviz.MsgsGen.Dynamic;
 
 public sealed class MessageArrayField<T> : IField<T[]> where T : IMessage, IDeserializable<T>, new()
 {
-    static readonly IDeserializable<T> Generator = new T();
+    static readonly IDeserializableRos1<T> Generator = new T();
 
     public T[] Value { get; set; } = Array.Empty<T>();
 

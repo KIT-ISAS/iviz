@@ -26,7 +26,7 @@ namespace Iviz.Roslib;
 /// </summary>
 /// <typeparam name="T">The message type</typeparam>
 public sealed class RosChannelReader<T> : BaseRosChannelReader<T>
-    where T : IMessage, IDeserializable<T>, new()
+    where T : IMessage, new()
 {
     /// <summary>
     /// Initializes the channel. <see cref="Start"/> or <see cref="StartAsync"/> must be called after this.
@@ -102,6 +102,8 @@ public sealed class RosChannelReader<T> : BaseRosChannelReader<T>
 /// This variant reconstructs the message type from the publisher handshake and should only
 /// be used if the message definition is unknown beforehand.
 /// </summary>
+
+/*
 public sealed class RosChannelReader : BaseRosChannelReader<IMessage>
 {
     public RosChannelReader()
@@ -161,6 +163,7 @@ public sealed class RosChannelReader : BaseRosChannelReader<IMessage>
         }
     }
 }
+*/
 
 public static class RosChannelReaderUtils
 {
@@ -170,10 +173,13 @@ public static class RosChannelReaderUtils
     /// <param name="client">The ROS client</param>
     /// <param name="topic">The topic name</param>
     /// <returns>The channel reader</returns>
+    
+    /*
     public static RosChannelReader CreateReader(this IRosClient client, string topic)
     {
         return new RosChannelReader(client, topic);
     }
+    */
         
     /// <summary>
     /// Creates a channel reader for the given topic and message type. 
@@ -183,20 +189,21 @@ public static class RosChannelReaderUtils
     /// <typeparam name="T">The message type</typeparam>
     /// <returns>The channel reader</returns>
     public static RosChannelReader<T> CreateReader<T>(this IRosClient client, string topic) 
-        where T : IMessage, IDeserializable<T>, new()
+        where T : IMessage, new()
     {
         return new RosChannelReader<T>(client, topic);
     }        
 
     public static async ValueTask<RosChannelReader<T>> CreateReaderAsync<T>(this IRosClient client, string topic,
         CancellationToken token = default)
-        where T : IMessage, IDeserializable<T>, new()
+        where T : IMessage, new()
     {
         var writer = new RosChannelReader<T>();
         await writer.StartAsync(client, topic, token);
         return writer;
     }
 
+    /*
     public static async ValueTask<RosChannelReader> CreateReaderAsync(this IRosClient client, string topic,
         CancellationToken token = default)
     {
@@ -204,6 +211,7 @@ public static class RosChannelReaderUtils
         await writer.StartAsync(client, topic, token);
         return writer;
     }
+    */
 
     public static IRosChannelReader CreateInstance(Type msgType)
     {

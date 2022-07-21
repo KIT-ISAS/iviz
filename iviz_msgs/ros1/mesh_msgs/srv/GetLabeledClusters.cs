@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetLabeledClustersRequest : IRequest<GetLabeledClusters, GetLabeledClustersResponse>, IDeserializableRos1<GetLabeledClustersRequest>
+    public sealed class GetLabeledClustersRequest : IRequest<GetLabeledClusters, GetLabeledClustersResponse>, IDeserializable<GetLabeledClustersRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
@@ -65,11 +65,23 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeString(out Uuid);
         }
         
+        public GetLabeledClustersRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeString(out Uuid);
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetLabeledClustersRequest(ref b);
         
         public GetLabeledClustersRequest RosDeserialize(ref ReadBuffer b) => new GetLabeledClustersRequest(ref b);
+        
+        public GetLabeledClustersRequest RosDeserialize(ref ReadBuffer2 b) => new GetLabeledClustersRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Uuid);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Uuid);
         }
@@ -80,12 +92,19 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uuid);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Uuid);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class GetLabeledClustersResponse : IResponse, IDeserializableRos1<GetLabeledClustersResponse>
+    public sealed class GetLabeledClustersResponse : IResponse, IDeserializable<GetLabeledClustersResponse>
     {
         [DataMember (Name = "clusters")] public MeshFaceCluster[] Clusters;
     
@@ -108,11 +127,27 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
+        public GetLabeledClustersResponse(ref ReadBuffer2 b)
+        {
+            b.DeserializeArray(out Clusters);
+            for (int i = 0; i < Clusters.Length; i++)
+            {
+                Clusters[i] = new MeshFaceCluster(ref b);
+            }
+        }
+        
         ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetLabeledClustersResponse(ref b);
         
         public GetLabeledClustersResponse RosDeserialize(ref ReadBuffer b) => new GetLabeledClustersResponse(ref b);
+        
+        public GetLabeledClustersResponse RosDeserialize(ref ReadBuffer2 b) => new GetLabeledClustersResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeArray(Clusters);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeArray(Clusters);
         }
@@ -128,6 +163,13 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Clusters);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Clusters);
+        }
     
         public override string ToString() => Extensions.ToString(this);
     }
