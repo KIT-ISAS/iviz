@@ -44,9 +44,10 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// <param name="topic">Name of the topic.</param>
     /// <param name="callback">Function to be called when a message arrives.</param>
     /// <param name="subscriber"> The shared subscriber for this topic, used by all subscribers from this client. </param>
+    /// <param name="transportHint">Specifies the policy of which protocol (TCP, UDP) to prefer</param>
     /// <returns>An identifier that can be used to unsubscribe from this topic.</returns>
     string Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
-        RosTransportHint hint = RosTransportHint.PreferTcp)
+        RosTransportHint transportHint = RosTransportHint.PreferTcp)
         where T : IMessage, new();
 
     /// <summary>
@@ -55,10 +56,11 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// <typeparam name="T">Message type.</typeparam>
     /// <param name="topic">Name of the topic.</param>
     /// <param name="callback">Function to be called when a message arrives.</param>
+    /// <param name="transportHint">Specifies the policy of which protocol (TCP, UDP) to prefer</param>
     /// <param name="token">An optional cancellation token</param>
     /// <returns>A pair containing an identifier that can be used to unsubscribe from this topic, and the subscriber object.</returns>        
     ValueTask<(string id, IRosSubscriber<T> subscriber)>
-        SubscribeAsync<T>(string topic, Action<T> callback, RosTransportHint hint = RosTransportHint.PreferTcp,
+        SubscribeAsync<T>(string topic, Action<T> callback, RosTransportHint transportHint = RosTransportHint.PreferTcp,
             CancellationToken token = default)
         where T : IMessage, new();
 
@@ -69,10 +71,11 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// <typeparam name="T">Message type.</typeparam>
     /// <param name="topic">Name of the topic.</param>
     /// <param name="callback">Function to be called when a message arrives.</param>
+    /// <param name="transportHint">Specifies the policy of which protocol (TCP, UDP) to prefer</param>
     /// <param name="token">An optional cancellation token</param>
     /// <returns>A pair containing an identifier that can be used to unsubscribe from this topic, and the subscriber object.</returns>
     ValueTask<(string id, IRosSubscriber<T> subscriber)> SubscribeAsync<T>(
-        string topic, RosCallback<T> callback, RosTransportHint hint = RosTransportHint.PreferTcp,
+        string topic, RosCallback<T> callback, RosTransportHint transportHint = RosTransportHint.PreferTcp,
         CancellationToken token = default)
         where T : IMessage, new();
 
@@ -146,6 +149,10 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     IReadOnlyList<SubscriberState> GetSubscriberStatistics();
 
     IReadOnlyList<PublisherState> GetPublisherStatistics();
+
+    ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsAsync();
+
+    ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsAsync();
 
     bool IsServiceAvailable(string service);
 

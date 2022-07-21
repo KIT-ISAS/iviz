@@ -113,6 +113,8 @@ public interface IRosPublisher : IDisposable
     /// </summary>        
     public PublisherState GetState();
 
+    public ValueTask<PublisherState> GetStateAsync();
+
     /// <summary>
     /// Whether latching is enabled. When active, new subscribers will automatically receive a copy of the last message sent.
     /// </summary>

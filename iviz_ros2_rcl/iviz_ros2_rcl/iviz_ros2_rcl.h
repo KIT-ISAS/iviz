@@ -14,6 +14,8 @@ void native_rcl_destroy_context(void *context);
 
 int32_t native_rcl_init(void *context);
 
+int32_t native_rcl_shutdown(void *context_handle);
+
 int32_t native_rcl_init_logging();
 
 void native_rcl_set_logging_level(int level);

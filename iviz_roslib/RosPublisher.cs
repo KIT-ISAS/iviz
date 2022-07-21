@@ -61,11 +61,11 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
         get => manager.ForceTcpNoDelay;
         set => manager.ForceTcpNoDelay = value;
     }
-    
+
     public bool LatchingEnabled
     {
-        get => manager.Latching;
-        set => manager.Latching = value;
+        get => manager.LatchingEnabled;
+        set => manager.LatchingEnabled = value;
     }
     
     /// <summary>
@@ -87,6 +87,8 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
         AssertIsAlive();
         return new PublisherState(Topic, TopicType, ids, manager.GetStates());
     }
+    
+    public ValueTask<PublisherState> GetStateAsync() => new(GetState());
 
     void IRosPublisher.Publish(IMessage message)
     {

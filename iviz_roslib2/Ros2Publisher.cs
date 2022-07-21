@@ -62,9 +62,21 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
         return removed;
     }
 
-    public ValueTask<bool> UnadvertiseAsync(string id, CancellationToken token = default)
+    public async ValueTask<bool> UnadvertiseAsync(string id, CancellationToken token = default)
     {
-        return new ValueTask<bool>(Unadvertise(id, token));
+        if (!IsAlive)
+        {
+            return true;
+        }
+
+        bool removed = RemoveId(id ?? throw new ArgumentNullException(nameof(id)));
+
+        if (ids.Count == 0)
+        {
+            await DisposeAsync(token);
+        }
+
+        return removed;    
     }
 
     string GenerateId()
@@ -90,9 +102,12 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
         return type == typeof(TMessage);
     }
 
-    public PublisherState GetState()
+    public PublisherState GetState() => 
+        new PublisherState(Topic, TopicType, ids, Array.Empty<SenderState>());
+    
+    public ValueTask<PublisherState> GetStateAsync()
     {
-        return new PublisherState(Topic, TopicType, ids, Array.Empty<SenderState>());
+        return new ValueTask<PublisherState>(GetState());
     }
 
     public void Publish(in TMessage message)
@@ -134,29 +149,17 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
 
     public void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
+        TaskUtils.Run(() => DisposeAsync().AsTask()).WaitAndRethrow();
+    }
 
+    public async ValueTask DisposeAsync(CancellationToken token = default)
+    {
+        if (disposed) return;
         disposed = true;
         runningTs.Cancel();
         ids.Clear();
 
         client.RemovePublisher(this);
-        publisher.Dispose();
-    }
-
-    public ValueTask DisposeAsync(CancellationToken token)
-    {
-        try
-        {
-            Dispose();
-            return new ValueTask();
-        }
-        catch (Exception e)
-        {
-            return Task.FromException(e).AsValueTask();
-        }
+        await client.AsyncClient.DisposePublisherAsync(publisher);
     }
 }

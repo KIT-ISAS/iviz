@@ -4,7 +4,7 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib2.Rcl;
 
-internal sealed class RclSubscriber : IDisposable
+internal sealed class RclSubscriber
 {
     readonly IntPtr contextHandle;
     readonly IntPtr nodeHandle;
@@ -63,9 +63,11 @@ internal sealed class RclSubscriber : IDisposable
 
     public bool TryTakeMessage(int timeoutInMs, out ReadOnlySpan<byte> span, out Guid guid)
     {
+        if (disposed) throw new ObjectDisposedException(ToString());
+
         Check(Rcl.WaitSetClear(waitSet));
         Check(Rcl.WaitSetAddSubscription(waitSet, subscriptionHandle));
-
+        
         if (Rcl.Wait(waitSet, timeoutInMs) != Rcl.Ok)
         {
             span = default;
@@ -94,20 +96,10 @@ internal sealed class RclSubscriber : IDisposable
         if (disposed) return;
         disposed = true;
         GC.SuppressFinalize(this);
-        if (subscriptionHandle != IntPtr.Zero)
-        {
-            Rcl.DestroySubscriptionHandle(subscriptionHandle, nodeHandle);
-        }
 
-        if (messageBuffer != IntPtr.Zero)
-        {
-            Rcl.DestroySerializedMessage(messageBuffer);
-        }
-
-        if (waitSet != IntPtr.Zero)
-        {
-            Rcl.DestroyWaitSet(waitSet);
-        }
+        Rcl.DestroySerializedMessage(messageBuffer);
+        Rcl.DestroyWaitSet(waitSet);
+        Rcl.DestroySubscriptionHandle(subscriptionHandle, nodeHandle);
     }
 
     public override string ToString()
@@ -115,5 +107,5 @@ internal sealed class RclSubscriber : IDisposable
         return $"[{nameof(RclSubscriber)} {Topic} [{TopicType}] ]";
     }
 
-    ~RclSubscriber() => Dispose();
+    //~RclSubscriber() => Dispose();
 }

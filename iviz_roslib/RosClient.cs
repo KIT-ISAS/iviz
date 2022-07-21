@@ -1459,6 +1459,10 @@ public sealed class RosClient : IRosClient
     public IReadOnlyList<PublisherState> GetPublisherStatistics() =>
         publishersByTopic.Values.Select(publisher => publisher.GetState()).ToArray();
 
+    public ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsAsync() => new(GetSubscriberStatistics());
+
+    public ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsAsync() => new(GetPublisherStatistics());
+
     internal List<BusInfo> GetBusInfoRpc()
     {
         var busInfos = new List<BusInfo>();

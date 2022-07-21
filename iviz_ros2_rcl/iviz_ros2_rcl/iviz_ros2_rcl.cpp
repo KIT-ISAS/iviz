@@ -58,7 +58,7 @@
 #include <visualization_msgs/msg/interactive_marker_init.h>
 
 
-static char log_buffer[1024];
+static char log_buffer[2048];
 
 static void empty_handler(int severity, const char *name, rcutils_time_point_value_t timestamp, const char *message) { }
 
@@ -156,6 +156,12 @@ int32_t native_rcl_init(void *context_handle)
     IgnoreRet(rcl_init_options_fini(&init_options));
     
     return r_ret;
+}
+
+int32_t native_rcl_shutdown(void *context_handle)
+{
+    interop_context *context = (interop_context*) context_handle;
+    return rcl_shutdown(&context->context);
 }
 
 static void rcl_logging_output_handler (const rcutils_log_location_t *location, int severity,

@@ -14,9 +14,10 @@ public sealed class Ros2Client : IRosClient
     readonly ConcurrentDictionary<string, IRos2Subscriber> subscribersByTopic = new();
     readonly ConcurrentDictionary<string, IRos2Publisher> publishersByTopic = new();
     readonly string namespacePrefix;
+    bool disposed;
 
-    internal RclClient Client { get; }
-    public string CallerId => Client.FullName;
+    internal AsyncRclClient AsyncClient { get; }
+    public string CallerId => AsyncClient.FullName;
 
     string ResolveResourceName(string name)
     {
@@ -29,11 +30,23 @@ public sealed class Ros2Client : IRosClient
             _ => $"{namespacePrefix}{name}"
         };
     }
+    
+    Ros2Client(AsyncRclClient asyncClient, string? @namespace = null)
+    {
+        namespacePrefix = @namespace == null ? "/" : $"/{@namespace}/";
+        AsyncClient = asyncClient;
+    }
 
     public Ros2Client(string callerId, string? @namespace = null)
     {
         namespacePrefix = @namespace == null ? "/" : $"/{@namespace}/";
-        Client = new RclClient(callerId, @namespace ?? "");
+        AsyncClient = AsyncRclClient.Create(callerId, @namespace ?? "");
+    }
+
+    public static async ValueTask<Ros2Client> CreateAsync(string callerId, string? @namespace = null)
+    {
+        var client = await AsyncRclClient.CreateAsync(callerId, @namespace ?? "");
+        return new Ros2Client(client, @namespace);
     }
 
     public bool TryGetSubscriber(string topic, [NotNullWhen(true)] out IRos2Subscriber? subscriber)
@@ -50,6 +63,28 @@ public sealed class Ros2Client : IRosClient
     public string Subscribe<T>(string topic, RosCallback<T> callback, out Ros2Subscriber<T> subscriber)
         where T : IMessage, new()
     {
+        (string id, subscriber) = TaskUtils.Run(() => SubscribeAsync(topic, callback).AsTask()).WaitAndRethrow();
+        return id;
+    }
+
+    public string Subscribe<T>(string topic, Action<T> callback, out Ros2Subscriber<T> subscriber)
+        where T : IMessage, new()
+    {
+        void Callback(in T message, IRosReceiver info) => callback(message);
+        return Subscribe(topic, Callback, out subscriber);
+    }
+
+    public ValueTask<(string id, Ros2Subscriber<T> subscriber)> SubscribeAsync<T>(string topic,
+        Action<T> callback, CancellationToken token) where T : IMessage, new()
+    {
+        void Callback(in T message, IRosReceiver info) => callback(message);
+        return SubscribeAsync<T>(topic, Callback, token);
+    }
+
+    public async ValueTask<(string id, Ros2Subscriber<T> subscriber)> SubscribeAsync<T>(string topic,
+        RosCallback<T> callback, CancellationToken token = default)
+        where T : IMessage, new()
+    {
         if (topic is null) BuiltIns.ThrowArgumentNull(nameof(topic));
         if (callback is null) BuiltIns.ThrowArgumentNull(nameof(callback));
 
@@ -62,40 +97,17 @@ public sealed class Ros2Client : IRosClient
         string resolvedTopic = ResolveResourceName(topic);
         if (!TryGetSubscriberImpl(resolvedTopic, out var baseSubscriber))
         {
-            var rclSubscriber = Client.Subscribe(resolvedTopic, messageType);
-            subscriber = new Ros2Subscriber<T>(this, rclSubscriber);
+            var rclSubscriber = await AsyncClient.SubscribeAsync(resolvedTopic, messageType);
+            var subscriber = new Ros2Subscriber<T>(this, rclSubscriber);
             subscribersByTopic[topic] = subscriber;
             string id = subscriber.Subscribe(callback);
             subscriber.Start();
-            return id;
+            return (id, subscriber);
         }
 
-        var newSubscriber = baseSubscriber as Ros2Subscriber<T>;
-        subscriber = newSubscriber ?? throw new RosInvalidMessageTypeException(topic,
+        var newSubscriber = baseSubscriber as Ros2Subscriber<T> ?? throw new RosInvalidMessageTypeException(topic,
             baseSubscriber.TopicType, messageType);
-        return subscriber.Subscribe(callback);
-    }
-
-    public string Subscribe<T>(string topic, Action<T> callback, out Ros2Subscriber<T> subscriber)
-        where T : IMessage, new()
-    {
-        void Callback(in T message, IRosReceiver info) => callback(message);
-        return Subscribe(topic, Callback, out subscriber);
-    }
-
-    public ValueTask<(string id, Ros2Subscriber<T> subscriber)> SubscribeAsync<T>(string topic, Action<T> callback,
-        CancellationToken token) where T : IMessage, new()
-    {
-        string id = Subscribe(topic, callback, out var subscriber);
-        return new ValueTask<(string, Ros2Subscriber<T>)>((id, subscriber));
-    }
-
-    public ValueTask<(string id, Ros2Subscriber<T> subscriber)> SubscribeAsync<T>(string topic, RosCallback<T> callback,
-        CancellationToken token = default)
-        where T : IMessage, new()
-    {
-        string id = Subscribe(topic, callback, out var subscriber);
-        return new ValueTask<(string, Ros2Subscriber<T>)>((id, subscriber));
+        return (newSubscriber.Subscribe(callback), newSubscriber);
     }
 
     string IRosClient.Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
@@ -114,6 +126,13 @@ public sealed class Ros2Client : IRosClient
 
     public string Advertise<T>(string topic, out Ros2Publisher<T> publisher) where T : IMessage, new()
     {
+        (string id, publisher) = TaskUtils.Run(async () => await AdvertiseAsync<T>(topic)).WaitAndRethrow();
+        return id;
+    }
+
+    public async ValueTask<(string id, Ros2Publisher<T> publisher)> AdvertiseAsync<T>(string topic,
+        CancellationToken token = default) where T : IMessage, new()
+    {
         string resolvedTopic = ResolveResourceName(topic);
 
         string messageType = BuiltIns.GetMessageType<T>();
@@ -124,10 +143,10 @@ public sealed class Ros2Client : IRosClient
 
         if (!TryGetPublisher(resolvedTopic, out var existingPublisher))
         {
-            var rclPublisher = Client.Advertise(topic, messageType);
-            publisher = new Ros2Publisher<T>(this, rclPublisher);
+            var rclPublisher = await AsyncClient.AdvertiseAsync(topic, messageType);
+            var publisher = new Ros2Publisher<T>(this, rclPublisher);
             publishersByTopic[topic] = publisher;
-            return publisher.Advertise();
+            return (publisher.Advertise(), publisher);
         }
 
         if (existingPublisher is not Ros2Publisher<T> validatedPublisher)
@@ -135,15 +154,7 @@ public sealed class Ros2Client : IRosClient
             throw new RosInvalidMessageTypeException(topic, existingPublisher.TopicType, messageType);
         }
 
-        publisher = validatedPublisher;
-        return publisher.Advertise();
-    }
-
-    public ValueTask<(string id, Ros2Publisher<T> publisher)> AdvertiseAsync<T>(string topic,
-        CancellationToken token = default) where T : IMessage, new()
-    {
-        string id = Advertise<T>(topic, out var publisher);
-        return new ValueTask<(string, Ros2Publisher<T>)>((id, publisher));
+        return (validatedPublisher.Advertise(), validatedPublisher);
     }
 
     string IRosClient.Advertise<T>(string topic, out IRosPublisher<T> publisher)
@@ -174,7 +185,7 @@ public sealed class Ros2Client : IRosClient
     internal void RemoveSubscriber(IRosSubscriber subscriber)
     {
         subscribersByTopic.TryRemove(subscriber.Topic, out _);
-    }   
+    }
 
     internal void RemovePublisher(IRosPublisher subscriber)
     {
@@ -221,29 +232,49 @@ public sealed class Ros2Client : IRosClient
     public IReadOnlyList<PublisherState> GetPublisherStatistics() =>
         publishersByTopic.Values.Select(publisher => publisher.GetState()).ToArray();
 
+    public async ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsAsync()
+    {
+        var subscribers = subscribersByTopic.Values.ToArray();
+        var states = new SubscriberState[subscribers.Length];
+        for (int i = 0; i < subscribers.Length; i++)
+        {
+            states[i] = await subscribers[i].GetStateAsync();
+        }
+
+        return states;
+    }
+
+    public async ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsAsync()
+    {
+        var publishers = publishersByTopic.Values.ToArray();
+        var states = new PublisherState[publishers.Length];
+        for (int i = 0; i < publishers.Length; i++)
+        {
+            states[i] = await publishers[i].GetStateAsync();
+        }
+
+        return states;
+    }
+
     public bool IsServiceAvailable(string service)
     {
         return false;
     }
 
-    public ValueTask<bool> IsServiceAvailableAsync(string service, CancellationToken token = default)
-    {
-        return new ValueTask<bool>(IsServiceAvailable(service));
-    }
+    public ValueTask<bool> IsServiceAvailableAsync(string service, CancellationToken token = default) =>
+        new(IsServiceAvailable(service));
 
-    public TopicNameType[] GetSystemPublishedTopics() => GetSystemTopics();
+    public TopicNameType[] GetSystemPublishedTopics() =>
+        GetSystemTopics();
 
-    public ValueTask<TopicNameType[]> GetSystemPublishedTopicsAsync(CancellationToken token = default)
-    {
-        return GetSystemTopicsAsync(token);
-    }
+    public ValueTask<TopicNameType[]> GetSystemPublishedTopicsAsync(CancellationToken token = default) =>
+        GetSystemTopicsAsync(token);
 
-    public TopicNameType[] GetSystemTopics() => Client.GetTopicNamesAndTypes();
+    public TopicNameType[] GetSystemTopics() =>
+        TaskUtils.Run(() => GetSystemTopicsAsync().AsTask()).WaitAndRethrow();
 
-    public ValueTask<TopicNameType[]> GetSystemTopicsAsync(CancellationToken token = default)
-    {
-        return new ValueTask<TopicNameType[]>(GetSystemTopics());
-    }
+    public ValueTask<TopicNameType[]> GetSystemTopicsAsync(CancellationToken token = default) =>
+        AsyncClient.GetTopicNamesAndTypesAsync().AsValueTask();
 
     public string[] GetParameterNames()
     {
@@ -268,6 +299,7 @@ public sealed class Ros2Client : IRosClient
 
     public SystemState GetSystemState()
     {
+        /*
         var topics = Client.GetTopicNamesAndTypes();
 
         var subscribers = topics.Select(topic =>
@@ -283,46 +315,70 @@ public sealed class Ros2Client : IRosClient
 
         string[] GetPublishers(string topic) =>
             Client.GetPublisherInfo(topic).Select(info => info.NodeName.ToString()).ToArray();
+            */
+        return TaskUtils.Run(() => GetSystemStateAsync().AsTask()).WaitAndRethrow();
     }
 
-    public ValueTask<SystemState> GetSystemStateAsync(CancellationToken token = default)
+    public async ValueTask<SystemState> GetSystemStateAsync(CancellationToken token = default)
     {
-        return new ValueTask<SystemState>(GetSystemState());
+        var topics = await AsyncClient.GetTopicNamesAndTypesAsync();
+
+        var subscribers = new TopicTuple[topics.Length];
+
+        for (int i = 0; i < topics.Length; i++)
+        {
+            string topic = topics[i].Topic;
+            string[] subscriberNodes =
+                (await AsyncClient.GetSubscriberInfoAsync(topic))
+                .Select(NodeToString)
+                .ToArray();
+            subscribers[i] = new TopicTuple(topic, subscriberNodes);
+        }
+
+        var publishers = new TopicTuple[topics.Length];
+        for (int i = 0; i < topics.Length; i++)
+        {
+            string topic = topics[i].Topic;
+            string[] publisherNodes =
+                (await AsyncClient.GetPublisherInfoAsync(topic))
+                .Select(NodeToString)
+                .ToArray();
+            subscribers[i] = new TopicTuple(topic, publisherNodes);
+        }
+
+        return new SystemState(publishers, subscribers, Array.Empty<TopicTuple>());
+
+        static string NodeToString(EndpointInfo info) => info.NodeName.ToString();
     }
 
     public void Dispose()
     {
-        foreach (var publisher in publishersByTopic.Values)
-        {
-            publisher.Dispose();
-        }
-
-        foreach (var subscriber in subscribersByTopic.Values)
-        {
-            subscriber.Dispose();
-        }
-
-        Client.Dispose();
+        TaskUtils.Run(() => DisposeAsync().AsTask()).WaitAndRethrow();
     }
 
     ValueTask IAsyncDisposable.DisposeAsync() => DisposeAsync();
 
     public async ValueTask DisposeAsync(CancellationToken token = default)
     {
+        if (disposed) return;
+        disposed = true;
+
         var tasks = new List<Task>();
-        foreach (var publisher in publishersByTopic.Values)
+        var publishers = publishersByTopic.Values.ToArray();
+        foreach (var publisher in publishers)
         {
             tasks.Add(publisher.DisposeAsync(token).AwaitNoThrow(this));
         }
 
-        foreach (var subscriber in subscribersByTopic.Values)
+        var subscribers = subscribersByTopic.Values.ToArray();
+        foreach (var subscriber in subscribers)
         {
             tasks.Add(subscriber.DisposeAsync(token).AwaitNoThrow(this));
         }
 
         await tasks.WhenAll();
 
-        Dispose();
+        await AsyncClient.DisposeAsync();
     }
 
     [DoesNotReturn]

@@ -5,7 +5,8 @@ namespace Iviz.Roslib2.Rcl;
 
 internal static class Rcl
 {
-    const string Library = "iviz_ros2_rcl.framework/iviz_ros2_rcl";
+    //const string Library = "iviz_ros2_rcl.framework/iviz_ros2_rcl";
+    const string Library = "iviz_ros2_rcl_macos";
 
     public const int Ok = (int)RclRet.Ok;
 
@@ -43,6 +44,9 @@ internal static class Rcl
 
     [DllImport(Library, EntryPoint = "native_rcl_init")]
     public static extern int Init(IntPtr context);
+    
+    [DllImport(Library, EntryPoint = "native_rcl_shutdown")]
+    public static extern int Shutdown(IntPtr contextHandle);
 
     [DllImport(Library, EntryPoint = "native_rcl_init_logging")]
     public static extern int InitLogging();

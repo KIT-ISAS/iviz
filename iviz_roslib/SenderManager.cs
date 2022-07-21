@@ -28,7 +28,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
     NullableMessage<TMessage> latchedMessage;
 
     int maxQueueSizeInBytes;
-    bool latching;
+    bool latchingEnabled;
     bool forceTcpNoDelay;
     bool disposed;
 
@@ -59,12 +59,12 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
         }
     }
 
-    public bool Latching
+    public bool LatchingEnabled
     {
-        get => latching;
+        get => latchingEnabled;
         set
         {
-            latching = value;
+            latchingEnabled = value;
             latchedMessage = default;
         }
     }
@@ -208,7 +208,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
 
     public void Publish(in TMessage msg)
     {
-        if (Latching)
+        if (LatchingEnabled)
         {
             latchedMessage = msg;
         }
@@ -221,7 +221,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
 
     public ValueTask PublishAndWaitAsync(in TMessage msg, CancellationToken token)
     {
-        if (Latching)
+        if (LatchingEnabled)
         {
             latchedMessage = msg;
         }

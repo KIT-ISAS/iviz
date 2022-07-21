@@ -128,7 +128,9 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
         AssertIsAlive();
         return new SubscriberState(Topic, TopicType, callbacksById.Keys.ToArray(), manager.GetStates());
     }
-
+    
+    public ValueTask<SubscriberState> GetStateAsync() => new(GetState());
+    
     ValueTask IRos1Subscriber.PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
     {
         return PublisherUpdateRcpAsync(publisherUris, token);

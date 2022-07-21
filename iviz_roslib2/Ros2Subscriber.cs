@@ -50,7 +50,7 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
             return;
         }
 
-        var receiverInfo = new Ros2Receiver()
+        var receiverInfo = new Ros2Receiver
         {
             Topic = Topic,
             Type = TopicType
@@ -58,14 +58,14 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
 
         while (IsAlive)
         {
-            if (!subscriber.TryTakeMessage(2000, out var span, out var guid) || IsPaused)
+            if (!subscriber.TryTakeMessage(500, out var span, out var guid))
             {
                 continue;
             }
 
             var msg = ReadBuffer2.Deserialize(generator, span);
             MessageCallback(msg, receiverInfo);
-            
+
             //Console.WriteLine(guid);
             UpdateReceiverInfo(guid, span.Length);
         }
@@ -124,11 +124,17 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
         return prevNumSubscribers == 0 ? Topic : $"{Topic}-{prevNumSubscribers.ToString()}";
     }
 
-    public SubscriberState GetState()
+    public SubscriberState GetState() =>
+        TaskUtils.Run(() => GetStateAsync().AsTask()).WaitAndRethrow();
+
+    public async ValueTask<SubscriberState> GetStateAsync() =>
+        GenerateState(await client.AsyncClient.GetPublisherInfoAsync(Topic));
+
+    SubscriberState GenerateState(EndpointInfo[] publishers)
     {
-        var publishers = client.Client.GetPublisherInfo(Topic);
         var knownPublishers = publishers.ToDictionary(info => info.Guid);
-        var contactedPublishers = publisherStats.Take(numPublishers).ToDictionary(stats => stats.guid);
+        var contactedPublishers = 
+            publisherStats.Take(numPublishers).ToDictionary(stats => stats.guid);
 
         var receiverStates = new List<Ros2ReceiverState>(knownPublishers.Count);
 
@@ -260,6 +266,11 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
 
     public void Dispose()
     {
+        TaskUtils.Run(() => DisposeAsync().AsTask()).WaitAndRethrow();
+    }
+
+    public async ValueTask DisposeAsync(CancellationToken token = default)
+    {
         if (disposed)
         {
             return;
@@ -267,31 +278,13 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
 
         disposed = true;
         runningTs.Cancel();
+        await task.AwaitNoThrow(2000, this, token);
+
         callbacksById.Clear();
         cachedCallbacks = EmptyCallback;
 
         client.RemoveSubscriber(this);
-        subscriber.Dispose();
-
-        task.WaitNoThrow(2000, this);
-    }
-
-    public ValueTask DisposeAsync(CancellationToken token)
-    {
-        if (disposed)
-        {
-            return default;
-        }
-
-        disposed = true;
-        runningTs.Cancel();
-        callbacksById.Clear();
-        cachedCallbacks = EmptyCallback;
-
-        client.RemoveSubscriber(this);
-        subscriber.Dispose();
-
-        return task.AwaitNoThrow(2000, this, token).AsValueTask();
+        //await client.AsyncClient.DisposeSubscriberAsync(subscriber);
     }
 
     struct PublisherStats

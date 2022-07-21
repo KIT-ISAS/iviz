@@ -43,6 +43,8 @@ public interface IRosSubscriber : IDisposable
     /// </summary>           
     public SubscriberState GetState();
 
+    public ValueTask<SubscriberState> GetStateAsync();
+
     /// <summary>
     /// Checks whether this subscriber has provided the given id from a Subscribe() call.
     /// </summary>

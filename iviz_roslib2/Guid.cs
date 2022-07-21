@@ -14,13 +14,13 @@ public readonly struct Guid
     readonly ulong c;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Equals(in Guid other) => a == other.a && b == other.b && c == other.c;
+    public bool Equals(in Guid other) => a == other.a && b == other.b /* && c == other.c */;
 
     public override bool Equals(object? obj) => obj is Guid other && Equals(other);
 
     public override int GetHashCode()
     {
-        ulong l = a ^ b ^ c;
+        ulong l = a ^ b /*^ c*/;
         ulong ll = (l >> 32) ^ (l & (uint.MaxValue - 1));
         return (int)ll;
     }
@@ -37,8 +37,10 @@ public readonly struct Guid
         if (a > other.a) return 1;
         if (b < other.b) return -1;
         if (b > other.b) return 1;
+        /*
         if (c < other.c) return -1;
         if (c > other.c) return 1;
+        */
         return 0;
     }
 
@@ -48,23 +50,22 @@ public readonly struct Guid
 
     public override string ToString()
     {
-        using var rent = new Rent<char>(24 + 24 + 23);
-        char[] array = rent.Array;
+        Span<char> array = stackalloc char[24 + 24 + 23];
 
         int o = 0;
 
-        Append((a >> (0 * 8)) & 0xff);
+        Append(array, a & 0xff);
 
         for (int i = 1; i < 8; i++)
         {
             array[o++] = '.';
-            Append((a >> (i * 8)) & 0xff);
+            Append(array, (a >> (i * 8)) & 0xff);
         }
 
         for (int i = 0; i < 8; i++)
         {
             array[o++] = '.';
-            Append((b >> (i * 8)) & 0xff);
+            Append(array, (b >> (i * 8)) & 0xff);
         }
 
         if (c != 0)
@@ -72,11 +73,11 @@ public readonly struct Guid
             for (int i = 0; i < 8; i++)
             {
                 array[o++] = '.';
-                Append((c >> (i * 8)) & 0xff);
+                Append(array, (c >> (i * 8)) & 0xff);
             }
         }
-
-        void Append(ulong j)
+        
+        void Append(Span<char> array, ulong j)
         {
             array[o++] = AsChar(j >> 4);
             array[o++] = AsChar(j & 0xf);
@@ -87,7 +88,7 @@ public readonly struct Guid
                 ? (char)('0' + j)
                 : (char)('a' - 10 + j);
 
-        return new string(array, 0, o);
+        return new string(array[..o]);
     }
 
     [DataMember]

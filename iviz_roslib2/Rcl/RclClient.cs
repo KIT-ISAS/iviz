@@ -162,6 +162,7 @@ internal sealed class RclClient : IDisposable
 
         if (contextHandle != IntPtr.Zero)
         {
+            Rcl.Shutdown(contextHandle);
             Rcl.DestroyContext(contextHandle);
         }
     }
