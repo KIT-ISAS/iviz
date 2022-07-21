@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshFaceClusterStamped : IDeserializableRos1<MeshFaceClusterStamped>, IDeserializableRos2<MeshFaceClusterStamped>, IMessageRos1, IMessageRos2
+    public sealed class MeshFaceClusterStamped : IDeserializableCommon<MeshFaceClusterStamped>, IMessageCommon
     {
         // header
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -16,14 +16,12 @@ namespace Iviz.Msgs.MeshMsgs
         // overwrite existing labeled faces
         [DataMember (Name = "override")] public bool @override;
     
-        /// Constructor for empty message.
         public MeshFaceClusterStamped()
         {
             Uuid = "";
             Cluster = new MeshFaceCluster();
         }
         
-        /// Explicit constructor.
         public MeshFaceClusterStamped(in StdMsgs.Header Header, string Uuid, MeshFaceCluster Cluster, bool @override)
         {
             this.Header = Header;
@@ -32,7 +30,6 @@ namespace Iviz.Msgs.MeshMsgs
             this.@override = @override;
         }
         
-        /// Constructor with buffer.
         public MeshFaceClusterStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -41,7 +38,6 @@ namespace Iviz.Msgs.MeshMsgs
             b.Deserialize(out @override);
         }
         
-        /// Constructor with buffer.
         public MeshFaceClusterStamped(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -100,26 +96,25 @@ namespace Iviz.Msgs.MeshMsgs
             WriteBuffer2.AddLength(ref c, @override);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshFaceClusterStamped";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "e9b5993e06e78f5ff36e4050fa2e88c6";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE7VTTWvcMBC961cM+JCksCm0t4WeGtLmECgkt1KWsTRrD8iSK8m78b/vkx2nIaceGiOw" +
-                "Pt57891QL+wkmVzcYchd/vh9OW/XpqFBck/TpA6YpKFb93j46qdcgLkH4JatPJ/JPt8DEk+SzkmLkDxp" +
-                "LpXtuRUvjo5gZNPG6BdUUifGfPnPn7l/+LanN7HBr4fCwXFyCK6w48J0jIhZu17SzstJPEg8jPBzeS3z" +
-                "KPkaxMdeM2F1EiSx9zNNGaASycZhmIJaRrBFkbTXfDA1ENPIqaidPCNLMSanocKPiQep6lhZfk8SrNDd" +
-                "zR6YkMVOReHQDAWbhHNN4t0NmUlD+fypEkzzeI47HKVD+l+MU+m5VGflaUySq5+c97DxYQ3uGtpIjsCK" +
-                "y3S53B1wzFcEI3BBxmh7uoTnP+bSxwBBoRMn5dZLFbbIAFQvKuni6pVyWKQDh7jJr4p/bfyLbHjRrTHt" +
-                "etTM1+jz1CGBAI4pntA3jtp5EbFeJRTy2iZOs6ms1aRpbmuOAQJrqQj+nHO0igI4Omvpt/ZeqnGoLf4+" +
-                "3VjnaW3HN4Njmm2zlvbnr2VIDhqc1llp4lg0Bvabp8soGfMHCtWNf8QDAAA=";
+                "H4sIAAAAAAAAE7VTTWvcMBC961cM+JCksCltbws9NaTNIVCa3EJYZqVZe0CWXEnejf99n+w4DTn1kBqB" +
+                "9fHem++GOmEnyeTidn1u88cf83m9Ng31kjsaR3XAJA3tssfDNz/mAswtANds5flM9vkekHiUdEpahORJ" +
+                "c6lsz3vx4ugARjb7GP2MSurEmK/v/Jnbu+9behMb/LorHBwnh+AKOy5Mh4iYte0kbbwcxYPE/QA/59cy" +
+                "DZIvQbzvNBNWK0ESez/RmAEqkWzs+zGoZQRbFEl7zQdTAzENnIra0TOyFGNyGir8kLiXqo6V5fcowQrd" +
+                "XG2BCVnsWBQOTVCwSTjXJN5ckRk1lC+fK4EaevgV86dH09yf4gb30qIOL15Q6bhUr+VpSJKrw5y3MPZh" +
+                "ifISRpAlgTmX6Xy+2+GYLwjW4IsM0XZ0jhB+TqWLAYJCR07Key9V2CIVUD2rpLOLV8phlg4c4iq/KP61" +
+                "8S+y4UW3xrTpUDxf05DHFpkEcEjxiAZytJ9mEetVQiGv+8RpMpW1mDTNdU02QGDNpcGfc45WUQlHJy3d" +
+                "2udzWXa11/9PW9bBWvryzQSZZt0sNX54nKdlp8FpHZomDkVjYL96Os+UMX8AzWNdIs0DAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

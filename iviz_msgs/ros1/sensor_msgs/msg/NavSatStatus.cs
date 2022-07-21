@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class NavSatStatus : IDeserializableRos1<NavSatStatus>, IDeserializableRos2<NavSatStatus>, IMessageRos1, IMessageRos2
+    public sealed class NavSatStatus : IDeserializableCommon<NavSatStatus>, IMessageCommon
     {
         // Navigation Satellite fix status for any Global Navigation Satellite System
         // Whether to output an augmented fix is determined by both the fix
@@ -29,26 +29,22 @@ namespace Iviz.Msgs.SensorMsgs
         public const ushort SERVICE_GALILEO = 8;
         [DataMember (Name = "service")] public ushort Service;
     
-        /// Constructor for empty message.
         public NavSatStatus()
         {
         }
         
-        /// Explicit constructor.
         public NavSatStatus(sbyte Status, ushort Service)
         {
             this.Status = Status;
             this.Service = Service;
         }
         
-        /// Constructor with buffer.
         public NavSatStatus(ref ReadBuffer b)
         {
             b.Deserialize(out Status);
             b.Deserialize(out Service);
         }
         
-        /// Constructor with buffer.
         public NavSatStatus(ref ReadBuffer2 b)
         {
             b.Deserialize(out Status);
@@ -77,12 +73,10 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 3;
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        /// <summary> Constant size of this message. </summary> 
         public const int Ros2FixedMessageLength = 3;
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
@@ -93,17 +87,16 @@ namespace Iviz.Msgs.SensorMsgs
             WriteBuffer2.AddLength(ref c, Service);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/NavSatStatus";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "331cdbddfa4bc96ffc3b9ad98900a54c";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE42RT0/DMAzF7/0UlnZmYgghLiB1MKZJY0OUfzeUtm5rKUumxNnYt8ehLWyMA7nV7vvZ" +
                 "fm8AC7WhWjFZA5li1JoYoaIP8Kw4eKisA2V2MNU2V/rv37OdZ1wlyQBeG+QGHbAFG3gdWLSgQr1Cw1h+" +

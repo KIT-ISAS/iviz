@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Mesh : IDeserializableRos1<Mesh>, IDeserializableRos2<Mesh>, IMessageRos1, IMessageRos2
+    public sealed class Mesh : IDeserializableCommon<Mesh>, IMessageCommon
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "vertices")] public Vector3f[] Vertices;
@@ -17,7 +17,6 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "faces")] public Triangle[] Faces;
         [DataMember (Name = "material_index")] public uint MaterialIndex;
     
-        /// Constructor for empty message.
         public Mesh()
         {
             Name = "";
@@ -30,7 +29,6 @@ namespace Iviz.Msgs.IvizMsgs
             Faces = System.Array.Empty<Triangle>();
         }
         
-        /// Constructor with buffer.
         public Mesh(ref ReadBuffer b)
         {
             b.DeserializeString(out Name);
@@ -52,7 +50,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out MaterialIndex);
         }
         
-        /// Constructor with buffer.
         public Mesh(ref ReadBuffer2 b)
         {
             b.DeserializeString(out Name);
@@ -159,17 +156,16 @@ namespace Iviz.Msgs.IvizMsgs
             WriteBuffer2.AddLength(ref c, MaterialIndex);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Mesh";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "a5cea1d5d993b3cd934f9a3c7f16378c";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71SOw7CMAzdc4rcAKldEBJTByYmEAtCkZu6JVLqSEmoSk9PCknU7kAWPz/H8ufZeauo" +
                 "4wQ9sgtKb2zZXm98QOuVRLfkyNge9IryQB2SX3G1Epk+41gZYxs3/8VRyLfDKqONre5AhDpE5OwK+fFD" +

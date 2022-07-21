@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshVertexCostsStamped : IDeserializableRos1<MeshVertexCostsStamped>, IDeserializableRos2<MeshVertexCostsStamped>, IMessageRos1, IMessageRos2
+    public sealed class MeshVertexCostsStamped : IDeserializableCommon<MeshVertexCostsStamped>, IMessageCommon
     {
         // Mesh Attribute Message
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -13,7 +13,6 @@ namespace Iviz.Msgs.MeshMsgs
         [DataMember (Name = "type")] public string Type;
         [DataMember (Name = "mesh_vertex_costs")] public MeshMsgs.MeshVertexCosts MeshVertexCosts;
     
-        /// Constructor for empty message.
         public MeshVertexCostsStamped()
         {
             Uuid = "";
@@ -21,7 +20,6 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexCosts = new MeshMsgs.MeshVertexCosts();
         }
         
-        /// Explicit constructor.
         public MeshVertexCostsStamped(in StdMsgs.Header Header, string Uuid, string Type, MeshMsgs.MeshVertexCosts MeshVertexCosts)
         {
             this.Header = Header;
@@ -30,7 +28,6 @@ namespace Iviz.Msgs.MeshMsgs
             this.MeshVertexCosts = MeshVertexCosts;
         }
         
-        /// Constructor with buffer.
         public MeshVertexCostsStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -39,7 +36,6 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexCosts = new MeshMsgs.MeshVertexCosts(ref b);
         }
         
-        /// Constructor with buffer.
         public MeshVertexCostsStamped(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -100,26 +96,25 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexCosts.AddRos2MessageLength(ref c);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshVertexCostsStamped";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "f65d52b48920bc9c2a071d643ab7b6b3";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE7VTTWsbMRC961cM+JCk4ATam6GH0tAmh0AhoZdSzFgarwRaaSuNnOy/79O6TkMh0EO7" +
-                "CLQavffmUyu6k+rpg2oJu6bSj5UHMVXddqxDvboRdlLILxvMJaSBWgvu9K/zJGaEyhHf9b5KUXn6mKtW" +
-                "Wm4Oi2Fru8WY9//4M3f3nzf0R8RmRffKyXFxiEHZsTLtMzIJg5eyjnKQCBKPkzhabnsm9RLEBx8qYQ2S" +
-                "pHCMM7UKkGayeRxbCpZRKg3I7SUfzJCIaeKiwbbIBfhcXEgdvi88SlfHqvKjSbJCt9cbYFIV2zQgoBkK" +
-                "tgjXXtnbazItJH33thPM6uExr3GUAf14dk7qWXuw8jQVNA/BcN3Ax5tjcpfQRnEEXlyl88W2xbFeEJwg" +
-                "BJmy9XSOyL/M6nOCoNCBS+BdlC5sUQGonnXS2cUL5bRIJ075JH9U/O3jb2TTs27Pae3Rs9izr21AAQGc" +
-                "Sj4EB+huXkRsDJKUYtgVLrPprKNLs/rUawwQWEtHsHOt2QY0wNFjUH+a2qUbW0zxf5rGVx8E8nzlye1j" +
-                "ZvT623f69U5+AlNTzwmdAwAA";
+                "H4sIAAAAAAAAE7VTTWvcMBC961cM+JCksCltbws9lIakOQRKE3oJYZmVZm2BLLkaaRP/+z55u2koBHpo" +
+                "jUDW6L03X5qObkQH+lRK9ttapB2VezFa3GbUXt9+EXaSaVg2mLOPPdXq3fG/zJOYESoHfNP7LrnI0+ek" +
+                "RWm52S+GjW0WYz7+48/c3F6t6Y+ITUe3haPj7BBDYceFaZeQie8Hyasgewkg8TiJo+W2ZaLnIN4NXgmr" +
+                "lyiZQ5ipKkAlkU3jWKO3jFIVj9xe8sH0kZgmzsXbGjgDn7LzscF3mUdp6lgqP6pEK3R9sQYmqthaPAKa" +
+                "oWCzsLbKXl+QqT6WD+8bgTq6/5b03YPp7h7TCnbp0ZjnKKgMXFrU8jRldBFRsa7h7M0hy3M4QZUE7pzS" +
+                "6WLb4KhnBG+IRaZkBzpFCl/nMqQIQaE9Z8/bIE3YohRQPWmkk7MXynGRjhzTUf6g+NvH38jGZ92W02pA" +
+                "80Irg9YelQRwymnvHaDbeRGxwUssFPw2c55NYx1cmu6yFRsgsJbWYGfVZD064ejRl+H4fJe2bPCc/9Oz" +
+                "fHUykOcrs7cLidH0+wf6NTA/AfuiUGGmAwAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

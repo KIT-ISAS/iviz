@@ -50,19 +50,16 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
-        /// Constructor for empty message.
         public GetVertexColorsRequest()
         {
             Uuid = "";
         }
         
-        /// Explicit constructor.
         public GetVertexColorsRequest(string Uuid)
         {
             this.Uuid = Uuid;
         }
         
-        /// Constructor with buffer.
         public GetVertexColorsRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out Uuid);
@@ -92,19 +89,16 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "mesh_vertex_colors_stamped")] public MeshMsgs.MeshVertexColorsStamped MeshVertexColorsStamped;
     
-        /// Constructor for empty message.
         public GetVertexColorsResponse()
         {
             MeshVertexColorsStamped = new MeshMsgs.MeshVertexColorsStamped();
         }
         
-        /// Explicit constructor.
         public GetVertexColorsResponse(MeshMsgs.MeshVertexColorsStamped MeshVertexColorsStamped)
         {
             this.MeshVertexColorsStamped = MeshVertexColorsStamped;
         }
         
-        /// Constructor with buffer.
         public GetVertexColorsResponse(ref ReadBuffer b)
         {
             MeshVertexColorsStamped = new MeshMsgs.MeshVertexColorsStamped(ref b);

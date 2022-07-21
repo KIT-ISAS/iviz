@@ -5,26 +5,23 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshFeatures : IDeserializableRos1<MeshFeatures>, IDeserializableRos2<MeshFeatures>, IMessageRos1, IMessageRos2
+    public sealed class MeshFeatures : IDeserializableCommon<MeshFeatures>, IMessageCommon
     {
         [DataMember (Name = "map_uuid")] public string MapUuid;
         [DataMember (Name = "features")] public MeshMsgs.Feature[] Features;
     
-        /// Constructor for empty message.
         public MeshFeatures()
         {
             MapUuid = "";
             Features = System.Array.Empty<MeshMsgs.Feature>();
         }
         
-        /// Explicit constructor.
         public MeshFeatures(string MapUuid, MeshMsgs.Feature[] Features)
         {
             this.MapUuid = MapUuid;
             this.Features = Features;
         }
         
-        /// Constructor with buffer.
         public MeshFeatures(ref ReadBuffer b)
         {
             b.DeserializeString(out MapUuid);
@@ -35,7 +32,6 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        /// Constructor with buffer.
         public MeshFeatures(ref ReadBuffer2 b)
         {
             b.DeserializeString(out MapUuid);
@@ -85,17 +81,16 @@ namespace Iviz.Msgs.MeshMsgs
             WriteBuffer2.AddLength(ref c, Features);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshFeatures";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "ea0bfd1049bc24f2cd76d68461f1f987";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7XQwQqCYAwH8PueYtADBBYdgq51CoK6RcjQqYP8Jt8mZE+fYniojrnTf2OwHzOPEkqs" +
                 "qUnbVnKo2aq0ttKWeyZvI19vWIzJAHZ/LjieD1v8ugkla80eu3F6UgmOd83IRQOY5+/tu5Kvkl6Ys2VR" +

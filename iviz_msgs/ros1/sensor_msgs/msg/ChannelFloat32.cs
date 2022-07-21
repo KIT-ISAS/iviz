@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class ChannelFloat32 : IDeserializableRos1<ChannelFloat32>, IDeserializableRos2<ChannelFloat32>, IMessageRos1, IMessageRos2
+    public sealed class ChannelFloat32 : IDeserializableCommon<ChannelFloat32>, IMessageCommon
     {
         // This message is used by the PointCloud message to hold optional data
         // associated with each point in the cloud. The length of the values
@@ -29,28 +29,24 @@ namespace Iviz.Msgs.SensorMsgs
         // PointCloud.
         [DataMember (Name = "values")] public float[] Values;
     
-        /// Constructor for empty message.
         public ChannelFloat32()
         {
             Name = "";
             Values = System.Array.Empty<float>();
         }
         
-        /// Explicit constructor.
         public ChannelFloat32(string Name, float[] Values)
         {
             this.Name = Name;
             this.Values = Values;
         }
         
-        /// Constructor with buffer.
         public ChannelFloat32(ref ReadBuffer b)
         {
             b.DeserializeString(out Name);
             b.DeserializeStructArray(out Values);
         }
         
-        /// Constructor with buffer.
         public ChannelFloat32(ref ReadBuffer2 b)
         {
             b.DeserializeString(out Name);
@@ -91,17 +87,16 @@ namespace Iviz.Msgs.SensorMsgs
             WriteBuffer2.AddLength(ref c, Values);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/ChannelFloat32";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "3d40139cdd33dfedcb71ffeeeb42ae7f";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE11Ty47bMAy8+ysI7yUBsgY27aHosQu016LoreiBlhhbqCwaopRs/r6UYudl+CBA5Mxw" +
                 "hnqB36MTmEgEBwI9ZiEL/RnSSPCTXUjvnrO9ViSGkb0FnpPjgB4sJmxeAEXYOEzafHJpBEIzwlz6wYUK" +

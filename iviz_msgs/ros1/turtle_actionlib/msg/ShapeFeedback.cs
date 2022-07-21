@@ -5,21 +5,18 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TurtleActionlib
 {
     [DataContract]
-    public sealed class ShapeFeedback : IDeserializableRos1<ShapeFeedback>, IDeserializableRos2<ShapeFeedback>, IMessageRos1, IMessageRos2, IFeedback<ShapeActionFeedback>
+    public sealed class ShapeFeedback : IDeserializableCommon<ShapeFeedback>, IMessageCommon, IFeedback<ShapeActionFeedback>
     {
         //feedback
     
-        /// Constructor for empty message.
         public ShapeFeedback()
         {
         }
         
-        /// Constructor with buffer.
         public ShapeFeedback(ref ReadBuffer b)
         {
         }
         
-        /// Constructor with buffer.
         public ShapeFeedback(ref ReadBuffer2 b)
         {
         }
@@ -45,7 +42,6 @@ namespace Iviz.Msgs.TurtleActionlib
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -54,17 +50,16 @@ namespace Iviz.Msgs.TurtleActionlib
         
         public void AddRos2MessageLength(ref int c) { }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "turtle_actionlib/ShapeFeedback";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = BuiltIns.EmptyMd5Sum;
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+PiAgBrE+NbAgAAAA==";
                 

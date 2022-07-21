@@ -65,19 +65,16 @@ namespace Iviz.Msgs.DiagnosticMsgs
         // loaded into the namespace.
         [DataMember (Name = "load_namespace")] public string LoadNamespace;
     
-        /// Constructor for empty message.
         public AddDiagnosticsRequest()
         {
             LoadNamespace = "";
         }
         
-        /// Explicit constructor.
         public AddDiagnosticsRequest(string LoadNamespace)
         {
             this.LoadNamespace = LoadNamespace;
         }
         
-        /// Constructor with buffer.
         public AddDiagnosticsRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out LoadNamespace);
@@ -113,20 +110,17 @@ namespace Iviz.Msgs.DiagnosticMsgs
         // Message with additional information about the success or failure
         [DataMember (Name = "message")] public string Message;
     
-        /// Constructor for empty message.
         public AddDiagnosticsResponse()
         {
             Message = "";
         }
         
-        /// Explicit constructor.
         public AddDiagnosticsResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// Constructor with buffer.
         public AddDiagnosticsResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

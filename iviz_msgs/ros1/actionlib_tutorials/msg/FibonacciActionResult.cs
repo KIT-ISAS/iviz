@@ -5,20 +5,18 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class FibonacciActionResult : IDeserializableRos1<FibonacciActionResult>, IDeserializableRos2<FibonacciActionResult>, IMessageRos1, IMessageRos2, IActionResult<FibonacciResult>
+    public sealed class FibonacciActionResult : IDeserializableCommon<FibonacciActionResult>, IMessageCommon, IActionResult<FibonacciResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
         [DataMember (Name = "result")] public FibonacciResult Result { get; set; }
     
-        /// Constructor for empty message.
         public FibonacciActionResult()
         {
             Status = new ActionlibMsgs.GoalStatus();
             Result = new FibonacciResult();
         }
         
-        /// Explicit constructor.
         public FibonacciActionResult(in StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, FibonacciResult Result)
         {
             this.Header = Header;
@@ -26,7 +24,6 @@ namespace Iviz.Msgs.ActionlibTutorials
             this.Result = Result;
         }
         
-        /// Constructor with buffer.
         public FibonacciActionResult(ref ReadBuffer b)
         {
             Header = new StdMsgs.Header(ref b);
@@ -34,7 +31,6 @@ namespace Iviz.Msgs.ActionlibTutorials
             Result = new FibonacciResult(ref b);
         }
         
-        /// Constructor with buffer.
         public FibonacciActionResult(ref ReadBuffer2 b)
         {
             Header = new StdMsgs.Header(ref b);
@@ -90,36 +86,35 @@ namespace Iviz.Msgs.ActionlibTutorials
             Result.AddRos2MessageLength(ref c);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_tutorials/FibonacciActionResult";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "bee73a9fe29ae25e966e105f5553dd03";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE71WTXPbNhC981dgRofYnVppkzZNPaODKimOOk7isdVeOh0PCK5ItCSo4kOy/n3eghRF" +
-                "OVajQxKNbVoS8Pbh7dvFviWZkRVFfCRSeV2bUqf3lcvd86talnde+uCEi4/kjU5rI5XSt+RC6YWNj2T0" +
-                "hV/Ju7urS8TMGh5vG3YDATImkzYTFXmZSS/FsgZ5nRdkL0paU8lEqxVlIn7rtytyQ2xcFNoJ/ORkyMqy" +
-                "3IrgsMjXQtVVFYxW0pPwuqKD/dipjZBiJa3XKpTSYn1tM214+dLKihgdP47+C2QUifn0EmuMIxW8BqEt" +
-                "EJQl6bTJ8aVIgjb+5QvekAwWm/oCbylHCrrgwhfSM1l6WEFf5indJWJ81xxuCGyIQ4iSOXEWP7vHW3cu" +
-                "EAQUaFWrQpyB+c3WF7UBIIm1tFqmJTGwggJAfcabnp33kE2ENtLUO/gGcR/jFFjT4fKZLgrkrOTTu5BD" +
-                "QCxc2XqtMyxNtxFElZqMF/CdlXab8K4mZDJ4wxpjEXbFjOApnauVRgIysdG+SJy3jB6zca+z5Cu58Wht" +
-                "JPwvMpvjwfE5wa93BdO8uZm9n87fX4ndayR+wF+2JcVtopBObMmzIVNifVST+FagJjZybteogwZzPFnM" +
-                "/5yJHuaPh5ickWAtlIUJU2KNTgK+uZ3N3t0sZtMO+MUhsCVFsDZsiZTDHvwJ3O+8kEsPJ2vPp7ecIHqI" +
-                "dWDyRPzPa4BfmCSq0BgOVbkqiRG0dzsUED1bkK1QfSW3Ak/nLeW7PyaT2Wzao/zykPIGyFIVmpi2C4pV" +
-                "WAbuA08JcSzM+LcPt3tdOMxPT4RJ63j0LERb7rk/GSkL9Flp2BWuRhkspS6DpWP0bme/zyY9fiPx86f0" +
-                "LP1Dyh9xQCyoOvjHdvn+8xxTUhI9NWJ2wQL6pJdgyh0CnVqbtSx1duwArfO6ShmJV9/AeZ31TO1jEe7N" +
-                "1yWvU3gyvr7eV/JI/HIqwZRwVdGTDE9RFzn5NFuHpM1S24ovNb4+fL8LRCaUHRyib5PXX+AQp8nMpjgo" +
-                "vyYAXxtHPHH94W7RhxqJXyPg2OzEaG8PIIkMWWMQakSQnQSMMmymAAeDl1nULT2h9hxj16w2S7rROD4q" +
-                "R5pHrTMZjMuy3sR5hBeiFCzXbXdZgUx7UXGNid5oxVsySkOes4ztIk8PPvmGV9l8mjQOaEaQViTnOd18" +
-                "nngnQ9JNoTFbxPu411KiOyjjWWgeR5fQ3jGPdcJ+MuwfnJIcC4QRh6oVclWW2M2YrknehhC6g95ZD5Yk" +
-                "yy0lMuqPCi1/dJd2vEArBr3tYRaWRFkq1b/sRuxo5leMk87JnJrUuBUpvdRqVwyRgRu26DzrNQtAqgqx" +
-                "KNDnNFYNd8njIeSrp84HJEdDruePhvIkiRPmX393Q2nyEYHLfDjmCwAA";
+                "H4sIAAAAAAAAE71WTXMaRxC976+YKg6WUhGO7cR2VMWBAJZxybYKkVxcLtXsbLM7ye4smQ8Q/z6vZ5cF" +
+                "ZBFzsE0hrQQzr9+8ft3Tb0lmZEURH4lUXtem1Old5XL39KqW5a2XPjjh4iN5o9PaSKX0jFwovbDxkQy+" +
+                "8St5f3t1iZhZw+Ntw64nQMZk0maiIi8z6aVY1CCv84LsRUkrKplotaRMxG/9Zkmuj43zQjuBd06GrCzL" +
+                "jQgOi3wtVF1VwWglPQmvKzrYj53aCCmW0nqtQikt1tc204aXL6ysiNHxdvRvIKNITMeXWGMcqeA1CG2A" +
+                "oCxJp02OL0UStPEvnvMG0ROfZrV79jnpzdf1BT6nHLnoWAhfSM+s6X4JoZmwdJcI9lNzyj6CQCVCuMyJ" +
+                "s/jZHf515wLRwIWWtSrEGY5ws/FFbQBIYiWtlmlJDKwgBVCf8KYn53vIJkIbaeotfIO4i3EKrOlw+UwX" +
+                "BZJXsgwu5FASC5e2XukMS9NNBFGlJuMFDGil3SS8qwmZ9N6w2FiEXTE1eErnaqWRiUystS8S5y2jx7Tc" +
+                "6Sz5TrY8WiQJ/4kU53hwfM70623lNP/cTD6Mpx+uxPY1EL/gN/uT4jZRSCc25NmZKbE+qkl8K1ATGzm3" +
+                "KxREgzkczad/TcQe5rNDTM5IsBbKwo0psUYnAd/MJpP3N/PJuAN+fghsSRE8Dlsi5bAHf4IycF7IhYeT" +
+                "tefTW04Q3ceCMHki/ufVww9MElVoDIfyXJbECNq7LQqIns3JVijDknuCp/OW8u2fo9FkMt6j/OKQ8hrI" +
+                "UhWamLYLilVYBG4IjwlxLMzwj4+znS4c5tdHwqR1PHoWoi133B+NlAX6qjTsClejDBZSl8HSMXqzybvJ" +
+                "aI/fQPz2JT1Lf5PyRxwQC6oO/qFdfv46x5SURHONmF2wgIbpJZhyh0DL1mYlS50dO0DrvK5SBuLlD3Be" +
+                "Zz1T+1iEO/N1yesUHg2vr3eVPBCvTiWYEu4sepThKeoiJ19m65C0WWhb8e3G14ff7wKRCWUHh9i3yetv" +
+                "cIjTZGZTHJRfE4CvjSOeuP54O9+HGojfI+DQbMVobw8giQxZYxBqRJCdBIzSb8YBB4OXWdQtPaH2HGPX" +
+                "rDZLutY4PipHmgetM+kNy7Jex8GEF6IULNdtd1mBTHtRcY2JvRmLt2SUhjxnGdtFnu598gOvsuk4aRzQ" +
+                "jCCtSM5zuvk88U6GpOtCY7aI9/FeS4nuoIyHomkcXUJ7xzzUCfvJsH9wSnIsEEYcqpbIVVliN2O6Jnlr" +
+                "QugOems9WJIst5TIaH9UaPmju7TjBVox6G0Os7AgylKp/mE3YkczyGKudE7m1KTGLUnphVbbYogMXL9F" +
+                "56GvWQBSVYhFgT6nsaq/TR4PId89dT4gORpyPX0wnSdJHDU/fe6m0+Q/UFQvTO8LAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

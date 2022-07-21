@@ -5,30 +5,26 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Polygon : IDeserializableRos1<Polygon>, IDeserializableRos2<Polygon>, IMessageRos1, IMessageRos2
+    public sealed class Polygon : IDeserializableCommon<Polygon>, IMessageCommon
     {
         //A specification of a polygon where the first and last points are assumed to be connected
         [DataMember (Name = "points")] public Point32[] Points;
     
-        /// Constructor for empty message.
         public Polygon()
         {
             Points = System.Array.Empty<Point32>();
         }
         
-        /// Explicit constructor.
         public Polygon(Point32[] Points)
         {
             this.Points = Points;
         }
         
-        /// Constructor with buffer.
         public Polygon(ref ReadBuffer b)
         {
             b.DeserializeStructArray(out Points);
         }
         
-        /// Constructor with buffer.
         public Polygon(ref ReadBuffer2 b)
         {
             b.DeserializeStructArray(out Points);
@@ -64,17 +60,16 @@ namespace Iviz.Msgs.GeometryMsgs
             WriteBuffer2.AddLength(ref c, Points);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/Polygon";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "cd60a26494a087f577976f0329fa120e";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61RzUrEMBC+5ykG9qIgK+zeBA/iQTwIgt5EJG2m7WCaCZlZ1/r0Ttru4gPY0zSZ7zeb" +
                 "O5CMLXXUeiVOwB14yByn3n6OAxYEHRA6KqLgU4DobchMSQW83XqRw4gBlKFBaDklbBWDe64r+93b+7rs" +

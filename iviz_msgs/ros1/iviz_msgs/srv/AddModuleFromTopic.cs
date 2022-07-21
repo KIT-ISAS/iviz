@@ -54,21 +54,18 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Requested id to identify this module, or empty to autogenerate </summary>
         [DataMember (Name = "id")] public string Id;
     
-        /// Constructor for empty message.
         public AddModuleFromTopicRequest()
         {
             Topic = "";
             Id = "";
         }
         
-        /// Explicit constructor.
         public AddModuleFromTopicRequest(string Topic, string Id)
         {
             this.Topic = Topic;
             this.Id = Id;
         }
         
-        /// Constructor with buffer.
         public AddModuleFromTopicRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out Topic);
@@ -106,14 +103,12 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> An id identifying this module </summary>
         [DataMember (Name = "id")] public string Id;
     
-        /// Constructor for empty message.
         public AddModuleFromTopicResponse()
         {
             Message = "";
             Id = "";
         }
         
-        /// Explicit constructor.
         public AddModuleFromTopicResponse(bool Success, string Message, string Id)
         {
             this.Success = Success;
@@ -121,7 +116,6 @@ namespace Iviz.Msgs.IvizMsgs
             this.Id = Id;
         }
         
-        /// Constructor with buffer.
         public AddModuleFromTopicResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

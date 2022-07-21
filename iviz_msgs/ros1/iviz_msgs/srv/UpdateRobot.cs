@@ -53,7 +53,6 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "configuration")] public IvizMsgs.RobotConfiguration Configuration;
         [DataMember (Name = "valid_fields")] public string[] ValidFields;
     
-        /// Constructor for empty message.
         public UpdateRobotRequest()
         {
             Id = "";
@@ -61,7 +60,6 @@ namespace Iviz.Msgs.IvizMsgs
             ValidFields = System.Array.Empty<string>();
         }
         
-        /// Explicit constructor.
         public UpdateRobotRequest(int Operation, string Id, IvizMsgs.RobotConfiguration Configuration, string[] ValidFields)
         {
             this.Operation = Operation;
@@ -70,7 +68,6 @@ namespace Iviz.Msgs.IvizMsgs
             this.ValidFields = ValidFields;
         }
         
-        /// Constructor with buffer.
         public UpdateRobotRequest(ref ReadBuffer b)
         {
             b.Deserialize(out Operation);
@@ -123,20 +120,17 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "message")] public string Message;
     
-        /// Constructor for empty message.
         public UpdateRobotResponse()
         {
             Message = "";
         }
         
-        /// Explicit constructor.
         public UpdateRobotResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// Constructor with buffer.
         public UpdateRobotResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

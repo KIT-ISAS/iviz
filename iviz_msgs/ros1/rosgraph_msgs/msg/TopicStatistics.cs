@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract]
-    public sealed class TopicStatistics : IDeserializableRos1<TopicStatistics>, IDeserializableRos2<TopicStatistics>, IMessageRos1, IMessageRos2
+    public sealed class TopicStatistics : IDeserializableCommon<TopicStatistics>, IMessageCommon
     {
         // name of the topic
         [DataMember (Name = "topic")] public string Topic;
@@ -33,7 +33,6 @@ namespace Iviz.Msgs.RosgraphMsgs
         [DataMember (Name = "stamp_age_stddev")] public duration StampAgeStddev;
         [DataMember (Name = "stamp_age_max")] public duration StampAgeMax;
     
-        /// Constructor for empty message.
         public TopicStatistics()
         {
             Topic = "";
@@ -41,7 +40,6 @@ namespace Iviz.Msgs.RosgraphMsgs
             NodeSub = "";
         }
         
-        /// Constructor with buffer.
         public TopicStatistics(ref ReadBuffer b)
         {
             b.DeserializeString(out Topic);
@@ -60,7 +58,6 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.Deserialize(out StampAgeMax);
         }
         
-        /// Constructor with buffer.
         public TopicStatistics(ref ReadBuffer2 b)
         {
             b.DeserializeString(out Topic);
@@ -159,17 +156,16 @@ namespace Iviz.Msgs.RosgraphMsgs
             WriteBuffer2.AddLength(ref c, StampAgeMax);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "rosgraph_msgs/TopicStatistics";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "10152ed868c5097a5e2e4a89d7daa710";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE32RXW6DMBCE3znFSnmtkqo9RU+BDF7CSvhH3gWS23cdTEIh6htefzPjWU7gjUMIHUiP" +
                 "ICFSW7Ek8tdyqE7gg0Ugu0JxbAbiHtMK5vtap29YHhtuEzU7mBf4QYgRYqGWwcQ43DVW58QgpO+aydsw" +

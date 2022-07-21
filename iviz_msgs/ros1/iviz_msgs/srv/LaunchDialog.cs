@@ -50,19 +50,16 @@ namespace Iviz.Msgs.IvizMsgs
     {
         [DataMember (Name = "dialog")] public IvizMsgs.Dialog Dialog;
     
-        /// Constructor for empty message.
         public LaunchDialogRequest()
         {
             Dialog = new IvizMsgs.Dialog();
         }
         
-        /// Explicit constructor.
         public LaunchDialogRequest(IvizMsgs.Dialog Dialog)
         {
             this.Dialog = Dialog;
         }
         
-        /// Constructor with buffer.
         public LaunchDialogRequest(ref ReadBuffer b)
         {
             Dialog = new IvizMsgs.Dialog(ref b);
@@ -95,14 +92,12 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "message")] public string Message;
         [DataMember (Name = "feedback")] public IvizMsgs.Feedback Feedback;
     
-        /// Constructor for empty message.
         public LaunchDialogResponse()
         {
             Message = "";
             Feedback = new IvizMsgs.Feedback();
         }
         
-        /// Explicit constructor.
         public LaunchDialogResponse(bool Success, string Message, IvizMsgs.Feedback Feedback)
         {
             this.Success = Success;
@@ -110,7 +105,6 @@ namespace Iviz.Msgs.IvizMsgs
             this.Feedback = Feedback;
         }
         
-        /// Constructor with buffer.
         public LaunchDialogResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

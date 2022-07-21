@@ -5,20 +5,17 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TwoIntsFeedback : IDeserializableRos1<TwoIntsFeedback>, IDeserializableRos2<TwoIntsFeedback>, IMessageRos1, IMessageRos2, IFeedback<TwoIntsActionFeedback>
+    public sealed class TwoIntsFeedback : IDeserializableCommon<TwoIntsFeedback>, IMessageCommon, IFeedback<TwoIntsActionFeedback>
     {
     
-        /// Constructor for empty message.
         public TwoIntsFeedback()
         {
         }
         
-        /// Constructor with buffer.
         public TwoIntsFeedback(ref ReadBuffer b)
         {
         }
         
-        /// Constructor with buffer.
         public TwoIntsFeedback(ref ReadBuffer2 b)
         {
         }
@@ -44,7 +41,6 @@ namespace Iviz.Msgs.Actionlib
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -53,17 +49,16 @@ namespace Iviz.Msgs.Actionlib
         
         public void AddRos2MessageLength(ref int c) { }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib/TwoIntsFeedback";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = BuiltIns.EmptyMd5Sum;
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 => BuiltIns.EmptyDependenciesBase64;
     
         public override string ToString() => Extensions.ToString(this);

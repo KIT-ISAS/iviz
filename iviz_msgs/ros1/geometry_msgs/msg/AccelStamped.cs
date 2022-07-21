@@ -5,33 +5,29 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class AccelStamped : IDeserializableRos1<AccelStamped>, IDeserializableRos2<AccelStamped>, IMessageRos1, IMessageRos2
+    public sealed class AccelStamped : IDeserializableCommon<AccelStamped>, IMessageCommon
     {
         // An accel with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "accel")] public Accel Accel;
     
-        /// Constructor for empty message.
         public AccelStamped()
         {
             Accel = new Accel();
         }
         
-        /// Explicit constructor.
         public AccelStamped(in StdMsgs.Header Header, Accel Accel)
         {
             this.Header = Header;
             this.Accel = Accel;
         }
         
-        /// Constructor with buffer.
         public AccelStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Accel = new Accel(ref b);
         }
         
-        /// Constructor with buffer.
         public AccelStamped(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -72,29 +68,29 @@ namespace Iviz.Msgs.GeometryMsgs
             Accel.AddRos2MessageLength(ref c);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/AccelStamped";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "d8a98a5d81351b6eb0578c78557e7659";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE71UTWvbQBC961cM+JCk2CokpYdAD4HSNodCIKHXMN4dS0ukXXV3ZEf99X27spWGXnpo" +
-                "awTWx8ybeW/e7IpuPLEx0tHBaUtRdhLFGyETQrTOswrtIvdC7C2p6yUp90P1RdhKpLb8VTcFoeBU1Ye/" +
-                "/Ku+3n++pqT2sU9NejtXrlZ0r2iJo6VelC0r0y6gI9e0Ejed7NFR6VUsla86DZJqJD60LhGuRrxE7rqJ" +
-                "xoQgDSDd96N3JrNeuJ7ykekgFg0c1Zmx4/ibSBkdV5LvYxHx9uM1YnwSM6pDQxMQTBROzjf4SNXovF5d" +
-                "5oRq9XAIGzxKA12X4qQta25WnocoKffJ6Ro13szkamBDHEEVm+i8vHvEY7ogFEELMgTT0jk6v5u0DR6A" +
-                "QnuOjredZGADBYB6lpPOLn5B9gXasw8n+BnxpcafwPoFN3PatJhZl9mnsYGACBxi2DuL0O1UQEznxCt1" +
-                "bhs5TlXOmktWq0/FiJrHVyaCf04pGIcB2GLgKmnM6GUaj87+Kzc2EuC6OM2WLPY/Ges0qDTvAxymDvpA" +
-                "qV0UUBkYGm5jeJL8EqZzmsDWC+TIO8a+Kd7KNoNdv4nREK/oGPLyfIz7PwyPVU8co2SOGBNI0r58e02w" +
-                "zmtwW4wbPGzfC2OmILtkItG6iFSIUwMVxw7WV9aQg2yAej4oMHp+AqTARTmbhwFgWOXIPnWzsEVBOpe6" +
-                "qdd0aKFqicouKDtbttwZiq5xds5EoX5JZjqSW5PuLuGirpt7novBkgCJQUvCRU23O5rCSIdMCDfxeLgE" +
-                "2srSV1kCDWGdT5YjxGtB7wJmD1lS4gb74pPiWKuratcF1vfv6Hm5m5a7H9VP4NsfYa8FAAA=";
+                "H4sIAAAAAAAAE71UTW/UMBC9+1eMtIe2aBtEizisxKESAnpAqmjFBaFq1p4kVhM72M5uw6/n2dlNqbhw" +
+                "AFaRNh8zb+a9eeMVXTliraWjvU0tBakliNNC2vtgrOMkVAfuhdgZSraXmLgf1EdhI4Ha8qeuCkLBUert" +
+                "X/6pT7cfNhSTue9jE1/OldWKbhNa4mCol8SGE1Pt0ZFtWgnnnezQUelVDJWvaRokVki8a20kXI04Cdx1" +
+                "E40RQcmDdN+PzurMeuF6zEemhVg0cEhWjx2H30TK6LiifB+LiNfvNohxUfSYLBqagKCDcLSuwUdSo3Xp" +
+                "8iIn0Iq+fvbx1Te1utv7c7yXBgIvXVBqOeWu5XEIEnPDHDco9mJmWaEIVBKUM5FOy7t7PMYzQjX0IoPX" +
+                "LZ2Cws2UWu8AKLTjYHnbSQbWkAKoJznp5OwXZFegHTt/hJ8Rn2r8CaxbcDOn8xbD67IMcWygJAKH4HfW" +
+                "IHQ7FRDdWXGJOrsNHCaVs+aSavW+ODLlOZbR4J9j9NpiEqY4WcUUMnoZy701/8qWjXjYL0yzN8seHB12" +
+                "HFScFwNWSxb6QKk6CKgMDA23wT9Ifgn32RTB1gnkyMvGrikmy36Db7+ITj5c0iHk6fkQ938YHqoeOQbJ" +
+                "HDEmkKRd+facYJX34boY1zv4vxfGTEF2yUSisQGpEKcCKs4f7LGsIQcZD/WcT8Do+QGQAhflbB4GgGGn" +
+                "A7vYzcIWBelUqqZa076FqiUqu6Asb1l3qynYxpo5E4X6JZnpQG5Nqb6Ai7pu7nkuBksCJPhUEs4quq5p" +
+                "8iPtMyHchMMp42krS19lCZL363zEHCCeC3rjMXvIEiM32BcXE863Sqm685zevKbH5W5a7n6on24NfrG4" +
+                "BQAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

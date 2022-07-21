@@ -50,19 +50,16 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
-        /// Constructor for empty message.
         public GetVertexCostsRequest()
         {
             Uuid = "";
         }
         
-        /// Explicit constructor.
         public GetVertexCostsRequest(string Uuid)
         {
             this.Uuid = Uuid;
         }
         
-        /// Constructor with buffer.
         public GetVertexCostsRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out Uuid);
@@ -92,19 +89,16 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "mesh_vertex_costs_stamped")] public MeshMsgs.MeshVertexCostsStamped MeshVertexCostsStamped;
     
-        /// Constructor for empty message.
         public GetVertexCostsResponse()
         {
             MeshVertexCostsStamped = new MeshMsgs.MeshVertexCostsStamped();
         }
         
-        /// Explicit constructor.
         public GetVertexCostsResponse(MeshMsgs.MeshVertexCostsStamped MeshVertexCostsStamped)
         {
             this.MeshVertexCostsStamped = MeshVertexCostsStamped;
         }
         
-        /// Constructor with buffer.
         public GetVertexCostsResponse(ref ReadBuffer b)
         {
             MeshVertexCostsStamped = new MeshMsgs.MeshVertexCostsStamped(ref b);

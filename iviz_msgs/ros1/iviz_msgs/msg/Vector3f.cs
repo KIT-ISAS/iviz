@@ -8,13 +8,12 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3f : IMessageRos1, IMessageRos2, IDeserializableRos1<Vector3f>, IDeserializableRos2<Vector3f>
+    public struct Vector3f : IMessageCommon, IDeserializableCommon<Vector3f>
     {
         [DataMember (Name = "x")] public float X;
         [DataMember (Name = "y")] public float Y;
         [DataMember (Name = "z")] public float Z;
     
-        /// Explicit constructor.
         public Vector3f(float X, float Y, float Z)
         {
             this.X = X;
@@ -22,14 +21,12 @@ namespace Iviz.Msgs.IvizMsgs
             this.Z = Z;
         }
         
-        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector3f(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector3f(ref ReadBuffer2 b)
         {
@@ -56,12 +53,10 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 12;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
         
-        /// <summary> Constant size of this message. </summary> 
         public const int Ros2FixedMessageLength = 12;
         
         public readonly int Ros2MessageLength => Ros2FixedMessageLength;
@@ -69,17 +64,16 @@ namespace Iviz.Msgs.IvizMsgs
         public readonly void AddRos2MessageLength(ref int c) => WriteBuffer2.AddLength(ref c, this);
         
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Vector3f";
     
         public readonly string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "cc153912f1453b708d221682bc23d9ac";
     
         public readonly string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE0vLyU8sMTZSqOBKg7Iq4awqLi4A6Ofahh8AAAA=";
                 

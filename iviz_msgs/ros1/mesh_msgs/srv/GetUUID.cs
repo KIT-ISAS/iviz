@@ -49,12 +49,10 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class GetUUIDRequest : IRequest<GetUUID, GetUUIDResponse>, IDeserializableRos1<GetUUIDRequest>
     {
     
-        /// Constructor for empty message.
         public GetUUIDRequest()
         {
         }
         
-        /// Constructor with buffer.
         public GetUUIDRequest(ref ReadBuffer b)
         {
         }
@@ -74,7 +72,6 @@ namespace Iviz.Msgs.MeshMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -87,19 +84,16 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
-        /// Constructor for empty message.
         public GetUUIDResponse()
         {
             Uuid = "";
         }
         
-        /// Explicit constructor.
         public GetUUIDResponse(string Uuid)
         {
             this.Uuid = Uuid;
         }
         
-        /// Constructor with buffer.
         public GetUUIDResponse(ref ReadBuffer b)
         {
             b.DeserializeString(out Uuid);

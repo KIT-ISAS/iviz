@@ -50,19 +50,16 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
-        /// Constructor for empty message.
         public GetLabeledClustersRequest()
         {
             Uuid = "";
         }
         
-        /// Explicit constructor.
         public GetLabeledClustersRequest(string Uuid)
         {
             this.Uuid = Uuid;
         }
         
-        /// Constructor with buffer.
         public GetLabeledClustersRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out Uuid);
@@ -92,19 +89,16 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "clusters")] public MeshFaceCluster[] Clusters;
     
-        /// Constructor for empty message.
         public GetLabeledClustersResponse()
         {
             Clusters = System.Array.Empty<MeshFaceCluster>();
         }
         
-        /// Explicit constructor.
         public GetLabeledClustersResponse(MeshFaceCluster[] Clusters)
         {
             this.Clusters = Clusters;
         }
         
-        /// Constructor with buffer.
         public GetLabeledClustersResponse(ref ReadBuffer b)
         {
             b.DeserializeArray(out Clusters);

@@ -52,21 +52,18 @@ namespace Iviz.Msgs.NavMsgs
         [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map;
         [DataMember (Name = "initial_pose")] public GeometryMsgs.PoseWithCovarianceStamped InitialPose;
     
-        /// Constructor for empty message.
         public SetMapRequest()
         {
             Map = new NavMsgs.OccupancyGrid();
             InitialPose = new GeometryMsgs.PoseWithCovarianceStamped();
         }
         
-        /// Explicit constructor.
         public SetMapRequest(NavMsgs.OccupancyGrid Map, GeometryMsgs.PoseWithCovarianceStamped InitialPose)
         {
             this.Map = Map;
             this.InitialPose = InitialPose;
         }
         
-        /// Constructor with buffer.
         public SetMapRequest(ref ReadBuffer b)
         {
             Map = new NavMsgs.OccupancyGrid(ref b);
@@ -101,18 +98,15 @@ namespace Iviz.Msgs.NavMsgs
     {
         [DataMember (Name = "success")] public bool Success;
     
-        /// Constructor for empty message.
         public SetMapResponse()
         {
         }
         
-        /// Explicit constructor.
         public SetMapResponse(bool Success)
         {
             this.Success = Success;
         }
         
-        /// Constructor with buffer.
         public SetMapResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
@@ -131,7 +125,6 @@ namespace Iviz.Msgs.NavMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;

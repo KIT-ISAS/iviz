@@ -5,14 +5,13 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshGeometry : IDeserializableRos1<MeshGeometry>, IDeserializableRos2<MeshGeometry>, IMessageRos1, IMessageRos2
+    public sealed class MeshGeometry : IDeserializableCommon<MeshGeometry>, IMessageCommon
     {
         // Mesh Geometry Message
         [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices;
         [DataMember (Name = "vertex_normals")] public GeometryMsgs.Point[] VertexNormals;
         [DataMember (Name = "faces")] public MeshMsgs.TriangleIndices[] Faces;
     
-        /// Constructor for empty message.
         public MeshGeometry()
         {
             Vertices = System.Array.Empty<GeometryMsgs.Point>();
@@ -20,7 +19,6 @@ namespace Iviz.Msgs.MeshMsgs
             Faces = System.Array.Empty<MeshMsgs.TriangleIndices>();
         }
         
-        /// Explicit constructor.
         public MeshGeometry(GeometryMsgs.Point[] Vertices, GeometryMsgs.Point[] VertexNormals, MeshMsgs.TriangleIndices[] Faces)
         {
             this.Vertices = Vertices;
@@ -28,7 +26,6 @@ namespace Iviz.Msgs.MeshMsgs
             this.Faces = Faces;
         }
         
-        /// Constructor with buffer.
         public MeshGeometry(ref ReadBuffer b)
         {
             b.DeserializeStructArray(out Vertices);
@@ -40,7 +37,6 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        /// Constructor with buffer.
         public MeshGeometry(ref ReadBuffer2 b)
         {
             b.DeserializeStructArray(out Vertices);
@@ -104,17 +100,16 @@ namespace Iviz.Msgs.MeshMsgs
             WriteBuffer2.AddLength(ref c, Faces);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshGeometry";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "9a7ed3efa2a35ef81abaf7dcc675ed20";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VRsQrCQAzd7ysCDo6CFQfBTSgOBcFuRcpRc22gzZXLKa1f7xVLdVAnzfSSvISXvBkk" +
                 "KBXEaBv0rh8y0SWqcizkjZSyOFhin53gis5TgfKljV3O1jW6FtWEzQ9C6khzWeOez8N4oBo9rFHbH4dK" +

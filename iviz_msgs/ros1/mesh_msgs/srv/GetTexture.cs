@@ -51,20 +51,17 @@ namespace Iviz.Msgs.MeshMsgs
         [DataMember (Name = "uuid")] public string Uuid;
         [DataMember (Name = "texture_index")] public uint TextureIndex;
     
-        /// Constructor for empty message.
         public GetTextureRequest()
         {
             Uuid = "";
         }
         
-        /// Explicit constructor.
         public GetTextureRequest(string Uuid, uint TextureIndex)
         {
             this.Uuid = Uuid;
             this.TextureIndex = TextureIndex;
         }
         
-        /// Constructor with buffer.
         public GetTextureRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out Uuid);
@@ -96,19 +93,16 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "texture")] public MeshMsgs.MeshTexture Texture;
     
-        /// Constructor for empty message.
         public GetTextureResponse()
         {
             Texture = new MeshMsgs.MeshTexture();
         }
         
-        /// Explicit constructor.
         public GetTextureResponse(MeshMsgs.MeshTexture Texture)
         {
             this.Texture = Texture;
         }
         
-        /// Constructor with buffer.
         public GetTextureResponse(ref ReadBuffer b)
         {
             Texture = new MeshMsgs.MeshTexture(ref b);

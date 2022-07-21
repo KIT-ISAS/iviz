@@ -49,12 +49,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class StopCaptureRequest : IRequest<StopCapture, StopCaptureResponse>, IDeserializableRos1<StopCaptureRequest>
     {
     
-        /// Constructor for empty message.
         public StopCaptureRequest()
         {
         }
         
-        /// Constructor with buffer.
         public StopCaptureRequest(ref ReadBuffer b)
         {
         }
@@ -74,7 +72,6 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -88,20 +85,17 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "message")] public string Message;
     
-        /// Constructor for empty message.
         public StopCaptureResponse()
         {
             Message = "";
         }
         
-        /// Explicit constructor.
         public StopCaptureResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// Constructor with buffer.
         public StopCaptureResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

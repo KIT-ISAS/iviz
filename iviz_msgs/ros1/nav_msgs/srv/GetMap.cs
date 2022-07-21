@@ -50,12 +50,10 @@ namespace Iviz.Msgs.NavMsgs
     {
         // Get the map as a nav_msgs/OccupancyGrid
     
-        /// Constructor for empty message.
         public GetMapRequest()
         {
         }
         
-        /// Constructor with buffer.
         public GetMapRequest(ref ReadBuffer b)
         {
         }
@@ -75,7 +73,6 @@ namespace Iviz.Msgs.NavMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -88,19 +85,16 @@ namespace Iviz.Msgs.NavMsgs
     {
         [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map;
     
-        /// Constructor for empty message.
         public GetMapResponse()
         {
             Map = new NavMsgs.OccupancyGrid();
         }
         
-        /// Explicit constructor.
         public GetMapResponse(NavMsgs.OccupancyGrid Map)
         {
             this.Map = Map;
         }
         
-        /// Constructor with buffer.
         public GetMapResponse(ref ReadBuffer b)
         {
             Map = new NavMsgs.OccupancyGrid(ref b);

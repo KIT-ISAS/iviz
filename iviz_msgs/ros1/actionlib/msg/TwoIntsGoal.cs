@@ -5,31 +5,27 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TwoIntsGoal : IDeserializableRos1<TwoIntsGoal>, IDeserializableRos2<TwoIntsGoal>, IMessageRos1, IMessageRos2, IGoal<TwoIntsActionGoal>
+    public sealed class TwoIntsGoal : IDeserializableCommon<TwoIntsGoal>, IMessageCommon, IGoal<TwoIntsActionGoal>
     {
         [DataMember (Name = "a")] public long A;
         [DataMember (Name = "b")] public long B;
     
-        /// Constructor for empty message.
         public TwoIntsGoal()
         {
         }
         
-        /// Explicit constructor.
         public TwoIntsGoal(long A, long B)
         {
             this.A = A;
             this.B = B;
         }
         
-        /// Constructor with buffer.
         public TwoIntsGoal(ref ReadBuffer b)
         {
             b.Deserialize(out A);
             b.Deserialize(out B);
         }
         
-        /// Constructor with buffer.
         public TwoIntsGoal(ref ReadBuffer2 b)
         {
             b.Deserialize(out A);
@@ -58,12 +54,10 @@ namespace Iviz.Msgs.Actionlib
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 16;
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        /// <summary> Constant size of this message. </summary> 
         public const int Ros2FixedMessageLength = 16;
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
@@ -74,17 +68,16 @@ namespace Iviz.Msgs.Actionlib
             WriteBuffer2.AddLength(ref c, B);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib/TwoIntsGoal";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "36d09b846be0b371c5f190354dd3153e";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+PKzCsxM1FI5ILQSVwAD962hBEAAAA=";
                 

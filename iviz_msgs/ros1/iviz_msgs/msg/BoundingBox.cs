@@ -5,31 +5,27 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class BoundingBox : IDeserializableRos1<BoundingBox>, IDeserializableRos2<BoundingBox>, IMessageRos1, IMessageRos2
+    public sealed class BoundingBox : IDeserializableCommon<BoundingBox>, IMessageCommon
     {
         [DataMember (Name = "center")] public GeometryMsgs.Pose Center;
         [DataMember (Name = "size")] public GeometryMsgs.Vector3 Size;
     
-        /// Constructor for empty message.
         public BoundingBox()
         {
         }
         
-        /// Explicit constructor.
         public BoundingBox(in GeometryMsgs.Pose Center, in GeometryMsgs.Vector3 Size)
         {
             this.Center = Center;
             this.Size = Size;
         }
         
-        /// Constructor with buffer.
         public BoundingBox(ref ReadBuffer b)
         {
             b.Deserialize(out Center);
             b.Deserialize(out Size);
         }
         
-        /// Constructor with buffer.
         public BoundingBox(ref ReadBuffer2 b)
         {
             b.Deserialize(out Center);
@@ -58,12 +54,10 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 80;
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        /// <summary> Constant size of this message. </summary> 
         public const int Ros2FixedMessageLength = 80;
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
@@ -74,17 +68,16 @@ namespace Iviz.Msgs.IvizMsgs
             WriteBuffer2.AddLength(ref c, Size);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/BoundingBox";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "727c83f2b037373b8e968433d9c84ecb";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71SwUrDQBC971cM9KIQIqh4EDx4kh6EisWrTJPJZjHZibtbY/r1ziZtYrDQizSn2ey8" +
                 "t+/NPE1cU3Dde+21v1qxJ8jIBnJKz27eKAvsbsCbHSn18M+fen59ugf9R4tawCM4ahx5EYXBsAUuoIky" +

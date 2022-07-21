@@ -50,19 +50,16 @@ namespace Iviz.Msgs.IvizMsgs
     {
         [DataMember (Name = "uri")] public string Uri;
     
-        /// Constructor for empty message.
         public GetModelTextureRequest()
         {
             Uri = "";
         }
         
-        /// Explicit constructor.
         public GetModelTextureRequest(string Uri)
         {
             this.Uri = Uri;
         }
         
-        /// Constructor with buffer.
         public GetModelTextureRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out Uri);
@@ -94,14 +91,12 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "image")] public SensorMsgs.CompressedImage Image;
         [DataMember (Name = "message")] public string Message;
     
-        /// Constructor for empty message.
         public GetModelTextureResponse()
         {
             Image = new SensorMsgs.CompressedImage();
             Message = "";
         }
         
-        /// Explicit constructor.
         public GetModelTextureResponse(bool Success, SensorMsgs.CompressedImage Image, string Message)
         {
             this.Success = Success;
@@ -109,7 +104,6 @@ namespace Iviz.Msgs.IvizMsgs
             this.Message = Message;
         }
         
-        /// Constructor with buffer.
         public GetModelTextureResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

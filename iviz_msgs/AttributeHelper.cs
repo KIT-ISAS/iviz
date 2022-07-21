@@ -41,4 +41,13 @@ namespace Iviz
     public class PreserveAttribute : Attribute
     {
     }
-}
+    
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class MonoPInvokeCallbackAttribute : Attribute
+    {
+        public MonoPInvokeCallbackAttribute(Type type)
+        {
+        }
+    }
+}    
+

@@ -5,25 +5,22 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class Feature : IDeserializableRos1<Feature>, IDeserializableRos2<Feature>, IMessageRos1, IMessageRos2
+    public sealed class Feature : IDeserializableCommon<Feature>, IMessageCommon
     {
         [DataMember (Name = "location")] public GeometryMsgs.Point Location;
         [DataMember (Name = "descriptor")] public StdMsgs.Float32[] Descriptor;
     
-        /// Constructor for empty message.
         public Feature()
         {
             Descriptor = System.Array.Empty<StdMsgs.Float32>();
         }
         
-        /// Explicit constructor.
         public Feature(in GeometryMsgs.Point Location, StdMsgs.Float32[] Descriptor)
         {
             this.Location = Location;
             this.Descriptor = Descriptor;
         }
         
-        /// Constructor with buffer.
         public Feature(ref ReadBuffer b)
         {
             b.Deserialize(out Location);
@@ -34,7 +31,6 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        /// Constructor with buffer.
         public Feature(ref ReadBuffer2 b)
         {
             b.Deserialize(out Location);
@@ -83,17 +79,16 @@ namespace Iviz.Msgs.MeshMsgs
             WriteBuffer2.AddLength(ref c, Descriptor);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/Feature";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "ac711cf3ef6eb8582240a7afe5b9a573";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7XQsQrCQAwG4D1PEfABhFYcBFedBMFuIhKuaRtoL8clg/XptRQ66KqZ/vxLPtKyDux5" +
                 "vA/W2vqsEh17DeSiEczruT/0Sl4W1xvWbCFLcs0A+x8PnC7HHbbfIlhh1Ylh0Ogk0dA7xqQmkxK1QXpv" +

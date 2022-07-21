@@ -50,18 +50,15 @@ namespace Iviz.Msgs.IvizMsgs
     {
         [DataMember (Name = "compress")] public bool Compress;
     
-        /// Constructor for empty message.
         public CaptureScreenshotRequest()
         {
         }
         
-        /// Explicit constructor.
         public CaptureScreenshotRequest(bool Compress)
         {
             this.Compress = Compress;
         }
         
-        /// Constructor with buffer.
         public CaptureScreenshotRequest(ref ReadBuffer b)
         {
             b.Deserialize(out Compress);
@@ -80,7 +77,6 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -101,7 +97,6 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose;
         [DataMember (Name = "data")] public byte[] Data;
     
-        /// Constructor for empty message.
         public CaptureScreenshotResponse()
         {
             Message = "";
@@ -109,7 +104,6 @@ namespace Iviz.Msgs.IvizMsgs
             Data = System.Array.Empty<byte>();
         }
         
-        /// Constructor with buffer.
         public CaptureScreenshotResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

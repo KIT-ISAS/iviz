@@ -8,14 +8,13 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Color32 : IMessageRos1, IMessageRos2, IDeserializableRos1<Color32>, IDeserializableRos2<Color32>
+    public struct Color32 : IMessageCommon, IDeserializableCommon<Color32>
     {
         [DataMember (Name = "r")] public byte R;
         [DataMember (Name = "g")] public byte G;
         [DataMember (Name = "b")] public byte B;
         [DataMember (Name = "a")] public byte A;
     
-        /// Explicit constructor.
         public Color32(byte R, byte G, byte B, byte A)
         {
             this.R = R;
@@ -24,14 +23,12 @@ namespace Iviz.Msgs.IvizMsgs
             this.A = A;
         }
         
-        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Color32(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Color32(ref ReadBuffer2 b)
         {
@@ -58,12 +55,10 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 4;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
         
-        /// <summary> Constant size of this message. </summary> 
         public const int Ros2FixedMessageLength = 4;
         
         public readonly int Ros2MessageLength => Ros2FixedMessageLength;
@@ -71,17 +66,16 @@ namespace Iviz.Msgs.IvizMsgs
         public readonly void AddRos2MessageLength(ref int c) => WriteBuffer2.AddLength(ref c, this);
         
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Color32";
     
         public readonly string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "3a89b17adab5bedef0b554f03235d9b3";
     
         public readonly string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAEyvNzCuxUCjiKgXT6VA6CUoncnEBACHBa7shAAAA";
                 

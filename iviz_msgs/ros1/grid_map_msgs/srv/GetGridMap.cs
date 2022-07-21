@@ -61,14 +61,12 @@ namespace Iviz.Msgs.GridMapMsgs
         // Requested layers. If empty, get all layers.
         [DataMember (Name = "layers")] public string[] Layers;
     
-        /// Constructor for empty message.
         public GetGridMapRequest()
         {
             FrameId = "";
             Layers = System.Array.Empty<string>();
         }
         
-        /// Constructor with buffer.
         public GetGridMapRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out FrameId);
@@ -114,19 +112,16 @@ namespace Iviz.Msgs.GridMapMsgs
         // Submap
         [DataMember (Name = "map")] public GridMapMsgs.GridMap Map;
     
-        /// Constructor for empty message.
         public GetGridMapResponse()
         {
             Map = new GridMapMsgs.GridMap();
         }
         
-        /// Explicit constructor.
         public GetGridMapResponse(GridMapMsgs.GridMap Map)
         {
             this.Map = Map;
         }
         
-        /// Constructor with buffer.
         public GetGridMapResponse(ref ReadBuffer b)
         {
             Map = new GridMapMsgs.GridMap(ref b);

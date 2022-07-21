@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class TF2Error : IDeserializableRos1<TF2Error>, IDeserializableRos2<TF2Error>, IMessageRos1, IMessageRos2
+    public sealed class TF2Error : IDeserializableCommon<TF2Error>, IMessageCommon
     {
         public const byte NO_ERROR = 0;
         public const byte LOOKUP_ERROR = 1;
@@ -17,27 +17,23 @@ namespace Iviz.Msgs.Tf2Msgs
         [DataMember (Name = "error")] public byte Error;
         [DataMember (Name = "error_string")] public string ErrorString;
     
-        /// Constructor for empty message.
         public TF2Error()
         {
             ErrorString = "";
         }
         
-        /// Explicit constructor.
         public TF2Error(byte Error, string ErrorString)
         {
             this.Error = Error;
             this.ErrorString = ErrorString;
         }
         
-        /// Constructor with buffer.
         public TF2Error(ref ReadBuffer b)
         {
             b.Deserialize(out Error);
             b.DeserializeString(out ErrorString);
         }
         
-        /// Constructor with buffer.
         public TF2Error(ref ReadBuffer2 b)
         {
             b.Deserialize(out Error);
@@ -77,17 +73,16 @@ namespace Iviz.Msgs.Tf2Msgs
             WriteBuffer2.AddLength(ref c, ErrorString);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "tf2_msgs/TF2Error";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "bc6848fd6fd750c92e38575618a4917d";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE0XKuw7CMAyF4T1PkUfgLhaGqARkkdiVcSqYMiHUpUihfX8kasJ4/u9M/TDuLVL2zMT2" +
                 "YBdm+qZAdEltzUvNDSH6RqADuVdcKfqbsGspOAHCqmtVwM4FOGbH5xQ9Sj1s9CAQPaV/3/46O7yeiGOV" +

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibMsgs
 {
     [DataContract]
-    public sealed class GoalID : IDeserializableRos1<GoalID>, IDeserializableRos2<GoalID>, IMessageRos1, IMessageRos2
+    public sealed class GoalID : IDeserializableCommon<GoalID>, IMessageCommon
     {
         // The stamp should store the time at which this goal was requested.
         // It is used by an action server when it tries to preempt all
@@ -16,27 +16,23 @@ namespace Iviz.Msgs.ActionlibMsgs
         // specified must be unique.
         [DataMember (Name = "id")] public string Id;
     
-        /// Constructor for empty message.
         public GoalID()
         {
             Id = "";
         }
         
-        /// Explicit constructor.
         public GoalID(time Stamp, string Id)
         {
             this.Stamp = Stamp;
             this.Id = Id;
         }
         
-        /// Constructor with buffer.
         public GoalID(ref ReadBuffer b)
         {
             b.Deserialize(out Stamp);
             b.DeserializeString(out Id);
         }
         
-        /// Constructor with buffer.
         public GoalID(ref ReadBuffer2 b)
         {
             b.Deserialize(out Stamp);
@@ -76,17 +72,16 @@ namespace Iviz.Msgs.ActionlibMsgs
             WriteBuffer2.AddLength(ref c, Id);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_msgs/GoalID";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "302881f31927c1df708a2dbab0e80ee8";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAEz2PS5LDIAxE95yiq7L3PbKfC8ggG1VscJCIK7cf4XHNkqY/Tw/8ZIYa7Qc0174lf9TG" +
                 "MJdNdgYZziwxuyKKtdKGkxSN353VOE3hgafB/7pywvwFFVA0qQXK7cPN81wgBmvCCqs4GvN+GGjbPD06" +

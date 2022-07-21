@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class MenuEntry : IDeserializableRos1<MenuEntry>, IDeserializableRos2<MenuEntry>, IMessageRos1, IMessageRos2
+    public sealed class MenuEntry : IDeserializableCommon<MenuEntry>, IMessageCommon
     {
         // MenuEntry message.
         // Each InteractiveMarker message has an array of MenuEntry messages.
@@ -55,14 +55,12 @@ namespace Iviz.Msgs.VisualizationMsgs
         public const byte ROSLAUNCH = 2;
         [DataMember (Name = "command_type")] public byte CommandType;
     
-        /// Constructor for empty message.
         public MenuEntry()
         {
             Title = "";
             Command = "";
         }
         
-        /// Constructor with buffer.
         public MenuEntry(ref ReadBuffer b)
         {
             b.Deserialize(out Id);
@@ -72,7 +70,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out CommandType);
         }
         
-        /// Constructor with buffer.
         public MenuEntry(ref ReadBuffer2 b)
         {
             b.Deserialize(out Id);
@@ -125,17 +122,16 @@ namespace Iviz.Msgs.VisualizationMsgs
             WriteBuffer2.AddLength(ref c, CommandType);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "visualization_msgs/MenuEntry";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "b90ec63024573de83b57aa93eb39be2d";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE51Uy27bMBC8+ysWzqEJkFedFigC+JAmThu0Tou0OQeUtLYIS6RKUk78950lJVtuDgF6" +
                 "Epeand3ZBw9ozqadmeA2VLP3asmno9EBzVRe0p0J7FQe9Jrnyq3Y9RAqlSdlSDmnNmQXr0n8KUiuKLdV" +

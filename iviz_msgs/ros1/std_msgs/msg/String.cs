@@ -5,29 +5,25 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class String : IDeserializableRos1<String>, IDeserializableRos2<String>, IMessageRos1, IMessageRos2
+    public sealed class String : IDeserializableCommon<String>, IMessageCommon
     {
         [DataMember (Name = "data")] public string Data;
     
-        /// Constructor for empty message.
         public String()
         {
             Data = "";
         }
         
-        /// Explicit constructor.
         public String(string Data)
         {
             this.Data = Data;
         }
         
-        /// Constructor with buffer.
         public String(ref ReadBuffer b)
         {
             b.DeserializeString(out Data);
         }
         
-        /// Constructor with buffer.
         public String(ref ReadBuffer2 b)
         {
             b.DeserializeString(out Data);
@@ -63,17 +59,16 @@ namespace Iviz.Msgs.StdMsgs
             WriteBuffer2.AddLength(ref c, Data);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/String";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "992ce8a1687cec8c8bd883ec73ca41d1";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAEysuKcrMS1dISSxJ5OICADpmzaUNAAAA";
                 

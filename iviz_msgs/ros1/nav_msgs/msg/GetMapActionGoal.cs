@@ -5,20 +5,18 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapActionGoal : IDeserializableRos1<GetMapActionGoal>, IDeserializableRos2<GetMapActionGoal>, IMessageRos1, IMessageRos2, IActionGoal<GetMapGoal>
+    public sealed class GetMapActionGoal : IDeserializableCommon<GetMapActionGoal>, IMessageCommon, IActionGoal<GetMapGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
         [DataMember (Name = "goal")] public GetMapGoal Goal { get; set; }
     
-        /// Constructor for empty message.
         public GetMapActionGoal()
         {
             GoalId = new ActionlibMsgs.GoalID();
             Goal = GetMapGoal.Singleton;
         }
         
-        /// Explicit constructor.
         public GetMapActionGoal(in StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, GetMapGoal Goal)
         {
             this.Header = Header;
@@ -26,7 +24,6 @@ namespace Iviz.Msgs.NavMsgs
             this.Goal = Goal;
         }
         
-        /// Constructor with buffer.
         public GetMapActionGoal(ref ReadBuffer b)
         {
             Header = new StdMsgs.Header(ref b);
@@ -34,7 +31,6 @@ namespace Iviz.Msgs.NavMsgs
             Goal = GetMapGoal.Singleton;
         }
         
-        /// Constructor with buffer.
         public GetMapActionGoal(ref ReadBuffer2 b)
         {
             Header = new StdMsgs.Header(ref b);
@@ -81,28 +77,27 @@ namespace Iviz.Msgs.NavMsgs
             Goal.AddRos2MessageLength(ref c);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "nav_msgs/GetMapActionGoal";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "4b30be6cd12b9e72826df56b481f40e0";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE7VUwYrbMBC9+ysGctjdQlJob4HelmZzWCjs3sNEmtiisuRq5Lj++z7JSbqFHnroGoOQ" +
-                "PPPmzbwnPwlbSdTVpWGTXQzeHQ+9tvpxF9nvH6nFcnC22Ul+5qEc1qPmy39+mueX3ZY026X608JpRS+Z" +
-                "g+VkqZfMljPTKYKyaztJay9n8UjifhBL9WueB9ENEl87p4S3lSCJvZ9pVATlSCb2/Ric4SyUXS9/5CPT" +
-                "BWIaOGVnRs8J8TFZF0r4KXEvBR2vyo9RghHaP24RE1TMmB0IzUAwSVhdaPGRmtGF/PlTSWhWr1NcYyst" +
-                "Bn8rTrnjXMjKzyGJFp6sW9T4sDS3ATaGI6hile7r2QFbfSAUAQUZounoHsy/zbmLAYBCZ06Oj14KsMEE" +
-                "gHpXku4e3iCHCh04xCv8gvi7xr/Ahhtu6WndQTNfutexxQAROKR4dhahx7mCGO8kZILbEqe5KVlLyWb1" +
-                "tcwYQciqimBl1WgcBLA0udw1mlNBr2oUc76TG/96I6q1LmRJuzh6i01MUvuqjUDLqXMQpDZRrgtNrJSK" +
-                "YRRNFAPtq97VkhgJh0sxiJzOsMbUSSCXCY2KFtPCF9IPmTBwZBdMXVwzCUrfoOkop8KFyUjKDOUKo7fz" +
-                "vfB39qoJxgt6cylymzOdROyRzXcws8iAKUefcQdVuZUqAukgxp2cWRq8MNDNBb1ckCUApPpRM5gRbh2i" +
-                "Nlf9inLvJF3g80W023+raX4BiijCI/AEAAA=";
+                "H4sIAAAAAAAAE7VUwYrbMBC9+ysGctjdQlLa3gK9Lc3msFC6eyslTKSJLWpLrkaO67/vk+ykW+ihh24w" +
+                "CMszb97Me5MHYSuRmnJUbJILvnXHQ6e1vt0Fbvf3VOM4OFvtJD1yny/LVfXxP/+qx6fdljTZufrDzGlF" +
+                "T4m95Wipk8SWE9MpgLKrG4nrVs7SIom7XiyVr2nqRTdIfG6cEp5avERu24kGRVAKZELXDd4ZTkLJdfJH" +
+                "PjKdJ6aeY3JmaDkiPkTrfA4/Re4ko+NR+TGIN0L7+y1ivIoZkgOhCQgmCqvzNT5SNTifPrzPCbSir1+C" +
+                "vvtWrZ7HsMa91FDgyoJSwymzlp99FM2EWbco9mbucoMimJKgnFW6LXcHvOodoRq4SB9MQ7do4fOUmuAB" +
+                "KHTm6PjYSgY2GAVQb3LSzd0LZF+gPftwgZ8Rf9f4F1h/xc09rRuI1+Yx6FBjkgjsYzg7i9DjVEBM68Qn" +
+                "gu0ix6nKWXPJavUpDxtByCrS4GTVYByUsDS61FSaYkYvsmSXvpIt/7oaxWMLWdImDK3FS4hS+iqNQMux" +
+                "cRCkNJH3hkZWitk5iiayk/ZF7+JNjIT9UgwixzOsMTbiySVCo6LZvfCFdH0iDBzZGVNn14yC0ldoOsop" +
+                "c2EyEhNDuczo5XwX/s5eNMF4QW/KRa5zppOIPbL5DmYWGTDl0CYsoyrXUkQg7cW4kzNzgwsD3SzoeVPm" +
+                "AJDqBk1gRlg/RG0u+mXlXkk6z+dFtOsfWFX9Aty4sNv5BAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

@@ -50,12 +50,10 @@ namespace Iviz.Msgs.IvizMsgs
     {
         // Gets a list of modules
     
-        /// Constructor for empty message.
         public GetModulesRequest()
         {
         }
         
-        /// Constructor with buffer.
         public GetModulesRequest(ref ReadBuffer b)
         {
         }
@@ -75,7 +73,6 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -89,19 +86,16 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> List of module configurations in JSON encoding </summary>
         [DataMember (Name = "configs")] public string[] Configs;
     
-        /// Constructor for empty message.
         public GetModulesResponse()
         {
             Configs = System.Array.Empty<string>();
         }
         
-        /// Explicit constructor.
         public GetModulesResponse(string[] Configs)
         {
             this.Configs = Configs;
         }
         
-        /// Constructor with buffer.
         public GetModulesResponse(ref ReadBuffer b)
         {
             b.DeserializeStringArray(out Configs);

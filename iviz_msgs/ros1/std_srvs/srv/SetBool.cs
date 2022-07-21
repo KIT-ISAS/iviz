@@ -51,18 +51,15 @@ namespace Iviz.Msgs.StdSrvs
         /// <summary> E.g. for hardware enabling / disabling </summary>
         [DataMember (Name = "data")] public bool Data;
     
-        /// Constructor for empty message.
         public SetBoolRequest()
         {
         }
         
-        /// Explicit constructor.
         public SetBoolRequest(bool Data)
         {
             this.Data = Data;
         }
         
-        /// Constructor with buffer.
         public SetBoolRequest(ref ReadBuffer b)
         {
             b.Deserialize(out Data);
@@ -81,7 +78,6 @@ namespace Iviz.Msgs.StdSrvs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -97,20 +93,17 @@ namespace Iviz.Msgs.StdSrvs
         /// <summary> Informational, e.g. for error messages </summary>
         [DataMember (Name = "message")] public string Message;
     
-        /// Constructor for empty message.
         public SetBoolResponse()
         {
             Message = "";
         }
         
-        /// Explicit constructor.
         public SetBoolResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// Constructor with buffer.
         public SetBoolResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

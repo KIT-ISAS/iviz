@@ -5,26 +5,23 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class Path : IDeserializableRos1<Path>, IDeserializableRos2<Path>, IMessageRos1, IMessageRos2
+    public sealed class Path : IDeserializableCommon<Path>, IMessageCommon
     {
         //An array of poses that represents a Path for a robot to follow
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "poses")] public GeometryMsgs.PoseStamped[] Poses;
     
-        /// Constructor for empty message.
         public Path()
         {
             Poses = System.Array.Empty<GeometryMsgs.PoseStamped>();
         }
         
-        /// Explicit constructor.
         public Path(in StdMsgs.Header Header, GeometryMsgs.PoseStamped[] Poses)
         {
             this.Header = Header;
             this.Poses = Poses;
         }
         
-        /// Constructor with buffer.
         public Path(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -35,7 +32,6 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
         
-        /// Constructor with buffer.
         public Path(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -84,28 +80,27 @@ namespace Iviz.Msgs.NavMsgs
             WriteBuffer2.AddLength(ref c, Poses);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "nav_msgs/Path";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "6227e2b7e9cce15051f669a5e197bbf7";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE71UTYvbMBC961cM5LC7pUmhLT0Eelgo/TgUUnZvpSwTe2wLbMk7kpN1f32f5I2zWSjt" +
-                "oY0xWLJm3rw3H1pcO2JVHslX1PsggWLDkVR6lSAuBmLacGyo8oql+q2PFD22bev35rNwKUpN/phafCdR" +
-                "x7su1OHVBnA3kbteyu8/JnBj3v/jx3y9+bSmEMsp5sTHLAiBXclaEghxyZGzgMbWjeiylZ20cMrcKJ/G" +
-                "sZewguNtYwPhrcWJctuONAQYQXLhu25wtuAoFG0nJ/7wtEgl9azRFkPLCnuvpXXJvFLuJKHjDXI/iCuE" +
-                "vnxYw8YFKYZoQWgEQqHCwboah2QG6+Kb18nBLG73fomt1Mj2HHyqFcjKQypX4slhjRgvJnErYCM5gihl" +
-                "oMv87w7bcEUIAgrS+6KhSzDfjLHxDoBCO1bL21YScIEMAPUiOV1cPUF2Gdqx8wf4CfEY429g3YybNC0b" +
-                "1KxN6sNQI4Ew7NXvbAnT7ZhBitaiKam1W2UdTfKaQprFx5RjGMErVwRfDsEXFgUoaW9jY0LUhJ6rcWfL" +
-                "/9WNvx0D6LymtM90MGSVaG6F561CSMSxzM+mLAOkcTof/0x8vhM4WtT08cJIbV+poAw9F/IyTUn6XT6e" +
-                "22yb5Hi1B98VQQS6eTYw3wZoV5dxj3bnEggqh8lHL0e2LuRum/lDC0Y7Uz6Ra6rWc3z3lh7m1Tivfp6H" +
-                "/jF1Bw1PL++TfJ6ST7v7Y95xP3Yr8wdFh9XemF9wmt//OwYAAA==";
+                "H4sIAAAAAAAAE71UTWvbQBC9768Y8CFJqV36QQ+GHgKlH4eC2+QWghlLY2lB2lVmV3bUX9+3q1iOA6U9" +
+                "tBEC7a5m3rw3Hzu7dMSqPJDfUueDBIo1R1LpVIK4GIhpxbGmrVcs1W98pOixbRq/N1+ES1Gq88dU4luJ" +
+                "OqzbUIVXK8BdRW47KW9uR3BjPvzjx3y7+rykEMsx5sjHzAiBXclaEghxyZGzgNpWtei8kZ00cMrcKP+N" +
+                "QydhAcfr2gbCW4kT5aYZqA8wguTCt23vbMFRKNpWTvzhaZFK6lijLfqGFfZeS+uS+Va5lYSON8hdL64Q" +
+                "+vpxCRsXpOijBaEBCIUKB+sq/CTTWxffvkkONKObHz68vjWz672f41wqpH1iMRYNrOU+1S0R5rBEsBej" +
+                "ygWCIEuCcGWg83y2xjZcEKKBi3S+qOkcElZDrL0DoNCO1fKmkQRcIBVAPUtOZxePkF2Gduz8AX5EPMb4" +
+                "G1g34SZN8xrFa1IaQl8hkzDs1O9sCdPNkEGKxqI7qbEbZR1M8hpDmtmnlGwYwSuXBl8OwRcWlShpb2Nt" +
+                "QtSEnsuytuX/asvfzgN0XlLaZzqYtq1o7omnPUNIxLHMT8YtA6S5ej7+mfh0OXC0qOnDzZH6f6uCMnRc" +
+                "yMs0Lum4fPhvs22S49UefBcEEejmycB876FdXcY92j2XQFA5XAHo5cjWhdxtE39owYxnyidyzbbxHN+/" +
+                "o/tpNUyrn89D/5i6g4bHt/hJPk/Jp93dMe+4KNuF+YOiw2pvzC9gdHLNRAYAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

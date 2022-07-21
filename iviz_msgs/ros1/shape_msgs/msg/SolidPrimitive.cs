@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract]
-    public sealed class SolidPrimitive : IDeserializableRos1<SolidPrimitive>, IDeserializableRos2<SolidPrimitive>, IMessageRos1, IMessageRos2
+    public sealed class SolidPrimitive : IDeserializableCommon<SolidPrimitive>, IMessageCommon
     {
         // Define box, sphere, cylinder, cone 
         // All shapes are defined to have their bounding boxes centered around 0,0,0.
@@ -38,27 +38,23 @@ namespace Iviz.Msgs.ShapeMsgs
         public const byte CONE_HEIGHT = 0;
         public const byte CONE_RADIUS = 1;
     
-        /// Constructor for empty message.
         public SolidPrimitive()
         {
             Dimensions = System.Array.Empty<double>();
         }
         
-        /// Explicit constructor.
         public SolidPrimitive(byte Type, double[] Dimensions)
         {
             this.Type = Type;
             this.Dimensions = Dimensions;
         }
         
-        /// Constructor with buffer.
         public SolidPrimitive(ref ReadBuffer b)
         {
             b.Deserialize(out Type);
             b.DeserializeStructArray(out Dimensions);
         }
         
-        /// Constructor with buffer.
         public SolidPrimitive(ref ReadBuffer2 b)
         {
             b.Deserialize(out Type);
@@ -98,17 +94,16 @@ namespace Iviz.Msgs.ShapeMsgs
             WriteBuffer2.AddLength(ref c, Dimensions);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "shape_msgs/SolidPrimitive";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "d8f8cbc74c5ff283fca29569ccefb45d";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE3WTbWsbMQzH39+nEPRFW3Yc3VZGGeRF29yWwGhH2kGSUYJ7p+QMF/uwfSX59pNs30Mz" +
                 "SiCcbEl/6Sf5DKa4lQrhVR9SsE2FBlMojrVUJRr60nSXnMFtXYOtRIMWhEEofVAJTkMl3hBchdJQjlaV" +

@@ -54,19 +54,16 @@ namespace Iviz.Msgs.OctomapMsgs
         // maximum corner point of axis-aligned bounding box in global frame
         [DataMember (Name = "max")] public GeometryMsgs.Point Max;
     
-        /// Constructor for empty message.
         public BoundingBoxQueryRequest()
         {
         }
         
-        /// Explicit constructor.
         public BoundingBoxQueryRequest(in GeometryMsgs.Point Min, in GeometryMsgs.Point Max)
         {
             this.Min = Min;
             this.Max = Max;
         }
         
-        /// Constructor with buffer.
         public BoundingBoxQueryRequest(ref ReadBuffer b)
         {
             b.Deserialize(out Min);
@@ -87,7 +84,6 @@ namespace Iviz.Msgs.OctomapMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 48;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -99,12 +95,10 @@ namespace Iviz.Msgs.OctomapMsgs
     public sealed class BoundingBoxQueryResponse : IResponse, IDeserializableRos1<BoundingBoxQueryResponse>
     {
     
-        /// Constructor for empty message.
         public BoundingBoxQueryResponse()
         {
         }
         
-        /// Constructor with buffer.
         public BoundingBoxQueryResponse(ref ReadBuffer b)
         {
         }
@@ -124,7 +118,6 @@ namespace Iviz.Msgs.OctomapMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

@@ -5,33 +5,29 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Roscpp
 {
     [DataContract]
-    public sealed class Logger : IDeserializableRos1<Logger>, IDeserializableRos2<Logger>, IMessageRos1, IMessageRos2
+    public sealed class Logger : IDeserializableCommon<Logger>, IMessageCommon
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "level")] public string Level;
     
-        /// Constructor for empty message.
         public Logger()
         {
             Name = "";
             Level = "";
         }
         
-        /// Explicit constructor.
         public Logger(string Name, string Level)
         {
             this.Name = Name;
             this.Level = Level;
         }
         
-        /// Constructor with buffer.
         public Logger(ref ReadBuffer b)
         {
             b.DeserializeString(out Name);
             b.DeserializeString(out Level);
         }
         
-        /// Constructor with buffer.
         public Logger(ref ReadBuffer2 b)
         {
             b.DeserializeString(out Name);
@@ -72,17 +68,16 @@ namespace Iviz.Msgs.Roscpp
             WriteBuffer2.AddLength(ref c, Level);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "roscpp/Logger";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "a6069a2ff40db7bd32143dd66e1f408e";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAEysuKcrMS1fIS8xN5SqGsHNSy1JzuLi4AGqsOFEbAAAA";
                 

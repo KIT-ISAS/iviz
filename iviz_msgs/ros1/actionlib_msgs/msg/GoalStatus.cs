@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibMsgs
 {
     [DataContract]
-    public sealed class GoalStatus : IDeserializableRos1<GoalStatus>, IDeserializableRos2<GoalStatus>, IMessageRos1, IMessageRos2
+    public sealed class GoalStatus : IDeserializableCommon<GoalStatus>, IMessageCommon
     {
         [DataMember (Name = "goal_id")] public GoalID GoalId;
         [DataMember (Name = "status")] public byte Status;
@@ -39,14 +39,12 @@ namespace Iviz.Msgs.ActionlibMsgs
         //Allow for the user to associate a string with GoalStatus for debugging
         [DataMember (Name = "text")] public string Text;
     
-        /// Constructor for empty message.
         public GoalStatus()
         {
             GoalId = new GoalID();
             Text = "";
         }
         
-        /// Explicit constructor.
         public GoalStatus(GoalID GoalId, byte Status, string Text)
         {
             this.GoalId = GoalId;
@@ -54,7 +52,6 @@ namespace Iviz.Msgs.ActionlibMsgs
             this.Text = Text;
         }
         
-        /// Constructor with buffer.
         public GoalStatus(ref ReadBuffer b)
         {
             GoalId = new GoalID(ref b);
@@ -62,7 +59,6 @@ namespace Iviz.Msgs.ActionlibMsgs
             b.DeserializeString(out Text);
         }
         
-        /// Constructor with buffer.
         public GoalStatus(ref ReadBuffer2 b)
         {
             GoalId = new GoalID(ref b);
@@ -108,17 +104,16 @@ namespace Iviz.Msgs.ActionlibMsgs
             WriteBuffer2.AddLength(ref c, Text);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_msgs/GoalStatus";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "d388f9b87b3c471f784434d671988d4a";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71VTY/aMBC951eMtJdWquh3u63EgUKEqPZLC+115TgTcOs41B7D8u87Nkkgu9DlsGok" +
                 "CETjN2/evJmMK6EnI5jz7U7liVeGzsGRIO/qPzfp1WhyNYbm6sMb/j6D2QLjMVgIBxskoAoyhKWtJDqH" +

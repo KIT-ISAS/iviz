@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Material : IDeserializableRos1<Material>, IDeserializableRos2<Material>, IMessageRos1, IMessageRos2
+    public sealed class Material : IDeserializableCommon<Material>, IMessageCommon
     {
         public const byte BLEND_DEFAULT = 0;
         public const byte BLEND_ADDITIVE = 1;
@@ -21,14 +21,12 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "blend_mode")] public byte BlendMode;
         [DataMember (Name = "textures")] public Texture[] Textures;
     
-        /// Constructor for empty message.
         public Material()
         {
             Name = "";
             Textures = System.Array.Empty<Texture>();
         }
         
-        /// Constructor with buffer.
         public Material(ref ReadBuffer b)
         {
             b.DeserializeString(out Name);
@@ -48,7 +46,6 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        /// Constructor with buffer.
         public Material(ref ReadBuffer2 b)
         {
             b.DeserializeString(out Name);
@@ -134,17 +131,16 @@ namespace Iviz.Msgs.IvizMsgs
             WriteBuffer2.AddLength(ref c, Textures);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Material";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "dea645939e7a51f77d59181b714cdac1";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7WU247bIBCG73kKv0HbPbTbSntBbJKgArZ8yDaqKkQSkkWKDzI43e3TF9vYS7S3rS9s" +
                 "8/0j+Gdg6FRlHoIFQSziEVrCguTBY/ARdB6HUYRzvEFW+ASANq2qTkElSgnC+ly3tzeBKHdKVmYeH9Tx" +

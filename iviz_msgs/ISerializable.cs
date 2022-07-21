@@ -25,7 +25,7 @@ public interface ISerializableRos1 : ISerializable
     /// <summary>
     /// Length of this message in bytes after serialization.
     /// </summary>
-    int RosMessageLength => throw new RosInvalidMessageForVersion();
+    int RosMessageLength { get; }
 
     /// <summary>
     /// Creates a new message and deserializes into it the information read from the given buffer.
@@ -33,7 +33,7 @@ public interface ISerializableRos1 : ISerializable
     /// <param name="b">
     /// Buffer object.
     /// </param>
-    ISerializableRos1 RosDeserializeBase(ref ReadBuffer b) => throw new RosInvalidMessageForVersion();
+    ISerializableRos1 RosDeserializeBase(ref ReadBuffer b);
 }
 
 public interface ISerializableRos2 : ISerializable
@@ -44,16 +44,15 @@ public interface ISerializableRos2 : ISerializable
     /// <param name="b">
     /// Buffer object.
     /// </param>
-    void RosSerialize(ref WriteBuffer2 b) => throw new RosInvalidMessageForVersion();
+    void RosSerialize(ref WriteBuffer2 b);
 
     /// <summary>
     /// Length of this message in bytes after serialization.
     /// </summary>
-    int Ros2MessageLength => throw new RosInvalidMessageForVersion();
+    int Ros2MessageLength { get; }
 }
 
-
-public interface IDeserializable<out T> 
+public interface IDeserializable<out T>
 {
 }
 
@@ -65,7 +64,7 @@ public interface IDeserializableRos1<out T> : IDeserializable<T> where T : ISeri
     /// <param name="b">
     /// Buffer object.
     /// </param>
-    T RosDeserialize(ref ReadBuffer b) => throw new RosInvalidMessageForVersion();
+    T RosDeserialize(ref ReadBuffer b);
 }
 
 public interface IDeserializableRos2<out T> : IDeserializable<T> where T : ISerializableRos2
@@ -77,5 +76,10 @@ public interface IDeserializableRos2<out T> : IDeserializable<T> where T : ISeri
     /// Buffer object.
     /// </param>
     //T RosDeserialize(ref ReadBuffer b) => throw new RosInvalidMessageForVersion();
-    T RosDeserialize(ref ReadBuffer2 b) => throw new RosInvalidMessageForVersion();
+    T RosDeserialize(ref ReadBuffer2 b);
+}
+
+public interface IDeserializableCommon<out T> : IDeserializableRos1<T>, IDeserializableRos2<T>
+    where T : ISerializableRos1, ISerializableRos2
+{
 }

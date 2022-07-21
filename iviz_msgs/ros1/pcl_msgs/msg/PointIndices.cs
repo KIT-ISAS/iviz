@@ -5,32 +5,28 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class PointIndices : IDeserializableRos1<PointIndices>, IDeserializableRos2<PointIndices>, IMessageRos1, IMessageRos2
+    public sealed class PointIndices : IDeserializableCommon<PointIndices>, IMessageCommon
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "indices")] public int[] Indices;
     
-        /// Constructor for empty message.
         public PointIndices()
         {
             Indices = System.Array.Empty<int>();
         }
         
-        /// Explicit constructor.
         public PointIndices(in StdMsgs.Header Header, int[] Indices)
         {
             this.Header = Header;
             this.Indices = Indices;
         }
         
-        /// Constructor with buffer.
         public PointIndices(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.DeserializeStructArray(out Indices);
         }
         
-        /// Constructor with buffer.
         public PointIndices(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -70,25 +66,24 @@ namespace Iviz.Msgs.PclMsgs
             WriteBuffer2.AddLength(ref c, Indices);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "pcl_msgs/PointIndices";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "458c7998b7eaf99908256472e273b3d4";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE62RQWscMQyF7/4Vgj0kKWwK7W2ht9Kmh0AguZWyaG1lRuCxp5Zm0/n3fZ6laXvroYPB" +
-                "ePze92TpTjhJo3HbghZ//+7rN9KSNIqFED785y/cP34+kHk6TjbY27tL7o4enUvilmgS58TO9FxRlg6j" +
-                "tH2Ws2SYeJol0Xbr6yx2C+PTqEZYgxRpnPNKi0HklWKdpqVoZBdyneQvP5xaiGnm5hqXzA362pKWLn9u" +
-                "PEmnY5l8X6REoS8fD9AUk7i4oqAVhNiETcuASwrL1r5uCLunl7rHUQY09zWcfGTvxcqPuYn1OtkOyHhz" +
-                "edwt2GiOICUZXW//jjjaDSEEJchc40jXqPxh9bEWAIXO3JRPWTo4ogOgXnXT1c0f5LKhC5f6C38h/s74" +
-                "F2x55fY37UfMLPfX2zKggRDOrZ41QXpaN0jMKsUp66lxW0N3XSLD7lPvMURwbRPBzmY1KgaQ6EV9DOat" +
-                "07dpHDWF8BORtB2+rgIAAA==";
+                "H4sIAAAAAAAAE61RS0sDMRC+51cM9FArVFFvBW+i9SCIeitSpsm4O5BN1sxsdf+9ky2+bh5cAmGT75Vv" +
+                "1oSBCrTT5jjpxfnmGTgF9iTOuct//tzd480KRMO2k0ZO1wffGTwqpoAlQEeKARXhJVssbloqy0h7ikbC" +
+                "rqcA062OPcmJEZ9aFrDVUKKCMY4wiIE0g89dNyT2qATKHf3iG5MTIPRYlP0QsRg+l8Cpwl8KdlTVbQm9" +
+                "DpQ8we3VyjBJyA/KFmg0BV8IhVNjl+CGqb5KgBlsHrKcPbvZ01te2jk11vJXCtAWtaam976Q1MAoKzM7" +
+                "PrzyxEysJTK7IHA0nW3tVxZgbpaF+uxbOLIn3I/a5mSCBHssjLtIVdhbFaY6r6T54odymqQTpvwpf1D8" +
+                "9viLbPrSrW9atja8WGuQobEmDdiXvOdg0N04ifjIlBQi7wqW0VXWwdLNrmvZBjLWNBrbUSR7tkkEeGNt" +
+                "nWip6tNYthyc+wCoH7bctwIAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

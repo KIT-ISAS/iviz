@@ -49,12 +49,10 @@ namespace Iviz.Msgs.StdSrvs
     public sealed class EmptyRequest : IRequest<Empty, EmptyResponse>, IDeserializableRos1<EmptyRequest>
     {
     
-        /// Constructor for empty message.
         public EmptyRequest()
         {
         }
         
-        /// Constructor with buffer.
         public EmptyRequest(ref ReadBuffer b)
         {
         }
@@ -74,7 +72,6 @@ namespace Iviz.Msgs.StdSrvs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -86,12 +83,10 @@ namespace Iviz.Msgs.StdSrvs
     public sealed class EmptyResponse : IResponse, IDeserializableRos1<EmptyResponse>
     {
     
-        /// Constructor for empty message.
         public EmptyResponse()
         {
         }
         
-        /// Constructor with buffer.
         public EmptyResponse(ref ReadBuffer b)
         {
         }
@@ -111,7 +106,6 @@ namespace Iviz.Msgs.StdSrvs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract]
-    public sealed class JointTrajectoryPoint : IDeserializableRos1<JointTrajectoryPoint>, IDeserializableRos2<JointTrajectoryPoint>, IMessageRos1, IMessageRos2
+    public sealed class JointTrajectoryPoint : IDeserializableCommon<JointTrajectoryPoint>, IMessageCommon
     {
         // Each trajectory point specifies either positions[, velocities[, accelerations]]
         // or positions[, effort] for the trajectory to be executed.
@@ -16,7 +16,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
         [DataMember (Name = "effort")] public double[] Effort;
         [DataMember (Name = "time_from_start")] public duration TimeFromStart;
     
-        /// Constructor for empty message.
         public JointTrajectoryPoint()
         {
             Positions = System.Array.Empty<double>();
@@ -25,7 +24,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
             Effort = System.Array.Empty<double>();
         }
         
-        /// Constructor with buffer.
         public JointTrajectoryPoint(ref ReadBuffer b)
         {
             b.DeserializeStructArray(out Positions);
@@ -35,7 +33,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
             b.Deserialize(out TimeFromStart);
         }
         
-        /// Constructor with buffer.
         public JointTrajectoryPoint(ref ReadBuffer2 b)
         {
             b.DeserializeStructArray(out Positions);
@@ -100,17 +97,16 @@ namespace Iviz.Msgs.TrajectoryMsgs
             WriteBuffer2.AddLength(ref c, TimeFromStart);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "trajectory_msgs/JointTrajectoryPoint";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "f3cd1e1c4d320c79d6985c904ae5dcd3";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE1WPsQ7CMAxE93yFJVbEhNgZWJjZUIVMeoGgtEaxi+DvcYsEZYl07+zceUE7jleyyjdE" +
                 "k/qiu+TeSO+IOWUoIdsV1bFmy9LrcUkPFImuMAqOEQWVJ7NpwoLkfxopSbWG/CX/ap5lQmcQnoiDoV35" +

@@ -58,19 +58,16 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> The camera_info to store </summary>
         [DataMember (Name = "camera_info")] public SensorMsgs.CameraInfo CameraInfo;
     
-        /// Constructor for empty message.
         public SetCameraInfoRequest()
         {
             CameraInfo = new SensorMsgs.CameraInfo();
         }
         
-        /// Explicit constructor.
         public SetCameraInfoRequest(SensorMsgs.CameraInfo CameraInfo)
         {
             this.CameraInfo = CameraInfo;
         }
         
-        /// Constructor with buffer.
         public SetCameraInfoRequest(ref ReadBuffer b)
         {
             CameraInfo = new SensorMsgs.CameraInfo(ref b);
@@ -104,20 +101,17 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Used to give details about success </summary>
         [DataMember (Name = "status_message")] public string StatusMessage;
     
-        /// Constructor for empty message.
         public SetCameraInfoResponse()
         {
             StatusMessage = "";
         }
         
-        /// Explicit constructor.
         public SetCameraInfoResponse(bool Success, string StatusMessage)
         {
             this.Success = Success;
             this.StatusMessage = StatusMessage;
         }
         
-        /// Constructor with buffer.
         public SetCameraInfoResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

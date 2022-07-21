@@ -57,14 +57,12 @@ namespace Iviz.Msgs.NavMsgs
         // relax the constraint in x and y before failing. 
         [DataMember (Name = "tolerance")] public float Tolerance;
     
-        /// Constructor for empty message.
         public GetPlanRequest()
         {
             Start = new GeometryMsgs.PoseStamped();
             Goal = new GeometryMsgs.PoseStamped();
         }
         
-        /// Explicit constructor.
         public GetPlanRequest(GeometryMsgs.PoseStamped Start, GeometryMsgs.PoseStamped Goal, float Tolerance)
         {
             this.Start = Start;
@@ -72,7 +70,6 @@ namespace Iviz.Msgs.NavMsgs
             this.Tolerance = Tolerance;
         }
         
-        /// Constructor with buffer.
         public GetPlanRequest(ref ReadBuffer b)
         {
             Start = new GeometryMsgs.PoseStamped(ref b);
@@ -109,19 +106,16 @@ namespace Iviz.Msgs.NavMsgs
     {
         [DataMember (Name = "plan")] public NavMsgs.Path Plan;
     
-        /// Constructor for empty message.
         public GetPlanResponse()
         {
             Plan = new NavMsgs.Path();
         }
         
-        /// Explicit constructor.
         public GetPlanResponse(NavMsgs.Path Plan)
         {
             this.Plan = Plan;
         }
         
-        /// Constructor with buffer.
         public GetPlanResponse(ref ReadBuffer b)
         {
             Plan = new NavMsgs.Path(ref b);

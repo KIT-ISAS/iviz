@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class MultiArrayDimension : IDeserializableRos1<MultiArrayDimension>, IDeserializableRos2<MultiArrayDimension>, IMessageRos1, IMessageRos2
+    public sealed class MultiArrayDimension : IDeserializableCommon<MultiArrayDimension>, IMessageCommon
     {
         /// <summary> Label of given dimension </summary>
         [DataMember (Name = "label")] public string Label;
@@ -14,13 +14,11 @@ namespace Iviz.Msgs.StdMsgs
         /// <summary> Stride of given dimension </summary>
         [DataMember (Name = "stride")] public uint Stride;
     
-        /// Constructor for empty message.
         public MultiArrayDimension()
         {
             Label = "";
         }
         
-        /// Explicit constructor.
         public MultiArrayDimension(string Label, uint Size, uint Stride)
         {
             this.Label = Label;
@@ -28,7 +26,6 @@ namespace Iviz.Msgs.StdMsgs
             this.Stride = Stride;
         }
         
-        /// Constructor with buffer.
         public MultiArrayDimension(ref ReadBuffer b)
         {
             b.DeserializeString(out Label);
@@ -36,7 +33,6 @@ namespace Iviz.Msgs.StdMsgs
             b.Deserialize(out Stride);
         }
         
-        /// Constructor with buffer.
         public MultiArrayDimension(ref ReadBuffer2 b)
         {
             b.DeserializeString(out Label);
@@ -80,17 +76,16 @@ namespace Iviz.Msgs.StdMsgs
             WriteBuffer2.AddLength(ref c, Stride);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/MultiArrayDimension";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "4cd0c83a8683deae40ecdac60e53bfa8";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE22NMQqAMBAEe1+xYKOtvkjJGRbiRbxE0NcrUWy0m2KGsbRSPcIwSgBQPxQneG6icJxF" +
                 "jVGrTE19B+MhKGahr4iGirQvgqxM1r7hdXJSwpt+HicAFGWdjgAAAA==";

@@ -50,19 +50,16 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
-        /// Constructor for empty message.
         public GetMaterialsRequest()
         {
             Uuid = "";
         }
         
-        /// Explicit constructor.
         public GetMaterialsRequest(string Uuid)
         {
             this.Uuid = Uuid;
         }
         
-        /// Constructor with buffer.
         public GetMaterialsRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out Uuid);
@@ -92,19 +89,16 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "mesh_materials_stamped")] public MeshMsgs.MeshMaterialsStamped MeshMaterialsStamped;
     
-        /// Constructor for empty message.
         public GetMaterialsResponse()
         {
             MeshMaterialsStamped = new MeshMsgs.MeshMaterialsStamped();
         }
         
-        /// Explicit constructor.
         public GetMaterialsResponse(MeshMsgs.MeshMaterialsStamped MeshMaterialsStamped)
         {
             this.MeshMaterialsStamped = MeshMaterialsStamped;
         }
         
-        /// Constructor with buffer.
         public GetMaterialsResponse(ref ReadBuffer b)
         {
             MeshMaterialsStamped = new MeshMsgs.MeshMaterialsStamped(ref b);

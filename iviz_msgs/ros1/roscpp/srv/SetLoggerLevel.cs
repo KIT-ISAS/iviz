@@ -51,21 +51,18 @@ namespace Iviz.Msgs.Roscpp
         [DataMember (Name = "logger")] public string Logger;
         [DataMember (Name = "level")] public string Level;
     
-        /// Constructor for empty message.
         public SetLoggerLevelRequest()
         {
             Logger = "";
             Level = "";
         }
         
-        /// Explicit constructor.
         public SetLoggerLevelRequest(string Logger, string Level)
         {
             this.Logger = Logger;
             this.Level = Level;
         }
         
-        /// Constructor with buffer.
         public SetLoggerLevelRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out Logger);
@@ -97,12 +94,10 @@ namespace Iviz.Msgs.Roscpp
     public sealed class SetLoggerLevelResponse : IResponse, IDeserializableRos1<SetLoggerLevelResponse>
     {
     
-        /// Constructor for empty message.
         public SetLoggerLevelResponse()
         {
         }
         
-        /// Constructor with buffer.
         public SetLoggerLevelResponse(ref ReadBuffer b)
         {
         }
@@ -122,7 +117,6 @@ namespace Iviz.Msgs.Roscpp
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

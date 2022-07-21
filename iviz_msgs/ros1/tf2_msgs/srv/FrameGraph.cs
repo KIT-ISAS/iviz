@@ -49,12 +49,10 @@ namespace Iviz.Msgs.Tf2Msgs
     public sealed class FrameGraphRequest : IRequest<FrameGraph, FrameGraphResponse>, IDeserializableRos1<FrameGraphRequest>
     {
     
-        /// Constructor for empty message.
         public FrameGraphRequest()
         {
         }
         
-        /// Constructor with buffer.
         public FrameGraphRequest(ref ReadBuffer b)
         {
         }
@@ -74,7 +72,6 @@ namespace Iviz.Msgs.Tf2Msgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -87,19 +84,16 @@ namespace Iviz.Msgs.Tf2Msgs
     {
         [DataMember (Name = "frame_yaml")] public string FrameYaml;
     
-        /// Constructor for empty message.
         public FrameGraphResponse()
         {
             FrameYaml = "";
         }
         
-        /// Explicit constructor.
         public FrameGraphResponse(string FrameYaml)
         {
             this.FrameYaml = FrameYaml;
         }
         
-        /// Constructor with buffer.
         public FrameGraphResponse(ref ReadBuffer b)
         {
             b.DeserializeString(out FrameYaml);

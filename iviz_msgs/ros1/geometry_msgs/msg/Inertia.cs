@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Inertia : IDeserializableRos1<Inertia>, IDeserializableRos2<Inertia>, IMessageRos1, IMessageRos2
+    public sealed class Inertia : IDeserializableCommon<Inertia>, IMessageCommon
     {
         // Mass [kg]
         [DataMember (Name = "m")] public double M;
@@ -22,12 +22,10 @@ namespace Iviz.Msgs.GeometryMsgs
         [DataMember (Name = "iyz")] public double Iyz;
         [DataMember (Name = "izz")] public double Izz;
     
-        /// Constructor for empty message.
         public Inertia()
         {
         }
         
-        /// Constructor with buffer.
         public Inertia(ref ReadBuffer b)
         {
             b.Deserialize(out M);
@@ -40,7 +38,6 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out Izz);
         }
         
-        /// Constructor with buffer.
         public Inertia(ref ReadBuffer2 b)
         {
             b.Deserialize(out M);
@@ -87,12 +84,10 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 80;
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        /// <summary> Constant size of this message. </summary> 
         public const int Ros2FixedMessageLength = 80;
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
@@ -109,17 +104,16 @@ namespace Iviz.Msgs.GeometryMsgs
             WriteBuffer2.AddLength(ref c, Izz);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/Inertia";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "1d26e4bb6c83ff141c5cf0d883c2b0fe";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61STUsDMRC951c86EVhXaGKB6EnD9JDQbB4kSrT3dlt6CYpSWq7S3+8k137IXg0MDC8" +
                 "vPcyHxlhRiHgfV0vVNU4ig/3MEqN8MQ2soerYHqCWaianeHo208T6nD7xkV0/g6F6/lTyz5qwpxtcD4Z" +

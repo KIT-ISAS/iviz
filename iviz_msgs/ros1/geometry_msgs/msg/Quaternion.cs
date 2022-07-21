@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Quaternion : IMessageRos1, IMessageRos2, IDeserializableRos1<Quaternion>, IDeserializableRos2<Quaternion>
+    public struct Quaternion : IMessageCommon, IDeserializableCommon<Quaternion>
     {
         // This represents an orientation in free space in quaternion form.
         [DataMember (Name = "x")] public double X;
@@ -16,7 +16,6 @@ namespace Iviz.Msgs.GeometryMsgs
         [DataMember (Name = "z")] public double Z;
         [DataMember (Name = "w")] public double W;
     
-        /// Explicit constructor.
         public Quaternion(double X, double Y, double Z, double W)
         {
             this.X = X;
@@ -25,14 +24,12 @@ namespace Iviz.Msgs.GeometryMsgs
             this.W = W;
         }
         
-        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Quaternion(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Quaternion(ref ReadBuffer2 b)
         {
@@ -59,12 +56,10 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 32;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
         
-        /// <summary> Constant size of this message. </summary> 
         public const int Ros2FixedMessageLength = 32;
         
         public readonly int Ros2MessageLength => Ros2FixedMessageLength;
@@ -72,17 +67,16 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly void AddRos2MessageLength(ref int c) => WriteBuffer2.AddLength(ref c, this);
         
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/Quaternion";
     
         public readonly string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "a779879fadf0160734f906b8c19c7004";
     
         public readonly string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAEz3JTQqAQAhA4b2nENq3ik7SBSQcEkonNfo5fbWZ3fd4HU6LBDpX52DNQFI0l4+UYoqi" +
                 "WJwZo9LMf+0HJbv+r5hvPUBZjXIc8Gq6m56mE+AFLI5yL20AAAA=";

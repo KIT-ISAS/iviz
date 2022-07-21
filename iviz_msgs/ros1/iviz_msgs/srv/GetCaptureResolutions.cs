@@ -49,12 +49,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class GetCaptureResolutionsRequest : IRequest<GetCaptureResolutions, GetCaptureResolutionsResponse>, IDeserializableRos1<GetCaptureResolutionsRequest>
     {
     
-        /// Constructor for empty message.
         public GetCaptureResolutionsRequest()
         {
         }
         
-        /// Constructor with buffer.
         public GetCaptureResolutionsRequest(ref ReadBuffer b)
         {
         }
@@ -74,7 +72,6 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -89,14 +86,12 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "message")] public string Message;
         [DataMember (Name = "resolutions")] public Vector2i[] Resolutions;
     
-        /// Constructor for empty message.
         public GetCaptureResolutionsResponse()
         {
             Message = "";
             Resolutions = System.Array.Empty<Vector2i>();
         }
         
-        /// Explicit constructor.
         public GetCaptureResolutionsResponse(bool Success, string Message, Vector2i[] Resolutions)
         {
             this.Success = Success;
@@ -104,7 +99,6 @@ namespace Iviz.Msgs.IvizMsgs
             this.Resolutions = Resolutions;
         }
         
-        /// Constructor with buffer.
         public GetCaptureResolutionsResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

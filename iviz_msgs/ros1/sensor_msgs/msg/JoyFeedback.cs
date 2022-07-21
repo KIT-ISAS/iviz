@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class JoyFeedback : IDeserializableRos1<JoyFeedback>, IDeserializableRos2<JoyFeedback>, IMessageRos1, IMessageRos2
+    public sealed class JoyFeedback : IDeserializableCommon<JoyFeedback>, IMessageCommon
     {
         // Declare of the type of feedback
         public const byte TYPE_LED = 0;
@@ -19,12 +19,10 @@ namespace Iviz.Msgs.SensorMsgs
         // actually binary, driver should treat 0<=x<0.5 as off, 0.5<=x<=1 as on.
         [DataMember (Name = "intensity")] public float Intensity;
     
-        /// Constructor for empty message.
         public JoyFeedback()
         {
         }
         
-        /// Explicit constructor.
         public JoyFeedback(byte Type, byte Id, float Intensity)
         {
             this.Type = Type;
@@ -32,7 +30,6 @@ namespace Iviz.Msgs.SensorMsgs
             this.Intensity = Intensity;
         }
         
-        /// Constructor with buffer.
         public JoyFeedback(ref ReadBuffer b)
         {
             b.Deserialize(out Type);
@@ -40,7 +37,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Intensity);
         }
         
-        /// Constructor with buffer.
         public JoyFeedback(ref ReadBuffer2 b)
         {
             b.Deserialize(out Type);
@@ -72,12 +68,10 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 6;
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        /// <summary> Constant size of this message. </summary> 
         public const int Ros2FixedMessageLength = 6;
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
@@ -89,17 +83,16 @@ namespace Iviz.Msgs.SensorMsgs
             WriteBuffer2.AddLength(ref c, Intensity);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/JoyFeedback";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "f4dcd73460360d98f36e55ee7f2e46f1";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE1WPQWvCMBiG7/kVL3gtpTqEHexF1oPgYIge5mWkyRcaFhNJUrX/fp+dHS6n5PmS530z" +
                 "wxspJyMhGOSOkIfzuDdEupXqW/TW51fsPz+ar23zBl41qme6O7yvtw3T+TNdH47HZsd0IR74bhZihn1n" +

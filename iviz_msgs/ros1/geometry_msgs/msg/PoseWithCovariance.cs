@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PoseWithCovariance : IDeserializableRos1<PoseWithCovariance>, IDeserializableRos2<PoseWithCovariance>, IMessageRos1, IMessageRos2
+    public sealed class PoseWithCovariance : IDeserializableCommon<PoseWithCovariance>, IMessageCommon
     {
         // This represents a pose in free space with uncertainty.
         [DataMember (Name = "pose")] public Pose Pose;
@@ -15,27 +15,23 @@ namespace Iviz.Msgs.GeometryMsgs
         // (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
         [DataMember (Name = "covariance")] public double[/*36*/] Covariance;
     
-        /// Constructor for empty message.
         public PoseWithCovariance()
         {
             Covariance = new double[36];
         }
         
-        /// Explicit constructor.
         public PoseWithCovariance(in Pose Pose, double[] Covariance)
         {
             this.Pose = Pose;
             this.Covariance = Covariance;
         }
         
-        /// Constructor with buffer.
         public PoseWithCovariance(ref ReadBuffer b)
         {
             b.Deserialize(out Pose);
             b.DeserializeStructArray(36, out Covariance);
         }
         
-        /// Constructor with buffer.
         public PoseWithCovariance(ref ReadBuffer2 b)
         {
             b.Deserialize(out Pose);
@@ -66,12 +62,10 @@ namespace Iviz.Msgs.GeometryMsgs
             if (Covariance.Length != 36) BuiltIns.ThrowInvalidSizeForFixedArray(Covariance.Length, 36);
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 344;
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        /// <summary> Constant size of this message. </summary> 
         public const int Ros2FixedMessageLength = 344;
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
@@ -82,17 +76,16 @@ namespace Iviz.Msgs.GeometryMsgs
             WriteBuffer2.AddLength(ref c, Covariance, 36);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "geometry_msgs/PoseWithCovariance";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "c23e848cf1b7533a8d7c259073a97e6f";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71TyU7DQAy9z1dY6gWktBxAOVTiwAlxQGLpgUUImcRpB5GZ4JnQpF+PJ22WLuKEmpPj" +
                 "5Y3fsz2C2UI7YCqYHBnvAKGwjkAbyJgIXIEJwVL7BZQmIfaoja8nSt2FrJCq1Age7HKc46flHgm9tgZs" +

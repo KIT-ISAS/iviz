@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshMaterials : IDeserializableRos1<MeshMaterials>, IDeserializableRos2<MeshMaterials>, IMessageRos1, IMessageRos2
+    public sealed class MeshMaterials : IDeserializableCommon<MeshMaterials>, IMessageCommon
     {
         // Mesh Attribute Message
         [DataMember (Name = "clusters")] public MeshMsgs.MeshFaceCluster[] Clusters;
@@ -13,7 +13,6 @@ namespace Iviz.Msgs.MeshMsgs
         [DataMember (Name = "cluster_materials")] public uint[] ClusterMaterials;
         [DataMember (Name = "vertex_tex_coords")] public MeshMsgs.MeshVertexTexCoords[] VertexTexCoords;
     
-        /// Constructor for empty message.
         public MeshMaterials()
         {
             Clusters = System.Array.Empty<MeshMsgs.MeshFaceCluster>();
@@ -22,7 +21,6 @@ namespace Iviz.Msgs.MeshMsgs
             VertexTexCoords = System.Array.Empty<MeshMsgs.MeshVertexTexCoords>();
         }
         
-        /// Explicit constructor.
         public MeshMaterials(MeshMsgs.MeshFaceCluster[] Clusters, MeshMsgs.MeshMaterial[] Materials, uint[] ClusterMaterials, MeshMsgs.MeshVertexTexCoords[] VertexTexCoords)
         {
             this.Clusters = Clusters;
@@ -31,7 +29,6 @@ namespace Iviz.Msgs.MeshMsgs
             this.VertexTexCoords = VertexTexCoords;
         }
         
-        /// Constructor with buffer.
         public MeshMaterials(ref ReadBuffer b)
         {
             b.DeserializeArray(out Clusters);
@@ -52,7 +49,6 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        /// Constructor with buffer.
         public MeshMaterials(ref ReadBuffer2 b)
         {
             b.DeserializeArray(out Clusters);
@@ -140,17 +136,16 @@ namespace Iviz.Msgs.MeshMsgs
             WriteBuffer2.AddLength(ref c, VertexTexCoords);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshMaterials";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "e151c9a065aae90d545559129a79a70a";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE72TQWrDMBBF93MKgQ8QaHeFLBJDs/KmCdmEIsbyxBHIVtBIwb19JMdRqEt3bQSCr9Ef" +
                 "ePORClERn8TKe6fr4CkdGVuCLpZlxy0vkuEdFZUmsCd3+BTqpnhmqjAWNZro6CbJEHTvX18eTfJx9b17" +

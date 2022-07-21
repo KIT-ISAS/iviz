@@ -52,12 +52,10 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "resolution_y")] public int ResolutionY;
         [DataMember (Name = "with_holograms")] public bool WithHolograms;
     
-        /// Constructor for empty message.
         public StartCaptureRequest()
         {
         }
         
-        /// Explicit constructor.
         public StartCaptureRequest(int ResolutionX, int ResolutionY, bool WithHolograms)
         {
             this.ResolutionX = ResolutionX;
@@ -65,7 +63,6 @@ namespace Iviz.Msgs.IvizMsgs
             this.WithHolograms = WithHolograms;
         }
         
-        /// Constructor with buffer.
         public StartCaptureRequest(ref ReadBuffer b)
         {
             b.Deserialize(out ResolutionX);
@@ -88,7 +85,6 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 9;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -102,20 +98,17 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "message")] public string Message;
     
-        /// Constructor for empty message.
         public StartCaptureResponse()
         {
             Message = "";
         }
         
-        /// Explicit constructor.
         public StartCaptureResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// Constructor with buffer.
         public StartCaptureResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

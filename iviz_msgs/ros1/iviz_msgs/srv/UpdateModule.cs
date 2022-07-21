@@ -56,7 +56,6 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Configuration encoded in JSON </summary>
         [DataMember (Name = "config")] public string Config;
     
-        /// Constructor for empty message.
         public UpdateModuleRequest()
         {
             Id = "";
@@ -64,7 +63,6 @@ namespace Iviz.Msgs.IvizMsgs
             Config = "";
         }
         
-        /// Explicit constructor.
         public UpdateModuleRequest(string Id, string[] Fields, string Config)
         {
             this.Id = Id;
@@ -72,7 +70,6 @@ namespace Iviz.Msgs.IvizMsgs
             this.Config = Config;
         }
         
-        /// Constructor with buffer.
         public UpdateModuleRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out Id);
@@ -124,20 +121,17 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> An error message if success is false </summary>
         [DataMember (Name = "message")] public string Message;
     
-        /// Constructor for empty message.
         public UpdateModuleResponse()
         {
             Message = "";
         }
         
-        /// Explicit constructor.
         public UpdateModuleResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// Constructor with buffer.
         public UpdateModuleResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

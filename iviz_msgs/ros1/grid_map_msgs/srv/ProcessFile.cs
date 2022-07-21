@@ -53,21 +53,18 @@ namespace Iviz.Msgs.GridMapMsgs
         // For ROS bags: topic name that should be processed (optional).
         [DataMember (Name = "topic_name")] public string TopicName;
     
-        /// Constructor for empty message.
         public ProcessFileRequest()
         {
             FilePath = "";
             TopicName = "";
         }
         
-        /// Explicit constructor.
         public ProcessFileRequest(string FilePath, string TopicName)
         {
             this.FilePath = FilePath;
             this.TopicName = TopicName;
         }
         
-        /// Constructor with buffer.
         public ProcessFileRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out FilePath);
@@ -101,18 +98,15 @@ namespace Iviz.Msgs.GridMapMsgs
         // True if file processing was successful.
         [DataMember (Name = "success")] public bool Success;
     
-        /// Constructor for empty message.
         public ProcessFileResponse()
         {
         }
         
-        /// Explicit constructor.
         public ProcessFileResponse(bool Success)
         {
             this.Success = Success;
         }
         
-        /// Constructor with buffer.
         public ProcessFileResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
@@ -131,7 +125,6 @@ namespace Iviz.Msgs.GridMapMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;

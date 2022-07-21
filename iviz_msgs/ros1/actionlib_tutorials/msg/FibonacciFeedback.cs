@@ -5,30 +5,26 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class FibonacciFeedback : IDeserializableRos1<FibonacciFeedback>, IDeserializableRos2<FibonacciFeedback>, IMessageRos1, IMessageRos2, IFeedback<FibonacciActionFeedback>
+    public sealed class FibonacciFeedback : IDeserializableCommon<FibonacciFeedback>, IMessageCommon, IFeedback<FibonacciActionFeedback>
     {
         //feedback
         [DataMember (Name = "sequence")] public int[] Sequence;
     
-        /// Constructor for empty message.
         public FibonacciFeedback()
         {
             Sequence = System.Array.Empty<int>();
         }
         
-        /// Explicit constructor.
         public FibonacciFeedback(int[] Sequence)
         {
             this.Sequence = Sequence;
         }
         
-        /// Constructor with buffer.
         public FibonacciFeedback(ref ReadBuffer b)
         {
             b.DeserializeStructArray(out Sequence);
         }
         
-        /// Constructor with buffer.
         public FibonacciFeedback(ref ReadBuffer2 b)
         {
             b.DeserializeStructArray(out Sequence);
@@ -64,17 +60,16 @@ namespace Iviz.Msgs.ActionlibTutorials
             WriteBuffer2.AddLength(ref c, Sequence);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "actionlib_tutorials/FibonacciFeedback";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "b81e37d2a31925a0e8ae261a8699cb79";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+PKzCsxNoqOVShOLSxNzUtO5eICAHPWhAoTAAAA";
                 

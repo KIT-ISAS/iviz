@@ -49,12 +49,10 @@ namespace Iviz.Msgs.StdSrvs
     public sealed class TriggerRequest : IRequest<Trigger, TriggerResponse>, IDeserializableRos1<TriggerRequest>
     {
     
-        /// Constructor for empty message.
         public TriggerRequest()
         {
         }
         
-        /// Constructor with buffer.
         public TriggerRequest(ref ReadBuffer b)
         {
         }
@@ -74,7 +72,6 @@ namespace Iviz.Msgs.StdSrvs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -90,20 +87,17 @@ namespace Iviz.Msgs.StdSrvs
         /// <summary> Informational, e.g. for error messages </summary>
         [DataMember (Name = "message")] public string Message;
     
-        /// Constructor for empty message.
         public TriggerResponse()
         {
             Message = "";
         }
         
-        /// Explicit constructor.
         public TriggerResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// Constructor with buffer.
         public TriggerResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

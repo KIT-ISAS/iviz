@@ -5,24 +5,21 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class JoyFeedbackArray : IDeserializableRos1<JoyFeedbackArray>, IDeserializableRos2<JoyFeedbackArray>, IMessageRos1, IMessageRos2
+    public sealed class JoyFeedbackArray : IDeserializableCommon<JoyFeedbackArray>, IMessageCommon
     {
         // This message publishes values for multiple feedback at once. 
         [DataMember (Name = "array")] public JoyFeedback[] Array;
     
-        /// Constructor for empty message.
         public JoyFeedbackArray()
         {
             Array = System.Array.Empty<JoyFeedback>();
         }
         
-        /// Explicit constructor.
         public JoyFeedbackArray(JoyFeedback[] Array)
         {
             this.Array = Array;
         }
         
-        /// Constructor with buffer.
         public JoyFeedbackArray(ref ReadBuffer b)
         {
             b.DeserializeArray(out Array);
@@ -32,7 +29,6 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        /// Constructor with buffer.
         public JoyFeedbackArray(ref ReadBuffer2 b)
         {
             b.DeserializeArray(out Array);
@@ -77,17 +73,16 @@ namespace Iviz.Msgs.SensorMsgs
             WriteBuffer2.AddLength(ref c, Array);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/JoyFeedbackArray";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "cde5730a895b1fc4dee6f91b754b213d";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61Ry07DMBC8+ytG6rUKKQgJIXKpCKiISqiUA0WocpJNY+HYlR9t8/dsQ4PKnb3YnrVn" +
                 "xrMjLBvl0ZL3ckPYxkIr35DHTurIS20d2qiD2mpCTVQVsvyCDLCmpATiyXYPJ/TjE9I52Ynsn0vMXx9v" +

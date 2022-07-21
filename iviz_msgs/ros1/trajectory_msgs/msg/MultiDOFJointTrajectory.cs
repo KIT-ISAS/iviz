@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract]
-    public sealed class MultiDOFJointTrajectory : IDeserializableRos1<MultiDOFJointTrajectory>, IDeserializableRos2<MultiDOFJointTrajectory>, IMessageRos1, IMessageRos2
+    public sealed class MultiDOFJointTrajectory : IDeserializableCommon<MultiDOFJointTrajectory>, IMessageCommon
     {
         // The header is used to specify the coordinate frame and the reference time for the trajectory durations
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -16,14 +16,12 @@ namespace Iviz.Msgs.TrajectoryMsgs
         [DataMember (Name = "joint_names")] public string[] JointNames;
         [DataMember (Name = "points")] public MultiDOFJointTrajectoryPoint[] Points;
     
-        /// Constructor for empty message.
         public MultiDOFJointTrajectory()
         {
             JointNames = System.Array.Empty<string>();
             Points = System.Array.Empty<MultiDOFJointTrajectoryPoint>();
         }
         
-        /// Explicit constructor.
         public MultiDOFJointTrajectory(in StdMsgs.Header Header, string[] JointNames, MultiDOFJointTrajectoryPoint[] Points)
         {
             this.Header = Header;
@@ -31,7 +29,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
             this.Points = Points;
         }
         
-        /// Constructor with buffer.
         public MultiDOFJointTrajectory(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -43,7 +40,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
             }
         }
         
-        /// Constructor with buffer.
         public MultiDOFJointTrajectory(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -110,35 +106,34 @@ namespace Iviz.Msgs.TrajectoryMsgs
             WriteBuffer2.AddLength(ref c, Points);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "trajectory_msgs/MultiDOFJointTrajectory";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "ef145a45a5f47b77b7f5cdde4b16c942";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE71WS4/bNhC+81cM4EPswusFkiKHBXookKbdAkFTxMilKAxaGklMJFIhqXXUX99vqJft" +
-                "TR9AmzV84Gve33yjFe0rpop1zp5MoC5wTtFRaDkzRU8Rt5lzPjdWR6bC64ZJ2zxdeC7Ys82YosFx4Xw6" +
-                "jl5/4Cw631PeeR2Ns0H9NJgYLCm1ou8h3noObGN6Qq4gTU1XR3OTY/3BGRvPda1ZZxW16RiearmzAUab" +
-                "JL+Bzh+WF7p2trx252TqmozN6i6XKEh7r3sx3Lpgkp+3D1y7DGsOtzrLuOYpgBWU6UiVDklrkETUbMtY" +
-                "0Xg0axtct3gRtilZF0JIJhIxPQsinZTzudygbKdUiN7Y8rffh8tDulRvJEuvfnn9s5zt5/jeyhZPUwaC" +
-                "Ut/9zz/15t2PdxRifmhCGW6HksL3dxFBap9Tw1HnOuoEhcqUFfubmpFSCOmmBbTSbexbDjsI7isUEv+S" +
-                "LfJc1/2Mv8w1TWdNJqATcF3IQ9KgeNRqH03W1do/wqhoxz/wpy4B9P7VHd7YwFkXDRzqBQaedUBycUmq" +
-                "Q8pePBcBtdqf3A22XKJOs/Gh/HCWPwtsxU8d7mDjmyG4HXQjOQwreaB1OjtgGzYEI3CBWwd0ruH52z5W" +
-                "ALyU/EF7o481i+IMGYDWZyL0bHOm2SbVVls3qR80Ljb+jVo765WYbirUrJboQ1fq1Putdw8mx9Pj2Pe1" +
-                "QXNSbY5e+16lHk8m1ep14oEo5UsVkX4MAY2DAuRos1iNwB2qcTD510Lj0t0DKP+uNSaGuCaZDFQwEd4Z" +
-                "rdC6awWLLwn6NqpkB3xPdvbTK/TbLBFUAjVIMek8ghNoJJR+tGCQn4konTelScS3dP+1mZMJ0tILLT02" +
-                "gVY4Y6r/ZueS89TE3wkyh8K75gAE+Pi1qvkXOZ6oYp4YYWL2sVJHjidmuHlyj6ggCFkUngHeVmdgBvU+" +
-                "YeLFIF+nANWvHQS8lVi9GybS0wQ5OvOFEAU7cnflv/DafWIiZ8FjDWuZk26RhGBuPEQRw27ACpLEWzKR" +
-                "cod8WCet0OiPUMmgBZHWbVvP6K/HojsRWfOu3G3pVCG/6ZW0dSLhRNsmI4FXfjWOk04ag9tSLJ4P0zf5" +
-                "PBhDCaFkyvZmR/cF9a6jkwSEhR+nhROUT34lVovObWVUjCouE5paHWkJQZcgQBsi5hSqXtROx5ff0ud5" +
-                "1c+rP56k1AvGvlRtK306fw1d1Fx2nxaASpL/MaBpdXqiXhUCmcKaRmRY2O8ynqN3H1mCTBALmDGWMYTk" +
-                "W0nbMk10Ge74SJh6dXyy7Md3Sv0JINHGMsMKAAA=";
+                "H4sIAAAAAAAAE71WS4/bNhC+81cM4EO8hdeLJkUOC/RQIE27BYKmjdFLEBi0NJKYSKRCUuuovz7fUC/b" +
+                "mz6ANmv4IJHznm++0Yp2FVPFOmdPJlAXOKfoKLScmaKniNvMOZ8bqyNT4XXDpG2eLjwX7NlmTNHguHA+" +
+                "HUev33MWne8p77yOxtmgfh5cDJ6UWtEPUG89B7YxiZArSFPT1dFc53h+74yNp7bWrLOK2nSMSLXc2QCn" +
+                "TdK/gs0fFwldO1tehnM0dU3GZnWXSxakvde9OG5dMCnOm3uuXYZnDjc6y7jmKYEVjOlIlQ7JapBC1GzL" +
+                "WNF4NFsbQreQCJtUrDMlFBOFmMSCaCfjfKo3GNsqFaI3tnz7brjcp0v1Sqr04teXv8jZbs7vtbxCNFUg" +
+                "KPX9//xTr978dEsh5vsmlOFmaClifxORpPY5NRx1rqNOUKhMWbG/rhklhZJuWkAr3ca+5bCF4q5CI/Ev" +
+                "2aLOdd3P+Mtc03TWZAI6AdeZPjQNmket9tFkXa39A4yKdfwDf+wSQO9e3ELGBs66aBBQLzDwrAOKi0tS" +
+                "HUr27Kko0Ire/u7Ct+/Uand01zjnEg2boxhwgKj5k+BXAtbhFs6+GbLcwgmqxHCXB1qnsz1ewxXBG2Lh" +
+                "1gGma6Twuo8VkC+9v9fe6EPNYjhDKWD1iSg9uTqxbJNpq62bzA8WFx//xqyd7UpO1xWaV0sZQlfqRAKt" +
+                "d/cmh+hhJIDaYEqpNgevfa/SsCeXavUyEUKUPqbWyGCGgAlCJ3LMW6xGBA9t2Zv8a8FyGfMBnX83IxNV" +
+                "XLJNBk6YmO+EX2jdtQLK5wR7V6pkB6BPfnaTFAZv1ggqoRvsmGweQA40Mks/ejCoz8SYzpvSJAZcaODS" +
+                "zdEEme2Fnx66wEycUNZ/83NOfmoi8gSZfeFdswcCfPxa3fyLGk+cMa+OMFH82KkDxyMzwjy6B5wQhDUK" +
+                "zwBvqzNQhPojYeLZoF+nBNVvHRS8lVy9G1bT4yQ5BvOFFAU7cncRvxDcXWIiZ0FoDWtZmG7RhGJuPFSR" +
+                "w3bACorEGzKRcod6WCej0OgPMMmgBdHWbVvP6K/HpjtRWfO23G7oWKG+SUrGOrFx4m+TkcArv9jLySaN" +
+                "yW0oFk+HNZxiHpyhhTAyVftqS3cF9a6joySEBz+uDScon+JKrBad28jOGE2cFzSNOsoSgi5BgDZELCx0" +
+                "vaidjs+/o0/zUz8//fkorV4w9qVuW5nT+bPorOfy9nEBqBT5HxOano6PNKtCIFNa04oMC/ud53Pw7gNL" +
+                "kgliATvGMpaQfDRpW6bVLlseXwvTrI4iy/sop9RnJhydHMwKAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

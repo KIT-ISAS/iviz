@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class TimeReference : IDeserializableRos1<TimeReference>, IDeserializableRos2<TimeReference>, IMessageRos1, IMessageRos2
+    public sealed class TimeReference : IDeserializableCommon<TimeReference>, IMessageCommon
     {
         // Measurement from an external time source not actively synchronized with the system clock.
         /// <summary> Stamp is system time for which measurement was valid </summary>
@@ -16,13 +16,11 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> (optional) name of time source </summary>
         [DataMember (Name = "source")] public string Source;
     
-        /// Constructor for empty message.
         public TimeReference()
         {
             Source = "";
         }
         
-        /// Explicit constructor.
         public TimeReference(in StdMsgs.Header Header, time TimeRef, string Source)
         {
             this.Header = Header;
@@ -30,7 +28,6 @@ namespace Iviz.Msgs.SensorMsgs
             this.Source = Source;
         }
         
-        /// Constructor with buffer.
         public TimeReference(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -38,7 +35,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeString(out Source);
         }
         
-        /// Constructor with buffer.
         public TimeReference(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -82,27 +78,26 @@ namespace Iviz.Msgs.SensorMsgs
             WriteBuffer2.AddLength(ref c, Source);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "sensor_msgs/TimeReference";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "fded64a0265108ba86c3d38fb11c0c16";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE61TwYrbMBC96ysGfNikkBTaW6C3Zds9LBR272EiTSxReeRK46Tu13ckJ2naUw8VBmP7" +
-                "zXsz7407eCEsU6aBWOCY0wDIQD+EMmMECQNBSVO2BJwE0Eo4UZyhzGx9Thx+koNzEA/iFTkXoQFsTPbb" +
-                "1pgvhI4y+OWmp4MiOIwQyhXaBI4pw9kH62G4a+aMBU4YgzPw9+m0UxxoH1ylqo1NRfswptFBY91nOlak" +
-                "TTlTGRO7wP1Fr44pXktvgy4zmiK5oi4TN6VVGiUkxayBVRPS8d4VYz7952NeXj/v1Ce3H0pf3i8emg5e" +
-                "BdlhduqRoEPBZpsPvae8iaSpLOaqD+2rzCOVrRa+1UH16okpY9TwmlmS1JphmDhYFGoz/VGvlYEBYcQs" +
-                "wU4Rs+JTVhcrvPlf2fUq9H0iVr+eH3eK4UJ2uqxJYJs10urp8yOYKbB8/FALTPd2Tht9pF5X4yauqaBA" +
-                "C2bU1GqfWHaq8W4Zbqvcag6piiuwau/2+ljWoCLaAo1J12ilnX+dxSdua3nCHPAQqRJbdUBZH2rRw/qO" +
-                "mRs1I6cr/cL4W+NfaPnGW2faeM0sto2aejVQgWNOp+AUepgbiY2hLnsMh4x5Xha4SZruqXq87GlLRO9Y" +
-                "SrJBA1h+uuu+Xv8GY34B7F3gx9ADAAA=";
+                "H4sIAAAAAAAAE61TwY7TMBC9+ytG6mFbpBYBt0rcVsAeVkLs3hCqpvY0tnDGwZ60hK9n7LSl7IkDVqQo" +
+                "yZv3Zt6bLOCRsIyZemKBQ049IAP9FMqMEST0BCWN2RJwEkAr4UhxgjKx9Tlx+EUOTkE8iFfkVIR6sDHZ" +
+                "7xtjPhE6yuDnm54FFMF+gFAu0CZwSBlOPlgP/U0zJyxwxBicgZdnoZ1iT7vgKlVtbCzahzGNDhrrLtOh" +
+                "Im3KmcqQ2AXuznp1TPFaeh10ntEUyRV1nrgpLdMgISlmBayakA63rhjz/j8f8/j0cas+uV1fuvJ69tAs" +
+                "4EmQHWanHgk6FGy2+dB5yutImspsrvrQvso0UNlo4XMdVK+OmDJGDa+ZJUmt6fuRg0WhNtNf9VoZGBAG" +
+                "zBLsGDErPmV1scKb/5Vdr0I/RmL16+F+qxguZMfzmgS2WSOtnj7cgxkDy7u3tUCN/follTffzOL5lNb6" +
+                "njrdkWsXGg8KtIQGja82jGWrYq/mKTcqoi6RyrkCy/Zup49lBaqmvdCQdJ+WOsLnSXzitp9HzAH3kSqx" +
+                "VSuU9a4W3a1umLlRM3K60M+MfzT+hZavvHWmtdfwYlutsVMnFTjkdAxOofupkdgY6tbHsM+Yp3mTm6RZ" +
+                "fKhmzwvbotE7lpJs0CTmv++yuJffwpjfcAJBaNkDAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

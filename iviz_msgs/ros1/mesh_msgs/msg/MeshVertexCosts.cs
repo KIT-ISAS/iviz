@@ -5,30 +5,26 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshVertexCosts : IDeserializableRos1<MeshVertexCosts>, IDeserializableRos2<MeshVertexCosts>, IMessageRos1, IMessageRos2
+    public sealed class MeshVertexCosts : IDeserializableCommon<MeshVertexCosts>, IMessageCommon
     {
         // Mesh Attribute Message
         [DataMember (Name = "costs")] public float[] Costs;
     
-        /// Constructor for empty message.
         public MeshVertexCosts()
         {
             Costs = System.Array.Empty<float>();
         }
         
-        /// Explicit constructor.
         public MeshVertexCosts(float[] Costs)
         {
             this.Costs = Costs;
         }
         
-        /// Constructor with buffer.
         public MeshVertexCosts(ref ReadBuffer b)
         {
             b.DeserializeStructArray(out Costs);
         }
         
-        /// Constructor with buffer.
         public MeshVertexCosts(ref ReadBuffer2 b)
         {
             b.DeserializeStructArray(out Costs);
@@ -64,17 +60,16 @@ namespace Iviz.Msgs.MeshMsgs
             WriteBuffer2.AddLength(ref c, Costs);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "mesh_msgs/MeshVertexCosts";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "ade4ce6a157397b6c023e12482bc76c8";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE1NW8E0tzlBwLCkpykwqLUkFcYsT01O50nLyE0uMjaJjFZLzi0uKubgAIEHWRioAAAA=";
                 

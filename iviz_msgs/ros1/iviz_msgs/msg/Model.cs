@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Model : IDeserializableRos1<Model>, IDeserializableRos2<Model>, IMessageRos1, IMessageRos2
+    public sealed class Model : IDeserializableCommon<Model>, IMessageCommon
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "filename")] public string Filename;
@@ -14,7 +14,6 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "materials")] public Material[] Materials;
         [DataMember (Name = "nodes")] public Node[] Nodes;
     
-        /// Constructor for empty message.
         public Model()
         {
             Name = "";
@@ -25,7 +24,6 @@ namespace Iviz.Msgs.IvizMsgs
             Nodes = System.Array.Empty<Node>();
         }
         
-        /// Constructor with buffer.
         public Model(ref ReadBuffer b)
         {
             b.DeserializeString(out Name);
@@ -48,7 +46,6 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        /// Constructor with buffer.
         public Model(ref ReadBuffer2 b)
         {
             b.DeserializeString(out Name);
@@ -148,17 +145,16 @@ namespace Iviz.Msgs.IvizMsgs
             WriteBuffer2.AddLength(ref c, Nodes);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Model";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "bd9be904104258bcedbf207e42db2852";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71WXW/aMBR9z6+ItB+wFdqum9SHkBiwli8lgQ5VU2SCAU/kQ3agtL9+14kTHPV1wAO2" +
                 "z3Xsc4/vvbaoOSt2ZkFyaoi2v2UHqo9LzmhRk5qVRbpnRW14VOxf/5g5NFQYHqkpZ+QgEdUVhl9uKAAF" +

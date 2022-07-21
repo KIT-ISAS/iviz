@@ -8,13 +8,14 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Header : IMessageRos1, IMessageRos2, IDeserializableRos1<Header>, IDeserializableRos2<Header>
+    public struct Header : IMessageCommon, IDeserializableCommon<Header>
     {
         // Standard metadata for higher-level stamped data types.
         // This is generally used to communicate timestamped data 
         // in a particular coordinate frame.
         // 
         // sequence ID: consecutively increasing ID 
+        /// <summary> [Ros1] </summary>
         [DataMember (Name = "seq")] public uint Seq;
         //Two-integer timestamp that is expressed as:
         // * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
@@ -24,7 +25,6 @@ namespace Iviz.Msgs.StdMsgs
         //Frame this data is associated with
         [DataMember (Name = "frame_id")] public string FrameId;
     
-        /// Explicit constructor.
         public Header(uint Seq, time Stamp, string FrameId)
         {
             this.Seq = Seq;
@@ -32,7 +32,6 @@ namespace Iviz.Msgs.StdMsgs
             this.FrameId = FrameId;
         }
         
-        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Header(ref ReadBuffer b)
         {
@@ -46,7 +45,6 @@ namespace Iviz.Msgs.StdMsgs
             b.DeserializeString(out h.FrameId);
         }
         
-        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Header(ref ReadBuffer2 b)
         {
@@ -55,7 +53,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public static void Deserialize(ref ReadBuffer2 b, out Header h)
         {
-            b.Deserialize(out h.Seq);
+            h.Seq = default;
             b.Deserialize(out h.Stamp);
             b.DeserializeString(out h.FrameId);
         }
@@ -75,7 +73,6 @@ namespace Iviz.Msgs.StdMsgs
         
         public readonly void RosSerialize(ref WriteBuffer2 b)
         {
-            b.Serialize(Seq);
             b.Serialize(Stamp);
             b.Serialize(FrameId ?? "");
         }
@@ -90,29 +87,27 @@ namespace Iviz.Msgs.StdMsgs
         
         public readonly void AddRos2MessageLength(ref int c)
         {
-            WriteBuffer2.AddLength(ref c, Seq);
             WriteBuffer2.AddLength(ref c, Stamp);
             WriteBuffer2.AddLength(ref c, FrameId);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/Header";
     
         public readonly string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "2176decaecbce78abc3b96ef049fabed";
     
         public readonly string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public readonly string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE42RT2vDMAzF7/4UghzaDtrDdut5DHYbrPei2moscOxMVtrl209O2brdBobg+L3f058O" +
-                "3hVzQAkwkGJARTgXgch9JNkmulCCqjiMFGB51XmkunMdHCJXsNNTJsGUZpiqibSAL8MwZfaoBMoD/fGb" +
-                "kzMgjCjKfkoopi8SODf5WXCgRrdT6WOi7Alen/emyZX8pGwFzUbwQlg59/YIbuKsT4/N4LrDtWztSj3J" +
-                "PRw0orZi6XMUqq1OrHvLeLg1tzP23vyWEiqsl39Hu9YNWIiVQGPxEdZW+dussWQDElxQGE+JGtjbBIy6" +
-                "aqbV5hc5L+iMuXzjb8R7xn+w+YfbetpG21lq3deptwGacJRy4WDS07xAfGLKColPgjK75rpFuu6lzdhE" +
-                "5lo2Yl+stXi2BQS4skZXVRp92caRg3NfAmsPMygCAAA=";
+                "H4sIAAAAAAAAE42RT0sDMRDF7/kUA3toK7Sg3noWwZtobyJlmkx3B7LJOplt3W/vZItWb0Jg2eS935s/" +
+                "DbwqpoASoCfFgIpwzAIdtx3JOtKJIhTFfqAA86tOA5WNa2DXcQE7LSUSjHGCsZhIM/jc92Nij0qg3NMf" +
+                "vzk5AcKAouzHiGL6LIFTlR8Fe6p0O4U+Rkqe4Olha5pUyI/KVtBkBC+EhVNrj+BGTnp/Vw3QwNtLLrfv" +
+                "rtmd89ruqSW5VgHaodaq6XMQKrVgLFsLu7l0ubGQrYEsLhRYznd7+y0rsDSrhYbsO1haC8+TdjkZkOCE" +
+                "wniIVMHeRmHURTUtVr/IaUYnTPkbfyFeM/6DTT/c2tO6s+XFOoYytjZJEw6STxxMephmiI9MSSHyQVAm" +
+                "V12XSNc81mGbyFzzauyLpWTPtokAZ9bOFZVKn9ey5+DcFwKP/KIxAgAA";
                 
         public override string ToString() => Extensions.ToString(this);
     

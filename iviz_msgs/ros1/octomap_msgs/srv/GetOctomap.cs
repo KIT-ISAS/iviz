@@ -50,12 +50,10 @@ namespace Iviz.Msgs.OctomapMsgs
     {
         // Get the map as a octomap
     
-        /// Constructor for empty message.
         public GetOctomapRequest()
         {
         }
         
-        /// Constructor with buffer.
         public GetOctomapRequest(ref ReadBuffer b)
         {
         }
@@ -75,7 +73,6 @@ namespace Iviz.Msgs.OctomapMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -88,19 +85,16 @@ namespace Iviz.Msgs.OctomapMsgs
     {
         [DataMember (Name = "map")] public OctomapMsgs.Octomap Map;
     
-        /// Constructor for empty message.
         public GetOctomapResponse()
         {
             Map = new OctomapMsgs.Octomap();
         }
         
-        /// Explicit constructor.
         public GetOctomapResponse(OctomapMsgs.Octomap Map)
         {
             this.Map = Map;
         }
         
-        /// Constructor with buffer.
         public GetOctomapResponse(ref ReadBuffer b)
         {
             Map = new OctomapMsgs.Octomap(ref b);

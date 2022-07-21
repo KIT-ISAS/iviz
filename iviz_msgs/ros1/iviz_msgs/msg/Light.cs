@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Light : IDeserializableRos1<Light>, IDeserializableRos2<Light>, IMessageRos1, IMessageRos2
+    public sealed class Light : IDeserializableCommon<Light>, IMessageCommon
     {
         public const byte POINT = 0;
         public const byte DIRECTIONAL = 1;
@@ -20,13 +20,11 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "inner_angle")] public float InnerAngle;
         [DataMember (Name = "outer_angle")] public float OuterAngle;
     
-        /// Constructor for empty message.
         public Light()
         {
             Name = "";
         }
         
-        /// Constructor with buffer.
         public Light(ref ReadBuffer b)
         {
             b.DeserializeString(out Name);
@@ -40,7 +38,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out OuterAngle);
         }
         
-        /// Constructor with buffer.
         public Light(ref ReadBuffer2 b)
         {
             b.DeserializeString(out Name);
@@ -108,17 +105,16 @@ namespace Iviz.Msgs.IvizMsgs
             WriteBuffer2.AddLength(ref c, OuterAngle);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Light";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "c08cec0d4c9fe9b11d0596f99987e126";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7WQzwrCMAzG73mKvoE6LyLsICoyUDfc8Dqq62agNqPt/LOnt2JXX0Bz+b780oQm0KGy" +
                 "M5alyb5gMRvDJ18lh/WySNL9YuvoxNM8S9+PIgBjNaqGKX4VvmafrYATkWRnbmxpLryiu4ElSdLTiFVY" +

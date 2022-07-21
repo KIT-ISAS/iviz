@@ -49,12 +49,10 @@ namespace Iviz.Msgs.Roscpp
     public sealed class GetLoggersRequest : IRequest<GetLoggers, GetLoggersResponse>, IDeserializableRos1<GetLoggersRequest>
     {
     
-        /// Constructor for empty message.
         public GetLoggersRequest()
         {
         }
         
-        /// Constructor with buffer.
         public GetLoggersRequest(ref ReadBuffer b)
         {
         }
@@ -74,7 +72,6 @@ namespace Iviz.Msgs.Roscpp
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -87,19 +84,16 @@ namespace Iviz.Msgs.Roscpp
     {
         [DataMember (Name = "loggers")] public Logger[] Loggers;
     
-        /// Constructor for empty message.
         public GetLoggersResponse()
         {
             Loggers = System.Array.Empty<Logger>();
         }
         
-        /// Explicit constructor.
         public GetLoggersResponse(Logger[] Loggers)
         {
             this.Loggers = Loggers;
         }
         
-        /// Constructor with buffer.
         public GetLoggersResponse(ref ReadBuffer b)
         {
             b.DeserializeArray(out Loggers);

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract]
-    public sealed class MultiDOFJointTrajectoryPoint : IDeserializableRos1<MultiDOFJointTrajectoryPoint>, IDeserializableRos2<MultiDOFJointTrajectoryPoint>, IMessageRos1, IMessageRos2
+    public sealed class MultiDOFJointTrajectoryPoint : IDeserializableCommon<MultiDOFJointTrajectoryPoint>, IMessageCommon
     {
         // Each multi-dof joint can specify a transform (up to 6 DOF)
         [DataMember (Name = "transforms")] public GeometryMsgs.Transform[] Transforms;
@@ -15,7 +15,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
         [DataMember (Name = "accelerations")] public GeometryMsgs.Twist[] Accelerations;
         [DataMember (Name = "time_from_start")] public duration TimeFromStart;
     
-        /// Constructor for empty message.
         public MultiDOFJointTrajectoryPoint()
         {
             Transforms = System.Array.Empty<GeometryMsgs.Transform>();
@@ -23,7 +22,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
             Accelerations = System.Array.Empty<GeometryMsgs.Twist>();
         }
         
-        /// Explicit constructor.
         public MultiDOFJointTrajectoryPoint(GeometryMsgs.Transform[] Transforms, GeometryMsgs.Twist[] Velocities, GeometryMsgs.Twist[] Accelerations, duration TimeFromStart)
         {
             this.Transforms = Transforms;
@@ -32,7 +30,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
             this.TimeFromStart = TimeFromStart;
         }
         
-        /// Constructor with buffer.
         public MultiDOFJointTrajectoryPoint(ref ReadBuffer b)
         {
             b.DeserializeStructArray(out Transforms);
@@ -49,7 +46,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
             b.Deserialize(out TimeFromStart);
         }
         
-        /// Constructor with buffer.
         public MultiDOFJointTrajectoryPoint(ref ReadBuffer2 b)
         {
             b.DeserializeStructArray(out Transforms);
@@ -126,17 +122,16 @@ namespace Iviz.Msgs.TrajectoryMsgs
             WriteBuffer2.AddLength(ref c, TimeFromStart);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "trajectory_msgs/MultiDOFJointTrajectoryPoint";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "3ebe08d1abd5b65862d50e09430db776";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71UTY/TQAy9z6+wtJddqQQJ0B6QuPGhPSBArLggVE0nTjrsZBw8Dtnw6/EkabJdFXEA" +
                 "tVIlT2s/+73nmQt4Y90emi6If1JSBd/JRwFnI6QWna8GsCBsY6qIG7jsWhCCa3j94e2VqZEaFB62TarT" +

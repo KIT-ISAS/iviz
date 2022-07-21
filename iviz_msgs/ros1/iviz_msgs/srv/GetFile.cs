@@ -52,19 +52,16 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Uri of the file. Example: package://some_package/file.dae </summary>
         [DataMember (Name = "uri")] public string Uri;
     
-        /// Constructor for empty message.
         public GetFileRequest()
         {
             Uri = "";
         }
         
-        /// Explicit constructor.
         public GetFileRequest(string Uri)
         {
             this.Uri = Uri;
         }
         
-        /// Constructor with buffer.
         public GetFileRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out Uri);
@@ -99,14 +96,12 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> An error message if success is false </summary>
         [DataMember (Name = "message")] public string Message;
     
-        /// Constructor for empty message.
         public GetFileResponse()
         {
             Bytes = System.Array.Empty<byte>();
             Message = "";
         }
         
-        /// Explicit constructor.
         public GetFileResponse(bool Success, byte[] Bytes, string Message)
         {
             this.Success = Success;
@@ -114,7 +109,6 @@ namespace Iviz.Msgs.IvizMsgs
             this.Message = Message;
         }
         
-        /// Constructor with buffer.
         public GetFileResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

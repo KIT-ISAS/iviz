@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GridCells : IDeserializableRos1<GridCells>, IDeserializableRos2<GridCells>, IMessageRos1, IMessageRos2
+    public sealed class GridCells : IDeserializableCommon<GridCells>, IMessageCommon
     {
         //an array of cells in a 2D grid
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -13,13 +13,11 @@ namespace Iviz.Msgs.NavMsgs
         [DataMember (Name = "cell_height")] public float CellHeight;
         [DataMember (Name = "cells")] public GeometryMsgs.Point[] Cells;
     
-        /// Constructor for empty message.
         public GridCells()
         {
             Cells = System.Array.Empty<GeometryMsgs.Point>();
         }
         
-        /// Explicit constructor.
         public GridCells(in StdMsgs.Header Header, float CellWidth, float CellHeight, GeometryMsgs.Point[] Cells)
         {
             this.Header = Header;
@@ -28,7 +26,6 @@ namespace Iviz.Msgs.NavMsgs
             this.Cells = Cells;
         }
         
-        /// Constructor with buffer.
         public GridCells(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -37,7 +34,6 @@ namespace Iviz.Msgs.NavMsgs
             b.DeserializeStructArray(out Cells);
         }
         
-        /// Constructor with buffer.
         public GridCells(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -85,26 +81,25 @@ namespace Iviz.Msgs.NavMsgs
             WriteBuffer2.AddLength(ref c, Cells);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "nav_msgs/GridCells";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "b9e4f5df6d28e272ebde00a3994830f5";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE7VTTWvcMBC961cM7CFJYVNISw+B3kI/DoVAcitlmZVm7QFZcqXxbtxf3yebbBvooYfW" +
-                "GGRL772ZeTPacCIuhWfKB/ISYyXFDt3cUVc0uE/CQQr1y+IOMbO9uVmAu5MG619u9aJdb66TPIiVeTfU" +
-                "rr6+z5rs67dV3bn3//hxXx4+3lK1sEZbE3YbejBOgUsgpMKBjemQUQgSlLKNcpQIEg+jBFpObR6lXoP4" +
-                "2CtMqNRJksIxzjRVgCyTz8MwJfVsQqaDvOCDuTg3cjH1U+QCfC5BU4MfCg/S1PFW+T5J8kKf726BSVX8" +
-                "ZIqEZij4Ilw1dTgkN8E5eAuC2zye8ha/0qEd5+BkPVtLVp7GIrXlyfUWMV6txV1DG+YIooRKl8veDr/1" +
-                "ihAEKciYfU+XyPx+tj4nCAoduSjvozRhDwegetFIF1e/KadFOnHKz/Kr4q8YfyObzrqtpm2PnsVWfZ06" +
-                "GAjgWPJRA6D7eRHxUSUZRd0XLrNrrDWk23xoHgME1tIRrFxr9ooGBDopprVaaepLN3YY7/80jX+4AM+D" +
-                "BauMNdWlmDFXNYU9uHyYnIZrQ3QogqJG9rJer3dv6en8NZ+/fjj3E0KsLTO/AwAA";
+                "H4sIAAAAAAAAE7VTwWrcMBC96ysGfEhS2JSmpYeF3kKTHgqhyS2EZVYa2wJZcqXxbtyv75NNtg300ENr" +
+                "DJal997MvBk1HIlz5plSS1ZCKOSxQ1fX1GXvzK2wk0z98jFtSKzvrxbg7uid9q+3evFdr6aTNIjmeTeU" +
+                "rry9Sz7q49Oqbsynf/yYr/c3Wyrq1mhrwqahe+XoODtCKuxYmdqEQpCg5E2QgwSQeBjF0XKq8yjlEsSH" +
+                "3sOEQp1EyRzCTFMBSBPZNAxT9JZVSP0gr/hgLs6NnNXbKXAGPmXnY4W3mQep6niLfJ8kWqEv11tgYhE7" +
+                "qUdCMxRsFi4+djgkM8E5eAsCNfT4LZV3T6Z5OKYN9qVDX05ZkPasNWt5HrOUmjCXLYK9Wau8RBC4JAjn" +
+                "Cp0vezv8lgtCNOQiY7I9naOEu1n7FCEodODseR+kCltYAdWzSjq7+E05LtKRY3qRXxV/xfgb2XjSrTVt" +
+                "ejQvVBvK1MFJAMecDt4Bup8XERu8RKXg95nzbCprDWmaz9VsgMBaWoMvl5KsRyccHT3Gtmiu6ktbdpjz" +
+                "/zSWf7gJLxMGq5R9LEsxYypePezBLcQIVVydpjYLihrZynrPPn6g59NqPq1+GPMTaZDOMMgDAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

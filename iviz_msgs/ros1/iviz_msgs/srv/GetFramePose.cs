@@ -52,19 +52,16 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Frame ids </summary>
         [DataMember (Name = "frames")] public string[] Frames;
     
-        /// Constructor for empty message.
         public GetFramePoseRequest()
         {
             Frames = System.Array.Empty<string>();
         }
         
-        /// Explicit constructor.
         public GetFramePoseRequest(string[] Frames)
         {
             this.Frames = Frames;
         }
         
-        /// Constructor with buffer.
         public GetFramePoseRequest(ref ReadBuffer b)
         {
             b.DeserializeStringArray(out Frames);
@@ -101,21 +98,18 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> The absolute poses </summary>
         [DataMember (Name = "poses")] public GeometryMsgs.Pose[] Poses;
     
-        /// Constructor for empty message.
         public GetFramePoseResponse()
         {
             IsValid = System.Array.Empty<bool>();
             Poses = System.Array.Empty<GeometryMsgs.Pose>();
         }
         
-        /// Explicit constructor.
         public GetFramePoseResponse(bool[] IsValid, GeometryMsgs.Pose[] Poses)
         {
             this.IsValid = IsValid;
             this.Poses = Poses;
         }
         
-        /// Constructor with buffer.
         public GetFramePoseResponse(ref ReadBuffer b)
         {
             b.DeserializeStructArray(out IsValid);

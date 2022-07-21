@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Texture : IDeserializableRos1<Texture>, IDeserializableRos2<Texture>, IMessageRos1, IMessageRos2
+    public sealed class Texture : IDeserializableCommon<Texture>, IMessageCommon
     {
         public const byte TYPE_NONE = 0;
         public const byte TYPE_DIFFUSE = 1;
@@ -46,13 +46,11 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "wrap_mode_u")] public byte WrapModeU;
         [DataMember (Name = "wrap_mode_v")] public byte WrapModeV;
     
-        /// Constructor for empty message.
         public Texture()
         {
             Path = "";
         }
         
-        /// Constructor with buffer.
         public Texture(ref ReadBuffer b)
         {
             b.DeserializeString(out Path);
@@ -66,7 +64,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out WrapModeV);
         }
         
-        /// Constructor with buffer.
         public Texture(ref ReadBuffer2 b)
         {
             b.DeserializeString(out Path);
@@ -134,17 +131,16 @@ namespace Iviz.Msgs.IvizMsgs
             WriteBuffer2.AddLength(ref c, WrapModeV);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Texture";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "0c05ed3d1750fc865d4edeecbd425ef0";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE2WQzVKDMBSF9zwFj6D90bpwkUIoGfM3CbSyyqClykwLDELVtzehoLfjhoHvHO499/Rl" +
                 "1a38JJPYcMGx/+jfeP0fC0kUpdrhW4i1xEFKkbJ8Bjlia4J5YvEcYsyI1mTrxiwgjzHZxM69hJQLxRDV" +

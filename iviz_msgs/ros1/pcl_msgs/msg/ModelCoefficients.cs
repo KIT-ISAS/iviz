@@ -5,32 +5,28 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class ModelCoefficients : IDeserializableRos1<ModelCoefficients>, IDeserializableRos2<ModelCoefficients>, IMessageRos1, IMessageRos2
+    public sealed class ModelCoefficients : IDeserializableCommon<ModelCoefficients>, IMessageCommon
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "values")] public float[] Values;
     
-        /// Constructor for empty message.
         public ModelCoefficients()
         {
             Values = System.Array.Empty<float>();
         }
         
-        /// Explicit constructor.
         public ModelCoefficients(in StdMsgs.Header Header, float[] Values)
         {
             this.Header = Header;
             this.Values = Values;
         }
         
-        /// Constructor with buffer.
         public ModelCoefficients(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.DeserializeStructArray(out Values);
         }
         
-        /// Constructor with buffer.
         public ModelCoefficients(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -70,25 +66,24 @@ namespace Iviz.Msgs.PclMsgs
             WriteBuffer2.AddLength(ref c, Values);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "pcl_msgs/ModelCoefficients";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "ca27dea75e72cb894cd36f9e5005e93e";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE62RQYsUMRCF7/kVBXPYXWFW0NuAN9H1IAi7N5GhJqnpLkgnbap61v73vvTgqjcPNoGQ" +
-                "znvfq1Q9CCdpNG5bOOfK/vbN12904byIhRDe/ecvfH78eCDzdJxssNcP1+AdPTqXxC3RJM6JnelcUZcO" +
-                "o7R9lotkmHiaJdF26+ssdg/j06hGWIMUaZzzSotB5JVinaalaGQXcp3kLz+cWohp5uYal8wN+tqSli4/" +
-                "N56k07FMvi9SotCn9wdoiklcXFHQCkJswqZlwCWFRQu61w1h9/Rc9zjKgO6+hJOP7L1Y+TE3sV4n2wEZ" +
-                "r66PuwcbzRGkJKPb7d8RR7sjhKAEmWsc6RaVf1l9rAVAwaya8ilLB0d0ANSbbrq5+4NcNnThUn/hr8Tf" +
-                "Gf+CLS/c/qb9iJnl/npbBjQQwrnViyZIT+sGiVmlOGU9NW5r6K5rZNh96D2GCK5tItjZrEbFABI9q4/B" +
-                "vHX6No2jphB+ArSKNHWvAgAA";
+                "H4sIAAAAAAAAE61RTWvcMBC961cM7CFJYROS3hZ6K216KIQktxCWWWnWHpAlVyNv4n/fJy/5uuUQIxCW" +
+                "3pfeXAsHKdQvm9vHzPX71cMjHThOYs65H1/8ub93vzdkNWwH6+zi+mi8orvKKXAJNEjlwJVpn5FLu17K" +
+                "OspBIkg8jBJoua3zKHYO4n2vRlidJCkc40yTAVQz+TwMU1LPVajqIB/4YGoippFLVT9FLsDnEjQ1+L7w" +
+                "IE0dy+TfJMkL/fm5ASaZ+KkqAs1Q8EXYNHW4JDdpQnuNQCt6uM12+ehW9095jXPpUPNrCqo915Zansci" +
+                "1gKzbWD27fjKc5igJYFdMDpdzrb4tTOCG7LImH1Pp3jCzVz7nCAoGFpR3kVpwh5VQPWkkU7O3imnRTpx" +
+                "yi/yR8U3j8/Iplfd9qZ1j+HFVoNNHZoEcCz5oAHQ3byI+KiSKkXdFS6za6yjpVv9amUDBNYyGuxslr1i" +
+                "EoGetPbOamnqy1i2Gpz7DzMLnaW4AgAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

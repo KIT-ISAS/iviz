@@ -5,19 +5,16 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformFeedback : IDeserializableRos1<LookupTransformFeedback>, IDeserializableRos2<LookupTransformFeedback>, IMessageRos1, IMessageRos2, IFeedback<LookupTransformActionFeedback>
+    public sealed class LookupTransformFeedback : IDeserializableCommon<LookupTransformFeedback>, IMessageCommon, IFeedback<LookupTransformActionFeedback>
     {
-        /// Constructor for empty message.
         public LookupTransformFeedback()
         {
         }
         
-        /// Constructor with buffer.
         public LookupTransformFeedback(ref ReadBuffer b)
         {
         }
         
-        /// Constructor with buffer.
         public LookupTransformFeedback(ref ReadBuffer2 b)
         {
         }
@@ -43,7 +40,6 @@ namespace Iviz.Msgs.Tf2Msgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -52,17 +48,16 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void AddRos2MessageLength(ref int c) { }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "tf2_msgs/LookupTransformFeedback";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = BuiltIns.EmptyMd5Sum;
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 => BuiltIns.EmptyDependenciesBase64;
     
         public override string ToString() => Extensions.ToString(this);

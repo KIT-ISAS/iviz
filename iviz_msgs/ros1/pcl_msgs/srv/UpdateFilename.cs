@@ -50,19 +50,16 @@ namespace Iviz.Msgs.PclMsgs
     {
         [DataMember (Name = "filename")] public string Filename;
     
-        /// Constructor for empty message.
         public UpdateFilenameRequest()
         {
             Filename = "";
         }
         
-        /// Explicit constructor.
         public UpdateFilenameRequest(string Filename)
         {
             this.Filename = Filename;
         }
         
-        /// Constructor with buffer.
         public UpdateFilenameRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out Filename);
@@ -92,18 +89,15 @@ namespace Iviz.Msgs.PclMsgs
     {
         [DataMember (Name = "success")] public bool Success;
     
-        /// Constructor for empty message.
         public UpdateFilenameResponse()
         {
         }
         
-        /// Explicit constructor.
         public UpdateFilenameResponse(bool Success)
         {
             this.Success = Success;
         }
         
-        /// Constructor with buffer.
         public UpdateFilenameResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
@@ -122,7 +116,6 @@ namespace Iviz.Msgs.PclMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;

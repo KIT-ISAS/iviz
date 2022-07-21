@@ -5,20 +5,18 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TurtleActionlib
 {
     [DataContract]
-    public sealed class ShapeActionResult : IDeserializableRos1<ShapeActionResult>, IDeserializableRos2<ShapeActionResult>, IMessageRos1, IMessageRos2, IActionResult<ShapeResult>
+    public sealed class ShapeActionResult : IDeserializableCommon<ShapeActionResult>, IMessageCommon, IActionResult<ShapeResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
         [DataMember (Name = "result")] public ShapeResult Result { get; set; }
     
-        /// Constructor for empty message.
         public ShapeActionResult()
         {
             Status = new ActionlibMsgs.GoalStatus();
             Result = new ShapeResult();
         }
         
-        /// Explicit constructor.
         public ShapeActionResult(in StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, ShapeResult Result)
         {
             this.Header = Header;
@@ -26,7 +24,6 @@ namespace Iviz.Msgs.TurtleActionlib
             this.Result = Result;
         }
         
-        /// Constructor with buffer.
         public ShapeActionResult(ref ReadBuffer b)
         {
             Header = new StdMsgs.Header(ref b);
@@ -34,7 +31,6 @@ namespace Iviz.Msgs.TurtleActionlib
             Result = new ShapeResult(ref b);
         }
         
-        /// Constructor with buffer.
         public ShapeActionResult(ref ReadBuffer2 b)
         {
             Header = new StdMsgs.Header(ref b);
@@ -81,36 +77,36 @@ namespace Iviz.Msgs.TurtleActionlib
             Result.AddRos2MessageLength(ref c);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "turtle_actionlib/ShapeActionResult";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "c8d13d5d140f1047a2e4d3bf5c045822";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE71WTXPbNhC981dgxofYnVppk36kntFBtVVHGSfx2GqvHpBckWhBgMWHZf37vgUpmnKs" +
-                "RockGtu0JODtw9u3i31LsiQn6vTIZBGUNVrld42v/MtLK/VtkCF64dMju61lSzfkow7CpUc2/cKv7P3t" +
-                "5RnilR2Htx2zIwEippSuFA0FWcogxcqCuKpqcqea7kkzyaalUqRvw6YlP8HGZa28wE9FhpzUeiOix6Jg" +
-                "RWGbJhpVyEAiqIZ29mOnMkKKVrqgiqilw3rrSmV4+crJhhgdP57+jWQKEouLM6wxnooYFAhtgFA4kl6Z" +
-                "Cl+KLCoTXr/iDdnRcm1P8ZYqyD8EF6GWgcnSQwt9maf0Z4jxXXe4CbAhDiFK6cVx+uwOb/2JQBBQoNYW" +
-                "tTgG8+tNqK0BIIl76ZTMNTFwAQWA+oI3vTgZIZsEbaSxW/gO8THGIbBmwOUzndbImebT+1hBQCxsnb1X" +
-                "JZbmmwRSaEUmCHjOSbfJeFcXMjv6gzXGIuxKGcFTem8LhQSUYq1CnfngGD1l406V2Vdy4966yPhfZLbC" +
-                "g+Nzgt9si6V7cz3/cLH4cCm2r6n4AX/ZlpS2iVp6saHAhsyJ9Sm6xPcCdbGRc3ePOugwZ+fLxV9zMcL8" +
-                "cReTMxKdg7IwYU6s0UHA1zfz+fvr5fxiAH61C+yoIFgbtkTKYQ/+BO73QchVgJNV4NM7ThA9pDowVSb+" +
-                "53WEX5gkqdAZDlXZamIEFfwWBUSPl+QaVJ/mVhDopKd8++f5+Xx+MaL8epfyGsiyqBUxbR8LVmEVuQ88" +
-                "J8S+MLPfP9486sJhfnomTG7T0cuYbPnI/dlIZaTPSsOu8BZlsJJKR0f76N3M383PR/ym4udP6Tn6m4qw" +
-                "xwGpoGwMT+3y/ec55lRI9NSEOQSL6JNBgil3CHRqZe6lVuW+A/TOGyplKn75Bs4brGdsSEX4aL4heYPC" +
-                "57Orq8dKnopfDyWYE64qepbhIeoiJ59ma5e0WSnX8KXG10cYd4HEhMqdQ4xt8uYLHOIwmdkUO+XXBeBr" +
-                "Y48nrj7eLsdQU/FbApyZrRj97QEkUSJrDEKdCHKQgFEm3RTgYXBdJt3yA2rPM7ZltVnStcLxUTnSPGmd" +
-                "2dFMa7tO8wgvRCk4rtvhsgKZ/qLiGhOjsYq3lJTHqmIZ+0WBHkL2Da+yxUXWOaAbQXqRfOB083nSnQxJ" +
-                "17XCbJHu41FLSe6gkmehRRpdYn/HPNUJ+8mwf3BK8iwQRhxqWuRKa+xmTN8lb00IPUBvrQdLkuOWkhiN" +
-                "R4WeP7pLP16gFYPeZjcLK6Iyl8U/7Ebs6OZXjJPey4q61PiWCrVSxbYYEgM/6dF51usWgFQTU1Ggzyms" +
-                "mmyTx0PIV0pdiC5ouhsy+HI0jWfZSlvJwyXPlE5ZdydNpWn4WLYWuWyy/wA+Bzam8QsAAA==";
+                "H4sIAAAAAAAAE71WTXPbNhC981dgRofYndppkjZNPaODa6uOOk7isdVeOh0PSK5ItCDA4sOy/n3eghRN" +
+                "OVajQxKNbNoS8Pbh7dvFviVZkhN1emSyCMoarfLbxlf++YWV+ibIEL3w6ZHd1LKla/JRB+HSI5t+4Vf2" +
+                "7ubiBPHKjsPbjtlEgIgppStFQ0GWMkixtCCuqprckaY70kyyaakU6duwbskfY+OiVl7gXZEhJ7Vei+ix" +
+                "KFhR2KaJRhUykAiqoa392KmMkKKVLqgiaumw3rpSGV6+dLIhRsfb03+RTEFifn6CNcZTEYMCoTUQCkfS" +
+                "K1PhS5FFZcKrl7xBTMRf19a/+DubLFb2CJ9ThTwMLESoZWDWdN9CaCYs/QmCfded8hhBoBIhXOnFQfrs" +
+                "Fv/6Q4Fo4EKtLWpxgCNcrUNtDQBJ3EmnZK6JgQtIAdRnvOnZ4QjZJGgjjd3Ad4gPMfaBNQMun+moRvI0" +
+                "y+BjBSWxsHX2TpVYmq8TSKEVmSBgPifdOuNdXchs8huLjUXYlVKDp/TeFgqZKMVKhTrzwTF6SsutKrOv" +
+                "ZMudBZLxn0hxhQfH50y/2VRN98/V7P35/P2F2Lym4gf8Zn9S2iZq6cWaAjszJ9an6BLfC9TFRs7dHQqi" +
+                "wzw9W8z/nIkR5ottTM5IdA7Kwo05sUZ7AV9dz2bvrhaz8wH45Tawo4LgcdgSKYc9+BOUgQ9CLgOcrAKf" +
+                "3nGC6D4VhKky8T+vCX5gkqRCZziUZ6uJEVTwGxQQPViQa1CGmntCoMOe8s0fZ2ez2fmI8qttyisgy6JW" +
+                "xLR9LFiFZeSG8JQQu8Kc/vrh+kEXDvPjE2Fym45exmTLB+5PRiojfVYadoW3KIOlVDo62kXvevb77GzE" +
+                "byp++pSeo3+oCDsckArKxvDYLt9/nmNOhURzTZhDsIiGGSSYcodAy1bmTmpV7jpA77yhUqbi9Tdw3mA9" +
+                "Y0MqwgfzDckbFD47vbx8qOSp+HlfgjnhzqInGe6jLnLyaba2SZulcg3fbnx9hHEXSEyo3DrE2CZvvsAh" +
+                "9pOZTbFVfl0AvjZ2eOLyw81iDDUVvyTAU7MRo789gCRKZI1BqBNBDhIwynE3DngYXJdJt3yP2vOMbVlt" +
+                "lnSlcHxUjjSPWmc2OdXartJgwgtRCo7rdrisQKa/qLjGxGi+4i0l5bGqWMZ+UaD7kH3Dq2x+nnUO6EaQ" +
+                "XiQfON18nnQnQ9JVrTBbpPt41FKSO6jkoWieRpfY3zGPdcJ+MuwfnJI8C4QRh5oWudIauxnTd8lbEUIP" +
+                "0BvrwZLkuKUkRuNRoeeP7tKPF2jFoLfezsKSqMxl8S+7ETu6QRZzpfeyoi41vqVCLVWxKYbEwB/36Dz0" +
+                "dQtAqompKNDnFFYdb5LHQ8hXSl2ILmi6HTL4fDSWZ9lSW8lTJs+UTll3K02lafhYtha5bLKPmNIuo/oL" +
+                "AAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

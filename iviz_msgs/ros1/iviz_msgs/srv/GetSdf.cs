@@ -52,19 +52,16 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Uri of the file. Example: package://some_package/file.world </summary>
         [DataMember (Name = "uri")] public string Uri;
     
-        /// Constructor for empty message.
         public GetSdfRequest()
         {
             Uri = "";
         }
         
-        /// Explicit constructor.
         public GetSdfRequest(string Uri)
         {
             this.Uri = Uri;
         }
         
-        /// Constructor with buffer.
         public GetSdfRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out Uri);
@@ -99,14 +96,12 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> An error message if success is false </summary>
         [DataMember (Name = "message")] public string Message;
     
-        /// Constructor for empty message.
         public GetSdfResponse()
         {
             Scene = new Scene();
             Message = "";
         }
         
-        /// Explicit constructor.
         public GetSdfResponse(bool Success, Scene Scene, string Message)
         {
             this.Success = Success;
@@ -114,7 +109,6 @@ namespace Iviz.Msgs.IvizMsgs
             this.Message = Message;
         }
         
-        /// Constructor with buffer.
         public GetSdfResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

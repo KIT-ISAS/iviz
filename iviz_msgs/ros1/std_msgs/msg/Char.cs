@@ -5,28 +5,24 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class Char : IDeserializableRos1<Char>, IDeserializableRos2<Char>, IMessageRos1, IMessageRos2
+    public sealed class Char : IDeserializableCommon<Char>, IMessageCommon
     {
         [DataMember (Name = "data")] public sbyte Data;
     
-        /// Constructor for empty message.
         public Char()
         {
         }
         
-        /// Explicit constructor.
         public Char(sbyte Data)
         {
             this.Data = Data;
         }
         
-        /// Constructor with buffer.
         public Char(ref ReadBuffer b)
         {
             b.Deserialize(out Data);
         }
         
-        /// Constructor with buffer.
         public Char(ref ReadBuffer2 b)
         {
             b.Deserialize(out Data);
@@ -52,12 +48,10 @@ namespace Iviz.Msgs.StdMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        /// <summary> Constant size of this message. </summary> 
         public const int Ros2FixedMessageLength = 1;
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
@@ -67,17 +61,16 @@ namespace Iviz.Msgs.StdMsgs
             WriteBuffer2.AddLength(ref c, Data);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "std_msgs/Char";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "1bf77f25acecdedba0e224b162199717";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE0vOSCxSSEksSeQCADeiGH4KAAAA";
                 

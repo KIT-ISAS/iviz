@@ -277,7 +277,7 @@ public unsafe partial struct WriteBuffer2
     public static void AddLength(ref int c, string? s)
     {
         c = DoAlign4(c) + sizeof(int);
-        if (s == null)
+        if (string.IsNullOrEmpty(s))
         {
             c++;
             return;

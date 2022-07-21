@@ -49,12 +49,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
     public sealed class SelfTestRequest : IRequest<SelfTest, SelfTestResponse>, IDeserializableRos1<SelfTestRequest>
     {
     
-        /// Constructor for empty message.
         public SelfTestRequest()
         {
         }
         
-        /// Constructor with buffer.
         public SelfTestRequest(ref ReadBuffer b)
         {
         }
@@ -74,7 +72,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -89,14 +86,12 @@ namespace Iviz.Msgs.DiagnosticMsgs
         [DataMember (Name = "passed")] public byte Passed;
         [DataMember (Name = "status")] public DiagnosticStatus[] Status;
     
-        /// Constructor for empty message.
         public SelfTestResponse()
         {
             Id = "";
             Status = System.Array.Empty<DiagnosticStatus>();
         }
         
-        /// Explicit constructor.
         public SelfTestResponse(string Id, byte Passed, DiagnosticStatus[] Status)
         {
             this.Id = Id;
@@ -104,7 +99,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
             this.Status = Status;
         }
         
-        /// Constructor with buffer.
         public SelfTestResponse(ref ReadBuffer b)
         {
             b.DeserializeString(out Id);

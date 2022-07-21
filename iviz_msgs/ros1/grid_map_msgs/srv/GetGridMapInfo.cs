@@ -49,12 +49,10 @@ namespace Iviz.Msgs.GridMapMsgs
     public sealed class GetGridMapInfoRequest : IRequest<GetGridMapInfo, GetGridMapInfoResponse>, IDeserializableRos1<GetGridMapInfoRequest>
     {
     
-        /// Constructor for empty message.
         public GetGridMapInfoRequest()
         {
         }
         
-        /// Constructor with buffer.
         public GetGridMapInfoRequest(ref ReadBuffer b)
         {
         }
@@ -74,7 +72,6 @@ namespace Iviz.Msgs.GridMapMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -88,19 +85,16 @@ namespace Iviz.Msgs.GridMapMsgs
         // Grid map info
         [DataMember (Name = "info")] public GridMapMsgs.GridMapInfo Info;
     
-        /// Constructor for empty message.
         public GetGridMapInfoResponse()
         {
             Info = new GridMapMsgs.GridMapInfo();
         }
         
-        /// Explicit constructor.
         public GetGridMapInfoResponse(GridMapMsgs.GridMapInfo Info)
         {
             this.Info = Info;
         }
         
-        /// Constructor with buffer.
         public GetGridMapInfoResponse(ref ReadBuffer b)
         {
             Info = new GridMapMsgs.GridMapInfo(ref b);

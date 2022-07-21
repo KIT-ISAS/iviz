@@ -51,19 +51,16 @@ namespace Iviz.Msgs.GridMapMsgs
         // map
         [DataMember (Name = "map")] public GridMapMsgs.GridMap Map;
     
-        /// Constructor for empty message.
         public SetGridMapRequest()
         {
             Map = new GridMapMsgs.GridMap();
         }
         
-        /// Explicit constructor.
         public SetGridMapRequest(GridMapMsgs.GridMap Map)
         {
             this.Map = Map;
         }
         
-        /// Constructor with buffer.
         public SetGridMapRequest(ref ReadBuffer b)
         {
             Map = new GridMapMsgs.GridMap(ref b);
@@ -93,12 +90,10 @@ namespace Iviz.Msgs.GridMapMsgs
     public sealed class SetGridMapResponse : IResponse, IDeserializableRos1<SetGridMapResponse>
     {
     
-        /// Constructor for empty message.
         public SetGridMapResponse()
         {
         }
         
-        /// Constructor with buffer.
         public SetGridMapResponse(ref ReadBuffer b)
         {
         }
@@ -118,7 +113,6 @@ namespace Iviz.Msgs.GridMapMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary> 
         public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

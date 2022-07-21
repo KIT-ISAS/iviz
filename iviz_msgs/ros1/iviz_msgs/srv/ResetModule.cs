@@ -52,19 +52,16 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Id of the module </summary>
         [DataMember (Name = "id")] public string Id;
     
-        /// Constructor for empty message.
         public ResetModuleRequest()
         {
             Id = "";
         }
         
-        /// Explicit constructor.
         public ResetModuleRequest(string Id)
         {
             this.Id = Id;
         }
         
-        /// Constructor with buffer.
         public ResetModuleRequest(ref ReadBuffer b)
         {
             b.DeserializeString(out Id);
@@ -97,20 +94,17 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> An error message if success is false </summary>
         [DataMember (Name = "message")] public string Message;
     
-        /// Constructor for empty message.
         public ResetModuleResponse()
         {
             Message = "";
         }
         
-        /// Explicit constructor.
         public ResetModuleResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// Constructor with buffer.
         public ResetModuleResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);

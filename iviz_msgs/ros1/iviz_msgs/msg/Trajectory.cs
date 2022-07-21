@@ -5,33 +5,29 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Trajectory : IDeserializableRos1<Trajectory>, IDeserializableRos2<Trajectory>, IMessageRos1, IMessageRos2
+    public sealed class Trajectory : IDeserializableCommon<Trajectory>, IMessageCommon
     {
         [DataMember (Name = "poses")] public GeometryMsgs.Pose[] Poses;
         [DataMember (Name = "timestamps")] public time[] Timestamps;
     
-        /// Constructor for empty message.
         public Trajectory()
         {
             Poses = System.Array.Empty<GeometryMsgs.Pose>();
             Timestamps = System.Array.Empty<time>();
         }
         
-        /// Explicit constructor.
         public Trajectory(GeometryMsgs.Pose[] Poses, time[] Timestamps)
         {
             this.Poses = Poses;
             this.Timestamps = Timestamps;
         }
         
-        /// Constructor with buffer.
         public Trajectory(ref ReadBuffer b)
         {
             b.DeserializeStructArray(out Poses);
             b.DeserializeStructArray(out Timestamps);
         }
         
-        /// Constructor with buffer.
         public Trajectory(ref ReadBuffer2 b)
         {
             b.DeserializeStructArray(out Poses);
@@ -72,17 +68,16 @@ namespace Iviz.Msgs.IvizMsgs
             WriteBuffer2.AddLength(ref c, Timestamps);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "iviz_msgs/Trajectory";
     
         public string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "106d0bcefed39b91bf6dcd161d3c7864";
     
         public string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE72RPwvCMBDF9/sUB65SF3EQHJycBEU3EQl6rQGT1NyJfz69l2Jbi4OLmCX3kkvyey8F" +
                 "BUcS7zvHBQ8WgWmzxVInBrEuiTSxGFcyAEx+PGC+mo2x+ICAHk4xUhmJyYsRGzyGvAJD6zGPRMil2VMf" +

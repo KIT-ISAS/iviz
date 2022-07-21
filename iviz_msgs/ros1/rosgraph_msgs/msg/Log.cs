@@ -8,7 +8,7 @@ namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Log : IMessageRos1, IMessageRos2, IDeserializableRos1<Log>, IDeserializableRos2<Log>
+    public struct Log : IMessageCommon, IDeserializableCommon<Log>
     {
         //#
         //# Severity level constants
@@ -42,7 +42,6 @@ namespace Iviz.Msgs.RosgraphMsgs
         /// <summary> [Ignore] </summary>
         [DataMember (Name = "topics")] public string[] Topics;
     
-        /// Explicit constructor.
         public Log(in StdMsgs.Header Header, byte Level, string Name, string Msg, string File, string Function, uint Line, string[] Topics)
         {
             this.Header = Header;
@@ -55,7 +54,6 @@ namespace Iviz.Msgs.RosgraphMsgs
             this.Topics = Topics;
         }
         
-        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Log(ref ReadBuffer b)
         {
@@ -74,7 +72,6 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.SkipStringArray(out h.Topics);
         }
         
-        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Log(ref ReadBuffer2 b)
         {
@@ -162,28 +159,27 @@ namespace Iviz.Msgs.RosgraphMsgs
             WriteBuffer2.AddLength(ref c, Topics);
         }
     
-        /// <summary> Full ROS name of this message. </summary>
         public const string MessageType = "rosgraph_msgs/Log";
     
         public readonly string RosMessageType => MessageType;
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "acffd30cd6b6de30f120938c17c593fb";
     
         public readonly string RosMd5Sum => Md5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public readonly string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE61TwWrcMBC9+ysGdEhS2ISkpYQFH1I2my60Sdls6SGERbZmbYEsuZK8W/99n+yuu6WX" +
-                "HmoMkjXz3ozmPQuRCUHPvGevY08GG0OlsyFKGwNiWdFHpsX9h68P+TUJxUVXjWljZPW4fMpviETFlr00" +
-                "p7Fvd+vH/B1iB+mttn/g7tfrp3V+S4K9d/40srzb3H3Kr9+T2MkozVWJznQ5MYuh46Vmo4b+PrJU7Kke" +
-                "lpFhTAzRp5pWNkxiXNyOYs1kneJjuAkVog2HICum4+lOmwR6WVXWeX6djjtbRu3saajTNr69IaNtQgxL" +
-                "qnFkLFPdnXdNJkaSl1eKrtVlQPawGVoLAMk4dUdtVxgdag7Z36ipdJb/5yf7/PwwpxDVFmMJV+NoM/gD" +
-                "blDSK9wqSgVVaAfNal3V7GejZ2CYpmVFQzT2LYdLADe1DoT3lzlMT11AUnTwWNN0FrpCr6gxgFM8kNqS" +
-                "pFZ6SN8Z6ZHvvNI2pe88BpbY8Qb+3rEt4cPFfPAtl13UaKgHQ+lZhqTbakFHnQDIxObgZvjkCsaZio8K" +
-                "oFn+0Xqoh2ZkmKPGm/Fyl+DGcBhVVKDz4WyLz3BBKIIWuHVlTefo/Esfa7gkqbmXXssCbgIxTGzAepZA" +
-                "ZxcnzHagttK6I/3I+LvGv9DaiTfdaVZDM5NuH7oKA0Ri691eK6QW/UBSGs02wrOFl77PEmosmYllmjGS" +
-                "gBoUwSpDcKWGAIoOOtbTP5Eyt1pl2U9vGjN+TAQAAA==";
+                "H4sIAAAAAAAAE61T0WrbMBR991dc0EPbQVrSjVECfshI0wW2dqQZeyglKNaNLZAlT5KT+e93ZC9exl72" +
+                "MGOQrHvPuVf3HAuRCUHPfGCvY0cGG0OFsyFKGwNi2a6LTIv7D18f8ikJxbu2HNKGyOpx+ZTfEomSLXtp" +
+                "zmPf5uvH/B1iR+mttn/g7tfrp3V+R4K9d/48spxv5p/y6XsSexmluSnQmS5GZtF3vNRsVN/fR5aKPVX9" +
+                "MjAMiSH6VNPKmkkMi9tTrJisU3wK16FEtOYQZMl0Ot1rk0Avq9I6z6/jcWuLqJ09D7Xaxre3ZLRNiH5J" +
+                "NU6MRaq7967OxEDy8krRNboIyO43fWsBIBnH7qhpd0aHikP2N2osneX/+ck+Pz/MKES1xVjCzTDaDP6A" +
+                "G5T0CreKUkEV2kOzSpcV+8ngGRimblhRH41dw+EawE2lA+H9ZQ7TURuQFB08Vtetha7QK2oM4BwPpLYk" +
+                "qZEe0rdGeuQ7r7RN6XuPgSV2vIG/t2wL+HAx633LRRs1GurAUHiWIem2WtBJJwDSCNcuTF8zsTm6Cc65" +
+                "hIPGLgYp0DX/aDxkRFcyzFDszXDLaxTBlBjlVKDL/myLz3BFqIZeuHFFRZe4wpcuVrBLkvUgvZY72ArE" +
+                "cLMB60UCXVydMdue2krrTvQD4+8a/0JrR950p0kF8UwaQ2hLTBKJjXcHrZC663qSwmi2Eebdeem7LKGG" +
+                "kplYpmEjCaheGqwyBFdoKKHoqGM1/hwpc6tVlv0Ea64vs1UEAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }
