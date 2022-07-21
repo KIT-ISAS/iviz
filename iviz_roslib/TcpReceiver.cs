@@ -87,6 +87,7 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
             try
             {
                 await ProcessLoop(newTcpClient);
+                shouldRetry = true;
             }
             catch (Exception e)
             {
@@ -122,7 +123,6 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         Status = ReceiverStatus.Dead;
         TcpClient?.Dispose();
         TcpClient = null;
-        runningTs.Cancel();
 
         Logger.LogDebugFormat("{0}: Stopped!", this);
 
@@ -137,6 +137,8 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
             {
             }
         }
+        
+        runningTs.Cancel();
     }
 
     async ValueTask<TcpClient?> StartTcpConnection()
