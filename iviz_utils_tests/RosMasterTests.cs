@@ -20,19 +20,19 @@ namespace Iviz.UtilsTests
         static readonly Uri MasterUri = new Uri("http://localhost:11312");
         const string CallerId = "/iviz_util_tests";
         RosMasterServer rosMasterServer;
-        
-        
+
+
         [SetUp]
         public void Setup()
         {
             rosMasterServer ??= new RosMasterServer(MasterUri, startInBackground: true);
         }
-        
-        
+
+
         [Test]
         public async Task TestXmlRpcGetUriAsync()
         {
-            var args = new XmlRpcArg[] {CallerId};
+            var args = new XmlRpcArg[] { CallerId };
 
             using var source = new CancellationTokenSource();
             source.CancelAfter(3000);
@@ -84,7 +84,8 @@ namespace Iviz.UtilsTests
                 {
                     var systemState2 = await client.GetSystemStateAsync();
                     Assert.True(
-                        systemState2.Subscribers.Any(tuple => tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
+                        systemState2.Subscribers.Any(tuple =>
+                            tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
 
                     using var source = new CancellationTokenSource(5000);
 
@@ -96,11 +97,11 @@ namespace Iviz.UtilsTests
                         }
                     }
                 } // auto unsubscribe
-                
+
                 var systemState3 = await client.GetSystemStateAsync();
                 Assert.False(
-                    systemState3.Subscribers.Any(tuple => tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
-                
+                    systemState3.Subscribers.Any(tuple =>
+                        tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
             } // auto unadvertise
 
             var systemState4 = await client.GetSystemStateAsync();
@@ -108,6 +109,7 @@ namespace Iviz.UtilsTests
                 systemState4.Publishers.Any(tuple => tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
         }
 
+        /*
         [Test]
         public async Task TestGenericChannelReaderAsync()
         {
@@ -136,6 +138,7 @@ namespace Iviz.UtilsTests
                 }
             }
         }
+        */
 
         [Test]
         public async Task TestChannelsWithEmptyMessageAsync()
@@ -157,7 +160,7 @@ namespace Iviz.UtilsTests
 
             await subscriber.ReadAsync(source.Token);
         }
-        
+
         [Test]
         public async Task TestChannelsWithFixedSizeMessageAsync()
         {
@@ -178,7 +181,7 @@ namespace Iviz.UtilsTests
 
             await subscriber.ReadAsync(source.Token);
         }
-        
+
         [Test]
         public async Task TestChannelsWithFalseMessageAsync()
         {
@@ -198,13 +201,15 @@ namespace Iviz.UtilsTests
             Assert.True(subscriber.Subscriber.TopicType != publisher.Publisher.TopicType);
 
             await Task.Delay(1000);
-            
+
             var state = subscriber.Subscriber.GetState();
-            Assert.True(state.Receivers.Length > 0);
-            Assert.False(state.Receivers[0].IsAlive);
-            Assert.NotNull(state.Receivers[0].ErrorDescription);
+            Assert.True(state.Receivers.Count > 0);
+            
+            var receiverState = (Ros1ReceiverState)state.Receivers[0];
+            Assert.False(receiverState.IsAlive);
+            Assert.NotNull(receiverState.ErrorDescription);
         }
-        
+
         [Test]
         public async Task TestChannelsSubscribeNoPublishersAsync()
         {
@@ -213,7 +218,7 @@ namespace Iviz.UtilsTests
 
             await using var subscriber = await client.CreateReaderAsync<Twist>(topicName);
             await Task.Delay(1000);
-            
+
             await using var publisher = await client.CreateWriterAsync<Twist>(topicName);
             publisher.LatchingEnabled = true;
             publisher.Write(default);
@@ -222,7 +227,7 @@ namespace Iviz.UtilsTests
 
             await subscriber.ReadAsync(source.Token);
         }
-        
+
         [Test]
         public async Task TestRosClientParametersAsync()
         {
@@ -240,7 +245,7 @@ namespace Iviz.UtilsTests
             Assert.True(success && value.TryGetInteger(out int valueInt) && valueInt == inValueInt);
             Assert.True(await client.Parameters.DeleteParameterAsync("/iviz_utils_tests/a"));
 
-            string[] inValueArray = {"a", "b"};
+            string[] inValueArray = { "a", "b" };
             Assert.True(await client.Parameters.SetParameterAsync("/iviz_utils_tests/a", inValueArray));
             (success, value) = await client.Parameters.GetParameterAsync("/iviz_utils_tests/a");
             Assert.True(success && value.TryGetArray(out var valueArray)
@@ -256,6 +261,5 @@ namespace Iviz.UtilsTests
                                 && emptyValueArray.Length == 0);
             Assert.True(await client.Parameters.DeleteParameterAsync("/iviz_utils_tests/a"));
         }
-        
     }
 }

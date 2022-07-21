@@ -237,7 +237,7 @@ namespace Iviz.TfHelpers
 
             var msg = new TFMessage(transforms);
             writer.Write(msg);
-            writer.Publisher.LatchedMessage = msg;
+            ((RosPublisher<TFMessage>)writer.Publisher).LatchedMessage = msg;
         }
 
         public void PublishInBackground(CancellationToken token = default)

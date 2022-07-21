@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.GridMapMsgs;
-using Iviz.Msgs.IvizMsgs;
-using Iviz.Msgs.MoveitMsgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.StdMsgs;

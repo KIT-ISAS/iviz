@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Iviz.Msgs;
@@ -43,6 +44,7 @@ internal readonly struct ConfigurationSerializer : IDisposable
             return;
         }
 
+        ThrowIfNull(fieldName);
         writer.WritePropertyName(fieldName);
         writer.WriteValue(field);
         //fields.Add(fieldName!);
@@ -54,7 +56,8 @@ internal readonly struct ConfigurationSerializer : IDisposable
         {
             return;
         }
-
+        
+        ThrowIfNull(fieldName);
         writer.WritePropertyName(fieldName);
         writer.WriteValue(value);
         //fields.Add(fieldName!);
@@ -67,6 +70,7 @@ internal readonly struct ConfigurationSerializer : IDisposable
             return;
         }
 
+        ThrowIfNull(fieldName);
         writer.WritePropertyName(fieldName);
         writer.WriteValueExtended(value);
         //fields.Add(fieldName!);
@@ -79,6 +83,7 @@ internal readonly struct ConfigurationSerializer : IDisposable
             return;
         }
 
+        ThrowIfNull(fieldName);
         writer.WritePropertyName(fieldName);
         writer.WriteValueExtended(value);
         //fields.Add(fieldName!);
@@ -91,6 +96,7 @@ internal readonly struct ConfigurationSerializer : IDisposable
             return;
         }
 
+        ThrowIfNull(fieldName);
         writer.WritePropertyName(fieldName);
         writer.WriteValue(value);
         //fields.Add(fieldName!);
@@ -98,6 +104,7 @@ internal readonly struct ConfigurationSerializer : IDisposable
 
     public void Serialize(ModuleType field, [CallerArgumentExpression("field")] string? fieldName = null)
     {
+        ThrowIfNull(fieldName);
         writer.WritePropertyName(fieldName);
         writer.WriteValue(ModuleNames[field]);
         //fields.Add(fieldName!);
@@ -110,6 +117,8 @@ internal readonly struct ConfigurationSerializer : IDisposable
             return;
         }
 
+        ThrowIfNull(fieldName);
+        
         writer.WritePropertyName(fieldName);
         writer.WriteStartArray();
         foreach (bool b in value)
@@ -119,5 +128,10 @@ internal readonly struct ConfigurationSerializer : IDisposable
 
         writer.WriteEndArray();
         //fields.Add(fieldName!);
+    }
+
+    static void ThrowIfNull([NotNull] string? fieldName)
+    {
+        if (fieldName == null) throw new ArgumentNullException(nameof(fieldName));
     }
 }
