@@ -17,6 +17,7 @@ public readonly struct time : IEquatable<time>, IComparable<time>
     static DateTime UnixEpoch => (unixEpoch ??= new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
     [DataMember(Name = "secs")] public readonly uint Secs;
+    
     [DataMember(Name = "nsecs")] public readonly uint Nsecs;
 
     public time(uint secs, uint nsecs)
@@ -40,40 +41,19 @@ public readonly struct time : IEquatable<time>, IComparable<time>
     /// </summary>
     public static time Now() => new(DateTime.Now + GlobalTimeOffset);
 
-    public DateTime ToDateTime()
-    {
-        return (UnixEpoch + ToTimeSpan()).ToLocalTime();
-    }
+    public DateTime ToDateTime() => (UnixEpoch + ToTimeSpan()).ToLocalTime();
 
-    public TimeSpan ToTimeSpan()
-    {
-        return TimeSpan.FromSeconds(Secs) + TimeSpan.FromTicks(Nsecs / 100);
-    }
+    public TimeSpan ToTimeSpan() => TimeSpan.FromSeconds(Secs) + TimeSpan.FromTicks(Nsecs / 100);
 
-    public override bool Equals(object? obj)
-    {
-        return (obj is time d) && (this == d);
-    }
+    public override bool Equals(object? obj) => (obj is time d) && (this == d);
 
-    public override int GetHashCode()
-    {
-        return (Secs, Nsecs).GetHashCode();
-    }
+    public override int GetHashCode() => HashCode.Combine(Secs, Nsecs);
 
-    public static bool operator ==(time left, time right)
-    {
-        return left.Nsecs == right.Nsecs && left.Secs == right.Secs;
-    }
+    public static bool operator ==(time left, time right) => left.Nsecs == right.Nsecs && left.Secs == right.Secs;
 
-    public static bool operator !=(time left, time right)
-    {
-        return !(left == right);
-    }
+    public static bool operator !=(time left, time right) => !(left == right);
 
-    public bool Equals(time other)
-    {
-        return this == other;
-    }
+    public bool Equals(time other) => this == other;
 
     public int CompareTo(time other)
     {
@@ -81,30 +61,17 @@ public readonly struct time : IEquatable<time>, IComparable<time>
         return secsComparison != 0 ? secsComparison : Nsecs.CompareTo(other.Nsecs);
     }
 
-    public static bool operator >(time left, time right)
-    {
-        return left.Secs != right.Secs ? left.Secs > right.Secs : left.Nsecs > right.Nsecs;
-    }
+    public static bool operator >(time left, time right) =>
+        left.Secs != right.Secs ? left.Secs > right.Secs : left.Nsecs > right.Nsecs;
 
-    public static bool operator <(time left, time right)
-    {
-        return left.Secs != right.Secs ? left.Secs < right.Secs : left.Nsecs < right.Nsecs;
-    }
+    public static bool operator <(time left, time right) =>
+        left.Secs != right.Secs ? left.Secs < right.Secs : left.Nsecs < right.Nsecs;
 
-    public static bool operator >=(time left, time right)
-    {
-        return !(left < right);
-    }
+    public static bool operator >=(time left, time right) => !(left < right);
 
-    public static bool operator <=(time left, time right)
-    {
-        return !(left > right);
-    }
+    public static bool operator <=(time left, time right) => !(left > right);
 
-    public time WithSecs(uint secs)
-    {
-        return new(secs, Nsecs);
-    }
+    public time WithSecs(uint secs) => new(secs, Nsecs);
 
     public override string ToString()
     {

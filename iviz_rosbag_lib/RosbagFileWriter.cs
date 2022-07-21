@@ -224,7 +224,7 @@ public sealed class RosbagFileWriter : IDisposable
         int dataLength = message.RosMessageLength;
 
         using Rent<byte> bytes = new Rent<byte>(dataLength);
-        message.SerializeTo(bytes);
+        WriteBuffer.Serialize(message, bytes);
 
         writer.WriteValue(dataLength)
             .Write(bytes);
@@ -246,7 +246,7 @@ public sealed class RosbagFileWriter : IDisposable
         int dataLength = message.RosMessageLength;
 
         using Rent<byte> bytes = new Rent<byte>(dataLength);
-        message.SerializeTo(bytes);
+        WriteBuffer.Serialize(message, bytes);
 
         await writer.WriteValueAsync(dataLength);
         await writer.WriteAsync(bytes);

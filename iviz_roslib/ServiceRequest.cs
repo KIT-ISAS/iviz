@@ -231,7 +231,7 @@ internal sealed class ServiceRequest
                     using var writeBuffer = new Rent<byte>(msgLength + 5);
 
                     WriteHeader(writeBuffer, SuccessByte, msgLength);
-                    responseMsg.SerializeTo(writeBuffer[5..]);
+                    WriteBuffer.Serialize(responseMsg, writeBuffer[5..]);
 
                     await tcpClient.WriteChunkAsync(writeBuffer, runningTs.Token);
                 }

@@ -123,7 +123,7 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         task = TaskUtils.Run(() => StartSession().AwaitNoThrow(this));
     }
 
-    public SubscriberReceiverState State => new UdpReceiverState(RemoteUri)
+    public Ros1ReceiverState State => new UdpReceiverState(RemoteUri)
     {
         RemoteId = RemoteId,
         Status = Status,
@@ -189,7 +189,7 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
 
     async ValueTask ProcessLoop()
     {
-        if (topicInfo.Generator is not IDeserializable<TMessage> generator)
+        if (topicInfo.Generator is not IDeserializableRos1<TMessage> generator)
         {
             throw new InvalidOperationException("Invalid generator!"); // shouldn'T happen
         }
@@ -300,7 +300,7 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         }
     }
 
-    void ProcessMessage(IDeserializable<TMessage> generator, ReadOnlySpan<byte> array, int rcvLength)
+    void ProcessMessage(IDeserializableRos1<TMessage> generator, ReadOnlySpan<byte> array, int rcvLength)
     {
         if (IsPaused)
         {
@@ -315,7 +315,7 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
             return;
         }
 
-        var message = generator.DeserializeFrom(array[4..]);
+        var message = ReadBuffer.Deserialize(generator, array[4..]);
         manager.MessageCallback(message, this);
 
         CheckBufferSize(rcvLength);

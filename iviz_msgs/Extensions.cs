@@ -19,14 +19,6 @@ namespace Iviz.Msgs
             return q;
         }
 
-        /*
-        public static Vector3 Multiply(in Quaternion q, in Vector3 v) => Multiply(q.XYZ, q.W, v);
-
-        static Vector3 Multiply(in Vector3 qv, double w, in Vector3 v)
-        {
-            return v + 2 * qv.Cross(qv.Cross(v) + w * v);
-        }
-        */
         public static Vector3 Multiply(in Quaternion q, in Vector3 v)
         {
             Vector3 qv;
@@ -45,7 +37,7 @@ namespace Iviz.Msgs
             q.Z = p.X * v.Y - p.Y * v.X;
             return q;
         }
-        
+
         public static Point Cross(this in Point p, in Point v)
         {
             //  new(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
@@ -59,13 +51,13 @@ namespace Iviz.Msgs
         public static double Dot(this in Vector3 p, in Vector3 v)
         {
             return p.X * v.X + p.Y * v.Y + p.Z * v.Z;
-        } 
+        }
 
         public static double Dot(this in Point p, in Point v)
         {
             return p.X * v.X + p.Y * v.Y + p.Z * v.Z;
-        } 
-        
+        }
+
         public static Transform RotateAround(this in Quaternion q, in Point p) => new(p - q * p, q);
 
         public static Quaternion AngleAxis(double angleInRad, in Vector3 axis)
@@ -124,11 +116,6 @@ namespace Iviz.Msgs
             }
 
             return q;
-            /*
-            return AngleAxis(rpy.Z, new VectorUnitZ())
-                   * AngleAxis(rpy.Y, new VectorUnitY())
-                   * AngleAxis(rpy.X, new VectorUnitX());
-             */
         }
 
         public static Quaternion Normalize(Quaternion q)
@@ -314,10 +301,13 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Transform AsTransform(in Pose p) => Unsafe.As<Pose, Transform>(ref Unsafe.AsRef(in p));
+        public static ref readonly Transform AsTransform(in Pose p) => ref As<Pose, Transform>(in p);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Pose AsPose(in Transform p) => Unsafe.As<Transform, Pose>(ref Unsafe.AsRef(in p));
+        public static ref readonly Pose AsPose(in Transform p) => ref As<Transform, Pose>(in p);
+
+        static ref readonly TU As<TT, TU>(in TT tt) where TT : unmanaged where TU : unmanaged =>
+            ref Unsafe.As<TT, TU>(ref Unsafe.AsRef(in tt));
 
         public static string ToString(in Point p) =>
             $"{{\"x\": {p.X.ToString(BuiltIns.Culture)}, \"y\": {p.Y.ToString(BuiltIns.Culture)}, \"z\": {p.Z.ToString(BuiltIns.Culture)}}}";
@@ -336,6 +326,10 @@ namespace Iviz.Msgs
 
         public static string ToString(IService t) => t.ToJsonString();
 
+        public static string ToString(IRequest t) => t.ToJsonString();
+
+        public static string ToString(IResponse t) => t.ToJsonString();
+
         public static void WriteValueExtended(this JsonTextWriter writer, in ColorRGBA value)
         {
             writer.WriteStartObject();
@@ -348,8 +342,8 @@ namespace Iviz.Msgs
             writer.WritePropertyName(nameof(value.A));
             writer.WriteValue(value.A);
             writer.WriteEndObject();
-        } 
-        
+        }
+
         public static void WriteValueExtended(this JsonTextWriter writer, in Vector3 value)
         {
             writer.WriteStartObject();
@@ -360,7 +354,7 @@ namespace Iviz.Msgs
             writer.WritePropertyName(nameof(value.Z));
             writer.WriteValue(value.Z);
             writer.WriteEndObject();
-        } 
+        }
     }
 
 

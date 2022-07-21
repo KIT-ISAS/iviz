@@ -236,7 +236,7 @@ public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMe
         return t;
     }
 
-    ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b)
+    ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b)
     {
         return RosDeserialize(ref b);
     }
@@ -244,6 +244,11 @@ public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMe
     public static bool IsDynamic(Type T) => typeof(DynamicMessage) == T;
 
     public static bool IsGeneric(Type T) => typeof(IMessage) == T || IsDynamic(T);
+
+    public DynamicMessage RosDeserialize(ref ReadBuffer2 b)
+    {
+        throw new NotImplementedException();
+    }
 
     public override string ToString() => this.ToJsonString();
 
@@ -327,4 +332,8 @@ public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMe
         public IField CreateArrayField() => new MessageArrayField<T>();
         public IField CreateFixedArrayField(int size) => new MessageFixedArrayField<T>(size);
     }
+
+    public void RosSerialize(ref WriteBuffer2 b) => throw new RosInvalidMessageForVersion();
+    public int Ros2MessageLength => throw new RosInvalidMessageForVersion();
+    public void AddRos2MessageLength(ref int offset) => throw new RosInvalidMessageForVersion();
 }

@@ -307,6 +307,16 @@ internal static class RosUtils
             _ => 4 * 1024 * 1024,
         };
     }
+    
+    public static IRequest DeserializeFrom(this IRequest generator, ReadOnlySpan<byte> bytes)
+    {
+        return (IRequest) ReadBuffer.Deserialize(generator, bytes);
+    }
+
+    public static IResponse DeserializeFrom(this IResponse generator, ReadOnlySpan<byte> bytes)
+    {
+        return (IResponse) ReadBuffer.Deserialize(generator, bytes);
+    }
 }
 
 public static class RosEventHandler

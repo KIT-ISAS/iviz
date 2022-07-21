@@ -142,7 +142,7 @@ internal sealed class ServiceCaller : IDisposable
 
         using var writeBuffer = new Rent<byte>(msgLength);
 
-        requestMsg.SerializeTo(writeBuffer);
+        WriteBuffer.Serialize(requestMsg, writeBuffer);
 
         await tcpClient.WriteChunkAsync(BitConverter.GetBytes(msgLength), 4, token);
         await tcpClient.WriteChunkAsync(writeBuffer, token);
@@ -155,7 +155,7 @@ internal sealed class ServiceCaller : IDisposable
         {
             throw new RosServiceCallFailed(serviceInfo.Service, BuiltIns.UTF8.GetString(readBuffer));
         }
-
+        
         service.Response = (IResponse)service.Response.DeserializeFrom(readBuffer);
     }
 

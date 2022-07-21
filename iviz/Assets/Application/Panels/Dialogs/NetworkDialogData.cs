@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Iviz.Core;
@@ -38,7 +39,10 @@ namespace Iviz.App
             {
                 try
                 {
-                    GenerateReport(description, RosManager.Connection.Client);
+                    if (RosManager.Connection.Client is RosClient client)
+                    {
+                        GenerateReport(description, client);
+                    }
                 }
                 catch (InvalidOperationException)
                 {
@@ -73,17 +77,19 @@ namespace Iviz.App
             var subscriberStats = client.GetSubscriberStatistics();
             var publisherStats = client.GetPublisherStatistics();
 
-            foreach (var stat in subscriberStats.Topics)
+            foreach (var stat in subscriberStats)
             {
                 builder.Append("<color=#000080ff><b><< Subscribed to ")
                     .Append(stat.Topic).Append("</b></color>")
                     .AppendLine();
                 builder.Append("<b>Type: </b>[").Append(stat.Type).Append("]").AppendLine();
 
+                var receivers = (IReadOnlyList<Ros1ReceiverState>)stat.Receivers;
+
                 long totalMessages = 0;
                 long totalBytes = 0;
                 long totalDropped = 0;
-                foreach (var receiver in stat.Receivers)
+                foreach (var receiver in receivers)
                 {
                     totalMessages += receiver.NumReceived;
                     totalBytes += receiver.BytesReceived;
@@ -91,7 +97,7 @@ namespace Iviz.App
                 }
 
                 builder.Append("<b>Received ").Append(totalMessages.ToString("N0")).Append(" msgs | ");
-                    builder.AppendBandwidth(totalBytes).Append(" total</b>").AppendLine();
+                builder.AppendBandwidth(totalBytes).Append(" total</b>").AppendLine();
 
                 if (totalDropped != 0)
                 {
@@ -100,14 +106,14 @@ namespace Iviz.App
                         .Append(percentage).Append("%)</b>").AppendLine();
                 }
 
-                if (stat.Receivers.Length == 0)
+                if (stat.Receivers.Count == 0)
                 {
                     builder.Append("  (No publishers)").AppendLine().AppendLine();
                     continue;
                 }
 
-                bool anyErrors = stat.Receivers.Any(receiver => receiver.ErrorDescription != null);
-                foreach (var receiver in stat.Receivers)
+                bool anyErrors = receivers.Any(receiver => receiver.ErrorDescription != null);
+                foreach (var receiver in receivers)
                 {
                     builder.Append("    <b>[");
                     if (receiver.RemoteUri == client.CallerUri)
@@ -170,7 +176,7 @@ namespace Iviz.App
                 builder.AppendLine();
             }
 
-            foreach (var stat in publisherStats.Topics)
+            foreach (var stat in publisherStats)
             {
                 builder.Append("<color=#800000ff><b>>> Publishing to ").Append(stat.Topic)
                     .Append("</b></color>")
@@ -194,7 +200,9 @@ namespace Iviz.App
                     continue;
                 }
 
-                foreach (var sender in stat.Senders)
+                var senders = (IReadOnlyList<Ros1SenderState>)stat.Senders;
+
+                foreach (var sender in senders)
                 {
                     bool isAlive = sender.IsAlive;
                     builder.Append("    <b>[");
@@ -216,7 +224,7 @@ namespace Iviz.App
                     {
                         remoteHostname = remoteHostname[7..];
                     }
-                    
+
                     builder.Append(sender.RemoteEndpoint != default
                         ? remoteHostname
                         : "(Unknown address)");

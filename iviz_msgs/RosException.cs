@@ -45,8 +45,12 @@ public sealed class RosBufferException : RosException
     public RosBufferException(string message) : base(message)
     {
     }
+}
 
-    public RosBufferException(string message, Exception innerException) : base(message, innerException)
+public sealed class RosInvalidMessageForVersion : RosException
+{
+    public RosInvalidMessageForVersion() : base(
+        "This message cannot be used in this version of ROS")
     {
     }
-}   
+}

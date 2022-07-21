@@ -59,7 +59,7 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         task = TaskUtils.Run(async () => await StartSession().AwaitNoThrow(this), runningTs.Token);
     }
 
-    public SubscriberReceiverState State => new TcpReceiverState(RemoteUri)
+    public Ros1ReceiverState State => new TcpReceiverState(RemoteUri)
     {
         RemoteId = RemoteId,
         Status = Status,
@@ -281,7 +281,7 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
 
     async ValueTask ProcessMessages(TcpClient client)
     {
-        if (topicInfo.Generator is not IDeserializable<TMessage> generator)
+        if (topicInfo.Generator is not IDeserializableRos1<TMessage> generator)
         {
             throw new InvalidOperationException("Invalid generator!"); // shouldn'T happen
         }
@@ -308,8 +308,8 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
             {
                 continue;
             }
-
-            var message = generator.DeserializeFrom(readBuffer[..rcvLength]);
+            
+            var message = ReadBuffer.Deserialize(generator, readBuffer[..rcvLength]);
             manager.MessageCallback(message, this);
 
             CheckBufferSize(client, rcvLength);

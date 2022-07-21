@@ -28,7 +28,7 @@ namespace Iviz.UtilsTests
             var header = new Header(1, new time(10, 20), "abcd");
             var log = new Log(header, 1, "name", "message", "file", "function", 2000, new[] { "topic1, topic2" });
 
-            byte[] logArray = log.SerializeToArray();
+            byte[] logArray = log.SerializeToArrayRos1();
             Assert.AreEqual(BaseUtils.GetMd5Hash(logArray), "2da79d032c7392f78627aff94eda903a");
 
             double[] eye = new double[36];
@@ -40,7 +40,7 @@ namespace Iviz.UtilsTests
             var cov = new TwistWithCovarianceStamped(header,
                 new TwistWithCovariance(new Twist(Vector3.UnitX, Vector3.UnitZ), eye));
 
-            byte[] covArray = cov.SerializeToArray();
+            byte[] covArray = cov.SerializeToArrayRos1();
             Assert.AreEqual(BaseUtils.GetMd5Hash(covArray), "35ca07d018d5627c247bc4f9cbaccefc");
 
             Assert.AreEqual(TwistWithCovarianceStamped.Md5Sum, "8927a1a12fb2607ceea095b2dc440a96");
@@ -94,7 +94,7 @@ namespace Iviz.UtilsTests
                 "time stamp\n" +
                 "string frame_id";
 
-            DynamicMessage message =
+            var message =
                 DynamicMessage.CreateFromDependencyString("iviz_test/Header", definition);
 
             Assert.True(message.Fields.Count == 3);
@@ -115,8 +115,8 @@ namespace Iviz.UtilsTests
             Assert.True(message.RosMd5Sum == new Header().RosMd5Sum);
             Assert.True(message.RosMessageLength == realHeader.RosMessageLength);
 
-            byte[] messageBytes = message.SerializeToArray();
-            byte[] otherMessageBytes = realHeader.SerializeToArray();
+            byte[] messageBytes = message.SerializeToArrayRos1();
+            byte[] otherMessageBytes = realHeader.SerializeToArrayRos1();
 
             Assert.True(messageBytes.SequenceEqual(otherMessageBytes));
         }
@@ -170,8 +170,8 @@ namespace Iviz.UtilsTests
             Assert.True(message.RosMd5Sum == new TransformStamped().RosMd5Sum);
             Assert.True(message.RosMessageLength == realTransformStamped.RosMessageLength);
 
-            byte[] messageBytes = message.SerializeToArray();
-            byte[] otherMessageBytes = realTransformStamped.SerializeToArray();
+            byte[] messageBytes = message.SerializeToArrayRos1();
+            byte[] otherMessageBytes = realTransformStamped.SerializeToArrayRos1();
 
             Assert.True(messageBytes.SequenceEqual(otherMessageBytes));
         }
@@ -212,7 +212,7 @@ namespace Iviz.UtilsTests
             public void RosSerialize(ref WriteBuffer b) => throw new NotImplementedException();
             public int RosMessageLength => 0;
             public void RosValidate() => throw new NotImplementedException();
-            public ISerializable RosDeserializeBase(ref ReadBuffer b) => throw new NotImplementedException();
+            public ISerializableRos1 RosDeserializeBase(ref ReadBuffer b) => throw new NotImplementedException();
             public string RosMessageType => "";
             public string RosMd5Sum => "";
             public string RosDependenciesBase64 => "";
@@ -220,6 +220,10 @@ namespace Iviz.UtilsTests
             public void Dispose()
             {
             }
+
+            public void RosSerialize(ref WriteBuffer2 b) => throw new RosInvalidMessageForVersion();
+            public int Ros2MessageLength => throw new RosInvalidMessageForVersion();
+            public void AddRos2MessageLength(ref int offset) => throw new RosInvalidMessageForVersion();
         }
     }
 }

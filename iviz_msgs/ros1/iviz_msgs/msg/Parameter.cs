@@ -1,0 +1,144 @@
+/* This file was created automatically, do not edit! */
+
+using System.Runtime.Serialization;
+
+namespace Iviz.Msgs.IvizMsgs
+{
+    [DataContract]
+    public sealed class Parameter : IDeserializable<Parameter>, IMessage
+    {
+        [DataMember (Name = "type")] public byte Type;
+        [DataMember (Name = "bool")] public bool @bool;
+        [DataMember (Name = "int32")] public int Int32;
+        [DataMember (Name = "float64")] public double Float64;
+        [DataMember (Name = "string")] public string @string;
+        [DataMember (Name = "bytes")] public byte[] Bytes;
+        [DataMember (Name = "int32s")] public int[] Int32s;
+        [DataMember (Name = "float64s")] public double[] Float64s;
+        [DataMember (Name = "strings")] public string[] Strings;
+    
+        public Parameter()
+        {
+            @string = "";
+            Bytes = System.Array.Empty<byte>();
+            Int32s = System.Array.Empty<int>();
+            Float64s = System.Array.Empty<double>();
+            Strings = System.Array.Empty<string>();
+        }
+        
+        public Parameter(ref ReadBuffer b)
+        {
+            b.Deserialize(out Type);
+            b.Deserialize(out @bool);
+            b.Deserialize(out Int32);
+            b.Deserialize(out Float64);
+            b.DeserializeString(out @string);
+            b.DeserializeStructArray(out Bytes);
+            b.DeserializeStructArray(out Int32s);
+            b.DeserializeStructArray(out Float64s);
+            b.DeserializeStringArray(out Strings);
+        }
+        
+        public Parameter(ref ReadBuffer2 b)
+        {
+            b.Deserialize(out Type);
+            b.Deserialize(out @bool);
+            b.Deserialize(out Int32);
+            b.Deserialize(out Float64);
+            b.DeserializeString(out @string);
+            b.DeserializeStructArray(out Bytes);
+            b.DeserializeStructArray(out Int32s);
+            b.DeserializeStructArray(out Float64s);
+            b.DeserializeStringArray(out Strings);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Parameter(ref b);
+        
+        public Parameter RosDeserialize(ref ReadBuffer b) => new Parameter(ref b);
+        
+        public Parameter RosDeserialize(ref ReadBuffer2 b) => new Parameter(ref b);
+    
+        public void RosSerialize(ref WriteBuffer b)
+        {
+            b.Serialize(Type);
+            b.Serialize(@bool);
+            b.Serialize(Int32);
+            b.Serialize(Float64);
+            b.Serialize(@string);
+            b.SerializeStructArray(Bytes);
+            b.SerializeStructArray(Int32s);
+            b.SerializeStructArray(Float64s);
+            b.SerializeArray(Strings);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
+        {
+            b.Serialize(Type);
+            b.Serialize(@bool);
+            b.Serialize(Int32);
+            b.Serialize(Float64);
+            b.Serialize(@string);
+            b.SerializeStructArray(Bytes);
+            b.SerializeStructArray(Int32s);
+            b.SerializeStructArray(Float64s);
+            b.SerializeArray(Strings);
+        }
+        
+        public void RosValidate()
+        {
+            if (@string is null) BuiltIns.ThrowNullReference();
+            if (Bytes is null) BuiltIns.ThrowNullReference();
+            if (Int32s is null) BuiltIns.ThrowNullReference();
+            if (Float64s is null) BuiltIns.ThrowNullReference();
+            if (Strings is null) BuiltIns.ThrowNullReference();
+            for (int i = 0; i < Strings.Length; i++)
+            {
+                if (Strings[i] is null) BuiltIns.ThrowNullReference(nameof(Strings), i);
+            }
+        }
+    
+        public int RosMessageLength
+        {
+            get {
+                int size = 34;
+                size += WriteBuffer.GetStringSize(@string);
+                size += Bytes.Length;
+                size += 4 * Int32s.Length;
+                size += 8 * Float64s.Length;
+                size += WriteBuffer.GetArraySize(Strings);
+                return size;
+            }
+        }
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Type);
+            WriteBuffer2.AddLength(ref c, @bool);
+            WriteBuffer2.AddLength(ref c, Int32);
+            WriteBuffer2.AddLength(ref c, Float64);
+            WriteBuffer2.AddLength(ref c, @string);
+            WriteBuffer2.AddLength(ref c, Bytes);
+            WriteBuffer2.AddLength(ref c, Int32s);
+            WriteBuffer2.AddLength(ref c, Float64s);
+            WriteBuffer2.AddLength(ref c, Strings);
+        }
+    
+        public const string MessageType = "iviz_msgs/Parameter";
+    
+        public string RosMessageType => MessageType;
+    
+        /// MD5 hash of a compact representation of the ROS1 message
+        public const string Md5Sum = "b32e29f252ff98ac5d0cd0104be754bc";
+    
+        public string RosMd5Sum => Md5Sum;
+    
+        /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        public string RosDependenciesBase64 =>
+                "H4sIAAAAAAAAEyvNzCuxUCipLEjlSsrPz1EAEVxAMWMjBTDJlZaTn1hiZqIApbmKS4oy89IVIBRXKUh7" +
+                "dKxCUmVJajFEH5AHpothWoECUFYxVDdQBMIo5gICAJ1TqtGDAAAA";
+                
+        public override string ToString() => Extensions.ToString(this);
+    }
+}

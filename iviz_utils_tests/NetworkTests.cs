@@ -109,7 +109,7 @@ namespace Iviz.UtilsTests
         public void TestRosClientGetTopics()
         {
             using var client = new RosClient(MasterUri, CallerId, CallerUri);
-            var topics = client.GetSystemTopicTypes();
+            var topics = client.GetSystemTopics();
             Assert.IsNotEmpty(topics);
         }
 
@@ -203,6 +203,7 @@ namespace Iviz.UtilsTests
             }
         }
 
+        /*
         [Test]
         public async Task TestGenericChannelReaderAsync()
         {
@@ -243,6 +244,7 @@ namespace Iviz.UtilsTests
                 break;
             }
         }
+        */
 
         [Test]
         public async Task TestChannelsWithEmptyMessageAsync()

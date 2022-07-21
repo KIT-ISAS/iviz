@@ -11,20 +11,10 @@ using String = System.String;
 
 namespace Iviz.Roslib.Actionlib;
 
-public class InvalidRosActionState : RoslibException
-{
-    public InvalidRosActionState(string message) : base(message)
-    {
-    }
-}
-
-public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
-#if !NETSTANDARD2_0
-    , IAsyncDisposable
-#endif
-    where TAGoal : class, IActionGoal, new()
-    where TAFeedback : class, IActionFeedback, IDeserializable<TAFeedback>, new()
-    where TAResult : class, IActionResult, IDeserializable<TAResult>, new()
+public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable, IAsyncDisposable
+    where TAGoal : class, IMessage, IActionGoal, new()
+    where TAFeedback : class, IMessage, IActionFeedback, new()
+    where TAResult : class, IMessage, IActionResult, new()
 {
     readonly CancellationTokenSource runningTs = new();
 
@@ -116,7 +106,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
 
     public override string ToString()
     {
-        return $"[RosActionClient {actionName} state={State}]]";
+        return $"[{nameof(RosActionClient)} {actionName} state={State}]]";
     }
 
     void ValidateStart(IRosClient client, string newActionName)
@@ -132,10 +122,10 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
         }
 
         string validatedActionName = (newActionName[0] == '/')
-            ? newActionName.Substring(1)
+            ? newActionName[1..]
             : newActionName;
 
-        RosClient.ValidateResourceName(validatedActionName);
+        RosNameUtils.ValidateResourceName(validatedActionName);
 
         actionName = validatedActionName;
         callerId = client.CallerId;
@@ -242,7 +232,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
         time now = time.Now();
         goalId = new GoalID
         {
-            Id = $"{callerId}#{now.ToDateTime().ToString()}",
+            Id = $"{callerId}#{now.ToDateTime().ToString(BuiltIns.Culture)}",
             Stamp = now
         };
 
@@ -277,7 +267,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
             && State != RosActionClientState.Pending
             && State != RosActionClientState.Active)
         {
-            throw new InvalidRosActionState($"Cannot cancel from state {State}");
+            throw new InvalidRosActionStateException($"Cannot cancel from state {State}");
         }
 
         CancelPublisher.Write(goalId);
@@ -444,9 +434,9 @@ public static class RosActionClient
             RosClient client,
             string actionName
         )
-        where TActionGoal : class, IActionGoal, new()
-        where TActionFeedback : class, IActionFeedback, IDeserializable<TActionFeedback>, new()
-        where TActionResult : class, IActionResult, IDeserializable<TActionResult>, new()
+        where TActionGoal : class, IMessage, IActionGoal, new()
+        where TActionFeedback : class, IMessage, IActionFeedback, new()
+        where TActionResult : class, IMessage, IActionResult, new()
     {
         return new(client, actionName);
     }
@@ -456,9 +446,9 @@ public static class RosActionClient
         (
             this IAction<TActionGoal, TActionFeedback, TActionResult>? _
         )
-        where TActionGoal : class, IActionGoal, new()
-        where TActionFeedback : class, IActionFeedback, IDeserializable<TActionFeedback>, new()
-        where TActionResult : class, IActionResult, IDeserializable<TActionResult>, new()
+        where TActionGoal : class, IMessage, IActionGoal, new()
+        where TActionFeedback : class, IMessage, IActionFeedback, new()
+        where TActionResult : class, IMessage, IActionResult, new()
     {
         return new();
     }
@@ -466,9 +456,9 @@ public static class RosActionClient
     public static async ValueTask<RosActionClient<TActionGoal, TActionFeedback, TActionResult>>
         CreateClientAsync<TActionGoal, TActionFeedback, TActionResult>(
             this IRosClient client, string actionName, CancellationToken token = default)
-        where TActionGoal : class, IActionGoal, new()
-        where TActionFeedback : class, IActionFeedback, IDeserializable<TActionFeedback>, new()
-        where TActionResult : class, IActionResult, IDeserializable<TActionResult>, new()
+        where TActionGoal : class,IMessage, IActionGoal, new()
+        where TActionFeedback : class, IMessage, IActionFeedback, new()
+        where TActionResult : class, IMessage, IActionResult, new()
     {
         var actionClient = new RosActionClient<TActionGoal, TActionFeedback, TActionResult>();
         await actionClient.StartAsync(client, actionName, token);

@@ -24,8 +24,8 @@ namespace Iviz.MsgsGen
         {
             services ??= Array.Empty<ServiceInfo>();
             
-            this.messages = messages.ToDictionary(message => message.FullRosName, message => message);
-            this.services = services.ToDictionary(service => service.FullRosName, service => service);
+            this.messages = messages.ToDictionary(message => message.FullRosName);
+            this.services = services.ToDictionary(service => service.FullRosName);
             Messages = new ReadOnlyDictionary<string, ClassInfo>(this.messages);
             Services = new ReadOnlyDictionary<string, ServiceInfo>(this.services);
         }

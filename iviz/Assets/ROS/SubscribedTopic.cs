@@ -53,7 +53,7 @@ namespace Iviz.Ros
             listeners = listeners.Where(s => s != subscriber).ToArray();
         }
 
-        public async ValueTask SubscribeAsync(RosClient? client, IListener? listener, CancellationToken token)
+        public async ValueTask SubscribeAsync(IRosClient? client, IListener? listener, CancellationToken token)
         {
             if (listener != null)
             {
@@ -68,8 +68,7 @@ namespace Iviz.Ros
                     try
                     {
                         IRosSubscriber subscriber;
-                        (subscriberId, subscriber) = await client.SubscribeAsync<T>(topic, Callback, token: token,
-                            transportHint: transportHint);
+                        (subscriberId, subscriber) = await client.SubscribeAsync<T>(topic, Callback, transportHint, token);
                         if (bagListener != null)
                         {
                             bagId = subscriber.Subscribe(bagListener.EnqueueMessage);

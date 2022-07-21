@@ -47,7 +47,7 @@ namespace Iviz.App
             var newTopics = RosManager.Connection.GetSystemPublishedTopicTypes();
             foreach ((string topic, string msgType) in newTopics)
             {
-                if (!RosClient.IsValidResourceName(topic))
+                if (!RosNameUtils.IsValidResourceName(topic))
                 {
                     RosLogger.Info($"{nameof(AddTopicDialogData)}: Ignoring topic '{topic}'. " +
                                    $"Reason: Not a valid ROS identifier, may cause trouble later.");

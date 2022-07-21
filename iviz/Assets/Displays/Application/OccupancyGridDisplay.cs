@@ -38,7 +38,7 @@ namespace Iviz.Displays
 
                 if (value is < 0 or > MaxSize)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    ThrowHelper.ThrowArgumentOutOfRange(nameof(value));
                 }
 
                 numCellsX = value;
@@ -57,7 +57,7 @@ namespace Iviz.Displays
 
                 if (value is < 0 or > MaxSize)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    ThrowHelper.ThrowArgumentOutOfRange(nameof(value));
                 }
 
                 numCellsY = value;
@@ -97,8 +97,6 @@ namespace Iviz.Displays
             set => Resource.FlipMinMax = value;
         }
 
-        public bool IsProcessing { get; private set; }
-
         public int NumValidValues => Resource != null ? Resource.Size : 0;
 
         void Awake()
@@ -133,8 +131,6 @@ namespace Iviz.Displays
 
         public void SetOccupancy(ReadOnlySpan<sbyte> values, RectInt? inBounds, Pose pose)
         {
-            IsProcessing = true;
-            
             var bounds = inBounds ?? new RectInt(0,  0, numCellsX, numCellsY);
 
             pointBuffer.Clear();
@@ -173,7 +169,6 @@ namespace Iviz.Displays
             {
                 Resource.Transform.SetLocalPose(pose);
                 Resource.Set(pointBuffer.AsReadOnlySpan());
-                IsProcessing = false;
             });
         }
 

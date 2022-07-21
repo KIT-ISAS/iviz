@@ -13,7 +13,7 @@ using System;
 /// <summary>
 /// Manager for a subscription to a ROS topic.
 /// </summary>
-public sealed class RosSubscriber<TMessage> : IRosSubscriber<TMessage> where TMessage : IMessage
+public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TMessage> where TMessage : IMessage
 {
     static RosCallback<TMessage>[] EmptyCallback => Array.Empty<RosCallback<TMessage>>();
 
@@ -123,13 +123,13 @@ public sealed class RosSubscriber<TMessage> : IRosSubscriber<TMessage> where TMe
         }
     }
 
-    public SubscriberTopicState GetState()
+    public SubscriberState GetState()
     {
         AssertIsAlive();
-        return new SubscriberTopicState(Topic, TopicType, callbacksById.Keys.ToArray(), manager.GetStates());
+        return new SubscriberState(Topic, TopicType, callbacksById.Keys.ToArray(), manager.GetStates());
     }
 
-    ValueTask IRosSubscriber.PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
+    ValueTask IRos1Subscriber.PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
     {
         return PublisherUpdateRcpAsync(publisherUris, token);
     }
@@ -154,11 +154,11 @@ public sealed class RosSubscriber<TMessage> : IRosSubscriber<TMessage> where TMe
         manager.Stop();
     }
 
-    public async ValueTask DisposeAsync(CancellationToken token)
+    public ValueTask DisposeAsync(CancellationToken token)
     {
         if (disposed)
         {
-            return;
+            return default;
         }
 
         disposed = true;
@@ -166,7 +166,7 @@ public sealed class RosSubscriber<TMessage> : IRosSubscriber<TMessage> where TMe
         callbacksById.Clear();
         cachedCallbacks = EmptyCallback;
         NumPublishersChanged = null;
-        await manager.StopAsync(token).AwaitNoThrow(this);
+        return manager.StopAsync(token).AwaitNoThrow(this).AsValueTask();
     }
 
     public bool MessageTypeMatches(Type type)
@@ -285,7 +285,7 @@ public sealed class RosSubscriber<TMessage> : IRosSubscriber<TMessage> where TMe
         _ = TaskUtils.Run(() => PublisherUpdateRcpAsync(publisherUris, token).AsTask(), token).AwaitNoThrow(this);
     }
 
-    bool IRosSubscriber<TMessage>.TryGetLoopbackReceiver(in Endpoint endPoint, out ILoopbackReceiver<TMessage>? receiver) =>
+    internal bool TryGetLoopbackReceiver(in Endpoint endPoint, out ILoopbackReceiver<TMessage>? receiver) =>
         manager.TryGetLoopbackReceiver(endPoint, out receiver);
 
     public override string ToString() => $"[{nameof(RosSubscriber<TMessage>)} {Topic} [{TopicType}] ]";

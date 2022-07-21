@@ -25,6 +25,8 @@ namespace Iviz.Displays
 
         public static readonly int IntensityCoeffId = Shader.PropertyToID("_IntensityCoeff");
         public static readonly int IntensityAddId = Shader.PropertyToID("_IntensityAdd");
+
+        public static readonly int AtlasTexId = Shader.PropertyToID("_AtlasTex");        
         public static readonly int AtlasRowId = Shader.PropertyToID("_AtlasRow");        
         
         public static readonly int ColorId = Shader.PropertyToID("_Color");

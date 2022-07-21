@@ -7,29 +7,28 @@ namespace Iviz.MsgsGen
     {
         internal static readonly Dictionary<string, string> BuiltInsMaps = new Dictionary<string, string>
         {
-            {"bool", "bool"},
-            {"int8", "sbyte"},
-            {"uint8", "byte"},
-            {"int16", "short"},
-            {"uint16", "ushort"},
-            {"int32", "int"},
-            {"uint32", "uint"},
-            {"int64", "long"},
-            {"uint64", "ulong"},
-            {"float32", "float"},
-            {"float64", "double"},
-            {"string", "string"},
-            {"time", "time"},
-            {"duration", "duration"},
-            {"char", "sbyte"},
-            {"byte", "byte"},
+            { "bool", "bool" },
+            { "int8", "sbyte" },
+            { "uint8", "byte" },
+            { "int16", "short" },
+            { "uint16", "ushort" },
+            { "int32", "int" },
+            { "uint32", "uint" },
+            { "int64", "long" },
+            { "uint64", "ulong" },
+            { "float32", "float" },
+            { "float64", "double" },
+            { "string", "string" },
+            { "time", "time" },
+            { "duration", "duration" },
+            { "char", "sbyte" },
+            { "byte", "byte" },
         };
 
         internal static string CsIfy(string name)
         {
             return BuiltIns.RosNameToCs(name);
         }
-
 
         static bool IsIdentifierLetter(char c)
         {
@@ -139,10 +138,19 @@ namespace Iviz.MsgsGen
 
                         break;
                     case 3:
-                        // class identifier # comment
-                        if (terms[0] != "=" && terms[1] != "=" && terms[2][0] == '#')
+                        if (terms[0] != "=" && terms[1] != "=")
                         {
-                            elements.Add(new VariableElement(terms[2].Substring(1), terms[0], terms[1], className));
+                            if (terms[2][0] == '#')
+                            {
+                                // class identifier # comment
+                                elements.Add(new VariableElement(terms[2].Substring(1), terms[0], terms[1], className));
+                            }
+                            else
+                            {
+                                // class identifier, ignore constant
+                                elements.Add(new VariableElement("", terms[0], terms[1], className));
+                            }
+
                             continue;
                         }
 

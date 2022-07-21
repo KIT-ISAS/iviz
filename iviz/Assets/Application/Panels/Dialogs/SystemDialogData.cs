@@ -9,6 +9,7 @@ using System.Threading;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Ros;
+using Iviz.Roslib;
 using Iviz.Roslib.Utils;
 using Iviz.Tools;
 using Iviz.XmlRpc;
@@ -339,7 +340,11 @@ namespace Iviz.App
                     return;
                 }
 
-                var client = RosManager.Connection.Client;
+                if (RosManager.Connection.Client is not RosClient client)
+                {
+                    return;
+                }
+                
                 try
                 {
                     var response = await client.RosMasterClient.LookupServiceAsync(service, token);
@@ -491,7 +496,11 @@ namespace Iviz.App
                 return;
             }
 
-            var client = RosManager.Connection.Client;
+            if (RosManager.Connection.Client is not RosClient client)
+            {
+                return;
+            }
+            
             try
             {
                 var response = await client.RosMasterClient.LookupNodeAsync(node, token);
@@ -539,9 +548,15 @@ namespace Iviz.App
                 return;
             }
 
-            var state = RosManager.Connection.Client.GetSubscriberStatistics();
-            var hostsEnum = state.Topics
+            if (RosManager.Connection.Client is not RosClient client)
+            {
+                return;
+            }
+
+            var state = client.GetSubscriberStatistics();
+            var hostsEnum = state
                 .SelectMany(topic => topic.Receivers)
+                .Cast<Ros1ReceiverState>()
                 .Select(receiver => receiver.RemoteUri.Host)
                 .Where(host => !IPAddress.TryParse(host, out _));
 

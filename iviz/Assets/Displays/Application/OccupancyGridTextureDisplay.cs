@@ -17,7 +17,7 @@ namespace Iviz.Displays
     public sealed class OccupancyGridTextureDisplay : MarkerDisplayWithColormap, IHighlightable
     {
         static float baseOffset = 0.001f;
-        static readonly int AtlasTex = Shader.PropertyToID("_AtlasTex");
+
         [SerializeField] Texture2D? atlasLarge;
         [SerializeField] Texture2D? atlasLargeFlipped;
         [SerializeField] Texture2D? texture;
@@ -58,7 +58,7 @@ namespace Iviz.Displays
             set
             {
                 newFlipMinMax = value;
-                Material.SetTexture(AtlasTex, value ? AtlasLargeFlipped : AtlasLarge);
+                Material.SetTexture(ShaderIds.AtlasTexId, value ? AtlasLargeFlipped : AtlasLarge);
             }
         }
 
@@ -256,7 +256,7 @@ namespace Iviz.Displays
         {
             if (width < 2 || height < 2)
             {
-                throw new InvalidOperationException("NYI!");
+                throw new NotImplementedException();
             }
 
             int halfWidth = width / 2;

@@ -13,7 +13,7 @@ namespace Iviz.Ros
         int Count { get; }
         void Add(ISender subscriber);
         void Remove(ISender subscriber);
-        ValueTask AdvertiseAsync(RosClient? client, CancellationToken token);
+        ValueTask AdvertiseAsync(IRosClient? client, CancellationToken token);
         ValueTask UnadvertiseAsync(CancellationToken token);
         void Invalidate();
     }

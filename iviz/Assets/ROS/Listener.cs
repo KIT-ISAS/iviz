@@ -32,7 +32,7 @@ namespace Iviz.Ros
         RosTransportHint transportHint;
 
         bool CallbackInGameThread => handlerOnGameThread != null;
-        (int active, int total) NumPublishers => Connection.GetNumPublishers(Topic);
+        int NumPublishers => Connection.GetNumPublishers(Topic);
 
         public string Topic { get; }
         public string Type { get; }
@@ -309,7 +309,7 @@ namespace Iviz.Ros
 
         public void WriteDescriptionTo(StringBuilder description)
         {
-            (int numActivePublishers, int numPublishers) = NumPublishers;
+            int numPublishers = NumPublishers;
             if (numPublishers == -1)
             {
                 description.Append("Off");
@@ -320,7 +320,7 @@ namespace Iviz.Ros
             }
             else
             {
-                description.Append(numActivePublishers.ToString()).Append(" pub");
+                description.Append(numPublishers.ToString()).Append(" pub");
             }
         }
 

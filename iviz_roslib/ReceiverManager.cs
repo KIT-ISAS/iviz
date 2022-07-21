@@ -180,8 +180,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
     
     public bool TryGetLoopbackReceiver(Endpoint endPoint, out ILoopbackReceiver<TMessage>? receiver)
     {
-        IProtocolReceiver? newReceiver =
-            receiversByUri.FirstOrDefault(pair => endPoint.Equals(pair.Value.Endpoint)).Value;
+        var newReceiver = receiversByUri.FirstOrDefault(pair => endPoint.Equals(pair.Value.Endpoint)).Value;
         receiver = newReceiver as ILoopbackReceiver<TMessage>;
         return receiver != null;
     }
@@ -229,16 +228,16 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
         await connectors.Select(connector => connector.DisposeAsync(token).AsTask()).WhenAll().AwaitNoThrow(this);
     }
 
-    public SubscriberReceiverState[] GetStates()
+    public Ros1ReceiverState[] GetStates()
     {
         var publisherUris = cachedPublisherUris;
         var receivers = new Dictionary<Uri, IProtocolReceiver>(receiversByUri);
         var connectors = new Dictionary<Uri, ReceiverConnector>(connectorsByUri);
 
-        SubscriberReceiverState[] states = new SubscriberReceiverState[publisherUris.Count];
+        Ros1ReceiverState[] states = new Ros1ReceiverState[publisherUris.Count];
         int receiverIndex = 0;
 
-        void Add(SubscriberReceiverState state) => states[receiverIndex++] = state;
+        void Add(Ros1ReceiverState state) => states[receiverIndex++] = state;
         
         foreach (Uri uri in publisherUris)
         {

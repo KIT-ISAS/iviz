@@ -1,2 +1,0 @@
-string ip_address
-time connection_time

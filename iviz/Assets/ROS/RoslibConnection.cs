@@ -23,7 +23,7 @@ namespace Iviz.Ros
 {
     public sealed class RoslibConnection : RosConnection, Iviz.Displays.IServiceProvider
     {
-        static BriefTopicInfo[] EmptyTopics => Array.Empty<BriefTopicInfo>();
+        static TopicNameType[] EmptyTopics => Array.Empty<TopicNameType>();
         static string[] EmptyParameters => Array.Empty<string>();
         static readonly Random Random = Defaults.Random;
 
@@ -34,8 +34,8 @@ namespace Iviz.Ros
         readonly List<(string hostname, string address)> hostAliases = new();
 
         string[] cachedParameters = EmptyParameters;
-        BriefTopicInfo[] cachedPublishedTopics = EmptyTopics;
-        BriefTopicInfo[] cachedTopics = EmptyTopics;
+        TopicNameType[] cachedPublishedTopics = EmptyTopics;
+        TopicNameType[] cachedTopics = EmptyTopics;
         SystemState? cachedSystemState;
         RosClient? client;
         BagListener? bagListener;
@@ -53,7 +53,7 @@ namespace Iviz.Ros
 
         bool Connected => client != null;
 
-        public RosClient Client => client ?? throw new InvalidOperationException("Client not connected");
+        public IRosClient Client => client ?? throw new InvalidOperationException("Client not connected");
 
         public Uri? MasterUri
         {
@@ -126,7 +126,7 @@ namespace Iviz.Ros
 
             runningTs.Cancel();
             runningTs = new CancellationTokenSource();
-            await Client.CloseAsync(runningTs.Token).AwaitNoThrow(this);
+            await Client.DisposeAsync(runningTs.Token).AwaitNoThrow(this);
             client = null;
         }
 
@@ -182,21 +182,17 @@ namespace Iviz.Ros
                 var token = runningTs.Token;
 
                 var newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
+                newClient.ShutdownAction = OnShutdown;
+                await newClient.CheckOwnUriAsync(token);
+                newClient.RosMasterClient.TimeoutInMs = rpcTimeoutInMs;
                 client = newClient;
-
-                newClient.ShutdownAction = OnShutdown; 
-
-                await Client.CheckOwnUriAsync(token);
-
-                Client.RosMasterClient.TimeoutInMs = rpcTimeoutInMs;
 
                 Post(async () =>
                 {
                     RosLogger.Internal("Resubscribing and readvertising...");
                     token.ThrowIfCancellationRequested();
 
-                    (bool success, XmlRpcValue hosts) =
-                        await Client.Parameters.GetParameterAsync("/iviz/hosts", token);
+                    (bool success, XmlRpcValue hosts) = await Client.GetParameterAsync("/iviz/hosts", token);
                     if (success)
                     {
                         AddHostsParamFromArg(hosts);
@@ -235,8 +231,11 @@ namespace Iviz.Ros
 
                     RosLogger.Internal("Finished resubscribing and readvertising!");
 
-                    watchdogTask = WatchdogTask(Client.RosMasterClient, token);
-                    ntpTask = NtpCheckerTask(Client.MasterUri.Host, token);
+                    if (Client is RosClient ros1Client)
+                    {
+                        watchdogTask = WatchdogTask(ros1Client.RosMasterClient, token);
+                        ntpTask = NtpCheckerTask(ros1Client.MasterUri.Host, token);
+                    }
                 });
 
                 RosLogger.Debug($"{this}: Connected!");
@@ -951,7 +950,7 @@ namespace Iviz.Ros
             servicesByTopic.Remove(serviceName);
         }
 
-        public BriefTopicInfo[] GetSystemPublishedTopicTypes(
+        public TopicNameType[] GetSystemPublishedTopicTypes(
             RequestType type = RequestType.CachedButRequestInBackground)
         {
             if (type == RequestType.CachedButRequestInBackground)
@@ -962,7 +961,7 @@ namespace Iviz.Ros
             return cachedPublishedTopics;
         }
 
-        public async ValueTask<BriefTopicInfo[]> GetSystemPublishedTopicTypesAsync(int timeoutInMs = 2000,
+        public async ValueTask<TopicNameType[]> GetSystemPublishedTopicTypesAsync(int timeoutInMs = 2000,
             CancellationToken token = default)
         {
             if (!Connected || token.IsCancellationRequested || runningTs.Token.IsCancellationRequested)
@@ -989,7 +988,7 @@ namespace Iviz.Ros
             return cachedPublishedTopics;
         }
 
-        public BriefTopicInfo[] GetSystemTopicTypes(RequestType type = RequestType.CachedButRequestInBackground)
+        public TopicNameType[] GetSystemTopicTypes(RequestType type = RequestType.CachedButRequestInBackground)
         {
             if (type == RequestType.CachedButRequestInBackground)
             {
@@ -1011,7 +1010,7 @@ namespace Iviz.Ros
             {
                 using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
                 tokenSource.CancelAfter(timeoutInMs);
-                cachedTopics = await Client.GetSystemTopicTypesAsync(tokenSource.Token);
+                cachedTopics = await Client.GetSystemTopicsAsync(tokenSource.Token);
             }
             catch (OperationCanceledException)
             {
@@ -1037,7 +1036,7 @@ namespace Iviz.Ros
                 try
                 {
                     using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, internalToken);
-                    cachedParameters = await Client.Parameters.GetParameterNamesAsync(tokenSource.Token);
+                    cachedParameters = await Client.GetParameterNamesAsync(tokenSource.Token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -1072,7 +1071,7 @@ namespace Iviz.Ros
                 using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
                 tokenSource.CancelAfter(timeoutInMs);
                 (bool success, XmlRpcValue param) =
-                    await Client.Parameters.GetParameterAsync(parameter, tokenSource.Token);
+                    await Client.GetParameterAsync(parameter, tokenSource.Token);
                 if (!success)
                 {
                     return (default, $"'{parameter}' not found");
@@ -1132,13 +1131,12 @@ namespace Iviz.Ros
             }
         }
 
-        public (int active, int total) GetNumPublishers(string topic)
+        public int GetNumPublishers(string topic)
         {
             ThrowHelper.ThrowIfNull(topic, nameof(topic));
 
             subscribersByTopic.TryGetValue(topic, out var subscribedTopic);
-            var subscriber = subscribedTopic?.Subscriber;
-            return subscriber != null ? (subscriber.NumActivePublishers, subscriber.NumPublishers) : (-1, -1);
+            return subscribedTopic?.Subscriber?.NumPublishers ?? -1;
         }
 
         internal int GetNumSubscribers(ISender sender)

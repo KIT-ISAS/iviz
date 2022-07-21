@@ -39,7 +39,7 @@ namespace Iviz.Ros
             return true;
         }
 
-        public async ValueTask AdvertiseAsync(RosClient? client, CancellationToken token)
+        public async ValueTask AdvertiseAsync(IRosClient? client, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
             if (client != null)
@@ -60,7 +60,7 @@ namespace Iviz.Ros
             }
         }
 
-        public async ValueTask UnadvertiseAsync(RosClient? client, CancellationToken token)
+        public async ValueTask UnadvertiseAsync(IRosClient? client, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
             if (client != null)

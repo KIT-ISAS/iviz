@@ -37,7 +37,7 @@ public sealed class IvizController
     /// </param>
     public IvizController(RosClient client, string ivizId)
     {
-        RosClient.ValidateResourceName(ivizId);
+        RosNameUtils.ValidateResourceName(ivizId);
         this.client = client;
         this.ivizId = ivizId[0] == '/' ? ivizId[1..] : ivizId;
     }

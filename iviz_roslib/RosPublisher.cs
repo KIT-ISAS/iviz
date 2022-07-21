@@ -12,7 +12,7 @@ namespace Iviz.Roslib;
 ///     Manager for a ROS publisher.
 /// </summary>
 /// <typeparam name="TMessage">Topic type</typeparam>
-public sealed class RosPublisher<TMessage> : IRosPublisher<TMessage> where TMessage : IMessage
+public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMessage> where TMessage : IMessage
 {
     readonly RosClient client;
     readonly List<string> ids = new();
@@ -20,12 +20,6 @@ public sealed class RosPublisher<TMessage> : IRosPublisher<TMessage> where TMess
     readonly CancellationTokenSource runningTs = new();
     int totalPublishers;
     bool disposed;
-
-    internal RosPublisher(RosClient client, TopicInfo topicInfo)
-    {
-        this.client = client;
-        manager = new SenderManager<TMessage>(this, topicInfo) { ForceTcpNoDelay = true };
-    }
 
     /// <summary>
     ///     Whether this publisher is valid.
@@ -81,11 +75,17 @@ public sealed class RosPublisher<TMessage> : IRosPublisher<TMessage> where TMess
     {
         set => manager.LatchedMessage = value;
     }
+    
+    internal RosPublisher(RosClient client, TopicInfo topicInfo)
+    {
+        this.client = client;
+        manager = new SenderManager<TMessage>(this, topicInfo) { ForceTcpNoDelay = true };
+    }
 
-    public PublisherTopicState GetState()
+    public PublisherState GetState()
     {
         AssertIsAlive();
-        return new PublisherTopicState(Topic, TopicType, ids, manager.GetStates());
+        return new PublisherState(Topic, TopicType, ids, manager.GetStates());
     }
 
     void IRosPublisher.Publish(IMessage message)
@@ -109,7 +109,7 @@ public sealed class RosPublisher<TMessage> : IRosPublisher<TMessage> where TMess
     {
         if (message is null)
         {
-            throw new ArgumentNullException(nameof(message));
+            BuiltIns.ThrowArgumentNull(nameof(message));
         }
 
         if (message is not TMessage tMessage)
@@ -129,10 +129,7 @@ public sealed class RosPublisher<TMessage> : IRosPublisher<TMessage> where TMess
     /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>
     public void Publish(in TMessage message)
     {
-        if (message is null)
-        {
-            throw new ArgumentNullException(nameof(message));
-        }
+        if (message is null) BuiltIns.ThrowArgumentNull(nameof(message));
 
         AssertIsAlive();
         message.RosValidate();
@@ -144,7 +141,7 @@ public sealed class RosPublisher<TMessage> : IRosPublisher<TMessage> where TMess
     {
         if (message is null)
         {
-            throw new ArgumentNullException(nameof(message));
+            BuiltIns.ThrowArgumentNull(nameof(message));
         }
 
         AssertIsAlive();
@@ -162,7 +159,7 @@ public sealed class RosPublisher<TMessage> : IRosPublisher<TMessage> where TMess
         }
     }
 
-    TopicRequestRpcResult IRosPublisher.RequestTopicRpc(bool requestsTcp, RpcUdpTopicRequest? requestsUdp,
+    TopicRequestRpcResult IRos1Publisher.RequestTopicRpc(bool requestsTcp, RpcUdpTopicRequest? requestsUdp,
         out Endpoint? tcpResponse, out RpcUdpTopicResponse? udpResponse)
     {
         if (disposed)
@@ -276,11 +273,7 @@ public sealed class RosPublisher<TMessage> : IRosPublisher<TMessage> where TMess
 
     public bool ContainsId(string id)
     {
-        if (id is null)
-        {
-            throw new ArgumentNullException(nameof(id));
-        }
-
+        if (id is null) BuiltIns.ThrowArgumentNull(nameof(id));
         return ids.Contains(id);
     }
 

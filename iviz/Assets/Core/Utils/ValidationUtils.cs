@@ -61,6 +61,9 @@ namespace Iviz.Core
         public static bool IsInvalid(this in Pose pose) => IsInvalid(pose.Position.ToUnity()) || IsInvalid(pose.Orientation.ToUnity());
      
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsInvalid(this in UnityEngine.Pose pose) => IsInvalid(pose.position) || IsInvalid(pose.rotation);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this in Bounds v) => v.center.IsInvalid() || v.size.IsInvalid();
     }
 }

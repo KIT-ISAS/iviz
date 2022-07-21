@@ -160,7 +160,7 @@ namespace Iviz.App
             panel.MyId.Submit += text =>
             {
                 string trimmed = text.Trim();
-                MyId = RosClient.IsValidResourceName(trimmed) ? trimmed : null;
+                MyId = RosNameUtils.IsValidResourceName(trimmed) ? trimmed : null;
             };
             panel.RefreshMyId.Clicked += () =>
             {

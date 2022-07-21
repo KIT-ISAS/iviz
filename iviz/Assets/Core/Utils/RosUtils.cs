@@ -480,5 +480,15 @@ namespace Iviz.Core
             int lastSlash = imageTopic.LastIndexOf('/');
             return lastSlash != -1 ? $"{imageTopic[..lastSlash]}/camera_info" : "/camera_info";
         }
+
+        public static T DeserializeMessage<T>(ReadOnlySpan<byte> span) where T : ISerializableRos1, IDeserializableRos1<T>, new()
+        {
+            return ReadBuffer.Deserialize(new T(), span);
+        }
+
+        public static void SerializeTo(this IMessage msg, Span<byte> span)
+        {
+            WriteBuffer.Serialize(msg, span);
+        }
     }
 }

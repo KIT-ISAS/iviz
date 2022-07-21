@@ -269,6 +269,7 @@ public static class BuilderPool
             [UsedImplicitly]
             class OpenStringBuilder
             {
+                [UsedImplicitly]
                 public char[]? chunkChars;
             }
 
