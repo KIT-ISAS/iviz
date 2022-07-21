@@ -13,6 +13,7 @@ using Iviz.Msgs;
 using Iviz.Ntp;
 using Iviz.Roslib;
 using Iviz.Roslib.XmlRpc;
+using Iviz.Roslib2;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
 using Iviz.Tools;
@@ -21,6 +22,12 @@ using Random = System.Random;
 
 namespace Iviz.Ros
 {
+    public enum RosVersion
+    {
+        Ros1,
+        Ros2
+    }
+    
     public sealed class RoslibConnection : RosConnection, Iviz.Displays.IServiceProvider
     {
         static TopicNameType[] EmptyTopics => Array.Empty<TopicNameType>();
@@ -37,7 +44,7 @@ namespace Iviz.Ros
         TopicNameType[] cachedPublishedTopics = EmptyTopics;
         TopicNameType[] cachedTopics = EmptyTopics;
         SystemState? cachedSystemState;
-        RosClient? client;
+        IRosClient? client;
         BagListener? bagListener;
 
         float? modelServiceBlacklistTime;
@@ -50,9 +57,22 @@ namespace Iviz.Ros
         Uri? masterUri;
         string? myId;
         Uri? myUri;
+        RosVersion version = RosVersion.Ros2;
 
         bool Connected => client != null;
 
+        public static event Action<RosVersion>? RosVersionChanged;
+
+        public RosVersion RosVersion
+        {
+            get => version;
+            set
+            {
+                version = value;
+                RosVersionChanged?.Invoke(version);
+            }
+        }
+        
         public IRosClient Client => client ?? throw new InvalidOperationException("Client not connected");
 
         public Uri? MasterUri
@@ -181,11 +201,18 @@ namespace Iviz.Ros
 
                 var token = runningTs.Token;
 
-                var newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
-                newClient.ShutdownAction = OnShutdown;
-                await newClient.CheckOwnUriAsync(token);
-                newClient.RosMasterClient.TimeoutInMs = rpcTimeoutInMs;
-                client = newClient;
+                if (version == RosVersion.Ros1)
+                {
+                    var newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
+                    newClient.ShutdownAction = OnShutdown;
+                    await newClient.CheckOwnUriAsync(token);
+                    newClient.RosMasterClient.TimeoutInMs = rpcTimeoutInMs;
+                    client = newClient;
+                }
+                else
+                {
+                    client = new Ros2Client(MyId);
+                }
 
                 Post(async () =>
                 {
@@ -234,7 +261,7 @@ namespace Iviz.Ros
                     if (Client is RosClient ros1Client)
                     {
                         watchdogTask = WatchdogTask(ros1Client.RosMasterClient, token);
-                        ntpTask = NtpCheckerTask(ros1Client.MasterUri.Host, token);
+                        ntpTask = NtpCheckerTask(MasterUri.Host, token);
                     }
                 });
 
@@ -393,6 +420,8 @@ namespace Iviz.Ros
                     LookupNodeResponse response;
                     try
                     {
+                        // check if the master is responding to requests.
+                        // the node name does not matter. 
                         response = await masterApi.LookupNodeAsync("/rosout", token);
                     }
                     catch

@@ -387,9 +387,9 @@ namespace Iviz.Displays
                 collider.convex = true;
 
                 collisionObject.transform.localScale = new Vector3(
-                    cylinderRadius * 2,
+                    cylinderRadius,
                     cylinderLength,
-                    cylinderRadius * 2);
+                    cylinderRadius);
             }
             else if (geometry.Box is { } box)
             {

@@ -1,6 +1,0 @@
-framework module iviz_ros2_rcl {
-  umbrella header "iviz_ros2_rcl.h"
-
-  export *
-  module * { export * }
-}

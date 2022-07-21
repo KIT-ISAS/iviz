@@ -20,12 +20,12 @@ namespace Iviz.Ros
         public static bool IsConnected => instance?.connection.IsConnected ?? false;
         public static bool HasInstance => instance != null;
         public static RoslibConnection Connection => instance?.connection ?? throw NewDisposeException();
-        public static RosLoggerManager Logger => instance?.logger ?? throw NewDisposeException();
+        public static RosOutLogger Logger => instance?.logger ?? throw NewDisposeException();
         public static RosServerManager Server => instance?.server ?? throw NewDisposeException();
         public static RosModelService ModelService => instance?.modelService ?? throw NewDisposeException();
 
         readonly RoslibConnection connection;
-        readonly RosLoggerManager logger;
+        readonly RosOutLogger logger;
         readonly RosServerManager server;
         readonly RosModelService modelService;
 
@@ -36,7 +36,7 @@ namespace Iviz.Ros
         {
             instance = this;
             connection = new RoslibConnection();
-            logger = new RosLoggerManager();
+            logger = new RosOutLogger();
             server = new RosServerManager();
             modelService = new RosModelService();
         }

@@ -64,14 +64,14 @@ namespace Iviz.App
         {
             dialog = DialogPanelManager.GetPanelByType<ConsoleDialogPanel>(DialogPanelType.Console);
             dialog.Text.vertexBufferAutoSizeReduction = false;
-            RosManager.Logger.MessageArrived += HandleMessage;
-            RosLogger.LogExternal += HandleMessage;
+            RosOutLogger.MessageArrived += HandleExternalMessage;
+            RosLogger.LogExternal += HandleOwnMessage;
         }
 
         public override void Dispose()
         {
-            RosManager.Logger.MessageArrived -= HandleMessage;
-            RosLogger.LogExternal -= HandleMessage;
+            RosOutLogger.MessageArrived -= HandleExternalMessage;
+            RosLogger.LogExternal -= HandleOwnMessage;
         }
 
         public override void SetupPanel()
@@ -128,8 +128,19 @@ namespace Iviz.App
             dialog.BottomText.SetTextRent(description);
         }
 
+        void HandleExternalMessage(in LogMessage log)
+        {
+            if (log.Level < minLogLevel
+                || idCode is FromIdCode.None or FromIdCode.Me
+                || log.SourceId == RosManager.MyId)
+            {
+                return;
+            }
 
-        void HandleMessage(in LogMessage log)
+            HandleOwnMessage(log);
+        }
+
+        void HandleOwnMessage(in LogMessage log)
         {
             if (log.SourceId != null)
             {
@@ -156,18 +167,6 @@ namespace Iviz.App
             messageQueue.Enqueue(log);
 
             queueIsDirty = true;
-        }
-
-        void HandleMessage(in Log log)
-        {
-            if (log.Level < (byte)minLogLevel
-                || idCode is FromIdCode.None or FromIdCode.Me
-                || log.Name == RosManager.MyId)
-            {
-                return;
-            }
-
-            HandleMessage(new LogMessage(log));
         }
 
         static string ColorFromLevel(LogLevel level) =>

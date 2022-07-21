@@ -3,7 +3,6 @@
 using System;
 using System.Text;
 using System.Threading;
-using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Tools;
 
 namespace Iviz.Core
@@ -141,7 +140,16 @@ namespace Iviz.Core
                 return;
             }
 
-            LogExternal(new LogMessage(level, msg ?? NullMessage));
+            try
+            {
+                LogExternal(new LogMessage(level, msg ?? NullMessage));
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogError(
+                    $"[{nameof(RosLogger)}]: {nameof(PublishExternal)} failed! {Logger.ExceptionToString(e)}");
+            }
+
             PublishLocal();
 
             void PublishLocal()
@@ -242,15 +250,5 @@ namespace Iviz.Core
                 }
             }
         }
-    }
-
-    [Flags]
-    public enum LogLevel
-    {
-        Debug = Log.DEBUG,
-        Info = Log.INFO,
-        Warn = Log.WARN,
-        Error = Log.ERROR,
-        Fatal = Log.FATAL
     }
 }

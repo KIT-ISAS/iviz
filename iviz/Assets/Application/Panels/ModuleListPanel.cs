@@ -179,6 +179,25 @@ namespace Iviz.App
             Thread.CurrentThread.CurrentCulture = BuiltIns.Culture;
 
             Settings.SettingsManager = new SettingsManager();
+
+            var scaler = RootCanvas.GetComponent<CanvasScaler>();
+            bool isPhoneDevice = Screen.width / (float)Screen.height > 1.6f; // is phone not tablet
+            
+            //Debug.Log(Screen.safeArea);
+            //Debug.Log(Screen.dpi);
+            
+            if (isPhoneDevice)
+            {
+                // landscape phone mode!
+                scaler.referenceResolution = new Vector2(600, 720);
+                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            }
+            else
+            {
+                // landscape tablet mode! 
+                scaler.referenceResolution = new Vector2(1100, 720);
+                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
+            }
         }
 
         public void Dispose()
@@ -656,7 +675,8 @@ namespace Iviz.App
                 }
 
                 var connectionData = Dialogs.ConnectionData;
-                connectionData.MasterUri = string.IsNullOrWhiteSpace(config.MasterUri) ? null : new Uri(config.MasterUri);
+                connectionData.MasterUri =
+                    string.IsNullOrWhiteSpace(config.MasterUri) ? null : new Uri(config.MasterUri);
                 connectionData.MyUri = string.IsNullOrWhiteSpace(config.MyUri) ? null : new Uri(config.MyUri);
                 connectionData.MyId = config.MyId;
                 if (config.LastMasterUris.Count != 0)
