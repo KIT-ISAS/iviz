@@ -3,7 +3,7 @@
 # in a particular coordinate frame.
 # 
 # sequence ID: consecutively increasing ID 
-uint32 seq
+uint32 seq # [Ros1]
 #Two-integer timestamp that is expressed as:
 # * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
 # * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
