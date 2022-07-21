@@ -1,11 +1,14 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class Log : IDeserializable<Log>, IMessage
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Log : IMessage, IDeserializable<Log>
     {
         //#
         //# Severity level constants
@@ -49,73 +52,84 @@ namespace Iviz.Msgs.RclInterfaces
         // The line in the file the message came from.
         [DataMember (Name = "line")] public uint Line;
     
-        public Log()
+        public Log(time Stamp, byte Level, string Name, string Msg, string File, string Function, uint Line)
         {
-            Name = "";
-            Msg = "";
-            File = "";
-            Function = "";
+            this.Stamp = Stamp;
+            this.Level = Level;
+            this.Name = Name;
+            this.Msg = Msg;
+            this.File = File;
+            this.Function = Function;
+            this.Line = Line;
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Log(ref ReadBuffer b)
         {
-            b.Deserialize(out Stamp);
-            b.Deserialize(out Level);
-            b.DeserializeString(out Name);
-            b.DeserializeString(out Msg);
-            b.DeserializeString(out File);
-            b.DeserializeString(out Function);
-            b.Deserialize(out Line);
+            Deserialize(ref b, out this);
         }
         
+        public static void Deserialize(ref ReadBuffer b, out Log h)
+        {
+            b.Deserialize(out h.Stamp);
+            b.Deserialize(out h.Level);
+            b.DeserializeString(out h.Name);
+            b.DeserializeString(out h.Msg);
+            b.DeserializeString(out h.File);
+            b.DeserializeString(out h.Function);
+            b.Deserialize(out h.Line);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Log(ref ReadBuffer2 b)
         {
-            b.Deserialize(out Stamp);
-            b.Deserialize(out Level);
-            b.DeserializeString(out Name);
-            b.DeserializeString(out Msg);
-            b.DeserializeString(out File);
-            b.DeserializeString(out Function);
-            b.Deserialize(out Line);
+            Deserialize(ref b, out this);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Log(ref b);
+        public static void Deserialize(ref ReadBuffer2 b, out Log h)
+        {
+            b.Deserialize(out h.Stamp);
+            b.Deserialize(out h.Level);
+            b.DeserializeString(out h.Name);
+            b.DeserializeString(out h.Msg);
+            b.DeserializeString(out h.File);
+            b.DeserializeString(out h.Function);
+            b.Deserialize(out h.Line);
+        }
         
-        public Log RosDeserialize(ref ReadBuffer b) => new Log(ref b);
+        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Log(ref b);
         
-        public Log RosDeserialize(ref ReadBuffer2 b) => new Log(ref b);
+        public readonly Log RosDeserialize(ref ReadBuffer b) => new Log(ref b);
+        
+        public readonly Log RosDeserialize(ref ReadBuffer2 b) => new Log(ref b);
     
-        public void RosSerialize(ref WriteBuffer b)
+        public readonly void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Stamp);
             b.Serialize(Level);
-            b.Serialize(Name);
-            b.Serialize(Msg);
-            b.Serialize(File);
-            b.Serialize(Function);
+            b.Serialize(Name ?? "");
+            b.Serialize(Msg ?? "");
+            b.Serialize(File ?? "");
+            b.Serialize(Function ?? "");
             b.Serialize(Line);
         }
         
-        public void RosSerialize(ref WriteBuffer2 b)
+        public readonly void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Stamp);
             b.Serialize(Level);
-            b.Serialize(Name);
-            b.Serialize(Msg);
-            b.Serialize(File);
-            b.Serialize(Function);
+            b.Serialize(Name ?? "");
+            b.Serialize(Msg ?? "");
+            b.Serialize(File ?? "");
+            b.Serialize(Function ?? "");
             b.Serialize(Line);
         }
         
-        public void RosValidate()
+        public readonly void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
-            if (Msg is null) BuiltIns.ThrowNullReference();
-            if (File is null) BuiltIns.ThrowNullReference();
-            if (Function is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength
+        public readonly int RosMessageLength
         {
             get {
                 int size = 29;
@@ -127,9 +141,9 @@ namespace Iviz.Msgs.RclInterfaces
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public readonly int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
-        public void AddRos2MessageLength(ref int c)
+        public readonly void AddRos2MessageLength(ref int c)
         {
             WriteBuffer2.AddLength(ref c, Stamp);
             WriteBuffer2.AddLength(ref c, Level);
@@ -142,15 +156,15 @@ namespace Iviz.Msgs.RclInterfaces
     
         public const string MessageType = "rcl_interfaces/Log";
     
-        public string RosMessageType => MessageType;
+        public readonly string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "2e550226619c297add0debbcdcf7d29b";
     
-        public string RosMd5Sum => Md5Sum;
+        public readonly string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
-        public string RosDependenciesBase64 =>
+        public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE31US0/jMBC+91dY6hWatimvlXroLrBCQrAqrDiuHHuSWHLsyI92++93xnFDQVoOqDie" +
                 "7zHfTDKdTqZT9gI7cCocmMZ/NBPW+MBN8HRHf68teGDaNo0yzVDkWW21tnsWWmC/DqG1hr0gSHInCdKG" +
                 "0PtvRSGt8LM+3c+sa4qy0Kpy3B2KTDdrQ6en+XA+cBPBxkjGHTDV9Ro6MAEkU4Y5EYNCde7ZHrQ+lWpU" +

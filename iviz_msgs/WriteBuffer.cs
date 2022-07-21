@@ -73,11 +73,11 @@ namespace Iviz.Msgs
             }
 
             int count = BuiltIns.UTF8.GetByteCount(val);
-            ThrowIfOutOfRange(4 + count);
             WriteInt(count);
+            ThrowIfOutOfRange(count);
             fixed (char* valPtr = val)
             {
-                BuiltIns.UTF8.GetBytes(valPtr, val.Length, ptr, remaining);
+                BuiltIns.UTF8.GetBytes(valPtr, val.Length, ptr + offset, remaining);
             }
 
             Advance(count);
@@ -134,9 +134,8 @@ namespace Iviz.Msgs
         public void SerializeStructArray<T>(T[] val, int count) where T : unmanaged
         {
             ThrowIfWrongSize(val, count);
-            int sizeOfT = Unsafe.SizeOf<T>();
-            int size = val.Length * sizeOfT;
-            ThrowIfOutOfRange(4 + size);
+            int size = val.Length * sizeof(T);
+            ThrowIfOutOfRange(size);
 
             fixed (T* valPtr = val)
             {

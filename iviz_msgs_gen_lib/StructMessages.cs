@@ -23,6 +23,7 @@ public static class StructMessages
     {
         "std_msgs/Header",
         "geometry_msgs/TransformStamped",
-        "rosgraph_msgs/Log"
+        "rosgraph_msgs/Log",
+        "rcl_interfaces/Log",
     };
 }

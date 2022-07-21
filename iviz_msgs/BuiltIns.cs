@@ -161,7 +161,7 @@ public static class BuiltIns
     public static byte[] SerializeToArrayRos2(this IMessage o)
     {
         o.RosValidate();
-        byte[] bytes = new byte[o.RosMessageLength];
+        byte[] bytes = new byte[o.Ros2MessageLength];
         WriteBuffer2.Serialize(o, bytes);
 
         return bytes;
@@ -169,7 +169,7 @@ public static class BuiltIns
     public static byte[] SerializeToArrayRos1(this ISerializable o)
     {
         o.RosValidate();
-        byte[] bytes = new byte[o.Ros2MessageLength];
+        byte[] bytes = new byte[o.RosMessageLength];
         WriteBuffer.Serialize(o, bytes);
 
         return bytes;
