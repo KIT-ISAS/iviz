@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class FluidPressure : IDeserializableCommon<FluidPressure>, IMessageCommon
+    public sealed class FluidPressure : IDeserializable<FluidPressure>, IMessage
     {
         // Single pressure reading.  This message is appropriate for measuring the
         // pressure inside of a fluid (air, water, etc).  This also includes

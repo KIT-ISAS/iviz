@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformAction : IDeserializableCommon<LookupTransformAction>, IMessageCommon,
+    public sealed class LookupTransformAction : IDeserializable<LookupTransformAction>, IMessage,
 		IAction<LookupTransformActionGoal, LookupTransformActionFeedback, LookupTransformActionResult>
     {
         [DataMember (Name = "action_goal")] public LookupTransformActionGoal ActionGoal { get; set; }

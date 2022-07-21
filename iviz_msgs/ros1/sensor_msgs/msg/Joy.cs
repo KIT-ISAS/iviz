@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Joy : IDeserializableCommon<Joy>, IMessageCommon
+    public sealed class Joy : IDeserializable<Joy>, IMessage
     {
         // Reports the state of a joysticks axes and buttons.
         /// <summary> Timestamp in the header is the time the data is received from the joystick </summary>

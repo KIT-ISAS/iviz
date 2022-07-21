@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class Int16 : IDeserializableCommon<Int16>, IMessageCommon
+    public sealed class Int16 : IDeserializable<Int16>, IMessage
     {
         [DataMember (Name = "data")] public short Data;
     

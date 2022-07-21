@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshFaceCluster : IDeserializableCommon<MeshFaceCluster>, IMessageCommon
+    public sealed class MeshFaceCluster : IDeserializable<MeshFaceCluster>, IMessage
     {
         //Cluster
         [DataMember (Name = "face_indices")] public uint[] FaceIndices;

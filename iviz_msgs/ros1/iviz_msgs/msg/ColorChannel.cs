@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ColorChannel : IDeserializableCommon<ColorChannel>, IMessageCommon
+    public sealed class ColorChannel : IDeserializable<ColorChannel>, IMessage
     {
         [DataMember (Name = "colors")] public Color32[] Colors;
     

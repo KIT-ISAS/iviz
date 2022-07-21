@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TwoIntsFeedback : IDeserializableCommon<TwoIntsFeedback>, IMessageCommon, IFeedback<TwoIntsActionFeedback>
+    public sealed class TwoIntsFeedback : IDeserializable<TwoIntsFeedback>, IMessage, IFeedback<TwoIntsActionFeedback>
     {
     
         public TwoIntsFeedback()

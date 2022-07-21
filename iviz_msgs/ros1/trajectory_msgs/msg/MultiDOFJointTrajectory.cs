@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract]
-    public sealed class MultiDOFJointTrajectory : IDeserializableCommon<MultiDOFJointTrajectory>, IMessageCommon
+    public sealed class MultiDOFJointTrajectory : IDeserializable<MultiDOFJointTrajectory>, IMessage
     {
         // The header is used to specify the coordinate frame and the reference time for the trajectory durations
         [DataMember (Name = "header")] public StdMsgs.Header Header;

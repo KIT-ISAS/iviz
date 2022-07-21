@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GridCells : IDeserializableCommon<GridCells>, IMessageCommon
+    public sealed class GridCells : IDeserializable<GridCells>, IMessage
     {
         //an array of cells in a 2D grid
         [DataMember (Name = "header")] public StdMsgs.Header Header;

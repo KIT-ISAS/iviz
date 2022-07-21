@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformResult : IDeserializableCommon<LookupTransformResult>, IMessageCommon, IResult<LookupTransformActionResult>
+    public sealed class LookupTransformResult : IDeserializable<LookupTransformResult>, IMessage, IResult<LookupTransformActionResult>
     {
         [DataMember (Name = "transform")] public GeometryMsgs.TransformStamped Transform;
         [DataMember (Name = "error")] public Tf2Msgs.TF2Error Error;

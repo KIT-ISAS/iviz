@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Roscpp
 {
     [DataContract]
-    public sealed class Logger : IDeserializableCommon<Logger>, IMessageCommon
+    public sealed class Logger : IDeserializable<Logger>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "level")] public string Level;

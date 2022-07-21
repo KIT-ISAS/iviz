@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct TransformStamped : IMessageCommon, IDeserializableCommon<TransformStamped>
+    public struct TransformStamped : IMessage, IDeserializable<TransformStamped>
     {
         // This expresses a transform from coordinate frame header.frame_id
         // to the coordinate frame child_frame_id

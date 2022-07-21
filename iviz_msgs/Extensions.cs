@@ -326,6 +326,10 @@ namespace Iviz.Msgs
 
         public static string ToString(IService t) => t.ToJsonString();
 
+        public static string ToString(IRequest t) => t.ToJsonString();
+
+        public static string ToString(IResponse t) => t.ToJsonString();
+
         public static void WriteValueExtended(this JsonTextWriter writer, in ColorRGBA value)
         {
             writer.WriteStartObject();

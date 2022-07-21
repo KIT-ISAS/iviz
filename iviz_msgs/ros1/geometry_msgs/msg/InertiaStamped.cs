@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class InertiaStamped : IDeserializableCommon<InertiaStamped>, IMessageCommon
+    public sealed class InertiaStamped : IDeserializable<InertiaStamped>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "inertia")] public Inertia Inertia;

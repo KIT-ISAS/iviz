@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class PolygonMesh : IDeserializableCommon<PolygonMesh>, IMessageCommon
+    public sealed class PolygonMesh : IDeserializable<PolygonMesh>, IMessage
     {
         // Separate header for the polygonal surface
         [DataMember (Name = "header")] public StdMsgs.Header Header;

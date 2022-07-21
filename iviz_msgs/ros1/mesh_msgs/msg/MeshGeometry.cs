@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshGeometry : IDeserializableCommon<MeshGeometry>, IMessageCommon
+    public sealed class MeshGeometry : IDeserializable<MeshGeometry>, IMessage
     {
         // Mesh Geometry Message
         [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices;

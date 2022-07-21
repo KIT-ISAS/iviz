@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Imu : IDeserializableCommon<Imu>, IMessageCommon
+    public sealed class Imu : IDeserializable<Imu>, IMessage
     {
         // This is a message to hold data from an IMU (Inertial Measurement Unit)
         //

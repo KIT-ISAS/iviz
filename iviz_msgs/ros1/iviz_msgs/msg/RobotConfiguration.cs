@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class RobotConfiguration : IDeserializableCommon<RobotConfiguration>, IMessageCommon
+    public sealed class RobotConfiguration : IDeserializable<RobotConfiguration>, IMessage
     {
         [DataMember (Name = "source_parameter")] public string SourceParameter;
         [DataMember (Name = "saved_robot_name")] public string SavedRobotName;

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class Feature : IDeserializableCommon<Feature>, IMessageCommon
+    public sealed class Feature : IDeserializable<Feature>, IMessage
     {
         [DataMember (Name = "location")] public GeometryMsgs.Point Location;
         [DataMember (Name = "descriptor")] public StdMsgs.Float32[] Descriptor;

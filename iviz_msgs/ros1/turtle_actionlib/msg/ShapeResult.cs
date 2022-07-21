@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TurtleActionlib
 {
     [DataContract]
-    public sealed class ShapeResult : IDeserializableCommon<ShapeResult>, IMessageCommon, IResult<ShapeActionResult>
+    public sealed class ShapeResult : IDeserializable<ShapeResult>, IMessage, IResult<ShapeActionResult>
     {
         //result definition
         [DataMember (Name = "interior_angle")] public float InteriorAngle;

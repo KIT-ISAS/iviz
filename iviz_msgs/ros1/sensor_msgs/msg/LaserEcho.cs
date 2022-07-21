@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class LaserEcho : IDeserializableCommon<LaserEcho>, IMessageCommon
+    public sealed class LaserEcho : IDeserializable<LaserEcho>, IMessage
     {
         // This message is a submessage of MultiEchoLaserScan and is not intended
         // to be used separately.

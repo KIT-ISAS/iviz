@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class ModelCoefficients : IDeserializableCommon<ModelCoefficients>, IMessageCommon
+    public sealed class ModelCoefficients : IDeserializable<ModelCoefficients>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "values")] public float[] Values;

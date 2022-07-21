@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TwoIntsActionResult : IDeserializableCommon<TwoIntsActionResult>, IMessageCommon, IActionResult<TwoIntsResult>
+    public sealed class TwoIntsActionResult : IDeserializable<TwoIntsActionResult>, IMessage, IActionResult<TwoIntsResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }

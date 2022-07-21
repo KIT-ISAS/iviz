@@ -248,7 +248,7 @@ public unsafe struct ReadBuffer
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Quaternion t)
-    { 
+    {
         const int size = Quaternion.RosFixedMessageLength;
         ThrowIfOutOfRange(size);
         t = *(Quaternion*)(ptr + offset);
@@ -290,7 +290,7 @@ public unsafe struct ReadBuffer
         t = *(ColorRGBA*)(ptr + offset);
         Advance(size);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Color32 t)
     {
@@ -299,7 +299,7 @@ public unsafe struct ReadBuffer
         t = *(Color32*)(ptr + offset);
         Advance(size);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Vector3f t)
     {
@@ -308,7 +308,7 @@ public unsafe struct ReadBuffer
         t = *(Vector3f*)(ptr + offset);
         Advance(size);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Triangle t)
     {
@@ -326,7 +326,7 @@ public unsafe struct ReadBuffer
         t = *(Vector2f*)(ptr + offset);
         Advance(size);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize<T>(out T t) where T : unmanaged
     {
@@ -335,7 +335,7 @@ public unsafe struct ReadBuffer
         t = *(T*)(ptr + offset);
         Advance(size);
     }
-    
+
     #endregion
 
     public void DeserializeStructArray<T>(out T[] val) where T : unmanaged
@@ -436,7 +436,7 @@ public unsafe struct ReadBuffer
     /// The source byte array. 
     /// </param>
     /// <returns>The deserialized message.</returns>
-    public static ISerializable Deserialize(ISerializableRos1 generator, ReadOnlySpan<byte> buffer)
+    public static ISerializableRos1 Deserialize(ISerializable generator, ReadOnlySpan<byte> buffer)
     {
         fixed (byte* bufferPtr = buffer)
         {

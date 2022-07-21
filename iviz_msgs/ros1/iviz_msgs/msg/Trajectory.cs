@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Trajectory : IDeserializableCommon<Trajectory>, IMessageCommon
+    public sealed class Trajectory : IDeserializable<Trajectory>, IMessage
     {
         [DataMember (Name = "poses")] public GeometryMsgs.Pose[] Poses;
         [DataMember (Name = "timestamps")] public time[] Timestamps;

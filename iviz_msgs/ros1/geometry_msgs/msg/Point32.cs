@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Point32 : IMessageCommon, IDeserializableCommon<Point32>
+    public struct Point32 : IMessage, IDeserializable<Point32>
     {
         // This contains the position of a point in free space(with 32 bits of precision).
         // It is recommeded to use Point wherever possible instead of Point32.  

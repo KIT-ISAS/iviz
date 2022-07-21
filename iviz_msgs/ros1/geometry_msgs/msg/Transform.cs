@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Transform : IMessageCommon, IDeserializableCommon<Transform>
+    public struct Transform : IMessage, IDeserializable<Transform>
     {
         // This represents the transform between two coordinate frames in free space.
         [DataMember (Name = "translation")] public Vector3 Translation;

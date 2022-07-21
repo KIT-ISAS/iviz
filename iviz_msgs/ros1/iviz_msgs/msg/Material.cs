@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Material : IDeserializableCommon<Material>, IMessageCommon
+    public sealed class Material : IDeserializable<Material>, IMessage
     {
         public const byte BLEND_DEFAULT = 0;
         public const byte BLEND_ADDITIVE = 1;

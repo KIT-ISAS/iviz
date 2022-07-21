@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformGoal : IDeserializableCommon<LookupTransformGoal>, IMessageCommon, IGoal<LookupTransformActionGoal>
+    public sealed class LookupTransformGoal : IDeserializable<LookupTransformGoal>, IMessage, IGoal<LookupTransformActionGoal>
     {
         //Simple API
         [DataMember (Name = "target_frame")] public string TargetFrame;

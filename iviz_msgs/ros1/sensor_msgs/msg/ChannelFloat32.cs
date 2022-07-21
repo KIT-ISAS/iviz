@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class ChannelFloat32 : IDeserializableCommon<ChannelFloat32>, IMessageCommon
+    public sealed class ChannelFloat32 : IDeserializable<ChannelFloat32>, IMessage
     {
         // This message is used by the PointCloud message to hold optional data
         // associated with each point in the cloud. The length of the values

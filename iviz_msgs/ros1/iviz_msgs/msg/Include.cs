@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Include : IDeserializableCommon<Include>, IMessageCommon
+    public sealed class Include : IDeserializable<Include>, IMessage
     {
         // Reference to an external asset
         /// <summary> Uri of the asset </summary>

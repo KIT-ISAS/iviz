@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class MultiArrayDimension : IDeserializableCommon<MultiArrayDimension>, IMessageCommon
+    public sealed class MultiArrayDimension : IDeserializable<MultiArrayDimension>, IMessage
     {
         /// <summary> Label of given dimension </summary>
         [DataMember (Name = "label")] public string Label;

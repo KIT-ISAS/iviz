@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class WidgetArray : IDeserializableCommon<WidgetArray>, IMessageCommon
+    public sealed class WidgetArray : IDeserializable<WidgetArray>, IMessage
     {
         [DataMember (Name = "dialogs")] public IvizMsgs.Dialog[] Dialogs;
         [DataMember (Name = "widgets")] public IvizMsgs.Widget[] Widgets;

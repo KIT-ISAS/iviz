@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Model : IDeserializableCommon<Model>, IMessageCommon
+    public sealed class Model : IDeserializable<Model>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "filename")] public string Filename;

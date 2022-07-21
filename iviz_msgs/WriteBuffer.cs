@@ -146,7 +146,7 @@ namespace Iviz.Msgs
             Advance(size);
         }
 
-        public void SerializeArray<T>(T[] val) where T : IMessageRos1
+        public void SerializeArray<T>(T[] val) where T : IMessage
         {
             WriteInt(val.Length);
             for (int i = 0; i < val.Length; i++)
@@ -155,7 +155,7 @@ namespace Iviz.Msgs
             }
         }
 
-        public void SerializeArray<T>(T[] val, int count) where T : IMessageRos1
+        public void SerializeArray<T>(T[] val, int count) where T : IMessage
         {
             ThrowIfWrongSize(val, count);
             for (int i = 0; i < val.Length; i++)
@@ -165,7 +165,7 @@ namespace Iviz.Msgs
         }
         
         /// Returns the size in bytes of a message array when deserialized in ROS
-        public static int GetArraySize<T>(T[]? array) where T : struct, IMessageRos1
+        public static int GetArraySize<T>(T[]? array) where T : struct, IMessage
         {
             if (array == null)
             {
@@ -182,7 +182,7 @@ namespace Iviz.Msgs
         }
 
         /// Returns the size in bytes of a message array when serialized in ROS
-        public static int GetArraySize(IMessageRos1[]? array)
+        public static int GetArraySize(IMessage[]? array)
         {
             if (array == null)
             {

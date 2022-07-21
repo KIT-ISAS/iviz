@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class RelativeHumidity : IDeserializableCommon<RelativeHumidity>, IMessageCommon
+    public sealed class RelativeHumidity : IDeserializable<RelativeHumidity>, IMessage
     {
         // Single reading from a relative humidity sensor.  Defines the ratio of partial
         // pressure of water vapor to the saturated vapor pressure at a temperature.

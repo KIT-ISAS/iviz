@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshVertexCosts : IDeserializableCommon<MeshVertexCosts>, IMessageCommon
+    public sealed class MeshVertexCosts : IDeserializable<MeshVertexCosts>, IMessage
     {
         // Mesh Attribute Message
         [DataMember (Name = "costs")] public float[] Costs;

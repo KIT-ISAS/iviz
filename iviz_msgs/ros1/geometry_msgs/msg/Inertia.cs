@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Inertia : IDeserializableCommon<Inertia>, IMessageCommon
+    public sealed class Inertia : IDeserializable<Inertia>, IMessage
     {
         // Mass [kg]
         [DataMember (Name = "m")] public double M;

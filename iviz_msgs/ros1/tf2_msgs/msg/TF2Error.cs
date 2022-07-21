@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class TF2Error : IDeserializableCommon<TF2Error>, IMessageCommon
+    public sealed class TF2Error : IDeserializable<TF2Error>, IMessage
     {
         public const byte NO_ERROR = 0;
         public const byte LOOKUP_ERROR = 1;

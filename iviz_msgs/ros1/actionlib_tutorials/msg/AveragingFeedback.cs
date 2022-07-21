@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class AveragingFeedback : IDeserializableCommon<AveragingFeedback>, IMessageCommon, IFeedback<AveragingActionFeedback>
+    public sealed class AveragingFeedback : IDeserializable<AveragingFeedback>, IMessage, IFeedback<AveragingActionFeedback>
     {
         //feedback
     

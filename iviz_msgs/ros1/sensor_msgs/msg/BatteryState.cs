@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class BatteryState : IDeserializableCommon<BatteryState>, IMessageCommon
+    public sealed class BatteryState : IDeserializable<BatteryState>, IMessage
     {
         // Constants are chosen to match the enums in the linux kernel
         // defined in include/linux/power_supply.h as of version 3.7

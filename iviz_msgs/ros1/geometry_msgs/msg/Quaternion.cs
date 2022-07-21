@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Quaternion : IMessageCommon, IDeserializableCommon<Quaternion>
+    public struct Quaternion : IMessage, IDeserializable<Quaternion>
     {
         // This represents an orientation in free space in quaternion form.
         [DataMember (Name = "x")] public double X;

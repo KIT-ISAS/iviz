@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class UInt64 : IDeserializableCommon<UInt64>, IMessageCommon
+    public sealed class UInt64 : IDeserializable<UInt64>, IMessage
     {
         [DataMember (Name = "data")] public ulong Data;
     

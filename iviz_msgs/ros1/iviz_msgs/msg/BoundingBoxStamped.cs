@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class BoundingBoxStamped : IDeserializableCommon<BoundingBoxStamped>, IMessageCommon
+    public sealed class BoundingBoxStamped : IDeserializable<BoundingBoxStamped>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "boundary")] public BoundingBox Boundary;

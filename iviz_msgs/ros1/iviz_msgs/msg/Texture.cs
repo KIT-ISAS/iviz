@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Texture : IDeserializableCommon<Texture>, IMessageCommon
+    public sealed class Texture : IDeserializable<Texture>, IMessage
     {
         public const byte TYPE_NONE = 0;
         public const byte TYPE_DIFFUSE = 1;

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class MenuEntry : IDeserializableCommon<MenuEntry>, IMessageCommon
+    public sealed class MenuEntry : IDeserializable<MenuEntry>, IMessage
     {
         // MenuEntry message.
         // Each InteractiveMarker message has an array of MenuEntry messages.

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshTexture : IDeserializableCommon<MeshTexture>, IMessageCommon
+    public sealed class MeshTexture : IDeserializable<MeshTexture>, IMessage
     {
         // Mesh Attribute Message
         [DataMember (Name = "uuid")] public string Uuid;

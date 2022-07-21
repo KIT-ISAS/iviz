@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestRequestActionGoal : IDeserializableCommon<TestRequestActionGoal>, IMessageCommon, IActionGoal<TestRequestGoal>
+    public sealed class TestRequestActionGoal : IDeserializable<TestRequestActionGoal>, IMessage, IActionGoal<TestRequestGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }

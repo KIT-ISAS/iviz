@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class AveragingGoal : IDeserializableCommon<AveragingGoal>, IMessageCommon, IGoal<AveragingActionGoal>
+    public sealed class AveragingGoal : IDeserializable<AveragingGoal>, IMessage, IGoal<AveragingActionGoal>
     {
         //goal definition
         [DataMember (Name = "edges")] public int Edges;

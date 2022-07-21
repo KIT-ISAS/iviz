@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestRequestGoal : IDeserializableCommon<TestRequestGoal>, IMessageCommon, IGoal<TestRequestActionGoal>
+    public sealed class TestRequestGoal : IDeserializable<TestRequestGoal>, IMessage, IGoal<TestRequestActionGoal>
     {
         public const int TERMINATE_SUCCESS = 0;
         public const int TERMINATE_ABORTED = 1;

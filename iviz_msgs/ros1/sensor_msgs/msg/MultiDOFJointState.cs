@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class MultiDOFJointState : IDeserializableCommon<MultiDOFJointState>, IMessageCommon
+    public sealed class MultiDOFJointState : IDeserializable<MultiDOFJointState>, IMessage
     {
         // Representation of state for joints with multiple degrees of freedom, 
         // following the structure of JointState.

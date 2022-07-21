@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class TriangleIndices : IDeserializableCommon<TriangleIndices>, IMessageCommon
+    public sealed class TriangleIndices : IDeserializable<TriangleIndices>, IMessage
     {
         // Definition of a triangle's vertices
         [DataMember (Name = "vertex_indices")] public uint[/*3*/] VertexIndices;

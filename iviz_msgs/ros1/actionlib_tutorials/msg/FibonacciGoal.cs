@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class FibonacciGoal : IDeserializableCommon<FibonacciGoal>, IMessageCommon, IGoal<FibonacciActionGoal>
+    public sealed class FibonacciGoal : IDeserializable<FibonacciGoal>, IMessage, IGoal<FibonacciActionGoal>
     {
         //goal definition
         [DataMember (Name = "order")] public int Order;

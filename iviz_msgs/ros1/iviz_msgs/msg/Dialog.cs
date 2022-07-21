@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Dialog : IDeserializableCommon<Dialog>, IMessageCommon
+    public sealed class Dialog : IDeserializable<Dialog>, IMessage
     {
         public const byte ACTION_ADD = 0;
         public const byte ACTION_REMOVE = 1;

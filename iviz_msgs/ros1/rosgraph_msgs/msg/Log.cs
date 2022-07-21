@@ -8,7 +8,7 @@ namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Log : IMessageCommon, IDeserializableCommon<Log>
+    public struct Log : IMessage, IDeserializable<Log>
     {
         //#
         //# Severity level constants

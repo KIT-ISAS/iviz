@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapActionResult : IDeserializableCommon<GetMapActionResult>, IMessageCommon, IActionResult<GetMapResult>
+    public sealed class GetMapActionResult : IDeserializable<GetMapActionResult>, IMessage, IActionResult<GetMapResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }

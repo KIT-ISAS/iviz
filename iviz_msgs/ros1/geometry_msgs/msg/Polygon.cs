@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Polygon : IDeserializableCommon<Polygon>, IMessageCommon
+    public sealed class Polygon : IDeserializable<Polygon>, IMessage
     {
         //A specification of a polygon where the first and last points are assumed to be connected
         [DataMember (Name = "points")] public Point32[] Points;

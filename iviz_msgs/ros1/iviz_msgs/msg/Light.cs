@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Light : IDeserializableCommon<Light>, IMessageCommon
+    public sealed class Light : IDeserializable<Light>, IMessage
     {
         public const byte POINT = 0;
         public const byte DIRECTIONAL = 1;

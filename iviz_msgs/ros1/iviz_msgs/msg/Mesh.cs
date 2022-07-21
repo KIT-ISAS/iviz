@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Mesh : IDeserializableCommon<Mesh>, IMessageCommon
+    public sealed class Mesh : IDeserializable<Mesh>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "vertices")] public Vector3f[] Vertices;

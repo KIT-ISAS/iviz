@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PolygonStamped : IDeserializableCommon<PolygonStamped>, IMessageCommon
+    public sealed class PolygonStamped : IDeserializable<PolygonStamped>, IMessage
     {
         // This represents a Polygon with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;

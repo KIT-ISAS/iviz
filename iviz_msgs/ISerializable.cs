@@ -1,18 +1,6 @@
 ﻿namespace Iviz.Msgs;
 
-/// <summary>
-/// Establishes that the class can be (de-)serialized as a ROS binary stream. 
-/// </summary>
-public interface ISerializable
-{
-    /// <summary>
-    /// Checks if this message is valid (no null pointers, fixed arrays have the right size, and so on).
-    /// If not, throws an exception.
-    /// </summary>
-    void RosValidate();
-}
-
-public interface ISerializableRos1 : ISerializable
+public interface ISerializableRos1
 {
     /// <summary>
     /// Serializes this message into the buffer.
@@ -20,7 +8,7 @@ public interface ISerializableRos1 : ISerializable
     /// <param name="b">
     /// Buffer object.
     /// </param>
-    void RosSerialize(ref WriteBuffer b) => throw new RosInvalidMessageForVersion();
+    void RosSerialize(ref WriteBuffer b);
 
     /// <summary>
     /// Length of this message in bytes after serialization.
@@ -36,7 +24,7 @@ public interface ISerializableRos1 : ISerializable
     ISerializableRos1 RosDeserializeBase(ref ReadBuffer b);
 }
 
-public interface ISerializableRos2 : ISerializable
+public interface ISerializableRos2
 {
     /// <summary>
     /// Serializes this message into the buffer.
@@ -52,11 +40,19 @@ public interface ISerializableRos2 : ISerializable
     int Ros2MessageLength { get; }
 }
 
-public interface IDeserializable<out T>
+/// <summary>
+/// Establishes that the class can be (de-)serialized as a ROS binary stream. 
+/// </summary>
+public interface ISerializable : ISerializableRos1, ISerializableRos2
 {
+    /// <summary>
+    /// Checks if this message is valid (no null pointers, fixed arrays have the right size, and so on).
+    /// If not, throws an exception.
+    /// </summary>
+    void RosValidate();
 }
 
-public interface IDeserializableRos1<out T> : IDeserializable<T> where T : ISerializableRos1
+public interface IDeserializableRos1<out T>
 {
     /// <summary>
     /// Creates a new message an deserializes into it the information read from the given buffer.
@@ -67,7 +63,7 @@ public interface IDeserializableRos1<out T> : IDeserializable<T> where T : ISeri
     T RosDeserialize(ref ReadBuffer b);
 }
 
-public interface IDeserializableRos2<out T> : IDeserializable<T> where T : ISerializableRos2
+public interface IDeserializableRos2<out T>
 {
     /// <summary>
     /// Creates a new message an deserializes into it the information read from the given buffer.
@@ -79,7 +75,8 @@ public interface IDeserializableRos2<out T> : IDeserializable<T> where T : ISeri
     T RosDeserialize(ref ReadBuffer2 b);
 }
 
-public interface IDeserializableCommon<out T> : IDeserializableRos1<T>, IDeserializableRos2<T>
+
+public interface IDeserializable<out T> : IDeserializableRos1<T>, IDeserializableRos2<T>
     where T : ISerializableRos1, ISerializableRos2
 {
 }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Feedback : IDeserializableCommon<Feedback>, IMessageCommon
+    public sealed class Feedback : IDeserializable<Feedback>, IMessage
     {
         public const byte TYPE_EXPIRED = 0;
         public const byte TYPE_BUTTON_CLICK = 1;

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class MagneticField : IDeserializableCommon<MagneticField>, IMessageCommon
+    public sealed class MagneticField : IDeserializable<MagneticField>, IMessage
     {
         // Measurement of the Magnetic Field vector at a specific location.
         // If the covariance of the measurement is known, it should be filled in

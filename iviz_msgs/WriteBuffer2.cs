@@ -794,7 +794,7 @@ public unsafe partial struct WriteBuffer2
         Advance(size);
     }
 
-    public void SerializeArray<T>(T[] val) where T : IMessageRos2
+    public void SerializeArray<T>(T[] val) where T : IMessage
     {
         WriteInt(val.Length);
         for (int i = 0; i < val.Length; i++)
@@ -803,7 +803,7 @@ public unsafe partial struct WriteBuffer2
         }
     }
 
-    public void SerializeArray<T>(T[] val, int count) where T : IMessageRos2
+    public void SerializeArray<T>(T[] val, int count) where T : IMessage
     {
         ThrowIfWrongSize(val, count);
         for (int i = 0; i < val.Length; i++)
@@ -813,7 +813,7 @@ public unsafe partial struct WriteBuffer2
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetRosMessageLength<T>(in T msg) where T : IMessageRos2
+    public static int GetRosMessageLength<T>(in T msg) where T : IMessage
     {
         int s = 0;
         msg.AddRos2MessageLength(ref s);
@@ -826,7 +826,7 @@ public unsafe partial struct WriteBuffer2
     /// <param name="message">The ROS message.</param>
     /// <param name="buffer">The destination byte array.</param>
     /// <returns>The number of bytes written.</returns>
-    public static uint Serialize<T>(in T message, Span<byte> buffer) where T : ISerializableRos2
+    public static uint Serialize<T>(in T message, Span<byte> buffer) where T : ISerializable
     {
         fixed (byte* bufferPtr = buffer)
         {

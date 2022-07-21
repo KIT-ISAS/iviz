@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshFeatures : IDeserializableCommon<MeshFeatures>, IMessageCommon
+    public sealed class MeshFeatures : IDeserializable<MeshFeatures>, IMessage
     {
         [DataMember (Name = "map_uuid")] public string MapUuid;
         [DataMember (Name = "features")] public MeshMsgs.Feature[] Features;

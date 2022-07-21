@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StereoMsgs
 {
     [DataContract]
-    public sealed class DisparityImage : IDeserializableCommon<DisparityImage>, IMessageCommon
+    public sealed class DisparityImage : IDeserializable<DisparityImage>, IMessage
     {
         // Separate header for compatibility with current TimeSynchronizer.
         // Likely to be removed in a later release, use image.header instead.

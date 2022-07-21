@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TurtleActionlib
 {
     [DataContract]
-    public sealed class ShapeActionGoal : IDeserializableCommon<ShapeActionGoal>, IMessageCommon, IActionGoal<ShapeGoal>
+    public sealed class ShapeActionGoal : IDeserializable<ShapeActionGoal>, IMessage, IActionGoal<ShapeGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }

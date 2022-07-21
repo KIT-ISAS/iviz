@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Point : IMessageCommon, IDeserializableCommon<Point>
+    public struct Point : IMessage, IDeserializable<Point>
     {
         // This contains the position of a point in free space
         [DataMember (Name = "x")] public double X;

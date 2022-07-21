@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PoseStamped : IDeserializableCommon<PoseStamped>, IMessageCommon
+    public sealed class PoseStamped : IDeserializable<PoseStamped>, IMessage
     {
         // A Pose with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;

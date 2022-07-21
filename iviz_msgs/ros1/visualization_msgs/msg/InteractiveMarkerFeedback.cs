@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerFeedback : IDeserializableCommon<InteractiveMarkerFeedback>, IMessageCommon
+    public sealed class InteractiveMarkerFeedback : IDeserializable<InteractiveMarkerFeedback>, IMessage
     {
         // Time/frame info.
         [DataMember (Name = "header")] public StdMsgs.Header Header;

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class JointState : IDeserializableCommon<JointState>, IMessageCommon
+    public sealed class JointState : IDeserializable<JointState>, IMessage
     {
         // This is a message that holds data to describe the state of a set of torque controlled joints. 
         //

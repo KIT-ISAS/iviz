@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class UInt8 : IDeserializableCommon<UInt8>, IMessageCommon
+    public sealed class UInt8 : IDeserializable<UInt8>, IMessage
     {
         [DataMember (Name = "data")] public byte Data;
     

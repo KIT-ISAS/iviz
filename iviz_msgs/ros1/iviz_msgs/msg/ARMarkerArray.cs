@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ARMarkerArray : IDeserializableCommon<ARMarkerArray>, IMessageCommon
+    public sealed class ARMarkerArray : IDeserializable<ARMarkerArray>, IMessage
     {
         [DataMember (Name = "markers")] public ARMarker[] Markers;
     

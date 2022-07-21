@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Parameter : IDeserializableCommon<Parameter>, IMessageCommon
+    public sealed class Parameter : IDeserializable<Parameter>, IMessage
     {
         [DataMember (Name = "type")] public byte Type;
         [DataMember (Name = "bool")] public bool @bool;

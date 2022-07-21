@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ARMarker : IDeserializableCommon<ARMarker>, IMessageCommon
+    public sealed class ARMarker : IDeserializable<ARMarker>, IMessage
     {
         public const byte TYPE_ARUCO = 0;
         public const byte TYPE_QRCODE = 1;

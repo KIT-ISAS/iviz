@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.DiagnosticMsgs
 {
     [DataContract]
-    public sealed class KeyValue : IDeserializableCommon<KeyValue>, IMessageCommon
+    public sealed class KeyValue : IDeserializable<KeyValue>, IMessage
     {
         /// <summary> What to label this value when viewing </summary>
         [DataMember (Name = "key")] public string Key;

@@ -133,13 +133,23 @@ public static class BuiltIns
     {
         return ToJsonString((object)o, indented);
     }
+    
+    public static string ToJsonString(this IRequest o, bool indented = true)
+    {
+        return ToJsonString((object)o, indented);
+    }
+
+    public static string ToJsonString(this IResponse o, bool indented = true)
+    {
+        return ToJsonString((object)o, indented);
+    }
 
     public static string ToJsonString(object o, bool indented = true)
     {
         return JsonConvert.SerializeObject(o, indented ? Formatting.Indented : Formatting.None);
     }
 
-    public static byte[] SerializeToArray(this ISerializableRos1 o)
+    public static byte[] SerializeToArrayRos1(this IMessage o)
     {
         o.RosValidate();
         byte[] bytes = new byte[o.RosMessageLength];
@@ -148,7 +158,15 @@ public static class BuiltIns
         return bytes;
     }
 
-    public static byte[] SerializeToArray(this ISerializableRos2 o)
+    public static byte[] SerializeToArrayRos2(this IMessage o)
+    {
+        o.RosValidate();
+        byte[] bytes = new byte[o.RosMessageLength];
+        WriteBuffer2.Serialize(o, bytes);
+
+        return bytes;
+    }
+    public static byte[] SerializeToArray(this ISerializable o)
     {
         o.RosValidate();
         byte[] bytes = new byte[o.Ros2MessageLength];
