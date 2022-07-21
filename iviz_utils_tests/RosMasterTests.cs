@@ -166,18 +166,20 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz_fixed";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await client.CreateWriterAsync<Twist>(topicName);
+            await using var publisher = await client.CreateWriterAsync<Pose>(topicName);
             publisher.LatchingEnabled = true;
 
             var systemState = await client.GetSystemStateAsync();
             Assert.True(
                 systemState.Publishers.Any(tuple => tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
 
-            publisher.Write(default);
+            publisher.Write(new());
 
-            await using var subscriber = await client.CreateReaderAsync<Twist>(topicName);
+            await using var subscriber = await client.CreateReaderAsync<Pose>(topicName);
 
             using var source = new CancellationTokenSource(5000);
+
+            await Task.Delay(1000);
 
             await subscriber.ReadAsync(source.Token);
         }
@@ -187,14 +189,14 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz_false";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await client.CreateWriterAsync<Twist>(topicName);
+            await using var publisher = await client.CreateWriterAsync<Pose>(topicName);
             publisher.LatchingEnabled = true;
 
             var systemState = await client.GetSystemStateAsync();
             Assert.True(
                 systemState.Publishers.Any(tuple => tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
 
-            publisher.Write(default);
+            publisher.Write(new());
 
             await using var subscriber = await client.CreateReaderAsync<Empty>(topicName);
 
@@ -216,12 +218,12 @@ namespace Iviz.UtilsTests
             const string topicName = "/my_test_topic_xyz_fixed_no_pub";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
 
-            await using var subscriber = await client.CreateReaderAsync<Twist>(topicName);
+            await using var subscriber = await client.CreateReaderAsync<Pose>(topicName);
             await Task.Delay(1000);
 
-            await using var publisher = await client.CreateWriterAsync<Twist>(topicName);
+            await using var publisher = await client.CreateWriterAsync<Pose>(topicName);
             publisher.LatchingEnabled = true;
-            publisher.Write(default);
+            publisher.Write(new());
 
             using var source = new CancellationTokenSource(5000);
 

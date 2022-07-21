@@ -15,6 +15,7 @@
           "Iviz.Octree": "1.0.0",
           "Iviz.Rosbag.Lib": "1.0.0",
           "Iviz.Roslib": "1.0.0",
+          "Iviz.Roslib2": "1.0.0",
           "Iviz.Rosmaster.Lib": "1.0.0",
           "Iviz.TfManager": "1.0.0",
           "Iviz.Urdf": "1.0.0",
@@ -987,15 +988,34 @@
           "Iviz.Rosbag.Lib.dll": {}
         }
       },
+      "Iviz.RosClient/1.0.0": {
+        "dependencies": {
+          "Iviz.Msgs": "1.0.0",
+          "Nito.AsyncEx.Coordination": "5.1.2"
+        },
+        "runtime": {
+          "Iviz.RosClient.dll": {}
+        }
+      },
       "Iviz.Roslib/1.0.0": {
         "dependencies": {
           "Iviz.Msgs": "1.0.0",
           "Iviz.MsgsGen.Dynamic.Lib": "1.0.0",
           "Iviz.MsgsGen.Lib": "1.0.0",
+          "Iviz.RosClient": "1.0.0",
           "Iviz.XmlRpc": "1.0.0"
         },
         "runtime": {
           "Iviz.Roslib.dll": {}
+        }
+      },
+      "Iviz.Roslib2/1.0.0": {
+        "dependencies": {
+          "Iviz.Msgs": "1.0.0",
+          "Iviz.RosClient": "1.0.0"
+        },
+        "runtime": {
+          "Iviz.Roslib2.dll": {}
         }
       },
       "Iviz.Rosmaster.Lib/1.0.0": {
@@ -1677,7 +1697,17 @@
       "serviceable": false,
       "sha512": ""
     },
+    "Iviz.RosClient/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
     "Iviz.Roslib/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.Roslib2/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
