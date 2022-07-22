@@ -19,7 +19,7 @@ internal static class Rcl
 
     public static unsafe IntPtr GetArrayValue(IntPtr ptr, int index) => (IntPtr)((void**)ptr.ToPointer())[index];
 
-    public static unsafe ref T GetArrayValue<T>(IntPtr ptr, int index) where T : unmanaged => ref ((T*)ptr.ToPointer())[index];
+    public static unsafe ref T GetArrayRef<T>(IntPtr ptr) where T : unmanaged => ref *(T*)ptr.ToPointer();
 
     public static void Check(IntPtr context, int result)
     {
@@ -44,7 +44,7 @@ internal static class Rcl
 
     [DllImport(Library, EntryPoint = "native_rcl_init")]
     public static extern int Init(IntPtr context);
-    
+
     [DllImport(Library, EntryPoint = "native_rcl_shutdown")]
     public static extern int Shutdown(IntPtr contextHandle);
 
@@ -64,11 +64,23 @@ internal static class Rcl
     [DllImport(Library, EntryPoint = "native_rcl_destroy_node_handle")]
     public static extern int DestroyNode(IntPtr nodeHandle);
 
+
     [DllImport(Library, EntryPoint = "native_rcl_get_fully_qualified_node_name")]
     public static extern IntPtr GetFullyQualifiedNodeName(IntPtr nodeHandle);
 
     [DllImport(Library, EntryPoint = "native_rcl_ok")]
     public static extern bool IsOk(IntPtr contextHandle);
+
+
+    [DllImport(Library, EntryPoint = "native_rcl_create_guard")]
+    public static extern IntPtr CreateGuard(IntPtr context_handle);
+
+    [DllImport(Library, EntryPoint = "native_rcl_destroy_guard")]
+    public static extern int DestroyGuard(IntPtr guard_handle);
+
+    [DllImport(Library, EntryPoint = "native_rcl_trigger_guard")]
+    public static extern int TriggerGuard(IntPtr guard_handle);
+
 
     [DllImport(Library, EntryPoint = "native_rcl_create_wait_set")]
     public static extern IntPtr CreateWaitSet();
@@ -77,14 +89,15 @@ internal static class Rcl
     public static extern int WaitSetInit(IntPtr contextHandle, IntPtr waitSetHandle, int numberOfSubscriptions,
         int numberOfGuardConditions, int numberOfTimers, int numberOfClients, int numberOfServices, int numberOfEvents);
 
-    [DllImport(Library, EntryPoint = "native_rcl_wait_set_clear")]
-    public static extern int WaitSetClear(IntPtr waitSetHandle);
-
-    [DllImport(Library, EntryPoint = "native_rcl_wait_set_add_subscription")]
-    public static extern int WaitSetAddSubscription(IntPtr waitSetHandle, IntPtr subscriptionHandle);
-
     [DllImport(Library, EntryPoint = "native_rcl_wait")]
-    public static extern int Wait(IntPtr waitSetHandle, int timeoutInMs);
+    public static extern int Wait(IntPtr waitSetHandle, int timeoutInMs, 
+        out IntPtr subscriptionHandles,
+        out IntPtr guardHandles);
+
+    [DllImport(Library, EntryPoint = "native_rcl_wait_clear_and_add")]
+    public static extern int WaitClearAndAdd(IntPtr waitSetHandle, 
+        in IntPtr subscriptionHandles, int numSubscriptionHandles, 
+        in IntPtr guardHandles, int numGuardHandles);
 
     [DllImport(Library, EntryPoint = "native_rcl_destroy_wait_set")]
     public static extern int DestroyWaitSet(IntPtr waitSetHandle);

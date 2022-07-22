@@ -4,13 +4,12 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib2.Rcl;
 
-internal sealed class RclSubscriber
+internal sealed class RclSubscriber : IDisposable
 {
     readonly IntPtr contextHandle;
     readonly IntPtr nodeHandle;
     readonly IntPtr subscriptionHandle;
     readonly IntPtr messageBuffer;
-    readonly IntPtr waitSet;
     bool disposed;
 
     public string Topic { get; }
@@ -54,13 +53,16 @@ internal sealed class RclSubscriber
         }
 
         Check(Rcl.CreateSerializedMessage(out messageBuffer));
-
-        waitSet = Rcl.CreateWaitSet();
-        Check(Rcl.WaitSetInit(contextHandle, waitSet, 1, 0, 0, 0, 0, 0));
     }
 
     void Check(int result) => Rcl.Check(contextHandle, result);
+    
+    public void AddHandle(out IntPtr handle)
+    {
+        handle = subscriptionHandle;
+    }
 
+    /*
     public bool TryTakeMessage(int timeoutInMs, out ReadOnlySpan<byte> span, out Guid guid)
     {
         if (disposed) throw new ObjectDisposedException(ToString());
@@ -90,6 +92,33 @@ internal sealed class RclSubscriber
             return true;
         }
     }
+    */
+
+    public bool TryTakeMessage(out ReadOnlySpan<byte> span, out Guid guid)
+    {
+        if (disposed) throw new ObjectDisposedException(ToString());
+
+        int ret = Rcl.TakeSerializedMessage(subscriptionHandle, messageBuffer, out IntPtr ptr, out int length,
+            out guid);
+
+        switch ((RclRet)ret)
+        {
+            case RclRet.Ok:
+                unsafe
+                {
+                    const int headerSize = 4;
+                    span = new ReadOnlySpan<byte>(ptr.ToPointer(), length)[headerSize..];
+                    return true;
+                }
+            case RclRet.SubscriptionTakeFailed:
+                span = default;
+                return false;
+            default:
+                Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.TakeSerializedMessage));
+                span = default;
+                return false;
+        }
+    }
 
     public void Dispose()
     {
@@ -98,7 +127,6 @@ internal sealed class RclSubscriber
         GC.SuppressFinalize(this);
 
         Rcl.DestroySerializedMessage(messageBuffer);
-        Rcl.DestroyWaitSet(waitSet);
         Rcl.DestroySubscriptionHandle(subscriptionHandle, nodeHandle);
     }
 
@@ -107,5 +135,5 @@ internal sealed class RclSubscriber
         return $"[{nameof(RclSubscriber)} {Topic} [{TopicType}] ]";
     }
 
-    //~RclSubscriber() => Dispose();
+    ~RclSubscriber() => Dispose();
 }

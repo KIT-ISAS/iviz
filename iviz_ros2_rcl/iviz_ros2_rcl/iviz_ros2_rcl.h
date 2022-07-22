@@ -12,9 +12,11 @@ void *native_rcl_create_context();
 
 void native_rcl_destroy_context(void *context);
 
+
 int32_t native_rcl_init(void *context);
 
 int32_t native_rcl_shutdown(void *context_handle);
+
 
 int32_t native_rcl_init_logging();
 
@@ -22,13 +24,24 @@ void native_rcl_set_logging_level(int level);
 
 void native_rcl_set_logging_handler(void (*logger) (int severity, const char *name, int64_t timestamp, const char *message));
 
+
 int32_t native_rcl_create_node_handle(void *context_handle, void **node_handle, const char *name, const char *name_space);
 
 int32_t native_rcl_destroy_node_handle(void *node_handle);
 
+
 const char* native_rcl_get_fully_qualified_node_name(void *node_handle);
 
+
 bool native_rcl_ok(void *context_handle);
+
+
+void *native_rcl_create_guard(void *context_handle);
+
+int32_t native_rcl_destroy_guard(void *guard_handle);
+
+int32_t native_rcl_trigger_guard(void *guard_handle);
+
 
 void *native_rcl_create_wait_set();
 
@@ -41,15 +54,18 @@ int32_t native_rcl_wait_set_init(void *context_handle,
                                  int32_t number_of_services,
                                  int32_t number_of_events);
 
-int32_t native_rcl_wait_set_clear(void *wait_set_handle);
+int32_t native_rcl_wait(void *wait_set_handle, int32_t timeout_in_ms,
+                        void ***subscription_handles, void ***guard_handles);
 
-int32_t native_rcl_wait(void *wait_set_handle, int32_t timeout_in_ms);
-
-int32_t native_rcl_wait_set_add_subscription(void *wait_set_handle, void *subscription_handle);
+int32_t native_rcl_wait_clear_and_add(void *wait_set_handle,
+                                      void **subscription_handles, int num_subscription_handles,
+                                      void **guard_handles, int num_guard_handles);
 
 int32_t native_rcl_destroy_wait_set(void *wait_set_handle);
 
+
 const char* native_rcl_get_error_string(void *context_handle);
+
 
 int32_t native_rcl_create_subscription_handle(void **subscription_handle,
                                               void *node_handle,
@@ -60,9 +76,11 @@ int32_t native_rcl_destroy_subscription_handle(void *subscription_handle, void *
 
 int32_t native_rcl_subscription_get_publisher_count(void *subscription_handle, int32_t *count);
 
+int32_t native_rcl_destroy_subscription_handle(void *subscription_handle, void *node_handle);
+
+
 bool native_rcl_is_type_supported(const char *type);
 
-int32_t native_rcl_destroy_subscription_handle(void *subscription_handle, void *node_handle);
 
 int32_t native_rcl_take_serialized_message(void *subscription_handle, void *serialized_message, void **ptr, int32_t *length, void *gid);
 
@@ -71,6 +89,7 @@ int32_t native_rcl_create_serialized_message(void **message_handle);
 int32_t native_rcl_ensure_serialized_message_size(void *message_handle, int32_t size, void **ptr);
 
 int32_t native_rcl_destroy_serialized_message(void *message_handle);
+
 
 int32_t native_rcl_create_publisher_handle(void **publisher_handle,
                                            void *node_handle,

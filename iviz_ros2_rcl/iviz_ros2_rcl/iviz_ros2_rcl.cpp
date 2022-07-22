@@ -71,11 +71,11 @@ struct interop_context
     std::vector<std::string> strings1 {32};
     std::vector<std::string> strings2 {32};
     std::vector<std::string> strings3 {32};
-
+    
     std::vector<const char*> arrays1 {32};
     std::vector<const char*> arrays2 {32};
     std::vector<const char*> arrays3 {32};
-
+    
     std::vector<std::array<char, RMW_GID_STORAGE_SIZE>> gids {32};
 };
 
@@ -234,6 +234,32 @@ bool native_rcl_ok(void *context_handle)
 }
 
 
+void *native_rcl_create_guard(void *context_handle)
+{
+    interop_context *context = (interop_context*) context_handle;
+    rcl_guard_condition_t *guard = (rcl_guard_condition_t *)malloc(sizeof(rcl_guard_condition_t));
+    *guard = rcl_get_zero_initialized_guard_condition();
+    
+    rcl_guard_condition_options_t options = rcl_guard_condition_get_default_options();
+    IgnoreRet(rcl_guard_condition_init(guard, &context->context, options));
+    return guard;
+}
+
+int32_t native_rcl_destroy_guard(void *guard_handle)
+{
+    rcl_guard_condition_t *guard = (rcl_guard_condition_t *) guard_handle;
+    rcl_ret_t ret = rcl_guard_condition_fini(guard);
+    free(guard);
+    return ret;
+}
+
+int32_t native_rcl_trigger_guard(void *guard_handle)
+{
+    rcl_guard_condition_t *guard = (rcl_guard_condition_t *) guard_handle;
+    return rcl_trigger_guard_condition(guard);
+}
+
+
 void *native_rcl_create_wait_set()
 {
     rcl_wait_set_t *wait_set = (rcl_wait_set_t *)malloc(sizeof(rcl_wait_set_t));
@@ -260,24 +286,59 @@ int32_t native_rcl_wait_set_init(void *context_handle,
     return ret;
 }
 
-int32_t native_rcl_wait_set_clear(void *wait_set_handle)
+static int32_t native_rcl_wait_set_clear(void *wait_set_handle)
 {
     rcl_wait_set_t *wait_set = (rcl_wait_set_t *)wait_set_handle;
     return rcl_wait_set_clear(wait_set);
 }
 
-int32_t native_rcl_wait(void *wait_set_handle, int32_t timeout_in_ms)
-{
-    rcl_wait_set_t *wait_set = (rcl_wait_set_t *)wait_set_handle;
-    return rcl_wait(wait_set, RCL_MS_TO_NS(timeout_in_ms));
-}
-
-int32_t native_rcl_wait_set_add_subscription(void *wait_set_handle, void *subscription_handle)
+static int32_t native_rcl_wait_set_add_subscription(void *wait_set_handle, void *subscription_handle)
 {
     rcl_wait_set_t *wait_set = (rcl_wait_set_t *)wait_set_handle;
     rcl_subscription_t *subscription = (rcl_subscription_t *)subscription_handle;
-    return rcl_wait_set_add_subscription(wait_set, subscription, NULL);
+    return rcl_wait_set_add_subscription(wait_set, subscription, nullptr);
 }
+
+int32_t native_rcl_wait_clear_and_add(void *wait_set_handle,
+                                      void **subscription_handles, int num_subscription_handles,
+                                      void **guard_handles, int num_guard_handles)
+{
+    rcl_wait_set_t *wait_set = (rcl_wait_set_t *)wait_set_handle;
+    IgnoreRet(rcl_wait_set_clear(wait_set));
+    
+    for (int i = 0; i < num_subscription_handles; i++)
+    {
+        rcl_subscription_t *subscription = (rcl_subscription_t *)subscription_handles[i];
+        IgnoreRet(rcl_wait_set_add_subscription(wait_set, subscription, nullptr));
+    }
+
+    for (int i = 0; i < num_guard_handles; i++)
+    {
+        rcl_guard_condition_t *guard = (rcl_guard_condition_t *)guard_handles[i];
+        IgnoreRet(rcl_wait_set_add_guard_condition(wait_set, guard, nullptr));
+    }
+
+    return RCL_RET_OK;
+}
+
+int32_t native_rcl_wait(void *wait_set_handle, int32_t timeout_in_ms,
+                        void ***subscription_handles, void ***guard_handles)
+{
+    rcl_wait_set_t *wait_set = (rcl_wait_set_t *)wait_set_handle;
+    rcl_ret_t ret = rcl_wait(wait_set, RCL_MS_TO_NS(timeout_in_ms));
+    
+    if (ret != RCL_RET_OK)
+    {
+        *subscription_handles = nullptr;
+        *guard_handles = nullptr;
+        return ret;
+    }
+    
+    *subscription_handles = (void**) wait_set->subscriptions;
+    *guard_handles = (void**) wait_set->guard_conditions;
+    return RCL_RET_OK;
+}
+
 
 int32_t native_rcl_destroy_wait_set(void *wait_set_handle)
 {
@@ -534,7 +595,7 @@ int32_t native_rcl_get_topic_names_and_types(void *context_handle, void *node_ha
     if (topic_names_and_types.names.size == 0)
     {
         IgnoreRet(rmw_names_and_types_fini(&topic_names_and_types));
-
+        
         *topic_names_handle = nullptr;
         *topic_types_handle = nullptr;
         *num_topic_types = 0;
@@ -555,7 +616,7 @@ int32_t native_rcl_get_topic_names_and_types(void *context_handle, void *node_ha
     {
         context->strings1.push_back(topic_names_and_types.names.data[i]);
         context->arrays1.push_back(context->strings1.back().data());
-
+        
         rcutils_string_array_t *nat = &topic_names_and_types.types[i];
         const char *type = nat->size != 0 ? nat->data[0] : "";
         
@@ -567,7 +628,7 @@ int32_t native_rcl_get_topic_names_and_types(void *context_handle, void *node_ha
     
     *topic_names_handle = context->arrays1.data();
     *topic_types_handle = context->arrays2.data();
-
+    
     *num_topic_types = (int32_t) context->arrays2.size();
     
     return RCL_RET_OK;
@@ -589,7 +650,7 @@ int32_t native_rcl_get_service_names_and_types(void *context_handle, void *node_
     {
         return ret;
     }
-
+    
     
     context->strings1.clear();
     context->arrays1.clear();
@@ -638,7 +699,7 @@ int32_t native_rcl_get_publishers_info_by_topic(void *context_handle, void *node
     rcl_topic_endpoint_info_array_t topic_infos = rmw_get_zero_initialized_topic_endpoint_info_array();
     
     rcl_ret_t ret = rcl_get_publishers_info_by_topic(node, &allocator, topic_name, false, &topic_infos);
-
+    
     if (ret != RCL_RET_OK)
     {
         return ret;
@@ -647,7 +708,7 @@ int32_t native_rcl_get_publishers_info_by_topic(void *context_handle, void *node
     if (topic_infos.size == 0)
     {
         IgnoreRet(rmw_topic_endpoint_info_array_fini(&topic_infos, &allocator));
-
+        
         *node_names_handle = nullptr;
         *node_namespaces_handle = nullptr;
         *topic_types_handle = nullptr;
@@ -682,14 +743,14 @@ int32_t native_rcl_get_publishers_info_by_topic(void *context_handle, void *node
         
         context->strings3.push_back(topic_infos.info_array[i].topic_type);
         context->arrays3.push_back(context->strings3.back().data());
-
+        
         std::array<char, RMW_GID_STORAGE_SIZE> array;
         memcpy(array.data(), topic_infos.info_array[i].endpoint_gid, RMW_GID_STORAGE_SIZE);
         context->gids.push_back(array);
     }
     
     IgnoreRet(rmw_topic_endpoint_info_array_fini(&topic_infos, &allocator));
-
+    
     *node_names_handle = context->arrays1.data();
     *node_namespaces_handle = context->arrays2.data();
     *topic_types_handle = context->arrays3.data();
@@ -723,7 +784,7 @@ int32_t native_rcl_get_subscribers_info_by_topic(void *context_handle, void *nod
     if (topic_infos.size == 0)
     {
         IgnoreRet(rmw_topic_endpoint_info_array_fini(&topic_infos, &allocator));
-
+        
         *node_names_handle = nullptr;
         *node_namespaces_handle = nullptr;
         *topic_types_handle = nullptr;
@@ -746,8 +807,8 @@ int32_t native_rcl_get_subscribers_info_by_topic(void *context_handle, void *nod
     context->strings3.reserve(topic_infos.size);
     context->arrays3.reserve(topic_infos.size);
     context->gids.reserve(topic_infos.size);
-
-        
+    
+    
     for (int i = 0; i < topic_infos.size; i++)
     {
         context->strings1.push_back(topic_infos.info_array[i].node_name);
@@ -755,10 +816,10 @@ int32_t native_rcl_get_subscribers_info_by_topic(void *context_handle, void *nod
         
         context->strings2.push_back(topic_infos.info_array[i].node_namespace);
         context->arrays2.push_back(context->strings2.back().data());
-
+        
         context->strings3.push_back(topic_infos.info_array[i].topic_type);
         context->arrays3.push_back(context->strings3.back().data());
-
+        
         std::array<char, RMW_GID_STORAGE_SIZE> array;
         memcpy(array.data(), topic_infos.info_array[i].endpoint_gid, RMW_GID_STORAGE_SIZE);
         context->gids.push_back(array);
@@ -772,7 +833,7 @@ int32_t native_rcl_get_subscribers_info_by_topic(void *context_handle, void *nod
     *gid_handle = context->gids[0].data();
     
     *num_nodes = (int32_t) context->gids.size();
-
+    
     return RCL_RET_OK;
 }
 
@@ -912,7 +973,8 @@ int main_subscribe()
         
         native_rcl_wait_set_add_subscription((void*)wait_set_handle, (void*)subscription_handle);
         
-        ret = native_rcl_wait(wait_set_handle, 5000);
+        void **dummy;
+        ret = native_rcl_wait(wait_set_handle, 5000, &dummy, &dummy);
         std::cout << ret << std::endl;
         if (ret == RCL_RET_TIMEOUT)
         {

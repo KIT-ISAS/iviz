@@ -5,76 +5,115 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib2.Rcl;
 
-internal sealed class AsyncRclClient
+internal sealed class AsyncRclClient : TaskExecutor
 {
     readonly RclClient client;
-    readonly SingleThreadExecutor executor;
+    readonly RclWaitSet waitSet;
+    readonly RclGuardCondition guard;
 
-    public string Name => client.Name;
-    public string Namespace => client.Namespace;
+    readonly List<(RclSubscriber subscriber, ISignalizable signalizable)> subscribers = new();
+    readonly IntPtr[] cachedGuardHandles;
+    IntPtr[] cachedSubscriberHandles = Array.Empty<IntPtr>();
+    bool subscribersChanged;
+    
     public string FullName => client.FullName;
 
-    AsyncRclClient(SingleThreadExecutor executor, RclClient client)
+    public static bool IsTypeSupported(string message) => Rcl.IsTypeSupported(message);
+
+    public AsyncRclClient(string name, string @namespace = "")
     {
-        this.executor = executor;
-        this.client = client;
+        client = new RclClient(name, @namespace);
+        waitSet = client.CreateWaitSet(32, 1);
+        guard = client.CreateGuardCondition();
+
+        cachedGuardHandles = new IntPtr[1];
+        guard.AddHandle(out cachedGuardHandles[0]);
     }
 
-    public static async ValueTask<AsyncRclClient> CreateAsync(string name, string @namespace = "")
+    public Task<RclSubscriber> SubscribeAsync(string topic, string type, ISignalizable signalizable)
     {
-        var executor = new SingleThreadExecutor();
-        var client = await executor.Enqueue(() => new RclClient(name, @namespace));
-        return new AsyncRclClient(executor, client);
-    }
-
-    public static AsyncRclClient Create(string name, string @namespace = "")
-    {
-        return TaskUtils.Run(() => CreateAsync(name, @namespace).AsTask()).WaitAndRethrow();
-    }
-
-    public Task<RclSubscriber> SubscribeAsync(string topic, string type)
-    {
-        return executor.Enqueue(() => client.Subscribe(topic, type));
+        return Enqueue(() =>
+        {
+            var subscriber = client.Subscribe(topic, type);
+            subscribers.Add((subscriber, signalizable));
+            subscribersChanged = true;
+            return subscriber;
+        });
     }
 
     public Task<RclPublisher> AdvertiseAsync(string topic, string type)
     {
-        return executor.Enqueue(() => client.Advertise(topic, type));
+        return Enqueue(() => client.Advertise(topic, type));
     }
 
     public Task<NodeName[]> GetNodeNamesAsync()
     {
-        return executor.Enqueue(client.GetNodeNames);
+        return Enqueue(client.GetNodeNames);
     }
 
     public Task<TopicNameType[]> GetTopicNamesAndTypesAsync()
     {
-        return executor.Enqueue(client.GetTopicNamesAndTypes);
+        return Enqueue(client.GetTopicNamesAndTypes);
     }
 
     public Task<EndpointInfo[]> GetSubscriberInfoAsync(string topic)
     {
-        return executor.Enqueue(() => client.GetSubscriberInfo(topic));
+        return Enqueue(() => client.GetSubscriberInfo(topic));
     }
 
     public Task<EndpointInfo[]> GetPublisherInfoAsync(string topic)
     {
-        return executor.Enqueue(() => client.GetPublisherInfo(topic));
+        return Enqueue(() => client.GetPublisherInfo(topic));
     }
 
-    public Task DisposeAsync()
+    public Task DoDisposeAsync(IDisposable disposable)
     {
-        return executor.Enqueue(client.Dispose);
+        return Enqueue(disposable.Dispose);
     }
 
-    public Task DisposeSubscriberAsync(RclSubscriber subscriber)
+    protected override void Signal()
     {
-        return executor.Enqueue(subscriber.Dispose);
-    }
-    
-    public Task DisposePublisherAsync(RclPublisher publisher)
-    {
-        return executor.Enqueue(publisher.Dispose);
+        guard.Trigger();
     }
 
+    protected override void Wait()
+    {
+        if (subscribersChanged)
+        {
+            cachedSubscriberHandles = new IntPtr[subscribers.Count];
+            for (int i = 0; i < subscribers.Count; i++)
+            {
+                subscribers[i].subscriber.AddHandle(out cachedSubscriberHandles[i]);
+            }
+
+            subscribersChanged = false;
+        }
+
+        waitSet.WaitFor(cachedSubscriberHandles, cachedGuardHandles,
+            out var triggeredSubscriptions, out _);
+
+        for (int i = 0; i < triggeredSubscriptions.Length; i++)
+        {
+            if (triggeredSubscriptions[i] != IntPtr.Zero)
+            {
+                subscribers[i].signalizable.Signal();
+            }
+        }
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        _ = Enqueue(() =>
+        {
+            waitSet.Dispose();
+            guard.Dispose();
+            client.Dispose();
+        });
+        await base.DisposeAsync();
+    }
+}
+
+interface ISignalizable
+{
+    internal void Signal();
 }

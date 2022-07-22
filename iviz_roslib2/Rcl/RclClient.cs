@@ -36,7 +36,7 @@ internal sealed class RclClient : IDisposable
     {
         Name = name;
         Namespace = @namespace;
-        
+
         contextHandle = Rcl.CreateContext();
         Check(Rcl.Init(contextHandle));
 
@@ -52,6 +52,16 @@ internal sealed class RclClient : IDisposable
         Check(Rcl.CreateNode(contextHandle, out nodeHandle, name, @namespace));
 
         FullName = Rcl.ToString(Rcl.GetFullyQualifiedNodeName(nodeHandle));
+    }
+
+    public RclWaitSet CreateWaitSet(int maxSubscriptions, int maxGuardConditions)
+    {
+        return new RclWaitSet(contextHandle, maxSubscriptions, maxGuardConditions);
+    }
+
+    public RclGuardCondition CreateGuardCondition()
+    {
+        return new RclGuardCondition(contextHandle);
     }
 
     public RclSubscriber Subscribe(string topic, string type)
@@ -109,9 +119,9 @@ internal sealed class RclClient : IDisposable
             out var topicTypesHandle, out var gidHandle, out int numNodes));
 
         var guids = numNodes != 0
-            ? MemoryMarshal.CreateSpan(ref Rcl.GetArrayValue<Guid>(gidHandle, 0), numNodes)
-            : Array.Empty<Guid>();
-        
+            ? MemoryMarshal.CreateSpan(ref Rcl.GetArrayRef<Guid>(gidHandle), numNodes)
+            : Span<Guid>.Empty;
+
         var nodes = new EndpointInfo[numNodes];
         for (int i = 0; i < numNodes; i++)
         {
@@ -132,8 +142,8 @@ internal sealed class RclClient : IDisposable
             out var topicTypesHandle, out var gidHandle, out int numNodes));
 
         var guids = numNodes != 0
-            ? MemoryMarshal.CreateSpan(ref Rcl.GetArrayValue<Guid>(gidHandle, 0), numNodes)
-            : Array.Empty<Guid>();
+            ? MemoryMarshal.CreateSpan(ref Rcl.GetArrayRef<Guid>(gidHandle), numNodes)
+            : Span<Guid>.Empty;
 
         var nodes = new EndpointInfo[numNodes];
         for (int i = 0; i < numNodes; i++)

@@ -17,7 +17,7 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
     public CancellationToken CancellationToken => runningTs.Token;
     public string Topic => publisher.Topic;
     public string TopicType => publisher.TopicType;
-    public int NumSubscribers  => publisher.NumSubscribers;
+    public int NumSubscribers => publisher.NumSubscribers;
     public bool LatchingEnabled { get; set; }
 
     public bool IsAlive => !CancellationToken.IsCancellationRequested;
@@ -76,7 +76,7 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
             await DisposeAsync(token);
         }
 
-        return removed;    
+        return removed;
     }
 
     string GenerateId()
@@ -102,9 +102,9 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
         return type == typeof(TMessage);
     }
 
-    public PublisherState GetState() => 
-        new PublisherState(Topic, TopicType, ids, Array.Empty<SenderState>());
-    
+    public PublisherState GetState() =>
+        new(Topic, TopicType, ids, Array.Empty<SenderState>());
+
     public ValueTask<PublisherState> GetStateAsync()
     {
         return new ValueTask<PublisherState>(GetState());
@@ -116,7 +116,7 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
 
         AssertIsAlive();
         message.RosValidate();
-        
+
         publisher.Publish(message);
     }
 
@@ -149,7 +149,7 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
 
     public void Dispose()
     {
-        TaskUtils.Run(() => DisposeAsync().AsTask()).WaitAndRethrow();
+        TaskUtils.RunSync(DisposeAsync, default);
     }
 
     public async ValueTask DisposeAsync(CancellationToken token = default)
@@ -160,6 +160,6 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
         ids.Clear();
 
         client.RemovePublisher(this);
-        await client.AsyncClient.DisposePublisherAsync(publisher);
+        await client.Rcl.DoDisposeAsync(publisher);
     }
 }

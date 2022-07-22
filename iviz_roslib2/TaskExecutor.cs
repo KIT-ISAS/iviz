@@ -1,21 +1,23 @@
 using System.Collections.Concurrent;
 using Iviz.Tools;
 
-namespace Iviz.Roslib2;
+namespace Iviz.Roslib2.Rcl;
 
-internal sealed class SingleThreadExecutor : IAsyncDisposable
+internal abstract class TaskExecutor
 {
-    readonly SemaphoreSlim signal = new(0);
     readonly Task task;
     readonly CancellationTokenSource tokenSource = new();
     readonly ConcurrentQueue<Action> queue = new();
 
-    public SingleThreadExecutor()
-    {
-        task = TaskUtils.Run(() => Run().AwaitNoThrow(this));
-    }
+    protected abstract void Wait();
+    protected abstract void Signal();
 
-    async Task Run()
+    protected TaskExecutor()
+    {
+        task = Task.Run(Run);
+    }
+    
+    void Run()
     {
         while (!tokenSource.IsCancellationRequested)
         {
@@ -24,11 +26,11 @@ internal sealed class SingleThreadExecutor : IAsyncDisposable
                 action();
             }
 
-            await signal.WaitAsync();
+            Wait();
         }
     }
 
-    public Task Enqueue(Action action)
+    protected Task Enqueue(Action action)
     {
         var ts = TaskUtils.CreateCompletionSource();
         queue.Enqueue(() =>
@@ -44,11 +46,11 @@ internal sealed class SingleThreadExecutor : IAsyncDisposable
             }
         });
 
-        signal.Release();
+        Signal();
         return ts.Task;
     }
 
-    public Task<T> Enqueue<T>(Func<T> action)
+    protected Task<T> Enqueue<T>(Func<T> action)
     {
         var ts = TaskUtils.CreateCompletionSource<T>();
         queue.Enqueue(() =>
@@ -63,15 +65,15 @@ internal sealed class SingleThreadExecutor : IAsyncDisposable
             }
         });
 
-        signal.Release();
+        Signal();
         return ts.Task;
     }
 
-    public async ValueTask DisposeAsync()
+    public virtual async ValueTask DisposeAsync()
     {
-        await Enqueue(() => tokenSource.Cancel());
+        await Enqueue(tokenSource.Cancel);
         await task.AwaitNoThrow(this);
     }
 
-    public override string ToString() => $"[{nameof(SingleThreadExecutor)}]";
+    public override string ToString() => $"[{nameof(TaskExecutor)}]";
 }
