@@ -24,31 +24,17 @@ public static class Extensions
 
     public static void WaitForService(this IRosClient client, string service, CancellationToken token = default)
     {
-        if (client == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(client));
-        }
+        if (client == null) BuiltIns.ThrowArgumentNull(nameof(client));
+        if (service == null) BuiltIns.ThrowArgumentNull(nameof(service));
 
-        if (service == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(service));
-        }
-
-        TaskUtils.Run(() => client.WaitForServiceAsync(service, token).AsTask(), token).WaitAndRethrow();
+        TaskUtils.RunSync(() => client.WaitForServiceAsync(service, token));
     }
 
     public static async ValueTask WaitForServiceAsync(this IRosClient client, string service,
         CancellationToken token = default)
     {
-        if (client == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(client));
-        }
-
-        if (service == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(service));
-        }
+        if (client == null) BuiltIns.ThrowArgumentNull(nameof(client));
+        if (service == null) BuiltIns.ThrowArgumentNull(nameof(service));
 
         while (true)
         {
@@ -76,12 +62,14 @@ public static class Extensions
 
     public static void WaitForAnySubscriber(this IRosPublisher publisher, CancellationToken token = default)
     {
-        if (publisher == null)
-        {
-            throw new ArgumentNullException(nameof(publisher));
-        }
+        if (publisher == null) throw new ArgumentNullException(nameof(publisher));
 
-        TaskUtils.Run(() => publisher.WaitForAnySubscriberAsync(token).AsTask(), token).WaitAndRethrow();
+        if (publisher.NumSubscribers != 0)
+        {
+            return;
+        }
+        
+        TaskUtils.RunSync(publisher.WaitForAnySubscriberAsync, token);
     }
 
     public static void WaitForAnySubscriber(this IRosChannelWriter writer, CancellationToken token = default)
@@ -92,10 +80,7 @@ public static class Extensions
     public static async ValueTask WaitForAnySubscriberAsync(this IRosPublisher publisher,
         CancellationToken token = default)
     {
-        if (publisher == null)
-        {
-            throw new ArgumentNullException(nameof(publisher));
-        }
+        if (publisher == null) throw new ArgumentNullException(nameof(publisher));
 
         if (publisher.NumSubscribers != 0)
         {
@@ -129,21 +114,20 @@ public static class Extensions
 
     public static void WaitForAnyPublisher(this IRosSubscriber subscriber, CancellationToken token = default)
     {
-        if (subscriber == null)
+        if (subscriber == null) throw new ArgumentNullException(nameof(subscriber));
+
+        if (subscriber.NumPublishers != 0)
         {
-            throw new ArgumentNullException(nameof(subscriber));
+            return;
         }
 
-        TaskUtils.Run(() => subscriber.WaitForAnyPublisherAsync(token).AsTask(), token).WaitAndRethrow();
+        TaskUtils.RunSync(subscriber.WaitForAnyPublisherAsync, token);
     }
 
     public static async ValueTask WaitForAnyPublisherAsync(this IRosSubscriber subscriber,
         CancellationToken token = default)
     {
-        if (subscriber == null)
-        {
-            throw new ArgumentNullException(nameof(subscriber));
-        }
+        if (subscriber == null) throw new ArgumentNullException(nameof(subscriber));
 
         if (subscriber.NumPublishers != 0)
         {
@@ -172,31 +156,17 @@ public static class Extensions
 
     public static void WaitForTopic(this IRosClient client, string topic, CancellationToken token = default)
     {
-        if (client == null)
-        {
-            throw new ArgumentNullException(nameof(client));
-        }
+        if (client == null) throw new ArgumentNullException(nameof(client));
+        if (topic == null) throw new ArgumentNullException(nameof(topic));
 
-        if (topic == null)
-        {
-            throw new ArgumentNullException(nameof(topic));
-        }
-
-        TaskUtils.Run(() => client.WaitForTopicAsync(topic, token).AsTask(), token).WaitAndRethrow();
+        TaskUtils.RunSync(() => client.WaitForTopicAsync(topic, token));
     }
 
     public static async ValueTask WaitForTopicAsync(this IRosClient client, string topic,
         CancellationToken token = default)
     {
-        if (client == null)
-        {
-            throw new ArgumentNullException(nameof(client));
-        }
-
-        if (topic == null)
-        {
-            throw new ArgumentNullException(nameof(topic));
-        }
+        if (client == null) throw new ArgumentNullException(nameof(client));
+        if (topic == null) throw new ArgumentNullException(nameof(topic));
 
         while (true)
         {
