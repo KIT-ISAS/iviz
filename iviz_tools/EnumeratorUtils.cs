@@ -8,6 +8,8 @@ namespace Iviz.Tools;
 
 public static class EnumeratorUtils
 {
+    delegate TA InAction<TA, TB>(in TB tb);
+    
     public static ZipEnumerable<TA, TB> Zip<TA, TB>(this IReadOnlyList<TA> a, IReadOnlyList<TB> b)
     {
         if (a == null) BaseUtils.ThrowArgumentNull(nameof(a));

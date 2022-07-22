@@ -27,7 +27,7 @@ namespace Iviz.Ros
         Ros1,
         Ros2
     }
-    
+
     public sealed class RoslibConnection : RosConnection, Iviz.Displays.IServiceProvider
     {
         static TopicNameType[] EmptyTopics => Array.Empty<TopicNameType>();
@@ -68,11 +68,17 @@ namespace Iviz.Ros
             get => version;
             set
             {
+                if (version == value)
+                {
+                    return;
+                }
+
                 version = value;
                 RosVersionChanged?.Invoke(version);
+                Disconnect();
             }
         }
-        
+
         public IRosClient Client => client ?? throw new InvalidOperationException("Client not connected");
 
         public Uri? MasterUri
@@ -130,7 +136,7 @@ namespace Iviz.Ros
                 });
             }
         }
-        
+
         public void SetHostAliases(IEnumerable<(string hostname, string address)> newHostAliases)
         {
             hostAliases.Clear();
@@ -180,6 +186,7 @@ namespace Iviz.Ros
 
             try
             {
+                var currentVersion = version;
                 const int rpcTimeoutInMs = 3000;
 
                 //Tools.Logger.LogDebugCallback = RosLogger.Debug;
@@ -201,7 +208,7 @@ namespace Iviz.Ros
 
                 var token = runningTs.Token;
 
-                if (version == RosVersion.Ros1)
+                if (currentVersion == RosVersion.Ros1)
                 {
                     var newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
                     newClient.ShutdownAction = OnShutdown;
@@ -214,12 +221,14 @@ namespace Iviz.Ros
                     client = new Ros2Client(MyId);
                 }
 
+                var currentClient = client;
+                
                 Post(async () =>
                 {
                     RosLogger.Internal("Resubscribing and readvertising...");
                     token.ThrowIfCancellationRequested();
 
-                    (bool success, XmlRpcValue hosts) = await Client.GetParameterAsync("/iviz/hosts", token);
+                    (bool success, XmlRpcValue hosts) = await currentClient.GetParameterAsync("/iviz/hosts", token);
                     if (success)
                     {
                         AddHostsParamFromArg(hosts);
@@ -230,27 +239,27 @@ namespace Iviz.Ros
                     //RosLogger.Debug("--- Advertising services...");
                     token.ThrowIfCancellationRequested();
                     await servicesByTopic.Values
-                        .Select(topic => ReAdvertiseService(topic, token).AwaitNoThrow(this))
+                        .Select(topic => ReAdvertiseService(currentClient, topic, token).AwaitNoThrow(this))
                         .WhenAll();
                     //RosLogger.Debug("+++ Done advertising services");
 
                     //RosLogger.Debug("--- Readvertising...");
                     token.ThrowIfCancellationRequested();
                     await publishersByTopic.Values
-                        .Select(topic => ReAdvertise(topic, token).AwaitNoThrow(this))
+                        .Select(topic => ReAdvertise(currentClient, topic, token).AwaitNoThrow(this))
                         .WhenAll();
                     //RosLogger.Debug("+++ Done readvertising");
 
                     //RosLogger.Debug("--- Resubscribing...");
                     token.ThrowIfCancellationRequested();
                     await subscribersByTopic.Values
-                        .Select(topic => ReSubscribe(topic, token).AwaitNoThrow(this))
+                        .Select(topic => ReSubscribe(currentClient, topic, token).AwaitNoThrow(this))
                         .WhenAll();
                     //RosLogger.Debug("+++ Done resubscribing");
 
                     //RosLogger.Debug("--- Requesting topics...");
                     token.ThrowIfCancellationRequested();
-                    cachedPublishedTopics = await Client.GetSystemPublishedTopicsAsync(token);
+                    cachedPublishedTopics = await currentClient.GetSystemPublishedTopicsAsync(token);
                     //RosLogger.Debug("+++ Done requesting topics");
 
                     cachedSystemState = null;
@@ -258,9 +267,9 @@ namespace Iviz.Ros
 
                     RosLogger.Internal("Finished resubscribing and readvertising!");
 
-                    if (Client is RosClient ros1Client)
+                    if (currentVersion == RosVersion.Ros1)
                     {
-                        watchdogTask = WatchdogTask(ros1Client.RosMasterClient, token);
+                        watchdogTask = WatchdogTask(((RosClient)currentClient).RosMasterClient, token);
                         ntpTask = NtpCheckerTask(MasterUri.Host, token);
                     }
                 });
@@ -268,7 +277,10 @@ namespace Iviz.Ros
                 RosLogger.Debug($"{this}: Connected!");
                 RosLogger.Internal("<b>Connected!</b>");
 
-                LogConnectionCheck(token);
+                if (currentVersion == RosVersion.Ros1)
+                {
+                    LogConnectionCheck(token);
+                }
 
                 return true;
             }
@@ -520,17 +532,6 @@ namespace Iviz.Ros
             }
         }
 
-        static Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 100), token);
-
-        async ValueTask ReAdvertise(IAdvertisedTopic topic, CancellationToken token)
-        {
-            await RandomDelay(token);
-            await topic.AdvertiseAsync(Connected ? Client : null, token);
-            int id = GetFreeId();
-            topic.Id = id;
-            publishers[id] = topic.Publisher;
-        }
-
         int GetFreeId()
         {
             for (int i = 0; i < publishers.Length; i++)
@@ -543,17 +544,29 @@ namespace Iviz.Ros
 
             throw new InvalidOperationException("Ran out of publishers!"); // NYI!
         }
+        
+        static Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 100), token);
 
-        async ValueTask ReSubscribe(ISubscribedTopic topic, CancellationToken token)
+        async ValueTask ReAdvertise(IRosClient newClient, IAdvertisedTopic topic, CancellationToken token)
         {
             await RandomDelay(token);
-            await topic.SubscribeAsync(Connected ? Client : null, token: token);
+            await topic.AdvertiseAsync(newClient, token);
+            int id = GetFreeId();
+            topic.Id = id;
+            publishers[id] = topic.Publisher;
         }
 
-        async ValueTask ReAdvertiseService(IAdvertisedService service, CancellationToken token)
+        static async ValueTask ReSubscribe(IRosClient newClient, ISubscribedTopic topic, CancellationToken token)
         {
             await RandomDelay(token);
-            await service.AdvertiseAsync(Connected ? Client : null, token);
+            await topic.SubscribeAsync(newClient, token: token);
+        }
+
+        static async ValueTask ReAdvertiseService(IRosClient newClient, IAdvertisedService service,
+            CancellationToken token)
+        {
+            await RandomDelay(token);
+            await service.AdvertiseAsync(newClient, token);
         }
 
         public override void Disconnect()
@@ -784,7 +797,7 @@ namespace Iviz.Ros
             try
             {
                 var basePublisher = publishers[id];
-                if (basePublisher is { NumSubscribers: > 0 } and RosPublisher<T> publisher)
+                if (basePublisher is { NumSubscribers: > 0 } and IRosPublisher<T> publisher)
                 {
                     publisher.Publish(msg);
                 }
@@ -814,7 +827,7 @@ namespace Iviz.Ros
                 {
                     // ignore
                 }
-                catch (Exception e) 
+                catch (Exception e)
                 {
                     RosLogger.Error($"{this}: Exception during {nameof(Subscribe)}()", e);
                 }

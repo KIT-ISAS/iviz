@@ -82,34 +82,75 @@ internal sealed class RclClient : IDisposable
 
         if (numNodeNames != numNodeNamespaces)
         {
-            throw new Exception("Sizes do not match!");
+            throw new RosRclException($"Sizes in {nameof(GetNodeNames)} do not match!");
         }
 
-        var nodeNames = new NodeName[numNodeNames];
+        if (numNodeNames == 0)
+        {
+            return Array.Empty<NodeName>();
+        }
+
+        var nodeNames = Rcl.CreateSpan<IntPtr>(nodeNamesHandle, numNodeNames);
+        var nodeNamespaces = Rcl.CreateSpan<IntPtr>(nodeNamespacesHandle, numNodeNames);
+
+        var result = new NodeName[numNodeNames];
         for (int i = 0; i < numNodeNames; i++)
         {
-            string ns = Rcl.ToString(Rcl.GetArrayValue(nodeNamespacesHandle, i));
-            string name = Rcl.ToString(Rcl.GetArrayValue(nodeNamesHandle, i));
-            nodeNames[i] = new NodeName(ns, name);
+            result[i] = new NodeName(
+                Rcl.ToString(nodeNames[i]),
+                Rcl.ToString(nodeNamespaces[i])
+            );
         }
 
-        return nodeNames;
+        return result;
     }
 
     public TopicNameType[] GetTopicNamesAndTypes()
     {
         Check(Rcl.GetTopicNamesAndTypes(contextHandle, nodeHandle,
-            out var topicNamesHandle, out var topicTypesHandle, out int numTopicTypes));
+            out var topicNamesHandle, out var topicTypesHandle, out int numTopics));
 
-        var topics = new TopicNameType[numTopicTypes];
-        for (int i = 0; i < numTopicTypes; i++)
+        if (numTopics == 0)
         {
-            string topic = Rcl.ToString(Rcl.GetArrayValue(topicNamesHandle, i));
-            string type = Rcl.ToString(Rcl.GetArrayValue(topicTypesHandle, i)).Replace("/msg", "");
+            return Array.Empty<TopicNameType>();
+        }
+
+        var topics = new TopicNameType[numTopics];
+        var topicNamesSpan = Rcl.CreateSpan<IntPtr>(topicNamesHandle, numTopics);
+        var topicTypesSpan = Rcl.CreateSpan<IntPtr>(topicTypesHandle, numTopics);
+
+        for (int i = 0; i < numTopics; i++)
+        {
+            string topic = Rcl.ToString(topicNamesSpan[i]);
+            string type = Rcl.ToString(topicTypesSpan[i]).Replace("/msg", "");
             topics[i] = new TopicNameType(topic, type);
         }
 
         return topics;
+    }
+
+    public TopicNameType[] GetServiceNamesAndTypesByNode(string nodeName, string nodeNamespace)
+    {
+        Check(Rcl.GetServiceNamesAndTypesByNode(contextHandle, nodeHandle,
+            nodeName, nodeNamespace, out var serviceNamesHandle, out var serviceTypesHandle, out int numServices));
+
+        if (numServices == 0)
+        {
+            return Array.Empty<TopicNameType>();
+        }
+
+        var services = new TopicNameType[numServices];
+        var serviceNamesSpan = Rcl.CreateSpan<IntPtr>(serviceNamesHandle, numServices);
+        var serviceTypesSpan = Rcl.CreateSpan<IntPtr>(serviceTypesHandle, numServices);
+
+        for (int i = 0; i < numServices; i++)
+        {
+            string topic = Rcl.ToString(serviceNamesSpan[i]);
+            string type = Rcl.ToString(serviceTypesSpan[i]).Replace("/msg", "");
+            services[i] = new TopicNameType(topic, type);
+        }
+
+        return services;
     }
 
     public EndpointInfo[] GetSubscriberInfo(string topic)
@@ -118,21 +159,38 @@ internal sealed class RclClient : IDisposable
             out var nodeNamesHandle, out var nodeNamespacesHandle,
             out var topicTypesHandle, out var gidHandle, out int numNodes));
 
-        var guids = numNodes != 0
-            ? MemoryMarshal.CreateSpan(ref Rcl.GetArrayRef<Guid>(gidHandle), numNodes)
-            : Span<Guid>.Empty;
+        if (numNodes == 0)
+        {
+            return Array.Empty<EndpointInfo>();
+        }
+
+        var guids = Rcl.CreateSpan<Guid>(gidHandle, numNodes);
+        var nodeNames = Rcl.CreateSpan<IntPtr>(nodeNamesHandle, numNodes);
+        var nodeNamespaces = Rcl.CreateSpan<IntPtr>(nodeNamespacesHandle, numNodes);
+        var topicTypes = Rcl.CreateSpan<IntPtr>(topicTypesHandle, numNodes);
 
         var nodes = new EndpointInfo[numNodes];
         for (int i = 0; i < numNodes; i++)
         {
-            string name = Rcl.ToString(Rcl.GetArrayValue(nodeNamesHandle, i));
-            string ns = Rcl.ToString(Rcl.GetArrayValue(nodeNamespacesHandle, i));
-            string type = Rcl.ToString(Rcl.GetArrayValue(topicTypesHandle, i));
-
-            nodes[i] = new EndpointInfo(guids[i], new NodeName(ns, name), type);
+            nodes[i] = new EndpointInfo(guids[i],
+                Rcl.ToString(nodeNames[i]),
+                Rcl.ToString(nodeNamespaces[i]),
+                Rcl.ToString(topicTypes[i]));
         }
 
         return nodes;
+    }
+
+    public int CountPublishers(string topic)
+    {
+        Check(Rcl.CountPublishers(nodeHandle, topic, out int count));
+        return count;
+    }
+
+    public int CountSubscribers(string topic)
+    {
+        Check(Rcl.CountSubscribers(nodeHandle, topic, out int count));
+        return count;
     }
 
     public EndpointInfo[] GetPublisherInfo(string topic)
@@ -141,24 +199,27 @@ internal sealed class RclClient : IDisposable
             out var nodeNamesHandle, out var nodeNamespacesHandle,
             out var topicTypesHandle, out var gidHandle, out int numNodes));
 
-        var guids = numNodes != 0
-            ? MemoryMarshal.CreateSpan(ref Rcl.GetArrayRef<Guid>(gidHandle), numNodes)
-            : Span<Guid>.Empty;
+        if (numNodes == 0)
+        {
+            return Array.Empty<EndpointInfo>();
+        }
+
+        var guids = Rcl.CreateSpan<Guid>(gidHandle, numNodes);
+        var nodeNames = Rcl.CreateSpan<IntPtr>(nodeNamesHandle, numNodes);
+        var nodeNamespaces = Rcl.CreateSpan<IntPtr>(nodeNamespacesHandle, numNodes);
+        var topicTypes = Rcl.CreateSpan<IntPtr>(topicTypesHandle, numNodes);
 
         var nodes = new EndpointInfo[numNodes];
         for (int i = 0; i < numNodes; i++)
         {
-            string name = Rcl.ToString(Rcl.GetArrayValue(nodeNamesHandle, i));
-            string ns = Rcl.ToString(Rcl.GetArrayValue(nodeNamespacesHandle, i));
-            string type = Rcl.ToString(Rcl.GetArrayValue(topicTypesHandle, i));
-
-            nodes[i] = new EndpointInfo(guids[i], new NodeName(ns, name), type);
+            nodes[i] = new EndpointInfo(guids[i],
+                Rcl.ToString(nodeNames[i]),
+                Rcl.ToString(nodeNamespaces[i]),
+                Rcl.ToString(topicTypes[i]));
         }
 
         return nodes;
     }
-
-    public static bool IsTypeSupported(string message) => Rcl.IsTypeSupported(message);
 
     public void Dispose()
     {

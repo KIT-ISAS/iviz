@@ -1,3 +1,5 @@
+using Iviz.Tools;
+
 namespace Iviz.Roslib2.Rcl;
 
 internal sealed class RclGuardCondition : IDisposable
@@ -12,11 +14,21 @@ internal sealed class RclGuardCondition : IDisposable
 
     public void Trigger()
     {
+        if (disposed)
+        {
+            throw new ObjectDisposedException(ToString());
+        }
+        
         Rcl.TriggerGuard(guardHandle);
     }
 
     public void AddHandle(out IntPtr handle)
     {
+        if (disposed)
+        {
+            throw new ObjectDisposedException(ToString());
+        }
+
         handle = guardHandle;
     }
     
@@ -28,5 +40,7 @@ internal sealed class RclGuardCondition : IDisposable
         Rcl.DestroyGuard(guardHandle);
     }
 
-    ~RclGuardCondition() => Dispose();
+    public override string ToString() => $"[{nameof(RclGuardCondition)}]";
+    
+    ~RclGuardCondition() => Logger.LogErrorFormat("{0} has not been disposed!", this);
 }

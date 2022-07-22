@@ -133,7 +133,6 @@ namespace Iviz.Core
             return q;
         }
 
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Ros2Unity(this in Point32 p)
         {

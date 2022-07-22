@@ -44,12 +44,12 @@ internal sealed class RclSubscriber : IDisposable
         int ret = Rcl.CreateSubscriptionHandle(out subscriptionHandle, nodeHandle, topic, topicType);
         if (ret == -1)
         {
-            throw new Exception("Message type not implemented");
+            throw new RosUnsupportedMessageException(topicType);
         }
 
         if (ret != Rcl.Ok)
         {
-            throw new Exception("Subscription failed!");
+            throw new RosRclException($"Subscription for topic '{topic}' [{topicType}] failed!", ret);
         }
 
         Check(Rcl.CreateSerializedMessage(out messageBuffer));
@@ -59,40 +59,13 @@ internal sealed class RclSubscriber : IDisposable
     
     public void AddHandle(out IntPtr handle)
     {
+        if (disposed)
+        {
+            throw new ObjectDisposedException(ToString());
+        }
+
         handle = subscriptionHandle;
     }
-
-    /*
-    public bool TryTakeMessage(int timeoutInMs, out ReadOnlySpan<byte> span, out Guid guid)
-    {
-        if (disposed) throw new ObjectDisposedException(ToString());
-
-        Check(Rcl.WaitSetClear(waitSet));
-        Check(Rcl.WaitSetAddSubscription(waitSet, subscriptionHandle));
-        
-        if (Rcl.Wait(waitSet, timeoutInMs) != Rcl.Ok)
-        {
-            span = default;
-            guid = default;
-            return false;
-        }
-
-        if (Rcl.TakeSerializedMessage(subscriptionHandle, messageBuffer, out IntPtr ptr, out int length, out guid) !=
-            Rcl.Ok)
-        {
-            Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.TakeSerializedMessage));
-            span = default;
-            return false;
-        }
-
-        unsafe
-        {
-            const int headerSize = 4;
-            span = new ReadOnlySpan<byte>(ptr.ToPointer(), length)[headerSize..];
-            return true;
-        }
-    }
-    */
 
     public bool TryTakeMessage(out ReadOnlySpan<byte> span, out Guid guid)
     {
@@ -104,12 +77,9 @@ internal sealed class RclSubscriber : IDisposable
         switch ((RclRet)ret)
         {
             case RclRet.Ok:
-                unsafe
-                {
-                    const int headerSize = 4;
-                    span = new ReadOnlySpan<byte>(ptr.ToPointer(), length)[headerSize..];
-                    return true;
-                }
+                const int headerSize = 4;
+                span = Rcl.CreateSpan<byte>(ptr, length)[headerSize..];
+                return true;
             case RclRet.SubscriptionTakeFailed:
                 span = default;
                 return false;
@@ -130,10 +100,7 @@ internal sealed class RclSubscriber : IDisposable
         Rcl.DestroySubscriptionHandle(subscriptionHandle, nodeHandle);
     }
 
-    public override string ToString()
-    {
-        return $"[{nameof(RclSubscriber)} {Topic} [{TopicType}] ]";
-    }
+    public override string ToString() => $"[{nameof(RclSubscriber)} {Topic} [{TopicType}] ]";
 
-    ~RclSubscriber() => Dispose();
+    ~RclSubscriber() => Logger.LogErrorFormat("{0} has not been disposed!", this);
 }

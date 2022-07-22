@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Iviz.Roslib;
 using Iviz.Tools;
 
@@ -10,12 +11,13 @@ internal sealed class AsyncRclClient : TaskExecutor
     readonly RclClient client;
     readonly RclWaitSet waitSet;
     readonly RclGuardCondition guard;
+    bool disposed;
 
     readonly List<(RclSubscriber subscriber, ISignalizable signalizable)> subscribers = new();
     readonly IntPtr[] cachedGuardHandles;
     IntPtr[] cachedSubscriberHandles = Array.Empty<IntPtr>();
     bool subscribersChanged;
-    
+
     public string FullName => client.FullName;
 
     public static bool IsTypeSupported(string message) => Rcl.IsTypeSupported(message);
@@ -28,47 +30,159 @@ internal sealed class AsyncRclClient : TaskExecutor
 
         cachedGuardHandles = new IntPtr[1];
         guard.AddHandle(out cachedGuardHandles[0]);
+
+        Start();
     }
 
-    public Task<RclSubscriber> SubscribeAsync(string topic, string type, ISignalizable signalizable)
+    public Task<RclSubscriber> SubscribeAsync(string topic, string type, ISignalizable signalizable,
+        CancellationToken token)
     {
-        return Enqueue(() =>
+        return Post(() =>
         {
             var subscriber = client.Subscribe(topic, type);
             subscribers.Add((subscriber, signalizable));
             subscribersChanged = true;
             return subscriber;
-        });
+        }, token);
     }
 
-    public Task<RclPublisher> AdvertiseAsync(string topic, string type)
+    public Task UnsubscribeAsync(RclSubscriber subscriber, CancellationToken token)
     {
-        return Enqueue(() => client.Advertise(topic, type));
+        return Post(() =>
+        {
+            if (subscribers.RemoveAll(pair => pair.subscriber == subscriber) != 1)
+            {
+                Logger.LogErrorFormat("{0}: " + nameof(UnsubscribeAsync) + " failed to find subscriber for topic {1}",
+                    this, subscriber.Topic);
+            }
+            else
+            {
+                subscribersChanged = true;
+            }
+
+            subscriber.Dispose();
+        }, token);
     }
 
-    public Task<NodeName[]> GetNodeNamesAsync()
+    public Task<RclPublisher> AdvertiseAsync(string topic, string type, CancellationToken token)
     {
-        return Enqueue(client.GetNodeNames);
+        return Post(() => client.Advertise(topic, type), token);
     }
 
-    public Task<TopicNameType[]> GetTopicNamesAndTypesAsync()
+    public Task<NodeName[]> GetNodeNamesAsync(CancellationToken token = default)
     {
-        return Enqueue(client.GetTopicNamesAndTypes);
+        return Post(client.GetNodeNames, token);
     }
 
-    public Task<EndpointInfo[]> GetSubscriberInfoAsync(string topic)
+    public Task<TopicNameType[]> GetTopicNamesAndTypesAsync(CancellationToken token)
     {
-        return Enqueue(() => client.GetSubscriberInfo(topic));
+        return Post(client.GetTopicNamesAndTypes, token);
     }
 
-    public Task<EndpointInfo[]> GetPublisherInfoAsync(string topic)
+    public Task<TopicNameType[]> GetPublishedTopicNamesAndTypesAsync(CancellationToken token)
     {
-        return Enqueue(() => client.GetPublisherInfo(topic));
+        return Post(() =>
+                client.GetTopicNamesAndTypes()
+                    .Where(topic => client.CountPublishers(topic.Topic) != 0)
+                    .ToArray(),
+            token);
     }
 
-    public Task DoDisposeAsync(IDisposable disposable)
+    public Task<EndpointInfo[]> GetSubscriberInfoAsync(string topic, CancellationToken token)
     {
-        return Enqueue(disposable.Dispose);
+        return Post(() => client.GetSubscriberInfo(topic), token);
+    }
+
+    public Task<EndpointInfo[]> GetPublisherInfoAsync(string topic, CancellationToken token)
+    {
+        return Post(() => client.GetPublisherInfo(topic), token);
+    }
+
+    public Task<SystemState> GetSystemStateAsync(CancellationToken token)
+    {
+        return Post(() =>
+        {
+            var topics = client.GetTopicNamesAndTypes();
+            if (topics.Length == 0)
+            {
+                var emptyTuple = Array.Empty<TopicTuple>();
+                return new SystemState(emptyTuple, emptyTuple, emptyTuple);
+            }
+
+            var topicSubscribers =
+                topics.Length == 0
+                    ? Array.Empty<TopicTuple>()
+                    : topics
+                        .Select(topic => new TopicTuple(topic.Topic, GetSubscribers(topic.Topic)))
+                        .Where(tuple => tuple.Members.Length != 0)
+                        .ToArray();
+
+            var topicPublishers =
+                topics.Length == 0
+                    ? Array.Empty<TopicTuple>()
+                    : topics
+                        .Select(topic => new TopicTuple(topic.Topic, GetPublishers(topic.Topic)))
+                        .Where(tuple => tuple.Members.Length != 0)
+                        .ToArray();
+
+            var serviceProviders = GetProviders(client);
+
+            return new SystemState(topicPublishers, topicSubscribers, serviceProviders);
+
+            static string NodeToString(EndpointInfo info) => info.NodeName.ToString();
+
+            string[] GetSubscribers(string topic) =>
+                client.GetSubscriberInfo(topic)
+                    .Select(NodeToString)
+                    .ToArray();
+
+            string[] GetPublishers(string topic) =>
+                client.GetPublisherInfo(topic)
+                    .Select(NodeToString)
+                    .ToArray();
+
+            static TopicTuple[] GetProviders(RclClient client)
+            {
+                var nodeServices = client.GetNodeNames().Select(node =>
+                    (provider: node, services: client.GetServiceNamesAndTypesByNode(node.Name, node.Namespace)));
+
+                if (nodeServices.Count == 0)
+                {
+                    return Array.Empty<TopicTuple>();
+                }
+                
+                var serviceDict = new Dictionary<string, List<string>>();
+                foreach (var tuple in nodeServices)
+                {
+                    foreach (var service in tuple.services)
+                    {
+                        string provider = tuple.provider.ToString();
+                        if (serviceDict.TryGetValue(service.Topic, out var serviceNames))
+                        {
+                            serviceNames.Add(provider);
+                        }
+                        else
+                        {
+                            serviceDict[service.Topic] = new List<string>(1) { provider };
+                        }
+                    }
+                }
+
+                if (serviceDict.Count == 0)
+                {
+                    return Array.Empty<TopicTuple>();
+                }
+
+                return serviceDict
+                    .Select(entry => new TopicTuple(entry.Key, entry.Value.ToArray()))
+                    .ToArray();
+            }
+        }, token);
+    }
+
+    public Task UnadvertiseAsync(RclPublisher publisher, CancellationToken token = default)
+    {
+        return Post(publisher.Dispose, token);
     }
 
     protected override void Signal()
@@ -101,15 +215,19 @@ internal sealed class AsyncRclClient : TaskExecutor
         }
     }
 
-    public override async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync(CancellationToken token = default)
     {
-        _ = Enqueue(() =>
+        if (disposed) return;
+        disposed = true;
+
+        await Post(() =>
         {
             waitSet.Dispose();
             guard.Dispose();
             client.Dispose();
-        });
-        await base.DisposeAsync();
+            Stop();
+        }, token);
+        await base.DisposeAsync(token);
     }
 }
 

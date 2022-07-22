@@ -14,16 +14,16 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
     readonly CancellationTokenSource runningTs = new();
     readonly Ros2Client client;
     readonly SemaphoreSlim signal = new(0);
-    Task? task;
 
     RosCallback<TMessage>[] cachedCallbacks = EmptyCallback; // cache to iterate through callbacks quickly
+    RclSubscriber? subscriber;
+    Task? task;
+
     int totalSubscribers;
     bool disposed;
 
     bool IsAlive => !runningTs.IsCancellationRequested;
-
-    RclSubscriber? subscriber;
-
+    
     internal RclSubscriber Subscriber
     {
         private get => subscriber ?? throw new NullReferenceException("Subscriber has not been initialized!");
@@ -146,9 +146,9 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
 
     public SubscriberState GetState() => TaskUtils.RunSync(GetStateAsync);
 
-    public async ValueTask<SubscriberState> GetStateAsync()
+    public async ValueTask<SubscriberState> GetStateAsync(CancellationToken token)
     {
-        var publishers = await client.Rcl.GetPublisherInfoAsync(Topic);
+        var publishers = await client.Rcl.GetPublisherInfoAsync(Topic, token);
 
         var knownPublishers = publishers.ToDictionary(info => info.Guid);
 
@@ -295,7 +295,7 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
 
         disposed = true;
 
-        await client.Rcl.DoDisposeAsync(Subscriber);
+        await client.Rcl.UnsubscribeAsync(Subscriber, token).AwaitNoThrow(this);
 
         runningTs.Cancel();
         await task.AwaitNoThrow(2000, this, token);

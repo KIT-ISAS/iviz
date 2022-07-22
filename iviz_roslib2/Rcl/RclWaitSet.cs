@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Iviz.Tools;
 
 namespace Iviz.Roslib2.Rcl;
 
@@ -19,6 +20,11 @@ internal sealed class RclWaitSet : IDisposable
         ReadOnlySpan<IntPtr> subscriptions, ReadOnlySpan<IntPtr> guards,
         out ReadOnlySpan<IntPtr> triggeredSubscriptions, out ReadOnlySpan<IntPtr> triggeredGuards)
     {
+        if (disposed)
+        {
+            throw new ObjectDisposedException(ToString());
+        }
+
         IntPtr dummy = IntPtr.Zero;
         
         ref readonly IntPtr subscriptionHandles = ref (subscriptions.Length != 0 ? ref subscriptions[0] : ref dummy);
@@ -27,13 +33,26 @@ internal sealed class RclWaitSet : IDisposable
         Check(Rcl.WaitClearAndAdd(waitSetHandle, 
             in subscriptionHandles, subscriptions.Length,
             in guardHandles, guards.Length));
-        Check(Rcl.Wait(waitSetHandle, 5000, out IntPtr changedSubscriptionHandles, out IntPtr changedGuardHandles));
-
-        triggeredSubscriptions =
-            MemoryMarshal.CreateReadOnlySpan(ref Rcl.GetArrayRef<IntPtr>(changedSubscriptionHandles),
-                subscriptions.Length);
-        triggeredGuards =
-            MemoryMarshal.CreateReadOnlySpan(ref Rcl.GetArrayRef<IntPtr>(changedGuardHandles), guards.Length);
+        
+        int ret = Rcl.Wait(waitSetHandle, 5000, out IntPtr changedSubscriptionHandles, out IntPtr changedGuardHandles);
+        
+        switch ((RclRet)ret)
+        {
+            case RclRet.Timeout:
+                triggeredSubscriptions = default;
+                triggeredGuards = default;
+                return;
+            case RclRet.Ok:
+                triggeredSubscriptions = Rcl.CreateSpan<IntPtr>(changedSubscriptionHandles, subscriptions.Length);
+                triggeredGuards = Rcl.CreateSpan<IntPtr>(changedGuardHandles, guards.Length);
+                break;
+            default:
+                Check(ret); // throws
+                triggeredSubscriptions = default;
+                triggeredGuards = default;
+                break;
+        }
+        
     }
 
     void Check(int result) => Rcl.Check(contextHandle, result);
@@ -46,5 +65,7 @@ internal sealed class RclWaitSet : IDisposable
         Rcl.DestroyWaitSet(waitSetHandle);
     }
 
-    ~RclWaitSet() => Dispose();
+    public override string ToString() => $"[{nameof(RclWaitSet)}]";
+
+    ~RclWaitSet() => Logger.LogErrorFormat("{0} has not been disposed!", this);
 }

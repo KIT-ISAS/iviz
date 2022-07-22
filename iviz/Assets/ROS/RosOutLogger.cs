@@ -13,7 +13,7 @@ namespace Iviz.Ros
         const string RosOutTopic = "/rosout";
         const string RosOutAggTopic = "/rosout_agg";
 
-        uint logSeq;
+        static uint logSeq;
         RosVersion currentVersion;
 
         public delegate void LogDelegate(in LogMessage log);
@@ -26,7 +26,7 @@ namespace Iviz.Ros
 
         public RosOutLogger()
         {
-            (Sender, Listener) = GetSenderListener(RosManager.Connection.RosVersion);
+            (Sender, Listener) = CreateSenderAndListener(RosManager.Connection.RosVersion);
             currentVersion = RosManager.Connection.RosVersion;
             
             RoslibConnection.RosVersionChanged += UpdateRosVersion;
@@ -37,11 +37,11 @@ namespace Iviz.Ros
         {
             Sender.Dispose();
             Listener.Dispose();
-            (Sender, Listener) = GetSenderListener(RosManager.Connection.RosVersion);
+            (Sender, Listener) = CreateSenderAndListener(RosManager.Connection.RosVersion);
             currentVersion = version;
         }
 
-        static (ISender, IListener) GetSenderListener(RosVersion version)
+        static (ISender, IListener) CreateSenderAndListener(RosVersion version)
         {
             return (
                 version == RosVersion.Ros1
@@ -49,7 +49,7 @@ namespace Iviz.Ros
                     : new Sender<Msgs.RclInterfaces.Log>(RosOutTopic),
                 version == RosVersion.Ros1
                     ? new Listener<Msgs.RosgraphMsgs.Log>(RosOutAggTopic, Handle, RosTransportHint.PreferUdp)
-                    : new Listener<Msgs.RclInterfaces.Log>(RosOutAggTopic, Handle, RosTransportHint.PreferUdp)
+                    : new Listener<Msgs.RclInterfaces.Log>(RosOutTopic, Handle, RosTransportHint.PreferUdp)
             );
         }
 
@@ -82,7 +82,7 @@ namespace Iviz.Ros
             }
         }
 
-        Msgs.RosgraphMsgs.Log ToRos1(in LogMessage msg) => new()
+        static Msgs.RosgraphMsgs.Log ToRos1(in LogMessage msg) => new()
         {
             Header = new Header(logSeq++, GameThread.TimeNow, ""),
             Level = LogMessage.ToRos1(msg.Level),

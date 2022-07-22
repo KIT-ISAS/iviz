@@ -160,6 +160,6 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
         ids.Clear();
 
         client.RemovePublisher(this);
-        await client.Rcl.DoDisposeAsync(publisher);
+        await client.Rcl.UnadvertiseAsync(publisher, token).AwaitNoThrow(this);
     }
 }

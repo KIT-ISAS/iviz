@@ -16,6 +16,13 @@ internal readonly struct EndpointInfo
         TopicType = topicType;
     }
     
+    public EndpointInfo(in Guid guid, string nodeName, string nodeNamespace, string topicType)
+    {
+        Guid = guid;
+        NodeName = new NodeName(nodeName, nodeNamespace);
+        TopicType = topicType;
+    }
+
     public void Deconstruct(out NodeName nodeName, out string topicType, out Guid guid)
     {
         nodeName = NodeName;

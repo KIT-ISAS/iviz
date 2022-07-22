@@ -311,13 +311,13 @@ int32_t native_rcl_wait_clear_and_add(void *wait_set_handle,
         rcl_subscription_t *subscription = (rcl_subscription_t *)subscription_handles[i];
         IgnoreRet(rcl_wait_set_add_subscription(wait_set, subscription, nullptr));
     }
-
+    
     for (int i = 0; i < num_guard_handles; i++)
     {
         rcl_guard_condition_t *guard = (rcl_guard_condition_t *)guard_handles[i];
         IgnoreRet(rcl_wait_set_add_guard_condition(wait_set, guard, nullptr));
     }
-
+    
     return RCL_RET_OK;
 }
 
@@ -540,6 +540,18 @@ int32_t native_rcl_get_node_names(void *context_handle, void *node_handle,
         return ret;
     }
     
+    if (node_names.size == 0)
+    {
+        IgnoreRet(rcutils_string_array_fini(&node_names));
+        IgnoreRet(rcutils_string_array_fini(&node_namespaces));
+
+        *node_names_handle = nullptr;
+        *node_namespaces_handle = nullptr;
+        *num_node_names = 0;
+        *num_node_namespaces = 0;
+        return RCL_RET_OK;
+    }
+    
     context->strings1.clear();
     context->arrays1.clear();
     context->strings2.clear();
@@ -635,7 +647,7 @@ int32_t native_rcl_get_topic_names_and_types(void *context_handle, void *node_ha
 }
 
 int32_t native_rcl_get_service_names_and_types(void *context_handle, void *node_handle,
-                                               const char*** service_names_handle, int32_t *num_service_names,
+                                               const char*** service_names_handle,
                                                const char*** service_types_handle, int32_t *num_service_types)
 {
     
@@ -649,6 +661,16 @@ int32_t native_rcl_get_service_names_and_types(void *context_handle, void *node_
     if (ret != RCL_RET_OK)
     {
         return ret;
+    }
+    
+    if (topic_names_and_types.names.size == 0)
+    {
+        IgnoreRet(rmw_names_and_types_fini(&topic_names_and_types));
+        
+        *service_names_handle = nullptr;
+        *service_types_handle = nullptr;
+        *num_service_types = 0;
+        return RCL_RET_OK;
     }
     
     
@@ -666,11 +688,11 @@ int32_t native_rcl_get_service_names_and_types(void *context_handle, void *node_
     {
         context->strings1.push_back(topic_names_and_types.names.data[i]);
         context->arrays1.push_back(context->strings1.back().data());
-    }
-    
-    for (int i = 0; i < topic_names_and_types.types->size; i++)
-    {
-        context->strings2.push_back(topic_names_and_types.types->data[i]);
+
+        rcutils_string_array_t *nat = &topic_names_and_types.types[i];
+        const char *type = nat->size != 0 ? nat->data[0] : "";
+        
+        context->strings2.push_back(type);
         context->arrays2.push_back(context->strings2.back().data());
     }
     
@@ -679,7 +701,67 @@ int32_t native_rcl_get_service_names_and_types(void *context_handle, void *node_
     *service_names_handle = context->arrays1.data();
     *service_types_handle = context->arrays2.data();
     
-    *num_service_names = (int32_t) context->arrays1.size();
+    *num_service_types = (int32_t) context->arrays1.size();
+    
+    return RCL_RET_OK;
+}
+
+int32_t native_rcl_get_service_names_and_types_by_node(void *context_handle, void *node_handle,
+                                                       char *node_name, char *node_namespace,
+                                                       const char*** service_names_handle,
+                                                       const char*** service_types_handle, int32_t *num_service_types)
+{
+    
+    interop_context *context = (interop_context*) context_handle;
+    rcl_node_t *node = (rcl_node_t *)node_handle;
+    rcutils_allocator_t allocator = rcl_get_default_allocator();
+    
+    rcl_names_and_types_t topic_names_and_types = rmw_get_zero_initialized_names_and_types();
+    
+    rcl_ret_t ret = rcl_get_service_names_and_types_by_node(node, &allocator, node_name,
+                                                            node_namespace, &topic_names_and_types);
+    if (ret != RCL_RET_OK)
+    {
+        return ret;
+    }
+    
+    if (topic_names_and_types.names.size == 0)
+    {
+        IgnoreRet(rmw_names_and_types_fini(&topic_names_and_types));
+        
+        *service_names_handle = nullptr;
+        *service_types_handle = nullptr;
+        *num_service_types = 0;
+        return RCL_RET_OK;
+    }
+    
+    context->strings1.clear();
+    context->arrays1.clear();
+    context->strings2.clear();
+    context->arrays2.clear();
+    
+    context->strings1.reserve(topic_names_and_types.names.size);
+    context->arrays1.reserve(topic_names_and_types.names.size);
+    context->strings2.reserve(topic_names_and_types.types->size);
+    context->arrays2.reserve(topic_names_and_types.types->size);
+    
+    for (int i = 0; i < topic_names_and_types.names.size; i++)
+    {
+        context->strings1.push_back(topic_names_and_types.names.data[i]);
+        context->arrays1.push_back(context->strings1.back().data());
+
+        rcutils_string_array_t *nat = &topic_names_and_types.types[i];
+        const char *type = nat->size != 0 ? nat->data[0] : "";
+        
+        context->strings2.push_back(type);
+        context->arrays2.push_back(context->strings2.back().data());
+    }
+    
+    IgnoreRet(rmw_names_and_types_fini(&topic_names_and_types));
+    
+    *service_names_handle = context->arrays1.data();
+    *service_types_handle = context->arrays2.data();
+    
     *num_service_types = (int32_t) context->arrays2.size();
     
     return RCL_RET_OK;
@@ -768,7 +850,6 @@ int32_t native_rcl_get_subscribers_info_by_topic(void *context_handle, void *nod
                                                  const char **gid_handle,
                                                  int32_t *num_nodes)
 {
-    
     interop_context *context = (interop_context*) context_handle;
     rcl_node_t *node = (rcl_node_t *)node_handle;
     rcutils_allocator_t allocator = rcl_get_default_allocator();
@@ -836,6 +917,26 @@ int32_t native_rcl_get_subscribers_info_by_topic(void *context_handle, void *nod
     
     return RCL_RET_OK;
 }
+
+int32_t native_rcl_count_publishers(void *node_handle, char *topic_name, int32_t *count)
+{
+    rcl_node_t *node = (rcl_node_t *)node_handle;
+    size_t count_large;
+    rcl_ret_t ret = rcl_count_publishers(node, topic_name, &count_large);
+    *count = (int32_t) count_large;
+    return ret;
+}
+
+int32_t native_rcl_count_subscribers(void *node_handle, char *topic_name, int32_t *count)
+{
+    rcl_node_t *node = (rcl_node_t *)node_handle;
+    size_t count_large;
+    rcl_ret_t ret = rcl_count_subscribers(node, topic_name, &count_large);
+    *count = (int32_t) count_large;
+    return ret;
+}
+
+
 
 
 void default_handler(int severity, const char *name, rcutils_time_point_value_t timestamp, const char *message)

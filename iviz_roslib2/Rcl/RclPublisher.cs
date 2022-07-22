@@ -1,4 +1,3 @@
-using System;
 using Iviz.Msgs;
 using Iviz.Tools;
 
@@ -14,7 +13,7 @@ internal sealed class RclPublisher : IDisposable
 
     public string Topic { get; }
     public string TopicType { get; }
-    
+
     public int NumSubscribers
     {
         get
@@ -23,11 +22,11 @@ internal sealed class RclPublisher : IDisposable
             {
                 return count;
             }
-            
-            Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.GetSubscriptionCount));
+
+            Logger.LogErrorFormat("{0}: " + nameof(Rcl.GetSubscriptionCount) + " failed!", this);
             return 0;
-        }  
-    } 
+        }
+    }
 
 
     public RclPublisher(IntPtr contextHandle, IntPtr nodeHandle, string topic, string topicType)
@@ -43,17 +42,16 @@ internal sealed class RclPublisher : IDisposable
         TopicType = topicType;
 
         int ret = Rcl.CreatePublisherHandle(out publisherHandle, nodeHandle, topic, topicType);
-        if (ret == -1)
+        switch (ret)
         {
-            throw new Exception("Message type not implemented");
+            case -1:
+                throw new RosUnsupportedMessageException(topicType);
+            case Rcl.Ok:
+                Check(Rcl.CreateSerializedMessage(out messageBuffer));
+                break;
+            default:
+                throw new RosRclException($"Advertisement for topic '{topic}' [{topicType}] failed!", ret);
         }
-
-        if (ret != Rcl.Ok)
-        {
-            throw new Exception("Subscription failed!");
-        }
-
-        Check(Rcl.CreateSerializedMessage(out messageBuffer));
     }
 
     void Check(int result) => Rcl.Check(contextHandle, result);
@@ -62,23 +60,23 @@ internal sealed class RclPublisher : IDisposable
     {
         const int headerSize = 4;
 
+        const int cdrLittleEndian0 = 0x00;
+        const int cdrLittleEndian1 = 0x01;
+        const int serializationOptions0 = 0x00;
+        const int serializationOptions1 = 0x00;
+
         int messageLength = message.Ros2MessageLength;
         int serializedLength = messageLength + headerSize;
 
         Rcl.EnsureSerializedMessageSize(messageBuffer, serializedLength, out IntPtr ptr);
 
-        unsafe
-        {
-            var span = new Span<byte>(ptr.ToPointer(), serializedLength)
-            {
-                [0] = 0,
-                [1] = 1,
-                [2] = 0,
-                [3] = 0
-            };
-            
-            WriteBuffer2.Serialize(message, span[headerSize..]);
-        }
+        var span = Rcl.CreateSpan<byte>(ptr, serializedLength);
+        span[0] = cdrLittleEndian0;
+        span[1] = cdrLittleEndian1;
+        span[2] = serializationOptions0;
+        span[3] = serializationOptions1;
+
+        WriteBuffer2.Serialize(message, span[headerSize..]);
 
         Rcl.PublishSerializedMessage(publisherHandle, messageBuffer);
     }
@@ -88,21 +86,11 @@ internal sealed class RclPublisher : IDisposable
         if (disposed) return;
         disposed = true;
         GC.SuppressFinalize(this);
-        if (publisherHandle != IntPtr.Zero)
-        {
-            Rcl.DestroyPublisherHandle(publisherHandle, nodeHandle);
-        }
-
-        if (messageBuffer != IntPtr.Zero)
-        {
-            Rcl.DestroySerializedMessage(messageBuffer);
-        }
+        Rcl.DestroyPublisherHandle(publisherHandle, nodeHandle);
+        Rcl.DestroySerializedMessage(messageBuffer);
     }
 
-    public override string ToString()
-    {
-        return $"[{nameof(RclPublisher)} {Topic} [{TopicType}] ]";
-    }
+    public override string ToString() => $"[{nameof(RclPublisher)} {Topic} [{TopicType}] ]";
 
-    ~RclPublisher() => Dispose();
+    ~RclPublisher() => Logger.LogErrorFormat("{0} has not been disposed!", this);
 }

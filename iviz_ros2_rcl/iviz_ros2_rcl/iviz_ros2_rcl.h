@@ -114,8 +114,13 @@ int32_t native_rcl_get_topic_names_and_types(void *context_handle, void *node_ha
                                              const char*** topic_types_handle, int32_t *num_topic_types);
 
 int32_t native_rcl_get_service_names_and_types(void *context_handle, void *node_handle,
-                                                const char*** node_names_handle, int32_t *num_node_names,
-                                                const char*** node_namespaces_handle, int32_t *num_node_namespaces);
+                                               const char*** service_names_handle,
+                                               const char*** node_namespaces_handle, int32_t *num_node_namespaces);
+
+int32_t native_rcl_get_service_names_and_types_by_node(void *context_handle, void *node_handle,
+                                                       char *node_name, char *node_namespace,
+                                                       const char*** service_names_handle,
+                                                       const char*** service_types_handle, int32_t *num_service_types);
 
 int32_t native_rcl_get_publishers_info_by_topic(void *context_handle, void *node_handle, char *topic_name,
                                                 const char ***node_names_handle,
@@ -129,4 +134,9 @@ int32_t native_rcl_get_subscribers_info_by_topic(void *context_handle, void *nod
                                                  const char ***topic_types_handle,
                                                  const char **gid_handle,
                                                  int32_t *num_nodes);
+
+int32_t native_rcl_count_publishers(void *node_handle, char *topic_name, int32_t *count);
+
+int32_t native_rcl_count_subscribers(void *node_handle, char *topic_name, int32_t *count);
+
 }

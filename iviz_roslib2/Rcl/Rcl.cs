@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using Iviz.Roslib;
 
 namespace Iviz.Roslib2.Rcl;
 
@@ -17,9 +18,10 @@ internal static class Rcl
         return Marshal.PtrToStringUTF8(ptr) ?? "";
     }
 
-    public static unsafe IntPtr GetArrayValue(IntPtr ptr, int index) => (IntPtr)((void**)ptr.ToPointer())[index];
-
-    public static unsafe ref T GetArrayRef<T>(IntPtr ptr) where T : unmanaged => ref *(T*)ptr.ToPointer();
+    public static unsafe Span<T> CreateSpan<T>(IntPtr ptr, int size) where T : unmanaged
+    {
+        return new Span<T>(ptr.ToPointer(), size);
+    }
 
     public static void Check(IntPtr context, int result)
     {
@@ -29,9 +31,8 @@ internal static class Rcl
         }
 
         string msg = ToString(GetErrorString(context));
-        throw new Exception(msg);
+        throw new RosRclException(msg, result);
     }
-
 
     [DllImport(Library, EntryPoint = "native_rcl_set_dds_profile_path")]
     public static extern bool SetDdsProfilePath([MarshalAs(UnmanagedType.LPUTF8Str)] string path);
@@ -73,13 +74,13 @@ internal static class Rcl
 
 
     [DllImport(Library, EntryPoint = "native_rcl_create_guard")]
-    public static extern IntPtr CreateGuard(IntPtr context_handle);
+    public static extern IntPtr CreateGuard(IntPtr contextHandle);
 
     [DllImport(Library, EntryPoint = "native_rcl_destroy_guard")]
-    public static extern int DestroyGuard(IntPtr guard_handle);
+    public static extern int DestroyGuard(IntPtr guardHandle);
 
     [DllImport(Library, EntryPoint = "native_rcl_trigger_guard")]
-    public static extern int TriggerGuard(IntPtr guard_handle);
+    public static extern int TriggerGuard(IntPtr guardHandle);
 
 
     [DllImport(Library, EntryPoint = "native_rcl_create_wait_set")]
@@ -90,20 +91,20 @@ internal static class Rcl
         int numberOfGuardConditions, int numberOfTimers, int numberOfClients, int numberOfServices, int numberOfEvents);
 
     [DllImport(Library, EntryPoint = "native_rcl_wait")]
-    public static extern int Wait(IntPtr waitSetHandle, int timeoutInMs, 
+    public static extern int Wait(IntPtr waitSetHandle, int timeoutInMs,
         out IntPtr subscriptionHandles,
         out IntPtr guardHandles);
 
     [DllImport(Library, EntryPoint = "native_rcl_wait_clear_and_add")]
-    public static extern int WaitClearAndAdd(IntPtr waitSetHandle, 
-        in IntPtr subscriptionHandles, int numSubscriptionHandles, 
+    public static extern int WaitClearAndAdd(IntPtr waitSetHandle,
+        in IntPtr subscriptionHandles, int numSubscriptionHandles,
         in IntPtr guardHandles, int numGuardHandles);
 
     [DllImport(Library, EntryPoint = "native_rcl_destroy_wait_set")]
     public static extern int DestroyWaitSet(IntPtr waitSetHandle);
 
     [DllImport(Library, EntryPoint = "native_rcl_get_error_string")]
-    public static extern IntPtr GetErrorString(IntPtr contextHandle);
+    static extern IntPtr GetErrorString(IntPtr contextHandle);
 
     [DllImport(Library, EntryPoint = "native_rcl_create_subscription_handle")]
     public static extern int CreateSubscriptionHandle(out IntPtr subscriptionHandle, IntPtr nodeHandle,
@@ -160,8 +161,13 @@ internal static class Rcl
 
     [DllImport(Library, EntryPoint = "native_rcl_get_service_names_and_types")]
     public static extern int GetServiceNamesAndTypes(IntPtr contextHandle, IntPtr nodeHandle,
-        out IntPtr nodeNamesHandle, out int numNodeNames,
-        out IntPtr nodeNamespacesHandle, out int numNodeNamespaces);
+        out IntPtr serviceNamesHandle, out IntPtr serviceTypesHandle, out int numNodeNamespaces);
+
+    [DllImport(Library, EntryPoint = "native_rcl_get_service_names_and_types_by_node")]
+    public static extern int GetServiceNamesAndTypesByNode(IntPtr contextHandle, IntPtr nodeHandle,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string nodeName,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string nodeNamespace,
+        out IntPtr serviceNamesHandle, out IntPtr serviceTypesHandle, out int numNodeNamespaces);
 
     [DllImport(Library, EntryPoint = "native_rcl_get_publishers_info_by_topic")]
     public static extern int GetPublishersInfoByTopic(IntPtr contextHandle, IntPtr nodeHandle,
@@ -174,4 +180,12 @@ internal static class Rcl
         [MarshalAs(UnmanagedType.LPUTF8Str)] string topic,
         out IntPtr nodeNamesHandle, out IntPtr nodeNamespacesHandle, out IntPtr topicTypesHandle,
         out IntPtr gidHandle, out int numNodes);
+
+    [DllImport(Library, EntryPoint = "native_rcl_count_publishers")]
+    public static extern int CountPublishers(IntPtr nodeHandle,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string topic, out int count);
+
+    [DllImport(Library, EntryPoint = "native_rcl_count_subscribers")]
+    public static extern int CountSubscribers(IntPtr nodeHandle,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string topic, out int count);
 }
