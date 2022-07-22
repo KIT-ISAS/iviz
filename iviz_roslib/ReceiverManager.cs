@@ -214,7 +214,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
 
     public void Stop()
     {
-        TaskUtils.Run(() => StopAsync(default).AsTask()).WaitNoThrow(this);
+        TaskUtils.RunSync(StopAsync);
     }
 
     public async ValueTask StopAsync(CancellationToken token)

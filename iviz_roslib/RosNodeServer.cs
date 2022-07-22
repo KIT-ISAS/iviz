@@ -132,10 +132,7 @@ internal sealed class RosNodeServer
 
     static XmlRpcArg FailureResponse(string msg) => new(StatusCode.Failure, msg, 0);
 
-    static XmlRpcArg GetBusStats(XmlRpcValue[] _)
-    {
-        return ErrorResponse("Not implemented yet");
-    }
+    static XmlRpcArg GetBusStats(XmlRpcValue[] _) => ErrorResponse("Not implemented yet");
 
     XmlRpcArg GetBusInfo(XmlRpcValue[] _)
     {

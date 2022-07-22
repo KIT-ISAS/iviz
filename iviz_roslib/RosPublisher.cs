@@ -243,7 +243,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
 
         if (ids.Count == 0)
         {
-            TaskUtils.Run(() => RemovePublisherAsync(token), token).WaitAndRethrow();
+            TaskUtils.RunSync(RemovePublisherAsync, token);
         }
 
         return removed;

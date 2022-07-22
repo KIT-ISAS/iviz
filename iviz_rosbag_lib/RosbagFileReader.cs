@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Iviz.Msgs;
 using Iviz.Tools;
 
@@ -164,7 +165,7 @@ public sealed class RosbagFileReader : IDisposable
         var enumerator = Records.GetEnumerator();
         if (!enumerator.MoveNext())
         {
-            return Array.Empty<Connection>();
+            return Enumerable.Empty<Connection>();
         }
 
         var firstRecord = enumerator.Current;
@@ -172,7 +173,7 @@ public sealed class RosbagFileReader : IDisposable
             || !firstRecord.TryGetHeaderEntry("conn_count", out var connEntry)
             || !firstRecord.TryGetHeaderEntry("index_pos", out var indexEntry))
         {
-            return Array.Empty<Connection>();
+            return Enumerable.Empty<Connection>();
         }
 
         int numConnections = connEntry.ValueAsInt;

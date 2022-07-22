@@ -128,9 +128,9 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
         AssertIsAlive();
         return new SubscriberState(Topic, TopicType, callbacksById.Keys.ToArray(), manager.GetStates());
     }
-    
+
     public ValueTask<SubscriberState> GetStateAsync() => new(GetState());
-    
+
     ValueTask IRos1Subscriber.PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
     {
         return PublisherUpdateRcpAsync(publisherUris, token);
@@ -284,7 +284,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
 
     internal void PublisherUpdateRcp(IEnumerable<Uri> publisherUris, CancellationToken token)
     {
-        _ = TaskUtils.Run(() => PublisherUpdateRcpAsync(publisherUris, token).AsTask(), token).AwaitNoThrow(this);
+        TaskUtils.RunSync(() => PublisherUpdateRcpAsync(publisherUris, token).AwaitNoThrow(this));
     }
 
     internal bool TryGetLoopbackReceiver(in Endpoint endPoint, out ILoopbackReceiver<TMessage>? receiver) =>

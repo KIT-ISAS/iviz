@@ -246,7 +246,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
 
     public void Dispose()
     {
-        TaskUtils.Run(() => DisposeAsync(default).AsTask()).WaitNoThrow(this);
+        TaskUtils.RunSync(DisposeAsync);
     }
 
     public async ValueTask DisposeAsync(CancellationToken token)

@@ -577,7 +577,7 @@ public sealed class RosClient : IRosClient
     /// </summary>
     public void EnsureCleanSlate(CancellationToken token = default)
     {
-        TaskUtils.Run(() => EnsureCleanSlateAsync(token).AsTask(), token).WaitAndRethrow();
+        TaskUtils.RunSync(EnsureCleanSlateAsync, token);
     }
 
     /// <summary>
@@ -618,7 +618,7 @@ public sealed class RosClient : IRosClient
     /// <param name="token">An optional cancellation token</param>
     public void CheckOwnUri(CancellationToken token = default)
     {
-        TaskUtils.Run(() => CheckOwnUriAsync(token).AsTask(), token).WaitAndRethrow();
+        TaskUtils.RunSync(CheckOwnUriAsync, token);
     }
 
     /// <summary>
@@ -1549,8 +1549,7 @@ public sealed class RosClient : IRosClient
         CancellationToken token = default)
         where T : IService, new()
     {
-        return TaskUtils.Run(() => CallServiceAsync(serviceName, service, persistent, token).AsTask(), token)
-            .WaitAndRethrow();
+        return TaskUtils.RunSync(() => CallServiceAsync(serviceName, service, persistent, token));
     }
 
     /// <summary>
@@ -1722,8 +1721,7 @@ public sealed class RosClient : IRosClient
     public bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
         where T : IService, new()
     {
-        return TaskUtils.Run(() => AdvertiseServiceAsync(serviceName, callback, token).AsTask(), token)
-            .WaitAndRethrow();
+        return TaskUtils.RunSync(() => AdvertiseServiceAsync(serviceName, callback, token));
     }
 
     /// <summary>
@@ -1793,7 +1791,7 @@ public sealed class RosClient : IRosClient
     /// <exception cref="ArgumentException">Thrown if name is null</exception>
     public bool UnadvertiseService(string name, CancellationToken token = default)
     {
-        return TaskUtils.Run(() => UnadvertiseServiceAsync(name, token).AsTask(), token).WaitAndRethrow();
+        return TaskUtils.RunSync(() => UnadvertiseServiceAsync(name, token));
     }
 
     /// <summary>
@@ -1858,7 +1856,7 @@ public sealed class RosClient : IRosClient
     /// </summary>
     public void Close(CancellationToken token = default)
     {
-        TaskUtils.Run(() => CloseAsync(token).AsTask(), token).WaitNoThrow(this);
+        TaskUtils.RunSync(CloseAsync, token);
     }
 
     /// <summary>

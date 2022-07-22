@@ -10,46 +10,24 @@ public static class EnumeratorUtils
 {
     public static ZipEnumerable<TA, TB> Zip<TA, TB>(this IReadOnlyList<TA> a, IReadOnlyList<TB> b)
     {
-        if (a == null)
-        {
-            BaseUtils.ThrowArgumentNull(nameof(a));
-        }
-
-        if (b == null)
-        {
-            BaseUtils.ThrowArgumentNull(nameof(b));
-        }
+        if (a == null) BaseUtils.ThrowArgumentNull(nameof(a));
+        if (b == null) BaseUtils.ThrowArgumentNull(nameof(b));
 
         return new ZipEnumerable<TA, TB>(a, b);
     }
 
-    public static SelectEnumerable<IReadOnlyList<TA>, TA, TB> Select<TA, TB>(this IReadOnlyList<TA> a,
-        Func<TA, TB> f)
+    public static SelectEnumerable<IReadOnlyList<TA>, TA, TB> Select<TA, TB>(this IReadOnlyList<TA> a, Func<TA, TB> f)
     {
-        if (a == null)
-        {
-            BaseUtils.ThrowArgumentNull(nameof(a));
-        }
-
-        if (f == null)
-        {
-            BaseUtils.ThrowArgumentNull(nameof(f));
-        }
+        if (a == null) BaseUtils.ThrowArgumentNull(nameof(a));
+        if (f == null) BaseUtils.ThrowArgumentNull(nameof(f));
 
         return new SelectEnumerable<IReadOnlyList<TA>, TA, TB>(a, f);
     }
 
     public static SelectEnumerable<TA[], TA, TB> Select<TA, TB>(this TA[] a, Func<TA, TB> f)
     {
-        if (a == null)
-        {
-            BaseUtils.ThrowArgumentNull(nameof(a));
-        }
-
-        if (f == null)
-        {
-            BaseUtils.ThrowArgumentNull(nameof(f));
-        }
+        if (a == null) BaseUtils.ThrowArgumentNull(nameof(a));
+        if (f == null) BaseUtils.ThrowArgumentNull(nameof(f));
 
         return new SelectEnumerable<TA[], TA, TB>(a, f);
     }

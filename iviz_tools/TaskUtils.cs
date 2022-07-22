@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +31,24 @@ public static class TaskUtils
     {
         return Task.Run(task, token);
     }
+    
+    public static T RunSync<T>(Func<CancellationToken, ValueTask<T>> func, CancellationToken token = default) =>
+        Run(() => func(token).AsTask(), token).WaitAndRethrow();
+
+    public static T RunSync<T>(Func<ValueTask<T>> func) =>
+        Run(() => func().AsTask()).WaitAndRethrow();
+
+    public static void RunSync(Func<CancellationToken, ValueTask> func, CancellationToken token = default) =>
+        Run(() => func(token).AsTask(), token).WaitAndRethrow();
+
+    public static void RunSync(Func<CancellationToken, Task> func, CancellationToken token = default) =>
+        Run(() => func(token), token).WaitAndRethrow();
+
+    public static void RunSync(Func<ValueTask> func) => 
+        Run(() => func().AsTask()).WaitAndRethrow();
+
+    public static void RunSync(Func<Task> func) => 
+        Run(func).WaitAndRethrow();    
 
     /// <summary>
     /// Waits for the task to complete.
@@ -220,16 +239,17 @@ public static class TaskUtils
     /// Waits for the task to finish. If an exception happens, unwraps the aggregated exception and rethrows it.
     /// </summary>
     /// <param name="t">The task to await.</param>
-    public static T WaitAndRethrow<T>(this Task<T>? t)
+    [return: NotNullIfNotNull("t")]
+    public static T? WaitAndRethrow<T>(this Task<T>? t)
     {
         if (t == null)
         {
-            return default!;
+            return default;
         }
 
         try
         {
-            return t.GetAwaiter().GetResult();
+            return t.GetAwaiter().GetResult()!;
         }
         catch (AggregateException e) when (e.InnerException != null)
         {
@@ -328,8 +348,34 @@ public static class TaskUtils
     {
         var (t1, t2) = ts;
         return t1.IsCompleted ? t1.AsTaskResult() :
-            t2.IsCompleted ? t2.AsTaskResult() : 
+            t2.IsCompleted ? t2.AsTaskResult() :
             Task.WhenAny(t1, t2).AsValueTask();
+    }
+
+    public static async ValueTask<TB[]> WhenAll<TA, TB, TC>(this SelectEnumerable<TC, TA, ValueTask<TB>> ts)
+        where TC : IReadOnlyList<TA>
+    {
+        var tasks = ts.ToArray(); // evaluate to start tasks in parallel
+        TB[] values = new TB[tasks.Length];
+        for (int i = 0; i < tasks.Length; i++)
+        {
+            values[i] = await tasks[i];
+        }
+
+        return values;
+    }
+    
+    public static async ValueTask<TB[]> WhenAll<TA, TB, TC>(this SelectEnumerable<TC, TA, Task<TB>> ts)
+        where TC : IReadOnlyList<TA>
+    {
+        var tasks = ts.ToArray(); // evaluate to start tasks in parallel
+        TB[] values = new TB[tasks.Length];
+        for (int i = 0; i < tasks.Length; i++)
+        {
+            values[i] = await tasks[i];
+        }
+
+        return values;
     }
 
     /// <summary>
@@ -345,6 +391,7 @@ public static class TaskUtils
     /// </summary>
     public static TaskCompletionSource<T> CreateCompletionSource<T>() =>
         new(TaskCreationOptions.RunContinuationsAsynchronously);
+    
 }
 
 public static class ValueTaskUtils
