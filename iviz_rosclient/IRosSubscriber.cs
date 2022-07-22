@@ -43,7 +43,7 @@ public interface IRosSubscriber : IDisposable
     /// </summary>           
     public SubscriberState GetState();
 
-    public ValueTask<SubscriberState> GetStateAsync();
+    public ValueTask<SubscriberState> GetStateAsync(CancellationToken token = default);
 
     /// <summary>
     /// Checks whether this subscriber has provided the given id from a Subscribe() call.
