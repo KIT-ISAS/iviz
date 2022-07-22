@@ -219,20 +219,9 @@ public static class XmlRpcService
         XmlRpcArg[] args,
         CancellationToken token = default)
     {
-        if (remoteUri is null)
-        {
-            BaseUtils.ThrowArgumentNull(nameof(remoteUri));
-        }
-
-        if (callerUri is null)
-        {
-            BaseUtils.ThrowArgumentNull(nameof(callerUri));
-        }
-
-        if (args is null)
-        {
-            BaseUtils.ThrowArgumentNull(nameof(args));
-        }
+        if (remoteUri is null) BaseUtils.ThrowArgumentNull(nameof(remoteUri));
+        if (callerUri is null) BaseUtils.ThrowArgumentNull(nameof(callerUri));
+        if (args is null) BaseUtils.ThrowArgumentNull(nameof(args));
 
         string inData;
 
@@ -272,8 +261,7 @@ public static class XmlRpcService
     public static XmlRpcValue MethodCall(Uri remoteUri, Uri callerUri, string method, XmlRpcArg[] args,
         CancellationToken token = default)
     {
-        return TaskUtils.Run(() => MethodCallAsync(remoteUri, callerUri, method, args, token).AsTask(), token)
-            .WaitAndRethrow();
+        return TaskUtils.RunSync(() => MethodCallAsync(remoteUri, callerUri, method, args, token));
     }
 
     /// <summary>
@@ -294,15 +282,8 @@ public static class XmlRpcService
         IReadOnlyDictionary<string, Func<XmlRpcValue[], CancellationToken, ValueTask>>? lateCallbacks = null,
         CancellationToken token = default)
     {
-        if (httpContext is null)
-        {
-            BaseUtils.ThrowArgumentNull(nameof(httpContext));
-        }
-
-        if (methods is null)
-        {
-            BaseUtils.ThrowArgumentNull(nameof(methods));
-        }
+        if (httpContext is null) BaseUtils.ThrowArgumentNull(nameof(httpContext));
+        if (methods is null) BaseUtils.ThrowArgumentNull(nameof(methods));
 
         string inData = await httpContext.GetRequestAsync(token: token);
 
