@@ -61,32 +61,32 @@ namespace Iviz.Ros
             }
 
             token.ThrowIfCancellationRequested();
-            if (client != null)
-            {
-                foreach (int t in ..NumRetries)
-                {
-                    try
-                    {
-                        IRosSubscriber subscriber;
-                        (subscriberId, subscriber) = await client.SubscribeAsync<T>(topic, Callback, transportHint, token);
-                        if (bagListener != null)
-                        {
-                            bagId = subscriber.Subscribe(bagListener.EnqueueMessage);
-                        }
-
-                        Subscriber = subscriber;
-                        break;
-                    }
-                    catch (RoslibException e)
-                    {
-                        RosLogger.Error($"{this}: Failed to subscribe to topic (try {t.ToString()}): ", e);
-                        await Task.Delay(WaitBetweenRetriesInMs, token);
-                    }
-                }
-            }
-            else
+            if (client == null)
             {
                 Subscriber = null;
+                return;
+            }
+
+            foreach (int t in ..NumRetries)
+            {
+                try
+                {
+                    IRosSubscriber subscriber;
+                    (subscriberId, subscriber) =
+                        await client.SubscribeAsync<T>(topic, Callback, transportHint, token);
+                    if (bagListener != null)
+                    {
+                        bagId = subscriber.Subscribe(bagListener.EnqueueMessage);
+                    }
+
+                    Subscriber = subscriber;
+                    break;
+                }
+                catch (RoslibException e)
+                {
+                    RosLogger.Error($"{this}: Failed to subscribe to topic (try {t.ToString()}): ", e);
+                    await Task.Delay(WaitBetweenRetriesInMs, token);
+                }
             }
         }
 
@@ -144,7 +144,7 @@ namespace Iviz.Ros
             Subscriber = null;
         }
 
-        void Callback(in T msg, IRosReceiver receiver)
+        void Callback(in T msg, IRosConnection receiver)
         {
             var cache = listeners;
             try

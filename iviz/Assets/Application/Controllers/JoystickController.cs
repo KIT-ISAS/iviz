@@ -164,6 +164,7 @@ namespace Iviz.Controllers
         {
             SenderJoy?.Dispose();
             SenderTwist?.Dispose();
+            joystick.Changed -= PublishData;
             Visible = false;
         }
 

@@ -22,7 +22,7 @@ namespace Iviz.Ros
 
         readonly ConcurrentQueue<T> messageQueue = new();
         readonly Action<T>? handlerOnGameThread;
-        readonly Func<T, IRosReceiver, bool>? directHandler;
+        readonly Func<T, IRosConnection, bool>? directHandler;
         readonly List<T> messageHelper = new(32);
 
         int droppedMsgCounter;
@@ -94,7 +94,7 @@ namespace Iviz.Ros
         /// This is only used for logging purposes.
         /// </param>
         /// <param name="transportHint">Tells the subscriber which protocol is preferred</param>
-        public Listener(string topic, Func<T, IRosReceiver, bool> handler,
+        public Listener(string topic, Func<T, IRosConnection, bool> handler,
             RosTransportHint transportHint = RosTransportHint.PreferTcp) : this(topic, transportHint)
         {
             ThrowHelper.ThrowIfNull(handler, nameof(handler));
@@ -125,8 +125,8 @@ namespace Iviz.Ros
         /// Normal code should use the other constructors.
         /// </summary>
         [Preserve, UsedImplicitly]
-        public Listener(string topic, Func<IMessage, IRosReceiver, bool> handler, RosTransportHint transportHint)
-            : this(topic, (T msg, IRosReceiver receiver) => handler(msg, receiver), transportHint)
+        public Listener(string topic, Func<IMessage, IRosConnection, bool> handler, RosTransportHint transportHint)
+            : this(topic, (T msg, IRosConnection receiver) => handler(msg, receiver), transportHint)
         {
         }
 
@@ -192,7 +192,7 @@ namespace Iviz.Ros
             Subscribe();
         }
 
-        internal void EnqueueMessage(in T msg, IRosReceiver receiver)
+        internal void EnqueueMessage(in T msg, IRosConnection receiver)
         {
             if (!Subscribed)
             {
@@ -256,7 +256,7 @@ namespace Iviz.Ros
             Interlocked.Add(ref recentMsgCounter, messageCount);
         }
 
-        void CallHandlerDirect(in T msg, IRosReceiver receiver)
+        void CallHandlerDirect(in T msg, IRosConnection receiver)
         {
             if (directHandler == null) // shouldn't happen
             {

@@ -99,9 +99,10 @@ namespace Iviz.App
             entries.Sort();
         }
 
-        bool Handle(IMessage msg, IRosReceiver receiver)
+        bool Handle(IMessage msg, IRosConnection receiver)
         {
-            messageQueue.Enqueue((GameThread.NowFormatted, receiver.RemoteId, msg));
+            
+            messageQueue.Enqueue((GameThread.NowFormatted, (receiver as IRos1Receiver)?.RemoteId, msg));
             if (messageQueue.Count > MaxMessages)
             {
                 messageQueue.TryDequeue(out _);

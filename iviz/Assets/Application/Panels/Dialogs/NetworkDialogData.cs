@@ -298,7 +298,26 @@ namespace Iviz.App
                         builder.Append("unknown]</b> ");
                     }
 
-                    builder.Append(receiver.Guid.ToString());
+                    builder.Append(receiver.Guid.ToString()).Append('\n');
+
+                    builder.Append("        <b>< ").AppendBandwidth(receiver.BytesReceived).Append("</b> | ReliabilityPolicy: ");
+
+                    builder.Append(receiver.Profile.Reliability switch
+                    {
+                        ReliabilityPolicy.SystemDefault => "Default",
+                        ReliabilityPolicy.BestEffort => "BestEffort",
+                        ReliabilityPolicy.Reliable => "Reliable",
+                        _ => "Unknown (" + (int)receiver.Profile.Reliability + ")"
+                    });
+
+                    builder.Append(" | HistoryPolicy: ");
+                    builder.Append(receiver.Profile.History switch
+                    {
+                        HistoryPolicy.SystemDefault => "Default",
+                        HistoryPolicy.KeepAll => "KeepAll",
+                        HistoryPolicy.KeepLast => "KeepLast",
+                        _ => "Unknown (" + (int)receiver.Profile.History + ")"
+                    });
 
                     builder.AppendLine();
                 }
@@ -313,13 +332,9 @@ namespace Iviz.App
                     .AppendLine();
                 builder.Append("<b>Type: </b>[").Append(stat.Type).Append("]").AppendLine();
 
-                long totalMessages = 0;
-                long totalBytes = 0;
-                foreach (var sender in stat.Senders)
-                {
-                    totalMessages += sender.NumSent;
-                    totalBytes += sender.BytesSent;
-                }
+                (long totalMessages, long totalBytes) = stat.Senders.Count == 0
+                    ? (0, 0)
+                    : (stat.Senders[0].NumSent, stat.Senders[0].BytesSent);
 
                 builder.Append("<b>Sent ").Append(totalMessages.ToString("N0")).Append(" msgs | ")
                     .AppendBandwidth(totalBytes).Append("</b> total").AppendLine();
@@ -330,11 +345,10 @@ namespace Iviz.App
                     continue;
                 }
 
-                var senders = (IReadOnlyList<SenderState>)stat.Senders;
+                var senders = (IReadOnlyList<Ros2SenderState>)stat.Senders;
 
                 foreach (var sender in senders)
                 {
-                    bool isAlive = sender.IsAlive;
                     builder.Append("    <b>[");
                     if (sender.RemoteId == client.CallerId)
                     {
@@ -349,14 +363,27 @@ namespace Iviz.App
                         builder.Append("unknown]</b> ");
                     }
 
-                    if (isAlive)
+                    builder.Append(sender.Guid.ToString()).Append('\n');
+
+                    builder.Append("        ReliabilityPolicy: ");
+
+                    builder.Append(sender.Profile.Reliability switch
                     {
-                        builder.Append(" | ").AppendBandwidth(sender.BytesSent);
-                    }
-                    else
+                        ReliabilityPolicy.SystemDefault => "Default",
+                        ReliabilityPolicy.BestEffort => "BestEffort",
+                        ReliabilityPolicy.Reliable => "Reliable",
+                        _ => "Unknown (" + (int)sender.Profile.Reliability + ")"
+                    });
+
+                    builder.Append(" | DurabilityPolicy: ");
+                    builder.Append(sender.Profile.Durability switch
                     {
-                        builder.Append(" <color=#ff0000ff>(dead)</color>");
-                    }
+                        DurabilityPolicy.SystemDefault => "Default",
+                        DurabilityPolicy.Volatile => "Volatile",
+                        DurabilityPolicy.TransientLocal => "TransientLocal",
+                        _ => "Unknown (" + (int)sender.Profile.Durability + ")"
+                    });
+
 
                     builder.AppendLine();
                 }

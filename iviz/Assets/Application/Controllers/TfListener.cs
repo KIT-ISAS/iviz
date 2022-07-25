@@ -6,6 +6,7 @@ using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.Configurations;
+using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
@@ -173,7 +174,7 @@ namespace Iviz.Controllers
             }
         }
 
-        bool HandleNonStatic(TFMessage msg, IRosReceiver? _)
+        bool HandleNonStatic(TFMessage msg, IRosConnection? _)
         {
             if (incomingMessages.Count > MaxQueueSize)
             {
@@ -184,7 +185,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        bool HandleStatic(TFMessage msg, IRosReceiver? _)
+        bool HandleStatic(TFMessage msg, IRosConnection? _)
         {
             if (incomingMessages.Count > MaxQueueSize)
             {

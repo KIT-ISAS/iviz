@@ -222,7 +222,7 @@ namespace Iviz.Ros
                 }
 
                 var currentClient = client;
-                
+
                 Post(async () =>
                 {
                     RosLogger.Internal("Resubscribing and readvertising...");
@@ -544,7 +544,7 @@ namespace Iviz.Ros
 
             throw new InvalidOperationException("Ran out of publishers!"); // NYI!
         }
-        
+
         static Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 100), token);
 
         async ValueTask ReAdvertise(IRosClient newClient, IAdvertisedTopic topic, CancellationToken token)
@@ -794,13 +794,22 @@ namespace Iviz.Ros
                 return;
             }
 
+            var basePublisher = publishers[id];
+            if (basePublisher == null || basePublisher.NumSubscribers == 0)
+            {
+                return;
+            }
+
+            if (basePublisher is not IRosPublisher<T> publisher)
+            {
+                RosLogger.Error($"{this}: Publisher type does not match! Message is " + typeof(T).Name +
+                                ", publisher is " + basePublisher.GetType().Name);
+                return;
+            }
+
             try
             {
-                var basePublisher = publishers[id];
-                if (basePublisher is { NumSubscribers: > 0 } and IRosPublisher<T> publisher)
-                {
-                    publisher.Publish(msg);
-                }
+                publisher.Publish(msg);
             }
             catch (OperationCanceledException)
             {
