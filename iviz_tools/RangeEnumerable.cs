@@ -18,7 +18,7 @@ public readonly struct RangeEnumerable<TA> : IReadOnlyList<TA>, ICollection<TA>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public int Count => end - start;
-    public TA this[int index] => a[index];
+    public TA this[int index] => a[start + index];
     public RangeEnumerable<TA> Take(int count) => new(a, start, start + count);
     public RangeEnumerable<TA> Skip(int toSkip) => new(a, start + toSkip, end);
     public SelectEnumerable<RangeEnumerable<TA>, TA, TB> Select<TB>(Func<TA, TB> f) => new(this, f);
@@ -26,10 +26,18 @@ public readonly struct RangeEnumerable<TA> : IReadOnlyList<TA>, ICollection<TA>
     void ICollection<TA>.Add(TA item) => throw new NotSupportedException();
     void ICollection<TA>.Clear() => throw new NotSupportedException();
     bool ICollection<TA>.Contains(TA item) => throw new NotSupportedException();
-    void ICollection<TA>.CopyTo(TA[] array, int arrayIndex) => throw new NotSupportedException();
+
     bool ICollection<TA>.Remove(TA item) => throw new NotSupportedException();
     bool ICollection<TA>.IsReadOnly => true;
 
+    void ICollection<TA>.CopyTo(TA[] array, int arrayIndex)
+    {
+        for (int i = 0; i < Count; i++)
+        {
+            array[arrayIndex + i] = this[i];
+        }
+    }
+    
     public struct Enumerator : IEnumerator<TA>
     {
         readonly IReadOnlyList<TA> a;

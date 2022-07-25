@@ -60,12 +60,16 @@ public readonly struct ZipEnumerable<TA, TB> : IReadOnlyList<(TA First, TB Secon
     public SelectEnumerable<ZipEnumerable<TA, TB>, (TA, TB), TC> Select<TC>(Func<TA, TB, TC> f) =>
         new(this, ((TA first, TB second) pair) => f(pair.first, pair.second));
 
+    void ICollection<(TA First, TB Second)>.CopyTo((TA First, TB Second)[] array, int arrayIndex)
+    {
+        for (int i = 0; i < Count; i++)
+        {
+            array[i + arrayIndex] = this[i];
+        }
+    }
+
     void ICollection<(TA First, TB Second)>.Add((TA First, TB Second) item) => throw new NotImplementedException();
     void ICollection<(TA First, TB Second)>.Clear() => throw new NotImplementedException();
     bool ICollection<(TA First, TB Second)>.Contains((TA First, TB Second) item) => throw new NotImplementedException();
-
-    void ICollection<(TA First, TB Second)>.CopyTo((TA First, TB Second)[] array, int arrayIndex) =>
-        throw new NotImplementedException();
-
     bool ICollection<(TA First, TB Second)>.Remove((TA First, TB Second) item) => throw new NotImplementedException();
 }

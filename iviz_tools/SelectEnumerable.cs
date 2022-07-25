@@ -37,8 +37,6 @@ public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB>, ICollec
 
     public Enumerator GetEnumerator() => new(a, f);
 
-    public void CopyTo(TB[] array, int arrayIndex) => CopyTo(array.AsSpan()[arrayIndex..]);
-
     public TB[] ToArray()
     {
         if (a.Count == 0)
@@ -97,6 +95,7 @@ public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB>, ICollec
     }
 
 
+    void ICollection<TB>.CopyTo(TB[] array, int arrayIndex) => CopyTo(array.AsSpan()[arrayIndex..]);
     void ICollection<TB>.Add(TB item) => throw new NotSupportedException();
     void ICollection<TB>.Clear() => throw new NotSupportedException();
     bool ICollection<TB>.Contains(TB item) => throw new NotSupportedException();
