@@ -108,7 +108,9 @@ internal static class Rcl
 
     [DllImport(Library, EntryPoint = "native_rcl_create_subscription_handle")]
     public static extern int CreateSubscriptionHandle(out IntPtr subscriptionHandle, IntPtr nodeHandle,
-        [MarshalAs(UnmanagedType.LPUTF8Str)] string topic, [MarshalAs(UnmanagedType.LPUTF8Str)] string type);
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string topic, 
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string type,
+        in QosProfile profile);
 
     [DllImport(Library, EntryPoint = "native_rcl_is_type_supported")]
     public static extern bool IsTypeSupported([MarshalAs(UnmanagedType.LPUTF8Str)] string type);
@@ -173,13 +175,13 @@ internal static class Rcl
     public static extern int GetPublishersInfoByTopic(IntPtr contextHandle, IntPtr nodeHandle,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string topic,
         out IntPtr nodeNamesHandle, out IntPtr nodeNamespacesHandle, out IntPtr topicTypesHandle,
-        out IntPtr gidHandle, out int numNodes);
+        out IntPtr gidHandle, out IntPtr profilesHandle, out int numNodes);
 
     [DllImport(Library, EntryPoint = "native_rcl_get_subscribers_info_by_topic")]
     public static extern int GetSubscribersInfoByTopic(IntPtr contextHandle, IntPtr nodeHandle,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string topic,
         out IntPtr nodeNamesHandle, out IntPtr nodeNamespacesHandle, out IntPtr topicTypesHandle,
-        out IntPtr gidHandle, out int numNodes);
+        out IntPtr gidHandle, out IntPtr profilesHandle, out int numNodes);
 
     [DllImport(Library, EntryPoint = "native_rcl_count_publishers")]
     public static extern int CountPublishers(IntPtr nodeHandle,

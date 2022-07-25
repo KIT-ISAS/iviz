@@ -825,7 +825,7 @@ public sealed class RosClient : IRosClient
         RosTransportHint transportHint = RosTransportHint.PreferTcp, CancellationToken token = default)
         where T : IMessage, new()
     {
-        void Callback(in T t, IRosReceiver _) => callback(t);
+        void Callback(in T t, IRosConnection _) => callback(t);
         return SubscribeAsyncCore(topic, (RosCallback<T>)Callback, requestNoDelay, transportHint, token);
     }
 
@@ -854,7 +854,7 @@ public sealed class RosClient : IRosClient
         string resolvedTopic = ResolveResourceName(topic);
         if (!TryGetSubscriberImpl(resolvedTopic, out var existingSubscriber))
         {
-            void Callback(in IMessage t, IRosReceiver _) => callback(t);
+            void Callback(in IMessage t, IRosConnection _) => callback(t);
             return CreateSubscriberAsync(resolvedTopic, requestNoDelay, (RosCallback<IMessage>)Callback,
                 new DynamicMessage(), transportHint, token);
         }
@@ -993,7 +993,7 @@ public sealed class RosClient : IRosClient
         return name[0] switch
         {
             '/' => name,
-            '~' => $"{CallerId}/{name.Substring(1)}",
+            '~' => $"{CallerId}/{name[1..]}",
             _ => $"{namespacePrefix}{name}"
         };
     }

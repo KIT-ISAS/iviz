@@ -5,9 +5,9 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib2;
 
-[DataContract]
-[StructLayout(LayoutKind.Sequential)]
-public readonly struct Guid
+/// Global unique identifier.
+[DataContract, StructLayout(LayoutKind.Sequential)]
+public readonly struct Guid : IEquatable<Guid>, IComparable<Guid>
 {
     readonly ulong a;
     readonly ulong b;
@@ -30,6 +30,10 @@ public readonly struct Guid
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(in Guid left, in Guid right) => !left.Equals(right);
+
+    bool IEquatable<Guid>.Equals(Guid other) => Equals(other);
+
+    int IComparable<Guid>.CompareTo(Guid other) => CompareTo(other);
 
     public int CompareTo(in Guid other)
     {

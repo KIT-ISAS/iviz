@@ -14,10 +14,13 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
     int totalPublishers;
     bool disposed;
 
+    int numSent;
+    long bytesSent;
+
     public CancellationToken CancellationToken => runningTs.Token;
     public string Topic => publisher.Topic;
     public string TopicType => publisher.TopicType;
-    public int NumSubscribers => publisher.NumSubscribers;
+    public int NumSubscribers => publisher.GetNumSubscribers();
     public bool LatchingEnabled { get; set; }
 
     public bool IsAlive => !CancellationToken.IsCancellationRequested;
@@ -47,13 +50,13 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
 
     public bool Unadvertise(string id, CancellationToken token = default)
     {
+        if (id is null) BuiltIns.ThrowArgumentNull(nameof(id));
         if (!IsAlive)
         {
             return true;
         }
 
-        bool removed = RemoveId(id ?? throw new ArgumentNullException(nameof(id)));
-
+        bool removed = RemoveId(id);
         if (ids.Count == 0)
         {
             Dispose();
@@ -64,13 +67,13 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
 
     public async ValueTask<bool> UnadvertiseAsync(string id, CancellationToken token = default)
     {
+        if (id is null) BuiltIns.ThrowArgumentNull(nameof(id));
         if (!IsAlive)
         {
             return true;
         }
 
-        bool removed = RemoveId(id ?? throw new ArgumentNullException(nameof(id)));
-
+        bool removed = RemoveId(id);
         if (ids.Count == 0)
         {
             await DisposeAsync(token);
@@ -102,12 +105,23 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
         return type == typeof(TMessage);
     }
 
-    public PublisherState GetState() =>
-        new(Topic, TopicType, ids, Array.Empty<SenderState>());
+    public PublisherState GetState() => TaskUtils.RunSync(GetStateAsync);
 
-    public ValueTask<PublisherState> GetStateAsync()
+    public async ValueTask<PublisherState> GetStateAsync(CancellationToken token)
     {
-        return new ValueTask<PublisherState>(GetState());
+        var subscribers = await client.Rcl.GetSubscriberInfoAsync(Topic, token);
+
+        var senderStates = subscribers.Select(subscriber =>
+            new Ros2SenderState(subscriber.Guid, subscriber.Profile)
+            {
+                RemoteId = subscriber.NodeName.ToString(),
+                BytesSent = bytesSent,
+                NumSent = numSent,
+                TopicType = publisher.TopicType
+            }
+        ).ToArray();
+
+        return new PublisherState(Topic, TopicType, ids, senderStates);
     }
 
     public void Publish(in TMessage message)
@@ -117,7 +131,9 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
         AssertIsAlive();
         message.RosValidate();
 
-        publisher.Publish(message);
+        int newBytesSent = publisher.Publish(message);
+        Interlocked.Increment(ref numSent);
+        Interlocked.Add(ref bytesSent, newBytesSent);
     }
 
     public ValueTask PublishAsync(in TMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
@@ -129,22 +145,25 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
 
     void IRosPublisher.Publish(IMessage message)
     {
-        if (message is not TMessage tMessage)
+        if (message is TMessage tMessage)
         {
-            throw new RosInvalidMessageTypeException("Type does not match publisher.");
+            Publish(tMessage);
+            return;
         }
 
-        Publish(tMessage);
+        RosInvalidMessageTypeException.Throw();
     }
 
     ValueTask IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
     {
-        if (message is not TMessage tMessage)
+        if (message is TMessage tMessage)
         {
-            throw new RosInvalidMessageTypeException("Type does not match publisher.");
+            return PublishAsync(tMessage, policy, token);
         }
+        
+        RosInvalidMessageTypeException.Throw();
+        return default; // unreachable
 
-        return PublishAsync(tMessage, policy, token);
     }
 
     public void Dispose()
@@ -152,14 +171,15 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
         TaskUtils.RunSync(DisposeAsync, default);
     }
 
-    public async ValueTask DisposeAsync(CancellationToken token = default)
+    public ValueTask DisposeAsync(CancellationToken token = default)
     {
-        if (disposed) return;
+        if (disposed) return new ValueTask();
         disposed = true;
+        
         runningTs.Cancel();
         ids.Clear();
 
         client.RemovePublisher(this);
-        await client.Rcl.UnadvertiseAsync(publisher, token).AwaitNoThrow(this);
+        return client.Rcl.UnadvertiseAsync(publisher, default).AwaitNoThrow(this).AsValueTask();
     }
 }

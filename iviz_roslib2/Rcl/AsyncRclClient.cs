@@ -11,11 +11,13 @@ internal sealed class AsyncRclClient : TaskExecutor
     readonly RclClient client;
     readonly RclWaitSet waitSet;
     readonly RclGuardCondition guard;
-    bool disposed;
 
     readonly List<(RclSubscriber subscriber, ISignalizable signalizable)> subscribers = new();
     readonly IntPtr[] cachedGuardHandles;
+
     IntPtr[] cachedSubscriberHandles = Array.Empty<IntPtr>();
+
+    bool disposed;
     bool subscribersChanged;
 
     public string FullName => client.FullName;
@@ -28,18 +30,25 @@ internal sealed class AsyncRclClient : TaskExecutor
         waitSet = client.CreateWaitSet(32, 1);
         guard = client.CreateGuardCondition();
 
-        cachedGuardHandles = new IntPtr[1];
-        guard.AddHandle(out cachedGuardHandles[0]);
+        cachedGuardHandles = new[] { guard.Handle };
 
         Start();
     }
 
     public Task<RclSubscriber> SubscribeAsync(string topic, string type, ISignalizable signalizable,
+        RosTransportHint transportHint,
         CancellationToken token)
     {
         return Post(() =>
         {
-            var subscriber = client.Subscribe(topic, type);
+            var profile = new QosProfile(transportHint switch
+            {
+                RosTransportHint.OnlyUdp or RosTransportHint.PreferUdp => ReliabilityPolicy.BestEffort,
+                RosTransportHint.OnlyTcp or RosTransportHint.PreferTcp => ReliabilityPolicy.Reliable,
+                _ => throw new IndexOutOfRangeException()
+            });
+
+            var subscriber = client.Subscribe(topic, type, profile);
             subscribers.Add((subscriber, signalizable));
             subscribersChanged = true;
             return subscriber;
@@ -150,7 +159,7 @@ internal sealed class AsyncRclClient : TaskExecutor
                 {
                     return Array.Empty<TopicTuple>();
                 }
-                
+
                 var serviceDict = new Dictionary<string, List<string>>();
                 foreach (var tuple in nodeServices)
                 {
@@ -174,13 +183,13 @@ internal sealed class AsyncRclClient : TaskExecutor
                 }
 
                 return serviceDict
-                    .Select(entry => new TopicTuple(entry.Key, entry.Value.ToArray()))
+                    .Select(pair => new TopicTuple(pair.Key, pair.Value.ToArray()))
                     .ToArray();
             }
         }, token);
     }
 
-    public Task UnadvertiseAsync(RclPublisher publisher, CancellationToken token = default)
+    public Task UnadvertiseAsync(RclPublisher publisher, CancellationToken token)
     {
         return Post(publisher.Dispose, token);
     }
@@ -194,12 +203,7 @@ internal sealed class AsyncRclClient : TaskExecutor
     {
         if (subscribersChanged)
         {
-            cachedSubscriberHandles = new IntPtr[subscribers.Count];
-            for (int i = 0; i < subscribers.Count; i++)
-            {
-                subscribers[i].subscriber.AddHandle(out cachedSubscriberHandles[i]);
-            }
-
+            cachedSubscriberHandles = subscribers.Select(tuple => tuple.subscriber.Handle).ToArray();
             subscribersChanged = false;
         }
 
@@ -215,7 +219,7 @@ internal sealed class AsyncRclClient : TaskExecutor
         }
     }
 
-    public override async ValueTask DisposeAsync(CancellationToken token = default)
+    public override async ValueTask DisposeAsync(CancellationToken token)
     {
         if (disposed) return;
         disposed = true;

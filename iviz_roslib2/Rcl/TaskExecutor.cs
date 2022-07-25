@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Iviz.Tools;
 
@@ -36,7 +37,7 @@ internal abstract class TaskExecutor
                 action();
             }
         }
-
+        
         if (queue.Count != 0)
         {
             Logger.LogErrorFormat("{0}: {1} tasks left in queue!", this, queue.Count);
@@ -85,7 +86,7 @@ internal abstract class TaskExecutor
         {
             return Task.FromException<T>(new ObjectDisposedException(ToString()));
         }
-        
+
         if (token.IsCancellationRequested)
         {
             return Task.FromCanceled<T>(token);
@@ -119,9 +120,9 @@ internal abstract class TaskExecutor
         tokenSource.Cancel();
     }
 
-    public virtual async ValueTask DisposeAsync(CancellationToken token = default)
+    public virtual ValueTask DisposeAsync(CancellationToken token)
     {
-        await task.AwaitNoThrow(this);
+        return task.AwaitNoThrow(this).AsValueTask();
     }
 
     public override string ToString() => $"[{nameof(TaskExecutor)}]";

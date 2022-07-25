@@ -26,16 +26,18 @@ internal sealed class RclWaitSet : IDisposable
         }
 
         IntPtr dummy = IntPtr.Zero;
-        
+
         ref readonly IntPtr subscriptionHandles = ref (subscriptions.Length != 0 ? ref subscriptions[0] : ref dummy);
         ref readonly IntPtr guardHandles = ref (guards.Length != 0 ? ref guards[0] : ref dummy);
-        
-        Check(Rcl.WaitClearAndAdd(waitSetHandle, 
+
+        Check(Rcl.WaitClearAndAdd(waitSetHandle,
             in subscriptionHandles, subscriptions.Length,
             in guardHandles, guards.Length));
-        
-        int ret = Rcl.Wait(waitSetHandle, 5000, out IntPtr changedSubscriptionHandles, out IntPtr changedGuardHandles);
-        
+
+        int ret = Rcl.Wait(waitSetHandle, 5000, 
+            out var changedSubscriptionHandles, 
+            out var changedGuardHandles);
+
         switch ((RclRet)ret)
         {
             case RclRet.Timeout:
@@ -52,7 +54,6 @@ internal sealed class RclWaitSet : IDisposable
                 triggeredGuards = default;
                 break;
         }
-        
     }
 
     void Check(int result) => Rcl.Check(contextHandle, result);

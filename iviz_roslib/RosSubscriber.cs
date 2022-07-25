@@ -179,8 +179,8 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
     string IRosSubscriber.Subscribe(Action<IMessage> callback) =>
         Subscribe(msg => callback(msg));
 
-    string IRosSubscriber.Subscribe(Action<IMessage, IRosReceiver> callback) =>
-        Subscribe((in TMessage msg, IRosReceiver receiver) => callback(msg, receiver));
+    string IRosSubscriber.Subscribe(Action<IMessage, IRosConnection> callback) =>
+        Subscribe((in TMessage msg, IRosConnection receiver) => callback(msg, receiver));
 
 
     /// <summary>
@@ -191,7 +191,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
     /// <returns>The subscribed id.</returns>
     /// <exception cref="ArgumentNullException">The callback is null.</exception>
     public string Subscribe(Action<TMessage> callback) =>
-        Subscribe((in TMessage t, IRosReceiver _) => callback(t));
+        Subscribe((in TMessage t, IRosConnection _) => callback(t));
 
     public string Subscribe(RosCallback<TMessage> callback)
     {

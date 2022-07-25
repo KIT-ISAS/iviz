@@ -67,7 +67,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
         get => manager.LatchingEnabled;
         set => manager.LatchingEnabled = value;
     }
-    
+
     /// <summary>
     /// Manually sets the latched message.
     /// </summary>
@@ -75,7 +75,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
     {
         set => manager.LatchedMessage = value;
     }
-    
+
     internal RosPublisher(RosClient client, TopicInfo topicInfo)
     {
         this.client = client;
@@ -87,39 +87,29 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
         AssertIsAlive();
         return new PublisherState(Topic, TopicType, ids, manager.GetStates());
     }
-    
-    public ValueTask<PublisherState> GetStateAsync() => new(GetState());
+
+    public ValueTask<PublisherState> GetStateAsync(CancellationToken token = default) => new(GetState());
 
     void IRosPublisher.Publish(IMessage message)
     {
-        if (message is null)
+        if (message is TMessage tMessage)
         {
-            throw new ArgumentNullException(nameof(message));
+            Publish(tMessage);
+            return;
         }
 
-        if (message is not TMessage tMessage)
-        {
-            throw new RosInvalidMessageTypeException("Type does not match publisher.");
-        }
-
-        message.RosValidate();
-        AssertIsAlive();
-        manager.Publish(tMessage);
+        RosInvalidMessageTypeException.Throw();
     }
 
     ValueTask IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
     {
-        if (message is null)
+        if (message is TMessage tMessage)
         {
-            BuiltIns.ThrowArgumentNull(nameof(message));
+            return PublishAsync(tMessage, policy, token);
         }
-
-        if (message is not TMessage tMessage)
-        {
-            throw new RosInvalidMessageTypeException("Type does not match publisher.");
-        }
-
-        return PublishAsync(tMessage, policy, token);
+        
+        RosInvalidMessageTypeException.Throw();
+        return default;
     }
 
 
@@ -298,7 +288,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
         {
             return;
         }
-            
+
         Task.Run(() =>
         {
             try
@@ -309,7 +299,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
             {
                 Logger.LogErrorFormat("{0}: Exception from NumSubscribersChanged : {1}", this, e);
             }
-        }, default);            
+        }, default);
     }
 
     void AssertIsAlive()
@@ -336,7 +326,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
     {
         return client.TryGetLoopbackReceiver(Topic, endpoint, out receiver);
     }
-    
+
     public void UnsetLatch()
     {
         manager.UnsetLatch();

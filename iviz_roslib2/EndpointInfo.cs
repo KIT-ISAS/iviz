@@ -3,30 +3,21 @@ using System.Runtime.Serialization;
 namespace Iviz.Roslib2;
 
 [DataContract]
-internal readonly struct EndpointInfo
+internal class EndpointInfo
 {
-    [DataMember] public readonly NodeName NodeName;
-    [DataMember] public readonly string TopicType;
-    [DataMember] public readonly Guid Guid;
+    readonly Guid guid;
+    readonly QosProfile profile;
+
+    [DataMember] public NodeName NodeName { get; }
+    [DataMember] public string TopicType { get; }
+    [DataMember] public ref readonly Guid Guid => ref guid;
+    [DataMember] public ref readonly QosProfile Profile => ref profile;
     
-    public EndpointInfo(in Guid guid, in NodeName nodeName, string topicType)
+    public EndpointInfo(string nodeName, string nodeNamespace, string topicType, in Guid guid, in QosProfile profile)
     {
-        Guid = guid;
-        NodeName = nodeName;
-        TopicType = topicType;
-    }
-    
-    public EndpointInfo(in Guid guid, string nodeName, string nodeNamespace, string topicType)
-    {
-        Guid = guid;
         NodeName = new NodeName(nodeName, nodeNamespace);
         TopicType = topicType;
-    }
-
-    public void Deconstruct(out NodeName nodeName, out string topicType, out Guid guid)
-    {
-        nodeName = NodeName;
-        topicType = TopicType;
-        guid = Guid;
+        this.guid = guid;
+        this.profile = profile;
     }
 }

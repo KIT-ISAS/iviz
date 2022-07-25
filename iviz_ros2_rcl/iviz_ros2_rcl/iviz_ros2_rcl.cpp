@@ -50,6 +50,7 @@
 #include <sensor_msgs/msg/compressed_image.h>
 #include <sensor_msgs/msg/laser_scan.h>
 #include <sensor_msgs/msg/camera_info.h>
+#include <sensor_msgs/msg/joy.h>
 
 #include <visualization_msgs/msg/marker.h>
 #include <visualization_msgs/msg/interactive_marker.h>
@@ -77,6 +78,7 @@ struct interop_context
     std::vector<const char*> arrays3 {32};
     
     std::vector<std::array<char, RMW_GID_STORAGE_SIZE>> gids {32};
+    std::vector<rmw_qos_profile_t> profiles {32};
 };
 
 
@@ -105,6 +107,7 @@ static std::map<std::string, rosidl_message_type_support_t*> default_types
     ENTRY(sensor_msgs, CompressedImage),
     ENTRY(sensor_msgs, LaserScan),
     ENTRY(sensor_msgs, CameraInfo),
+    ENTRY(sensor_msgs, Joy),
     ENTRY(visualization_msgs, Marker),
     ENTRY(visualization_msgs, InteractiveMarker),
     ENTRY(visualization_msgs, InteractiveMarkerFeedback),
@@ -362,7 +365,8 @@ bool native_rcl_is_type_supported(const char *type)
 int32_t native_rcl_create_subscription_handle(void **subscription_handle,
                                               void *node_handle,
                                               const char *topic,
-                                              const char *type)
+                                              const char *type,
+                                              void *profile_handle)
 {
     rcl_node_t *node = (rcl_node_t *)node_handle;
     
@@ -379,6 +383,8 @@ int32_t native_rcl_create_subscription_handle(void **subscription_handle,
     *subscription = rcl_get_zero_initialized_subscription();
     
     rcl_subscription_options_t subscription_ops = rcl_subscription_get_default_options();
+    rmw_qos_profile_t *profile = (rmw_qos_profile_t*) profile_handle;
+    subscription_ops.qos = *profile;
     
     rcl_ret_t ret = rcl_subscription_init(subscription, node, ts, topic, &subscription_ops);
     
@@ -771,7 +777,8 @@ int32_t native_rcl_get_publishers_info_by_topic(void *context_handle, void *node
                                                 const char ***node_names_handle,
                                                 const char ***node_namespaces_handle,
                                                 const char ***topic_types_handle,
-                                                const char **gid_handle, int32_t *num_nodes)
+                                                char **gid_handle,
+                                                void **profiles_handle, int32_t *num_nodes)
 {
     
     interop_context *context = (interop_context*) context_handle;
@@ -794,7 +801,8 @@ int32_t native_rcl_get_publishers_info_by_topic(void *context_handle, void *node
         *node_names_handle = nullptr;
         *node_namespaces_handle = nullptr;
         *topic_types_handle = nullptr;
-        *gid_handle = 0;
+        *gid_handle = nullptr;
+        *profiles_handle = nullptr;
         return RCL_RET_OK;
     }
     
@@ -805,7 +813,8 @@ int32_t native_rcl_get_publishers_info_by_topic(void *context_handle, void *node
     context->strings3.clear();
     context->arrays3.clear();
     context->gids.clear();
-    
+    context->profiles.clear();
+
     context->strings1.reserve(topic_infos.size);
     context->arrays1.reserve(topic_infos.size);
     context->strings2.reserve(topic_infos.size);
@@ -813,7 +822,8 @@ int32_t native_rcl_get_publishers_info_by_topic(void *context_handle, void *node
     context->strings3.reserve(topic_infos.size);
     context->arrays3.reserve(topic_infos.size);
     context->gids.reserve(topic_infos.size);
-    
+    context->profiles.reserve(topic_infos.size);
+
     
     for (int i = 0; i < topic_infos.size; i++)
     {
@@ -829,6 +839,8 @@ int32_t native_rcl_get_publishers_info_by_topic(void *context_handle, void *node
         std::array<char, RMW_GID_STORAGE_SIZE> array;
         memcpy(array.data(), topic_infos.info_array[i].endpoint_gid, RMW_GID_STORAGE_SIZE);
         context->gids.push_back(array);
+        
+        context->profiles.push_back(topic_infos.info_array[i].qos_profile);
     }
     
     IgnoreRet(rmw_topic_endpoint_info_array_fini(&topic_infos, &allocator));
@@ -837,6 +849,7 @@ int32_t native_rcl_get_publishers_info_by_topic(void *context_handle, void *node
     *node_namespaces_handle = context->arrays2.data();
     *topic_types_handle = context->arrays3.data();
     *gid_handle = context->gids[0].data();
+    *profiles_handle = (void**) context->profiles.data();
     
     *num_nodes = (int32_t) context->gids.size();
     
@@ -847,8 +860,8 @@ int32_t native_rcl_get_subscribers_info_by_topic(void *context_handle, void *nod
                                                  const char ***node_names_handle,
                                                  const char ***node_namespaces_handle,
                                                  const char ***topic_types_handle,
-                                                 const char **gid_handle,
-                                                 int32_t *num_nodes)
+                                                 char **gid_handle,
+                                                 void **profiles_handle, int32_t *num_nodes)
 {
     interop_context *context = (interop_context*) context_handle;
     rcl_node_t *node = (rcl_node_t *)node_handle;
@@ -880,6 +893,7 @@ int32_t native_rcl_get_subscribers_info_by_topic(void *context_handle, void *nod
     context->strings3.clear();
     context->arrays3.clear();
     context->gids.clear();
+    context->profiles.clear();
     
     context->strings1.reserve(topic_infos.size);
     context->arrays1.reserve(topic_infos.size);
@@ -888,6 +902,7 @@ int32_t native_rcl_get_subscribers_info_by_topic(void *context_handle, void *nod
     context->strings3.reserve(topic_infos.size);
     context->arrays3.reserve(topic_infos.size);
     context->gids.reserve(topic_infos.size);
+    context->profiles.reserve(topic_infos.size);
     
     
     for (int i = 0; i < topic_infos.size; i++)
@@ -904,6 +919,8 @@ int32_t native_rcl_get_subscribers_info_by_topic(void *context_handle, void *nod
         std::array<char, RMW_GID_STORAGE_SIZE> array;
         memcpy(array.data(), topic_infos.info_array[i].endpoint_gid, RMW_GID_STORAGE_SIZE);
         context->gids.push_back(array);
+        
+        context->profiles.push_back(topic_infos.info_array[i].qos_profile);
     }
     
     IgnoreRet(rmw_topic_endpoint_info_array_fini(&topic_infos, &allocator));
@@ -912,6 +929,8 @@ int32_t native_rcl_get_subscribers_info_by_topic(void *context_handle, void *nod
     *node_namespaces_handle = context->arrays2.data();
     *topic_types_handle = context->arrays3.data();
     *gid_handle = context->gids[0].data();
+    
+    *profiles_handle = (void**) context->profiles.data();
     
     *num_nodes = (int32_t) context->gids.size();
     
@@ -1053,7 +1072,9 @@ int main_subscribe()
     
     rcl_subscription_t* subscription_handle;
     
-    ret = native_rcl_create_subscription_handle((void**)&subscription_handle, node_handle, "chatter", "std_msgs/String");
+    rmw_qos_profile_t profile;
+    ret = native_rcl_create_subscription_handle((void**)&subscription_handle, node_handle, "chatter", "std_msgs/String",
+                                                &profile);
     
     if (ret != RCL_RET_OK)
     {

@@ -7,6 +7,10 @@ internal sealed class RclGuardCondition : IDisposable
     readonly IntPtr guardHandle;
     bool disposed;
     
+    internal IntPtr Handle => disposed 
+        ? throw new ObjectDisposedException(ToString()) 
+        : guardHandle;
+
     public RclGuardCondition(IntPtr contextHandle)
     {
         guardHandle = Rcl.CreateGuard(contextHandle);
@@ -14,24 +18,9 @@ internal sealed class RclGuardCondition : IDisposable
 
     public void Trigger()
     {
-        if (disposed)
-        {
-            throw new ObjectDisposedException(ToString());
-        }
-        
-        Rcl.TriggerGuard(guardHandle);
+        Rcl.TriggerGuard(Handle);
     }
 
-    public void AddHandle(out IntPtr handle)
-    {
-        if (disposed)
-        {
-            throw new ObjectDisposedException(ToString());
-        }
-
-        handle = guardHandle;
-    }
-    
     public void Dispose()
     {
         if (disposed) return;

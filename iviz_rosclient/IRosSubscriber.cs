@@ -73,7 +73,7 @@ public interface IRosSubscriber : IDisposable
     /// <param name="callback">The function to call when a message arrives.</param>
     /// <returns>The subscribed id.</returns>
     /// <exception cref="ArgumentNullException">The callback is null.</exception>
-    public string Subscribe(Action<IMessage, IRosReceiver> callback);
+    public string Subscribe(Action<IMessage, IRosConnection> callback);
  
     /// <summary>
     /// Unregisters the given id from the subscriber. If the subscriber has no ids left, the topic will be unsubscribed from the master.
@@ -93,7 +93,7 @@ public interface IRosSubscriber : IDisposable
     public ValueTask DisposeAsync(CancellationToken token);
 }
 
-public delegate void RosCallback<T>(in T message, IRosReceiver info) where T : IMessage;
+public delegate void RosCallback<T>(in T message, IRosConnection info) where T : IMessage;
 
 public interface IRosSubscriber<T> : IRosSubscriber where T : IMessage
 {

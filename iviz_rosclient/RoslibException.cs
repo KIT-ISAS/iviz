@@ -31,6 +31,8 @@ public class RosInvalidMessageTypeException : RoslibException
                $"requested type was [{newType}]")
     {
     }
+
+    public static void Throw() => throw new RosInvalidMessageTypeException("Message does not match the expected type");
 }
 
 /// <summary>

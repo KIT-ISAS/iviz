@@ -7,22 +7,22 @@ namespace Iviz.Roslib;
 public enum RosTransportHint
 {
     /// <summary>
-    /// Take TCP if offered, otherwise take anything
+    /// Take TCP if offered, otherwise take anything.
     /// </summary>
     PreferTcp,
 
     /// <summary>
-    /// Take UDP if offered, otherwise take anything
+    /// Take UDP if offered, otherwise take anything.
     /// </summary>
     PreferUdp,
         
     /// <summary>
-    /// Only allow TCP
+    /// Only allow TCP.
     /// </summary>
     OnlyTcp,
 
     /// <summary>
-    /// Only allow UDP
+    /// Only allow UDP.
     /// </summary>
     OnlyUdp,
 }

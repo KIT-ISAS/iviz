@@ -6,34 +6,12 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
-/// <summary>
-/// The type of transport protocol being used
-/// </summary>
-public enum TransportType
-{
-    Tcp,
-    Udp
-}
-
 [DataContract]
 public class SenderState : JsonToString
 {
-    [DataMember] public bool IsAlive { get; set; }
-    [DataMember] public Endpoint Endpoint { get; set; }
     [DataMember] public string RemoteId { get; set; } = "";
-    [DataMember] public Endpoint RemoteEndpoint { get; set; }
     [DataMember] public long NumSent { get; set; }
     [DataMember] public long BytesSent { get; set; }
-}
-
-[DataContract]
-public sealed class Ros1SenderState : SenderState
-{
-    [DataMember] public TransportType TransportType { get; set; }
-    [DataMember] public int CurrentQueueSize { get; set; }
-    [DataMember] public long MaxQueueSizeInBytes { get; set; }
-    [DataMember] public long NumDropped { get; set; }
-    [DataMember] public long BytesDropped { get; set; }
 }
 
 [DataContract]

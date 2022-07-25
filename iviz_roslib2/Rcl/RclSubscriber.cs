@@ -12,24 +12,14 @@ internal sealed class RclSubscriber : IDisposable
     readonly IntPtr messageBuffer;
     bool disposed;
 
+    internal IntPtr Handle => disposed
+        ? throw new ObjectDisposedException(ToString())
+        : subscriptionHandle;
+
     public string Topic { get; }
     public string TopicType { get; }
-
-    public int NumPublishers
-    {
-        get
-        {
-            if (Rcl.GetPublisherCount(subscriptionHandle, out int count) == Rcl.Ok)
-            {
-                return count;
-            }
-
-            Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.GetPublisherCount));
-            return 0;
-        }
-    }
-
-    public RclSubscriber(IntPtr contextHandle, IntPtr nodeHandle, string topic, string topicType)
+    
+    public RclSubscriber(IntPtr contextHandle, IntPtr nodeHandle, string topic, string topicType, in QosProfile profile)
     {
         if (contextHandle == IntPtr.Zero) BuiltIns.ThrowArgumentNull(nameof(nodeHandle));
         if (nodeHandle == IntPtr.Zero) BuiltIns.ThrowArgumentNull(nameof(nodeHandle));
@@ -41,7 +31,7 @@ internal sealed class RclSubscriber : IDisposable
         Topic = topic;
         TopicType = topicType;
 
-        int ret = Rcl.CreateSubscriptionHandle(out subscriptionHandle, nodeHandle, topic, topicType);
+        int ret = Rcl.CreateSubscriptionHandle(out subscriptionHandle, nodeHandle, topic, topicType, profile);
         if (ret == -1)
         {
             throw new RosUnsupportedMessageException(topicType);
@@ -56,23 +46,10 @@ internal sealed class RclSubscriber : IDisposable
     }
 
     void Check(int result) => Rcl.Check(contextHandle, result);
-    
-    public void AddHandle(out IntPtr handle)
-    {
-        if (disposed)
-        {
-            throw new ObjectDisposedException(ToString());
-        }
-
-        handle = subscriptionHandle;
-    }
 
     public bool TryTakeMessage(out ReadOnlySpan<byte> span, out Guid guid)
     {
-        if (disposed) throw new ObjectDisposedException(ToString());
-
-        int ret = Rcl.TakeSerializedMessage(subscriptionHandle, messageBuffer, out IntPtr ptr, out int length,
-            out guid);
+        int ret = Rcl.TakeSerializedMessage(Handle, messageBuffer, out IntPtr ptr, out int length, out guid);
 
         switch ((RclRet)ret)
         {
@@ -89,13 +66,23 @@ internal sealed class RclSubscriber : IDisposable
                 return false;
         }
     }
+    
+    public int GetNumPublishers()
+    {
+        if (Rcl.GetPublisherCount(Handle, out int count) == Rcl.Ok)
+        {
+            return count;
+        }
 
+        Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.GetPublisherCount));
+        return 0;
+    }
+    
     public void Dispose()
     {
         if (disposed) return;
         disposed = true;
         GC.SuppressFinalize(this);
-
         Rcl.DestroySerializedMessage(messageBuffer);
         Rcl.DestroySubscriptionHandle(subscriptionHandle, nodeHandle);
     }

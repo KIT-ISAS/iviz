@@ -8,11 +8,11 @@ public abstract class Ros1ReceiverState : ReceiverState
 {
     [DataMember] public bool IsAlive { get; set; }
     [DataMember] public Endpoint EndPoint { get; set; }
-    [DataMember] public Endpoint RemoteEndpoint { get;set; }
+    [DataMember] public Endpoint RemoteEndpoint { get; set; }
     [DataMember] public Uri RemoteUri { get; }
     [DataMember] public abstract TransportType? TransportType { get; }
     [DataMember] public ReceiverStatus Status { get; set; }
-    [DataMember] public long NumDropped { get;set; }
+    [DataMember] public long NumDropped { get; set; }
     [DataMember] public ErrorMessage? ErrorDescription { get; set; }
 
     protected Ros1ReceiverState(Uri remoteUri)

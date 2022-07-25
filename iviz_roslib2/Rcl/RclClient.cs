@@ -64,9 +64,9 @@ internal sealed class RclClient : IDisposable
         return new RclGuardCondition(contextHandle);
     }
 
-    public RclSubscriber Subscribe(string topic, string type)
+    public RclSubscriber Subscribe(string topic, string type, in QosProfile profile)
     {
-        return new RclSubscriber(contextHandle, nodeHandle, topic, type);
+        return new RclSubscriber(contextHandle, nodeHandle, topic, type, profile);
     }
 
     public RclPublisher Advertise(string topic, string type)
@@ -157,25 +157,28 @@ internal sealed class RclClient : IDisposable
     {
         Check(Rcl.GetSubscribersInfoByTopic(contextHandle, nodeHandle, topic,
             out var nodeNamesHandle, out var nodeNamespacesHandle,
-            out var topicTypesHandle, out var gidHandle, out int numNodes));
+            out var topicTypesHandle, out var gidHandle, out var profilesHandle, out int numNodes));
 
         if (numNodes == 0)
         {
             return Array.Empty<EndpointInfo>();
         }
 
-        var guids = Rcl.CreateSpan<Guid>(gidHandle, numNodes);
         var nodeNames = Rcl.CreateSpan<IntPtr>(nodeNamesHandle, numNodes);
         var nodeNamespaces = Rcl.CreateSpan<IntPtr>(nodeNamespacesHandle, numNodes);
         var topicTypes = Rcl.CreateSpan<IntPtr>(topicTypesHandle, numNodes);
+        var guids = Rcl.CreateSpan<Guid>(gidHandle, numNodes);
+        var profiles = Rcl.CreateSpan<QosProfile>(profilesHandle, numNodes);
 
         var nodes = new EndpointInfo[numNodes];
         for (int i = 0; i < numNodes; i++)
         {
-            nodes[i] = new EndpointInfo(guids[i],
+            nodes[i] = new EndpointInfo(
                 Rcl.ToString(nodeNames[i]),
                 Rcl.ToString(nodeNamespaces[i]),
-                Rcl.ToString(topicTypes[i]));
+                Rcl.ToString(topicTypes[i]),
+                guids[i],
+                profiles[i]);
         }
 
         return nodes;
@@ -197,25 +200,28 @@ internal sealed class RclClient : IDisposable
     {
         Check(Rcl.GetPublishersInfoByTopic(contextHandle, nodeHandle, topic,
             out var nodeNamesHandle, out var nodeNamespacesHandle,
-            out var topicTypesHandle, out var gidHandle, out int numNodes));
+            out var topicTypesHandle, out var gidHandle, out var profilesHandle, out int numNodes));
 
         if (numNodes == 0)
         {
             return Array.Empty<EndpointInfo>();
         }
 
-        var guids = Rcl.CreateSpan<Guid>(gidHandle, numNodes);
         var nodeNames = Rcl.CreateSpan<IntPtr>(nodeNamesHandle, numNodes);
         var nodeNamespaces = Rcl.CreateSpan<IntPtr>(nodeNamespacesHandle, numNodes);
         var topicTypes = Rcl.CreateSpan<IntPtr>(topicTypesHandle, numNodes);
+        var guids = Rcl.CreateSpan<Guid>(gidHandle, numNodes);
+        var profiles = Rcl.CreateSpan<QosProfile>(profilesHandle, numNodes);
 
         var nodes = new EndpointInfo[numNodes];
         for (int i = 0; i < numNodes; i++)
         {
-            nodes[i] = new EndpointInfo(guids[i],
+            nodes[i] = new EndpointInfo(
                 Rcl.ToString(nodeNames[i]),
                 Rcl.ToString(nodeNamespaces[i]),
-                Rcl.ToString(topicTypes[i]));
+                Rcl.ToString(topicTypes[i]),
+                guids[i],
+                profiles[i]);
         }
 
         return nodes;
@@ -226,16 +232,9 @@ internal sealed class RclClient : IDisposable
         if (disposed) return;
         disposed = true;
         GC.SuppressFinalize(this);
-        if (nodeHandle != IntPtr.Zero)
-        {
-            Rcl.DestroyNode(nodeHandle);
-        }
-
-        if (contextHandle != IntPtr.Zero)
-        {
-            Rcl.Shutdown(contextHandle);
-            Rcl.DestroyContext(contextHandle);
-        }
+        Rcl.DestroyNode(nodeHandle);
+        Rcl.Shutdown(contextHandle);
+        Rcl.DestroyContext(contextHandle);
     }
 
     [MonoPInvokeCallback(typeof(Rcl.LoggingHandler))]

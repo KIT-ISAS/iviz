@@ -70,7 +70,8 @@ const char* native_rcl_get_error_string(void *context_handle);
 int32_t native_rcl_create_subscription_handle(void **subscription_handle,
                                               void *node_handle,
                                               const char *topic,
-                                              const char *type);
+                                              const char *type,
+                                              void *profile);
 
 int32_t native_rcl_destroy_subscription_handle(void *subscription_handle, void *node_handle);
 
@@ -126,14 +127,15 @@ int32_t native_rcl_get_publishers_info_by_topic(void *context_handle, void *node
                                                 const char ***node_names_handle,
                                                 const char ***node_namespaces_handle,
                                                 const char ***topic_types_handle,
-                                                const char **gid_handle, int32_t *num_nodes);
+                                                char **gid_handle,
+                                                void **profiles_handle, int32_t *num_nodes);
 
 int32_t native_rcl_get_subscribers_info_by_topic(void *context_handle, void *node_handle, char *topic_name,
                                                  const char ***node_names_handle,
                                                  const char ***node_namespaces_handle,
                                                  const char ***topic_types_handle,
-                                                 const char **gid_handle,
-                                                 int32_t *num_nodes);
+                                                 char **gid_handle,
+                                                 void **profiles_handle, int32_t *num_nodes);
 
 int32_t native_rcl_count_publishers(void *node_handle, char *topic_name, int32_t *count);
 

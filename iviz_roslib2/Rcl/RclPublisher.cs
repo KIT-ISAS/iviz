@@ -14,21 +14,6 @@ internal sealed class RclPublisher : IDisposable
     public string Topic { get; }
     public string TopicType { get; }
 
-    public int NumSubscribers
-    {
-        get
-        {
-            if (Rcl.GetSubscriptionCount(publisherHandle, out int count) == Rcl.Ok)
-            {
-                return count;
-            }
-
-            Logger.LogErrorFormat("{0}: " + nameof(Rcl.GetSubscriptionCount) + " failed!", this);
-            return 0;
-        }
-    }
-
-
     public RclPublisher(IntPtr contextHandle, IntPtr nodeHandle, string topic, string topicType)
     {
         if (contextHandle == IntPtr.Zero) BuiltIns.ThrowArgumentNull(nameof(nodeHandle));
@@ -56,7 +41,7 @@ internal sealed class RclPublisher : IDisposable
 
     void Check(int result) => Rcl.Check(contextHandle, result);
 
-    public void Publish<T>(in T message) where T : IMessage
+    public int Publish<T>(in T message) where T : IMessage
     {
         const int headerSize = 4;
 
@@ -79,6 +64,19 @@ internal sealed class RclPublisher : IDisposable
         WriteBuffer2.Serialize(message, span[headerSize..]);
 
         Rcl.PublishSerializedMessage(publisherHandle, messageBuffer);
+
+        return serializedLength;
+    }
+
+    public int GetNumSubscribers()
+    {
+        if (Rcl.GetSubscriptionCount(publisherHandle, out int count) == Rcl.Ok)
+        {
+            return count;
+        }
+
+        Logger.LogErrorFormat("{0}: " + nameof(Rcl.GetSubscriptionCount) + " failed!", this);
+        return 0;
     }
 
     public void Dispose()

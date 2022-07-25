@@ -48,30 +48,36 @@ public sealed class Ros2Client : IRosClient
         return subscribersByTopic.TryGetValue(resolvedTopic, out subscriber);
     }
 
-    public string Subscribe<T>(string topic, RosCallback<T> callback, out Ros2Subscriber<T> subscriber)
+    public string Subscribe<T>(string topic, RosCallback<T> callback, out Ros2Subscriber<T> subscriber,
+        RosTransportHint transportHint = RosTransportHint.PreferTcp)
         where T : IMessage, new()
     {
-        (string id, subscriber) = TaskUtils.RunSync(() => SubscribeAsync(topic, callback));
+        (string id, subscriber) = TaskUtils.RunSync(() => SubscribeAsync(topic, callback, transportHint));
         return id;
     }
 
-    public string Subscribe<T>(string topic, Action<T> callback, out Ros2Subscriber<T> subscriber)
+    public string Subscribe<T>(string topic, Action<T> callback, out Ros2Subscriber<T> subscriber,
+        RosTransportHint transportHint = RosTransportHint.PreferTcp)
         where T : IMessage, new()
     {
-        void Callback(in T message, IRosReceiver info) => callback(message);
-        return Subscribe(topic, Callback, out subscriber);
+        void Callback(in T message, IRosConnection info) => callback(message);
+        return Subscribe(topic, Callback, out subscriber, transportHint);
     }
 
     public ValueTask<(string id, Ros2Subscriber<T> subscriber)>
-        SubscribeAsync<T>(string topic, Action<T> callback, CancellationToken token)
+        SubscribeAsync<T>(string topic, Action<T> callback,
+            RosTransportHint transportHint = RosTransportHint.PreferTcp,
+            CancellationToken token = default)
         where T : IMessage, new()
     {
-        void Callback(in T message, IRosReceiver info) => callback(message);
-        return SubscribeAsync<T>(topic, Callback, token);
+        void Callback(in T message, IRosConnection info) => callback(message);
+        return SubscribeAsync<T>(topic, Callback, transportHint, token);
     }
 
     public async ValueTask<(string id, Ros2Subscriber<T> subscriber)>
-        SubscribeAsync<T>(string topic, RosCallback<T> callback, CancellationToken token = default)
+        SubscribeAsync<T>(string topic, RosCallback<T> callback,
+            RosTransportHint transportHint = RosTransportHint.PreferTcp,
+            CancellationToken token = default)
         where T : IMessage, new()
     {
         if (topic is null) BuiltIns.ThrowArgumentNull(nameof(topic));
@@ -87,10 +93,10 @@ public sealed class Ros2Client : IRosClient
         if (!TryGetSubscriberImpl(resolvedTopic, out var baseSubscriber))
         {
             var subscriber = new Ros2Subscriber<T>(this);
-            var rclSubscriber = await Rcl.SubscribeAsync(resolvedTopic, messageType, subscriber, token);
+            var rclSubscriber = await Rcl.SubscribeAsync(resolvedTopic, messageType, subscriber, transportHint, token);
             subscriber.Subscriber = rclSubscriber;
 
-            subscribersByTopic[topic] = subscriber;
+            subscribersByTopic[resolvedTopic] = subscriber;
             string id = subscriber.Subscribe(callback);
             subscriber.Start();
             return (id, subscriber);
@@ -101,10 +107,11 @@ public sealed class Ros2Client : IRosClient
         return (newSubscriber.Subscribe(callback), newSubscriber);
     }
 
-    string IRosClient.Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
+    string IRosClient.Subscribe<T>(string topic, Action<T> callback,
+        out IRosSubscriber<T> subscriber,
         RosTransportHint transportHint)
     {
-        string id = Subscribe(topic, callback, out var newSubscriber);
+        string id = Subscribe(topic, callback, out var newSubscriber, transportHint);
         subscriber = newSubscriber;
         return id;
     }
@@ -124,6 +131,8 @@ public sealed class Ros2Client : IRosClient
     public async ValueTask<(string id, Ros2Publisher<T> publisher)> AdvertiseAsync<T>(string topic,
         CancellationToken token = default) where T : IMessage, new()
     {
+        if (topic is null) BuiltIns.ThrowArgumentNull(nameof(topic));
+        
         string resolvedTopic = ResolveResourceName(topic);
 
         string messageType = BuiltIns.GetMessageType<T>();
@@ -136,13 +145,13 @@ public sealed class Ros2Client : IRosClient
         {
             var rclPublisher = await Rcl.AdvertiseAsync(resolvedTopic, messageType, token);
             var publisher = new Ros2Publisher<T>(this, rclPublisher);
-            publishersByTopic[topic] = publisher;
+            publishersByTopic[resolvedTopic] = publisher;
             return (publisher.Advertise(), publisher);
         }
 
         if (existingPublisher is not Ros2Publisher<T> validatedPublisher)
         {
-            throw new RosInvalidMessageTypeException(topic, existingPublisher.TopicType, messageType);
+            throw new RosInvalidMessageTypeException(resolvedTopic, existingPublisher.TopicType, messageType);
         }
 
         return (validatedPublisher.Advertise(), validatedPublisher);
@@ -164,13 +173,13 @@ public sealed class Ros2Client : IRosClient
     async ValueTask<(string id, IRosSubscriber<T> subscriber)> IRosClient.SubscribeAsync<T>(string topic,
         Action<T> callback, RosTransportHint transportHint, CancellationToken token)
     {
-        return await SubscribeAsync(topic, callback, token);
+        return await SubscribeAsync(topic, callback, transportHint, token);
     }
 
     async ValueTask<(string id, IRosSubscriber<T> subscriber)> IRosClient.SubscribeAsync<T>(string topic,
         RosCallback<T> callback, RosTransportHint transportHint, CancellationToken token)
     {
-        return await SubscribeAsync(topic, callback, token);
+        return await SubscribeAsync(topic, callback, transportHint, token);
     }
 
     internal void RemoveSubscriber(IRosSubscriber subscriber)
@@ -180,7 +189,7 @@ public sealed class Ros2Client : IRosClient
 
     internal void RemovePublisher(IRosPublisher subscriber)
     {
-        subscribersByTopic.TryRemove(subscriber.Topic, out _);
+        publishersByTopic.TryRemove(subscriber.Topic, out _);
     }
 
     public bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
