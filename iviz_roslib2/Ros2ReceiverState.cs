@@ -23,3 +23,16 @@ public sealed class Ros2ReceiverState : ReceiverState
         this.profile = profile;
     }
 }
+
+[DataContract]
+public sealed class Ros2SubscriberState : SubscriberState
+{
+    readonly QosProfile profile;
+    [DataMember] public ref readonly QosProfile Profile => ref profile;
+
+    public Ros2SubscriberState(string topic, string type,
+        IReadOnlyList<string> advertiserIds,
+        IReadOnlyList<ReceiverState> receivers,
+        in QosProfile profile) : base(topic, type, advertiserIds, receivers) =>
+        this.profile = profile;
+}

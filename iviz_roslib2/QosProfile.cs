@@ -38,11 +38,25 @@ public readonly struct QosProfile
     /// If true, any ROS specific namespacing conventions will be circumvented.
     [DataMember] public readonly bool AvoidRosNamespaceConventions;
 
-    public QosProfile(ReliabilityPolicy reliability)
+    public QosProfile(ReliabilityPolicy reliability) : this(0)
     {
-        this = default;
         Reliability = reliability;
     }
+    
+    QosProfile(int _)
+    {
+        History = HistoryPolicy.KeepLast;
+        Depth = 10;
+        Reliability = ReliabilityPolicy.Reliable;
+        Durability = DurabilityPolicy.Volatile;
+        Deadline = default;
+        Lifespan = default;
+        Liveliness = LivelinessPolicy.SystemDefault;
+        LivelinessLeaseDuration = default;
+        AvoidRosNamespaceConventions = false;
+    }
+
+    public static QosProfile Default() => new(0);
 }
 
 [DataContract, StructLayout(LayoutKind.Sequential)]

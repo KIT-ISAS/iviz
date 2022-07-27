@@ -14,8 +14,6 @@ internal readonly struct NodeName
         Namespace = nodeNamespace;
     }
 
-    public void Deconstruct(out string ns, out string name) => (ns, name) = (Namespace, Name);
-
     public override string ToString()
     {
         return Namespace + Name;

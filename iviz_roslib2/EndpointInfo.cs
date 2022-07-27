@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Roslib2;
 
 [DataContract]
-internal class EndpointInfo
+internal sealed class EndpointInfo
 {
     readonly Guid guid;
     readonly QosProfile profile;

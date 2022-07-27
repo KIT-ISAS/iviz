@@ -141,4 +141,5 @@ int32_t native_rcl_count_publishers(void *node_handle, char *topic_name, int32_t
 
 int32_t native_rcl_count_subscribers(void *node_handle, char *topic_name, int32_t *count);
 
+const void *native_rcl_get_graph_guard_condition(void *node_handle);
 }

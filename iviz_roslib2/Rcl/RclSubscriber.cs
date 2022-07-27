@@ -18,7 +18,8 @@ internal sealed class RclSubscriber : IDisposable
 
     public string Topic { get; }
     public string TopicType { get; }
-    
+    public QosProfile Profile { get; }
+
     public RclSubscriber(IntPtr contextHandle, IntPtr nodeHandle, string topic, string topicType, in QosProfile profile)
     {
         if (contextHandle == IntPtr.Zero) BuiltIns.ThrowArgumentNull(nameof(nodeHandle));
@@ -30,6 +31,7 @@ internal sealed class RclSubscriber : IDisposable
         this.nodeHandle = nodeHandle;
         Topic = topic;
         TopicType = topicType;
+        Profile = profile;
 
         int ret = Rcl.CreateSubscriptionHandle(out subscriptionHandle, nodeHandle, topic, topicType, profile);
         if (ret == -1)

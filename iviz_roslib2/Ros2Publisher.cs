@@ -5,7 +5,7 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib2;
 
-public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> where TMessage : IMessage
+public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> where TMessage : IMessage
 {
     readonly Ros2Client client;
     readonly RclPublisher publisher;
@@ -22,8 +22,8 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
     public string TopicType => publisher.TopicType;
     public int NumSubscribers => publisher.GetNumSubscribers();
     public bool LatchingEnabled { get; set; }
-
     public bool IsAlive => !CancellationToken.IsCancellationRequested;
+    public QosProfile Profile { get; } = QosProfile.Default();
 
     internal Ros2Publisher(Ros2Client client, RclPublisher publisher)
     {
@@ -121,7 +121,7 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
             }
         ).ToArray();
 
-        return new PublisherState(Topic, TopicType, ids, senderStates);
+        return new Ros2PublisherState(Topic, TopicType, ids, senderStates, Profile);
     }
 
     public void Publish(in TMessage message)
@@ -140,7 +140,7 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
         CancellationToken token = default)
     {
         Publish(message);
-        return new ValueTask();
+        return default;
     }
 
     void IRosPublisher.Publish(IMessage message)
@@ -163,7 +163,6 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
         
         RosInvalidMessageTypeException.Throw();
         return default; // unreachable
-
     }
 
     public void Dispose()
@@ -173,7 +172,7 @@ public class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> w
 
     public ValueTask DisposeAsync(CancellationToken token = default)
     {
-        if (disposed) return new ValueTask();
+        if (disposed) return default;
         disposed = true;
         
         runningTs.Cancel();

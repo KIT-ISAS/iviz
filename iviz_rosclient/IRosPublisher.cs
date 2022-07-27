@@ -120,10 +120,6 @@ public interface IRosPublisher : IDisposable
     /// </summary>
     public bool LatchingEnabled { get; set; }
 
-    /// <summary>
-    /// Async version of Dispose(), for NET Standard 2.0 where IAsyncDisposable is not available.
-    /// </summary>
-    /// <returns>The awaitable dispose task.</returns>
     public ValueTask DisposeAsync(CancellationToken token);
 }
 

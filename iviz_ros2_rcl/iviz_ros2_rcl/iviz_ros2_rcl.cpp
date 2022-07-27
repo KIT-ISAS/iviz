@@ -154,11 +154,11 @@ int32_t native_rcl_init(void *context_handle)
     rmw_init_options->localhost_only = RMW_LOCALHOST_ONLY_DISABLED;
     
     const char ** arg_values = NULL;
-    rcl_ret_t r_ret = rcl_init(num_args, arg_values, &init_options, &context->context);
+    ret = rcl_init(num_args, arg_values, &init_options, &context->context);
     
     IgnoreRet(rcl_init_options_fini(&init_options));
     
-    return r_ret;
+    return ret;
 }
 
 int32_t native_rcl_shutdown(void *context_handle)
@@ -955,7 +955,11 @@ int32_t native_rcl_count_subscribers(void *node_handle, char *topic_name, int32_
     return ret;
 }
 
-
+const void *native_rcl_get_graph_guard_condition(void *node_handle)
+{
+    rcl_node_t *node = (rcl_node_t *)node_handle;
+    return rcl_node_get_graph_guard_condition(node);
+}
 
 
 void default_handler(int severity, const char *name, rcutils_time_point_value_t timestamp, const char *message)

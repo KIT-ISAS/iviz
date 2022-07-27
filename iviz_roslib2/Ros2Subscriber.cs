@@ -38,6 +38,7 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
     public string TopicType => Subscriber.TopicType;
     public int NumPublishers => Subscriber.GetNumPublishers();
     public bool IsPaused { get; set; }
+    public QosProfile Profile => Subscriber.Profile;
 
     internal Ros2Subscriber(Ros2Client client)
     {
@@ -85,7 +86,7 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
         bool success = numPublishers <= 3
             ? LinearSearch(publisherStats, numPublishers, guid, out int index)
             : BinarySearch(publisherStats, numPublishers, guid, out index);
-        
+
         if (success)
         {
             ref var publisherStat = ref publisherStats[index];
@@ -98,14 +99,14 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
         {
             Array.Resize(ref publisherStats, 2 * publisherStats.Length);
         }
-        
+
         publisherStats[numPublishers++] = new PublisherStats
         {
             guid = guid,
             numReceived = 1,
             bytesReceived = lengthInBytes
         };
-        
+
         Array.Sort(publisherStats, 0, numPublishers);
     }
 
@@ -134,7 +135,7 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
         {
             int mid = (min + max) / 2;
             ref readonly var guid = ref arr[mid].guid;
-            
+
             if (key == guid)
             {
                 index = mid;
@@ -235,7 +236,7 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
                     TopicType = null
                 }));
 
-        return new SubscriberState(Topic, TopicType, callbacksById.Keys.ToArray(), receiverStates);
+        return new Ros2SubscriberState(Topic, TopicType, callbacksById.Keys.ToArray(), receiverStates, Profile);
     }
 
     public bool ContainsId(string id)

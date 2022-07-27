@@ -190,4 +190,7 @@ internal static class Rcl
     [DllImport(Library, EntryPoint = "native_rcl_count_subscribers")]
     public static extern int CountSubscribers(IntPtr nodeHandle,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string topic, out int count);
+
+    [DllImport(Library, EntryPoint = "native_rcl_get_graph_guard_condition")]
+    public static extern IntPtr GetGraphGuardCondition(IntPtr nodeHandle);
 }

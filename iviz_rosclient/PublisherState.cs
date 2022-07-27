@@ -15,7 +15,7 @@ public class SenderState : JsonToString
 }
 
 [DataContract]
-public sealed class PublisherState : JsonToString
+public class PublisherState : JsonToString
 {
     [DataMember] public string Topic { get; }
     [DataMember] public string Type { get; }

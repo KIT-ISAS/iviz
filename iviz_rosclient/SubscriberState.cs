@@ -15,7 +15,7 @@ public class ReceiverState : JsonToString
 }
 
 [DataContract]
-public sealed class SubscriberState : JsonToString
+public class SubscriberState : JsonToString
 {
     [DataMember] public string Topic { get; }
     [DataMember] public string Type { get; }

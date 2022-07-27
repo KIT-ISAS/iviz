@@ -1,5 +1,3 @@
-using System;
-using System.Runtime.InteropServices;
 using Iviz.Roslib;
 using Iviz.Tools;
 
@@ -13,9 +11,7 @@ internal sealed class RclClient : IDisposable
     readonly IntPtr contextHandle;
     readonly IntPtr nodeHandle;
     bool disposed;
-
-    public string Name { get; }
-    public string Namespace { get; }
+    
     public string FullName { get; }
 
     public static Rcl.LoggingHandler? LoggingHandler
@@ -34,9 +30,6 @@ internal sealed class RclClient : IDisposable
 
     public RclClient(string name, string @namespace = "")
     {
-        Name = name;
-        Namespace = @namespace;
-
         contextHandle = Rcl.CreateContext();
         Check(Rcl.Init(contextHandle));
 
@@ -62,6 +55,11 @@ internal sealed class RclClient : IDisposable
     public RclGuardCondition CreateGuardCondition()
     {
         return new RclGuardCondition(contextHandle);
+    }
+
+    public IntPtr GetGraphGuardCondition()
+    {
+        return Rcl.GetGraphGuardCondition(nodeHandle);
     }
 
     public RclSubscriber Subscribe(string topic, string type, in QosProfile profile)

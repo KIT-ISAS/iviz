@@ -16,6 +16,16 @@ public sealed class Ros2Client : IRosClient
     readonly string namespacePrefix;
     bool disposed;
 
+    struct Cache<T>
+    {
+        public T? cache;
+        public long ticks;
+    }
+    
+    Cache<IReadOnlyList<SubscriberState>> cachedSubscriberStats;
+    Cache<IReadOnlyList<PublisherState>> cachedPublisherStats;
+    Cache<SystemState> cachedSystemState;
+    
     internal AsyncRclClient Rcl { get; }
     public string CallerId => Rcl.FullName;
 
@@ -227,21 +237,40 @@ public sealed class Ros2Client : IRosClient
     }
 
     public IReadOnlyList<SubscriberState> GetSubscriberStatistics() =>
-        subscribersByTopic.Values.Select(subscriber => subscriber.GetState()).ToArray();
+        TaskUtils.RunSync(GetSubscriberStatisticsAsync);
 
     public IReadOnlyList<PublisherState> GetPublisherStatistics() =>
-        publishersByTopic.Values.Select(publisher => publisher.GetState()).ToArray();
+        TaskUtils.RunSync(GetPublisherStatisticsAsync);
 
-    public async ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsAsync()
+    public ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsAsync()
     {
-        var subscribers = subscribersByTopic.Values.ToArray();
-        return await subscribers.Select(subscriber => subscriber.GetStateAsync()).WhenAll();
+        return cachedSubscriberStats.ticks > Rcl.GraphChangedTicks && cachedSubscriberStats.cache is { } stats
+            ? stats.AsTaskResult()
+            : GetSubscriberStatisticsCoreAsync();
     }
 
-    public async ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsAsync()
+    
+    async ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsCoreAsync()
+    {
+        var subscribers = subscribersByTopic.Values.ToArray();
+        cachedSubscriberStats.ticks = DateTime.Now.Ticks;
+        cachedSubscriberStats.cache = await subscribers.Select(subscriber => subscriber.GetStateAsync()).WhenAll();
+        return cachedSubscriberStats.cache;
+    }
+
+    public ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsAsync()
+    {
+        return cachedPublisherStats.ticks > Rcl.GraphChangedTicks && cachedPublisherStats.cache is { } stats
+            ? stats.AsTaskResult()
+            : GetPublisherStatisticsCoreAsync();
+    }
+
+    async ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsCoreAsync()
     {
         var publishers = publishersByTopic.Values.ToArray();
-        return await publishers.Select(publisher => publisher.GetStateAsync()).WhenAll();
+        cachedPublisherStats.ticks = DateTime.Now.Ticks;
+        cachedPublisherStats.cache = await publishers.Select(publisher => publisher.GetStateAsync()).WhenAll();
+        return cachedPublisherStats.cache;
     }
 
     public bool IsServiceAvailable(string service)
@@ -252,7 +281,7 @@ public sealed class Ros2Client : IRosClient
     public ValueTask<bool> IsServiceAvailableAsync(string service, CancellationToken token = default) =>
         new(IsServiceAvailable(service));
 
-    public TopicNameType[] GetSystemPublishedTopics() => GetSystemTopics();
+    public TopicNameType[] GetSystemPublishedTopics() => TaskUtils.RunSync(GetSystemPublishedTopicsAsync);
 
     public ValueTask<TopicNameType[]> GetSystemPublishedTopicsAsync(CancellationToken token = default) =>
         Rcl.GetPublishedTopicNamesAndTypesAsync(token).AsValueTask();
@@ -269,7 +298,7 @@ public sealed class Ros2Client : IRosClient
 
     public ValueTask<string[]> GetParameterNamesAsync(CancellationToken token = default)
     {
-        return new ValueTask<string[]>(GetParameterNames());
+        return GetParameterNames().AsTaskResult();
     }
 
     public bool GetParameter(string key, out XmlRpcValue value)
@@ -290,9 +319,18 @@ public sealed class Ros2Client : IRosClient
 
     public ValueTask<SystemState> GetSystemStateAsync(CancellationToken token = default)
     {
-        return Rcl.GetSystemStateAsync(token).AsValueTask();
+        return cachedSystemState.ticks > Rcl.GraphChangedTicks && cachedSystemState.cache is { } state
+            ? state.AsTaskResult()
+            : GetSystemStateCoreAsync(token);
     }
 
+    async ValueTask<SystemState> GetSystemStateCoreAsync(CancellationToken token = default)
+    {
+        cachedSystemState.ticks = DateTime.Now.Ticks;
+        cachedSystemState.cache = await Rcl.GetSystemStateAsync(token);
+        return cachedSystemState.cache;
+    }
+    
     public void Dispose()
     {
         TaskUtils.RunSync(DisposeAsync);

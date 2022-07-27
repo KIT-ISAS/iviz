@@ -19,22 +19,26 @@ internal sealed class AsyncRclClient : TaskExecutor
 
     bool disposed;
     bool subscribersChanged;
+    
+    public long GraphChangedTicks { get; private set; }
 
     public string FullName => client.FullName;
 
     public static bool IsTypeSupported(string message) => Rcl.IsTypeSupported(message);
-
+    
     public AsyncRclClient(string name, string @namespace = "")
     {
         client = new RclClient(name, @namespace);
-        waitSet = client.CreateWaitSet(32, 1);
+        waitSet = client.CreateWaitSet(32, 2);
         guard = client.CreateGuardCondition();
 
-        cachedGuardHandles = new[] { guard.Handle };
+        var graphGuardHandle = client.GetGraphGuardCondition(); 
+
+        cachedGuardHandles = new[] { guard.Handle, graphGuardHandle };
 
         Start();
     }
-
+    
     public Task<RclSubscriber> SubscribeAsync(string topic, string type, ISignalizable signalizable,
         RosTransportHint transportHint,
         CancellationToken token)
@@ -208,7 +212,7 @@ internal sealed class AsyncRclClient : TaskExecutor
         }
 
         waitSet.WaitFor(cachedSubscriberHandles, cachedGuardHandles,
-            out var triggeredSubscriptions, out _);
+            out var triggeredSubscriptions, out var triggeredGuards);
 
         for (int i = 0; i < triggeredSubscriptions.Length; i++)
         {
@@ -216,6 +220,11 @@ internal sealed class AsyncRclClient : TaskExecutor
             {
                 subscribers[i].signalizable.Signal();
             }
+        }
+
+        if (triggeredGuards[1] != IntPtr.Zero)
+        {
+            GraphChangedTicks = DateTime.Now.Ticks;
         }
     }
 
@@ -233,9 +242,4 @@ internal sealed class AsyncRclClient : TaskExecutor
         }, token);
         await base.DisposeAsync(token);
     }
-}
-
-interface ISignalizable
-{
-    internal void Signal();
 }
