@@ -23,7 +23,7 @@
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Markers");
             Listener = p.AddListener();
-            //PreferUdp = p.AddToggle("Prefer UDP");
+            //PreferUdp = p.AddToggle("Prefer Unreliable/UDP");
 
             ShowDescriptions = p.AddToggle("Show Descriptions");
             Mask = p.AddDropdown("Visible Mask");

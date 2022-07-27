@@ -86,12 +86,12 @@ namespace Iviz.App
                 rosVersion = value;
                 switch (value)
                 {
-                    case RosVersion.Ros1:
+                    case RosVersion.ROS1:
                         panel.RosPanel2.SetActive(false);
                         panel.RosPanel1.SetActive(true);
                         panel.MyId.Value = panel.MyId2.Value;
                         break;
-                    case RosVersion.Ros2:
+                    case RosVersion.ROS2:
                         panel.RosPanel1.SetActive(false);
                         panel.RosPanel2.SetActive(true);
                         panel.MyId2.Value = panel.MyId.Value;
@@ -147,6 +147,7 @@ namespace Iviz.App
             panel.MyUri.Value = MyUri == null ? "" : MyUri.ToString();
             panel.MyUri.SetHints(RosClient.GetCallerUriCandidates(DefaultPort).Select(uri => uri.ToString()));
             panel.MyId.Value = MyId ?? "";
+            panel.MyId2.Value = MyId ?? "";
             panel.MyId.Hints = new[] { DefaultMyId };
             panel.MasterUri.Value = MasterUri == null ? "" : MasterUri.ToString();
             panel.MasterUri.Interactable = !RosManager.Server.IsActive;
@@ -199,8 +200,8 @@ namespace Iviz.App
                     ? TryCreateMasterAsync()
                     : TryDisposeMasterAsync();
             };
-            panel.RosVersion1.Clicked += () => RosVersion = RosVersion.Ros2;
-            panel.RosVersion2.Clicked += () => RosVersion = RosVersion.Ros1;
+            panel.RosVersion1.Clicked += () => RosVersion = RosVersion.ROS2;
+            panel.RosVersion2.Clicked += () => RosVersion = RosVersion.ROS1;
         }
 
         async Task TryDisposeMasterAsync()

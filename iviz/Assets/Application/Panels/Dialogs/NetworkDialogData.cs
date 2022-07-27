@@ -253,15 +253,20 @@ namespace Iviz.App
 
         static void GenerateReportRos2(StringBuilder builder, Ros2Client client)
         {
-            var subscriberStats = client.GetSubscriberStatistics();
-            var publisherStats = client.GetPublisherStatistics();
+            var subscriberStats = client.GetSubscriberStatistics().Cast<Ros2SubscriberState>();
+            var publisherStats = client.GetPublisherStatistics().Cast<Ros2PublisherState>();
 
             foreach (var stat in subscriberStats)
             {
                 builder.Append("<color=#000080ff><b><< Subscribed to ")
                     .Append(stat.Topic).Append("</b></color>")
                     .AppendLine();
+                
                 builder.Append("<b>Type: </b>[").Append(stat.Type).Append("]").AppendLine();
+
+                builder.Append("<b>QOS: </b>");
+                Append(stat.Profile);
+                builder.AppendLine();
 
                 var receivers = (IReadOnlyList<Ros2ReceiverState>)stat.Receivers;
 
@@ -300,24 +305,9 @@ namespace Iviz.App
 
                     builder.Append(receiver.Guid.ToString()).Append('\n');
 
-                    builder.Append("        <b>< ").AppendBandwidth(receiver.BytesReceived).Append("</b> | ReliabilityPolicy: ");
+                    builder.Append("        <b>").AppendBandwidth(receiver.BytesReceived).Append("</b> ");
 
-                    builder.Append(receiver.Profile.Reliability switch
-                    {
-                        ReliabilityPolicy.SystemDefault => "Default",
-                        ReliabilityPolicy.BestEffort => "BestEffort",
-                        ReliabilityPolicy.Reliable => "Reliable",
-                        _ => "Unknown (" + (int)receiver.Profile.Reliability + ")"
-                    });
-
-                    builder.Append(" | HistoryPolicy: ");
-                    builder.Append(receiver.Profile.History switch
-                    {
-                        HistoryPolicy.SystemDefault => "Default",
-                        HistoryPolicy.KeepAll => "KeepAll",
-                        HistoryPolicy.KeepLast => "KeepLast",
-                        _ => "Unknown (" + (int)receiver.Profile.History + ")"
-                    });
+                    Append(receiver.Profile);
 
                     builder.AppendLine();
                 }
@@ -330,7 +320,12 @@ namespace Iviz.App
                 builder.Append("<color=#800000ff><b>>> Publishing to ").Append(stat.Topic)
                     .Append("</b></color>")
                     .AppendLine();
+                
                 builder.Append("<b>Type: </b>[").Append(stat.Type).Append("]").AppendLine();
+
+                builder.Append("<b>QOS: </b>");
+                Append(stat.Profile);
+                builder.AppendLine();
 
                 (long totalMessages, long totalBytes) = stat.Senders.Count == 0
                     ? (0, 0)
@@ -338,7 +333,7 @@ namespace Iviz.App
 
                 builder.Append("<b>Sent ").Append(totalMessages.ToString("N0")).Append(" msgs | ")
                     .AppendBandwidth(totalBytes).Append("</b> total").AppendLine();
-
+                
                 if (stat.Senders.Count == 0)
                 {
                     builder.Append("  (No subscribers)").AppendLine().AppendLine();
@@ -365,30 +360,47 @@ namespace Iviz.App
 
                     builder.Append(sender.Guid.ToString()).Append('\n');
 
-                    builder.Append("        ReliabilityPolicy: ");
+                    builder.Append("        ");
+                    Append(sender.Profile);
 
-                    builder.Append(sender.Profile.Reliability switch
+                    if (sender.TopicType != stat.Type)
                     {
-                        ReliabilityPolicy.SystemDefault => "Default",
-                        ReliabilityPolicy.BestEffort => "BestEffort",
-                        ReliabilityPolicy.Reliable => "Reliable",
-                        _ => "Unknown (" + (int)sender.Profile.Reliability + ")"
-                    });
-
-                    builder.Append(" | DurabilityPolicy: ");
-                    builder.Append(sender.Profile.Durability switch
-                    {
-                        DurabilityPolicy.SystemDefault => "Default",
-                        DurabilityPolicy.Volatile => "Volatile",
-                        DurabilityPolicy.TransientLocal => "TransientLocal",
-                        _ => "Unknown (" + (int)sender.Profile.Durability + ")"
-                    });
-
+                        builder.Append($"        <color=red>Topic type mismatch. Expects [{sender.TopicType}].</color>");
+                    }
 
                     builder.AppendLine();
                 }
 
                 builder.AppendLine();
+            }
+
+            void Append(in QosProfile profile)
+            {
+                builder.Append(profile.Reliability switch
+                {
+                    ReliabilityPolicy.SystemDefault => "ReliabilityPolicy: Default",
+                    ReliabilityPolicy.BestEffort => "BestEffort",
+                    ReliabilityPolicy.Reliable => "Reliable",
+                    _ => "ReliabilityPolicy: Unknown (" + (int)profile.Reliability + ")"
+                });
+
+                builder.Append(" | ");
+                builder.Append(profile.Durability switch
+                {
+                    DurabilityPolicy.SystemDefault => "DurabilityPolicy: Default",
+                    DurabilityPolicy.Volatile => "Volatile",
+                    DurabilityPolicy.TransientLocal => "TransientLocal",
+                    _ => "DurabilityPolicy: Unknown (" + (int)profile.Durability + ")"
+                });                
+                
+                builder.Append(" | ");
+                builder.Append(profile.History switch
+                {
+                    HistoryPolicy.SystemDefault => "HistoryPolicy: Default",
+                    HistoryPolicy.KeepAll => "KeepAll",
+                    HistoryPolicy.KeepLast => $"KeepLast({profile.Depth.ToString()})",
+                    _ => "HistoryPolicy: Unknown (" + (int)profile.History + ")"
+                });                
             }
         }
     }

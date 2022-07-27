@@ -1336,17 +1336,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4398293991192997123}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 968006256231393161}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 1.8, y: 6.4}
+  m_AnchoredPosition: {x: 0.0000019073486, y: 8.099999}
   m_SizeDelta: {x: -9.73, y: -26.117327}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8020099293900015119
@@ -1572,8 +1572,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000042915344, y: -16.8}
-  m_SizeDelta: {x: 33.536, y: 13.5783}
+  m_AnchoredPosition: {x: 0.000021457672, y: -14.1}
+  m_SizeDelta: {x: 33.536, y: 18.26}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8095247155721910812
 CanvasRenderer:
@@ -1603,7 +1603,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: ROS2
+  m_text: 'Switch
+
+    to <b>ROS1</b>'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7ab7bd6bfe316484d8697f049b23fb2c, type: 2}
   m_sharedMaterial: {fileID: -6388908872585162227, guid: 7ab7bd6bfe316484d8697f049b23fb2c,
@@ -1631,13 +1633,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 8
-  m_fontSizeBase: 8
+  m_fontSize: 7
+  m_fontSizeBase: 7
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 1
+  m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
@@ -1923,8 +1925,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000042915344, y: -16.8}
-  m_SizeDelta: {x: 33.536, y: 13.5783}
+  m_AnchoredPosition: {x: 0.000021457672, y: -14.742}
+  m_SizeDelta: {x: 33.536, y: 19.459}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2294754380248809040
 CanvasRenderer:
@@ -1954,7 +1956,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: ROS1
+  m_text: 'Switch
+
+    to <b>ROS2</b>'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7ab7bd6bfe316484d8697f049b23fb2c, type: 2}
   m_sharedMaterial: {fileID: -6388908872585162227, guid: 7ab7bd6bfe316484d8697f049b23fb2c,
@@ -1982,13 +1986,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 8
-  m_fontSizeBase: 8
+  m_fontSize: 7
+  m_fontSizeBase: 7
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 1
+  m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
@@ -2049,17 +2053,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8503881467425590745}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8503881467689276328}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.20000076, y: 6.4000006}
+  m_AnchoredPosition: {x: 0.000005722046, y: 8.142301}
   m_SizeDelta: {x: -9.73, y: -26.117327}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8503881467425590740
@@ -3273,12 +3277,12 @@ PrefabInstance:
     - target: {fileID: 1020661555268663533, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 8.339966
+      value: 8.899994
       objectReference: {fileID: 0}
     - target: {fileID: 1020661555268663533, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -7.0999756
+      value: -3.2000122
       objectReference: {fileID: 0}
     - target: {fileID: 1020661555268663533, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}
@@ -3373,7 +3377,7 @@ PrefabInstance:
     - target: {fileID: 8784785036607910320, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}
       propertyPath: m_text
-      value: My ROS ID
+      value: My ROS2 ID
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d14c7cb0e23584f58932ad32ab180992, type: 3}

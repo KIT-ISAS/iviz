@@ -17,15 +17,18 @@ using Iviz.Roslib2;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
 using Iviz.Tools;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using UnityEngine;
 using Random = System.Random;
 
 namespace Iviz.Ros
 {
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum RosVersion
     {
-        Ros1,
-        Ros2
+        ROS1,
+        ROS2
     }
 
     public sealed class RoslibConnection : RosConnection, Iviz.Displays.IServiceProvider
@@ -57,7 +60,7 @@ namespace Iviz.Ros
         Uri? masterUri;
         string? myId;
         Uri? myUri;
-        RosVersion version = RosVersion.Ros2;
+        RosVersion version = RosVersion.ROS1;
 
         bool Connected => client != null;
 
@@ -75,6 +78,8 @@ namespace Iviz.Ros
 
                 version = value;
                 RosVersionChanged?.Invoke(version);
+                RosLogger.Internal("ROS version changed to " + (version == RosVersion.ROS1 ? "ROS1" : "ROS2"));
+
                 Disconnect();
             }
         }
@@ -208,7 +213,7 @@ namespace Iviz.Ros
 
                 var token = runningTs.Token;
 
-                if (currentVersion == RosVersion.Ros1)
+                if (currentVersion == RosVersion.ROS1)
                 {
                     var newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
                     newClient.ShutdownAction = OnShutdown;
@@ -267,7 +272,7 @@ namespace Iviz.Ros
 
                     RosLogger.Internal("Finished resubscribing and readvertising!");
 
-                    if (currentVersion == RosVersion.Ros1)
+                    if (currentVersion == RosVersion.ROS1)
                     {
                         watchdogTask = WatchdogTask(((RosClient)currentClient).RosMasterClient, token);
                         ntpTask = NtpCheckerTask(MasterUri.Host, token);
@@ -277,7 +282,7 @@ namespace Iviz.Ros
                 RosLogger.Debug($"{this}: Connected!");
                 RosLogger.Internal("<b>Connected!</b>");
 
-                if (currentVersion == RosVersion.Ros1)
+                if (currentVersion == RosVersion.ROS1)
                 {
                     LogConnectionCheck(token);
                 }

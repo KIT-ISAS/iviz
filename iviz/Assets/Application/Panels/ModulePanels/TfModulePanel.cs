@@ -30,7 +30,7 @@
             Listener = p.AddListener();
             ListenerStatic = p.AddListener();
             Frame = p.AddFrame();
-            PreferUdp = p.AddToggle("Prefer UDP");
+            PreferUdp = p.AddToggle("Prefer Unreliable/UDP");
             KeepAllFrames = p.AddToggle("Keep All Frames, Even if Unused");
             ShowFrameLabels = p.AddToggle("Show Frame Names");
             ConnectToParent = p.AddToggle("Connect Children to Parents");

@@ -329,7 +329,7 @@ namespace Iviz.Ros
 
     public static class Listener
     {
-        public static IListener Create(string topicName, Func<IMessage, IRosReceiver, bool> handler, Type csType)
+        public static IListener Create(string topicName, Func<IMessage, IRosConnection, bool> handler, Type csType)
         {
             Type listenerType = typeof(Listener<>).MakeGenericType(csType);
             return (IListener)Activator.CreateInstance(listenerType,

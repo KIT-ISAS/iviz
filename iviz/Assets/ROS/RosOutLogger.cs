@@ -44,10 +44,10 @@ namespace Iviz.Ros
         static (ISender, IListener) CreateSenderAndListener(RosVersion version)
         {
             return (
-                version == RosVersion.Ros1
+                version == RosVersion.ROS1
                     ? new Sender<Msgs.RosgraphMsgs.Log>(RosOutTopic)
                     : new Sender<Msgs.RclInterfaces.Log>(RosOutTopic),
-                version == RosVersion.Ros1
+                version == RosVersion.ROS1
                     ? new Listener<Msgs.RosgraphMsgs.Log>(RosOutAggTopic, Handle, RosTransportHint.PreferUdp)
                     : new Listener<Msgs.RclInterfaces.Log>(RosOutTopic, Handle, RosTransportHint.PreferUdp)
             );
@@ -72,7 +72,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            if (currentVersion == RosVersion.Ros1)
+            if (currentVersion == RosVersion.ROS1)
             {
                 ((Sender<Msgs.RosgraphMsgs.Log>)Sender).Publish(ToRos1(msg));
             }

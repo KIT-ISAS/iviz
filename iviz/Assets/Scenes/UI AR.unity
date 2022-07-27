@@ -10707,7 +10707,7 @@ PrefabInstance:
     - target: {fileID: 1384428322456353893, guid: 9c542219a0eec15448e8897cc2fc232d,
         type: 3}
       propertyPath: m_fontStyle
-      value: 4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2666184248650205346, guid: 9c542219a0eec15448e8897cc2fc232d,
         type: 3}

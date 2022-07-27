@@ -182,10 +182,10 @@ namespace Iviz.App
 
             var scaler = RootCanvas.GetComponent<CanvasScaler>();
             bool isPhoneDevice = Screen.width / (float)Screen.height > 1.6f; // is phone not tablet
-            
+
             //Debug.Log(Screen.safeArea);
             //Debug.Log(Screen.dpi);
-            
+
             if (isPhoneDevice)
             {
                 // landscape phone mode!
@@ -291,7 +291,7 @@ namespace Iviz.App
             UpperCanvas.ShowSystem.onClick.AddListener(Dialogs.SystemData.Show);
 
             var connectionData = Dialogs.ConnectionData;
-            UpperCanvas.MasterUriStr.Text = MasterUriToString(connectionData.MasterUri);
+            UpdateMasterUriStr();
             UpperCanvas.MasterUriButton.Clicked += connectionData.Show;
 
             Connection.MasterUri = connectionData.MasterUri;
@@ -306,17 +306,14 @@ namespace Iviz.App
                 if (uri == null)
                 {
                     RosLogger.Internal("<b>Error:</b> Failed to set master uri. Reason: Uri is not valid.");
-                    UpperCanvas.MasterUriStr.Text = "(?) →";
                 }
                 else if (RosManager.Server.IsActive)
                 {
                     RosLogger.Internal($"Changing master uri to local master '{uri}'");
-                    UpperCanvas.MasterUriStr.Text = MasterUriToString(uri);
                 }
                 else
                 {
                     RosLogger.Internal($"Changing master uri to '{uri}'");
-                    UpperCanvas.MasterUriStr.Text = MasterUriToString(uri);
                 }
             };
             connectionData.MyIdChanged += id =>
@@ -327,11 +324,14 @@ namespace Iviz.App
                         "<b>Error:</b> Failed to set caller id. Reason: Id is not a valid resource name.");
                     RosLogger.Internal("First character must be alphanumeric [a-z A-Z] or a '/'");
                     RosLogger.Internal("Remaining characters must be alphanumeric, digits, '_' or '/'");
+
+                    UpdateMasterUriStr();
                     return;
                 }
 
                 Connection.MyId = id;
                 KeepReconnecting = false;
+                UpdateMasterUriStr();
                 RosLogger.Internal($"Changing my ROS id to '{id}'");
             };
             connectionData.MyUriChanged += uri =>
@@ -343,6 +343,22 @@ namespace Iviz.App
                     : $"Changing caller uri to '{uri}'"
                 );
             };
+            connectionData.RosVersionChanged += version =>
+            {
+                Connection.RosVersion = version;
+                UpdateMasterUriStr();
+            };
+
+            Connection.RosVersion = connectionData.RosVersion;
+
+            void UpdateMasterUriStr()
+            {
+                string rosId = (connectionData.RosVersion == RosVersion.ROS1 ? "ROS1" : "ROS2");
+                UpperCanvas.MasterUriStr.Text = connectionData.MyId == null
+                    ? $"<u>(?)</u>\n<color=grey>{rosId}</color>"
+                    : $"<u>{connectionData.MyId}</u>\n<color=grey>{rosId}</color>";                
+            }
+
             UpperCanvas.StopButton.Clicked += () =>
             {
                 RosLogger.Internal(
@@ -362,7 +378,7 @@ namespace Iviz.App
                 KeepReconnecting = true;
             };
 
-            BottomCanvas.CameraButtonClicked += () => { CameraModuleData.ToggleShowPanel(); };
+            BottomCanvas.CameraButtonClicked += CameraModuleData.ToggleShowPanel;
 
             connectionData.MasterActiveChanged += _ => Connection.Disconnect();
             RosConnection.ConnectionStateChanged += OnConnectionStateChanged;
@@ -675,6 +691,7 @@ namespace Iviz.App
                 }
 
                 var connectionData = Dialogs.ConnectionData;
+                connectionData.RosVersion = config.RosVersion;
                 connectionData.MasterUri =
                     string.IsNullOrWhiteSpace(config.MasterUri) ? null : new Uri(config.MasterUri);
                 connectionData.MyUri = string.IsNullOrWhiteSpace(config.MyUri) ? null : new Uri(config.MyUri);
@@ -721,6 +738,7 @@ namespace Iviz.App
 
             var config = new ConnectionConfiguration
             {
+                RosVersion = Dialogs.ConnectionData.RosVersion,
                 MasterUri = Dialogs.ConnectionData.MasterUri?.ToString() ?? "",
                 MyUri = Dialogs.ConnectionData.MyUri?.ToString() ?? "",
                 MyId = Dialogs.ConnectionData.MyId ?? "",
