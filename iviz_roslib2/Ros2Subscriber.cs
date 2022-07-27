@@ -82,7 +82,11 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
 
     void UpdateReceiverInfo(in Guid guid, int lengthInBytes)
     {
-        if (BinarySearch(publisherStats, numPublishers, guid, out int index))
+        bool success = numPublishers <= 3
+            ? LinearSearch(publisherStats, numPublishers, guid, out int index)
+            : BinarySearch(publisherStats, numPublishers, guid, out index);
+        
+        if (success)
         {
             ref var publisherStat = ref publisherStats[index];
             publisherStat.bytesReceived += lengthInBytes;
@@ -104,6 +108,22 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
         
         Array.Sort(publisherStats, 0, numPublishers);
     }
+
+    static bool LinearSearch(PublisherStats[] arr, int length, in Guid key, out int index)
+    {
+        for (int i = 0; i < length; i++)
+        {
+            if (arr[i].guid == key)
+            {
+                index = i;
+                return true;
+            }
+        }
+
+        index = 0;
+        return false;
+    }
+
 
     static bool BinarySearch(PublisherStats[] arr, int length, in Guid key, out int index)
     {

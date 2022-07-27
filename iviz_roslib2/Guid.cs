@@ -14,7 +14,7 @@ public readonly struct Guid : IEquatable<Guid>, IComparable<Guid>
     readonly ulong c;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Equals(in Guid other) => a == other.a && b == other.b /* && c == other.c */;
+    bool Equals(in Guid other) => a == other.a && b == other.b /* && c == other.c */;
 
     public override bool Equals(object? obj) => obj is Guid other && Equals(other);
 
@@ -35,6 +35,7 @@ public readonly struct Guid : IEquatable<Guid>, IComparable<Guid>
 
     int IComparable<Guid>.CompareTo(Guid other) => CompareTo(other);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int CompareTo(in Guid other)
     {
         if (a < other.a) return -1;
@@ -48,8 +49,10 @@ public readonly struct Guid : IEquatable<Guid>, IComparable<Guid>
         return 0;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator >(in Guid left, in Guid right) => left.CompareTo(right) == 1;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator <(in Guid left, in Guid right) => left.CompareTo(right) == -1;
 
     public override string ToString()
@@ -58,18 +61,18 @@ public readonly struct Guid : IEquatable<Guid>, IComparable<Guid>
 
         int o = 0;
 
-        Append(array, a & 0xff);
+        Append(array, a, 0);
 
         for (int i = 1; i < 8; i++)
         {
             array[o++] = '.';
-            Append(array, (a >> (i * 8)) & 0xff);
+            Append(array, a, i);
         }
 
         for (int i = 0; i < 8; i++)
         {
             array[o++] = '.';
-            Append(array, (b >> (i * 8)) & 0xff);
+            Append(array, b, i);
         }
 
         if (c != 0)
@@ -77,12 +80,13 @@ public readonly struct Guid : IEquatable<Guid>, IComparable<Guid>
             for (int i = 0; i < 8; i++)
             {
                 array[o++] = '.';
-                Append(array, (c >> (i * 8)) & 0xff);
+                Append(array, c, i);
             }
         }
         
-        void Append(Span<char> array, ulong j)
+        void Append(Span<char> array, ulong k, int i)
         {
+            ulong j = (k >> (i * 8)) & 0xff;
             array[o++] = AsChar(j >> 4);
             array[o++] = AsChar(j & 0xf);
         }
