@@ -17,9 +17,9 @@ namespace Iviz.App
     public sealed class ConnectionDialogData : DialogData
     {
         const int DefaultPort = 7613;
-        
+
         static readonly Uri LocalhostMaster = new("http://127.0.0.1:11311/");
-        
+
         static Uri DefaultMasterUri => RosClient.TryGetMasterUri();
         static Uri DefaultMyUri => RosClient.TryGetCallerUri(DefaultPort);
         static string DefaultMyId => "iviz_" + UnityUtils.GetPlatformName();
@@ -30,6 +30,7 @@ namespace Iviz.App
         Uri? masterUri = DefaultMasterUri;
         Uri? myUri = DefaultMyUri;
         string? myId = DefaultMyId;
+        RosVersion rosVersion;
 
         public override IDialogPanel Panel => panel;
 
@@ -77,10 +78,35 @@ namespace Iviz.App
             }
         }
 
+        public RosVersion RosVersion
+        {
+            get => rosVersion;
+            set
+            {
+                rosVersion = value;
+                switch (value)
+                {
+                    case RosVersion.Ros1:
+                        panel.RosPanel2.SetActive(false);
+                        panel.RosPanel1.SetActive(true);
+                        panel.MyId.Value = panel.MyId2.Value;
+                        break;
+                    case RosVersion.Ros2:
+                        panel.RosPanel1.SetActive(false);
+                        panel.RosPanel2.SetActive(true);
+                        panel.MyId2.Value = panel.MyId.Value;
+                        break;
+                }
+
+                RosVersionChanged?.Invoke(value);
+            }
+        }
+
         public event Action<Uri?>? MasterUriChanged;
         public event Action<Uri?>? MyUriChanged;
         public event Action<string?>? MyIdChanged;
         public event Action<bool>? MasterActiveChanged;
+        public event Action<RosVersion>? RosVersionChanged;
 
         public ConnectionDialogData()
         {
@@ -162,27 +188,19 @@ namespace Iviz.App
                 string trimmed = text.Trim();
                 MyId = RosNameUtils.IsValidResourceName(trimmed) ? trimmed : null;
             };
-            panel.RefreshMyId.Clicked += () =>
+            panel.MyId2.Submit += text =>
             {
-                MyId = DefaultMyId;
-                panel.MyId.Value = DefaultMyId;
-            };
-            panel.RefreshMyUri.Clicked += () =>
-            {
-                MyUri = DefaultMyUri;
-                panel.MyUri.Value = DefaultMyUri.ToString();
+                string trimmed = text.Trim();
+                MyId = RosNameUtils.IsValidResourceName(trimmed) ? trimmed : null;
             };
             panel.ServerMode.Clicked += () =>
             {
-                if (!RosManager.Server.IsActive)
-                {
-                    _ = TryCreateMasterAsync();
-                }
-                else
-                {
-                    _ = TryDisposeMasterAsync();
-                }
+                _ = !RosManager.Server.IsActive
+                    ? TryCreateMasterAsync()
+                    : TryDisposeMasterAsync();
             };
+            panel.RosVersion1.Clicked += () => RosVersion = RosVersion.Ros2;
+            panel.RosVersion2.Clicked += () => RosVersion = RosVersion.Ros1;
         }
 
         async Task TryDisposeMasterAsync()
@@ -193,7 +211,7 @@ namespace Iviz.App
                 // hard if we just yank the master away and it cannot unregister its stuff
                 RosManager.Connection.KeepReconnecting = false; // do not retry
                 RosManager.Connection.Disconnect();
-                
+
                 // wait 200 ms for roslib to disconnect gracefully and hope the user
                 // does not click to create a new master until we're finished 
                 await Task.Delay(200);
