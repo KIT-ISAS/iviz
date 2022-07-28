@@ -6,10 +6,10 @@ namespace Iviz.Msgs.OctomapMsgs
     public sealed class GetOctomap : IService
     {
         /// Request message.
-        [DataMember] public GetOctomapRequest Request { get; set; }
+        [DataMember] public GetOctomapRequest Request;
         
         /// Response message.
-        [DataMember] public GetOctomapResponse Response { get; set; }
+        [DataMember] public GetOctomapResponse Response;
         
         /// Empty constructor.
         public GetOctomap()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         public const string ServiceType = "octomap_msgs/GetOctomap";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "be9d2869d24fe40d6bc21ac21f6bb2c5";

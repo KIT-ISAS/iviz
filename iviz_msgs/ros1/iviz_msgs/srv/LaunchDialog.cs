@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class LaunchDialog : IService
     {
         /// Request message.
-        [DataMember] public LaunchDialogRequest Request { get; set; }
+        [DataMember] public LaunchDialogRequest Request;
         
         /// Response message.
-        [DataMember] public LaunchDialogResponse Response { get; set; }
+        [DataMember] public LaunchDialogResponse Response;
         
         /// Empty constructor.
         public LaunchDialog()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/LaunchDialog";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "ec7ed08dc865a51d9dc5312b8351aa02";

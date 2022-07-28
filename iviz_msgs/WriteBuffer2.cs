@@ -794,26 +794,26 @@ public unsafe partial struct WriteBuffer2
         Advance(size);
     }
 
-    public void SerializeArray<T>(T[] val) where T : IMessage
+    public void SerializeArray(IMessage[] msgs)
     {
-        WriteInt(val.Length);
-        for (int i = 0; i < val.Length; i++)
+        WriteInt(msgs.Length);
+        foreach (var msg in msgs)
         {
-            val[i].RosSerialize(ref this);
+            msg.RosSerialize(ref this);
         }
     }
 
-    public void SerializeArray<T>(T[] val, int count) where T : IMessage
+    public void SerializeArray(IMessage[] msgs, int count)
     {
-        ThrowIfWrongSize(val, count);
-        for (int i = 0; i < val.Length; i++)
+        ThrowIfWrongSize(msgs, count);
+        foreach (var msg in msgs)
         {
-            val[i].RosSerialize(ref this);
+            msg.RosSerialize(ref this);
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetRosMessageLength<T>(in T msg) where T : ISerializable
+    public static int GetRosMessageLength(ISerializable msg)
     {
         int s = 0;
         msg.AddRos2MessageLength(ref s);
@@ -1045,5 +1045,40 @@ public unsafe partial struct WriteBuffer2
         ThrowIfOutOfRange(size);
         *(Triangle*)(ptr + offset) = val;
         Advance(size);
+    }
+    
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int GetRosMessageLength(in RclInterfaces.Log msg)
+    {
+        int s = 0;
+        msg.AddRos2MessageLength(ref s);
+        return s;
+    }    
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int GetRosMessageLength(in RosgraphMsgs.Log msg)
+    {
+        int s = 0;
+        msg.AddRos2MessageLength(ref s);
+        return s;
+    } 
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int GetRosMessageLength(in Header msg)
+    {
+        int s = 0;
+        msg.AddRos2MessageLength(ref s);
+        return s;
+    }     
+    
+    
+    public void SerializeArray(TransformStamped[] val)
+    {
+        WriteInt(val.Length);
+        for (int i = 0; i < val.Length; i++)
+        {
+            val[i].RosSerialize(ref this);
+        }
     }
 }

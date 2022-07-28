@@ -6,10 +6,10 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class GetMaterials : IService
     {
         /// Request message.
-        [DataMember] public GetMaterialsRequest Request { get; set; }
+        [DataMember] public GetMaterialsRequest Request;
         
         /// Response message.
-        [DataMember] public GetMaterialsResponse Response { get; set; }
+        [DataMember] public GetMaterialsResponse Response;
         
         /// Empty constructor.
         public GetMaterials()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public const string ServiceType = "mesh_msgs/GetMaterials";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "f9e04e76772e6c10688525f021cfc500";

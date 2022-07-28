@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class StopCapture : IService
     {
         /// Request message.
-        [DataMember] public StopCaptureRequest Request { get; set; }
+        [DataMember] public StopCaptureRequest Request;
         
         /// Response message.
-        [DataMember] public StopCaptureResponse Response { get; set; }
+        [DataMember] public StopCaptureResponse Response;
         
         /// Empty constructor.
         public StopCapture()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/StopCapture";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "937c9679a518e3a18d831e57125ea522";

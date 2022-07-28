@@ -6,10 +6,10 @@ namespace Iviz.Msgs.NavMsgs
     public sealed class SetMap : IService
     {
         /// Request message.
-        [DataMember] public SetMapRequest Request { get; set; }
+        [DataMember] public SetMapRequest Request;
         
         /// Response message.
-        [DataMember] public SetMapResponse Response { get; set; }
+        [DataMember] public SetMapResponse Response;
         
         /// Empty constructor.
         public SetMap()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         public const string ServiceType = "nav_msgs/SetMap";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "c36922319011e63ed7784112ad4fdd32";

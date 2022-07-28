@@ -6,10 +6,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
     public sealed class SelfTest : IService
     {
         /// Request message.
-        [DataMember] public SelfTestRequest Request { get; set; }
+        [DataMember] public SelfTestRequest Request;
         
         /// Response message.
-        [DataMember] public SelfTestResponse Response { get; set; }
+        [DataMember] public SelfTestResponse Response;
         
         /// Empty constructor.
         public SelfTest()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         public const string ServiceType = "diagnostic_msgs/SelfTest";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "ac21b1bab7ab17546986536c22eb34e9";

@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class UpdateModule : IService
     {
         /// Request message.
-        [DataMember] public UpdateModuleRequest Request { get; set; }
+        [DataMember] public UpdateModuleRequest Request;
         
         /// Response message.
-        [DataMember] public UpdateModuleResponse Response { get; set; }
+        [DataMember] public UpdateModuleResponse Response;
         
         /// Empty constructor.
         public UpdateModule()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/UpdateModule";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "9b8bbde938619f17558ceabafe5f3a13";

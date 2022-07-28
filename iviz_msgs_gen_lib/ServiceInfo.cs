@@ -205,10 +205,10 @@ namespace Iviz.MsgsGen
             return new[]
             {
                 "/// Request message.",
-                $"[DataMember] public {Name}Request Request {{ get; set; }}",
+                $"[DataMember] public {Name}Request Request;",
                 "",
                 "/// Response message.",
-                $"[DataMember] public {Name}Response Response {{ get; set; }}",
+                $"[DataMember] public {Name}Response Response;",
                 "",
                 "/// Empty constructor.",
                 $"public {Name}()",
@@ -244,6 +244,7 @@ namespace Iviz.MsgsGen
                 "",
                 //"string IService.RosType => RosServiceType;",
                 $"public const string ServiceType = \"{RosPackage}/{Name}\";",
+                "",
                 $"public string RosServiceType => ServiceType;",
                 "",
                 //"/// Full ROS name of this service.",

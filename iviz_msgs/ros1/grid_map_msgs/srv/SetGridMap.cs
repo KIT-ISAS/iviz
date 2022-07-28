@@ -6,10 +6,10 @@ namespace Iviz.Msgs.GridMapMsgs
     public sealed class SetGridMap : IService
     {
         /// Request message.
-        [DataMember] public SetGridMapRequest Request { get; set; }
+        [DataMember] public SetGridMapRequest Request;
         
         /// Response message.
-        [DataMember] public SetGridMapResponse Response { get; set; }
+        [DataMember] public SetGridMapResponse Response;
         
         /// Empty constructor.
         public SetGridMap()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         public const string ServiceType = "grid_map_msgs/SetGridMap";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "4f8e24cfd42bc1470fe765b7516ff7e5";

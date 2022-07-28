@@ -6,10 +6,10 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class GetGeometry : IService
     {
         /// Request message.
-        [DataMember] public GetGeometryRequest Request { get; set; }
+        [DataMember] public GetGeometryRequest Request;
         
         /// Response message.
-        [DataMember] public GetGeometryResponse Response { get; set; }
+        [DataMember] public GetGeometryResponse Response;
         
         /// Empty constructor.
         public GetGeometry()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public const string ServiceType = "mesh_msgs/GetGeometry";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "e21c42f8a3978429fcbcd1c03ddeb4e3";

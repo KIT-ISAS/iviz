@@ -6,10 +6,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
     public sealed class AddDiagnostics : IService
     {
         /// Request message.
-        [DataMember] public AddDiagnosticsRequest Request { get; set; }
+        [DataMember] public AddDiagnosticsRequest Request;
         
         /// Response message.
-        [DataMember] public AddDiagnosticsResponse Response { get; set; }
+        [DataMember] public AddDiagnosticsResponse Response;
         
         /// Empty constructor.
         public AddDiagnostics()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         public const string ServiceType = "diagnostic_msgs/AddDiagnostics";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "e6ac9bbde83d0d3186523c3687aecaee";

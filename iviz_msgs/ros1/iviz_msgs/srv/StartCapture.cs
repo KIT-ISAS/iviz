@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class StartCapture : IService
     {
         /// Request message.
-        [DataMember] public StartCaptureRequest Request { get; set; }
+        [DataMember] public StartCaptureRequest Request;
         
         /// Response message.
-        [DataMember] public StartCaptureResponse Response { get; set; }
+        [DataMember] public StartCaptureResponse Response;
         
         /// Empty constructor.
         public StartCapture()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/StartCapture";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "ddc13484ad3a5f74f6f36b363081b7e2";

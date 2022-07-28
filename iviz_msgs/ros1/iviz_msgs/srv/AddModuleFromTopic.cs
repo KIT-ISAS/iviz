@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class AddModuleFromTopic : IService
     {
         /// Request message.
-        [DataMember] public AddModuleFromTopicRequest Request { get; set; }
+        [DataMember] public AddModuleFromTopicRequest Request;
         
         /// Response message.
-        [DataMember] public AddModuleFromTopicResponse Response { get; set; }
+        [DataMember] public AddModuleFromTopicResponse Response;
         
         /// Empty constructor.
         public AddModuleFromTopic()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/AddModuleFromTopic";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "68ab9eda5fc795e020e1e72fec9f4815";

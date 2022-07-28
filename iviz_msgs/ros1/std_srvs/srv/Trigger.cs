@@ -6,10 +6,10 @@ namespace Iviz.Msgs.StdSrvs
     public sealed class Trigger : IService
     {
         /// Request message.
-        [DataMember] public TriggerRequest Request { get; set; }
+        [DataMember] public TriggerRequest Request;
         
         /// Response message.
-        [DataMember] public TriggerResponse Response { get; set; }
+        [DataMember] public TriggerResponse Response;
         
         /// Empty constructor.
         public Trigger()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         public const string ServiceType = "std_srvs/Trigger";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "937c9679a518e3a18d831e57125ea522";

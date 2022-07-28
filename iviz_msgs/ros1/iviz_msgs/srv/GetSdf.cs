@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class GetSdf : IService
     {
         /// Request message.
-        [DataMember] public GetSdfRequest Request { get; set; }
+        [DataMember] public GetSdfRequest Request;
         
         /// Response message.
-        [DataMember] public GetSdfResponse Response { get; set; }
+        [DataMember] public GetSdfResponse Response;
         
         /// Empty constructor.
         public GetSdf()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/GetSdf";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "4268e0641c7ff6b587e46790f433e3ba";

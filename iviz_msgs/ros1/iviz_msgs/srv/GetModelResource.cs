@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class GetModelResource : IService
     {
         /// Request message.
-        [DataMember] public GetModelResourceRequest Request { get; set; }
+        [DataMember] public GetModelResourceRequest Request;
         
         /// Response message.
-        [DataMember] public GetModelResourceResponse Response { get; set; }
+        [DataMember] public GetModelResourceResponse Response;
         
         /// Empty constructor.
         public GetModelResource()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/GetModelResource";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "a67de8e71bc8e03882d5d86e64000b51";

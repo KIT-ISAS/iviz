@@ -6,10 +6,10 @@ namespace Iviz.Msgs.PclMsgs
     public sealed class UpdateFilename : IService
     {
         /// Request message.
-        [DataMember] public UpdateFilenameRequest Request { get; set; }
+        [DataMember] public UpdateFilenameRequest Request;
         
         /// Response message.
-        [DataMember] public UpdateFilenameResponse Response { get; set; }
+        [DataMember] public UpdateFilenameResponse Response;
         
         /// Empty constructor.
         public UpdateFilename()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.PclMsgs
         }
         
         public const string ServiceType = "pcl_msgs/UpdateFilename";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "93a4bc4c60dc17e2a69e3fcaaa25d69d";

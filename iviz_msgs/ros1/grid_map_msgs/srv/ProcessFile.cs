@@ -6,10 +6,10 @@ namespace Iviz.Msgs.GridMapMsgs
     public sealed class ProcessFile : IService
     {
         /// Request message.
-        [DataMember] public ProcessFileRequest Request { get; set; }
+        [DataMember] public ProcessFileRequest Request;
         
         /// Response message.
-        [DataMember] public ProcessFileResponse Response { get; set; }
+        [DataMember] public ProcessFileResponse Response;
         
         /// Empty constructor.
         public ProcessFile()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         public const string ServiceType = "grid_map_msgs/ProcessFile";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "03f389710f49a6dd2a8b447bb2850cd6";

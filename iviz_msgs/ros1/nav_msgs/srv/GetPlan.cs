@@ -6,10 +6,10 @@ namespace Iviz.Msgs.NavMsgs
     public sealed class GetPlan : IService
     {
         /// Request message.
-        [DataMember] public GetPlanRequest Request { get; set; }
+        [DataMember] public GetPlanRequest Request;
         
         /// Response message.
-        [DataMember] public GetPlanResponse Response { get; set; }
+        [DataMember] public GetPlanResponse Response;
         
         /// Empty constructor.
         public GetPlan()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         public const string ServiceType = "nav_msgs/GetPlan";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "421c8ea4d21c6c9db7054b4bbdf1e024";

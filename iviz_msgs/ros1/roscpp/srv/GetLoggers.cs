@@ -6,10 +6,10 @@ namespace Iviz.Msgs.Roscpp
     public sealed class GetLoggers : IService
     {
         /// Request message.
-        [DataMember] public GetLoggersRequest Request { get; set; }
+        [DataMember] public GetLoggersRequest Request;
         
         /// Response message.
-        [DataMember] public GetLoggersResponse Response { get; set; }
+        [DataMember] public GetLoggersResponse Response;
         
         /// Empty constructor.
         public GetLoggers()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         public const string ServiceType = "roscpp/GetLoggers";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "32e97e85527d4678a8f9279894bb64b0";

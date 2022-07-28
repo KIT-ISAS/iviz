@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class GetFramePose : IService
     {
         /// Request message.
-        [DataMember] public GetFramePoseRequest Request { get; set; }
+        [DataMember] public GetFramePoseRequest Request;
         
         /// Response message.
-        [DataMember] public GetFramePoseResponse Response { get; set; }
+        [DataMember] public GetFramePoseResponse Response;
         
         /// Empty constructor.
         public GetFramePose()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/GetFramePose";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "80ebc02508d7723ac1b22636270c4ba6";

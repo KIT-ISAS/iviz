@@ -6,10 +6,10 @@ namespace Iviz.Msgs.StdSrvs
     public sealed class SetBool : IService
     {
         /// Request message.
-        [DataMember] public SetBoolRequest Request { get; set; }
+        [DataMember] public SetBoolRequest Request;
         
         /// Response message.
-        [DataMember] public SetBoolResponse Response { get; set; }
+        [DataMember] public SetBoolResponse Response;
         
         /// Empty constructor.
         public SetBool()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         public const string ServiceType = "std_srvs/SetBool";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "09fb03525b03e7ea1fd3992bafd87e16";

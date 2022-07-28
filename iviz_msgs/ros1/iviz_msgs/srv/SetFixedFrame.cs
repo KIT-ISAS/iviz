@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class SetFixedFrame : IService
     {
         /// Request message.
-        [DataMember] public SetFixedFrameRequest Request { get; set; }
+        [DataMember] public SetFixedFrameRequest Request;
         
         /// Response message.
-        [DataMember] public SetFixedFrameResponse Response { get; set; }
+        [DataMember] public SetFixedFrameResponse Response;
         
         /// Empty constructor.
         public SetFixedFrame()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/SetFixedFrame";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "7b2e77c05fb1342786184d949a9f06ed";

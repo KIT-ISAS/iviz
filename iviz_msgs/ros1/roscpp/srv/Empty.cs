@@ -6,10 +6,10 @@ namespace Iviz.Msgs.Roscpp
     public sealed class Empty : IService
     {
         /// Request message.
-        [DataMember] public EmptyRequest Request { get; set; }
+        [DataMember] public EmptyRequest Request;
         
         /// Response message.
-        [DataMember] public EmptyResponse Response { get; set; }
+        [DataMember] public EmptyResponse Response;
         
         /// Empty constructor.
         public Empty()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         public const string ServiceType = "roscpp/Empty";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "d41d8cd98f00b204e9800998ecf8427e";

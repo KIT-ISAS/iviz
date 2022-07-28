@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class GetCaptureResolutions : IService
     {
         /// Request message.
-        [DataMember] public GetCaptureResolutionsRequest Request { get; set; }
+        [DataMember] public GetCaptureResolutionsRequest Request;
         
         /// Response message.
-        [DataMember] public GetCaptureResolutionsResponse Response { get; set; }
+        [DataMember] public GetCaptureResolutionsResponse Response;
         
         /// Empty constructor.
         public GetCaptureResolutions()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/GetCaptureResolutions";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "e375c70c9e7caf58991e78dd0f791c3a";

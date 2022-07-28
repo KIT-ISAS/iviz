@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class CaptureScreenshot : IService
     {
         /// Request message.
-        [DataMember] public CaptureScreenshotRequest Request { get; set; }
+        [DataMember] public CaptureScreenshotRequest Request;
         
         /// Response message.
-        [DataMember] public CaptureScreenshotResponse Response { get; set; }
+        [DataMember] public CaptureScreenshotResponse Response;
         
         /// Empty constructor.
         public CaptureScreenshot()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/CaptureScreenshot";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "3846b8955f5006a6c3a2585f806a8d1c";

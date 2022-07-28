@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class GetModelTexture : IService
     {
         /// Request message.
-        [DataMember] public GetModelTextureRequest Request { get; set; }
+        [DataMember] public GetModelTextureRequest Request;
         
         /// Response message.
-        [DataMember] public GetModelTextureResponse Response { get; set; }
+        [DataMember] public GetModelTextureResponse Response;
         
         /// Empty constructor.
         public GetModelTexture()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/GetModelTexture";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "0d382728fb593e7fac7232b27f8a271f";

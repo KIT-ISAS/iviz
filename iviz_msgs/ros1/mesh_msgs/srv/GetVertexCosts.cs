@@ -6,10 +6,10 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class GetVertexCosts : IService
     {
         /// Request message.
-        [DataMember] public GetVertexCostsRequest Request { get; set; }
+        [DataMember] public GetVertexCostsRequest Request;
         
         /// Response message.
-        [DataMember] public GetVertexCostsResponse Response { get; set; }
+        [DataMember] public GetVertexCostsResponse Response;
         
         /// Empty constructor.
         public GetVertexCosts()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public const string ServiceType = "mesh_msgs/GetVertexCosts";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "d0fc06ce39b58884e8cdf147765b9d6b";

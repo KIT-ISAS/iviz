@@ -6,10 +6,10 @@ namespace Iviz.Msgs.Tf2Msgs
     public sealed class FrameGraph : IService
     {
         /// Request message.
-        [DataMember] public FrameGraphRequest Request { get; set; }
+        [DataMember] public FrameGraphRequest Request;
         
         /// Response message.
-        [DataMember] public FrameGraphResponse Response { get; set; }
+        [DataMember] public FrameGraphResponse Response;
         
         /// Empty constructor.
         public FrameGraph()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         public const string ServiceType = "tf2_msgs/FrameGraph";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "437ea58e9463815a0d511c7326b686b0";

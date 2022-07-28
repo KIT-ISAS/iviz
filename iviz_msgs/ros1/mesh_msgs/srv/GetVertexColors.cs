@@ -6,10 +6,10 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class GetVertexColors : IService
     {
         /// Request message.
-        [DataMember] public GetVertexColorsRequest Request { get; set; }
+        [DataMember] public GetVertexColorsRequest Request;
         
         /// Response message.
-        [DataMember] public GetVertexColorsResponse Response { get; set; }
+        [DataMember] public GetVertexColorsResponse Response;
         
         /// Empty constructor.
         public GetVertexColors()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public const string ServiceType = "mesh_msgs/GetVertexColors";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "f9925939094ed9c8a413184db9bca5b3";

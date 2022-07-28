@@ -371,16 +371,14 @@ namespace Iviz.MsgsGen
                     string text = classInfo.ToCsString();
                     File.WriteAllText($"{dstPackageDir}{classInfo.Name}.cs", text);
                 }
-
-                /*
-                foreach (ServiceInfo classInfo in p.Services.Values)
+                
+                foreach (var classInfo in p.Services.Values)
                 {
                     string packageDir = $"{ivizMsgPaths}/{classInfo.RosPackage}/srv/";
                     Directory.CreateDirectory(packageDir);
                     string text = classInfo.ToCsString();
                     File.WriteAllText($"{packageDir}{classInfo.Name}.cs", text);
                 }
-                */
             }
 
             Console.WriteLine("** Done!");

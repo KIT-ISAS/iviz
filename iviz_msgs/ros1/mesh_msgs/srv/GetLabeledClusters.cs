@@ -6,10 +6,10 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class GetLabeledClusters : IService
     {
         /// Request message.
-        [DataMember] public GetLabeledClustersRequest Request { get; set; }
+        [DataMember] public GetLabeledClustersRequest Request;
         
         /// Response message.
-        [DataMember] public GetLabeledClustersResponse Response { get; set; }
+        [DataMember] public GetLabeledClustersResponse Response;
         
         /// Empty constructor.
         public GetLabeledClusters()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public const string ServiceType = "mesh_msgs/GetLabeledClusters";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "d4165053db3e9b1ffe9db49f0702734c";

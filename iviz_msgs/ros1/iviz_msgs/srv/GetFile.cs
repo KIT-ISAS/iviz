@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class GetFile : IService
     {
         /// Request message.
-        [DataMember] public GetFileRequest Request { get; set; }
+        [DataMember] public GetFileRequest Request;
         
         /// Response message.
-        [DataMember] public GetFileResponse Response { get; set; }
+        [DataMember] public GetFileResponse Response;
         
         /// Empty constructor.
         public GetFile()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/GetFile";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "08088c7144705ee9cf37b287c931476d";

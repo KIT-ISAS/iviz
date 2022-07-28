@@ -1,0 +1,182 @@
+using System.Runtime.Serialization;
+
+namespace Iviz.Msgs.RclInterfaces
+{
+    [DataContract]
+    public sealed class SetParametersAtomically : IService
+    {
+        /// Request message.
+        [DataMember] public SetParametersAtomicallyRequest Request;
+        
+        /// Response message.
+        [DataMember] public SetParametersAtomicallyResponse Response;
+        
+        /// Empty constructor.
+        public SetParametersAtomically()
+        {
+            Request = new SetParametersAtomicallyRequest();
+            Response = new SetParametersAtomicallyResponse();
+        }
+        
+        /// Setter constructor.
+        public SetParametersAtomically(SetParametersAtomicallyRequest request)
+        {
+            Request = request;
+            Response = new SetParametersAtomicallyResponse();
+        }
+        
+        IRequest IService.Request
+        {
+            get => Request;
+            set => Request = (SetParametersAtomicallyRequest)value;
+        }
+        
+        IResponse IService.Response
+        {
+            get => Response;
+            set => Response = (SetParametersAtomicallyResponse)value;
+        }
+        
+        public const string ServiceType = "rcl_interfaces/SetParametersAtomically";
+        
+        public string RosServiceType => ServiceType;
+        
+        public string RosMd5Sum => "b212f806e7a333d89be2051122e406bf";
+        
+        public override string ToString() => Extensions.ToString(this);
+    }
+
+    [DataContract]
+    public sealed class SetParametersAtomicallyRequest : IRequest<SetParametersAtomically, SetParametersAtomicallyResponse>, IDeserializable<SetParametersAtomicallyRequest>
+    {
+        // A list of parameters to set atomically.
+        //
+        // This call will either set all values, or none of the values.
+        [DataMember (Name = "parameters")] public Parameter[] Parameters;
+    
+        public SetParametersAtomicallyRequest()
+        {
+            Parameters = System.Array.Empty<Parameter>();
+        }
+        
+        public SetParametersAtomicallyRequest(Parameter[] Parameters)
+        {
+            this.Parameters = Parameters;
+        }
+        
+        public SetParametersAtomicallyRequest(ref ReadBuffer b)
+        {
+            b.DeserializeArray(out Parameters);
+            for (int i = 0; i < Parameters.Length; i++)
+            {
+                Parameters[i] = new Parameter(ref b);
+            }
+        }
+        
+        public SetParametersAtomicallyRequest(ref ReadBuffer2 b)
+        {
+            b.DeserializeArray(out Parameters);
+            for (int i = 0; i < Parameters.Length; i++)
+            {
+                Parameters[i] = new Parameter(ref b);
+            }
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetParametersAtomicallyRequest(ref b);
+        
+        public SetParametersAtomicallyRequest RosDeserialize(ref ReadBuffer b) => new SetParametersAtomicallyRequest(ref b);
+        
+        public SetParametersAtomicallyRequest RosDeserialize(ref ReadBuffer2 b) => new SetParametersAtomicallyRequest(ref b);
+    
+        public void RosSerialize(ref WriteBuffer b)
+        {
+            b.SerializeArray(Parameters);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
+        {
+            b.SerializeArray(Parameters);
+        }
+        
+        public void RosValidate()
+        {
+            if (Parameters is null) BuiltIns.ThrowNullReference();
+            for (int i = 0; i < Parameters.Length; i++)
+            {
+                if (Parameters[i] is null) BuiltIns.ThrowNullReference(nameof(Parameters), i);
+                Parameters[i].RosValidate();
+            }
+        }
+    
+        public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Parameters);
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            WriteBuffer2.AddLength(ref c, Parameters);
+        }
+    
+        public override string ToString() => Extensions.ToString(this);
+    }
+
+    [DataContract]
+    public sealed class SetParametersAtomicallyResponse : IResponse, IDeserializable<SetParametersAtomicallyResponse>
+    {
+        // Indicates whether setting all of the parameters succeeded or not and why.
+        [DataMember (Name = "result")] public SetParametersResult Result;
+    
+        public SetParametersAtomicallyResponse()
+        {
+            Result = new SetParametersResult();
+        }
+        
+        public SetParametersAtomicallyResponse(SetParametersResult Result)
+        {
+            this.Result = Result;
+        }
+        
+        public SetParametersAtomicallyResponse(ref ReadBuffer b)
+        {
+            Result = new SetParametersResult(ref b);
+        }
+        
+        public SetParametersAtomicallyResponse(ref ReadBuffer2 b)
+        {
+            Result = new SetParametersResult(ref b);
+        }
+        
+        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetParametersAtomicallyResponse(ref b);
+        
+        public SetParametersAtomicallyResponse RosDeserialize(ref ReadBuffer b) => new SetParametersAtomicallyResponse(ref b);
+        
+        public SetParametersAtomicallyResponse RosDeserialize(ref ReadBuffer2 b) => new SetParametersAtomicallyResponse(ref b);
+    
+        public void RosSerialize(ref WriteBuffer b)
+        {
+            Result.RosSerialize(ref b);
+        }
+        
+        public void RosSerialize(ref WriteBuffer2 b)
+        {
+            Result.RosSerialize(ref b);
+        }
+        
+        public void RosValidate()
+        {
+            if (Result is null) BuiltIns.ThrowNullReference();
+            Result.RosValidate();
+        }
+    
+        public int RosMessageLength => 0 + Result.RosMessageLength;
+        
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        
+        public void AddRos2MessageLength(ref int c)
+        {
+            Result.AddRos2MessageLength(ref c);
+        }
+    
+        public override string ToString() => Extensions.ToString(this);
+    }
+}

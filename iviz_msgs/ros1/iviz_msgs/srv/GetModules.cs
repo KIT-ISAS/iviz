@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class GetModules : IService
     {
         /// Request message.
-        [DataMember] public GetModulesRequest Request { get; set; }
+        [DataMember] public GetModulesRequest Request;
         
         /// Response message.
-        [DataMember] public GetModulesResponse Response { get; set; }
+        [DataMember] public GetModulesResponse Response;
         
         /// Empty constructor.
         public GetModules()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/GetModules";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "854d12ba02315a7b73d8ac45d1a68e74";

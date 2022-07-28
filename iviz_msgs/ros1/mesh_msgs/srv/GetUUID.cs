@@ -6,10 +6,10 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class GetUUID : IService
     {
         /// Request message.
-        [DataMember] public GetUUIDRequest Request { get; set; }
+        [DataMember] public GetUUIDRequest Request;
         
         /// Response message.
-        [DataMember] public GetUUIDResponse Response { get; set; }
+        [DataMember] public GetUUIDResponse Response;
         
         /// Empty constructor.
         public GetUUID()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         public const string ServiceType = "mesh_msgs/GetUUID";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "18ad0215778d252d8f14959901273e8d";

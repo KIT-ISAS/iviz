@@ -6,10 +6,10 @@ namespace Iviz.Msgs.SensorMsgs
     public sealed class SetCameraInfo : IService
     {
         /// Request message.
-        [DataMember] public SetCameraInfoRequest Request { get; set; }
+        [DataMember] public SetCameraInfoRequest Request;
         
         /// Response message.
-        [DataMember] public SetCameraInfoResponse Response { get; set; }
+        [DataMember] public SetCameraInfoResponse Response;
         
         /// Empty constructor.
         public SetCameraInfo()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         public const string ServiceType = "sensor_msgs/SetCameraInfo";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "bef1df590ed75ed1f393692395e15482";

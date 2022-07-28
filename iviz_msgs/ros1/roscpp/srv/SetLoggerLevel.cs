@@ -6,10 +6,10 @@ namespace Iviz.Msgs.Roscpp
     public sealed class SetLoggerLevel : IService
     {
         /// Request message.
-        [DataMember] public SetLoggerLevelRequest Request { get; set; }
+        [DataMember] public SetLoggerLevelRequest Request;
         
         /// Response message.
-        [DataMember] public SetLoggerLevelResponse Response { get; set; }
+        [DataMember] public SetLoggerLevelResponse Response;
         
         /// Empty constructor.
         public SetLoggerLevel()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         public const string ServiceType = "roscpp/SetLoggerLevel";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "51da076440d78ca1684d36c868df61ea";

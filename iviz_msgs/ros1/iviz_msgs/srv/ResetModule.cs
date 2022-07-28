@@ -6,10 +6,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class ResetModule : IService
     {
         /// Request message.
-        [DataMember] public ResetModuleRequest Request { get; set; }
+        [DataMember] public ResetModuleRequest Request;
         
         /// Response message.
-        [DataMember] public ResetModuleResponse Response { get; set; }
+        [DataMember] public ResetModuleResponse Response;
         
         /// Empty constructor.
         public ResetModule()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         public const string ServiceType = "iviz_msgs/ResetModule";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "7b2e77c05fb1342786184d949a9f06ed";

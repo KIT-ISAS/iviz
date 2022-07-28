@@ -6,10 +6,10 @@ namespace Iviz.Msgs.OctomapMsgs
     public sealed class BoundingBoxQuery : IService
     {
         /// Request message.
-        [DataMember] public BoundingBoxQueryRequest Request { get; set; }
+        [DataMember] public BoundingBoxQueryRequest Request;
         
         /// Response message.
-        [DataMember] public BoundingBoxQueryResponse Response { get; set; }
+        [DataMember] public BoundingBoxQueryResponse Response;
         
         /// Empty constructor.
         public BoundingBoxQuery()
@@ -38,6 +38,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         public const string ServiceType = "octomap_msgs/BoundingBoxQuery";
+        
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "93aa3d73b866f04880927745f4aab303";
