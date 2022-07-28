@@ -84,6 +84,16 @@ namespace Iviz.Ros
             }
         }
 
+        public static bool IsRosVersionSupported(RosVersion rosVersion)
+        {
+            return rosVersion switch
+            {
+                RosVersion.ROS1 => true,
+                RosVersion.ROS2 => Settings.IsMacOS,
+                _ => false
+            };
+        }
+
         public IRosClient Client => client ?? throw new InvalidOperationException("Client not connected");
 
         public Uri? MasterUri

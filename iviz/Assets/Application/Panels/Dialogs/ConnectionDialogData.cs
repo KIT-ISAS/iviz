@@ -8,6 +8,7 @@ using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Tools;
 using UnityEngine;
+using Logger = Iviz.Tools.Logger;
 
 namespace Iviz.App
 {
@@ -200,7 +201,16 @@ namespace Iviz.App
                     ? TryCreateMasterAsync()
                     : TryDisposeMasterAsync();
             };
-            panel.RosVersion1.Clicked += () => RosVersion = RosVersion.ROS2;
+            panel.RosVersion1.Clicked += () =>
+            {
+                if (!RoslibConnection.IsRosVersionSupported(RosVersion.ROS2))
+                {
+                    RosLogger.Internal("ROS2 is not supported on this platform.");
+                    return;
+                }
+
+                RosVersion = RosVersion.ROS2;
+            };
             panel.RosVersion2.Clicked += () => RosVersion = RosVersion.ROS1;
         }
 
