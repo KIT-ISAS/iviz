@@ -249,7 +249,6 @@ public sealed class Ros2Client : IRosClient
             : GetSubscriberStatisticsCoreAsync();
     }
 
-    
     async ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsCoreAsync()
     {
         var subscribers = subscribersByTopic.Values.ToArray();
