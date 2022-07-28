@@ -142,4 +142,29 @@ int32_t native_rcl_count_publishers(void *node_handle, char *topic_name, int32_t
 int32_t native_rcl_count_subscribers(void *node_handle, char *topic_name, int32_t *count);
 
 const void *native_rcl_get_graph_guard_condition(void *node_handle);
+
+
+
+int32_t native_rcl_create_client_handle(void **client_handle,
+                                        void *node_handle,
+                                        const char *service,
+                                        const char *type);
+
+int32_t native_rcl_destroy_client_handle(void *client_handle, void *node_handle);
+
+int32_t native_rcl_send_request(void *client_handle, void* serialized_message_handle, int64_t *sequence_id);
+
+int32_t native_rcl_take_response(void *client_handle, void* serialized_message_handle, void *request_header);
+
+int32_t native_rcl_create_service_handle(void **service_handle,
+                                         void *node_handle,
+                                         const char *service,
+                                         const char *type);
+
+int32_t native_rcl_destroy_service_handle(void *service_handle, void *node_handle);
+
+int32_t native_rcl_send_response(void *service_handle, void* serialized_message_handle, const void *request_header_handle);
+
+int32_t native_rcl_take_request(void *service_handle, void* serialized_message_handle, void *request_header_handle);
+
 }

@@ -42,7 +42,7 @@ public sealed class RosClient : IRosClient
     readonly ConcurrentDictionary<string, IRos1Subscriber> subscribersByTopic = new();
     readonly ConcurrentDictionary<string, IRos1Publisher> publishersByTopic = new();
     readonly ConcurrentDictionary<string, ServiceCaller> subscribedServicesByName = new();
-    readonly ConcurrentDictionary<string, ServiceRequestManager> publishedServicesByName = new();
+    readonly ConcurrentDictionary<string, ServiceListener> publishedServicesByName = new();
     readonly string namespacePrefix;
 
     RosNodeServer? listener;
@@ -1766,7 +1766,7 @@ public sealed class RosClient : IRosClient
 
         ValueTask Callback(IService service) => callback((T)service);
 
-        var advertisedService = new ServiceRequestManager(serviceInfo, CallerUri.Host, Callback);
+        var advertisedService = new ServiceListener(serviceInfo, CallerUri.Host, Callback);
 
         publishedServicesByName.TryAdd(resolvedServiceName, advertisedService);
 

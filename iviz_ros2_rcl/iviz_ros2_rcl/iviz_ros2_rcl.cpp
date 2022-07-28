@@ -24,12 +24,37 @@
 #include <rcutils/logging.h>
 
 #include <rosidl_runtime_c/string_functions.h>
-#include <rmw/rmw.h>
+
+#include "fastcdr/Cdr.h"
+#include "fastcdr/FastBuffer.h"
+#include "fastdds/rtps/common/WriteParams.h"
+
+#include <cassert>
+#include "rmw/rmw.h"
+#include "rmw/error_handling.h"
+#include "rmw/impl/cpp/macros.hpp"
+#include "rmw/types.h"
+#include "rmw_fastrtps_cpp/identifier.hpp"
+#include "rmw_fastrtps_shared_cpp/custom_client_info.hpp"
+#include "rmw_fastrtps_shared_cpp/custom_service_info.hpp"
+#include "rmw_fastrtps_shared_cpp/guid_utils.hpp"
+#include "rmw_fastrtps_shared_cpp/rmw_common.hpp"
+#include "rmw_fastrtps_shared_cpp/TypeSupport.hpp"
 
 #include <std_msgs/msg/string.h>
 #include <std_msgs/msg/color_rgba.h>
+
 #include <tf2_msgs/msg/tf_message.h>
+
 #include <rcl_interfaces/msg/log.h>
+
+#include <rcl_interfaces/srv/describe_parameters.h>
+#include <rcl_interfaces/srv/get_parameter_types.h>
+#include <rcl_interfaces/srv/get_parameters.h>
+#include <rcl_interfaces/srv/list_parameters.h>
+#include <rcl_interfaces/srv/set_parameters.h>
+#include <rcl_interfaces/srv/set_parameters_atomically.h>
+
 
 #include <geometry_msgs/msg/transform.h>
 #include <geometry_msgs/msg/transform_stamped.h>
@@ -113,6 +138,19 @@ static std::map<std::string, rosidl_message_type_support_t*> default_types
     ENTRY(visualization_msgs, InteractiveMarkerFeedback),
     ENTRY(visualization_msgs, InteractiveMarkerInit),
     ENTRY(visualization_msgs, InteractiveMarkerUpdate),
+};
+
+#define SRVTYPE(a, b) (rosidl_service_type_support_t*) ROSIDL_GET_SRV_TYPE_SUPPORT(a, srv, b)
+#define SRVENTRY(a, b) {#a "/" #b, SRVTYPE(a, b)}
+
+static std::map<std::string, rosidl_service_type_support_t*> default_service_types
+{
+    SRVENTRY(rcl_interfaces, DescribeParameters),
+    SRVENTRY(rcl_interfaces, GetParameterTypes),
+    SRVENTRY(rcl_interfaces, GetParameters),
+    SRVENTRY(rcl_interfaces, ListParameters),
+    SRVENTRY(rcl_interfaces, SetParameters),
+    SRVENTRY(rcl_interfaces, SetParametersAtomically),
 };
 
 extern "C"
@@ -550,7 +588,7 @@ int32_t native_rcl_get_node_names(void *context_handle, void *node_handle,
     {
         IgnoreRet(rcutils_string_array_fini(&node_names));
         IgnoreRet(rcutils_string_array_fini(&node_namespaces));
-
+        
         *node_names_handle = nullptr;
         *node_namespaces_handle = nullptr;
         *num_node_names = 0;
@@ -694,7 +732,7 @@ int32_t native_rcl_get_service_names_and_types(void *context_handle, void *node_
     {
         context->strings1.push_back(topic_names_and_types.names.data[i]);
         context->arrays1.push_back(context->strings1.back().data());
-
+        
         rcutils_string_array_t *nat = &topic_names_and_types.types[i];
         const char *type = nat->size != 0 ? nat->data[0] : "";
         
@@ -755,7 +793,7 @@ int32_t native_rcl_get_service_names_and_types_by_node(void *context_handle, voi
     {
         context->strings1.push_back(topic_names_and_types.names.data[i]);
         context->arrays1.push_back(context->strings1.back().data());
-
+        
         rcutils_string_array_t *nat = &topic_names_and_types.types[i];
         const char *type = nat->size != 0 ? nat->data[0] : "";
         
@@ -814,7 +852,7 @@ int32_t native_rcl_get_publishers_info_by_topic(void *context_handle, void *node
     context->arrays3.clear();
     context->gids.clear();
     context->profiles.clear();
-
+    
     context->strings1.reserve(topic_infos.size);
     context->arrays1.reserve(topic_infos.size);
     context->strings2.reserve(topic_infos.size);
@@ -823,7 +861,7 @@ int32_t native_rcl_get_publishers_info_by_topic(void *context_handle, void *node
     context->arrays3.reserve(topic_infos.size);
     context->gids.reserve(topic_infos.size);
     context->profiles.reserve(topic_infos.size);
-
+    
     
     for (int i = 0; i < topic_infos.size; i++)
     {
@@ -960,6 +998,322 @@ const void *native_rcl_get_graph_guard_condition(void *node_handle)
     rcl_node_t *node = (rcl_node_t *)node_handle;
     return rcl_node_get_graph_guard_condition(node);
 }
+
+int32_t native_rcl_create_client_handle(void **client_handle,
+                                        void *node_handle,
+                                        const char *service,
+                                        const char *type)
+{
+    rcl_node_t *node = (rcl_node_t *)node_handle;
+    
+    auto it{ default_service_types.find( type ) };
+    
+    if (it == default_service_types.end())
+    {
+        return -1;
+    }
+    
+    const rosidl_service_type_support_t *ts = it->second;
+    
+    rcl_client_t *client = (rcl_client_t *)malloc(sizeof(rcl_client_t));
+    *client = rcl_get_zero_initialized_client();
+    
+    rcl_client_options_t options = rcl_client_get_default_options();
+    rcl_ret_t ret = rcl_client_init(client, node, ts, service, &options);
+    if (ret != RCL_RET_OK)
+    {
+        return ret;
+    }
+    
+    *client_handle = client;
+    return RCL_RET_OK;
+}
+
+int32_t native_rcl_destroy_client_handle(void *client_handle, void *node_handle)
+{
+    rcl_client_t *client = (rcl_client_t *)client_handle;
+    rcl_node_t *node = (rcl_node_t *)node_handle;
+    rcl_ret_t ret = rcl_client_fini(client, node);
+    free(client_handle);
+    return ret;
+}
+
+int32_t native_rcl_send_request(void *client_handle, void* serialized_message_handle, int64_t *sequence_id)
+{
+    rcl_client_t *rcl_client = (rcl_client_t *)client_handle;
+    rcl_serialized_message_t *serialized_message = (rcl_serialized_message_t *)serialized_message_handle;
+    
+    const char *identifier = eprosima_fastrtps_identifier;
+    
+    rmw_client_t *client = rcl_client_get_rmw_handle(rcl_client);
+    
+    RMW_CHECK_ARGUMENT_FOR_NULL(client, RMW_RET_INVALID_ARGUMENT);
+    RMW_CHECK_TYPE_IDENTIFIERS_MATCH(client,
+                                     client->implementation_identifier, identifier,
+                                     return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+    RMW_CHECK_ARGUMENT_FOR_NULL(sequence_id, RMW_RET_INVALID_ARGUMENT);
+    RMW_CHECK_ARGUMENT_FOR_NULL(serialized_message_handle, RMW_RET_INVALID_ARGUMENT);
+    
+    rmw_ret_t returnedValue = RMW_RET_ERROR;
+    
+    CustomClientInfo* info = static_cast<CustomClientInfo *>(client->data);
+    assert(info);
+    
+    eprosima::fastrtps::rtps::WriteParams wparams;
+    rmw_fastrtps_shared_cpp::SerializedData data;
+    data.is_cdr_buffer = true;
+    data.data = serialized_message->buffer;
+    data.impl = nullptr;
+    wparams.related_sample_identity().writer_guid() = info->reader_guid_;
+    if (info->request_publisher_->write(&data, wparams))
+    {
+        returnedValue = RMW_RET_OK;
+        *sequence_id = ((int64_t)wparams.sample_identity().sequence_number().high) << 32 |
+        wparams.sample_identity().sequence_number().low;
+    }
+    else
+    {
+        RMW_SET_ERROR_MSG("cannot publish data");
+    }
+    
+    return returnedValue;
+}
+
+int32_t native_rcl_take_response(void *client_handle, void* serialized_message_handle, void *request_header_handle)
+{
+    rcl_client_t *rcl_client = (rcl_client_t *)client_handle;
+    rcl_serialized_message_t *serialized_message = (rcl_serialized_message_t *)serialized_message_handle;
+    
+    const char *identifier = eprosima_fastrtps_identifier;
+    
+    rmw_client_t *client = rcl_client_get_rmw_handle(rcl_client);
+    
+    
+    RMW_CHECK_ARGUMENT_FOR_NULL(client, RMW_RET_INVALID_ARGUMENT);
+    RMW_CHECK_TYPE_IDENTIFIERS_MATCH(client, client->implementation_identifier, identifier,
+                                     return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+    RMW_CHECK_ARGUMENT_FOR_NULL(request_header_handle, RMW_RET_INVALID_ARGUMENT);
+    RMW_CHECK_ARGUMENT_FOR_NULL(serialized_message_handle, RMW_RET_INVALID_ARGUMENT);
+    
+    CustomClientInfo* info = static_cast<CustomClientInfo *>(client->data);
+    assert(info);
+    
+    CustomClientResponse response;
+    
+    if (info->listener_->getResponse(response))
+    {
+        auto buffer_size = static_cast<size_t>(response.buffer_->getBufferSize());
+        if (serialized_message->buffer_capacity < buffer_size)
+        {
+            auto ret = rmw_serialized_message_resize(serialized_message, buffer_size);
+            if (ret != RMW_RET_OK)
+            {
+                return ret;  // Error message already set
+            }
+        }
+        
+        serialized_message->buffer_length = buffer_size;
+        memcpy(serialized_message->buffer, response.buffer_->getBuffer(), serialized_message->buffer_length);
+        
+        
+        rmw_service_info_t *request_header = (rmw_service_info_t*) request_header_handle;
+        request_header->source_timestamp = response.sample_info_.sourceTimestamp.to_ns();
+        request_header->received_timestamp = response.sample_info_.receptionTimestamp.to_ns();
+        request_header->request_id.sequence_number =
+        ((int64_t)response.sample_identity_.sequence_number().high) <<
+        32 | response.sample_identity_.sequence_number().low;
+        
+        return RMW_RET_OK;
+        /*
+         auto raw_type_support = dynamic_cast<rmw_fastrtps_shared_cpp::TypeSupport *>(info->response_type_support_.get());
+         eprosima::fastcdr::Cdr deser(*response.buffer_,
+         eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
+         eprosima::fastcdr::Cdr::DDS_CDR);
+         if (raw_type_support->deserializeROSmessage(deser, ros_response, info->response_type_support_impl_))
+         {
+         request_header->source_timestamp = response.sample_info_.source_timestamp.to_ns();
+         request_header->received_timestamp = response.sample_info_.reception_timestamp.to_ns();
+         request_header->request_id.sequence_number =
+         ((int64_t)response.sample_identity_.sequence_number().high) <<
+         32 | response.sample_identity_.sequence_number().low;
+         
+         return RMW_RET_OK;
+         }
+         */
+    }
+    
+    return RCL_RET_CLIENT_TAKE_FAILED;
+}
+
+int32_t native_rcl_create_service_handle(void **service_handle,
+                                         void *node_handle,
+                                         const char *service,
+                                         const char *type)
+{
+    rcl_node_t *node = (rcl_node_t *)node_handle;
+    
+    auto it{ default_service_types.find( type ) };
+    
+    if (it == default_service_types.end())
+    {
+        return -1;
+    }
+    
+    const rosidl_service_type_support_t *ts = it->second;
+    
+    rcl_service_t *server = (rcl_service_t *)malloc(sizeof(rcl_service_t));
+    *server = rcl_get_zero_initialized_service();
+    
+    rcl_service_options_t options = rcl_service_get_default_options();
+    rcl_ret_t ret = rcl_service_init(server, node, ts, service, &options);
+    if (ret != RCL_RET_OK)
+    {
+        return ret;
+    }
+    
+    *service_handle = server;
+    return RCL_RET_OK;
+}
+
+int32_t native_rcl_destroy_service_handle(void *service_handle, void *node_handle)
+{
+    rcl_service_t *service = (rcl_service_t *)service_handle;
+    rcl_node_t *node = (rcl_node_t *)node_handle;
+    rcl_ret_t ret = rcl_service_fini(service, node);
+    free(service_handle);
+    return ret;
+}
+
+
+int32_t native_rcl_send_response(void *service_handle, void* serialized_message_handle, const void *request_header_handle)
+{
+    rcl_service_t *rcl_service = (rcl_service_t *)service_handle;
+    rcl_serialized_message_t *serialized_message = (rcl_serialized_message_t *)serialized_message_handle;
+    
+    const char *identifier = eprosima_fastrtps_identifier;
+    
+    rmw_service_t *service = rcl_service_get_rmw_handle(rcl_service);
+    
+    
+    RMW_CHECK_ARGUMENT_FOR_NULL(service, RMW_RET_INVALID_ARGUMENT);
+    RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+                                     service,
+                                     service->implementation_identifier, identifier,
+                                     return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+    RMW_CHECK_ARGUMENT_FOR_NULL(request_header_handle, RMW_RET_INVALID_ARGUMENT);
+    RMW_CHECK_ARGUMENT_FOR_NULL(serialized_message, RMW_RET_INVALID_ARGUMENT);
+    
+    rmw_ret_t returnedValue = RMW_RET_ERROR;
+    
+    auto info = static_cast<CustomServiceInfo *>(service->data);
+    assert(info);
+    
+    rmw_request_id_t *request_header = (rmw_request_id_t*) request_header_handle;
+    eprosima::fastrtps::rtps::WriteParams wparams;
+    rmw_fastrtps_shared_cpp::copy_from_byte_array_to_fastrtps_guid(request_header->writer_guid,
+                                                                   &wparams.related_sample_identity().writer_guid());
+    wparams.related_sample_identity().sequence_number().high =
+    (int32_t)((request_header->sequence_number & 0xFFFFFFFF00000000) >> 32);
+    wparams.related_sample_identity().sequence_number().low =
+    (int32_t)(request_header->sequence_number & 0xFFFFFFFF);
+    
+    // TODO(MiguelCompany) The following block is a workaround for the race on the
+    // discovery of services. It is (ab)using a related_sample_identity on the request
+    // with the GUID of the response reader, so we can wait here for it to be matched to
+    // the server response writer. In the future, this should be done with the mechanism
+    // explained on OMG DDS-RPC 1.0 spec under section 7.6.2 (Enhanced Service Mapping)
+    
+    // According to the list of possible entity kinds in section 9.3.1.2 of RTPS
+    // readers will have this bit on, while writers will not. We use this to know
+    // if the related guid is the request writer or the response reader.
+    constexpr uint8_t entity_id_is_reader_bit = 0x04;
+    const eprosima::fastrtps::rtps::GUID_t & related_guid =
+    wparams.related_sample_identity().writer_guid();
+    if ((related_guid.entityId.value[3] & entity_id_is_reader_bit) != 0)
+    {
+        // Related guid is a reader, so it is the response subscription guid.
+        // Wait for the response writer to be matched with it.
+        auto listener = static_cast<PatchedServicePubListener *>(info->pub_listener_);
+        client_present_t ret = listener->check_for_subscription(related_guid);
+        if (ret == client_present_t::GONE)
+        {
+            return RMW_RET_OK;
+        }
+        else if (ret == client_present_t::MAYBE)
+        {
+            RMW_SET_ERROR_MSG("client will not receive response");
+            return RMW_RET_TIMEOUT;
+        }
+    }
+    
+    rmw_fastrtps_shared_cpp::SerializedData data;
+    data.is_cdr_buffer = true;
+    data.data = serialized_message->buffer;
+    data.impl = nullptr;
+    if (info->response_publisher_->write(&data, wparams))
+    {
+        returnedValue = RMW_RET_OK;
+    }
+    else
+    {
+        RMW_SET_ERROR_MSG("cannot publish data");
+    }
+    
+    return returnedValue;
+}
+
+int32_t native_rcl_take_request(void *service_handle, void* serialized_message_handle, void *request_header_handle)
+{
+    rcl_service_t *rcl_service = (rcl_service_t *)service_handle;
+    rcl_serialized_message_t *serialized_message = (rcl_serialized_message_t *)serialized_message_handle;
+    
+    const char *identifier = eprosima_fastrtps_identifier;
+    
+    rmw_service_t *service = rcl_service_get_rmw_handle(rcl_service);
+    
+    RMW_CHECK_ARGUMENT_FOR_NULL(service, RMW_RET_INVALID_ARGUMENT);
+    RMW_CHECK_TYPE_IDENTIFIERS_MATCH(service,
+                                     service->implementation_identifier, identifier,
+                                     return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+    RMW_CHECK_ARGUMENT_FOR_NULL(request_header_handle, RMW_RET_INVALID_ARGUMENT);
+    RMW_CHECK_ARGUMENT_FOR_NULL(serialized_message_handle, RMW_RET_INVALID_ARGUMENT);
+    
+    auto info = static_cast<CustomServiceInfo *>(service->data);
+    assert(info);
+    
+    CustomServiceRequest request = info->listener_->getRequest();
+    
+    if (request.buffer_ != nullptr)
+    {
+        auto buffer_size = static_cast<size_t>(request.buffer_->getBufferSize());
+        if (serialized_message->buffer_capacity < buffer_size)
+        {
+            auto ret = rmw_serialized_message_resize(serialized_message, buffer_size);
+            if (ret != RMW_RET_OK)
+            {
+                return ret;  // Error message already set
+            }
+        }
+        
+        serialized_message->buffer_length = buffer_size;
+        memcpy(serialized_message->buffer, request.buffer_->getBuffer(), serialized_message->buffer_length);
+        
+        rmw_service_info_t *request_header = (rmw_service_info_t*) request_header_handle;
+        rmw_fastrtps_shared_cpp::copy_from_fastrtps_guid_to_byte_array(request.sample_identity_.writer_guid(),
+                                                                       request_header->request_id.writer_guid);
+        request_header->request_id.sequence_number =
+        ((int64_t)request.sample_identity_.sequence_number().high) <<
+        32 | request.sample_identity_.sequence_number().low;
+        request_header->source_timestamp = request.sample_info_.sourceTimestamp.to_ns();
+        request_header->received_timestamp = request.sample_info_.receptionTimestamp.to_ns();
+        
+        delete request.buffer_;
+        return RMW_RET_OK;
+    }
+    
+    return RCL_RET_SERVICE_TAKE_FAILED;
+}
+
 
 
 void default_handler(int severity, const char *name, rcutils_time_point_value_t timestamp, const char *message)

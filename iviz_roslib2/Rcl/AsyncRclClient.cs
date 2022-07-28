@@ -39,6 +39,36 @@ internal sealed class AsyncRclClient : TaskExecutor
         Start();
     }
     
+    protected override void Signal()
+    {
+        guard.Trigger();
+    }
+
+    protected override void Wait()
+    {
+        if (subscribersChanged)
+        {
+            cachedSubscriberHandles = subscribers.Select(tuple => tuple.subscriber.Handle).ToArray();
+            subscribersChanged = false;
+        }
+
+        waitSet.WaitFor(cachedSubscriberHandles, cachedGuardHandles,
+            out var triggeredSubscriptions, out var triggeredGuards);
+
+        for (int i = 0; i < triggeredSubscriptions.Length; i++)
+        {
+            if (triggeredSubscriptions[i] != IntPtr.Zero)
+            {
+                subscribers[i].signalizable.Signal();
+            }
+        }
+
+        if (triggeredGuards[1] != IntPtr.Zero)
+        {
+            GraphChangedTicks = DateTime.Now.Ticks;
+        }
+    }    
+    
     public Task<RclSubscriber> SubscribeAsync(string topic, string type, ISignalizable signalizable,
         RosTransportHint transportHint,
         CancellationToken token)
@@ -196,36 +226,6 @@ internal sealed class AsyncRclClient : TaskExecutor
     public Task UnadvertiseAsync(RclPublisher publisher, CancellationToken token)
     {
         return Post(publisher.Dispose, token);
-    }
-
-    protected override void Signal()
-    {
-        guard.Trigger();
-    }
-
-    protected override void Wait()
-    {
-        if (subscribersChanged)
-        {
-            cachedSubscriberHandles = subscribers.Select(tuple => tuple.subscriber.Handle).ToArray();
-            subscribersChanged = false;
-        }
-
-        waitSet.WaitFor(cachedSubscriberHandles, cachedGuardHandles,
-            out var triggeredSubscriptions, out var triggeredGuards);
-
-        for (int i = 0; i < triggeredSubscriptions.Length; i++)
-        {
-            if (triggeredSubscriptions[i] != IntPtr.Zero)
-            {
-                subscribers[i].signalizable.Signal();
-            }
-        }
-
-        if (triggeredGuards[1] != IntPtr.Zero)
-        {
-            GraphChangedTicks = DateTime.Now.Ticks;
-        }
     }
 
     public override async ValueTask DisposeAsync(CancellationToken token)

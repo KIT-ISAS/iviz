@@ -11,7 +11,7 @@ using Nito.AsyncEx;
 
 namespace Iviz.Roslib;
 
-internal sealed class ServiceRequestManager
+internal sealed class ServiceListener
 {
     readonly Func<IService, ValueTask> callback;
     readonly HashSet<ServiceRequest> requests = new();
@@ -24,7 +24,7 @@ internal sealed class ServiceRequestManager
 
     bool disposed;
 
-    public ServiceRequestManager(ServiceInfo serviceInfo, string host, Func<IService, ValueTask> callback)
+    public ServiceListener(ServiceInfo serviceInfo, string host, Func<IService, ValueTask> callback)
     {
         this.serviceInfo = serviceInfo;
         this.callback = callback;
@@ -122,6 +122,6 @@ internal sealed class ServiceRequestManager
 
     public override string ToString()
     {
-        return $"[{nameof(ServiceRequestManager)} {Service} [{ServiceType}] at {Uri}]";
+        return $"[{nameof(ServiceListener)} {Service} [{ServiceType}] at {Uri}]";
     }
 }

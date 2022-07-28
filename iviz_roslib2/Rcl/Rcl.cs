@@ -108,7 +108,7 @@ internal static class Rcl
 
     [DllImport(Library, EntryPoint = "native_rcl_create_subscription_handle")]
     public static extern int CreateSubscriptionHandle(out IntPtr subscriptionHandle, IntPtr nodeHandle,
-        [MarshalAs(UnmanagedType.LPUTF8Str)] string topic, 
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string topic,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string type,
         in QosProfile profile);
 
@@ -193,4 +193,36 @@ internal static class Rcl
 
     [DllImport(Library, EntryPoint = "native_rcl_get_graph_guard_condition")]
     public static extern IntPtr GetGraphGuardCondition(IntPtr nodeHandle);
+
+
+    [DllImport(Library, EntryPoint = "native_rcl_create_client_handle")]
+    public static extern int CreateClientHandle(out IntPtr serviceClientHandle, IntPtr nodeHandle,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string service,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string type);
+
+    [DllImport(Library, EntryPoint = "native_rcl_destroy_client_handle")]
+    public static extern int DestroyClientHandle(IntPtr clientHandle, IntPtr nodeHandle);
+
+    [DllImport(Library, EntryPoint = "native_rcl_send_request")]
+    public static extern int SendRequest(IntPtr clientHandle, IntPtr serializedMessageHandle, out long sequenceId);
+
+    [DllImport(Library, EntryPoint = "native_rcl_take_response")]
+    public static extern int TakeResponse(IntPtr clientHandle, IntPtr serializedMessageHandle,
+        out RmwServiceInfo requestHeader);
+
+    [DllImport(Library, EntryPoint = "native_rcl_create_service_handle")]
+    public static extern int CreateServiceHandle(out IntPtr serviceHandle, IntPtr nodeHandle,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string service,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string type);
+
+    [DllImport(Library, EntryPoint = "native_rcl_destroy_service_handle")]
+    public static extern int DestroyServiceHandle(IntPtr serviceHandle, IntPtr nodeHandle);
+
+    [DllImport(Library, EntryPoint = "native_rcl_send_response")]
+    public static extern int SendResponse(IntPtr serviceHandle, IntPtr serializedMessageHandle,
+        in RmwRequestId requestHeaderHandle);
+
+    [DllImport(Library, EntryPoint = "native_rcl_take_request")]
+    public static extern int TakeRequest(IntPtr serviceHandle, IntPtr serializedMessageHandle,
+        out RmwServiceInfo requestHeaderHandle);
 }
