@@ -16,7 +16,7 @@ internal sealed class RclWaitSet : IDisposable
         Check(Rcl.WaitSetInit(contextHandle, waitSetHandle, maxSubscriptions, maxGuardConditions, 0, 0, 0, 0));
     }
 
-    public void WaitFor(
+    public bool WaitFor(
         ReadOnlySpan<IntPtr> subscriptions, ReadOnlySpan<IntPtr> guards,
         out ReadOnlySpan<IntPtr> triggeredSubscriptions, out ReadOnlySpan<IntPtr> triggeredGuards)
     {
@@ -25,10 +25,8 @@ internal sealed class RclWaitSet : IDisposable
             throw new ObjectDisposedException(ToString());
         }
 
-        IntPtr dummy = IntPtr.Zero;
-
-        ref readonly IntPtr subscriptionHandles = ref (subscriptions.Length != 0 ? ref subscriptions[0] : ref dummy);
-        ref readonly IntPtr guardHandles = ref (guards.Length != 0 ? ref guards[0] : ref dummy);
+        ref readonly IntPtr subscriptionHandles = ref MemoryMarshal.GetReference(subscriptions);
+        ref readonly IntPtr guardHandles = ref MemoryMarshal.GetReference(guards);
 
         Check(Rcl.WaitClearAndAdd(waitSetHandle,
             in subscriptionHandles, subscriptions.Length,
@@ -43,16 +41,16 @@ internal sealed class RclWaitSet : IDisposable
             case RclRet.Timeout:
                 triggeredSubscriptions = default;
                 triggeredGuards = default;
-                return;
+                return false;
             case RclRet.Ok:
                 triggeredSubscriptions = Rcl.CreateSpan<IntPtr>(changedSubscriptionHandles, subscriptions.Length);
                 triggeredGuards = Rcl.CreateSpan<IntPtr>(changedGuardHandles, guards.Length);
-                break;
+                return true;
             default:
                 Check(ret); // throws
                 triggeredSubscriptions = default;
                 triggeredGuards = default;
-                break;
+                return false;
         }
     }
 

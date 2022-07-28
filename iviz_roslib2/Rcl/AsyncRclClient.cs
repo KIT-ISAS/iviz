@@ -19,26 +19,26 @@ internal sealed class AsyncRclClient : TaskExecutor
 
     bool disposed;
     bool subscribersChanged;
-    
+
     public long GraphChangedTicks { get; private set; }
 
     public string FullName => client.FullName;
 
     public static bool IsTypeSupported(string message) => Rcl.IsTypeSupported(message);
-    
+
     public AsyncRclClient(string name, string @namespace = "")
     {
         client = new RclClient(name, @namespace);
         waitSet = client.CreateWaitSet(32, 2);
         guard = client.CreateGuardCondition();
 
-        var graphGuardHandle = client.GetGraphGuardCondition(); 
+        var graphGuardHandle = client.GetGraphGuardCondition();
 
         cachedGuardHandles = new[] { guard.Handle, graphGuardHandle };
 
         Start();
     }
-    
+
     public Task<RclSubscriber> SubscribeAsync(string topic, string type, ISignalizable signalizable,
         RosTransportHint transportHint,
         CancellationToken token)
@@ -127,7 +127,7 @@ internal sealed class AsyncRclClient : TaskExecutor
                     ? Array.Empty<TopicTuple>()
                     : topics
                         .Select(topic => new TopicTuple(topic.Topic, GetSubscribers(topic.Topic)))
-                        .Where(tuple => tuple.Members.Length != 0)
+                        .Where(static tuple => tuple.Members.Length != 0)
                         .ToArray();
 
             var topicPublishers =
@@ -135,7 +135,7 @@ internal sealed class AsyncRclClient : TaskExecutor
                     ? Array.Empty<TopicTuple>()
                     : topics
                         .Select(topic => new TopicTuple(topic.Topic, GetPublishers(topic.Topic)))
-                        .Where(tuple => tuple.Members.Length != 0)
+                        .Where(static tuple => tuple.Members.Length != 0)
                         .ToArray();
 
             var serviceProviders = GetProviders(client);
@@ -145,14 +145,10 @@ internal sealed class AsyncRclClient : TaskExecutor
             static string NodeToString(EndpointInfo info) => info.NodeName.ToString();
 
             string[] GetSubscribers(string topic) =>
-                client.GetSubscriberInfo(topic)
-                    .Select(NodeToString)
-                    .ToArray();
+                client.GetSubscriberInfo(topic).Select(NodeToString).ToArray();
 
             string[] GetPublishers(string topic) =>
-                client.GetPublisherInfo(topic)
-                    .Select(NodeToString)
-                    .ToArray();
+                client.GetPublisherInfo(topic).Select(NodeToString).ToArray();
 
             static TopicTuple[] GetProviders(RclClient client)
             {
@@ -211,8 +207,13 @@ internal sealed class AsyncRclClient : TaskExecutor
             subscribersChanged = false;
         }
 
-        waitSet.WaitFor(cachedSubscriberHandles, cachedGuardHandles,
+        bool success = waitSet.WaitFor(cachedSubscriberHandles, cachedGuardHandles,
             out var triggeredSubscriptions, out var triggeredGuards);
+
+        if (!success)
+        {
+            return;
+        }
 
         for (int i = 0; i < triggeredSubscriptions.Length; i++)
         {
