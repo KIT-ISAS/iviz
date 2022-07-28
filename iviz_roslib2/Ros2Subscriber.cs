@@ -60,6 +60,7 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
         }
 
         var receiverInfo = new Ros2Receiver(Topic, TopicType);
+        var rclSubscriber = Subscriber;
 
         while (true)
         {
@@ -69,7 +70,7 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
 
         void ProcessMessages()
         {
-            while (Subscriber.TryTakeMessage(out var span, out receiverInfo.guid))
+            while (rclSubscriber.TryTakeMessage(out var span, out receiverInfo.guid))
             {
                 if (IsPaused) continue;
                 var msg = ReadBuffer2.Deserialize(generator, span);

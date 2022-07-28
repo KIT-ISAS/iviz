@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Roslib;
 
@@ -18,10 +19,17 @@ internal static class Rcl
         return Marshal.PtrToStringUTF8(ptr) ?? "";
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static unsafe Span<T> CreateSpan<T>(IntPtr ptr, int size) where T : unmanaged
     {
         return new Span<T>(ptr.ToPointer(), size);
     }
+
+    public static unsafe ReadOnlySpan<byte> CreateReadOnlySpan(IntPtr ptr, int size)
+    {
+        return new ReadOnlySpan<byte>(ptr.ToPointer(), size);
+    }
+
 
     public static void Check(IntPtr context, int result)
     {

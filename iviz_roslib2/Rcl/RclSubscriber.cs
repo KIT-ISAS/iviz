@@ -57,7 +57,7 @@ internal sealed class RclSubscriber : IDisposable
         {
             case RclRet.Ok:
                 const int headerSize = 4;
-                span = Rcl.CreateSpan<byte>(ptr, length)[headerSize..];
+                span = Rcl.CreateReadOnlySpan(ptr + headerSize, length - 4);
                 return true;
             case RclRet.SubscriptionTakeFailed:
                 span = default;
