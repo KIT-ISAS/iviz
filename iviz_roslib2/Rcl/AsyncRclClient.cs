@@ -12,12 +12,14 @@ internal sealed class AsyncRclClient : TaskExecutor
     readonly RclWaitSet waitSet;
     readonly RclGuardCondition guard;
 
-    readonly List<(RclSubscriber subscriber, ISignalizable signalizable)> subscribers = new();
-    readonly List<(RclServerClient client, ISignalizable signalizable)> serverClients = new();
+    readonly List<(IHasHandle handler, ISignalizable signalizable)> subscribers = new();
+    readonly List<(IHasHandle handler, ISignalizable signalizable)> serviceClients = new();
+    readonly List<(IHasHandle handler, ISignalizable signalizable)> serviceServers = new();
 
-    readonly IntPtr[] cachedGuardHandles;
-    IntPtr[] cachedSubscriberHandles = Array.Empty<IntPtr>();
-    IntPtr[] cachedServerClientHandles = Array.Empty<IntPtr>();
+    readonly IntPtr[] guardHandles;
+    IntPtr[] subscriberHandles = Array.Empty<IntPtr>();
+    IntPtr[] serviceClientHandles = Array.Empty<IntPtr>();
+    IntPtr[] serviceServerHandles = Array.Empty<IntPtr>();
 
     bool disposed;
 
@@ -25,17 +27,19 @@ internal sealed class AsyncRclClient : TaskExecutor
 
     public string FullName => client.FullName;
 
-    public static bool IsTypeSupported(string message) => Rcl.IsTypeSupported(message);
+    public static bool IsMessageTypeSupported(string message) => Rcl.IsTypeSupported(message);
+
+    public static bool IsServiceTypeSupported(string message) => false;
 
     public AsyncRclClient(string name, string @namespace = "")
     {
         client = new RclClient(name, @namespace);
-        waitSet = client.CreateWaitSet(32, 2);
+        waitSet = client.CreateWaitSet(32, 2, 32, 32);
         guard = client.CreateGuardCondition();
 
         var graphGuardHandle = client.GetGraphGuardCondition();
 
-        cachedGuardHandles = new[] { guard.Handle, graphGuardHandle };
+        guardHandles = new[] { guard.Handle, graphGuardHandle };
 
         Start();
     }
@@ -47,8 +51,8 @@ internal sealed class AsyncRclClient : TaskExecutor
 
     protected override void Wait()
     {
-        bool success = waitSet.WaitFor(cachedSubscriberHandles, cachedGuardHandles,
-            cachedServerClientHandles, default,
+        bool success = waitSet.WaitFor(subscriberHandles, guardHandles,
+            serviceClientHandles, serviceServerHandles,
             out var triggeredSubscriptions, out var triggeredGuards,
             out var triggeredClients, out _);
 
@@ -74,16 +78,15 @@ internal sealed class AsyncRclClient : TaskExecutor
         {
             if (triggeredClients[i] != 0)
             {
-                serverClients[i].signalizable.Signal();
+                serviceClients[i].signalizable.Signal();
             }
         }
     }
 
-    void RebuildCachedSubscribers()
+    void RebuildSubscribers()
     {
-        cachedSubscriberHandles = subscribers.Select(tuple => tuple.subscriber.Handle).ToArray();
+        subscriberHandles = subscribers.Select(tuple => tuple.handler.Handle).ToArray();
     }
-
 
     public Task<RclSubscriber> SubscribeAsync(string topic, string type, ISignalizable signalizable,
         RosTransportHint transportHint,
@@ -100,7 +103,7 @@ internal sealed class AsyncRclClient : TaskExecutor
 
             var subscriber = client.CreateSubscriber(topic, type, profile);
             subscribers.Add((subscriber, signalizable));
-            RebuildCachedSubscribers();
+            RebuildSubscribers();
             return subscriber;
         }, token);
     }
@@ -110,14 +113,14 @@ internal sealed class AsyncRclClient : TaskExecutor
         return Post(() =>
         {
             subscriber.Dispose();
-            if (subscribers.RemoveAll(tuple => tuple.subscriber == subscriber) != 1)
+            if (subscribers.RemoveAll(tuple => tuple.handler == subscriber) != 1)
             {
                 Logger.LogErrorFormat("{0}: {2} failed to find subscriber for topic {1}",
                     this, subscriber.Topic, nameof(UnsubscribeAsync));
                 return;
             }
 
-            RebuildCachedSubscribers();
+            RebuildSubscribers();
         }, token);
     }
 
@@ -131,39 +134,72 @@ internal sealed class AsyncRclClient : TaskExecutor
         return Post(publisher.Dispose, token);
     }
 
-    void RebuildCachedServerClients()
+    void RebuildServiceClients()
     {
-        cachedServerClientHandles = serverClients.Select(tuple => tuple.client.Handle).ToArray();
+        serviceClientHandles = serviceClients.Select(tuple => tuple.handler.Handle).ToArray();
     }
 
-    public Task<RclServerClient> CreateServerClientAsync(string topic, string type, ISignalizable signalizable,
+    public Task<RclServiceClient> CreateServiceClientAsync(string topic, string type, ISignalizable signalizable,
         CancellationToken token)
     {
         return Post(() =>
         {
             var serverClient = client.CreateServerClient(topic, type);
-            serverClients.Add((serverClient, signalizable));
-            RebuildCachedServerClients();
+            serviceClients.Add((serverClient, signalizable));
+            RebuildServiceClients();
             return serverClient;
         }, token);
     }
 
-    public Task DisposeServerClientAsync(RclServerClient serverClient, CancellationToken token)
+    public Task DisposeServiceClientAsync(RclServiceClient serviceClient, CancellationToken token)
     {
         return Post(() =>
         {
-            serverClient.Dispose();
-            if (serverClients.RemoveAll(tuple => tuple.client == serverClient) != 1)
+            serviceClient.Dispose();
+            if (serviceClients.RemoveAll(tuple => tuple.handler == serviceClient) != 1)
             {
-                Logger.LogErrorFormat("{0}: {2} failed to find server client for service {1}",
-                    this, serverClient.Service, nameof(DisposeServerClientAsync));
+                Logger.LogErrorFormat("{0}: {2} failed to find service client for service {1}",
+                    this, serviceClient.Service, nameof(DisposeServiceClientAsync));
                 return;
             }
 
-            RebuildCachedServerClients();
+            RebuildServiceClients();
+        }, token);
+    }
+    
+    void RebuildServiceServers()
+    {
+        serviceServerHandles = serviceServers.Select(tuple => tuple.handler.Handle).ToArray();
+    }
+
+    public Task<RclServiceServer> AdvertiseServiceAsync(string topic, string type, ISignalizable signalizable,
+        CancellationToken token)
+    {
+        return Post(() =>
+        {
+            var serviceServer = client.CreateServiceServer(topic, type);
+            serviceServers.Add((serviceServer, signalizable));
+            RebuildServiceServers();
+            return serviceServer;
         }, token);
     }
 
+    public Task UnadvertiseServiceAsync(RclServiceServer serviceServer, CancellationToken token)
+    {
+        return Post(() =>
+        {
+            serviceServer.Dispose();
+            if (serviceServers.RemoveAll(tuple => tuple.handler == serviceServer) != 1)
+            {
+                Logger.LogErrorFormat("{0}: {2} failed to find service server for service {1}",
+                    this, serviceServer.Service, nameof(UnadvertiseServiceAsync));
+                return;
+            }
+
+            RebuildServiceServers();
+        }, token);
+    }
+    
     public Task<NodeName[]> GetNodeNamesAsync(CancellationToken token = default)
     {
         return Post(client.GetNodeNames, token);

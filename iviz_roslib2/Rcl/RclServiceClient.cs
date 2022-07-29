@@ -5,24 +5,21 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib2.Rcl;
 
-internal sealed class RclServerClient : IDisposable
+internal sealed class RclServiceClient : IDisposable, IHasHandle
 {
     readonly IntPtr contextHandle;
     readonly IntPtr clientHandle;
     readonly IntPtr nodeHandle;
     bool disposed;
 
-    //delegate void SpanAction(ReadOnlySpan<byte> span);
-    //readonly ConcurrentDictionary<long, SpanAction> queue = new();
-
     public string Service { get; }
     public string ServiceType { get; }
     
-    internal IntPtr Handle => disposed
+    public IntPtr Handle => disposed
         ? throw new ObjectDisposedException(ToString())
         : clientHandle;
 
-    public RclServerClient(IntPtr contextHandle, IntPtr nodeHandle, string service, string serviceType)
+    public RclServiceClient(IntPtr contextHandle, IntPtr nodeHandle, string service, string serviceType)
     {
         if (contextHandle == IntPtr.Zero) BuiltIns.ThrowArgumentNull(nameof(nodeHandle));
         if (nodeHandle == IntPtr.Zero) BuiltIns.ThrowArgumentNull(nameof(nodeHandle));
@@ -46,7 +43,7 @@ internal sealed class RclServerClient : IDisposable
         }
     }
 
-    public void Execute(IRequest request, out long sequenceNumber)
+    public void SendRequest(ISerializable request, out long sequenceNumber)
     {
         using var messageBuffer = new RclSerializedBuffer();
         const int headerSize = 4;
@@ -94,46 +91,6 @@ internal sealed class RclServerClient : IDisposable
         }
     }
 
-
-    /*
-    bool TakeResponse(RclSerializedBuffer messageBuffer)
-    {
-        int ret = Rcl.TakeResponse(clientHandle, messageBuffer.Handle, out var requestHeader, out var ptr,
-            out int length);
-        switch ((RclRet)ret)
-        {
-            case RclRet.Ok:
-                long sequenceNumber = requestHeader.requestId.sequenceNumber;
-                if (queue.TryRemove(sequenceNumber, out var callback))
-                {
-                    callback(Rcl.CreateReadOnlySpan(ptr, length));
-                }
-                else
-                {
-                    Logger.LogErrorFormat("{0}: Could not find request with sequence number {1}!", this,
-                        sequenceNumber);
-                }
-
-                return true;
-            case RclRet.ClientTakeFailed:
-                return false;
-            default:
-                Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.TakeSerializedMessage));
-                return false;
-        }
-    }
-
-
-    void ISignalizable.Signal()
-    {
-        using var messageBuffer = new RclSerializedBuffer();
-        
-        while (TakeResponse(messageBuffer))
-        {
-        }
-    }
-    */
-
     void Check(int result) => Rcl.Check(contextHandle, result);
 
     public void Dispose()
@@ -144,5 +101,10 @@ internal sealed class RclServerClient : IDisposable
         Rcl.DestroyClientHandle(clientHandle, nodeHandle);
     }
 
-    ~RclServerClient() => Logger.LogErrorFormat("{0} has not been disposed!", this);
+    ~RclServiceClient() => Logger.LogErrorFormat("{0} has not been disposed!", this);
+    
+    public override string ToString()
+    {
+        return $"[{nameof(RclServiceClient)} {Service} [{ServiceType}] ]";
+    }    
 }

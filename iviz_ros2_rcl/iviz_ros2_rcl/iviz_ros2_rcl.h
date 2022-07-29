@@ -59,7 +59,9 @@ int32_t native_rcl_wait(void *wait_set_handle, int32_t timeout_in_ms,
 
 int32_t native_rcl_wait_clear_and_add(void *wait_set_handle,
                                       void **subscription_handles, int num_subscription_handles,
-                                      void **guard_handles, int num_guard_handles);
+                                      void **guard_handles, int num_guard_handles,
+                                      void **client_handles, int num_client_handles,
+                                      void **service_handles, int num_service_handles);
 
 int32_t native_rcl_destroy_wait_set(void *wait_set_handle);
 
@@ -154,7 +156,8 @@ int32_t native_rcl_destroy_client_handle(void *client_handle, void *node_handle)
 
 int32_t native_rcl_send_request(void *client_handle, void* serialized_message_handle, int64_t *sequence_id);
 
-int32_t native_rcl_take_response(void *client_handle, void* serialized_message_handle, void *request_header);
+int32_t native_rcl_take_response(void *client_handle, void* serialized_message_handle,
+                                 void *request_header_handle, void **ptr, int32_t *length);
 
 int32_t native_rcl_create_service_handle(void **service_handle,
                                          void *node_handle,
@@ -165,6 +168,6 @@ int32_t native_rcl_destroy_service_handle(void *service_handle, void *node_handl
 
 int32_t native_rcl_send_response(void *service_handle, void* serialized_message_handle, const void *request_header_handle);
 
-int32_t native_rcl_take_request(void *service_handle, void* serialized_message_handle, void *request_header_handle);
-
+int32_t native_rcl_take_request(void *service_handle, void* serialized_message_handle,
+                                void *request_header_handle, void **ptr, int32_t *length);
 }

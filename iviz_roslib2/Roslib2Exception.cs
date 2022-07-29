@@ -16,7 +16,7 @@ public class Roslib2Exception : RoslibException
 
 public sealed class RosUnsupportedMessageException : Roslib2Exception
 {
-    public RosUnsupportedMessageException(string messageType) : base($"Message type {messageType} is not supported")
+    public RosUnsupportedMessageException(string messageType) : base($"Message or service type {messageType} is not supported")
     {
     }
 }

@@ -115,7 +115,9 @@ internal static class Rcl
     [DllImport(Library, EntryPoint = "native_rcl_wait_clear_and_add")]
     public static extern int WaitClearAndAdd(IntPtr waitSetHandle,
         in IntPtr subscriptionHandles, int numSubscriptionHandles,
-        in IntPtr guardHandles, int numGuardHandles);
+        in IntPtr guardHandles, int numGuardHandles,
+        in IntPtr clientHandles, int numClientHandles,
+        in IntPtr serviceHandles, int numServiceHandles);
 
     [DllImport(Library, EntryPoint = "native_rcl_destroy_wait_set")]
     public static extern int DestroyWaitSet(IntPtr waitSetHandle);
@@ -241,5 +243,5 @@ internal static class Rcl
 
     [DllImport(Library, EntryPoint = "native_rcl_take_request")]
     public static extern int TakeRequest(IntPtr serviceHandle, IntPtr serializedMessageHandle,
-        out RmwServiceInfo requestHeaderHandle);
+        out RmwServiceInfo requestHeaderHandle, out IntPtr ptr, out int length);
 }

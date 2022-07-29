@@ -342,7 +342,9 @@ static int32_t native_rcl_wait_set_add_subscription(void *wait_set_handle, void 
 
 int32_t native_rcl_wait_clear_and_add(void *wait_set_handle,
                                       void **subscription_handles, int num_subscription_handles,
-                                      void **guard_handles, int num_guard_handles)
+                                      void **guard_handles, int num_guard_handles,
+                                      void **client_handles, int num_client_handles,
+                                      void **service_handles, int num_service_handles)
 {
     rcl_wait_set_t *wait_set = (rcl_wait_set_t *)wait_set_handle;
     IgnoreRet(rcl_wait_set_clear(wait_set));
@@ -358,7 +360,19 @@ int32_t native_rcl_wait_clear_and_add(void *wait_set_handle,
         rcl_guard_condition_t *guard = (rcl_guard_condition_t *)guard_handles[i];
         IgnoreRet(rcl_wait_set_add_guard_condition(wait_set, guard, nullptr));
     }
-    
+
+    for (int i = 0; i < num_client_handles; i++)
+    {
+        rcl_client_t *client = (rcl_client_t *)client_handles[i];
+        IgnoreRet(rcl_wait_set_add_client(wait_set, client, nullptr));
+    }
+
+    for (int i = 0; i < num_service_handles; i++)
+    {
+        rcl_service_t *service = (rcl_service_t *)service_handles[i];
+        IgnoreRet(rcl_wait_set_add_service(wait_set, service, nullptr));
+    }
+
     return RCL_RET_OK;
 }
 
@@ -1079,7 +1093,8 @@ int32_t native_rcl_send_request(void *client_handle, void* serialized_message_ha
     return returnedValue;
 }
 
-int32_t native_rcl_take_response(void *client_handle, void* serialized_message_handle, void *request_header_handle)
+int32_t native_rcl_take_response(void *client_handle, void* serialized_message_handle,
+                                 void *request_header_handle, void **ptr, int32_t *length)
 {
     rcl_client_t *rcl_client = (rcl_client_t *)client_handle;
     rcl_serialized_message_t *serialized_message = (rcl_serialized_message_t *)serialized_message_handle;
@@ -1123,6 +1138,9 @@ int32_t native_rcl_take_response(void *client_handle, void* serialized_message_h
         ((int64_t)response.sample_identity_.sequence_number().high) <<
         32 | response.sample_identity_.sequence_number().low;
         
+        *ptr = serialized_message->buffer;
+        *length = (int32_t) serialized_message->buffer_length;
+        
         return RMW_RET_OK;
         /*
          auto raw_type_support = dynamic_cast<rmw_fastrtps_shared_cpp::TypeSupport *>(info->response_type_support_.get());
@@ -1141,6 +1159,9 @@ int32_t native_rcl_take_response(void *client_handle, void* serialized_message_h
          }
          */
     }
+    
+    *ptr = nullptr;
+    *length = 0;
     
     return RCL_RET_CLIENT_TAKE_FAILED;
 }
@@ -1262,7 +1283,8 @@ int32_t native_rcl_send_response(void *service_handle, void* serialized_message_
     return returnedValue;
 }
 
-int32_t native_rcl_take_request(void *service_handle, void* serialized_message_handle, void *request_header_handle)
+int32_t native_rcl_take_request(void *service_handle, void* serialized_message_handle,
+                                void *request_header_handle, void **ptr, int32_t *length)
 {
     rcl_service_t *rcl_service = (rcl_service_t *)service_handle;
     rcl_serialized_message_t *serialized_message = (rcl_serialized_message_t *)serialized_message_handle;
@@ -1308,8 +1330,15 @@ int32_t native_rcl_take_request(void *service_handle, void* serialized_message_h
         request_header->received_timestamp = request.sample_info_.receptionTimestamp.to_ns();
         
         delete request.buffer_;
+        
+        *ptr = serialized_message->buffer;
+        *length = (int32_t)serialized_message->buffer_length;
+
         return RMW_RET_OK;
     }
+    
+    *ptr = nullptr;
+    *length = 0;
     
     return RCL_RET_SERVICE_TAKE_FAILED;
 }

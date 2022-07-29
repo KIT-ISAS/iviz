@@ -4,7 +4,7 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib2.Rcl;
 
-internal sealed class RclSubscriber : IDisposable
+internal sealed class RclSubscriber : IDisposable, IHasHandle
 {
     readonly IntPtr contextHandle;
     readonly IntPtr nodeHandle;
@@ -12,7 +12,7 @@ internal sealed class RclSubscriber : IDisposable
     readonly RclSerializedBuffer messageBuffer;
     bool disposed;
 
-    internal IntPtr Handle => disposed
+    public IntPtr Handle => disposed
         ? throw new ObjectDisposedException(ToString())
         : subscriptionHandle;
 

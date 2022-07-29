@@ -6,76 +6,71 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib2;
 
-public class Ros2ServiceCaller : ISignalizable
+internal class Ros2ServiceCaller : ISignalizable
 {
-    readonly IDeserializable<IResponse> generator;
     readonly SemaphoreSlim signal = new(0);
     readonly CancellationTokenSource runningTs = new();
     readonly ConcurrentDictionary<long, TaskCompletionSource<IResponse>> queue = new();
     readonly Ros2Client client;
 
-    RclServerClient? serverClient;
+    RclServiceClient? serverClient;
     Task? task;
     bool disposed;
 
-    internal Ros2ServiceCaller(Ros2Client client, IDeserializable<IResponse> generator)
-    {
-        this.client = client;
-        this.generator = generator;
-    }
-
-    internal RclServerClient ServerClient
+    public RclServiceClient ServiceClient
     {
         private get => serverClient ?? throw new NullReferenceException("Service client has not been initialized!");
         set => serverClient = value;
     }
 
-    internal void Start()
+    public string Service => ServiceClient.Service;
+    public string ServiceType => ServiceClient.ServiceType;
+
+    public Ros2ServiceCaller(Ros2Client client)
     {
-        task = TaskUtils.Run(() => Run().AwaitNoThrow(this));
+        this.client = client;
     }
 
-    public Task<IResponse> Execute(IRequest request)
+    public void Start(IDeserializableRos2<IResponse> generator)
     {
-        var ts = TaskUtils.CreateCompletionSource<IResponse>();
-        ServerClient.Execute(request, out long sequenceNumber);
-        queue.TryAdd(sequenceNumber, ts);
-        return ts.Task;
+        task = TaskUtils.Run(() => Run(generator).AwaitNoThrow(this));
     }
 
-    async ValueTask Run()
+    public Task<IResponse> ExecuteAsync(IRequest request)
     {
-        var rclCaller = ServerClient;
+        var tcs = TaskUtils.CreateCompletionSource<IResponse>();
+        ServiceClient.SendRequest(request, out long sequenceNumber);
+        queue.TryAdd(sequenceNumber, tcs);
+        return tcs.Task;
+    }
+
+    async ValueTask Run(IDeserializableRos2<IResponse> generator)
+    {
+        var rclServiceClient = ServiceClient;
         var cancellationToken = runningTs.Token;
         using var serializedBuffer = new RclSerializedBuffer();
 
         while (true)
         {
             await signal.WaitAsync(cancellationToken);
-            ProcessMessages();
+            ProcessResponses();
         }
 
-        void ProcessMessages()
+        void ProcessResponses()
         {
-            while (rclCaller.TryTakeResponse(serializedBuffer, out var span, out long sequenceNumber))
+            while (rclServiceClient.TryTakeResponse(serializedBuffer, out var span, out long sequenceNumber))
             {
                 var response = ReadBuffer2.Deserialize(generator, span);
-                if (queue.TryRemove(sequenceNumber, out var responseTs))
-                {
-                    responseTs.TrySetResult(response);
-                }
-                else
+                if (!queue.TryRemove(sequenceNumber, out var responseTcs))
                 {
                     Logger.LogErrorFormat("{0}: Could not find request with sequence number {1}!", this,
                         sequenceNumber);
+                    continue;
                 }
+
+                responseTcs.TrySetResult(response);
             }
         }
-    }
-
-    public void Dispose()
-    {
-        TaskUtils.RunSync(DisposeAsync, default);
     }
 
     public async ValueTask DisposeAsync(CancellationToken token = default)
@@ -83,16 +78,21 @@ public class Ros2ServiceCaller : ISignalizable
         if (disposed) return;
         disposed = true;
 
-        await client.Rcl.DisposeServerClientAsync(ServerClient, default).AwaitNoThrow(this);
+        await client.Rcl.DisposeServiceClientAsync(ServiceClient, default).AwaitNoThrow(this);
 
         runningTs.Cancel();
         await task.AwaitNoThrow(2000, this, token);
 
-        //client.RemoveSubscriber(this);
+        client.RemoveServiceCaller(this);
     }
 
     void ISignalizable.Signal()
     {
         signal.Release();
     }
+    
+    public override string ToString()
+    {
+        return $"[{nameof(Ros2ServiceCaller)} {Service} [{ServiceType}] ]";
+    }    
 }

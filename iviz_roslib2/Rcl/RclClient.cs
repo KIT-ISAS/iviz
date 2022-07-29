@@ -47,9 +47,9 @@ internal sealed class RclClient : IDisposable
         FullName = Rcl.ToString(Rcl.GetFullyQualifiedNodeName(nodeHandle));
     }
 
-    public RclWaitSet CreateWaitSet(int maxSubscriptions, int maxGuardConditions)
+    public RclWaitSet CreateWaitSet(int maxSubscriptions, int maxGuardConditions, int maxClients, int maxServers)
     {
-        return new RclWaitSet(contextHandle, maxSubscriptions, maxGuardConditions);
+        return new RclWaitSet(contextHandle, maxSubscriptions, maxGuardConditions, maxClients, maxServers);
     }
 
     public RclGuardCondition CreateGuardCondition()
@@ -72,9 +72,14 @@ internal sealed class RclClient : IDisposable
         return new RclPublisher(contextHandle, nodeHandle, topic, type);
     }
 
-    public RclServerClient CreateServerClient(string topic, string type)
+    public RclServiceClient CreateServerClient(string topic, string type)
     {
-        return new RclServerClient(contextHandle, nodeHandle, topic, type);
+        return new RclServiceClient(contextHandle, nodeHandle, topic, type);
+    }
+    
+    public RclServiceServer CreateServiceServer(string topic, string type)
+    {
+        return new RclServiceServer(contextHandle, nodeHandle, topic, type);
     }
     
     public NodeName[] GetNodeNames()

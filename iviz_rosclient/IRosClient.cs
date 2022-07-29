@@ -135,7 +135,7 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// <param name="name">Name of the service</param>
     /// <param name="token">An optional cancellation token</param>
     /// <exception cref="ArgumentException">Thrown if name is null</exception>
-    bool UnadvertiseService(string name, CancellationToken token = default);
+    void UnadvertiseService(string name, CancellationToken token = default);
 
     /// <summary>
     /// Unadvertises the service.
@@ -143,7 +143,7 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// <param name="name">Name of the service</param>
     /// <param name="token">An optional cancellation token</param>
     /// <exception cref="ArgumentException">Thrown if name is null</exception>        
-    ValueTask<bool> UnadvertiseServiceAsync(string name, CancellationToken token = default);
+    ValueTask UnadvertiseServiceAsync(string name, CancellationToken token = default);
 
 
     IReadOnlyList<SubscriberState> GetSubscriberStatistics();

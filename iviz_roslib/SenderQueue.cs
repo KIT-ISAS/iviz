@@ -55,13 +55,13 @@ internal sealed class SenderQueue<T> where T : IMessage
             return default;
         }
 
-        var msgSignal = TaskUtils.CreateCompletionSource();
-        messageQueue.Enqueue(new Entry(message, msgSignal));
+        var tcs = TaskUtils.CreateCompletionSource();
+        messageQueue.Enqueue(new Entry(message, tcs));
         signal.Release();
             
         return token.CanBeCanceled
-            ? WaitForSignal(msgSignal, token)
-            : msgSignal.Task.AsValueTask();
+            ? WaitForSignal(tcs, token)
+            : tcs.Task.AsValueTask();
     }
 
     static async ValueTask WaitForSignal(TaskCompletionSource msgSignal, CancellationToken token)

@@ -56,28 +56,28 @@ internal abstract class TaskExecutor
             return Task.FromCanceled(token);
         }
 
-        var ts = TaskUtils.CreateCompletionSource();
+        var tcs = TaskUtils.CreateCompletionSource();
         queue.Enqueue(() =>
         {
             if (token.IsCancellationRequested)
             {
-                ts.TrySetCanceled();
+                tcs.TrySetCanceled();
                 return;
             }
 
             try
             {
                 action();
-                ts.TrySetResult();
+                tcs.TrySetResult();
             }
             catch (Exception e)
             {
-                ts.TrySetException(e);
+                tcs.TrySetException(e);
             }
         });
 
         Signal();
-        return ts.Task;
+        return tcs.Task;
     }
 
     protected Task<T> Post<T>(Func<T> action, CancellationToken token = default)
@@ -92,27 +92,27 @@ internal abstract class TaskExecutor
             return Task.FromCanceled<T>(token);
         }
 
-        var ts = TaskUtils.CreateCompletionSource<T>();
+        var tcs = TaskUtils.CreateCompletionSource<T>();
         queue.Enqueue(() =>
         {
             if (token.IsCancellationRequested)
             {
-                ts.TrySetCanceled();
+                tcs.TrySetCanceled();
                 return;
             }
 
             try
             {
-                ts.TrySetResult(action());
+                tcs.TrySetResult(action());
             }
             catch (Exception e)
             {
-                ts.TrySetException(e);
+                tcs.TrySetException(e);
             }
         });
 
         Signal();
-        return ts.Task;
+        return tcs.Task;
     }
 
     protected void Stop()

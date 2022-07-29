@@ -2,5 +2,10 @@ namespace Iviz.Roslib2.Rcl;
 
 internal interface ISignalizable
 {
-    internal void Signal();
+    void Signal();
+}
+
+internal interface IHasHandle
+{
+    IntPtr Handle { get; }
 }

@@ -219,7 +219,7 @@ internal sealed class ServiceRequest
                 using (var readBuffer = await ReceivePacket(runningTs.Token))
                 {
                     serviceMsg = serviceInfo.Create();
-                    serviceMsg.Request = (IRequest)serviceMsg.Request.DeserializeFrom(readBuffer);
+                    serviceMsg.Request = serviceMsg.Request.DeserializeFrom(readBuffer);
                 }
 
                 string? errorMessage = await ProcessCallback(serviceMsg);

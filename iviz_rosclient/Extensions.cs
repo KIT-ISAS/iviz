@@ -11,7 +11,7 @@ public static class Extensions
 {
     public static void WaitForService(this IRosClient client, string service, int timeoutInMs)
     {
-        using CancellationTokenSource tokenSource = new(timeoutInMs);
+        using var tokenSource = new CancellationTokenSource(timeoutInMs);
         try
         {
             client.WaitForService(service, tokenSource.Token);
@@ -49,7 +49,7 @@ public static class Extensions
 
     public static void WaitForAnySubscriber(this IRosPublisher publisher, int timeoutInMs)
     {
-        using CancellationTokenSource tokenSource = new(timeoutInMs);
+        using var tokenSource = new CancellationTokenSource(timeoutInMs);
         try
         {
             publisher.WaitForAnySubscriber(tokenSource.Token);
@@ -101,7 +101,7 @@ public static class Extensions
 
     public static void WaitForAnyPublisher(this IRosSubscriber subscriber, int timeoutInMs)
     {
-        using CancellationTokenSource tokenSource = new(timeoutInMs);
+        using var tokenSource = new CancellationTokenSource(timeoutInMs);
         try
         {
             subscriber.WaitForAnyPublisher(tokenSource.Token);
@@ -143,7 +143,7 @@ public static class Extensions
 
     public static void WaitForTopic(this IRosClient client, string topic, int timeoutInMs)
     {
-        using CancellationTokenSource tokenSource = new(timeoutInMs);
+        using var tokenSource = new CancellationTokenSource(timeoutInMs);
         try
         {
             client.WaitForTopic(topic, tokenSource.Token);

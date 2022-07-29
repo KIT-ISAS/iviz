@@ -136,7 +136,7 @@ public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReade
     /// <returns>False if the channel has been disposed</returns>
     public bool WaitToRead(int timeoutInMs)
     {
-        using CancellationTokenSource ts = new(timeoutInMs);
+        using var ts = new CancellationTokenSource(timeoutInMs);
         try
         {
             return WaitToRead(ts.Token);
@@ -163,7 +163,7 @@ public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReade
     /// <returns>False if the channel has been disposed</returns>
     public async ValueTask<bool> WaitToReadAsync(int timeoutInMs)
     {
-        using CancellationTokenSource ts = new(timeoutInMs);
+        using var ts = new CancellationTokenSource(timeoutInMs);
         try
         {
             return await WaitToReadAsync(ts.Token);
@@ -190,7 +190,7 @@ public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReade
     /// <returns>The message that arrived</returns>
     public T Read(int timeoutInMs)
     {
-        using CancellationTokenSource ts = new(timeoutInMs);
+        using var ts = new CancellationTokenSource(timeoutInMs);
         try
         {
             return Read(ts.Token);
@@ -227,7 +227,7 @@ public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReade
     /// <returns>The message that arrived</returns>
     public async ValueTask<T> ReadAsync(int timeoutInMs)
     {
-        using CancellationTokenSource ts = new(timeoutInMs);
+        using var ts = new CancellationTokenSource(timeoutInMs);
         try
         {
             return await ReadAsync(ts.Token);

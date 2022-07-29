@@ -13,6 +13,8 @@ public sealed class Ros2Client : IRosClient
 {
     readonly ConcurrentDictionary<string, IRos2Subscriber> subscribersByTopic = new();
     readonly ConcurrentDictionary<string, IRos2Publisher> publishersByTopic = new();
+    readonly ConcurrentDictionary<string, Ros2ServiceCaller> callersByService = new();
+    readonly ConcurrentDictionary<string, Ros2ServiceListener> listenersByService = new();
     readonly string namespacePrefix;
     bool disposed;
 
@@ -21,11 +23,11 @@ public sealed class Ros2Client : IRosClient
         public T? cache;
         public long ticks;
     }
-    
+
     Cache<IReadOnlyList<SubscriberState>> cachedSubscriberStats;
     Cache<IReadOnlyList<PublisherState>> cachedPublisherStats;
     Cache<SystemState> cachedSystemState;
-    
+
     internal AsyncRclClient Rcl { get; }
     public string CallerId => Rcl.FullName;
 
@@ -94,7 +96,7 @@ public sealed class Ros2Client : IRosClient
         if (callback is null) BuiltIns.ThrowArgumentNull(nameof(callback));
 
         string messageType = BuiltIns.GetMessageType<T>();
-        if (!AsyncRclClient.IsTypeSupported(messageType))
+        if (!AsyncRclClient.IsMessageTypeSupported(messageType))
         {
             ThrowUnsupportedMessageTypeException(messageType);
         }
@@ -142,11 +144,11 @@ public sealed class Ros2Client : IRosClient
         CancellationToken token = default) where T : IMessage, new()
     {
         if (topic is null) BuiltIns.ThrowArgumentNull(nameof(topic));
-        
+
         string resolvedTopic = ResolveResourceName(topic);
 
         string messageType = BuiltIns.GetMessageType<T>();
-        if (!AsyncRclClient.IsTypeSupported(messageType))
+        if (!AsyncRclClient.IsMessageTypeSupported(messageType))
         {
             ThrowUnsupportedMessageTypeException(messageType);
         }
@@ -202,38 +204,126 @@ public sealed class Ros2Client : IRosClient
         publishersByTopic.TryRemove(subscriber.Topic, out _);
     }
 
-    public bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
-        where T : IService, new()
-    {
-        throw new NotImplementedException();
-    }
-
-    public ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, ValueTask> callback,
-        CancellationToken token = default) where T : IService, new()
-    {
-        throw new NotImplementedException();
-    }
-
     public T CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
         where T : IService, new()
     {
-        throw new NotImplementedException();
+        using var timeoutTs = new CancellationTokenSource(timeoutInMs);
+        var token = timeoutTs.Token;
+        return TaskUtils.RunSync(() => CallServiceAsync(serviceName, service, persistent, token));
     }
 
-    public ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
+    public async ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
         CancellationToken token = default) where T : IService, new()
     {
-        throw new NotImplementedException();
+        if (serviceName is null) BuiltIns.ThrowArgumentNull(nameof(serviceName));
+        if (service is null) BuiltIns.ThrowArgumentNull(nameof(service));
+        if (service.Request is null) BuiltIns.ThrowArgumentNull(nameof(service.Request));
+        if (service.Response is null) BuiltIns.ThrowArgumentNull(nameof(service.Response));
+
+        string resolvedServiceName = ResolveResourceName(serviceName);
+        string serviceType = service.RosServiceType;
+
+        if (!AsyncRclClient.IsServiceTypeSupported(serviceType))
+        {
+            ThrowUnsupportedMessageTypeException(serviceType);
+        }
+
+        Ros2ServiceCaller serviceCaller;
+        if (!callersByService.TryGetValue(resolvedServiceName, out var existingCaller))
+        {
+            var generator = (IDeserializable<IResponse>)new T().Response;
+            serviceCaller = new Ros2ServiceCaller(this);
+            var rclServiceClient = await Rcl.CreateServiceClientAsync(serviceName, serviceType, serviceCaller, token);
+            serviceCaller.ServiceClient = rclServiceClient;
+            serviceCaller.Start(generator);
+
+            callersByService[resolvedServiceName] = serviceCaller;
+        }
+        else if (existingCaller.ServiceType == serviceType)
+        {
+            serviceCaller = existingCaller;
+        }
+        else
+        {
+            throw new RosInvalidMessageTypeException(
+                $"Existing connection of {resolvedServiceName} with service type {existingCaller.ServiceType} " +
+                "does not match the new given type.");
+        }
+
+        service.Response = await serviceCaller.ExecuteAsync(service.Request);
+        return service;
     }
 
-    public bool UnadvertiseService(string name, CancellationToken token = default)
+    internal void RemoveServiceCaller(Ros2ServiceCaller caller)
     {
-        throw new NotImplementedException();
+        callersByService.TryRemove(caller.Service, out _);
     }
 
-    public ValueTask<bool> UnadvertiseServiceAsync(string name, CancellationToken token = default)
+    internal void RemoveServiceListener(Ros2ServiceListener server)
     {
-        throw new NotImplementedException();
+        listenersByService.TryRemove(server.Service, out _);
+    }
+
+    public bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
+        where T : IService, new()
+    {
+        ValueTask Callback(T service)
+        {
+            callback(service);
+            return default;
+        }
+
+        return TaskUtils.RunSync(() => AdvertiseServiceAsync<T>(serviceName, Callback, token));
+    }
+
+    public async ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, ValueTask> callback,
+        CancellationToken token = default) where T : IService, new()
+    {
+        if (serviceName is null) BuiltIns.ThrowArgumentNull(nameof(serviceName));
+        if (callback is null) BuiltIns.ThrowArgumentNull(nameof(callback));
+
+        string resolvedServiceName = ResolveResourceName(serviceName);
+        string serviceType = BuiltIns.GetServiceType<T>();
+
+        if (!AsyncRclClient.IsServiceTypeSupported(serviceType))
+        {
+            ThrowUnsupportedMessageTypeException(serviceType);
+        }
+
+        if (!listenersByService.TryGetValue(resolvedServiceName, out var existingListener))
+        {
+            ValueTask Callback(IService service) => callback((T)service);
+
+            var serviceListener = new Ros2ServiceListener(this, () => new T(), Callback);
+            var rclServiceClient = await Rcl.AdvertiseServiceAsync(serviceName, serviceType, serviceListener, token);
+            serviceListener.ServiceServer = rclServiceClient;
+            serviceListener.Start();
+
+            listenersByService[resolvedServiceName] = serviceListener;
+            return true;
+        }
+
+        if (existingListener.ServiceType == serviceType)
+        {
+            return false;
+        }
+
+        throw new RosInvalidMessageTypeException(
+            $"Existing connection of {resolvedServiceName} with service type {existingListener.ServiceType} " +
+            "does not match the new given type.");
+    }
+
+    public void UnadvertiseService(string name, CancellationToken token = default)
+    {
+        TaskUtils.RunSync(() => UnadvertiseServiceAsync(name, token));
+    }
+
+    public ValueTask UnadvertiseServiceAsync(string name, CancellationToken token = default)
+    {
+        string resolvedServiceName = ResolveResourceName(name);
+        return listenersByService.TryGetValue(resolvedServiceName, out var advertisedService)
+            ? advertisedService.DisposeAsync(token)
+            : default;
     }
 
     public IReadOnlyList<SubscriberState> GetSubscriberStatistics() =>
@@ -329,7 +419,7 @@ public sealed class Ros2Client : IRosClient
         cachedSystemState.cache = await Rcl.GetSystemStateAsync(token);
         return cachedSystemState.cache;
     }
-    
+
     public void Dispose()
     {
         TaskUtils.RunSync(DisposeAsync);
@@ -353,6 +443,12 @@ public sealed class Ros2Client : IRosClient
         foreach (var subscriber in subscribers)
         {
             tasks.Add(subscriber.DisposeAsync(default).AwaitNoThrow(this));
+        }
+
+        var callers = callersByService.Values.ToArray();
+        foreach (var caller in callers)
+        {
+            tasks.Add(caller.DisposeAsync(default).AwaitNoThrow(this));
         }
 
         await tasks.WhenAll();

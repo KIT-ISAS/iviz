@@ -130,7 +130,7 @@ internal sealed class RosServiceCaller : IDisposable
             throw new InvalidOperationException("Service caller has not been started!");
         }
 
-        if (service?.Request == null)
+        if (service.Request == null)
         {
             throw new NullReferenceException("Request cannot be null");
         }

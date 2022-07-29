@@ -18,11 +18,16 @@ internal sealed class RosServiceListener
     readonly TcpListener listener;
     readonly ServiceInfo serviceInfo;
     readonly Task task;
-
     readonly CancellationTokenSource tokenSource = new();
+    
+    bool disposed;
+
     bool KeepRunning => !tokenSource.IsCancellationRequested;
 
-    bool disposed;
+    public Uri Uri { get; }
+    public string Service => serviceInfo.Service;
+    public string ServiceType => serviceInfo.Type;
+
 
     public RosServiceListener(ServiceInfo serviceInfo, string host, Func<IService, ValueTask> callback)
     {
@@ -39,11 +44,6 @@ internal sealed class RosServiceListener
 
         task = TaskUtils.Run(() => RunLoop().AwaitNoThrow(this));
     }
-
-    public Uri Uri { get; }
-    public string Service => serviceInfo.Service;
-    public string ServiceType => serviceInfo.Type;
-
 
     async ValueTask RunLoop()
     {

@@ -363,7 +363,7 @@ public sealed class RosMasterClient : IDisposable
 
     internal XmlRpcValue[] MethodCall(string function, XmlRpcArg[] args)
     {
-        using CancellationTokenSource ts = new(TimeoutInMs);
+        using var ts = new CancellationTokenSource(TimeoutInMs);
 
         XmlRpcValue tmp;
         try

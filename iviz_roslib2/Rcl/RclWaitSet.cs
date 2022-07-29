@@ -9,11 +9,13 @@ internal sealed class RclWaitSet : IDisposable
     readonly IntPtr waitSetHandle;
     bool disposed;
 
-    public RclWaitSet(IntPtr contextHandle, int maxSubscriptions, int maxGuardConditions)
+    public RclWaitSet(IntPtr contextHandle, int maxSubscriptions, int maxGuardConditions, int maxClients,
+        int maxServers)
     {
         this.contextHandle = contextHandle;
         waitSetHandle = Rcl.CreateWaitSet();
-        Check(Rcl.WaitSetInit(contextHandle, waitSetHandle, maxSubscriptions, maxGuardConditions, 0, 0, 0, 0));
+        Check(Rcl.WaitSetInit(contextHandle, waitSetHandle, maxSubscriptions, maxGuardConditions, 0, 
+            maxClients, maxServers, 0));
     }
 
     public bool WaitFor(
@@ -32,13 +34,17 @@ internal sealed class RclWaitSet : IDisposable
 
         ref readonly IntPtr subscriptionHandles = ref MemoryMarshal.GetReference(subscriptions);
         ref readonly IntPtr guardHandles = ref MemoryMarshal.GetReference(guards);
+        ref readonly IntPtr clientHandles = ref MemoryMarshal.GetReference(clients);
+        ref readonly IntPtr servicesHandles = ref MemoryMarshal.GetReference(services);
 
         Check(Rcl.WaitClearAndAdd(waitSetHandle,
             in subscriptionHandles, subscriptions.Length,
-            in guardHandles, guards.Length));
+            in guardHandles, guards.Length,
+            in clientHandles, clients.Length,
+            in servicesHandles, services.Length));
 
-        int ret = Rcl.Wait(waitSetHandle, 5000, 
-            out var changedSubscriptionHandles, 
+        int ret = Rcl.Wait(waitSetHandle, 5000,
+            out var changedSubscriptionHandles,
             out var changedGuardHandles);
 
         switch ((RclRet)ret)

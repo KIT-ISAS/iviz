@@ -41,8 +41,8 @@ public sealed class RosClient : IRosClient
 
     readonly ConcurrentDictionary<string, IRos1Subscriber> subscribersByTopic = new();
     readonly ConcurrentDictionary<string, IRos1Publisher> publishersByTopic = new();
-    readonly ConcurrentDictionary<string, RosServiceCaller> subscribedServicesByName = new();
-    readonly ConcurrentDictionary<string, RosServiceListener> publishedServicesByName = new();
+    readonly ConcurrentDictionary<string, RosServiceCaller> callersByService = new();
+    readonly ConcurrentDictionary<string, RosServiceListener> listenersByService = new();
     readonly string namespacePrefix;
 
     RosNodeServer? listener;
@@ -1521,7 +1521,7 @@ public sealed class RosClient : IRosClient
     public T CallService<T>(string serviceName, T service, bool persistent, int timeoutInMs)
         where T : IService, new()
     {
-        using CancellationTokenSource timeoutTs = new(timeoutInMs);
+        using var timeoutTs = new CancellationTokenSource(timeoutInMs);
         return CallService(serviceName, service, persistent, timeoutTs.Token);
     }
 
@@ -1604,38 +1604,36 @@ public sealed class RosClient : IRosClient
     {
         string resolvedServiceName = ResolveResourceName(serviceName);
 
-        if (persistent && subscribedServicesByName.TryGetValue(resolvedServiceName, out var existingReceiver))
+        if (persistent && callersByService.TryGetValue(resolvedServiceName, out var existingCaller))
         {
-            if (service.RosServiceType != existingReceiver.ServiceType)
+            if (service.RosServiceType != existingCaller.ServiceType)
             {
                 throw new RosInvalidMessageTypeException(
-                    $"Existing connection of {resolvedServiceName} with service type {existingReceiver.ServiceType} " +
+                    $"Existing connection of {resolvedServiceName} with service type {existingCaller.ServiceType} " +
                     "does not match the new given type.");
             }
 
-            if (!existingReceiver.IsAlive)
-            {
-                existingReceiver.Dispose();
-                subscribedServicesByName.TryRemove(resolvedServiceName, out _);
-                // continues below
-            }
-            else
+            if (existingCaller.IsAlive)
             {
                 // is there a persistent connection? use it
                 try
                 {
-                    await existingReceiver.ExecuteAsync(service, token);
+                    await existingCaller.ExecuteAsync(service, token);
                     return service;
                 }
                 catch (Exception e)
                 {
-                    existingReceiver.Dispose();
-                    subscribedServicesByName.TryRemove(resolvedServiceName, out _);
+                    existingCaller.Dispose();
+                    callersByService.TryRemove(resolvedServiceName, out _);
                     if (e is OperationCanceledException or RosServiceCallFailed) throw;
                     throw new RoslibException($"Service call '{resolvedServiceName}' to " +
-                                              $"{existingReceiver.RemoteUri?.ToString() ?? "[unknown]"} failed", e);
+                                              $"{existingCaller.RemoteUri?.ToString() ?? "[unknown]"} failed", e);
                 }
             }
+
+            existingCaller.Dispose();
+            callersByService.TryRemove(resolvedServiceName, out _);
+            // continues below
         }
 
         var response = await RosMasterClient.LookupServiceAsync(resolvedServiceName, token);
@@ -1651,7 +1649,7 @@ public sealed class RosClient : IRosClient
             var serviceCaller = new RosServiceCaller(serviceInfo);
             try
             {
-                subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
+                callersByService.TryAdd(resolvedServiceName, serviceCaller);
                 await serviceCaller.StartAsync(serviceUri, persistent, token);
                 await serviceCaller.ExecuteAsync(service, token);
                 return service;
@@ -1659,7 +1657,7 @@ public sealed class RosClient : IRosClient
             catch (Exception e)
             {
                 serviceCaller.Dispose();
-                subscribedServicesByName.TryRemove(resolvedServiceName, out _);
+                callersByService.TryRemove(resolvedServiceName, out _);
                 switch (e)
                 {
                     case OperationCanceledException or RosServiceCallFailed:
@@ -1696,7 +1694,7 @@ public sealed class RosClient : IRosClient
 
     bool ServiceAlreadyAdvertised(string serviceName, string serviceType)
     {
-        if (!publishedServicesByName.TryGetValue(serviceName, out var existingSender))
+        if (!listenersByService.TryGetValue(serviceName, out var existingSender))
         {
             return false;
         }
@@ -1768,7 +1766,7 @@ public sealed class RosClient : IRosClient
 
         var advertisedService = new RosServiceListener(serviceInfo, CallerUri.Host, Callback);
 
-        publishedServicesByName.TryAdd(resolvedServiceName, advertisedService);
+        listenersByService.TryAdd(resolvedServiceName, advertisedService);
 
         try
         {
@@ -1776,7 +1774,7 @@ public sealed class RosClient : IRosClient
         }
         catch (Exception e)
         {
-            publishedServicesByName.TryRemove(resolvedServiceName, out _);
+            listenersByService.TryRemove(resolvedServiceName, out _);
             throw new RosRpcException($"Failed to advertise service '{serviceName}'", e);
         }
 
@@ -1789,9 +1787,9 @@ public sealed class RosClient : IRosClient
     /// <param name="name">Name of the service</param>
     /// <param name="token">An optional cancellation token</param>
     /// <exception cref="ArgumentException">Thrown if name is null</exception>
-    public bool UnadvertiseService(string name, CancellationToken token = default)
+    public void UnadvertiseService(string name, CancellationToken token = default)
     {
-        return TaskUtils.RunSync(() => UnadvertiseServiceAsync(name, token));
+        TaskUtils.RunSync(() => UnadvertiseServiceAsync(name, token));
     }
 
     /// <summary>
@@ -1800,20 +1798,19 @@ public sealed class RosClient : IRosClient
     /// <param name="name">Name of the service</param>
     /// <param name="token">An optional cancellation token</param>
     /// <exception cref="ArgumentException">Thrown if name is null</exception>        
-    public async ValueTask<bool> UnadvertiseServiceAsync(string name, CancellationToken token = default)
+    public async ValueTask UnadvertiseServiceAsync(string name, CancellationToken token = default)
     {
         string resolvedServiceName = ResolveResourceName(name);
 
-        if (!publishedServicesByName.TryGetValue(resolvedServiceName, out var advertisedService))
+        if (!listenersByService.TryGetValue(resolvedServiceName, out var advertisedService))
         {
-            return false;
+            return;
         }
 
-        publishedServicesByName.TryRemove(resolvedServiceName, out _);
+        listenersByService.TryRemove(resolvedServiceName, out _);
 
         await advertisedService.DisposeAsync(token);
         await RosMasterClient.UnregisterServiceAsync(resolvedServiceName, advertisedService.Uri, token);
-        return true;
     }
 
     public bool IsServiceAvailable(string service)
@@ -1898,16 +1895,16 @@ public sealed class RosClient : IRosClient
             tasks.Add(RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, innerToken).AwaitNoThrow(this));
         }
 
-        var receivers = subscribedServicesByName.Values.ToArray();
-        subscribedServicesByName.Clear();
+        var receivers = callersByService.Values.ToArray();
+        callersByService.Clear();
 
         foreach (var receiver in receivers)
         {
             receiver.Dispose();
         }
 
-        var serviceManagers = publishedServicesByName.Values.ToArray();
-        publishedServicesByName.Clear();
+        var serviceManagers = listenersByService.Values.ToArray();
+        listenersByService.Clear();
 
         foreach (var serviceManager in serviceManagers)
         {
