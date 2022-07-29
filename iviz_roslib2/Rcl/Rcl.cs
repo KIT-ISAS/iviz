@@ -25,11 +25,10 @@ internal static class Rcl
         return new Span<T>(ptr.ToPointer(), size);
     }
 
-    public static unsafe ReadOnlySpan<byte> CreateReadOnlySpan(IntPtr ptr, int size)
+    public static unsafe Span<byte> CreateSpan(IntPtr ptr, int size)
     {
-        return new ReadOnlySpan<byte>(ptr.ToPointer(), size);
+        return new Span<byte>(ptr.ToPointer(), size);
     }
-
 
     public static void Check(IntPtr context, int result)
     {
@@ -40,6 +39,16 @@ internal static class Rcl
 
         string msg = ToString(GetErrorString(context));
         throw new RosRclException(msg, result);
+    }
+    
+    public static void Check(int result)
+    {
+        if (result == Ok)
+        {
+            return;
+        }
+
+        throw new RosRclException("Rcl operation failed", result);
     }
 
     [DllImport(Library, EntryPoint = "native_rcl_set_dds_profile_path")]
@@ -216,7 +225,7 @@ internal static class Rcl
 
     [DllImport(Library, EntryPoint = "native_rcl_take_response")]
     public static extern int TakeResponse(IntPtr clientHandle, IntPtr serializedMessageHandle,
-        out RmwServiceInfo requestHeader);
+        out RmwServiceInfo requestHeader, out IntPtr ptr, out int length);
 
     [DllImport(Library, EntryPoint = "native_rcl_create_service_handle")]
     public static extern int CreateServiceHandle(out IntPtr serviceHandle, IntPtr nodeHandle,

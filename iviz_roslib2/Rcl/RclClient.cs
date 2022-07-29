@@ -62,16 +62,21 @@ internal sealed class RclClient : IDisposable
         return Rcl.GetGraphGuardCondition(nodeHandle);
     }
 
-    public RclSubscriber Subscribe(string topic, string type, in QosProfile profile)
+    public RclSubscriber CreateSubscriber(string topic, string type, in QosProfile profile)
     {
         return new RclSubscriber(contextHandle, nodeHandle, topic, type, profile);
     }
 
-    public RclPublisher Advertise(string topic, string type)
+    public RclPublisher CreatePublisher(string topic, string type)
     {
         return new RclPublisher(contextHandle, nodeHandle, topic, type);
     }
 
+    public RclServerClient CreateServerClient(string topic, string type)
+    {
+        return new RclServerClient(contextHandle, nodeHandle, topic, type);
+    }
+    
     public NodeName[] GetNodeNames()
     {
         Check(Rcl.GetNodeNames(contextHandle, nodeHandle,

@@ -41,8 +41,8 @@ public sealed class RosClient : IRosClient
 
     readonly ConcurrentDictionary<string, IRos1Subscriber> subscribersByTopic = new();
     readonly ConcurrentDictionary<string, IRos1Publisher> publishersByTopic = new();
-    readonly ConcurrentDictionary<string, ServiceCaller> subscribedServicesByName = new();
-    readonly ConcurrentDictionary<string, ServiceListener> publishedServicesByName = new();
+    readonly ConcurrentDictionary<string, RosServiceCaller> subscribedServicesByName = new();
+    readonly ConcurrentDictionary<string, RosServiceListener> publishedServicesByName = new();
     readonly string namespacePrefix;
 
     RosNodeServer? listener;
@@ -1648,7 +1648,7 @@ public sealed class RosClient : IRosClient
         var serviceInfo = ServiceInfo.Instantiate<T>(CallerId, resolvedServiceName);
         if (persistent)
         {
-            var serviceCaller = new ServiceCaller(serviceInfo);
+            var serviceCaller = new RosServiceCaller(serviceInfo);
             try
             {
                 subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
@@ -1677,7 +1677,7 @@ public sealed class RosClient : IRosClient
 
         try
         {
-            using var serviceCaller = new ServiceCaller(serviceInfo);
+            using var serviceCaller = new RosServiceCaller(serviceInfo);
             await serviceCaller.StartAsync(serviceUri, persistent, token);
             await serviceCaller.ExecuteAsync(service, token);
             return service;
@@ -1766,7 +1766,7 @@ public sealed class RosClient : IRosClient
 
         ValueTask Callback(IService service) => callback((T)service);
 
-        var advertisedService = new ServiceListener(serviceInfo, CallerUri.Host, Callback);
+        var advertisedService = new RosServiceListener(serviceInfo, CallerUri.Host, Callback);
 
         publishedServicesByName.TryAdd(resolvedServiceName, advertisedService);
 

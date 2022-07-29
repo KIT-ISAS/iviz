@@ -11,7 +11,7 @@ using Nito.AsyncEx;
 
 namespace Iviz.Roslib;
 
-internal sealed class ServiceListener
+internal sealed class RosServiceListener
 {
     readonly Func<IService, ValueTask> callback;
     readonly HashSet<ServiceRequest> requests = new();
@@ -24,7 +24,7 @@ internal sealed class ServiceListener
 
     bool disposed;
 
-    public ServiceListener(ServiceInfo serviceInfo, string host, Func<IService, ValueTask> callback)
+    public RosServiceListener(ServiceInfo serviceInfo, string host, Func<IService, ValueTask> callback)
     {
         this.serviceInfo = serviceInfo;
         this.callback = callback;
@@ -122,6 +122,6 @@ internal sealed class ServiceListener
 
     public override string ToString()
     {
-        return $"[{nameof(ServiceListener)} {Service} [{ServiceType}] at {Uri}]";
+        return $"[{nameof(RosServiceListener)} {Service} [{ServiceType}] at {Uri}]";
     }
 }

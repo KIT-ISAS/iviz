@@ -13,12 +13,13 @@ internal sealed class AsyncRclClient : TaskExecutor
     readonly RclGuardCondition guard;
 
     readonly List<(RclSubscriber subscriber, ISignalizable signalizable)> subscribers = new();
-    readonly IntPtr[] cachedGuardHandles;
+    readonly List<(RclServerClient client, ISignalizable signalizable)> serverClients = new();
 
+    readonly IntPtr[] cachedGuardHandles;
     IntPtr[] cachedSubscriberHandles = Array.Empty<IntPtr>();
+    IntPtr[] cachedServerClientHandles = Array.Empty<IntPtr>();
 
     bool disposed;
-    bool subscribersChanged;
 
     public long GraphChangedTicks { get; private set; }
 
@@ -46,33 +47,43 @@ internal sealed class AsyncRclClient : TaskExecutor
 
     protected override void Wait()
     {
-        if (subscribersChanged)
-        {
-            cachedSubscriberHandles = subscribers.Select(tuple => tuple.subscriber.Handle).ToArray();
-            subscribersChanged = false;
-        }
-
         bool success = waitSet.WaitFor(cachedSubscriberHandles, cachedGuardHandles,
-            out var triggeredSubscriptions, out var triggeredGuards);
+            cachedServerClientHandles, default,
+            out var triggeredSubscriptions, out var triggeredGuards,
+            out var triggeredClients, out _);
 
         if (!success)
         {
             return;
         }
 
+        if (triggeredGuards[1] != 0)
+        {
+            GraphChangedTicks = DateTime.Now.Ticks;
+        }
+
         for (int i = 0; i < triggeredSubscriptions.Length; i++)
         {
-            if (triggeredSubscriptions[i] != IntPtr.Zero)
+            if (triggeredSubscriptions[i] != 0)
             {
                 subscribers[i].signalizable.Signal();
             }
         }
 
-        if (triggeredGuards[1] != IntPtr.Zero)
+        for (int i = 0; i < triggeredClients.Length; i++)
         {
-            GraphChangedTicks = DateTime.Now.Ticks;
+            if (triggeredClients[i] != 0)
+            {
+                serverClients[i].signalizable.Signal();
+            }
         }
     }
+
+    void RebuildCachedSubscribers()
+    {
+        cachedSubscriberHandles = subscribers.Select(tuple => tuple.subscriber.Handle).ToArray();
+    }
+
 
     public Task<RclSubscriber> SubscribeAsync(string topic, string type, ISignalizable signalizable,
         RosTransportHint transportHint,
@@ -87,9 +98,9 @@ internal sealed class AsyncRclClient : TaskExecutor
                 _ => throw new IndexOutOfRangeException()
             });
 
-            var subscriber = client.Subscribe(topic, type, profile);
+            var subscriber = client.CreateSubscriber(topic, type, profile);
             subscribers.Add((subscriber, signalizable));
-            subscribersChanged = true;
+            RebuildCachedSubscribers();
             return subscriber;
         }, token);
     }
@@ -98,23 +109,59 @@ internal sealed class AsyncRclClient : TaskExecutor
     {
         return Post(() =>
         {
-            if (subscribers.RemoveAll(pair => pair.subscriber == subscriber) != 1)
+            subscriber.Dispose();
+            if (subscribers.RemoveAll(tuple => tuple.subscriber == subscriber) != 1)
             {
-                Logger.LogErrorFormat("{0}: " + nameof(UnsubscribeAsync) + " failed to find subscriber for topic {1}",
-                    this, subscriber.Topic);
-            }
-            else
-            {
-                subscribersChanged = true;
+                Logger.LogErrorFormat("{0}: {2} failed to find subscriber for topic {1}",
+                    this, subscriber.Topic, nameof(UnsubscribeAsync));
+                return;
             }
 
-            subscriber.Dispose();
+            RebuildCachedSubscribers();
         }, token);
     }
 
     public Task<RclPublisher> AdvertiseAsync(string topic, string type, CancellationToken token)
     {
-        return Post(() => client.Advertise(topic, type), token);
+        return Post(() => client.CreatePublisher(topic, type), token);
+    }
+
+    public Task DisposePublisher(RclPublisher publisher, CancellationToken token)
+    {
+        return Post(publisher.Dispose, token);
+    }
+
+    void RebuildCachedServerClients()
+    {
+        cachedServerClientHandles = serverClients.Select(tuple => tuple.client.Handle).ToArray();
+    }
+
+    public Task<RclServerClient> CreateServerClientAsync(string topic, string type, ISignalizable signalizable,
+        CancellationToken token)
+    {
+        return Post(() =>
+        {
+            var serverClient = client.CreateServerClient(topic, type);
+            serverClients.Add((serverClient, signalizable));
+            RebuildCachedServerClients();
+            return serverClient;
+        }, token);
+    }
+
+    public Task DisposeServerClientAsync(RclServerClient serverClient, CancellationToken token)
+    {
+        return Post(() =>
+        {
+            serverClient.Dispose();
+            if (serverClients.RemoveAll(tuple => tuple.client == serverClient) != 1)
+            {
+                Logger.LogErrorFormat("{0}: {2} failed to find server client for service {1}",
+                    this, serverClient.Service, nameof(DisposeServerClientAsync));
+                return;
+            }
+
+            RebuildCachedServerClients();
+        }, token);
     }
 
     public Task<NodeName[]> GetNodeNamesAsync(CancellationToken token = default)
@@ -222,11 +269,6 @@ internal sealed class AsyncRclClient : TaskExecutor
                     .ToArray();
             }
         }, token);
-    }
-
-    public Task UnadvertiseAsync(RclPublisher publisher, CancellationToken token)
-    {
-        return Post(publisher.Dispose, token);
     }
 
     public override async ValueTask DisposeAsync(CancellationToken token)

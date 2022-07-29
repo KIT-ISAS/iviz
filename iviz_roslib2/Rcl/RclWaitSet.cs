@@ -17,13 +17,18 @@ internal sealed class RclWaitSet : IDisposable
     }
 
     public bool WaitFor(
-        ReadOnlySpan<IntPtr> subscriptions, ReadOnlySpan<IntPtr> guards,
-        out ReadOnlySpan<IntPtr> triggeredSubscriptions, out ReadOnlySpan<IntPtr> triggeredGuards)
+        Span<IntPtr> subscriptions, Span<IntPtr> guards,
+        Span<IntPtr> clients, Span<IntPtr> services,
+        out Span<long> triggeredSubscriptions, out Span<long> triggeredGuards,
+        out Span<long> triggeredClients, out Span<long> triggeredServices)
     {
         if (disposed)
         {
             throw new ObjectDisposedException(ToString());
         }
+
+        triggeredClients = default;
+        triggeredServices = default;
 
         ref readonly IntPtr subscriptionHandles = ref MemoryMarshal.GetReference(subscriptions);
         ref readonly IntPtr guardHandles = ref MemoryMarshal.GetReference(guards);
@@ -43,8 +48,8 @@ internal sealed class RclWaitSet : IDisposable
                 triggeredGuards = default;
                 return false;
             case RclRet.Ok:
-                triggeredSubscriptions = Rcl.CreateSpan<IntPtr>(changedSubscriptionHandles, subscriptions.Length);
-                triggeredGuards = Rcl.CreateSpan<IntPtr>(changedGuardHandles, guards.Length);
+                triggeredSubscriptions = Rcl.CreateSpan<long>(changedSubscriptionHandles, subscriptions.Length);
+                triggeredGuards = Rcl.CreateSpan<long>(changedGuardHandles, guards.Length);
                 return true;
             default:
                 Check(ret); // throws

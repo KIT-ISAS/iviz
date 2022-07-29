@@ -179,6 +179,6 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
         ids.Clear();
 
         client.RemovePublisher(this);
-        return client.Rcl.UnadvertiseAsync(publisher, default).AwaitNoThrow(this).AsValueTask();
+        return client.Rcl.DisposePublisher(publisher, default).AwaitNoThrow(this).AsValueTask();
     }
 }

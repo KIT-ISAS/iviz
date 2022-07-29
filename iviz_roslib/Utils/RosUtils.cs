@@ -307,15 +307,15 @@ internal static class RosUtils
             _ => 4 * 1024 * 1024,
         };
     }
-    
+
     public static IRequest DeserializeFrom(this IRequest generator, ReadOnlySpan<byte> bytes)
     {
-        return (IRequest) ReadBuffer.Deserialize(generator, bytes);
+        return ReadBuffer.Deserialize((IDeserializable<IRequest>)generator, bytes);
     }
 
     public static IResponse DeserializeFrom(this IResponse generator, ReadOnlySpan<byte> bytes)
     {
-        return (IResponse) ReadBuffer.Deserialize(generator, bytes);
+        return ReadBuffer.Deserialize((IDeserializable<IResponse>)generator, bytes);
     }
 }
 
@@ -330,7 +330,7 @@ public static class RosEventHandler
         Console.CancelKeyPress += (_, _) => tc.TrySetResult();
         return tc.Task;
     }
-    
+
     /// <summary>
     /// Waits until Ctrl+C is pressed. 
     /// </summary>

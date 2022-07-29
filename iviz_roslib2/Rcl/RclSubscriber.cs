@@ -9,7 +9,7 @@ internal sealed class RclSubscriber : IDisposable
     readonly IntPtr contextHandle;
     readonly IntPtr nodeHandle;
     readonly IntPtr subscriptionHandle;
-    readonly IntPtr messageBuffer;
+    readonly RclSerializedBuffer messageBuffer;
     bool disposed;
 
     internal IntPtr Handle => disposed
@@ -44,20 +44,20 @@ internal sealed class RclSubscriber : IDisposable
             throw new RosRclException($"Subscription for topic '{topic}' [{topicType}] failed!", ret);
         }
 
-        Check(Rcl.CreateSerializedMessage(out messageBuffer));
+        messageBuffer = new RclSerializedBuffer();
     }
 
     void Check(int result) => Rcl.Check(contextHandle, result);
 
-    public bool TryTakeMessage(out ReadOnlySpan<byte> span, out Guid guid)
+    public bool TryTakeMessage(out Span<byte> span, out Guid guid)
     {
-        int ret = Rcl.TakeSerializedMessage(Handle, messageBuffer, out IntPtr ptr, out int length, out guid);
+        int ret = Rcl.TakeSerializedMessage(Handle, messageBuffer.Handle, out IntPtr ptr, out int length, out guid);
 
         switch ((RclRet)ret)
         {
             case RclRet.Ok:
                 const int headerSize = 4;
-                span = Rcl.CreateReadOnlySpan(ptr + headerSize, length - 4);
+                span = Rcl.CreateSpan(ptr + headerSize, length - 4);
                 return true;
             case RclRet.SubscriptionTakeFailed:
                 span = default;
@@ -85,7 +85,7 @@ internal sealed class RclSubscriber : IDisposable
         if (disposed) return;
         disposed = true;
         GC.SuppressFinalize(this);
-        Rcl.DestroySerializedMessage(messageBuffer);
+        messageBuffer.Dispose();
         Rcl.DestroySubscriptionHandle(subscriptionHandle, nodeHandle);
     }
 

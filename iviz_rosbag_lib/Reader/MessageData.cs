@@ -16,7 +16,7 @@ namespace Iviz.Rosbag.Reader;
 [DataContract]
 public readonly struct MessageData
 {
-    static readonly Dictionary<string, ISerializable> GeneratorsByMessageType = new();
+    static readonly Dictionary<string, IDeserializable<IMessage>> GeneratorsByMessageType = new();
 
     readonly Stream reader;
     [DataMember] readonly long dataStart;
@@ -88,7 +88,7 @@ public readonly struct MessageData
     /// Retrieves the enclosed dynamic message. Consider using <see cref="LinqUtils.SelectAnyMessage"/> instead of this.
     /// </summary>
     /// <returns>The enclosed message.</returns>
-    public IMessageRos1 GetAnyMessage()
+    public IMessage GetAnyMessage()
     {
         string? type = Type;
         if (type == null)
@@ -96,7 +96,7 @@ public readonly struct MessageData
             throw new InvalidOperationException("Connection record does not contain a type name");
         }
 
-        ISerializable? generator;
+        IDeserializable<IMessage>? generator;
         if (GeneratorsByMessageType.TryGetValue(type, out var serializable))
         {
             generator = serializable;
@@ -120,7 +120,7 @@ public readonly struct MessageData
         {
             reader.Seek(dataStart, SeekOrigin.Begin);
             reader.ReadAll(span);
-            return (IMessageRos1)ReadBuffer.Deserialize(generator, span);
+            return ReadBuffer.Deserialize(generator, span);
         }
     }
 

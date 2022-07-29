@@ -10,7 +10,7 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
-internal sealed class ServiceCaller : IDisposable
+internal sealed class RosServiceCaller : IDisposable
 {
     const int DefaultTimeoutInMs = 5000;
     const byte ErrorByte = 0;
@@ -25,7 +25,7 @@ internal sealed class ServiceCaller : IDisposable
     public string ServiceType => serviceInfo.Type;
     public Uri? RemoteUri { get; private set; }
 
-    public ServiceCaller(ServiceInfo serviceInfo, bool requestNoDelay = true)
+    public RosServiceCaller(ServiceInfo serviceInfo, bool requestNoDelay = true)
     {
         this.serviceInfo = serviceInfo;
         this.requestNoDelay = requestNoDelay;
@@ -155,8 +155,8 @@ internal sealed class ServiceCaller : IDisposable
         {
             throw new RosServiceCallFailed(serviceInfo.Service, BuiltIns.UTF8.GetString(readBuffer));
         }
-        
-        service.Response = (IResponse)service.Response.DeserializeFrom(readBuffer);
+
+        service.Response = service.Response.DeserializeFrom(readBuffer);
     }
 
     async ValueTask<byte> ReadOneByteAsync(CancellationToken token)
