@@ -424,6 +424,7 @@ public unsafe struct ReadBuffer
         val = Array.Empty<T>(); // unreachable
     }
 
+    /*
     /// <summary>
     /// Deserializes a message of the given type from the buffer array.  
     /// </summary>
@@ -444,6 +445,7 @@ public unsafe struct ReadBuffer
             return generator.RosDeserializeBase(ref b);
         }
     }
+    */
 
     /// <summary>
     /// Deserializes a message of the given type from the buffer array.  
