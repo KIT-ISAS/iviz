@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "231C403828898A25005A8488"
+               BlueprintIdentifier = "23431CEA288991E7005C5FA3"
                BuildableName = "iviz_ros2_rcl_macos.bundle"
                BlueprintName = "iviz_ros2_rcl_macos"
                ReferencedContainer = "container:iviz_ros2_rcl.xcodeproj">
@@ -50,7 +50,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "231C403828898A25005A8488"
+            BlueprintIdentifier = "23431CEA288991E7005C5FA3"
             BuildableName = "iviz_ros2_rcl_macos.bundle"
             BlueprintName = "iviz_ros2_rcl_macos"
             ReferencedContainer = "container:iviz_ros2_rcl.xcodeproj">

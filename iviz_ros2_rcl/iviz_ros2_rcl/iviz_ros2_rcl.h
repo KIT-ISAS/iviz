@@ -55,7 +55,10 @@ int32_t native_rcl_wait_set_init(void *context_handle,
                                  int32_t number_of_events);
 
 int32_t native_rcl_wait(void *wait_set_handle, int32_t timeout_in_ms,
-                        void ***subscription_handles, void ***guard_handles);
+                        void ***subscription_handles,
+                        void ***guard_handles,
+                        void ***client_handles,
+                        void ***service_handles);
 
 int32_t native_rcl_wait_clear_and_add(void *wait_set_handle,
                                       void **subscription_handles, int num_subscription_handles,
@@ -82,7 +85,11 @@ int32_t native_rcl_subscription_get_publisher_count(void *subscription_handle, i
 int32_t native_rcl_destroy_subscription_handle(void *subscription_handle, void *node_handle);
 
 
-bool native_rcl_is_type_supported(const char *type);
+
+bool native_rcl_is_message_type_supported(const char *type);
+
+bool native_rcl_is_service_type_supported(const char *type);
+
 
 
 int32_t native_rcl_take_serialized_message(void *subscription_handle, void *serialized_message, void **ptr, int32_t *length, void *gid);

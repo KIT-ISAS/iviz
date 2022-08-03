@@ -83,6 +83,27 @@
 #include <visualization_msgs/msg/interactive_marker_update.h>
 #include <visualization_msgs/msg/interactive_marker_init.h>
 
+#include <iviz_msgs/msg/xr_gaze_state.h>
+#include <iviz_msgs/msg/xr_hand_state.h>
+#include <iviz_msgs/msg/ar_marker_array.h>
+#include <iviz_msgs/msg/widget_array.h>
+
+#include <iviz_msgs/srv/get_model_resource.h>
+#include <iviz_msgs/srv/get_model_texture.h>
+#include <iviz_msgs/srv/get_file.h>
+#include <iviz_msgs/srv/get_sdf.h>
+#include <iviz_msgs/srv/add_module.h>
+#include <iviz_msgs/srv/add_module_from_topic.h>
+#include <iviz_msgs/srv/get_modules.h>
+#include <iviz_msgs/srv/update_module.h>
+#include <iviz_msgs/srv/reset_module.h>
+#include <iviz_msgs/srv/set_fixed_frame.h>
+
+#include <iviz_msgs/srv/update_robot.h>
+#include <iviz_msgs/srv/launch_dialog.h>
+
+#include <grid_map_msgs/msg/grid_map.h>
+
 
 static char log_buffer[2048];
 
@@ -138,6 +159,12 @@ static std::map<std::string, rosidl_message_type_support_t*> default_types
     ENTRY(visualization_msgs, InteractiveMarkerFeedback),
     ENTRY(visualization_msgs, InteractiveMarkerInit),
     ENTRY(visualization_msgs, InteractiveMarkerUpdate),
+    ENTRY(grid_map_msgs, GridMap),
+
+    ENTRY(iviz_msgs, XRGazeState),
+    ENTRY(iviz_msgs, XRHandState),
+    ENTRY(iviz_msgs, ARMarkerArray),
+    ENTRY(iviz_msgs, WidgetArray),
 };
 
 #define SRVTYPE(a, b) (rosidl_service_type_support_t*) ROSIDL_GET_SRV_TYPE_SUPPORT(a, srv, b)
@@ -151,6 +178,20 @@ static std::map<std::string, rosidl_service_type_support_t*> default_service_typ
     SRVENTRY(rcl_interfaces, ListParameters),
     SRVENTRY(rcl_interfaces, SetParameters),
     SRVENTRY(rcl_interfaces, SetParametersAtomically),
+    
+    SRVENTRY(iviz_msgs, GetModelResource),
+    SRVENTRY(iviz_msgs, GetModelTexture),
+    SRVENTRY(iviz_msgs, GetFile),
+    SRVENTRY(iviz_msgs, GetSdf),
+    SRVENTRY(iviz_msgs, AddModule),
+    SRVENTRY(iviz_msgs, AddModuleFromTopic),
+    SRVENTRY(iviz_msgs, GetModules),
+    SRVENTRY(iviz_msgs, UpdateModule),
+    SRVENTRY(iviz_msgs, ResetModule),
+    SRVENTRY(iviz_msgs, SetFixedFrame),
+    
+    SRVENTRY(iviz_msgs, UpdateRobot),
+    SRVENTRY(iviz_msgs, LaunchDialog),
 };
 
 extern "C"
@@ -360,24 +401,27 @@ int32_t native_rcl_wait_clear_and_add(void *wait_set_handle,
         rcl_guard_condition_t *guard = (rcl_guard_condition_t *)guard_handles[i];
         IgnoreRet(rcl_wait_set_add_guard_condition(wait_set, guard, nullptr));
     }
-
+    
     for (int i = 0; i < num_client_handles; i++)
     {
         rcl_client_t *client = (rcl_client_t *)client_handles[i];
         IgnoreRet(rcl_wait_set_add_client(wait_set, client, nullptr));
     }
-
+    
     for (int i = 0; i < num_service_handles; i++)
     {
         rcl_service_t *service = (rcl_service_t *)service_handles[i];
         IgnoreRet(rcl_wait_set_add_service(wait_set, service, nullptr));
     }
-
+    
     return RCL_RET_OK;
 }
 
 int32_t native_rcl_wait(void *wait_set_handle, int32_t timeout_in_ms,
-                        void ***subscription_handles, void ***guard_handles)
+                        void ***subscription_handles,
+                        void ***guard_handles,
+                        void ***client_handles,
+                        void ***service_handles)
 {
     rcl_wait_set_t *wait_set = (rcl_wait_set_t *)wait_set_handle;
     rcl_ret_t ret = rcl_wait(wait_set, RCL_MS_TO_NS(timeout_in_ms));
@@ -386,11 +430,15 @@ int32_t native_rcl_wait(void *wait_set_handle, int32_t timeout_in_ms,
     {
         *subscription_handles = nullptr;
         *guard_handles = nullptr;
+        *client_handles = nullptr;
+        *service_handles = nullptr;
         return ret;
     }
     
     *subscription_handles = (void**) wait_set->subscriptions;
     *guard_handles = (void**) wait_set->guard_conditions;
+    *client_handles = (void**) wait_set->clients;
+    *service_handles = (void**) wait_set->services;
     return RCL_RET_OK;
 }
 
@@ -409,9 +457,14 @@ const char* native_rcl_get_error_string(void *context_handle)
     return context->message.c_str();
 }
 
-bool native_rcl_is_type_supported(const char *type)
+bool native_rcl_is_message_type_supported(const char *type)
 {
     return default_types.count(type) != 0;
+}
+
+bool native_rcl_is_service_type_supported(const char *type)
+{
+    return default_service_types.count(type) != 0;
 }
 
 int32_t native_rcl_create_subscription_handle(void **subscription_handle,
@@ -1073,10 +1126,20 @@ int32_t native_rcl_send_request(void *client_handle, void* serialized_message_ha
     CustomClientInfo* info = static_cast<CustomClientInfo *>(client->data);
     assert(info);
     
+    eprosima::fastcdr::FastBuffer buffer(reinterpret_cast<char *>(serialized_message->buffer),
+                                         serialized_message->buffer_length);
+    eprosima::fastcdr::Cdr ser(buffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
+                               eprosima::fastcdr::Cdr::DDS_CDR);
+    if (!ser.jump(serialized_message->buffer_length))
+    {
+        RMW_SET_ERROR_MSG("cannot correctly set serialized buffer");
+        return RMW_RET_ERROR;
+    }
+    
     eprosima::fastrtps::rtps::WriteParams wparams;
     rmw_fastrtps_shared_cpp::SerializedData data;
     data.is_cdr_buffer = true;
-    data.data = serialized_message->buffer;
+    data.data = &ser;
     data.impl = nullptr;
     wparams.related_sample_identity().writer_guid() = info->reader_guid_;
     if (info->request_publisher_->write(&data, wparams))
@@ -1142,22 +1205,6 @@ int32_t native_rcl_take_response(void *client_handle, void* serialized_message_h
         *length = (int32_t) serialized_message->buffer_length;
         
         return RMW_RET_OK;
-        /*
-         auto raw_type_support = dynamic_cast<rmw_fastrtps_shared_cpp::TypeSupport *>(info->response_type_support_.get());
-         eprosima::fastcdr::Cdr deser(*response.buffer_,
-         eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
-         eprosima::fastcdr::Cdr::DDS_CDR);
-         if (raw_type_support->deserializeROSmessage(deser, ros_response, info->response_type_support_impl_))
-         {
-         request_header->source_timestamp = response.sample_info_.source_timestamp.to_ns();
-         request_header->received_timestamp = response.sample_info_.reception_timestamp.to_ns();
-         request_header->request_id.sequence_number =
-         ((int64_t)response.sample_identity_.sequence_number().high) <<
-         32 | response.sample_identity_.sequence_number().low;
-         
-         return RMW_RET_OK;
-         }
-         */
     }
     
     *ptr = nullptr;
@@ -1217,8 +1264,7 @@ int32_t native_rcl_send_response(void *service_handle, void* serialized_message_
     
     
     RMW_CHECK_ARGUMENT_FOR_NULL(service, RMW_RET_INVALID_ARGUMENT);
-    RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-                                     service,
+    RMW_CHECK_TYPE_IDENTIFIERS_MATCH(service,
                                      service->implementation_identifier, identifier,
                                      return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
     RMW_CHECK_ARGUMENT_FOR_NULL(request_header_handle, RMW_RET_INVALID_ARGUMENT);
@@ -1238,22 +1284,11 @@ int32_t native_rcl_send_response(void *service_handle, void* serialized_message_
     wparams.related_sample_identity().sequence_number().low =
     (int32_t)(request_header->sequence_number & 0xFFFFFFFF);
     
-    // TODO(MiguelCompany) The following block is a workaround for the race on the
-    // discovery of services. It is (ab)using a related_sample_identity on the request
-    // with the GUID of the response reader, so we can wait here for it to be matched to
-    // the server response writer. In the future, this should be done with the mechanism
-    // explained on OMG DDS-RPC 1.0 spec under section 7.6.2 (Enhanced Service Mapping)
-    
-    // According to the list of possible entity kinds in section 9.3.1.2 of RTPS
-    // readers will have this bit on, while writers will not. We use this to know
-    // if the related guid is the request writer or the response reader.
     constexpr uint8_t entity_id_is_reader_bit = 0x04;
     const eprosima::fastrtps::rtps::GUID_t & related_guid =
     wparams.related_sample_identity().writer_guid();
     if ((related_guid.entityId.value[3] & entity_id_is_reader_bit) != 0)
     {
-        // Related guid is a reader, so it is the response subscription guid.
-        // Wait for the response writer to be matched with it.
         auto listener = static_cast<PatchedServicePubListener *>(info->pub_listener_);
         client_present_t ret = listener->check_for_subscription(related_guid);
         if (ret == client_present_t::GONE)
@@ -1267,9 +1302,20 @@ int32_t native_rcl_send_response(void *service_handle, void* serialized_message_
         }
     }
     
+    eprosima::fastcdr::FastBuffer buffer(reinterpret_cast<char *>(serialized_message->buffer),
+                                         serialized_message->buffer_length);
+    eprosima::fastcdr::Cdr ser(buffer, eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
+                               eprosima::fastcdr::Cdr::DDS_CDR);
+    if (!ser.jump(serialized_message->buffer_length))
+    {
+        RMW_SET_ERROR_MSG("cannot correctly set serialized buffer");
+        return RMW_RET_ERROR;
+    }
+    
+    
     rmw_fastrtps_shared_cpp::SerializedData data;
     data.is_cdr_buffer = true;
-    data.data = serialized_message->buffer;
+    data.data = &ser;
     data.impl = nullptr;
     if (info->response_publisher_->write(&data, wparams))
     {
@@ -1333,7 +1379,7 @@ int32_t native_rcl_take_request(void *service_handle, void* serialized_message_h
         
         *ptr = serialized_message->buffer;
         *length = (int32_t)serialized_message->buffer_length;
-
+        
         return RMW_RET_OK;
     }
     
@@ -1483,7 +1529,7 @@ int main_subscribe()
         native_rcl_wait_set_add_subscription((void*)wait_set_handle, (void*)subscription_handle);
         
         void **dummy;
-        ret = native_rcl_wait(wait_set_handle, 5000, &dummy, &dummy);
+        ret = native_rcl_wait(wait_set_handle, 5000, &dummy, &dummy, &dummy, &dummy);
         std::cout << ret << std::endl;
         if (ret == RCL_RET_TIMEOUT)
         {
