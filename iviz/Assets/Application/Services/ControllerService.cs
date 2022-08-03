@@ -66,8 +66,8 @@ namespace Iviz.Controllers
             //connection.AdvertiseService<StopCapture>("stop_capture", StopCaptureAsync);
             //connection.AdvertiseService<CaptureScreenshot>("capture_screenshot", CaptureScreenshotAsync);
 
-            connection.AdvertiseService<UpdateRobot>("update_robot", UpdateRobotAsync);
-            connection.AdvertiseService<LaunchDialog>("launch_dialog", LaunchDialogAsync);
+            connection.AdvertiseService<UpdateRobot>("~update_robot", UpdateRobotAsync);
+            connection.AdvertiseService<LaunchDialog>("~launch_dialog", LaunchDialogAsync);
         }
 
         static void GetLoggers(GetLoggers srv)
@@ -336,21 +336,11 @@ namespace Iviz.Controllers
                 return result;
             }
 
-            ModuleType moduleType;
+            ModuleType? moduleType;
             string[] validatedFields;
             try
             {
-                var moduleInfo = JsonUtils.DeserializeObject<GenericConfiguration>(config);
-
-                if (moduleInfo.ModuleType is not { } type)
-                {
-                    result.success = false;
-                    result.message = "JSON config does not contain a ModuleType field";
-                    return result;
-                }
-
-                moduleType = type;
-
+                moduleType = JsonUtils.DeserializeObject<GenericConfiguration>(config).ModuleType;
                 validatedFields = fields.Length != 0 ? fields : GetFields(config);
             }
             catch (JsonException e)
@@ -386,10 +376,10 @@ namespace Iviz.Controllers
                         return;
                     }
 
-                    if (module.ModuleType != moduleType)
+                    if (moduleType is { } givenModuleType && givenModuleType != moduleType)
                     {
                         result.success = false;
-                        result.message = $"Given ModuleType field '{ModuleNames[moduleType]}' does not match " +
+                        result.message = $"Given ModuleType field '{ModuleNames[givenModuleType]}' does not match " +
                                          $"existing type '{ModuleNames[module.ModuleType]}'";
                         return;
                     }
@@ -412,50 +402,6 @@ namespace Iviz.Controllers
             }
 
             return result;
-
-            /*
-            using var signal = new SemaphoreSlim(0);
-            GameThread.Post(() =>
-            {
-                try
-                {
-                    if (!ModuleDatas.TryGetFirst(data => data.Configuration.Id == id, out var module))
-                    {
-                        result.success = false;
-                        result.message = $"There is no module with id '{id}'";
-                        return;
-                    }
-
-                    if (module.ModuleType != moduleType)
-                    {
-                        result.success = false;
-                        result.message = $"Given ModuleType field '{ModuleNames[moduleType]}' does not match " +
-                                         $"existing type '{ModuleNames[module.ModuleType]}'";
-                        return;
-                    }
-
-                    module.UpdateConfiguration(config, validatedFields);
-                    result.success = true;
-                }
-                catch (JsonException e)
-                {
-                    result.success = false;
-                    result.message = $"Error parsing JSON config: {e.Message}";
-                    RosLogger.Error($"{nameof(ControllerService)}: Error in {nameof(TryUpdateModuleAsync)}", e);
-                }
-                catch (Exception e)
-                {
-                    result.success = false;
-                    result.message = $"An exception was raised: {e.Message}";
-                    RosLogger.Error($"{nameof(ControllerService)}: Error in {nameof(TryUpdateModuleAsync)}", e);
-                }
-                finally
-                {
-                    signal.Release();
-                }
-            });
-            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : (false, "Request timed out!");
-            */
         }
 
         [Preserve]
@@ -831,9 +777,9 @@ namespace Iviz.Controllers
             switch (srv.Request.Operation)
             {
                 case 0:
-                    return RemoveRobotAsync(srv);
-                case 1:
                     return AddRobotAsync(srv);
+                case 1:
+                    return RemoveRobotAsync(srv);
                 default:
                     srv.Response.Success = false;
                     srv.Response.Message = "Unknown operation";
@@ -867,29 +813,18 @@ namespace Iviz.Controllers
                 return;
             }
 
-            using var signal = new SemaphoreSlim(0);
-            GameThread.Post(() =>
+            try
             {
-                try
+                await GameThread.PostAsync(() =>
                 {
                     RosLogger.Info($"{nameof(ControllerService)}: Removing robot");
                     ModuleListPanel.Instance.RemoveModule(moduleData);
-                }
-                catch (Exception e)
-                {
-                    srv.Response.Success = false;
-                    srv.Response.Message = $"An exception was raised: {e.Message}";
-                }
-                finally
-                {
-                    signal.Release();
-                }
-            });
-            if (!await signal.WaitAsync(DefaultTimeoutInMs))
+                });
+            }
+            catch (Exception e)
             {
                 srv.Response.Success = false;
-                srv.Response.Message = "Request timed out!";
-                return;
+                srv.Response.Message = $"An exception was raised: {e.Message}";
             }
 
             if (string.IsNullOrEmpty(srv.Response.Message))
@@ -923,9 +858,9 @@ namespace Iviz.Controllers
             {
                 await GameThread.PostAsync(() =>
                 {
-                    //Logger.Info($"ControllerService: Creating robot");
-                    var newModuleData = moduleData ?? ModuleListPanel.Instance.CreateModule(
-                        ModuleType.Robot, requestedId: id.Length != 0 ? id : null);
+                    var newModuleData = moduleData ??
+                                        ModuleListPanel.Instance.CreateModule(ModuleType.Robot,
+                                            requestedId: id.Length != 0 ? id : null);
                     srv.Response.Success = true;
 
                     var srcConfiguration = srv.Request.Configuration;
@@ -971,7 +906,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (Mathf.Abs((float)srv.Request.Dialog.Scale) < 1e-8)
+            if (srv.Request.Dialog.Scale.ApproximatelyZero())
             {
                 srv.Response.Success = false;
                 srv.Response.Message = "Cannot launch dialog with scale 0";

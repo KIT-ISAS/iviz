@@ -1,4 +1,5 @@
 using Iviz.Core;
+using Iviz.Msgs.IvizMsgs;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,6 +22,7 @@ namespace Iviz.App
         CanvasScaler Scaler => scaler.AssertNotNull(nameof(scaler));
 
         ScreenOrientation currentOrientation;
+        Vector2Int currentResolution;
 
         void Awake()
         {
@@ -43,15 +45,12 @@ namespace Iviz.App
         void Start()
         {
             UpdateSize();
-            if (!Settings.IsMobile)
-            {
-                enabled = false;
-            }
         }
 
         void UpdateSize()
         {
             currentOrientation = Screen.orientation;
+            currentResolution = CurrentResolution();
             
             float fullSize = FullCanvas.rect.width;
             float scale = fullSize / Screen.width;
@@ -74,10 +73,16 @@ namespace Iviz.App
 
         void Update()
         {
-            if (Screen.orientation != currentOrientation)
+            if (Screen.orientation != currentOrientation || CurrentResolution()  == currentResolution)
             {
                 UpdateSize();
             }
+        }
+
+        static Vector2Int CurrentResolution()
+        {
+            var resolution = Screen.currentResolution;
+            return new Vector2Int(resolution.width, resolution.height);
         }
     }
 }

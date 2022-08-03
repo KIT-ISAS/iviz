@@ -23,7 +23,7 @@ namespace Iviz.App
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic)
         {
             panel = ModulePanelManager.GetPanelByResourceType<GuiWidgetModulePanel>(ModuleType.GuiWidget);
-            listener = new GuiWidgetListener((GuiWidgetConfiguration?)constructor.Configuration, Topic);
+            listener = new GuiWidgetListener((GuiWidgetConfiguration?)constructor.Configuration, Topic, constructor.Type);
             Interactable = ModuleListPanel.SceneInteractable;
             UpdateModuleButton();
         }

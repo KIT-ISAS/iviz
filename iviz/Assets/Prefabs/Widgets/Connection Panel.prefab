@@ -453,8 +453,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.8967285, y: 480.48004}
-  m_SizeDelta: {x: -1.7934, y: -960.96}
+  m_AnchoredPosition: {x: -0.8967285, y: 150.17}
+  m_SizeDelta: {x: -1.7934, y: -300.33}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6316812648008045073
 CanvasRenderer:
@@ -471,7 +471,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1244121966979591720}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -1768,8 +1768,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.8967285, y: 480.48004}
-  m_SizeDelta: {x: -1.7934, y: -960.96}
+  m_AnchoredPosition: {x: -0.8967285, y: 150.17}
+  m_SizeDelta: {x: -1.7934, y: -300.33}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5379382264065932497
 CanvasRenderer:
@@ -1786,7 +1786,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5953602625877795006}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -2095,7 +2095,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Note: ROS2 support is experimental!'
+  m_text: <b>Note:</b> ROS2 support is experimental!
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7ab7bd6bfe316484d8697f049b23fb2c, type: 2}
   m_sharedMaterial: {fileID: -6388908872585162227, guid: 7ab7bd6bfe316484d8697f049b23fb2c,

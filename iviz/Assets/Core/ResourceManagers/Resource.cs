@@ -112,7 +112,9 @@ namespace Iviz.Resources
                 { Twist.MessageType, ModuleType.Magnitude },
                 { OccupancyGrid.MessageType, ModuleType.OccupancyGrid },
                 { GridMap.MessageType, ModuleType.GridMap },
+
                 { WidgetArray.MessageType, ModuleType.GuiWidget },
+                { Dialog.MessageType, ModuleType.GuiWidget },
 
                 // these are already implemented, but need refinement
                 //{ JointState.MessageType, ModuleType.JointState },

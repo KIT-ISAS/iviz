@@ -14,5 +14,6 @@ namespace Iviz.Core.Configurations
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public bool Interactable { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
+        [DataMember] public string Type { get; set; } = "";
     }
 }

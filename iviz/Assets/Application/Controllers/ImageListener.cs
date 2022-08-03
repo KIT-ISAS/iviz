@@ -224,7 +224,8 @@ namespace Iviz.Controllers
             Config = config ?? new ImageConfiguration
             {
                 Topic = topic,
-                Type = type
+                Type = type,
+                Id = topic
             };
 
             Listener = Config.Type switch

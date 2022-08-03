@@ -1,5 +1,6 @@
 #nullable enable
 
+using System;
 using Iviz.Core;
 using TMPro;
 using UnityEngine;
@@ -7,7 +8,8 @@ using UnityEngine;
 namespace Iviz.Displays.XR
 {
     public sealed class XRIconDialog : XRDialog,
-        IDialogWithTitle, IDialogWithCaption, IDialogWithAlignment, IDialogWithIcon, IDialogWithButtonSetup
+        IDialogWithTitle, IDialogWithCaption, IDialogWithAlignment, IDialogWithIcon, IDialogWithButtonSetup, 
+        IDialogCanBeClicked
     {
         [SerializeField] TMP_Text? title;
         [SerializeField] TMP_Text? caption;
@@ -22,6 +24,8 @@ namespace Iviz.Displays.XR
         XRButton Button1 => button1.AssertNotNull(nameof(button1));
         XRButton Button2 => button2.AssertNotNull(nameof(button2));
         XRButton Button3 => button3.AssertNotNull(nameof(button3));
+
+        public event Action<int>? Clicked;
 
         public string Title
         {
@@ -53,6 +57,17 @@ namespace Iviz.Displays.XR
             }
         }
 
+        protected override void Awake()
+        {
+            base.Awake();
+            // button 1 only appears alone
+            Button1.Clicked += () => Clicked?.Invoke(0);
+
+            // button 2 and 3 only appear in pairs
+            Button2.Clicked += () => Clicked?.Invoke(0);
+            Button3.Clicked += () => Clicked?.Invoke(1);
+        }
+        
         public ButtonSetup ButtonSetup
         {
             set => SetupButtons(Button1, Button2, Button3, value);

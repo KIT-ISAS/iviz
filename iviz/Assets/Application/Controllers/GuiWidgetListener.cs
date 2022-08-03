@@ -26,7 +26,7 @@ namespace Iviz.Controllers
         public static void DisposeDefaultHandler() => defaultHandler?.Dispose();
 
         public static GuiWidgetListener DefaultHandler =>
-            defaultHandler ??= new GuiWidgetListener(null, "~dialogs");
+            defaultHandler ??= new GuiWidgetListener(null, "~dialogs", Dialog.MessageType);
 
         readonly GuiWidgetConfiguration config = new();
         readonly Dictionary<string, GuiObject> widgets = new();
@@ -44,6 +44,7 @@ namespace Iviz.Controllers
             {
                 config.Topic = value.Topic;
                 config.Id = value.Id;
+                config.Type = value.Type;
                 Visible = value.Visible;
                 Interactable = value.Interactable;
             }
@@ -72,7 +73,7 @@ namespace Iviz.Controllers
                 {
                     widget.Interactable = value;
                 }
-                
+
                 foreach (var dialog in dialogs.Values)
                 {
                     dialog.Interactable = value;
@@ -113,17 +114,24 @@ namespace Iviz.Controllers
             }
         }
 
-        public GuiWidgetListener(GuiWidgetConfiguration? configuration, string topic)
+        public GuiWidgetListener(GuiWidgetConfiguration? configuration, string topic, string type)
         {
             Config = configuration ?? new GuiWidgetConfiguration
             {
                 Topic = topic,
-                Id = topic
+                Id = topic,
+                Type = type,
             };
 
             GameThread.EveryFrame += CheckDeadDialogs;
 
-            Listener = new Listener<WidgetArray>(config.Topic, Handler) { MaxQueueSize = 50 };
+            Listener = Config.Type switch
+            {
+                WidgetArray.MessageType => new Listener<WidgetArray>(Config.Topic, Handler) { MaxQueueSize = 50 },
+                Dialog.MessageType => new Listener<Dialog>(Config.Topic, Handler) { MaxQueueSize = 50 },
+                _ => throw new InvalidOperationException("Invalid message type")
+            };
+
             FeedbackSender = new Sender<Feedback>($"{config.Topic}/feedback");
         }
 
