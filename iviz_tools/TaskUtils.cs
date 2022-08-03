@@ -35,8 +35,8 @@ public static class TaskUtils
     public static T RunSync<T>(Func<CancellationToken, ValueTask<T>> func, CancellationToken token = default) =>
         Run(() => func(token).AsTask(), token).WaitAndRethrow();
 
-    public static T RunSync<T>(Func<ValueTask<T>> func) =>
-        Run(() => func().AsTask()).WaitAndRethrow();
+    public static T RunSync<T>(Func<ValueTask<T>> func, CancellationToken token = default) =>
+        Run(() => func().AsTask(), token).WaitAndRethrow();
 
     public static void RunSync(Func<CancellationToken, ValueTask> func, CancellationToken token = default) =>
         Run(() => func(token).AsTask(), token).WaitAndRethrow();
@@ -44,11 +44,11 @@ public static class TaskUtils
     public static void RunSync(Func<CancellationToken, Task> func, CancellationToken token = default) =>
         Run(() => func(token), token).WaitAndRethrow();
 
-    public static void RunSync(Func<ValueTask> func) => 
-        Run(() => func().AsTask()).WaitAndRethrow();
+    public static void RunSync(Func<ValueTask> func, CancellationToken token = default) => 
+        Run(() => func().AsTask(), token).WaitAndRethrow();
 
-    public static void RunSync(Func<Task> func) => 
-        Run(func).WaitAndRethrow();    
+    public static void RunSync(Func<Task> func, CancellationToken token = default) => 
+        Run(func, token).WaitAndRethrow();    
 
     /// <summary>
     /// Waits for the task to complete.
@@ -364,19 +364,6 @@ public static class TaskUtils
 
         return values;
     }
-    
-    public static async ValueTask<TB[]> WhenAll<TA, TB, TC>(this SelectEnumerable<TC, TA, Task<TB>> ts)
-        where TC : IReadOnlyList<TA>
-    {
-        var tasks = ts.ToArray(); // evaluate to start tasks in parallel
-        TB[] values = new TB[tasks.Length];
-        for (int i = 0; i < tasks.Length; i++)
-        {
-            values[i] = await tasks[i];
-        }
-
-        return values;
-    }
 
     /// <summary>
     /// Creates a <see cref="TaskCompletionSource"/> and sets its creation options to
@@ -430,6 +417,6 @@ public class TaskCompletionSource
     public TaskCompletionSource(TaskCreationOptions options) => ts = new TaskCompletionSource<object?>(options);
     public void TrySetException(Exception e) => ts.TrySetException(e);
     public void TrySetResult() => ts.TrySetResult(null);
-    public void TrySetCanceled() => ts.TrySetCanceled();
+    public void TrySetCanceled(CancellationToken token = default) => ts.TrySetCanceled(token);
 }
 #endif
