@@ -70,8 +70,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Compress);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new CaptureScreenshotRequest(ref b);
-        
         public CaptureScreenshotRequest RosDeserialize(ref ReadBuffer b) => new CaptureScreenshotRequest(ref b);
         
         public CaptureScreenshotRequest RosDeserialize(ref ReadBuffer2 b) => new CaptureScreenshotRequest(ref b);
@@ -94,9 +92,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 1;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {
@@ -151,8 +147,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Pose);
             b.DeserializeStructArray(out Data);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new CaptureScreenshotResponse(ref b);
         
         public CaptureScreenshotResponse RosDeserialize(ref ReadBuffer b) => new CaptureScreenshotResponse(ref b);
         

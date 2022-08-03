@@ -55,8 +55,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Count);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PointField(ref b);
-        
         public PointField RosDeserialize(ref ReadBuffer b) => new PointField(ref b);
         
         public PointField RosDeserialize(ref ReadBuffer2 b) => new PointField(ref b);

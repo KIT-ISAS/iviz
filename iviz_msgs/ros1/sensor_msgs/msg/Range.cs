@@ -71,8 +71,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Range_);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Range(ref b);
-        
         public Range RosDeserialize(ref ReadBuffer b) => new Range(ref b);
         
         public Range RosDeserialize(ref ReadBuffer2 b) => new Range(ref b);

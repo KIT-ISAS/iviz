@@ -58,8 +58,6 @@ namespace Iviz.Msgs.GridMapMsgs
             b.Deserialize(out InnerStartIndex);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GridMap(ref b);
-        
         public GridMap RosDeserialize(ref ReadBuffer b) => new GridMap(ref b);
         
         public GridMap RosDeserialize(ref ReadBuffer2 b) => new GridMap(ref b);

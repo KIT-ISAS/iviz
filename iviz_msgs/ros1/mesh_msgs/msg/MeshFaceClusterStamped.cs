@@ -46,8 +46,6 @@ namespace Iviz.Msgs.MeshMsgs
             b.Deserialize(out @override);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshFaceClusterStamped(ref b);
-        
         public MeshFaceClusterStamped RosDeserialize(ref ReadBuffer b) => new MeshFaceClusterStamped(ref b);
         
         public MeshFaceClusterStamped RosDeserialize(ref ReadBuffer2 b) => new MeshFaceClusterStamped(ref b);

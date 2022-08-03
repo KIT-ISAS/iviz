@@ -34,8 +34,6 @@ namespace Iviz.Msgs.GeometryMsgs
             Twist = new Twist(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TwistStamped(ref b);
-        
         public TwistStamped RosDeserialize(ref ReadBuffer b) => new TwistStamped(ref b);
         
         public TwistStamped RosDeserialize(ref ReadBuffer2 b) => new TwistStamped(ref b);

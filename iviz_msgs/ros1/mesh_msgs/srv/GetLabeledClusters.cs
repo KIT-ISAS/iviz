@@ -71,8 +71,6 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeString(out Uuid);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetLabeledClustersRequest(ref b);
-        
         public GetLabeledClustersRequest RosDeserialize(ref ReadBuffer b) => new GetLabeledClustersRequest(ref b);
         
         public GetLabeledClustersRequest RosDeserialize(ref ReadBuffer2 b) => new GetLabeledClustersRequest(ref b);
@@ -136,8 +134,6 @@ namespace Iviz.Msgs.MeshMsgs
                 Clusters[i] = new MeshFaceCluster(ref b);
             }
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetLabeledClustersResponse(ref b);
         
         public GetLabeledClustersResponse RosDeserialize(ref ReadBuffer b) => new GetLabeledClustersResponse(ref b);
         

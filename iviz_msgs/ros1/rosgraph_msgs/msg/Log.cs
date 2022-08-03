@@ -90,8 +90,6 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.SkipStringArray(out h.Topics);
         }
         
-        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Log(ref b);
-        
         public readonly Log RosDeserialize(ref ReadBuffer b) => new Log(ref b);
         
         public readonly Log RosDeserialize(ref ReadBuffer2 b) => new Log(ref b);

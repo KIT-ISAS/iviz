@@ -4,241 +4,240 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Tools;
 
-namespace Iviz.Msgs
+namespace Iviz.Msgs;
+
+/// <summary>
+/// Contains utilities to serialize ROS messages into a byte array. 
+/// </summary>
+public unsafe ref struct WriteBuffer
 {
-    /// <summary>
-    /// Contains utilities to (de)serialize ROS messages from a byte array. 
-    /// </summary>
-    public unsafe ref struct WriteBuffer
+    readonly byte* ptr;
+    int offset;
+    int remaining;
+
+    WriteBuffer(byte* ptr, int length)
     {
-        readonly byte* ptr;
-        int offset;
-        int remaining;
+        this.ptr = ptr;
+        offset = 0;
+        remaining = length;
+    }
 
-        WriteBuffer(byte* ptr, int length)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    void Advance(int value)
+    {
+        offset += value;
+        remaining -= value;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    readonly void ThrowIfOutOfRange(int off)
+    {
+        if (off < 0 || off > remaining)
         {
-            this.ptr = ptr;
-            offset = 0;
-            remaining = length;
+            BuiltIns.ThrowBufferOverflow(off, remaining);
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static void ThrowIfWrongSize(Array array, int size)
+    {
+        if (array is null)
+        {
+            BuiltIns.ThrowArgumentNull(nameof(array));
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void Advance(int value)
+        if (array.Length != size)
         {
-            offset += value;
-            remaining -= value;
+            BuiltIns.ThrowInvalidSizeForFixedArray(array.Length, size);
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Serialize<T>(in T val) where T : unmanaged
+    {
+        ThrowIfOutOfRange(sizeof(T));
+        *(T*)(ptr + offset) = val;
+        Advance(sizeof(T));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    void WriteInt(int value) => Serialize(value);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Serialize(string val)
+    {
+        if (val.Length == 0)
+        {
+            WriteInt(0);
+            return;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        readonly void ThrowIfOutOfRange(int off)
+        int count = BuiltIns.UTF8.GetByteCount(val);
+        WriteInt(count);
+        ThrowIfOutOfRange(count);
+        fixed (char* valPtr = val)
         {
-            if (off < 0 || off > remaining)
-            {
-                BuiltIns.ThrowBufferOverflow(off, remaining);
-            }
+            BuiltIns.UTF8.GetBytes(valPtr, val.Length, ptr + offset, remaining);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void ThrowIfWrongSize(Array array, int size)
-        {
-            if (array is null)
-            {
-                BuiltIns.ThrowArgumentNull(nameof(array));
-            }
+        Advance(count);
+    }
 
-            if (array.Length != size)
-            {
-                BuiltIns.ThrowInvalidSizeForFixedArray(array.Length, size);
-            }
+    public void SerializeArray(string[] val)
+    {
+        WriteInt(val.Length);
+        foreach (string str in val)
+        {
+            Serialize(str);
+        }
+    }
+
+    public void SerializeArray(string[] val, int count)
+    {
+        ThrowIfWrongSize(val, count);
+        foreach (string str in val)
+        {
+            Serialize(str);
+        }
+    }
+
+    public void SerializeStructArray<T>(T[] val) where T : unmanaged
+    {
+        int sizeOfT = Unsafe.SizeOf<T>();
+        int size = val.Length * sizeOfT;
+        ThrowIfOutOfRange(4 + size);
+
+        WriteInt(val.Length);
+        fixed (T* valPtr = val)
+        {
+            Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Serialize<T>(in T val) where T : unmanaged
+        Advance(size);
+    }
+
+    public void SerializeStructArray<T>(SharedRent<T> val) where T : unmanaged
+    {
+        int sizeOfT = Unsafe.SizeOf<T>();
+        int size = val.Length * sizeOfT;
+        ThrowIfOutOfRange(4 + size);
+
+        WriteInt(val.Length);
+        fixed (T* valPtr = val.Array)
         {
-            ThrowIfOutOfRange(sizeof(T));
-            *(T*)(ptr + offset) = val;
-            Advance(sizeof(T));
+            Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void WriteInt(int value) => Serialize(value);
+        Advance(size);
+    }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Serialize(string val)
+    public void SerializeStructArray<T>(T[] val, int count) where T : unmanaged
+    {
+        ThrowIfWrongSize(val, count);
+        int size = val.Length * sizeof(T);
+        ThrowIfOutOfRange(size);
+
+        fixed (T* valPtr = val)
         {
-            if (val.Length == 0)
-            {
-                WriteInt(0);
-                return;
-            }
-
-            int count = BuiltIns.UTF8.GetByteCount(val);
-            WriteInt(count);
-            ThrowIfOutOfRange(count);
-            fixed (char* valPtr = val)
-            {
-                BuiltIns.UTF8.GetBytes(valPtr, val.Length, ptr + offset, remaining);
-            }
-
-            Advance(count);
+            Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
         }
 
-        public void SerializeArray(string[] val)
+        Advance(size);
+    }
+
+    public void SerializeArray<T>(T[] val) where T : IMessage
+    {
+        WriteInt(val.Length);
+        for (int i = 0; i < val.Length; i++)
         {
-            WriteInt(val.Length);
-            foreach (string str in val)
-            {
-                Serialize(str);
-            }
+            val[i].RosSerialize(ref this);
         }
+    }
 
-        public void SerializeArray(string[] val, int count)
+    public void SerializeArray<T>(T[] val, int count) where T : IMessage
+    {
+        ThrowIfWrongSize(val, count);
+        for (int i = 0; i < val.Length; i++)
         {
-            ThrowIfWrongSize(val, count);
-            foreach (string str in val)
-            {
-                Serialize(str);
-            }
+            val[i].RosSerialize(ref this);
         }
-
-        public void SerializeStructArray<T>(T[] val) where T : unmanaged
-        {
-            int sizeOfT = Unsafe.SizeOf<T>();
-            int size = val.Length * sizeOfT;
-            ThrowIfOutOfRange(4 + size);
-
-            WriteInt(val.Length);
-            fixed (T* valPtr = val)
-            {
-                Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
-            }
-
-            Advance(size);
-        }
-
-        public void SerializeStructArray<T>(SharedRent<T> val) where T : unmanaged
-        {
-            int sizeOfT = Unsafe.SizeOf<T>();
-            int size = val.Length * sizeOfT;
-            ThrowIfOutOfRange(4 + size);
-
-            WriteInt(val.Length);
-            fixed (T* valPtr = val.Array)
-            {
-                Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
-            }
-
-            Advance(size);
-        }
-
-        public void SerializeStructArray<T>(T[] val, int count) where T : unmanaged
-        {
-            ThrowIfWrongSize(val, count);
-            int size = val.Length * sizeof(T);
-            ThrowIfOutOfRange(size);
-
-            fixed (T* valPtr = val)
-            {
-                Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
-            }
-
-            Advance(size);
-        }
-
-        public void SerializeArray<T>(T[] val) where T : IMessage
-        {
-            WriteInt(val.Length);
-            for (int i = 0; i < val.Length; i++)
-            {
-                val[i].RosSerialize(ref this);
-            }
-        }
-
-        public void SerializeArray<T>(T[] val, int count) where T : IMessage
-        {
-            ThrowIfWrongSize(val, count);
-            for (int i = 0; i < val.Length; i++)
-            {
-                val[i].RosSerialize(ref this);
-            }
-        }
+    }
         
-        /// Returns the size in bytes of a message array when deserialized in ROS
-        public static int GetArraySize<T>(T[]? array) where T : struct, IMessage
+    /// Returns the size in bytes of a message array when deserialized in ROS
+    public static int GetArraySize<T>(T[]? array) where T : struct, IMessage
+    {
+        if (array == null)
         {
-            if (array == null)
-            {
-                return 0;
-            }
-
-            int size = 0;
-            for (int i = 0; i < array.Length; i++)
-            {
-                size += array[i].RosMessageLength;
-            }
-
-            return size;
+            return 0;
         }
 
-        /// Returns the size in bytes of a message array when serialized in ROS
-        public static int GetArraySize(IMessage[]? array)
+        int size = 0;
+        for (int i = 0; i < array.Length; i++)
         {
-            if (array == null)
-            {
-                return 0;
-            }
-
-            int size = 0;
-            for (int i = 0; i < array.Length; i++)
-            {
-                size += array[i].RosMessageLength;
-            }
-
-            return size;
+            size += array[i].RosMessageLength;
         }
 
-        /// Returns the size in bytes of a string array when serialized in ROS
-        public static int GetArraySize(string[]? array)
+        return size;
+    }
+
+    /// Returns the size in bytes of a message array when serialized in ROS
+    public static int GetArraySize(IMessage[]? array)
+    {
+        if (array == null)
         {
-            if (array == null)
-            {
-                return 0;
-            }
-
-            int size = 4 * array.Length;
-            for (int i = 0; i < array.Length; i++)
-            {
-                size += BuiltIns.UTF8.GetByteCount(array[i]);
-            }
-
-            return size;
+            return 0;
         }
 
-        /// Returns the size in bytes of a string when deserialized in ROS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GetStringSize(string? s)
+        int size = 0;
+        for (int i = 0; i < array.Length; i++)
         {
-            return s == null ? 0 : BuiltIns.UTF8.GetByteCount(s);
-        }        
+            size += array[i].RosMessageLength;
+        }
 
-        /// <summary>
-        /// Serializes the given message into the buffer array.
-        /// </summary>
-        /// <param name="message">The ROS message.</param>
-        /// <param name="buffer">The destination byte array.</param>
-        /// <returns>The number of bytes written.</returns>
-        public static uint Serialize<T>(in T message, Span<byte> buffer) where T : ISerializableRos1
+        return size;
+    }
+
+    /// Returns the size in bytes of a string array when serialized in ROS
+    public static int GetArraySize(string[]? array)
+    {
+        if (array == null)
         {
-            fixed (byte* bufferPtr = buffer)
-            {
-                var b = new WriteBuffer(bufferPtr, buffer.Length);
-                message.RosSerialize(ref b);
+            return 0;
+        }
 
-                int oldLength = buffer.Length;
-                int newLength = b.offset;
+        int size = 4 * array.Length;
+        for (int i = 0; i < array.Length; i++)
+        {
+            size += BuiltIns.UTF8.GetByteCount(array[i]);
+        }
 
-                return (uint)(oldLength - newLength);
-            }
+        return size;
+    }
+
+    /// Returns the size in bytes of a string when deserialized in ROS
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int GetStringSize(string? s)
+    {
+        return s == null ? 0 : BuiltIns.UTF8.GetByteCount(s);
+    }        
+
+    /// <summary>
+    /// Serializes the given message into the buffer array.
+    /// </summary>
+    /// <param name="message">The ROS message.</param>
+    /// <param name="buffer">The destination byte array.</param>
+    /// <returns>The number of bytes written.</returns>
+    public static uint Serialize<T>(in T message, Span<byte> buffer) where T : ISerializableRos1
+    {
+        fixed (byte* bufferPtr = buffer)
+        {
+            var b = new WriteBuffer(bufferPtr, buffer.Length);
+            message.RosSerialize(ref b);
+
+            int oldLength = buffer.Length;
+            int newLength = b.offset;
+
+            return (uint)(oldLength - newLength);
         }
     }
 }

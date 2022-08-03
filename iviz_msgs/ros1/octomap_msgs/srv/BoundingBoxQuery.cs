@@ -77,8 +77,6 @@ namespace Iviz.Msgs.OctomapMsgs
             b.Deserialize(out Max);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new BoundingBoxQueryRequest(ref b);
-        
         public BoundingBoxQueryRequest RosDeserialize(ref ReadBuffer b) => new BoundingBoxQueryRequest(ref b);
         
         public BoundingBoxQueryRequest RosDeserialize(ref ReadBuffer2 b) => new BoundingBoxQueryRequest(ref b);
@@ -103,9 +101,7 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 48;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {
@@ -132,8 +128,6 @@ namespace Iviz.Msgs.OctomapMsgs
         {
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
-        
         public BoundingBoxQueryResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public BoundingBoxQueryResponse RosDeserialize(ref ReadBuffer2 b) => Singleton;
@@ -159,7 +153,7 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int c) { }
+        public void AddRos2MessageLength(ref int _) { }
     
         public override string ToString() => Extensions.ToString(this);
     }

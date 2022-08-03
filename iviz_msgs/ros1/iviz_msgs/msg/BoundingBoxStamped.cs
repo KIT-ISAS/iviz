@@ -33,8 +33,6 @@ namespace Iviz.Msgs.IvizMsgs
             Boundary = new BoundingBox(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new BoundingBoxStamped(ref b);
-        
         public BoundingBoxStamped RosDeserialize(ref ReadBuffer b) => new BoundingBoxStamped(ref b);
         
         public BoundingBoxStamped RosDeserialize(ref ReadBuffer2 b) => new BoundingBoxStamped(ref b);

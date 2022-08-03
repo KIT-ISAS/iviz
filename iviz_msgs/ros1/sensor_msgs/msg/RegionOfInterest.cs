@@ -51,8 +51,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out DoRectify);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new RegionOfInterest(ref b);
-        
         public RegionOfInterest RosDeserialize(ref ReadBuffer b) => new RegionOfInterest(ref b);
         
         public RegionOfInterest RosDeserialize(ref ReadBuffer2 b) => new RegionOfInterest(ref b);
@@ -83,9 +81,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 17;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

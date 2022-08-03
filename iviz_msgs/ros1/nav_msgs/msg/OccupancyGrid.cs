@@ -43,8 +43,6 @@ namespace Iviz.Msgs.NavMsgs
             b.DeserializeStructArray(out Data);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new OccupancyGrid(ref b);
-        
         public OccupancyGrid RosDeserialize(ref ReadBuffer b) => new OccupancyGrid(ref b);
         
         public OccupancyGrid RosDeserialize(ref ReadBuffer2 b) => new OccupancyGrid(ref b);

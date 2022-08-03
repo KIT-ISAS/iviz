@@ -51,8 +51,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out OuterAngle);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Light(ref b);
-        
         public Light RosDeserialize(ref ReadBuffer b) => new Light(ref b);
         
         public Light RosDeserialize(ref ReadBuffer2 b) => new Light(ref b);

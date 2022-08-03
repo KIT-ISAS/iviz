@@ -32,8 +32,6 @@ namespace Iviz.Msgs.Actionlib
             b.Deserialize(out IsSimpleServer);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TestRequestResult(ref b);
-        
         public TestRequestResult RosDeserialize(ref ReadBuffer b) => new TestRequestResult(ref b);
         
         public TestRequestResult RosDeserialize(ref ReadBuffer2 b) => new TestRequestResult(ref b);
@@ -58,9 +56,7 @@ namespace Iviz.Msgs.Actionlib
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 5;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

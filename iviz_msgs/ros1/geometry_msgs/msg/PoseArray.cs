@@ -34,8 +34,6 @@ namespace Iviz.Msgs.GeometryMsgs
             b.DeserializeStructArray(out Poses);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PoseArray(ref b);
-        
         public PoseArray RosDeserialize(ref ReadBuffer b) => new PoseArray(ref b);
         
         public PoseArray RosDeserialize(ref ReadBuffer2 b) => new PoseArray(ref b);

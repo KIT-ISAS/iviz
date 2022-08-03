@@ -46,8 +46,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new JointTrajectory(ref b);
-        
         public JointTrajectory RosDeserialize(ref ReadBuffer b) => new JointTrajectory(ref b);
         
         public JointTrajectory RosDeserialize(ref ReadBuffer2 b) => new JointTrajectory(ref b);

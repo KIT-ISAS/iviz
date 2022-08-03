@@ -33,8 +33,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructArray(out Echoes);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LaserEcho(ref b);
-        
         public LaserEcho RosDeserialize(ref ReadBuffer b) => new LaserEcho(ref b);
         
         public LaserEcho RosDeserialize(ref ReadBuffer2 b) => new LaserEcho(ref b);

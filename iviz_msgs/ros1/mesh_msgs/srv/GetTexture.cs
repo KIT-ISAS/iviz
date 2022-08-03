@@ -75,8 +75,6 @@ namespace Iviz.Msgs.MeshMsgs
             b.Deserialize(out TextureIndex);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetTextureRequest(ref b);
-        
         public GetTextureRequest RosDeserialize(ref ReadBuffer b) => new GetTextureRequest(ref b);
         
         public GetTextureRequest RosDeserialize(ref ReadBuffer2 b) => new GetTextureRequest(ref b);
@@ -135,8 +133,6 @@ namespace Iviz.Msgs.MeshMsgs
         {
             Texture = new MeshMsgs.MeshTexture(ref b);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetTextureResponse(ref b);
         
         public GetTextureResponse RosDeserialize(ref ReadBuffer b) => new GetTextureResponse(ref b);
         

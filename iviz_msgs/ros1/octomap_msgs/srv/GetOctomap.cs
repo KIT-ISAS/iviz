@@ -63,8 +63,6 @@ namespace Iviz.Msgs.OctomapMsgs
         {
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
-        
         public GetOctomapRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public GetOctomapRequest RosDeserialize(ref ReadBuffer2 b) => Singleton;
@@ -90,7 +88,7 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int c) { }
+        public void AddRos2MessageLength(ref int _) { }
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -119,8 +117,6 @@ namespace Iviz.Msgs.OctomapMsgs
         {
             Map = new OctomapMsgs.Octomap(ref b);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetOctomapResponse(ref b);
         
         public GetOctomapResponse RosDeserialize(ref ReadBuffer b) => new GetOctomapResponse(ref b);
         

@@ -29,8 +29,6 @@ namespace Iviz.Msgs.ActionlibTutorials
             b.Deserialize(out Order);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new FibonacciGoal(ref b);
-        
         public FibonacciGoal RosDeserialize(ref ReadBuffer b) => new FibonacciGoal(ref b);
         
         public FibonacciGoal RosDeserialize(ref ReadBuffer2 b) => new FibonacciGoal(ref b);
@@ -53,9 +51,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 4;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

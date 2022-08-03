@@ -78,8 +78,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out WithHolograms);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new StartCaptureRequest(ref b);
-        
         public StartCaptureRequest RosDeserialize(ref ReadBuffer b) => new StartCaptureRequest(ref b);
         
         public StartCaptureRequest RosDeserialize(ref ReadBuffer2 b) => new StartCaptureRequest(ref b);
@@ -106,9 +104,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 9;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {
@@ -148,8 +144,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Success);
             b.DeserializeString(out Message);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new StartCaptureResponse(ref b);
         
         public StartCaptureResponse RosDeserialize(ref ReadBuffer b) => new StartCaptureResponse(ref b);
         

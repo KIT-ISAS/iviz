@@ -44,8 +44,6 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexCosts = new MeshMsgs.MeshVertexCosts(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexCostsStamped(ref b);
-        
         public MeshVertexCostsStamped RosDeserialize(ref ReadBuffer b) => new MeshVertexCostsStamped(ref b);
         
         public MeshVertexCostsStamped RosDeserialize(ref ReadBuffer2 b) => new MeshVertexCostsStamped(ref b);

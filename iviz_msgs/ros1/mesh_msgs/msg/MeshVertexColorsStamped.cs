@@ -39,8 +39,6 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexColors = new MeshMsgs.MeshVertexColors(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexColorsStamped(ref b);
-        
         public MeshVertexColorsStamped RosDeserialize(ref ReadBuffer b) => new MeshVertexColorsStamped(ref b);
         
         public MeshVertexColorsStamped RosDeserialize(ref ReadBuffer2 b) => new MeshVertexColorsStamped(ref b);

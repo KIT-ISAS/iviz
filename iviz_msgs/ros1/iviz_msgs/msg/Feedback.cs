@@ -60,8 +60,6 @@ namespace Iviz.Msgs.IvizMsgs
             Trajectory = new IvizMsgs.Trajectory(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Feedback(ref b);
-        
         public Feedback RosDeserialize(ref ReadBuffer b) => new Feedback(ref b);
         
         public Feedback RosDeserialize(ref ReadBuffer2 b) => new Feedback(ref b);

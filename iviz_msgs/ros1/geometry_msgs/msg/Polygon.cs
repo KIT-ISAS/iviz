@@ -30,8 +30,6 @@ namespace Iviz.Msgs.GeometryMsgs
             b.DeserializeStructArray(out Points);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Polygon(ref b);
-        
         public Polygon RosDeserialize(ref ReadBuffer b) => new Polygon(ref b);
         
         public Polygon RosDeserialize(ref ReadBuffer2 b) => new Polygon(ref b);

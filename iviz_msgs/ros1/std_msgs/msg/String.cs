@@ -29,8 +29,6 @@ namespace Iviz.Msgs.StdMsgs
             b.DeserializeString(out Data);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new String(ref b);
-        
         public String RosDeserialize(ref ReadBuffer b) => new String(ref b);
         
         public String RosDeserialize(ref ReadBuffer2 b) => new String(ref b);

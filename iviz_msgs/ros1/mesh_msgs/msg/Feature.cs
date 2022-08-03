@@ -41,8 +41,6 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Feature(ref b);
-        
         public Feature RosDeserialize(ref ReadBuffer b) => new Feature(ref b);
         
         public Feature RosDeserialize(ref ReadBuffer2 b) => new Feature(ref b);

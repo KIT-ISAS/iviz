@@ -33,8 +33,6 @@ namespace Iviz.Msgs.MeshMsgs
             VectorField = new MeshMsgs.VectorField(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new VectorFieldStamped(ref b);
-        
         public VectorFieldStamped RosDeserialize(ref ReadBuffer b) => new VectorFieldStamped(ref b);
         
         public VectorFieldStamped RosDeserialize(ref ReadBuffer2 b) => new VectorFieldStamped(ref b);

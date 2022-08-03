@@ -71,8 +71,6 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeString(out Uuid);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetMaterialsRequest(ref b);
-        
         public GetMaterialsRequest RosDeserialize(ref ReadBuffer b) => new GetMaterialsRequest(ref b);
         
         public GetMaterialsRequest RosDeserialize(ref ReadBuffer2 b) => new GetMaterialsRequest(ref b);
@@ -128,8 +126,6 @@ namespace Iviz.Msgs.MeshMsgs
         {
             MeshMaterialsStamped = new MeshMsgs.MeshMaterialsStamped(ref b);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetMaterialsResponse(ref b);
         
         public GetMaterialsResponse RosDeserialize(ref ReadBuffer b) => new GetMaterialsResponse(ref b);
         

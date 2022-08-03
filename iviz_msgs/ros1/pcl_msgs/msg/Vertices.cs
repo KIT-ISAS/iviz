@@ -30,8 +30,6 @@ namespace Iviz.Msgs.PclMsgs
             b.DeserializeStructArray(out Vertices_);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Vertices(ref b);
-        
         public Vertices RosDeserialize(ref ReadBuffer b) => new Vertices(ref b);
         
         public Vertices RosDeserialize(ref ReadBuffer2 b) => new Vertices(ref b);

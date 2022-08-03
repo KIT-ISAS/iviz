@@ -65,8 +65,6 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Material(ref b);
-        
         public Material RosDeserialize(ref ReadBuffer b) => new Material(ref b);
         
         public Material RosDeserialize(ref ReadBuffer2 b) => new Material(ref b);

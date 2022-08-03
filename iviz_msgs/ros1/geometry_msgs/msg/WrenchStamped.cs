@@ -34,8 +34,6 @@ namespace Iviz.Msgs.GeometryMsgs
             Wrench = new Wrench(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new WrenchStamped(ref b);
-        
         public WrenchStamped RosDeserialize(ref ReadBuffer b) => new WrenchStamped(ref b);
         
         public WrenchStamped RosDeserialize(ref ReadBuffer2 b) => new WrenchStamped(ref b);

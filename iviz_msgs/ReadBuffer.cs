@@ -8,7 +8,7 @@ using Iviz.Tools;
 namespace Iviz.Msgs;
 
 /// <summary>
-/// Contains utilities to (de)serialize ROS messages from a byte array. 
+/// Contains utilities to deserialize ROS messages from a byte array. 
 /// </summary>
 public unsafe struct ReadBuffer
 {

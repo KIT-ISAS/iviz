@@ -40,8 +40,6 @@ namespace Iviz.Msgs.NavMsgs
             ActionFeedback = new GetMapActionFeedback(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetMapAction(ref b);
-        
         public GetMapAction RosDeserialize(ref ReadBuffer b) => new GetMapAction(ref b);
         
         public GetMapAction RosDeserialize(ref ReadBuffer2 b) => new GetMapAction(ref b);

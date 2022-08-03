@@ -38,8 +38,6 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new JoyFeedbackArray(ref b);
-        
         public JoyFeedbackArray RosDeserialize(ref ReadBuffer b) => new JoyFeedbackArray(ref b);
         
         public JoyFeedbackArray RosDeserialize(ref ReadBuffer2 b) => new JoyFeedbackArray(ref b);

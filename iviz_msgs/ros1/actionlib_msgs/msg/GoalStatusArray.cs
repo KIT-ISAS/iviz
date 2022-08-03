@@ -43,8 +43,6 @@ namespace Iviz.Msgs.ActionlibMsgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GoalStatusArray(ref b);
-        
         public GoalStatusArray RosDeserialize(ref ReadBuffer b) => new GoalStatusArray(ref b);
         
         public GoalStatusArray RosDeserialize(ref ReadBuffer2 b) => new GoalStatusArray(ref b);

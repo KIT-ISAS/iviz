@@ -71,8 +71,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Uri);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetModelTextureRequest(ref b);
-        
         public GetModelTextureRequest RosDeserialize(ref ReadBuffer b) => new GetModelTextureRequest(ref b);
         
         public GetModelTextureRequest RosDeserialize(ref ReadBuffer2 b) => new GetModelTextureRequest(ref b);
@@ -137,8 +135,6 @@ namespace Iviz.Msgs.IvizMsgs
             Image = new SensorMsgs.CompressedImage(ref b);
             b.DeserializeString(out Message);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetModelTextureResponse(ref b);
         
         public GetModelTextureResponse RosDeserialize(ref ReadBuffer b) => new GetModelTextureResponse(ref b);
         

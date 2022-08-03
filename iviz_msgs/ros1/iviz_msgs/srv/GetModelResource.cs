@@ -73,8 +73,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Uri);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetModelResourceRequest(ref b);
-        
         public GetModelResourceRequest RosDeserialize(ref ReadBuffer b) => new GetModelResourceRequest(ref b);
         
         public GetModelResourceRequest RosDeserialize(ref ReadBuffer2 b) => new GetModelResourceRequest(ref b);
@@ -142,8 +140,6 @@ namespace Iviz.Msgs.IvizMsgs
             Model = new Model(ref b);
             b.DeserializeString(out Message);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetModelResourceResponse(ref b);
         
         public GetModelResourceResponse RosDeserialize(ref ReadBuffer b) => new GetModelResourceResponse(ref b);
         

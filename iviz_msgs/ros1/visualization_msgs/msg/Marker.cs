@@ -103,8 +103,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out MeshUseEmbeddedMaterials);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Marker(ref b);
-        
         public Marker RosDeserialize(ref ReadBuffer b) => new Marker(ref b);
         
         public Marker RosDeserialize(ref ReadBuffer2 b) => new Marker(ref b);

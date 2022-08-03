@@ -33,8 +33,6 @@ namespace Iviz.Msgs.PclMsgs
             b.DeserializeStructArray(out Indices);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PointIndices(ref b);
-        
         public PointIndices RosDeserialize(ref ReadBuffer b) => new PointIndices(ref b);
         
         public PointIndices RosDeserialize(ref ReadBuffer2 b) => new PointIndices(ref b);

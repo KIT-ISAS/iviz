@@ -71,8 +71,6 @@ namespace Iviz.Msgs.IvizMsgs
             Dialog = new IvizMsgs.Dialog(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LaunchDialogRequest(ref b);
-        
         public LaunchDialogRequest RosDeserialize(ref ReadBuffer b) => new LaunchDialogRequest(ref b);
         
         public LaunchDialogRequest RosDeserialize(ref ReadBuffer2 b) => new LaunchDialogRequest(ref b);
@@ -138,8 +136,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Message);
             Feedback = new IvizMsgs.Feedback(ref b);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LaunchDialogResponse(ref b);
         
         public LaunchDialogResponse RosDeserialize(ref ReadBuffer b) => new LaunchDialogResponse(ref b);
         

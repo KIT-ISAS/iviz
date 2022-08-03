@@ -33,8 +33,6 @@ namespace Iviz.Msgs.MeshMsgs
             Mesh = new MeshMsgs.TriangleMesh(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TriangleMeshStamped(ref b);
-        
         public TriangleMeshStamped RosDeserialize(ref ReadBuffer b) => new TriangleMeshStamped(ref b);
         
         public TriangleMeshStamped RosDeserialize(ref ReadBuffer2 b) => new TriangleMeshStamped(ref b);

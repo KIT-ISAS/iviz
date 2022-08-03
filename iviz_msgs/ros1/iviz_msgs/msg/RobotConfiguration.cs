@@ -58,8 +58,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Visible);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new RobotConfiguration(ref b);
-        
         public RobotConfiguration RosDeserialize(ref ReadBuffer b) => new RobotConfiguration(ref b);
         
         public RobotConfiguration RosDeserialize(ref ReadBuffer2 b) => new RobotConfiguration(ref b);

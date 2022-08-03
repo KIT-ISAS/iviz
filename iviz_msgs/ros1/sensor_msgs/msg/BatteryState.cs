@@ -117,8 +117,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeString(out SerialNumber);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new BatteryState(ref b);
-        
         public BatteryState RosDeserialize(ref ReadBuffer b) => new BatteryState(ref b);
         
         public BatteryState RosDeserialize(ref ReadBuffer2 b) => new BatteryState(ref b);

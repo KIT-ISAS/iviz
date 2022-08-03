@@ -38,8 +38,6 @@ namespace Iviz.Msgs.Tf2Msgs
             Result = new LookupTransformResult(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformActionResult(ref b);
-        
         public LookupTransformActionResult RosDeserialize(ref ReadBuffer b) => new LookupTransformActionResult(ref b);
         
         public LookupTransformActionResult RosDeserialize(ref ReadBuffer2 b) => new LookupTransformActionResult(ref b);

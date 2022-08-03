@@ -39,8 +39,6 @@ namespace Iviz.Msgs.GeometryMsgs
             b.DeserializeStructArray(36, out Covariance);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AccelWithCovariance(ref b);
-        
         public AccelWithCovariance RosDeserialize(ref ReadBuffer b) => new AccelWithCovariance(ref b);
         
         public AccelWithCovariance RosDeserialize(ref ReadBuffer2 b) => new AccelWithCovariance(ref b);
@@ -69,9 +67,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 336;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

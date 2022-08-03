@@ -44,8 +44,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new DiagnosticArray(ref b);
-        
         public DiagnosticArray RosDeserialize(ref ReadBuffer b) => new DiagnosticArray(ref b);
         
         public DiagnosticArray RosDeserialize(ref ReadBuffer2 b) => new DiagnosticArray(ref b);

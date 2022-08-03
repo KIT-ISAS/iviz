@@ -34,8 +34,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Timestamps);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Trajectory(ref b);
-        
         public Trajectory RosDeserialize(ref ReadBuffer b) => new Trajectory(ref b);
         
         public Trajectory RosDeserialize(ref ReadBuffer2 b) => new Trajectory(ref b);

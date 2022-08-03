@@ -65,8 +65,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructRent(out Data);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Image(ref b);
-        
         public Image RosDeserialize(ref ReadBuffer b) => new Image(ref b);
         
         public Image RosDeserialize(ref ReadBuffer2 b) => new Image(ref b);

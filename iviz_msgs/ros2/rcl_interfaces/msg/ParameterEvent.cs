@@ -71,8 +71,6 @@ namespace Iviz.Msgs.RclInterfaces
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ParameterEvent(ref b);
-        
         public ParameterEvent RosDeserialize(ref ReadBuffer b) => new ParameterEvent(ref b);
         
         public ParameterEvent RosDeserialize(ref ReadBuffer2 b) => new ParameterEvent(ref b);

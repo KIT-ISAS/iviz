@@ -44,8 +44,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Intensity);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new JoyFeedback(ref b);
-        
         public JoyFeedback RosDeserialize(ref ReadBuffer b) => new JoyFeedback(ref b);
         
         public JoyFeedback RosDeserialize(ref ReadBuffer2 b) => new JoyFeedback(ref b);
@@ -72,9 +70,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 6;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

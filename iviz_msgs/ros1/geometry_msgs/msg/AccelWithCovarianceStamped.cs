@@ -34,8 +34,6 @@ namespace Iviz.Msgs.GeometryMsgs
             Accel = new AccelWithCovariance(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AccelWithCovarianceStamped(ref b);
-        
         public AccelWithCovarianceStamped RosDeserialize(ref ReadBuffer b) => new AccelWithCovarianceStamped(ref b);
         
         public AccelWithCovarianceStamped RosDeserialize(ref ReadBuffer2 b) => new AccelWithCovarianceStamped(ref b);

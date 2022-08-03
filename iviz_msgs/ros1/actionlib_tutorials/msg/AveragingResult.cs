@@ -33,8 +33,6 @@ namespace Iviz.Msgs.ActionlibTutorials
             b.Deserialize(out Apothem);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AveragingResult(ref b);
-        
         public AveragingResult RosDeserialize(ref ReadBuffer b) => new AveragingResult(ref b);
         
         public AveragingResult RosDeserialize(ref ReadBuffer2 b) => new AveragingResult(ref b);
@@ -59,9 +57,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 8;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

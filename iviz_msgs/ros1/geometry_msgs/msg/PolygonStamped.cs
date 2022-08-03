@@ -34,8 +34,6 @@ namespace Iviz.Msgs.GeometryMsgs
             Polygon = new Polygon(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PolygonStamped(ref b);
-        
         public PolygonStamped RosDeserialize(ref ReadBuffer b) => new PolygonStamped(ref b);
         
         public PolygonStamped RosDeserialize(ref ReadBuffer2 b) => new PolygonStamped(ref b);

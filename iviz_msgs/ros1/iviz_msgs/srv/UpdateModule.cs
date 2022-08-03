@@ -85,8 +85,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Config);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new UpdateModuleRequest(ref b);
-        
         public UpdateModuleRequest RosDeserialize(ref ReadBuffer b) => new UpdateModuleRequest(ref b);
         
         public UpdateModuleRequest RosDeserialize(ref ReadBuffer2 b) => new UpdateModuleRequest(ref b);
@@ -169,8 +167,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Success);
             b.DeserializeString(out Message);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new UpdateModuleResponse(ref b);
         
         public UpdateModuleResponse RosDeserialize(ref ReadBuffer b) => new UpdateModuleResponse(ref b);
         

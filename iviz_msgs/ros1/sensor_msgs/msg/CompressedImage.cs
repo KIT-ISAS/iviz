@@ -49,8 +49,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructArray(out Data);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new CompressedImage(ref b);
-        
         public CompressedImage RosDeserialize(ref ReadBuffer b) => new CompressedImage(ref b);
         
         public CompressedImage RosDeserialize(ref ReadBuffer2 b) => new CompressedImage(ref b);

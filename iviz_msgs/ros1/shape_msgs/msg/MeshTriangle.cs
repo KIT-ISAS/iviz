@@ -30,8 +30,6 @@ namespace Iviz.Msgs.ShapeMsgs
             b.DeserializeStructArray(3, out VertexIndices);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshTriangle(ref b);
-        
         public MeshTriangle RosDeserialize(ref ReadBuffer b) => new MeshTriangle(ref b);
         
         public MeshTriangle RosDeserialize(ref ReadBuffer2 b) => new MeshTriangle(ref b);
@@ -56,9 +54,7 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 12;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

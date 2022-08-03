@@ -19,8 +19,6 @@ namespace Iviz.Msgs.StdMsgs
         {
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
-        
         public Empty RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public Empty RosDeserialize(ref ReadBuffer2 b) => Singleton;
@@ -46,7 +44,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int c) { }
+        public void AddRos2MessageLength(ref int _) { }
     
         public const string MessageType = "std_msgs/Empty";
     

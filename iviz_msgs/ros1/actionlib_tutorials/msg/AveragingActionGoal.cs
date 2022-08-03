@@ -38,8 +38,6 @@ namespace Iviz.Msgs.ActionlibTutorials
             Goal = new AveragingGoal(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AveragingActionGoal(ref b);
-        
         public AveragingActionGoal RosDeserialize(ref ReadBuffer b) => new AveragingActionGoal(ref b);
         
         public AveragingActionGoal RosDeserialize(ref ReadBuffer2 b) => new AveragingActionGoal(ref b);

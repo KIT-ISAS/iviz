@@ -69,8 +69,6 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshMaterials(ref b);
-        
         public MeshMaterials RosDeserialize(ref ReadBuffer b) => new MeshMaterials(ref b);
         
         public MeshMaterials RosDeserialize(ref ReadBuffer2 b) => new MeshMaterials(ref b);

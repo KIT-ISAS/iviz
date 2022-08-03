@@ -38,8 +38,6 @@ namespace Iviz.Msgs.ActionlibTutorials
             Feedback = AveragingFeedback.Singleton;
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AveragingActionFeedback(ref b);
-        
         public AveragingActionFeedback RosDeserialize(ref ReadBuffer b) => new AveragingActionFeedback(ref b);
         
         public AveragingActionFeedback RosDeserialize(ref ReadBuffer2 b) => new AveragingActionFeedback(ref b);

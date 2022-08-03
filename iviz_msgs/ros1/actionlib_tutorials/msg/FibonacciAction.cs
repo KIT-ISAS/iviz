@@ -40,8 +40,6 @@ namespace Iviz.Msgs.ActionlibTutorials
             ActionFeedback = new FibonacciActionFeedback(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new FibonacciAction(ref b);
-        
         public FibonacciAction RosDeserialize(ref ReadBuffer b) => new FibonacciAction(ref b);
         
         public FibonacciAction RosDeserialize(ref ReadBuffer2 b) => new FibonacciAction(ref b);

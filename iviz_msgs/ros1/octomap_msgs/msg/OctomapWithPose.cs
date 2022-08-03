@@ -40,8 +40,6 @@ namespace Iviz.Msgs.OctomapMsgs
             Octomap = new OctomapMsgs.Octomap(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new OctomapWithPose(ref b);
-        
         public OctomapWithPose RosDeserialize(ref ReadBuffer b) => new OctomapWithPose(ref b);
         
         public OctomapWithPose RosDeserialize(ref ReadBuffer2 b) => new OctomapWithPose(ref b);

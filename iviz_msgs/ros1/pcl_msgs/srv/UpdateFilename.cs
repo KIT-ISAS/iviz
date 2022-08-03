@@ -71,8 +71,6 @@ namespace Iviz.Msgs.PclMsgs
             b.DeserializeString(out Filename);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new UpdateFilenameRequest(ref b);
-        
         public UpdateFilenameRequest RosDeserialize(ref ReadBuffer b) => new UpdateFilenameRequest(ref b);
         
         public UpdateFilenameRequest RosDeserialize(ref ReadBuffer2 b) => new UpdateFilenameRequest(ref b);
@@ -128,8 +126,6 @@ namespace Iviz.Msgs.PclMsgs
             b.Deserialize(out Success);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new UpdateFilenameResponse(ref b);
-        
         public UpdateFilenameResponse RosDeserialize(ref ReadBuffer b) => new UpdateFilenameResponse(ref b);
         
         public UpdateFilenameResponse RosDeserialize(ref ReadBuffer2 b) => new UpdateFilenameResponse(ref b);
@@ -152,9 +148,7 @@ namespace Iviz.Msgs.PclMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 1;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

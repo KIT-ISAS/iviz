@@ -33,8 +33,6 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out Vector);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Vector3Stamped(ref b);
-        
         public Vector3Stamped RosDeserialize(ref ReadBuffer b) => new Vector3Stamped(ref b);
         
         public Vector3Stamped RosDeserialize(ref ReadBuffer2 b) => new Vector3Stamped(ref b);

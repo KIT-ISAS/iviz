@@ -74,8 +74,6 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MultiDOFJointState(ref b);
-        
         public MultiDOFJointState RosDeserialize(ref ReadBuffer b) => new MultiDOFJointState(ref b);
         
         public MultiDOFJointState RosDeserialize(ref ReadBuffer2 b) => new MultiDOFJointState(ref b);

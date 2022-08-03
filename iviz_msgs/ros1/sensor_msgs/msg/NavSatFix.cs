@@ -72,8 +72,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out PositionCovarianceType);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new NavSatFix(ref b);
-        
         public NavSatFix RosDeserialize(ref ReadBuffer b) => new NavSatFix(ref b);
         
         public NavSatFix RosDeserialize(ref ReadBuffer2 b) => new NavSatFix(ref b);

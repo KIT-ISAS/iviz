@@ -47,8 +47,6 @@ namespace Iviz.Msgs.Tf2Msgs
             b.Deserialize(out Advanced);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformGoal(ref b);
-        
         public LookupTransformGoal RosDeserialize(ref ReadBuffer b) => new LookupTransformGoal(ref b);
         
         public LookupTransformGoal RosDeserialize(ref ReadBuffer2 b) => new LookupTransformGoal(ref b);

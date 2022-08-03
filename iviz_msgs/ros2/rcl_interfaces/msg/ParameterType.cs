@@ -32,8 +32,6 @@ namespace Iviz.Msgs.RclInterfaces
         {
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
-        
         public ParameterType RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public ParameterType RosDeserialize(ref ReadBuffer2 b) => Singleton;
@@ -59,7 +57,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int c) { }
+        public void AddRos2MessageLength(ref int _) { }
     
         public const string MessageType = "rcl_interfaces/ParameterType";
     

@@ -29,8 +29,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Coords);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TexCoords(ref b);
-        
         public TexCoords RosDeserialize(ref ReadBuffer b) => new TexCoords(ref b);
         
         public TexCoords RosDeserialize(ref ReadBuffer2 b) => new TexCoords(ref b);

@@ -8,7 +8,7 @@ using Iviz.Tools;
 namespace Iviz.Msgs;
 
 /// <summary>
-/// Contains utilities to (de)serialize ROS messages from a byte array. 
+/// Contains utilities to deserialize ROS 2 messages from a byte array.
 /// </summary>
 public unsafe partial struct ReadBuffer2
 {
@@ -493,16 +493,6 @@ public unsafe partial struct ReadBuffer2
     /// <returns>The deserialized message.</returns>
     public static T Deserialize<T>(IDeserializableRos2<T> generator, ReadOnlySpan<byte> buffer)
         where T : ISerializableRos2
-    {
-        fixed (byte* bufferPtr = buffer)
-        {
-            var b = new ReadBuffer2(bufferPtr, buffer.Length);
-            return generator.RosDeserialize(ref b);
-        }
-    }
-
-    public static T Deserialize<T>(in T generator, ReadOnlySpan<byte> buffer)
-        where T : ISerializableRos2, IDeserializableRos2<T>
     {
         fixed (byte* bufferPtr = buffer)
         {

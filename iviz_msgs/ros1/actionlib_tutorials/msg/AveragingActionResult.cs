@@ -38,8 +38,6 @@ namespace Iviz.Msgs.ActionlibTutorials
             Result = new AveragingResult(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AveragingActionResult(ref b);
-        
         public AveragingActionResult RosDeserialize(ref ReadBuffer b) => new AveragingActionResult(ref b);
         
         public AveragingActionResult RosDeserialize(ref ReadBuffer2 b) => new AveragingActionResult(ref b);

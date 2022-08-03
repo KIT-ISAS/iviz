@@ -94,8 +94,6 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MultiEchoLaserScan(ref b);
-        
         public MultiEchoLaserScan RosDeserialize(ref ReadBuffer b) => new MultiEchoLaserScan(ref b);
         
         public MultiEchoLaserScan RosDeserialize(ref ReadBuffer2 b) => new MultiEchoLaserScan(ref b);

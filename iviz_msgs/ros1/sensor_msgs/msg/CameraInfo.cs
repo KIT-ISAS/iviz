@@ -169,8 +169,6 @@ namespace Iviz.Msgs.SensorMsgs
             Roi = new RegionOfInterest(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new CameraInfo(ref b);
-        
         public CameraInfo RosDeserialize(ref ReadBuffer b) => new CameraInfo(ref b);
         
         public CameraInfo RosDeserialize(ref ReadBuffer2 b) => new CameraInfo(ref b);

@@ -31,8 +31,6 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.Deserialize(out Clock_);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Clock(ref b);
-        
         public Clock RosDeserialize(ref ReadBuffer b) => new Clock(ref b);
         
         public Clock RosDeserialize(ref ReadBuffer2 b) => new Clock(ref b);
@@ -55,9 +53,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 8;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

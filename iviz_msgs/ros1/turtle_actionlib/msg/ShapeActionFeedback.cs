@@ -38,8 +38,6 @@ namespace Iviz.Msgs.TurtleActionlib
             Feedback = ShapeFeedback.Singleton;
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ShapeActionFeedback(ref b);
-        
         public ShapeActionFeedback RosDeserialize(ref ReadBuffer b) => new ShapeActionFeedback(ref b);
         
         public ShapeActionFeedback RosDeserialize(ref ReadBuffer2 b) => new ShapeActionFeedback(ref b);

@@ -55,8 +55,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerInit(ref b);
-        
         public InteractiveMarkerInit RosDeserialize(ref ReadBuffer b) => new InteractiveMarkerInit(ref b);
         
         public InteractiveMarkerInit RosDeserialize(ref ReadBuffer2 b) => new InteractiveMarkerInit(ref b);

@@ -72,8 +72,6 @@ namespace Iviz.Msgs.GridMapMsgs
             Map = new GridMapMsgs.GridMap(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetGridMapRequest(ref b);
-        
         public SetGridMapRequest RosDeserialize(ref ReadBuffer b) => new SetGridMapRequest(ref b);
         
         public SetGridMapRequest RosDeserialize(ref ReadBuffer2 b) => new SetGridMapRequest(ref b);
@@ -122,8 +120,6 @@ namespace Iviz.Msgs.GridMapMsgs
         {
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
-        
         public SetGridMapResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public SetGridMapResponse RosDeserialize(ref ReadBuffer2 b) => Singleton;
@@ -149,7 +145,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int c) { }
+        public void AddRos2MessageLength(ref int _) { }
     
         public override string ToString() => Extensions.ToString(this);
     }

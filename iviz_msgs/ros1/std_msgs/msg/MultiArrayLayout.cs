@@ -65,8 +65,6 @@ namespace Iviz.Msgs.StdMsgs
             b.Deserialize(out DataOffset);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MultiArrayLayout(ref b);
-        
         public MultiArrayLayout RosDeserialize(ref ReadBuffer b) => new MultiArrayLayout(ref b);
         
         public MultiArrayLayout RosDeserialize(ref ReadBuffer2 b) => new MultiArrayLayout(ref b);

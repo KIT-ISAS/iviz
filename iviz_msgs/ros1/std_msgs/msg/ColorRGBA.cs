@@ -35,8 +35,6 @@ namespace Iviz.Msgs.StdMsgs
             b.Deserialize(out this);
         }
         
-        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ColorRGBA(ref b);
-        
         public readonly ColorRGBA RosDeserialize(ref ReadBuffer b) => new ColorRGBA(ref b);
         
         public readonly ColorRGBA RosDeserialize(ref ReadBuffer2 b) => new ColorRGBA(ref b);

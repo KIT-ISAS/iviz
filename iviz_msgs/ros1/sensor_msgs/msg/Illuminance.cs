@@ -52,8 +52,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Variance);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Illuminance(ref b);
-        
         public Illuminance RosDeserialize(ref ReadBuffer b) => new Illuminance(ref b);
         
         public Illuminance RosDeserialize(ref ReadBuffer2 b) => new Illuminance(ref b);

@@ -41,8 +41,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.DeserializeString(out Name);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerPose(ref b);
-        
         public InteractiveMarkerPose RosDeserialize(ref ReadBuffer b) => new InteractiveMarkerPose(ref b);
         
         public InteractiveMarkerPose RosDeserialize(ref ReadBuffer2 b) => new InteractiveMarkerPose(ref b);

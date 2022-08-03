@@ -43,8 +43,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Meshes);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Node(ref b);
-        
         public Node RosDeserialize(ref ReadBuffer b) => new Node(ref b);
         
         public Node RosDeserialize(ref ReadBuffer2 b) => new Node(ref b);

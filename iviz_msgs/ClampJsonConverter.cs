@@ -46,12 +46,13 @@ namespace Iviz.Msgs
                     break;
                 case string str:
                     string shortString =
-                        $"{str.Substring(0, maxStringLength)} <i>... +{(str.Length - maxStringLength).ToString()} chars</i>";
+                        $"{str[..maxStringLength]} <i>... +{(str.Length - maxStringLength).ToString()} chars</i>";
                     writer.WriteValue(shortString);
                     break;
                 case Array array:
                     _ = array switch
                     {
+                        bool[] i => WriteArray(i, writer.WriteValue),
                         int[] i => WriteArray(i, writer.WriteValue),
                         uint[] i => WriteArray(i, writer.WriteValue),
                         short[] i => WriteArray(i, writer.WriteValue),
@@ -99,7 +100,10 @@ namespace Iviz.Msgs
                 for (int i = 0; i < Math.Min(array.Length, maxArrayLength); i++)
                 {
                     object? element = array.GetValue(i);
-                    JToken.FromObject(element, serializer).WriteTo(writer);
+                    var token = element is null
+                        ? JValue.CreateNull() // shouldn't happen
+                        : JToken.FromObject(element, serializer);
+                    token.WriteTo(writer);
                 }
 
                 writer.WriteEndArray();

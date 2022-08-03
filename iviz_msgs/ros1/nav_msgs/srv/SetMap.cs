@@ -77,8 +77,6 @@ namespace Iviz.Msgs.NavMsgs
             InitialPose = new GeometryMsgs.PoseWithCovarianceStamped(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetMapRequest(ref b);
-        
         public SetMapRequest RosDeserialize(ref ReadBuffer b) => new SetMapRequest(ref b);
         
         public SetMapRequest RosDeserialize(ref ReadBuffer2 b) => new SetMapRequest(ref b);
@@ -140,8 +138,6 @@ namespace Iviz.Msgs.NavMsgs
             b.Deserialize(out Success);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetMapResponse(ref b);
-        
         public SetMapResponse RosDeserialize(ref ReadBuffer b) => new SetMapResponse(ref b);
         
         public SetMapResponse RosDeserialize(ref ReadBuffer2 b) => new SetMapResponse(ref b);
@@ -164,9 +160,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 1;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

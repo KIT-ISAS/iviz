@@ -42,8 +42,6 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Path(ref b);
-        
         public Path RosDeserialize(ref ReadBuffer b) => new Path(ref b);
         
         public Path RosDeserialize(ref ReadBuffer2 b) => new Path(ref b);

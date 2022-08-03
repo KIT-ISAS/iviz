@@ -32,8 +32,6 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out this);
         }
         
-        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Pose(ref b);
-        
         public readonly Pose RosDeserialize(ref ReadBuffer b) => new Pose(ref b);
         
         public readonly Pose RosDeserialize(ref ReadBuffer2 b) => new Pose(ref b);

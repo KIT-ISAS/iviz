@@ -29,8 +29,6 @@ namespace Iviz.Msgs.NavMsgs
             Map = new NavMsgs.OccupancyGrid(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetMapResult(ref b);
-        
         public GetMapResult RosDeserialize(ref ReadBuffer b) => new GetMapResult(ref b);
         
         public GetMapResult RosDeserialize(ref ReadBuffer2 b) => new GetMapResult(ref b);

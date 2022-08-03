@@ -76,8 +76,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructArray(out Intensities);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LaserScan(ref b);
-        
         public LaserScan RosDeserialize(ref ReadBuffer b) => new LaserScan(ref b);
         
         public LaserScan RosDeserialize(ref ReadBuffer2 b) => new LaserScan(ref b);

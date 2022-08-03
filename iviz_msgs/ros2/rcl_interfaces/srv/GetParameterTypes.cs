@@ -73,8 +73,6 @@ namespace Iviz.Msgs.RclInterfaces
             b.DeserializeStringArray(out Names);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetParameterTypesRequest(ref b);
-        
         public GetParameterTypesRequest RosDeserialize(ref ReadBuffer b) => new GetParameterTypesRequest(ref b);
         
         public GetParameterTypesRequest RosDeserialize(ref ReadBuffer2 b) => new GetParameterTypesRequest(ref b);
@@ -138,8 +136,6 @@ namespace Iviz.Msgs.RclInterfaces
         {
             b.DeserializeStructArray(out Types);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetParameterTypesResponse(ref b);
         
         public GetParameterTypesResponse RosDeserialize(ref ReadBuffer b) => new GetParameterTypesResponse(ref b);
         

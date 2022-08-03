@@ -37,8 +37,6 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ARMarkerArray(ref b);
-        
         public ARMarkerArray RosDeserialize(ref ReadBuffer b) => new ARMarkerArray(ref b);
         
         public ARMarkerArray RosDeserialize(ref ReadBuffer2 b) => new ARMarkerArray(ref b);

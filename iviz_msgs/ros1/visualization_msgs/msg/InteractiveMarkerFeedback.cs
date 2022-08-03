@@ -74,8 +74,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out MousePointValid);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerFeedback(ref b);
-        
         public InteractiveMarkerFeedback RosDeserialize(ref ReadBuffer b) => new InteractiveMarkerFeedback(ref b);
         
         public InteractiveMarkerFeedback RosDeserialize(ref ReadBuffer2 b) => new InteractiveMarkerFeedback(ref b);

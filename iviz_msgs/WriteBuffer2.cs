@@ -8,7 +8,7 @@ using Iviz.Tools;
 namespace Iviz.Msgs;
 
 /// <summary>
-/// Contains utilities to (de)serialize ROS messages from a byte array. 
+/// Contains utilities to serialize ROS 2 messages into a byte array. 
 /// </summary>
 public unsafe partial struct WriteBuffer2
 {
@@ -202,7 +202,7 @@ public unsafe partial struct WriteBuffer2
     static void AdvanceAlign1ArrayFixed(ref int c, int size) => c += size;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void AdvanceAlign1Type(ref int c, int length) => c = length;
+    static void AdvanceAlign1Type(ref int c, int length) => c += length;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static void AdvanceAlign1TypeArray(ref int c, int length) => AdvanceAlign1Array(ref c, length);
@@ -665,7 +665,7 @@ public unsafe partial struct WriteBuffer2
         Align8();
         SerializeStructArrayCore(val);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(Vector3[] val, int count)
     {
@@ -735,7 +735,7 @@ public unsafe partial struct WriteBuffer2
         if (val.Length == 0) return;
         SerializeStructArrayCore(val);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(Vector3f[] val)
     {
@@ -744,7 +744,7 @@ public unsafe partial struct WriteBuffer2
         Align4();
         SerializeStructArrayCore(val);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(Triangle[] val)
     {
@@ -779,7 +779,7 @@ public unsafe partial struct WriteBuffer2
         Advance(size);
     }
 
-    public void SerializeStructArray(SharedRent<byte> val) 
+    public void SerializeStructArray(SharedRent<byte> val)
     {
         const int sizeOfT = 1;
         int size = val.Length * sizeOfT;
@@ -875,7 +875,7 @@ public unsafe partial struct WriteBuffer2
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void AddLength(ref int c, in Vector2f _) => AdvanceAlign4Type(ref c, Vector2f.Ros2FixedMessageLength);
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void AddLength(ref int c, in Triangle _) => AdvanceAlign4Type(ref c, Triangle.Ros2FixedMessageLength);
 
@@ -918,7 +918,7 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void AddLength(ref int c, Point32[] b) =>
         AdvanceAlign4TypeArray(ref c, sizeof(Point32) * b.Length);
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void AddLength(ref int c, time[] b) =>
         AdvanceAlign4TypeArray(ref c, 2 * sizeof(int) * b.Length);
@@ -1007,7 +1007,7 @@ public unsafe partial struct WriteBuffer2
         *(Point32*)(ptr + offset) = val;
         Advance(size);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Serialize(in Color32 val)
     {
@@ -1016,7 +1016,7 @@ public unsafe partial struct WriteBuffer2
         *(Color32*)(ptr + offset) = val;
         Advance(size);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Serialize(in Vector2f val)
     {
@@ -1026,7 +1026,7 @@ public unsafe partial struct WriteBuffer2
         *(Vector2f*)(ptr + offset) = val;
         Advance(size);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Serialize(in Vector3f val)
     {
@@ -1036,7 +1036,7 @@ public unsafe partial struct WriteBuffer2
         *(Vector3f*)(ptr + offset) = val;
         Advance(size);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Serialize(in Triangle val)
     {
@@ -1046,7 +1046,7 @@ public unsafe partial struct WriteBuffer2
         *(Triangle*)(ptr + offset) = val;
         Advance(size);
     }
-    
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetRosMessageLength(in RclInterfaces.Log msg)
@@ -1054,25 +1054,25 @@ public unsafe partial struct WriteBuffer2
         int s = 0;
         msg.AddRos2MessageLength(ref s);
         return s;
-    }    
-    
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetRosMessageLength(in RosgraphMsgs.Log msg)
     {
         int s = 0;
         msg.AddRos2MessageLength(ref s);
         return s;
-    } 
-    
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetRosMessageLength(in Header msg)
     {
         int s = 0;
         msg.AddRos2MessageLength(ref s);
         return s;
-    }     
-    
-    
+    }
+
+
     public void SerializeArray(TransformStamped[] val)
     {
         WriteInt(val.Length);

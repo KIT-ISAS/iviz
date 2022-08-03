@@ -77,8 +77,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out WrapModeV);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Texture(ref b);
-        
         public Texture RosDeserialize(ref ReadBuffer b) => new Texture(ref b);
         
         public Texture RosDeserialize(ref ReadBuffer2 b) => new Texture(ref b);

@@ -37,8 +37,6 @@ namespace Iviz.Msgs.Tf2Msgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TFMessage(ref b);
-        
         public TFMessage RosDeserialize(ref ReadBuffer b) => new TFMessage(ref b);
         
         public TFMessage RosDeserialize(ref ReadBuffer2 b) => new TFMessage(ref b);

@@ -42,8 +42,6 @@ namespace Iviz.Msgs.NavMsgs
             b.DeserializeStructArray(out Cells);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GridCells(ref b);
-        
         public GridCells RosDeserialize(ref ReadBuffer b) => new GridCells(ref b);
         
         public GridCells RosDeserialize(ref ReadBuffer2 b) => new GridCells(ref b);

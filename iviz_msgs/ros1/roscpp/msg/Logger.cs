@@ -34,8 +34,6 @@ namespace Iviz.Msgs.Roscpp
             b.DeserializeString(out Level);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Logger(ref b);
-        
         public Logger RosDeserialize(ref ReadBuffer b) => new Logger(ref b);
         
         public Logger RosDeserialize(ref ReadBuffer2 b) => new Logger(ref b);

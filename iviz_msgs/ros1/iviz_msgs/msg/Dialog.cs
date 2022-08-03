@@ -120,8 +120,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out TfDisplacement);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Dialog(ref b);
-        
         public Dialog RosDeserialize(ref ReadBuffer b) => new Dialog(ref b);
         
         public Dialog RosDeserialize(ref ReadBuffer2 b) => new Dialog(ref b);

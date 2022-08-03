@@ -33,8 +33,6 @@ namespace Iviz.Msgs.Tf2Msgs
             Error = new Tf2Msgs.TF2Error(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformResult(ref b);
-        
         public LookupTransformResult RosDeserialize(ref ReadBuffer b) => new LookupTransformResult(ref b);
         
         public LookupTransformResult RosDeserialize(ref ReadBuffer2 b) => new LookupTransformResult(ref b);

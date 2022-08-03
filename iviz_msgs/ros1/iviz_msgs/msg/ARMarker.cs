@@ -59,8 +59,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out PoseRelativeToCamera);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ARMarker(ref b);
-        
         public ARMarker RosDeserialize(ref ReadBuffer b) => new ARMarker(ref b);
         
         public ARMarker RosDeserialize(ref ReadBuffer2 b) => new ARMarker(ref b);

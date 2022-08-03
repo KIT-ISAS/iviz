@@ -34,8 +34,6 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeStructArray(out Vectors);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new VectorField(ref b);
-        
         public VectorField RosDeserialize(ref ReadBuffer b) => new VectorField(ref b);
         
         public VectorField RosDeserialize(ref ReadBuffer2 b) => new VectorField(ref b);

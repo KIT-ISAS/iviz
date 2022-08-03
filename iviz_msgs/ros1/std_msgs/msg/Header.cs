@@ -58,8 +58,6 @@ namespace Iviz.Msgs.StdMsgs
             b.DeserializeString(out h.FrameId);
         }
         
-        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Header(ref b);
-        
         public readonly Header RosDeserialize(ref ReadBuffer b) => new Header(ref b);
         
         public readonly Header RosDeserialize(ref ReadBuffer2 b) => new Header(ref b);

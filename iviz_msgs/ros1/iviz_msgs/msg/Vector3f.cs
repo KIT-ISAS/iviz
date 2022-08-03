@@ -33,8 +33,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out this);
         }
         
-        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Vector3f(ref b);
-        
         public readonly Vector3f RosDeserialize(ref ReadBuffer b) => new Vector3f(ref b);
         
         public readonly Vector3f RosDeserialize(ref ReadBuffer2 b) => new Vector3f(ref b);

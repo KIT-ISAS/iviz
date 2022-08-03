@@ -38,8 +38,6 @@ namespace Iviz.Msgs.TurtleActionlib
             Result = new ShapeResult(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ShapeActionResult(ref b);
-        
         public ShapeActionResult RosDeserialize(ref ReadBuffer b) => new ShapeActionResult(ref b);
         
         public ShapeActionResult RosDeserialize(ref ReadBuffer2 b) => new ShapeActionResult(ref b);

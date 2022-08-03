@@ -48,8 +48,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Package);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Include(ref b);
-        
         public Include RosDeserialize(ref ReadBuffer b) => new Include(ref b);
         
         public Include RosDeserialize(ref ReadBuffer2 b) => new Include(ref b);

@@ -61,8 +61,6 @@ namespace Iviz.Msgs.ShapeMsgs
             b.DeserializeStructArray(out Dimensions);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SolidPrimitive(ref b);
-        
         public SolidPrimitive RosDeserialize(ref ReadBuffer b) => new SolidPrimitive(ref b);
         
         public SolidPrimitive RosDeserialize(ref ReadBuffer2 b) => new SolidPrimitive(ref b);

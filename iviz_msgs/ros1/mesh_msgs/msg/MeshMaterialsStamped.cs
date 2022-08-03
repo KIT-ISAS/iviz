@@ -39,8 +39,6 @@ namespace Iviz.Msgs.MeshMsgs
             MeshMaterials = new MeshMsgs.MeshMaterials(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshMaterialsStamped(ref b);
-        
         public MeshMaterialsStamped RosDeserialize(ref ReadBuffer b) => new MeshMaterialsStamped(ref b);
         
         public MeshMaterialsStamped RosDeserialize(ref ReadBuffer2 b) => new MeshMaterialsStamped(ref b);

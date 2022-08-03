@@ -46,8 +46,6 @@ namespace Iviz.Msgs.NavMsgs
             Twist = new GeometryMsgs.TwistWithCovariance(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Odometry(ref b);
-        
         public Odometry RosDeserialize(ref ReadBuffer b) => new Odometry(ref b);
         
         public Odometry RosDeserialize(ref ReadBuffer2 b) => new Odometry(ref b);

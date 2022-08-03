@@ -14,14 +14,6 @@ public interface ISerializableRos1
     /// Length of this message in bytes after serialization.
     /// </summary>
     int RosMessageLength { get; }
-
-    /// <summary>
-    /// Creates a new message and deserializes into it the information read from the given buffer.
-    /// </summary>
-    /// <param name="b">
-    /// Buffer object.
-    /// </param>
-    ISerializableRos1 RosDeserializeBase(ref ReadBuffer b);
 }
 
 public interface ISerializableRos2

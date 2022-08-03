@@ -76,8 +76,6 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.Deserialize(out StampAgeMax);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TopicStatistics(ref b);
-        
         public TopicStatistics RosDeserialize(ref ReadBuffer b) => new TopicStatistics(ref b);
         
         public TopicStatistics RosDeserialize(ref ReadBuffer2 b) => new TopicStatistics(ref b);

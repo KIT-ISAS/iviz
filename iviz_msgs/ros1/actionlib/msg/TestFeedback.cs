@@ -28,8 +28,6 @@ namespace Iviz.Msgs.Actionlib
             b.Deserialize(out Feedback);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TestFeedback(ref b);
-        
         public TestFeedback RosDeserialize(ref ReadBuffer b) => new TestFeedback(ref b);
         
         public TestFeedback RosDeserialize(ref ReadBuffer2 b) => new TestFeedback(ref b);
@@ -52,9 +50,7 @@ namespace Iviz.Msgs.Actionlib
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 4;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

@@ -62,8 +62,6 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
-        
         public StopCaptureRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public StopCaptureRequest RosDeserialize(ref ReadBuffer2 b) => Singleton;
@@ -89,7 +87,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int c) { }
+        public void AddRos2MessageLength(ref int _) { }
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -122,8 +120,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Success);
             b.DeserializeString(out Message);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new StopCaptureResponse(ref b);
         
         public StopCaptureResponse RosDeserialize(ref ReadBuffer b) => new StopCaptureResponse(ref b);
         

@@ -133,7 +133,7 @@ public static class BuiltIns
     {
         return ToJsonString((object)o, indented);
     }
-    
+
     public static string ToJsonString(this IRequest o, bool indented = true)
     {
         return ToJsonString((object)o, indented);
@@ -166,6 +166,7 @@ public static class BuiltIns
 
         return bytes;
     }
+
     public static byte[] SerializeToArrayRos1(this ISerializable o)
     {
         o.RosValidate();
@@ -174,7 +175,7 @@ public static class BuiltIns
 
         return bytes;
     }
-    
+
     public static byte[] SerializeToArrayRos2(this ISerializable o)
     {
         o.RosValidate();
@@ -245,6 +246,10 @@ public static class BuiltIns
     [DoesNotReturn, AssertionMethod]
     public static void ThrowImplausibleBufferSize() =>
         throw new RosBufferException("Implausible message requested more than 1TB elements.");
+
+    [DoesNotReturn, AssertionMethod]
+    public static void ThrowArgumentOutOfRange() =>
+        throw new ArgumentOutOfRangeException();
 
     [DoesNotReturn, AssertionMethod]
     public static void ThrowInvalidSizeForFixedArray(int size, int expected) =>

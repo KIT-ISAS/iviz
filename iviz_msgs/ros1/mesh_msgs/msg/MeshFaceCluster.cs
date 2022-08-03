@@ -36,8 +36,6 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeString(out Label);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshFaceCluster(ref b);
-        
         public MeshFaceCluster RosDeserialize(ref ReadBuffer b) => new MeshFaceCluster(ref b);
         
         public MeshFaceCluster RosDeserialize(ref ReadBuffer2 b) => new MeshFaceCluster(ref b);

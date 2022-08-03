@@ -80,8 +80,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.DeserializeStructArray(out OutlineColors);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ImageMarker(ref b);
-        
         public ImageMarker RosDeserialize(ref ReadBuffer b) => new ImageMarker(ref b);
         
         public ImageMarker RosDeserialize(ref ReadBuffer2 b) => new ImageMarker(ref b);

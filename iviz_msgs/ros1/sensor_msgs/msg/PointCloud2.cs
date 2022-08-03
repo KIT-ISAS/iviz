@@ -74,8 +74,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out IsDense);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PointCloud2(ref b);
-        
         public PointCloud2 RosDeserialize(ref ReadBuffer b) => new PointCloud2(ref b);
         
         public PointCloud2 RosDeserialize(ref ReadBuffer2 b) => new PointCloud2(ref b);

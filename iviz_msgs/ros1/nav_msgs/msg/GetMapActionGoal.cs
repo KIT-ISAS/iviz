@@ -38,8 +38,6 @@ namespace Iviz.Msgs.NavMsgs
             Goal = GetMapGoal.Singleton;
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetMapActionGoal(ref b);
-        
         public GetMapActionGoal RosDeserialize(ref ReadBuffer b) => new GetMapActionGoal(ref b);
         
         public GetMapActionGoal RosDeserialize(ref ReadBuffer2 b) => new GetMapActionGoal(ref b);

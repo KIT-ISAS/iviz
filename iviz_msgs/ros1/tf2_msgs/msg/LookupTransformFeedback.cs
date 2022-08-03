@@ -19,8 +19,6 @@ namespace Iviz.Msgs.Tf2Msgs
         {
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
-        
         public LookupTransformFeedback RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public LookupTransformFeedback RosDeserialize(ref ReadBuffer2 b) => Singleton;
@@ -46,7 +44,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int c) { }
+        public void AddRos2MessageLength(ref int _) { }
     
         public const string MessageType = "tf2_msgs/LookupTransformFeedback";
     

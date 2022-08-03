@@ -64,8 +64,6 @@ namespace Iviz.Msgs.StereoMsgs
             b.Deserialize(out DeltaD);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new DisparityImage(ref b);
-        
         public DisparityImage RosDeserialize(ref ReadBuffer b) => new DisparityImage(ref b);
         
         public DisparityImage RosDeserialize(ref ReadBuffer2 b) => new DisparityImage(ref b);

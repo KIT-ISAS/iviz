@@ -54,8 +54,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructArray(9, out MagneticFieldCovariance);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MagneticField(ref b);
-        
         public MagneticField RosDeserialize(ref ReadBuffer b) => new MagneticField(ref b);
         
         public MagneticField RosDeserialize(ref ReadBuffer2 b) => new MagneticField(ref b);

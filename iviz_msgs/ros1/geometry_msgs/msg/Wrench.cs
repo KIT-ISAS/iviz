@@ -34,8 +34,6 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out Torque);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Wrench(ref b);
-        
         public Wrench RosDeserialize(ref ReadBuffer b) => new Wrench(ref b);
         
         public Wrench RosDeserialize(ref ReadBuffer2 b) => new Wrench(ref b);
@@ -60,9 +58,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 48;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

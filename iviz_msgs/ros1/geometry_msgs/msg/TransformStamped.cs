@@ -54,8 +54,6 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out h.Transform);
         }
         
-        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TransformStamped(ref b);
-        
         public readonly TransformStamped RosDeserialize(ref ReadBuffer b) => new TransformStamped(ref b);
         
         public readonly TransformStamped RosDeserialize(ref ReadBuffer2 b) => new TransformStamped(ref b);

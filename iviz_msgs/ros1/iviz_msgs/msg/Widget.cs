@@ -81,8 +81,6 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Widget(ref b);
-        
         public Widget RosDeserialize(ref ReadBuffer b) => new Widget(ref b);
         
         public Widget RosDeserialize(ref ReadBuffer2 b) => new Widget(ref b);

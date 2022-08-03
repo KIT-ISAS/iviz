@@ -41,8 +41,6 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out Theta);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Pose2D(ref b);
-        
         public Pose2D RosDeserialize(ref ReadBuffer b) => new Pose2D(ref b);
         
         public Pose2D RosDeserialize(ref ReadBuffer2 b) => new Pose2D(ref b);
@@ -69,9 +67,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 24;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

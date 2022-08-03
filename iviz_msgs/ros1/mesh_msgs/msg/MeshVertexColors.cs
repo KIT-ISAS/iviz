@@ -30,8 +30,6 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeStructArray(out VertexColors);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexColors(ref b);
-        
         public MeshVertexColors RosDeserialize(ref ReadBuffer b) => new MeshVertexColors(ref b);
         
         public MeshVertexColors RosDeserialize(ref ReadBuffer2 b) => new MeshVertexColors(ref b);

@@ -36,8 +36,6 @@ namespace Iviz.Msgs.MeshMsgs
             b.Deserialize(out HasTexture);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshMaterial(ref b);
-        
         public MeshMaterial RosDeserialize(ref ReadBuffer b) => new MeshMaterial(ref b);
         
         public MeshMaterial RosDeserialize(ref ReadBuffer2 b) => new MeshMaterial(ref b);
@@ -64,9 +62,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 21;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

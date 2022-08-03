@@ -49,8 +49,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Little);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new XRHandState(ref b);
-        
         public XRHandState RosDeserialize(ref ReadBuffer b) => new XRHandState(ref b);
         
         public XRHandState RosDeserialize(ref ReadBuffer2 b) => new XRHandState(ref b);

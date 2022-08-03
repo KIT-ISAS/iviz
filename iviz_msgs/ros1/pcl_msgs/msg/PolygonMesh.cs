@@ -49,8 +49,6 @@ namespace Iviz.Msgs.PclMsgs
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new PolygonMesh(ref b);
-        
         public PolygonMesh RosDeserialize(ref ReadBuffer b) => new PolygonMesh(ref b);
         
         public PolygonMesh RosDeserialize(ref ReadBuffer2 b) => new PolygonMesh(ref b);

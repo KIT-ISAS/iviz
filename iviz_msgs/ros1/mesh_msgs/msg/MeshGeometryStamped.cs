@@ -39,8 +39,6 @@ namespace Iviz.Msgs.MeshMsgs
             MeshGeometry = new MeshMsgs.MeshGeometry(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshGeometryStamped(ref b);
-        
         public MeshGeometryStamped RosDeserialize(ref ReadBuffer b) => new MeshGeometryStamped(ref b);
         
         public MeshGeometryStamped RosDeserialize(ref ReadBuffer2 b) => new MeshGeometryStamped(ref b);

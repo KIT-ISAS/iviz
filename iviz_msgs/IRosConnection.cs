@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Iviz.Msgs
@@ -20,6 +21,6 @@ namespace Iviz.Msgs
         /// <summary>
         /// List of TCPROS header entries in the form of strings a=b
         /// </summary>
-        IReadOnlyCollection<string> RosHeader { get; }
+        IReadOnlyCollection<string> RosHeader => Array.Empty<string>();
     }
 }

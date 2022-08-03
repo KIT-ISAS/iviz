@@ -56,8 +56,6 @@ namespace Iviz.Msgs.Actionlib
             b.Deserialize(out PauseStatus);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TestRequestGoal(ref b);
-        
         public TestRequestGoal RosDeserialize(ref ReadBuffer b) => new TestRequestGoal(ref b);
         
         public TestRequestGoal RosDeserialize(ref ReadBuffer2 b) => new TestRequestGoal(ref b);

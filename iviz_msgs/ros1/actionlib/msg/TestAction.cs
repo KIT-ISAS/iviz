@@ -40,8 +40,6 @@ namespace Iviz.Msgs.Actionlib
             ActionFeedback = new TestActionFeedback(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TestAction(ref b);
-        
         public TestAction RosDeserialize(ref ReadBuffer b) => new TestAction(ref b);
         
         public TestAction RosDeserialize(ref ReadBuffer2 b) => new TestAction(ref b);

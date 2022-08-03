@@ -34,8 +34,6 @@ namespace Iviz.Msgs.GeometryMsgs
             Accel = new Accel(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AccelStamped(ref b);
-        
         public AccelStamped RosDeserialize(ref ReadBuffer b) => new AccelStamped(ref b);
         
         public AccelStamped RosDeserialize(ref ReadBuffer2 b) => new AccelStamped(ref b);

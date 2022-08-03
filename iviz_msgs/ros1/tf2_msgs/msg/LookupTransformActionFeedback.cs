@@ -38,8 +38,6 @@ namespace Iviz.Msgs.Tf2Msgs
             Feedback = LookupTransformFeedback.Singleton;
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformActionFeedback(ref b);
-        
         public LookupTransformActionFeedback RosDeserialize(ref ReadBuffer b) => new LookupTransformActionFeedback(ref b);
         
         public LookupTransformActionFeedback RosDeserialize(ref ReadBuffer2 b) => new LookupTransformActionFeedback(ref b);

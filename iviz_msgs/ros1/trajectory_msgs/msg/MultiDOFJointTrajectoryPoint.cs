@@ -62,8 +62,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
             b.Deserialize(out TimeFromStart);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MultiDOFJointTrajectoryPoint(ref b);
-        
         public MultiDOFJointTrajectoryPoint RosDeserialize(ref ReadBuffer b) => new MultiDOFJointTrajectoryPoint(ref b);
         
         public MultiDOFJointTrajectoryPoint RosDeserialize(ref ReadBuffer2 b) => new MultiDOFJointTrajectoryPoint(ref b);

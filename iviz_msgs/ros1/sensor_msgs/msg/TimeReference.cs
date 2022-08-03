@@ -42,8 +42,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeString(out Source);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TimeReference(ref b);
-        
         public TimeReference RosDeserialize(ref ReadBuffer b) => new TimeReference(ref b);
         
         public TimeReference RosDeserialize(ref ReadBuffer2 b) => new TimeReference(ref b);

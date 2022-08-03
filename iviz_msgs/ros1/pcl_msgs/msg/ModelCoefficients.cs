@@ -33,8 +33,6 @@ namespace Iviz.Msgs.PclMsgs
             b.DeserializeStructArray(out Values);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ModelCoefficients(ref b);
-        
         public ModelCoefficients RosDeserialize(ref ReadBuffer b) => new ModelCoefficients(ref b);
         
         public ModelCoefficients RosDeserialize(ref ReadBuffer2 b) => new ModelCoefficients(ref b);

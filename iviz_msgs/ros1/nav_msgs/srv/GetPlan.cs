@@ -85,8 +85,6 @@ namespace Iviz.Msgs.NavMsgs
             b.Deserialize(out Tolerance);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetPlanRequest(ref b);
-        
         public GetPlanRequest RosDeserialize(ref ReadBuffer b) => new GetPlanRequest(ref b);
         
         public GetPlanRequest RosDeserialize(ref ReadBuffer2 b) => new GetPlanRequest(ref b);
@@ -151,8 +149,6 @@ namespace Iviz.Msgs.NavMsgs
         {
             Plan = new NavMsgs.Path(ref b);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetPlanResponse(ref b);
         
         public GetPlanResponse RosDeserialize(ref ReadBuffer b) => new GetPlanResponse(ref b);
         

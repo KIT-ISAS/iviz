@@ -33,8 +33,6 @@ namespace Iviz.Msgs.UniqueIdentifierMsgs
             b.DeserializeStructArray(16, out Uuid);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new UUID(ref b);
-        
         public UUID RosDeserialize(ref ReadBuffer b) => new UUID(ref b);
         
         public UUID RosDeserialize(ref ReadBuffer2 b) => new UUID(ref b);
@@ -59,9 +57,7 @@ namespace Iviz.Msgs.UniqueIdentifierMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 16;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {

@@ -108,8 +108,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.DeserializeString(out Description);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerControl(ref b);
-        
         public InteractiveMarkerControl RosDeserialize(ref ReadBuffer b) => new InteractiveMarkerControl(ref b);
         
         public InteractiveMarkerControl RosDeserialize(ref ReadBuffer2 b) => new InteractiveMarkerControl(ref b);

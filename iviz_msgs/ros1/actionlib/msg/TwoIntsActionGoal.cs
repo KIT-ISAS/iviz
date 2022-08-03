@@ -38,8 +38,6 @@ namespace Iviz.Msgs.Actionlib
             Goal = new TwoIntsGoal(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TwoIntsActionGoal(ref b);
-        
         public TwoIntsActionGoal RosDeserialize(ref ReadBuffer b) => new TwoIntsActionGoal(ref b);
         
         public TwoIntsActionGoal RosDeserialize(ref ReadBuffer2 b) => new TwoIntsActionGoal(ref b);

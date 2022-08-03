@@ -36,8 +36,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Transform);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new XRGazeState(ref b);
-        
         public XRGazeState RosDeserialize(ref ReadBuffer b) => new XRGazeState(ref b);
         
         public XRGazeState RosDeserialize(ref ReadBuffer2 b) => new XRGazeState(ref b);

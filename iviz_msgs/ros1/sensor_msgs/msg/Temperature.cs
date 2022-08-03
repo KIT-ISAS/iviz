@@ -41,8 +41,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Variance);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Temperature(ref b);
-        
         public Temperature RosDeserialize(ref ReadBuffer b) => new Temperature(ref b);
         
         public Temperature RosDeserialize(ref ReadBuffer2 b) => new Temperature(ref b);

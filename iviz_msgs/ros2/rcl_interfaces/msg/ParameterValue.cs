@@ -73,8 +73,6 @@ namespace Iviz.Msgs.RclInterfaces
             b.DeserializeStringArray(out StringArrayValue);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ParameterValue(ref b);
-        
         public ParameterValue RosDeserialize(ref ReadBuffer b) => new ParameterValue(ref b);
         
         public ParameterValue RosDeserialize(ref ReadBuffer2 b) => new ParameterValue(ref b);

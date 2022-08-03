@@ -40,8 +40,6 @@ namespace Iviz.Msgs.Actionlib
             ActionFeedback = new TwoIntsActionFeedback(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TwoIntsAction(ref b);
-        
         public TwoIntsAction RosDeserialize(ref ReadBuffer b) => new TwoIntsAction(ref b);
         
         public TwoIntsAction RosDeserialize(ref ReadBuffer2 b) => new TwoIntsAction(ref b);

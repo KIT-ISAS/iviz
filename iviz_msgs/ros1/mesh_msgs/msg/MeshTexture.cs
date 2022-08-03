@@ -39,8 +39,6 @@ namespace Iviz.Msgs.MeshMsgs
             Image = new SensorMsgs.Image(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshTexture(ref b);
-        
         public MeshTexture RosDeserialize(ref ReadBuffer b) => new MeshTexture(ref b);
         
         public MeshTexture RosDeserialize(ref ReadBuffer2 b) => new MeshTexture(ref b);

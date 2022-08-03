@@ -76,8 +76,6 @@ namespace Iviz.Msgs.Roscpp
             b.DeserializeString(out Level);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetLoggerLevelRequest(ref b);
-        
         public SetLoggerLevelRequest RosDeserialize(ref ReadBuffer b) => new SetLoggerLevelRequest(ref b);
         
         public SetLoggerLevelRequest RosDeserialize(ref ReadBuffer2 b) => new SetLoggerLevelRequest(ref b);
@@ -129,8 +127,6 @@ namespace Iviz.Msgs.Roscpp
         {
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
-        
         public SetLoggerLevelResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public SetLoggerLevelResponse RosDeserialize(ref ReadBuffer2 b) => Singleton;
@@ -156,7 +152,7 @@ namespace Iviz.Msgs.Roscpp
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int c) { }
+        public void AddRos2MessageLength(ref int _) { }
     
         public override string ToString() => Extensions.ToString(this);
     }

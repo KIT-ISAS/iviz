@@ -29,8 +29,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Colors);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ColorChannel(ref b);
-        
         public ColorChannel RosDeserialize(ref ReadBuffer b) => new ColorChannel(ref b);
         
         public ColorChannel RosDeserialize(ref ReadBuffer2 b) => new ColorChannel(ref b);

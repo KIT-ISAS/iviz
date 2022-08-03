@@ -53,8 +53,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructArray(out Values);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ChannelFloat32(ref b);
-        
         public ChannelFloat32 RosDeserialize(ref ReadBuffer b) => new ChannelFloat32(ref b);
         
         public ChannelFloat32 RosDeserialize(ref ReadBuffer2 b) => new ChannelFloat32(ref b);

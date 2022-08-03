@@ -36,8 +36,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.DeserializeString(out Value);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new KeyValue(ref b);
-        
         public KeyValue RosDeserialize(ref ReadBuffer b) => new KeyValue(ref b);
         
         public KeyValue RosDeserialize(ref ReadBuffer2 b) => new KeyValue(ref b);

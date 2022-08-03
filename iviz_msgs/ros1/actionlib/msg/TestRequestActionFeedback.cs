@@ -38,8 +38,6 @@ namespace Iviz.Msgs.Actionlib
             Feedback = TestRequestFeedback.Singleton;
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new TestRequestActionFeedback(ref b);
-        
         public TestRequestActionFeedback RosDeserialize(ref ReadBuffer b) => new TestRequestActionFeedback(ref b);
         
         public TestRequestActionFeedback RosDeserialize(ref ReadBuffer2 b) => new TestRequestActionFeedback(ref b);

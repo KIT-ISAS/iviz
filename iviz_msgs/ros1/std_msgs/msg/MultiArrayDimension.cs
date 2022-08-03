@@ -40,8 +40,6 @@ namespace Iviz.Msgs.StdMsgs
             b.Deserialize(out Stride);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MultiArrayDimension(ref b);
-        
         public MultiArrayDimension RosDeserialize(ref ReadBuffer b) => new MultiArrayDimension(ref b);
         
         public MultiArrayDimension RosDeserialize(ref ReadBuffer2 b) => new MultiArrayDimension(ref b);

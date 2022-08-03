@@ -62,8 +62,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
-        
         public SelfTestRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public SelfTestRequest RosDeserialize(ref ReadBuffer2 b) => Singleton;
@@ -89,7 +87,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int c) { }
+        public void AddRos2MessageLength(ref int _) { }
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -135,8 +133,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
                 Status[i] = new DiagnosticStatus(ref b);
             }
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SelfTestResponse(ref b);
         
         public SelfTestResponse RosDeserialize(ref ReadBuffer b) => new SelfTestResponse(ref b);
         

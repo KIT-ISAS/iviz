@@ -82,8 +82,6 @@ namespace Iviz.Msgs.RclInterfaces
             }
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetParametersAtomicallyRequest(ref b);
-        
         public SetParametersAtomicallyRequest RosDeserialize(ref ReadBuffer b) => new SetParametersAtomicallyRequest(ref b);
         
         public SetParametersAtomicallyRequest RosDeserialize(ref ReadBuffer2 b) => new SetParametersAtomicallyRequest(ref b);
@@ -145,8 +143,6 @@ namespace Iviz.Msgs.RclInterfaces
         {
             Result = new SetParametersResult(ref b);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetParametersAtomicallyResponse(ref b);
         
         public SetParametersAtomicallyResponse RosDeserialize(ref ReadBuffer b) => new SetParametersAtomicallyResponse(ref b);
         

@@ -57,8 +57,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructArray(out Effort);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new JointState(ref b);
-        
         public JointState RosDeserialize(ref ReadBuffer b) => new JointState(ref b);
         
         public JointState RosDeserialize(ref ReadBuffer2 b) => new JointState(ref b);

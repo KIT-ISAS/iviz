@@ -71,8 +71,6 @@ namespace Iviz.Msgs.StdSrvs
             b.Deserialize(out Data);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetBoolRequest(ref b);
-        
         public SetBoolRequest RosDeserialize(ref ReadBuffer b) => new SetBoolRequest(ref b);
         
         public SetBoolRequest RosDeserialize(ref ReadBuffer2 b) => new SetBoolRequest(ref b);
@@ -95,9 +93,7 @@ namespace Iviz.Msgs.StdSrvs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public const int Ros2FixedMessageLength = 1;
-        
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
         
         public void AddRos2MessageLength(ref int c)
         {
@@ -137,8 +133,6 @@ namespace Iviz.Msgs.StdSrvs
             b.Deserialize(out Success);
             b.DeserializeString(out Message);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new SetBoolResponse(ref b);
         
         public SetBoolResponse RosDeserialize(ref ReadBuffer b) => new SetBoolResponse(ref b);
         

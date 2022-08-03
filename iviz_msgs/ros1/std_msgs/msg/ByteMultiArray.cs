@@ -38,8 +38,6 @@ namespace Iviz.Msgs.StdMsgs
             b.DeserializeStructArray(out Data);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ByteMultiArray(ref b);
-        
         public ByteMultiArray RosDeserialize(ref ReadBuffer b) => new ByteMultiArray(ref b);
         
         public ByteMultiArray RosDeserialize(ref ReadBuffer2 b) => new ByteMultiArray(ref b);

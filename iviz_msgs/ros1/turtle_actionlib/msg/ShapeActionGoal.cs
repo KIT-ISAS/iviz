@@ -38,8 +38,6 @@ namespace Iviz.Msgs.TurtleActionlib
             Goal = new ShapeGoal(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new ShapeActionGoal(ref b);
-        
         public ShapeActionGoal RosDeserialize(ref ReadBuffer b) => new ShapeActionGoal(ref b);
         
         public ShapeActionGoal RosDeserialize(ref ReadBuffer2 b) => new ShapeActionGoal(ref b);

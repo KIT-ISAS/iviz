@@ -30,8 +30,6 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeStructArray(out Costs);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexCosts(ref b);
-        
         public MeshVertexCosts RosDeserialize(ref ReadBuffer b) => new MeshVertexCosts(ref b);
         
         public MeshVertexCosts RosDeserialize(ref ReadBuffer2 b) => new MeshVertexCosts(ref b);

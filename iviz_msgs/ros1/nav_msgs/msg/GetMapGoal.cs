@@ -21,8 +21,6 @@ namespace Iviz.Msgs.NavMsgs
         {
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;
-        
         public GetMapGoal RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public GetMapGoal RosDeserialize(ref ReadBuffer2 b) => Singleton;
@@ -48,7 +46,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int c) { }
+        public void AddRos2MessageLength(ref int _) { }
     
         public const string MessageType = "nav_msgs/GetMapGoal";
     

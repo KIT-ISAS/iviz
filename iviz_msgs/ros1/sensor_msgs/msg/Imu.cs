@@ -60,8 +60,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStructArray(9, out LinearAccelerationCovariance);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Imu(ref b);
-        
         public Imu RosDeserialize(ref ReadBuffer b) => new Imu(ref b);
         
         public Imu RosDeserialize(ref ReadBuffer2 b) => new Imu(ref b);

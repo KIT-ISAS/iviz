@@ -79,8 +79,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out CommandType);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new MenuEntry(ref b);
-        
         public MenuEntry RosDeserialize(ref ReadBuffer b) => new MenuEntry(ref b);
         
         public MenuEntry RosDeserialize(ref ReadBuffer2 b) => new MenuEntry(ref b);

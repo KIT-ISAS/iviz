@@ -86,8 +86,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.DeserializeString(out LoadNamespace);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AddDiagnosticsRequest(ref b);
-        
         public AddDiagnosticsRequest RosDeserialize(ref ReadBuffer b) => new AddDiagnosticsRequest(ref b);
         
         public AddDiagnosticsRequest RosDeserialize(ref ReadBuffer2 b) => new AddDiagnosticsRequest(ref b);
@@ -152,8 +150,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.Deserialize(out Success);
             b.DeserializeString(out Message);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new AddDiagnosticsResponse(ref b);
         
         public AddDiagnosticsResponse RosDeserialize(ref ReadBuffer b) => new AddDiagnosticsResponse(ref b);
         

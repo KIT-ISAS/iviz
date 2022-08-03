@@ -33,8 +33,6 @@ namespace Iviz.Msgs.GeometryMsgs
             Inertia = new Inertia(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new InertiaStamped(ref b);
-        
         public InertiaStamped RosDeserialize(ref ReadBuffer b) => new InertiaStamped(ref b);
         
         public InertiaStamped RosDeserialize(ref ReadBuffer2 b) => new InertiaStamped(ref b);

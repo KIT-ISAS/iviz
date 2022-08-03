@@ -73,8 +73,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStringArray(out Frames);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetFramePoseRequest(ref b);
-        
         public GetFramePoseRequest RosDeserialize(ref ReadBuffer b) => new GetFramePoseRequest(ref b);
         
         public GetFramePoseRequest RosDeserialize(ref ReadBuffer2 b) => new GetFramePoseRequest(ref b);
@@ -141,8 +139,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out IsValid);
             b.DeserializeStructArray(out Poses);
         }
-        
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new GetFramePoseResponse(ref b);
         
         public GetFramePoseResponse RosDeserialize(ref ReadBuffer b) => new GetFramePoseResponse(ref b);
         

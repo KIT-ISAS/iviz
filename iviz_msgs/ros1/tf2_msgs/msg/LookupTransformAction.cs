@@ -40,8 +40,6 @@ namespace Iviz.Msgs.Tf2Msgs
             ActionFeedback = new LookupTransformActionFeedback(ref b);
         }
         
-        ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformAction(ref b);
-        
         public LookupTransformAction RosDeserialize(ref ReadBuffer b) => new LookupTransformAction(ref b);
         
         public LookupTransformAction RosDeserialize(ref ReadBuffer2 b) => new LookupTransformAction(ref b);

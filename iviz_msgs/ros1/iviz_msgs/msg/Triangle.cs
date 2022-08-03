@@ -33,8 +33,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out this);
         }
         
-        readonly ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new Triangle(ref b);
-        
         public readonly Triangle RosDeserialize(ref ReadBuffer b) => new Triangle(ref b);
         
         public readonly Triangle RosDeserialize(ref ReadBuffer2 b) => new Triangle(ref b);
