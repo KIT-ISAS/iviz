@@ -186,7 +186,7 @@ namespace Iviz.App
                 return;
             }
 
-            if (messageQueue.Count == 0)
+            if (messageQueue.IsEmpty)
             {
                 dialog.Text.text = "";
                 queueIsDirty = false;

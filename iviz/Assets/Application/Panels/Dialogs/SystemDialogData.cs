@@ -22,7 +22,7 @@ namespace Iviz.App
         const string EmptyTopText = "<b>State:</b> Disconnected. Nothing to show!";
         const string EmptyBottomText = "(Click on an item for more information)";
 
-        readonly JsonConverter[] JsonConverter = { new XmlRpcValue.JsonConverter() };
+        readonly JsonConverter[] JsonConverter = { new RosParameterValue.JsonConverter() };
 
         readonly SystemDialogPanel panel;
         readonly SortedSet<string> hostsBuffer = new();
@@ -31,7 +31,7 @@ namespace Iviz.App
         uint? descriptionHash;
         string? nodeAddress;
         string? providerAddress;
-        XmlRpcValue paramValue;
+        RosParameterValue paramValue;
 
         public override IDialogPanel Panel => panel;
         public HostAlias?[] HostAliases { get; set; } = Array.Empty<HostAlias?>();
@@ -379,7 +379,7 @@ namespace Iviz.App
                 description.Append("<b>Value:</b>").AppendLine();
 
                 string value = JsonConvert.SerializeObject(paramValue, Formatting.Indented, JsonConverter);
-                if (paramValue.ValueType != XmlRpcValue.Type.String)
+                if (paramValue.ValueType != RosParameterValue.Type.String)
                 {
                     description.Append(value);
                 }

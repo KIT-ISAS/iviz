@@ -295,22 +295,22 @@ namespace Iviz.Core
             var ts = TaskUtils.CreateCompletionSource();
             Post(() => TrySetAsync(ts, action()));
             return ts.Task;
-
-            static async ValueTask TrySetAsync(TaskCompletionSource ts, ValueTask task)
+        }
+        
+        static async ValueTask TrySetAsync(TaskCompletionSource ts, ValueTask task)
+        {
+            try
             {
-                try
-                {
-                    await task;
-                    ts.TrySetResult();
-                }
-                catch (OperationCanceledException)
-                {
-                    ts.TrySetCanceled();
-                }
-                catch (Exception e)
-                {
-                    ts.TrySetException(e);
-                }
+                await task;
+                ts.TrySetResult();
+            }
+            catch (OperationCanceledException)
+            {
+                ts.TrySetCanceled();
+            }
+            catch (Exception e)
+            {
+                ts.TrySetException(e);
             }
         }
 
@@ -325,23 +325,23 @@ namespace Iviz.Core
             var ts = TaskUtils.CreateCompletionSource<T>();
             Post(() => TrySetAsync(ts, action()));
             return ts.Task;
-
-            static async ValueTask TrySetAsync(TaskCompletionSource<T> ts, ValueTask<T> task)
-            {
-                try
-                {
-                    ts.TrySetResult(await task);
-                }
-                catch (OperationCanceledException)
-                {
-                    ts.TrySetCanceled();
-                }
-                catch (Exception e)
-                {
-                    ts.TrySetException(e);
-                }
-            }
         }
+        
+        static async ValueTask TrySetAsync<T>(TaskCompletionSource<T> ts, ValueTask<T> task)
+        {
+            try
+            {
+                ts.TrySetResult(await task);
+            }
+            catch (OperationCanceledException)
+            {
+                ts.TrySetCanceled();
+            }
+            catch (Exception e)
+            {
+                ts.TrySetException(e);
+            }
+        }        
 
         /// <summary>
         /// Puts this async action in a queue to be run on the main thread,
@@ -354,20 +354,20 @@ namespace Iviz.Core
             var ts = TaskUtils.CreateCompletionSource();
             Post(() => TrySet(ts, action));
             return ts.Task;
-
-            static void TrySet(TaskCompletionSource ts, Action action)
-            {
-                try
-                {
-                    action();
-                    ts.TrySetResult();
-                }
-                catch (Exception e)
-                {
-                    ts.TrySetException(e);
-                }
-            }
         }
+        
+        static void TrySet(TaskCompletionSource ts, Action action)
+        {
+            try
+            {
+                action();
+                ts.TrySetResult();
+            }
+            catch (Exception e)
+            {
+                ts.TrySetException(e);
+            }
+        }        
 
         /// <summary>
         /// Puts this action in a queue to be run on the main thread.

@@ -150,6 +150,7 @@ namespace Iviz.App
             panel.MyId.Value = MyId ?? "";
             panel.MyId2.Value = MyId ?? "";
             panel.MyId.Hints = new[] { DefaultMyId };
+            panel.MyId2.Hints = new[] { DefaultMyId };
             panel.MasterUri.Value = MasterUri == null ? "" : MasterUri.ToString();
             panel.MasterUri.Interactable = !RosManager.Server.IsActive;
             panel.MasterUri.SetHints(LastMasterUris.Select(uri => uri.ToString()));
@@ -242,6 +243,12 @@ namespace Iviz.App
 
         public async Task TryCreateMasterAsync()
         {
+            if (RosVersion == RosVersion.ROS2)
+            {
+                RosLogger.Internal("Cannot create ROS master when using ROS2.");
+                return;
+            }
+            
             const string defaultPort = "11311";
             string ownHost = MyUri?.Host ?? RosClient.TryGetCallerUri().Host;
             string ownMasterUriStr = $"http://{ownHost}:{defaultPort}/";

@@ -71,7 +71,7 @@ namespace Iviz.Ros
 
         public override string ToString()
         {
-            return $"[AdvertisedService '{service}']";
+            return $"[{nameof(AdvertisedService<T>)} '{service}']";
         }
     }
 }

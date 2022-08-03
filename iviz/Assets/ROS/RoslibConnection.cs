@@ -1,7 +1,5 @@
 ﻿#nullable enable
 
-#define LOG_ENABLED
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -76,11 +74,25 @@ namespace Iviz.Ros
                     return;
                 }
 
-                version = value;
-                RosVersionChanged?.Invoke(version);
-                RosLogger.Internal("ROS version changed to " + (version == RosVersion.ROS1 ? "ROS1" : "ROS2"));
+                if (!IsRosVersionSupported(value))
+                {
+                    throw new InvalidOperationException("ROS version not supported!");
+                }
+
+                RosLogger.Internal(
+                    value switch
+                    {
+                        RosVersion.ROS1 => "ROS version changed to ROS1. You can connect now.",
+                        RosVersion.ROS2 => "ROS version changed to ROS2 (experimental). You can connect now.",
+                        _ => throw new IndexOutOfRangeException("Invalid ROS version")
+                    }
+                );
 
                 Disconnect();
+                KeepReconnecting = false;
+
+                version = value;
+                RosVersionChanged?.Invoke(version);
             }
         }
 
@@ -89,7 +101,7 @@ namespace Iviz.Ros
             return rosVersion switch
             {
                 RosVersion.ROS1 => true,
-                RosVersion.ROS2 => Settings.IsMacOS,
+                RosVersion.ROS2 => Settings.IsMacOS || Settings.IsIPhone,
                 _ => false
             };
         }
@@ -243,7 +255,7 @@ namespace Iviz.Ros
                     RosLogger.Internal("Resubscribing and readvertising...");
                     token.ThrowIfCancellationRequested();
 
-                    (bool success, XmlRpcValue hosts) = await currentClient.GetParameterAsync("/iviz/hosts", token);
+                    var (success, hosts) = await currentClient.GetParameterAsync("/iviz/hosts", token);
                     if (success)
                     {
                         AddHostsParamFromArg(hosts);
@@ -331,14 +343,14 @@ namespace Iviz.Ros
             return false;
         }
 
-        static void AddHostsParamFromArg(XmlRpcValue hostsObj)
+        static void AddHostsParamFromArg(RosParameterValue hostsObj)
         {
             if (hostsObj.IsEmpty)
             {
                 return;
             }
 
-            if (!hostsObj.TryGetArray(out XmlRpcValue[] array))
+            if (!hostsObj.TryGetArray(out var array))
             {
                 RosLogger.Error($"{nameof(RoslibConnection)}: Error reading /iviz/hosts. " +
                                 $"Expected array of string pairs.");
@@ -348,7 +360,7 @@ namespace Iviz.Ros
             var hosts = new Dictionary<string, string>();
             foreach (var entry in array)
             {
-                if (!entry.TryGetArray(out XmlRpcValue[] pair) ||
+                if (!entry.TryGetArray(out var pair) ||
                     pair.Length != 2 ||
                     !pair[0].TryGetString(out string hostname) ||
                     !pair[1].TryGetString(out string address))
@@ -1117,7 +1129,7 @@ namespace Iviz.Ros
             return cachedParameters;
         }
 
-        public async ValueTask<(XmlRpcValue result, string? errorMsg)> GetParameterAsync(string parameter,
+        public async ValueTask<(RosParameterValue result, string? errorMsg)> GetParameterAsync(string parameter,
             int timeoutInMs, CancellationToken token = default)
         {
             ThrowHelper.ThrowIfNull(parameter, nameof(parameter));
@@ -1136,7 +1148,7 @@ namespace Iviz.Ros
             {
                 using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
                 tokenSource.CancelAfter(timeoutInMs);
-                (bool success, XmlRpcValue param) =
+                (bool success, RosParameterValue param) =
                     await Client.GetParameterAsync(parameter, tokenSource.Token);
                 if (!success)
                 {

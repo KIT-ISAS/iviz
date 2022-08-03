@@ -73,6 +73,7 @@ namespace Iviz.App
         [SerializeField] DialogPanelManager? dialogPanelManager;
         [SerializeField] ARJoystick? arJoystick;
         [SerializeField] TwistJoystick? twistJoystick;
+        [SerializeField] SafeAreaPanel? safeAreaPanel;
         [SerializeField] GameObject? contentObject;
         [SerializeField] Canvas? rootCanvas;
         [SerializeField] XRContents? xrController;
@@ -113,6 +114,7 @@ namespace Iviz.App
         DialogManager Dialogs => dialogs ??= new DialogManager();
         TfModuleData TfData => (TfModuleData)moduleDatas[0];
         Canvas RootCanvas => rootCanvas.AssertNotNull(nameof(rootCanvas));
+        SafeAreaPanel SafeAreaPanel => safeAreaPanel.AssertNotNull(nameof(safeAreaPanel));
 
         ModuleListButtons Buttons =>
             buttons ??= new ModuleListButtons(contentObject.AssertNotNull(nameof(contentObject)));
@@ -173,33 +175,7 @@ namespace Iviz.App
         }
 
         public int NumMastersInCache => Dialogs.ConnectionData.LastMasterUris.Count;
-
-        void Awake()
-        {
-            Thread.CurrentThread.CurrentCulture = BuiltIns.Culture;
-
-            Settings.SettingsManager = new SettingsManager();
-
-            var scaler = RootCanvas.GetComponent<CanvasScaler>();
-            bool isPhoneDevice = Screen.width / (float)Screen.height > 1.6f; // is phone not tablet
-
-            //Debug.Log(Screen.safeArea);
-            //Debug.Log(Screen.dpi);
-
-            if (isPhoneDevice)
-            {
-                // landscape phone mode!
-                scaler.referenceResolution = new Vector2(600, 720);
-                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            }
-            else
-            {
-                // landscape tablet mode! 
-                scaler.referenceResolution = new Vector2(1100, 720);
-                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
-            }
-        }
-
+        
         public void Dispose()
         {
             GameThread.LateEverySecond -= UpdateFpsStats;
@@ -236,6 +212,11 @@ namespace Iviz.App
 
         void Start()
         {
+            Thread.CurrentThread.CurrentCulture = BuiltIns.Culture;
+            Settings.SettingsManager = new SettingsManager();
+            
+            // SafeAreaPanel.UpdateSize();
+
             if (Settings.IsHololens)
             {
                 XRUtils.SetupForHololens();
@@ -260,6 +241,29 @@ namespace Iviz.App
                 CreateModule(ModuleType.Grid, configuration: new GridConfiguration { Id = "Grid" });
             }
 
+            InitializeCallbacks();
+
+            UpdateFpsStats();
+
+            ControllerService.Start();
+
+            InitMenuObject();
+
+            AllGuiVisible = AllGuiVisible; // initialize value
+
+            InitXR();
+
+            TryLoadDefaultStateConfiguration();
+
+            initialized = true;
+            InitFinished?.Invoke();
+            InitFinished = null;
+
+            TryOnceToConnect();
+        }
+
+        void InitializeCallbacks()
+        {
             UpperCanvas.Save.onClick.AddListener(Dialogs.SaveConfigData.Show);
             UpperCanvas.Load.onClick.AddListener(Dialogs.LoadConfigData.Show);
 
@@ -351,14 +355,6 @@ namespace Iviz.App
 
             Connection.RosVersion = connectionData.RosVersion;
 
-            void UpdateMasterUriStr()
-            {
-                string rosId = (connectionData.RosVersion == RosVersion.ROS1 ? "ROS1" : "ROS2");
-                UpperCanvas.MasterUriStr.Text = connectionData.MyId == null
-                    ? $"<u>(?)</u>\n<color=grey>{rosId}</color>"
-                    : $"<u>{connectionData.MyId}</u>\n<color=grey>{rosId}</color>";                
-            }
-
             UpperCanvas.StopButton.Clicked += () =>
             {
                 RosLogger.Internal(
@@ -386,10 +382,10 @@ namespace Iviz.App
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
             GameThread.EveryTenthOfASecond += UpdateCameraStats;
-            UpdateFpsStats();
+        }
 
-            ControllerService.Start();
-
+        void InitMenuObject()
+        {
             if (menuObject != null)
             {
                 menuDialog = menuObject.AssertHasComponent<IMenuDialogContents>(nameof(menuObject));
@@ -399,42 +395,58 @@ namespace Iviz.App
             {
                 throw new NullReferenceException("The menu dialog is not set!");
             }
+        }
 
-            AllGuiVisible = AllGuiVisible; // initialize value
-
-            if (Settings.IsXR)
-            {
-                if (xrController == null)
-                {
-                    throw new NullReferenceException("XR is enabled, but the XR controller is not set");
-                }
-
-                UpperCanvas.EnableAR.gameObject.SetActive(false);
-                CreateModule(ModuleType.XR);
-                RootCanvas.ProcessCanvasForXR();
-            }
-
-            TryLoadDefaultStateConfiguration();
-
-            initialized = true;
-
-            InitFinished?.Invoke();
-            InitFinished = null;
-
-            if (Connection.MasterUri == null || Connection.MyUri == null || Connection.MyId == null)
+        void InitXR()
+        {
+            if (!Settings.IsXR)
             {
                 return;
             }
 
-            RosLogger.Internal("Trying to connect to previous ROS server.");
-            if ((Settings.IsMacOS || Settings.IsMobile) && Connection.MyUri.Host == Connection.MasterUri.Host)
+            if (xrController == null)
             {
-                _ = connectionData.TryCreateMasterAsync(); // create master and connect
+                throw new NullReferenceException("XR is enabled, but the XR controller is not set");
             }
-            else
+
+            UpperCanvas.EnableAR.gameObject.SetActive(false);
+            CreateModule(ModuleType.XR);
+            RootCanvas.ProcessCanvasForXR();
+        }
+
+        void UpdateMasterUriStr()
+        {
+            var connectionData = Dialogs.ConnectionData;
+            string rosId = (connectionData.RosVersion == RosVersion.ROS1 ? "ROS1" : "ROS2");
+            UpperCanvas.MasterUriStr.Text = connectionData.MyId == null
+                ? $"<u>(?)</u>\n<color=grey>{rosId}</color>"
+                : $"<u>{connectionData.MyId}</u>\n<color=grey>{rosId}</color>";
+        }
+
+        void TryOnceToConnect()
+        {
+            if (Connection.MyId == null)
             {
-                Connection.TryOnceToConnect();
+                return;
             }
+
+            if (Connection.RosVersion == RosVersion.ROS1)
+            {
+                if (Connection.MasterUri == null || Connection.MyUri == null)
+                {
+                    return;
+                }
+
+                RosLogger.Internal("Trying to connect to previous ROS server.");
+                if ((Settings.IsMacOS || Settings.IsMobile)
+                    && Connection.MyUri.Host == Connection.MasterUri.Host)
+                {
+                    _ = Dialogs.ConnectionData.TryCreateMasterAsync(); // create master and connect
+                    return;
+                }
+            }
+
+            Connection.TryOnceToConnect();
         }
 
         public static void CallAfterInitialized(Action action)

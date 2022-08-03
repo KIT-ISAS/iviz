@@ -10,6 +10,7 @@ using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Displays.XR;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.Roscpp;
@@ -50,8 +51,8 @@ namespace Iviz.Controllers
         {
             var connection = RosManager.Connection;
 
-            connection.AdvertiseService<GetLoggers>("~get_loggers", GetLoggers);
-            connection.AdvertiseService<SetLoggerLevel>("~set_logger_level", SetLoggerLevel);
+            //connection.AdvertiseService<GetLoggers>("~get_loggers", GetLoggers);
+            //connection.AdvertiseService<SetLoggerLevel>("~set_logger_level", SetLoggerLevel);
 
             connection.AdvertiseService<AddModule>("~add_module", AddModuleAsync);
             connection.AdvertiseService<AddModuleFromTopic>("~add_module_from_topic", AddModuleFromTopicAsync);
@@ -65,8 +66,8 @@ namespace Iviz.Controllers
             //connection.AdvertiseService<StopCapture>("stop_capture", StopCaptureAsync);
             //connection.AdvertiseService<CaptureScreenshot>("capture_screenshot", CaptureScreenshotAsync);
 
-            //connection.AdvertiseService<UpdateRobot>("update_robot", UpdateRobotAsync);
-            //connection.AdvertiseService<LaunchDialog>("launch_dialog", LaunchDialogAsync);
+            connection.AdvertiseService<UpdateRobot>("update_robot", UpdateRobotAsync);
+            connection.AdvertiseService<LaunchDialog>("launch_dialog", LaunchDialogAsync);
         }
 
         static void GetLoggers(GetLoggers srv)
@@ -460,8 +461,7 @@ namespace Iviz.Controllers
         [Preserve]
         sealed class GenericConfiguration
         {
-            [Preserve, UsedImplicitly] 
-            public ModuleType? ModuleType { get; set; }
+            [Preserve, UsedImplicitly] public ModuleType? ModuleType { get; set; }
 
             [Preserve, UsedImplicitly]
             public GenericConfiguration()
@@ -824,14 +824,15 @@ namespace Iviz.Controllers
                 return builder.Save();
             });
         }
+        */
 
         static ValueTask UpdateRobotAsync(UpdateRobot srv)
         {
             switch (srv.Request.Operation)
             {
-                case OperationType.Remove:
+                case 0:
                     return RemoveRobotAsync(srv);
-                case OperationType.AddOrUpdate:
+                case 1:
                     return AddRobotAsync(srv);
                 default:
                     srv.Response.Success = false;
@@ -839,6 +840,7 @@ namespace Iviz.Controllers
                     return default;
             }
         }
+
 
         static async ValueTask RemoveRobotAsync(UpdateRobot srv)
         {
@@ -917,35 +919,41 @@ namespace Iviz.Controllers
                 moduleData = null;
             }
 
-            using var signal = new SemaphoreSlim(0);
-            GameThread.Post(() =>
+            try
             {
-                try
+                await GameThread.PostAsync(() =>
                 {
                     //Logger.Info($"ControllerService: Creating robot");
                     var newModuleData = moduleData ?? ModuleListPanel.Instance.CreateModule(
                         ModuleType.Robot, requestedId: id.Length != 0 ? id : null);
                     srv.Response.Success = true;
+
+                    var srcConfiguration = srv.Request.Configuration;
+                    var robotConfiguration = new Iviz.Core.Configurations.RobotConfiguration
+                    {
+                        SourceParameter = srcConfiguration.SourceParameter,
+                        SavedRobotName = srcConfiguration.SavedRobotName,
+                        FramePrefix = srcConfiguration.FramePrefix,
+                        FrameSuffix = srcConfiguration.FrameSuffix,
+                        AttachedToTf = srcConfiguration.AttachedToTf,
+                        RenderAsOcclusionOnly = srcConfiguration.RenderAsOcclusionOnly,
+                        Tint = srcConfiguration.Tint,
+                        Metallic = srcConfiguration.Metallic,
+                        Smoothness = srcConfiguration.Smoothness,
+                        Id = srcConfiguration.Id,
+                        Visible = srcConfiguration.Visible,
+                    };
+
                     ((SimpleRobotModuleData)newModuleData).UpdateConfiguration(
-                        srv.Request.Configuration,
+                        robotConfiguration,
                         srv.Request.ValidFields);
-                }
-                catch (Exception e)
-                {
-                    srv.Response.Success = false;
-                    srv.Response.Message = $"An exception was raised: {e.Message}";
-                    RosLogger.Error($"{nameof(ControllerService)}: Failed to create robot", e);
-                }
-                finally
-                {
-                    signal.Release();
-                }
-            });
-            if (!await signal.WaitAsync(DefaultTimeoutInMs))
+                });
+            }
+            catch (Exception e)
             {
                 srv.Response.Success = false;
-                srv.Response.Message = "Request timed out!";
-                return;
+                srv.Response.Message = $"An exception was raised: {e.Message}";
+                RosLogger.Error($"{nameof(ControllerService)}: Failed to create robot", e);
             }
 
             if (string.IsNullOrEmpty(srv.Response.Message))
@@ -1046,6 +1054,5 @@ namespace Iviz.Controllers
                 srv.Response.Feedback = feedback;
             }
         }
-        */
     }
 }

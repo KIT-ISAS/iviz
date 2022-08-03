@@ -8,6 +8,7 @@ using Iviz.Core;
 using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Roslib2;
+using Iviz.Roslib2.Rcl;
 using Iviz.Tools;
 
 namespace Iviz.App
@@ -261,7 +262,7 @@ namespace Iviz.App
                 builder.Append("<color=#000080ff><b><< Subscribed to ")
                     .Append(stat.Topic).Append("</b></color>")
                     .AppendLine();
-                
+
                 builder.Append("<b>Type: </b>[").Append(stat.Type).Append("]").AppendLine();
 
                 builder.Append("<b>QOS: </b>");
@@ -320,7 +321,7 @@ namespace Iviz.App
                 builder.Append("<color=#800000ff><b>>> Publishing to ").Append(stat.Topic)
                     .Append("</b></color>")
                     .AppendLine();
-                
+
                 builder.Append("<b>Type: </b>[").Append(stat.Type).Append("]").AppendLine();
 
                 builder.Append("<b>QOS: </b>");
@@ -333,7 +334,7 @@ namespace Iviz.App
 
                 builder.Append("<b>Sent ").Append(totalMessages.ToString("N0")).Append(" msgs | ")
                     .AppendBandwidth(totalBytes).Append("</b> total").AppendLine();
-                
+
                 if (stat.Senders.Count == 0)
                 {
                     builder.Append("  (No subscribers)").AppendLine().AppendLine();
@@ -365,7 +366,8 @@ namespace Iviz.App
 
                     if (sender.TopicType != stat.Type)
                     {
-                        builder.Append($"        <color=red>Topic type mismatch. Expects [{sender.TopicType}].</color>");
+                        builder.Append(
+                            $"        <color=red>Topic type mismatch. Expects [{sender.TopicType}].</color>");
                     }
 
                     builder.AppendLine();
@@ -374,7 +376,7 @@ namespace Iviz.App
                 builder.AppendLine();
             }
 
-            void Append(in QosProfile profile)
+            void Append(QosProfile profile)
             {
                 builder.Append(profile.Reliability switch
                 {
@@ -391,8 +393,8 @@ namespace Iviz.App
                     DurabilityPolicy.Volatile => "Volatile",
                     DurabilityPolicy.TransientLocal => "TransientLocal",
                     _ => "DurabilityPolicy: Unknown (" + (int)profile.Durability + ")"
-                });                
-                
+                });
+
                 builder.Append(" | ");
                 builder.Append(profile.History switch
                 {
@@ -400,7 +402,7 @@ namespace Iviz.App
                     HistoryPolicy.KeepAll => "KeepAll",
                     HistoryPolicy.KeepLast => $"KeepLast({profile.Depth.ToString()})",
                     _ => "HistoryPolicy: Unknown (" + (int)profile.History + ")"
-                });                
+                });
             }
         }
     }

@@ -328,7 +328,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            XmlRpcValue parameterValue;
+            RosParameterValue parameterValue;
             string? errorMsg;
             try
             {
