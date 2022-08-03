@@ -318,7 +318,6 @@
 		23FD71682897185D0072A8CD /* libstatistics_msgs__rosidl_typesupport_fastrtps_c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23FD70D9289718590072A8CD /* libstatistics_msgs__rosidl_typesupport_fastrtps_c.a */; };
 		23FD71692897185D0072A8CD /* librmw_dds_common__rosidl_typesupport_cpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23FD70DA289718590072A8CD /* librmw_dds_common__rosidl_typesupport_cpp.a */; };
 		23FD716A2897185D0072A8CD /* libvisualization_msgs__rosidl_typesupport_fastrtps_c.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23FD70DB289718590072A8CD /* libvisualization_msgs__rosidl_typesupport_fastrtps_c.a */; };
-		23FD716B2897185D0072A8CD /* libclass_loader.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 23FD70DC289718590072A8CD /* libclass_loader.dylib */; };
 		23FD716C2897185D0072A8CD /* libtrajectory_msgs__rosidl_typesupport_fastrtps_cpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23FD70DD289718590072A8CD /* libtrajectory_msgs__rosidl_typesupport_fastrtps_cpp.a */; };
 		23FD716D2897185D0072A8CD /* librmw_dds_common.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23FD70DE289718590072A8CD /* librmw_dds_common.a */; };
 		23FD716E2897185D0072A8CD /* libstatistics_msgs__rosidl_typesupport_fastrtps_cpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23FD70DF289718590072A8CD /* libstatistics_msgs__rosidl_typesupport_fastrtps_cpp.a */; };
@@ -1214,7 +1213,6 @@
 				23FD71682897185D0072A8CD /* libstatistics_msgs__rosidl_typesupport_fastrtps_c.a in Frameworks */,
 				23FD71692897185D0072A8CD /* librmw_dds_common__rosidl_typesupport_cpp.a in Frameworks */,
 				23FD716A2897185D0072A8CD /* libvisualization_msgs__rosidl_typesupport_fastrtps_c.a in Frameworks */,
-				23FD716B2897185D0072A8CD /* libclass_loader.dylib in Frameworks */,
 				23FD716C2897185D0072A8CD /* libtrajectory_msgs__rosidl_typesupport_fastrtps_cpp.a in Frameworks */,
 				23FD716D2897185D0072A8CD /* librmw_dds_common.a in Frameworks */,
 				23FD716E2897185D0072A8CD /* libstatistics_msgs__rosidl_typesupport_fastrtps_cpp.a in Frameworks */,
