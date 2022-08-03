@@ -100,10 +100,10 @@ public sealed class RosNodeClient
         return new GetPidResponse(response);
     }
 
-    XmlRpcValue[] MethodCall(string function, XmlRpcArg[] args)
+    RosParameterValue[] MethodCall(string function, XmlRpcArg[] args)
     {
         var wrapper = XmlRpcService.MethodCall(Uri, CallerUri, function, args);
-        if (wrapper.TryGetArray(out XmlRpcValue[] response))
+        if (wrapper.TryGetArray(out RosParameterValue[] response))
         {
             return response;
         }
@@ -112,12 +112,12 @@ public sealed class RosNodeClient
                                   $"Expected type object[], got {wrapper}");
     }
 
-    async ValueTask<XmlRpcValue[]> MethodCallAsync(string function, XmlRpcArg[] args, CancellationToken token)
+    async ValueTask<RosParameterValue[]> MethodCallAsync(string function, XmlRpcArg[] args, CancellationToken token)
     {
         using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
         tokenSource.CancelAfter(TimeoutInMs);
 
-        XmlRpcValue wrapper;
+        RosParameterValue wrapper;
         try
         {
             wrapper = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, tokenSource.Token);
@@ -132,7 +132,7 @@ public sealed class RosNodeClient
             throw;
         }
 
-        if (wrapper.TryGetArray(out XmlRpcValue[] response))
+        if (wrapper.TryGetArray(out RosParameterValue[] response))
         {
             return response;
         }
@@ -149,14 +149,14 @@ public sealed class RequestTopicResponse : BaseResponse
     public Endpoint? TcpResponse { get; }
     public RpcUdpTopicResponse? UdpResponse { get; }
 
-    internal RequestTopicResponse(XmlRpcValue[] a)
+    internal RequestTopicResponse(RosParameterValue[] a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
 
-        if (!value.TryGetArray(out XmlRpcValue[] protocolInfo))
+        if (!value.TryGetArray(out RosParameterValue[] protocolInfo))
         {
             MarkError();
             return;
@@ -210,7 +210,7 @@ public sealed class GetMasterUriResponse : BaseResponse
 {
     public Uri? Uri { get; }
 
-    internal GetMasterUriResponse(XmlRpcValue[] a)
+    internal GetMasterUriResponse(RosParameterValue[] a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
@@ -232,7 +232,7 @@ public sealed class GetPidResponse : BaseResponse
 {
     public int Pid { get; }
 
-    internal GetPidResponse(XmlRpcValue[] a)
+    internal GetPidResponse(RosParameterValue[] a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {

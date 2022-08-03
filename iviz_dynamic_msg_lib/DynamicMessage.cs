@@ -236,11 +236,6 @@ public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMe
         return t;
     }
 
-    ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b)
-    {
-        return RosDeserialize(ref b);
-    }
-
     public static bool IsDynamic(Type T) => typeof(DynamicMessage) == T;
 
     public static bool IsGeneric(Type T) => typeof(IMessage) == T || IsDynamic(T);

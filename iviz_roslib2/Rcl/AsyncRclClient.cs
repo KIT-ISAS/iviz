@@ -1,6 +1,4 @@
-using System;
-using System.Runtime.InteropServices;
-using System.Threading;
+using System.Runtime.CompilerServices;
 using Iviz.Roslib;
 using Iviz.Tools;
 
@@ -12,9 +10,9 @@ internal sealed class AsyncRclClient : TaskExecutor
     readonly RclWaitSet waitSet;
     readonly RclGuardCondition guard;
 
-    readonly List<(IHasHandle handler, ISignalizable signalizable)> subscribers = new();
-    readonly List<(IHasHandle handler, ISignalizable signalizable)> serviceClients = new();
-    readonly List<(IHasHandle handler, ISignalizable signalizable)> serviceServers = new();
+    readonly List<(IHasHandle handler, Signalizable signalizable)> subscribers = new();
+    readonly List<(IHasHandle handler, Signalizable signalizable)> serviceClients = new();
+    readonly List<(IHasHandle handler, Signalizable signalizable)> serviceServers = new();
 
     readonly IntPtr[] guardHandles;
     IntPtr[] subscriberHandles = Array.Empty<IntPtr>();
@@ -27,9 +25,9 @@ internal sealed class AsyncRclClient : TaskExecutor
 
     public string FullName => client.FullName;
 
-    public static bool IsMessageTypeSupported(string message) => Rcl.IsTypeSupported(message);
+    public static bool IsMessageTypeSupported(string message) => Rcl.IsMessageTypeSupported(message);
 
-    public static bool IsServiceTypeSupported(string message) => false;
+    public static bool IsServiceTypeSupported(string message) => Rcl.IsServiceTypeSupported(message);
 
     public AsyncRclClient(string name, string @namespace = "")
     {
@@ -49,58 +47,64 @@ internal sealed class AsyncRclClient : TaskExecutor
         guard.Trigger();
     }
 
-    protected override void Wait()
+    public void Wait()
     {
+        const int timeoutInMs = 5000;
+
         bool success = waitSet.WaitFor(subscriberHandles, guardHandles,
             serviceClientHandles, serviceServerHandles,
             out var triggeredSubscriptions, out var triggeredGuards,
-            out var triggeredClients, out _);
+            out var triggeredClients, out var triggeredServers,
+            timeoutInMs);
 
         if (!success)
         {
-            return;
+            return; // timeout, nothing triggered
         }
 
-        if (triggeredGuards[1] != 0)
+        if (IsNotZero(triggeredGuards[1]))
         {
             GraphChangedTicks = DateTime.Now.Ticks;
         }
 
-        for (int i = 0; i < triggeredSubscriptions.Length; i++)
+        for (int i = 0; i < subscriberHandles.Length; i++)
         {
-            if (triggeredSubscriptions[i] != 0)
+            if (IsNotZero(triggeredSubscriptions[i]))
             {
                 subscribers[i].signalizable.Signal();
             }
         }
 
-        for (int i = 0; i < triggeredClients.Length; i++)
+        for (int i = 0; i < serviceClientHandles.Length; i++)
         {
-            if (triggeredClients[i] != 0)
+            if (IsNotZero(triggeredClients[i]))
             {
                 serviceClients[i].signalizable.Signal();
             }
         }
+
+        for (int i = 0; i < serviceServerHandles.Length; i++)
+        {
+            if (IsNotZero(triggeredServers[i]))
+            {
+                serviceServers[i].signalizable.Signal();
+            }
+        }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static bool IsNotZero(IntPtr ptr) => Unsafe.As<IntPtr, nint>(ref ptr) != 0;
+    
     void RebuildSubscribers()
     {
         subscriberHandles = subscribers.Select(tuple => tuple.handler.Handle).ToArray();
     }
 
-    public Task<RclSubscriber> SubscribeAsync(string topic, string type, ISignalizable signalizable,
-        RosTransportHint transportHint,
+    public Task<RclSubscriber> SubscribeAsync(string topic, string type, Signalizable signalizable, QosProfile profile,
         CancellationToken token)
     {
         return Post(() =>
         {
-            var profile = new QosProfile(transportHint switch
-            {
-                RosTransportHint.OnlyUdp or RosTransportHint.PreferUdp => ReliabilityPolicy.BestEffort,
-                RosTransportHint.OnlyTcp or RosTransportHint.PreferTcp => ReliabilityPolicy.Reliable,
-                _ => throw new IndexOutOfRangeException()
-            });
-
             var subscriber = client.CreateSubscriber(topic, type, profile);
             subscribers.Add((subscriber, signalizable));
             RebuildSubscribers();
@@ -124,9 +128,9 @@ internal sealed class AsyncRclClient : TaskExecutor
         }, token);
     }
 
-    public Task<RclPublisher> AdvertiseAsync(string topic, string type, CancellationToken token)
+    public Task<RclPublisher> AdvertiseAsync(string topic, string type, QosProfile profile, CancellationToken token)
     {
-        return Post(() => client.CreatePublisher(topic, type), token);
+        return Post(() => client.CreatePublisher(topic, type, profile), token);
     }
 
     public Task DisposePublisher(RclPublisher publisher, CancellationToken token)
@@ -139,7 +143,7 @@ internal sealed class AsyncRclClient : TaskExecutor
         serviceClientHandles = serviceClients.Select(tuple => tuple.handler.Handle).ToArray();
     }
 
-    public Task<RclServiceClient> CreateServiceClientAsync(string topic, string type, ISignalizable signalizable,
+    public Task<RclServiceClient> CreateServiceClientAsync(string topic, string type, Signalizable signalizable,
         CancellationToken token)
     {
         return Post(() =>
@@ -166,13 +170,13 @@ internal sealed class AsyncRclClient : TaskExecutor
             RebuildServiceClients();
         }, token);
     }
-    
+
     void RebuildServiceServers()
     {
         serviceServerHandles = serviceServers.Select(tuple => tuple.handler.Handle).ToArray();
     }
 
-    public Task<RclServiceServer> AdvertiseServiceAsync(string topic, string type, ISignalizable signalizable,
+    public Task<RclServiceServer> AdvertiseServiceAsync(string topic, string type, Signalizable signalizable,
         CancellationToken token)
     {
         return Post(() =>
@@ -199,7 +203,7 @@ internal sealed class AsyncRclClient : TaskExecutor
             RebuildServiceServers();
         }, token);
     }
-    
+
     public Task<NodeName[]> GetNodeNamesAsync(CancellationToken token = default)
     {
         return Post(client.GetNodeNames, token);

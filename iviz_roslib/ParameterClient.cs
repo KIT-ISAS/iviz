@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using TopicTuple = System.Tuple<string, string>;
 using TopicTuples = System.Tuple<string, string[]>;
@@ -53,7 +54,7 @@ public sealed class ParameterClient
         return (await SetParamAsync(key, value, token)).IsValid;
     }
 
-    public bool GetParameter(string key, out XmlRpcValue value)
+    public bool GetParameter(string key, out RosParameterValue value)
     {
         if (key == null)
         {
@@ -66,7 +67,7 @@ public sealed class ParameterClient
         return success;
     }
 
-    public async ValueTask<(bool success, XmlRpcValue value)> GetParameterAsync(string key,
+    public async ValueTask<(bool success, RosParameterValue value)> GetParameterAsync(string key,
         CancellationToken token = default)
     {
         if (key == null)
@@ -295,21 +296,21 @@ public sealed class ParameterClient
         return new GetParamNamesResponse(response);
     }
 
-    XmlRpcValue[] MethodCall(string function, XmlRpcArg[] args)
+    RosParameterValue[] MethodCall(string function, XmlRpcArg[] args)
     {
         return backend.MethodCall(function, args);
     }
 
-    ValueTask<XmlRpcValue[]> MethodCallAsync(string function, XmlRpcArg[] args, CancellationToken token = default)
+    ValueTask<RosParameterValue[]> MethodCallAsync(string function, XmlRpcArg[] args, CancellationToken token = default)
     {
         return backend.MethodCallAsync(function, args, token);
     }
 
     internal sealed class GetParamResponse : BaseResponse
     {
-        public XmlRpcValue ParameterValue { get; }
+        public RosParameterValue ParameterValue { get; }
 
-        internal GetParamResponse(XmlRpcValue[]? a)
+        internal GetParamResponse(RosParameterValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
@@ -336,7 +337,7 @@ public sealed class ParameterClient
     {
         public string? FoundKey { get; }
 
-        internal SearchParamResponse(XmlRpcValue[]? a)
+        internal SearchParamResponse(RosParameterValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
@@ -367,9 +368,9 @@ public sealed class ParameterClient
 
     internal sealed class SubscribeParamResponse : BaseResponse
     {
-        public XmlRpcValue ParameterValue { get; }
+        public RosParameterValue ParameterValue { get; }
 
-        internal SubscribeParamResponse(XmlRpcValue[]? a)
+        internal SubscribeParamResponse(RosParameterValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
@@ -396,7 +397,7 @@ public sealed class ParameterClient
     {
         public int NumUnsubscribed { get; }
 
-        internal UnsubscribeParamResponse(XmlRpcValue[]? a)
+        internal UnsubscribeParamResponse(RosParameterValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
@@ -429,7 +430,7 @@ public sealed class ParameterClient
     {
         public bool HasParam { get; }
 
-        internal HasParamResponse(XmlRpcValue[]? a)
+        internal HasParamResponse(RosParameterValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
@@ -462,7 +463,7 @@ public sealed class ParameterClient
     {
         public string[] ParameterNameList { get; } = Array.Empty<string>();
 
-        internal GetParamNamesResponse(XmlRpcValue[]? a)
+        internal GetParamNamesResponse(RosParameterValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
@@ -481,7 +482,7 @@ public sealed class ParameterClient
                 return;
             }
 
-            if (!a[2].TryGetArray(out XmlRpcValue[] objNameList))
+            if (!a[2].TryGetArray(out RosParameterValue[] objNameList))
             {
                 MarkError();
                 return;

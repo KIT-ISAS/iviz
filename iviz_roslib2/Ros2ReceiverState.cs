@@ -6,33 +6,29 @@ namespace Iviz.Roslib2;
 [DataContract]
 public sealed class Ros2ReceiverState : ReceiverState
 {
-    readonly Guid guid;
-    readonly QosProfile profile;
-
     [DataMember] public string? TopicType { get; set; }
-    [DataMember] public ref readonly Guid Guid => ref guid;
-    [DataMember] public ref readonly QosProfile Profile => ref profile;
+    [DataMember] public Guid Guid { get; }
+    [DataMember] public QosProfile Profile { get; }
 
     public Ros2ReceiverState()
     {
+        Profile = QosProfile.SystemDefault;
     }
 
-    public Ros2ReceiverState(in Guid guid, in QosProfile profile)
+    public Ros2ReceiverState(in Guid guid, QosProfile profile)
     {
-        this.guid = guid;
-        this.profile = profile;
+        Guid = guid;
+        Profile = profile;
     }
 }
 
 [DataContract]
 public sealed class Ros2SubscriberState : SubscriberState
 {
-    readonly QosProfile profile;
-    [DataMember] public ref readonly QosProfile Profile => ref profile;
+    [DataMember] public QosProfile Profile { get;}
 
     public Ros2SubscriberState(string topic, string type,
         IReadOnlyList<string> advertiserIds,
         IReadOnlyList<ReceiverState> receivers,
-        in QosProfile profile) : base(topic, type, advertiserIds, receivers) =>
-        this.profile = profile;
+        QosProfile profile) : base(topic, type, advertiserIds, receivers) => Profile = profile;
 }

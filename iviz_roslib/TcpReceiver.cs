@@ -12,7 +12,7 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
-internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiver<TMessage>, ITcpReceiver
+internal sealed class TcpReceiver<TMessage> : TcpReceiverStaticHelper, IProtocolReceiver, ILoopbackReceiver<TMessage>, ITcpReceiver
     where TMessage : IMessage
 {
     const int DisposeTimeoutInMs = 2000;
@@ -178,55 +178,6 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         return null;
     }
 
-    async ValueTask<int> ReceivePacket(TcpClient client, ResizableRent readBuffer)
-    {
-        byte[] array = readBuffer.Array;
-        if (!await client.ReadChunkAsync(array, 4, runningTs.Token))
-        {
-            return -1;
-        }
-
-        int length = array.ReadInt();
-        if (length == 0)
-        {
-            return 0;
-        }
-
-        const int maxMessageLength = 64 * 1024 * 1024;
-        if (length is < 0 or > maxMessageLength)
-        {
-            throw new RosInvalidPackageSizeException($"Invalid packet size {length}. Disconnecting.");
-        }
-
-        readBuffer.EnsureCapacity(length);
-        if (!await client.ReadChunkAsync(readBuffer.Array, length, runningTs.Token))
-        {
-            return -1;
-        }
-
-        return length;
-    }
-
-    async ValueTask<int> ReceiveAndIgnore(TcpClient client, byte[] readBuffer)
-    {
-        if (!await client.ReadChunkAsync(readBuffer, 4, runningTs.Token))
-        {
-            return -1;
-        }
-
-        int length = readBuffer.ReadInt();
-        if (length == 0)
-        {
-            return 0;
-        }
-
-        if (!await client.ReadAndIgnoreAsync(length, runningTs.Token))
-        {
-            return -1;
-        }
-
-        return length;
-    }
 
     ValueTask SendHeader(TcpClient client)
     {
@@ -249,7 +200,7 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
 
         using var readBuffer = new ResizableRent();
 
-        int receivedLength = await ReceivePacket(client, readBuffer);
+        int receivedLength = await ReceivePacket(client, readBuffer, runningTs.Token);
         if (receivedLength == -1)
         {
             throw new IOException("Connection closed during handshake");
@@ -286,14 +237,16 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
             throw new InvalidOperationException("Invalid generator!"); // shouldn'T happen
         }
 
+        var token = runningTs.Token;
+
         using var readBuffer = new ResizableRent();
         while (KeepRunning)
         {
             bool isPaused = IsPaused;
 
             int rcvLength = isPaused
-                ? await ReceiveAndIgnore(client, readBuffer.Array)
-                : await ReceivePacket(client, readBuffer);
+                ? await ReceiveAndIgnore(client, readBuffer.Array, token)
+                : await ReceivePacket(client, readBuffer, token);
 
             if (rcvLength == -1)
             {
@@ -312,27 +265,8 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
             var message = ReadBuffer.Deserialize(generator, readBuffer[..rcvLength]);
             manager.MessageCallback(message, this);
 
-            CheckBufferSize(client, rcvLength);
+            CheckBufferSize(client, rcvLength, ref receiveBufferSize);
         }
-    }
-
-    void CheckBufferSize(TcpClient client, int rcvLength)
-    {
-        if (receiveBufferSize >= rcvLength)
-        {
-            return;
-        }
-
-        int recommendedSize = RosUtils.GetRecommendedBufferSize(rcvLength, receiveBufferSize);
-        if (recommendedSize == receiveBufferSize)
-        {
-            return;
-        }
-
-        receiveBufferSize = recommendedSize;
-        client.Client.ReceiveBufferSize = recommendedSize;
-        Logger.LogDebugFormat("{0}: Large message received. Changing buffer size to {1} kB.", this,
-            recommendedSize / 1024);
     }
 
     async ValueTask ProcessLoop(TcpClient client)
@@ -377,4 +311,77 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         return $"[{nameof(TcpReceiver<TMessage>)} for '{Topic}' PartnerUri={RemoteUri} " +
                $"PartnerSocket={RemoteEndpoint.Hostname}:{RemoteEndpoint.Port.ToString()}]";
     }
+}
+
+internal class TcpReceiverStaticHelper
+{
+    protected static async ValueTask<int> ReceivePacket(TcpClient client, ResizableRent readBuffer, CancellationToken token)
+    {
+        byte[] array = readBuffer.Array;
+        if (!await client.ReadChunkAsync(array, 4, token))
+        {
+            return -1;
+        }
+
+        int length = array.ReadInt();
+        if (length == 0)
+        {
+            return 0;
+        }
+
+        const int maxMessageLength = 64 * 1024 * 1024;
+        if (length is < 0 or > maxMessageLength)
+        {
+            throw new RosInvalidPackageSizeException($"Invalid packet size {length}. Disconnecting.");
+        }
+
+        readBuffer.EnsureCapacity(length);
+        if (!await client.ReadChunkAsync(readBuffer.Array, length, token))
+        {
+            return -1;
+        }
+
+        return length;
+    }
+
+    protected static async ValueTask<int> ReceiveAndIgnore(TcpClient client, byte[] readBuffer, CancellationToken token)
+    {
+        if (!await client.ReadChunkAsync(readBuffer, 4, token))
+        {
+            return -1;
+        }
+
+        int length = readBuffer.ReadInt();
+        if (length == 0)
+        {
+            return 0;
+        }
+
+        if (!await client.ReadAndIgnoreAsync(length, token))
+        {
+            return -1;
+        }
+
+        return length;
+    }
+    
+
+    protected void CheckBufferSize(TcpClient client, int rcvLength, ref int receiveBufferSize)
+    {
+        if (receiveBufferSize >= rcvLength)
+        {
+            return;
+        }
+
+        int recommendedSize = RosUtils.GetRecommendedBufferSize(rcvLength, receiveBufferSize);
+        if (recommendedSize == receiveBufferSize)
+        {
+            return;
+        }
+
+        receiveBufferSize = recommendedSize;
+        client.Client.ReceiveBufferSize = recommendedSize;
+        Logger.LogDebugFormat("{0}: Large message received. Changing buffer size to {1} kB.", this,
+            recommendedSize / 1024);
+    }    
 }

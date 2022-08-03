@@ -1,5 +1,4 @@
-using System.Buffers;
-using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using Iviz.Msgs;
 using Iviz.Tools;
 
@@ -14,7 +13,7 @@ internal sealed class RclServiceClient : IDisposable, IHasHandle
 
     public string Service { get; }
     public string ServiceType { get; }
-    
+
     public IntPtr Handle => disposed
         ? throw new ObjectDisposedException(ToString())
         : clientHandle;
@@ -45,38 +44,44 @@ internal sealed class RclServiceClient : IDisposable, IHasHandle
 
     public void SendRequest(ISerializable request, out long sequenceNumber)
     {
-        using var messageBuffer = new RclSerializedBuffer();
+        using var messageBuffer = new RclBuffer();
         const int headerSize = 4;
 
+        int messageLength = request.Ros2MessageLength;
+        int serializedLength = messageLength + headerSize;
+
+        var span = messageBuffer.Resize(serializedLength);
+
+        /*
         const byte cdrLittleEndian0 = 0x00;
         const byte cdrLittleEndian1 = 0x01;
         const byte serializationOptions0 = 0x00;
         const byte serializationOptions1 = 0x00;
 
-        int messageLength = request.Ros2MessageLength;
-        int serializedLength = messageLength + headerSize;
-
-        var span = messageBuffer.EnsureSize(serializedLength);
         span[0] = cdrLittleEndian0;
         span[1] = cdrLittleEndian1;
         span[2] = serializationOptions0;
         span[3] = serializationOptions1;
+        */
+
+        const int header = 0x00000100;
+        Unsafe.WriteUnaligned(ref span[0], header);
 
         WriteBuffer2.Serialize(request, span[headerSize..]);
 
         Check(Rcl.SendRequest(Handle, messageBuffer.Handle, out sequenceNumber));
     }
 
-    public bool TryTakeResponse(RclSerializedBuffer messageBuffer, out Span<byte> span, out long sequenceNumber)
+    public bool TryTakeResponse(RclBuffer messageBuffer, out Span<byte> span, out long sequenceNumber)
     {
-        int ret = Rcl.TakeResponse(clientHandle, messageBuffer.Handle, out var requestHeader, out var ptr,
+        int ret = Rcl.TakeResponse(Handle, messageBuffer.Handle, out var requestHeader, out var ptr,
             out int length);
 
         switch ((RclRet)ret)
         {
             case RclRet.Ok:
                 const int headerSize = 4;
-                span = Rcl.CreateSpan(ptr + headerSize, length - 4);
+                span = Rcl.CreateByteSpan(ptr + headerSize, length - 4);
                 sequenceNumber = requestHeader.requestId.sequenceNumber;
                 return true;
             case RclRet.SubscriptionTakeFailed:
@@ -102,9 +107,9 @@ internal sealed class RclServiceClient : IDisposable, IHasHandle
     }
 
     ~RclServiceClient() => Logger.LogErrorFormat("{0} has not been disposed!", this);
-    
+
     public override string ToString()
     {
         return $"[{nameof(RclServiceClient)} {Service} [{ServiceType}] ]";
-    }    
+    }
 }

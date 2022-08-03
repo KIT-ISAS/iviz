@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
@@ -150,9 +150,9 @@ public interface IRosClient : IDisposable, IAsyncDisposable
 
     IReadOnlyList<PublisherState> GetPublisherStatistics();
 
-    ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsAsync();
+    ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsAsync(CancellationToken token = default);
 
-    ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsAsync();
+    ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsAsync(CancellationToken token = default);
 
     bool IsServiceAvailable(string service);
 
@@ -172,9 +172,9 @@ public interface IRosClient : IDisposable, IAsyncDisposable
 
     ValueTask<string[]> GetParameterNamesAsync(CancellationToken token = default);
 
-    bool GetParameter(string key, out XmlRpcValue value);
+    bool GetParameter(string key, out RosParameterValue value);
 
-    ValueTask<(bool success, XmlRpcValue value)>
+    ValueTask<(bool success, RosParameterValue value)>
         GetParameterAsync(string key, CancellationToken token = default);
 
     SystemState GetSystemState();

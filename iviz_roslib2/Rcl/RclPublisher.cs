@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Iviz.Msgs;
 using Iviz.Tools;
 
@@ -8,13 +9,14 @@ internal sealed class RclPublisher : IDisposable
     readonly IntPtr contextHandle;
     readonly IntPtr nodeHandle;
     readonly IntPtr publisherHandle;
-    readonly RclSerializedBuffer messageBuffer;
+    readonly RclBuffer messageBuffer;
     bool disposed;
 
     public string Topic { get; }
     public string TopicType { get; }
+    public QosProfile Profile { get; }
 
-    public RclPublisher(IntPtr contextHandle, IntPtr nodeHandle, string topic, string topicType)
+    public RclPublisher(IntPtr contextHandle, IntPtr nodeHandle, string topic, string topicType, QosProfile profile)
     {
         if (contextHandle == IntPtr.Zero) BuiltIns.ThrowArgumentNull(nameof(nodeHandle));
         if (nodeHandle == IntPtr.Zero) BuiltIns.ThrowArgumentNull(nameof(nodeHandle));
@@ -25,6 +27,7 @@ internal sealed class RclPublisher : IDisposable
         this.nodeHandle = nodeHandle;
         Topic = topic;
         TopicType = topicType;
+        Profile = profile;
 
         int ret = Rcl.CreatePublisherHandle(out publisherHandle, nodeHandle, topic, topicType);
         switch (ret)
@@ -32,7 +35,7 @@ internal sealed class RclPublisher : IDisposable
             case -1:
                 throw new RosUnsupportedMessageException(topicType);
             case Rcl.Ok:
-                messageBuffer = new RclSerializedBuffer();
+                messageBuffer = new RclBuffer();
                 break;
             default:
                 throw new RosRclException($"Advertisement for topic '{topic}' [{topicType}] failed!", ret);
@@ -45,24 +48,29 @@ internal sealed class RclPublisher : IDisposable
     {
         const int headerSize = 4;
 
+        int messageLength = message.Ros2MessageLength;
+        int serializedLength = messageLength + headerSize;
+
+        var span = messageBuffer.Resize(serializedLength);
+        
+        /*
         const byte cdrLittleEndian0 = 0x00;
         const byte cdrLittleEndian1 = 0x01;
         const byte serializationOptions0 = 0x00;
         const byte serializationOptions1 = 0x00;
 
-        int messageLength = message.Ros2MessageLength;
-        int serializedLength = messageLength + headerSize;
-
-        var span = messageBuffer.EnsureSize(serializedLength);
-        
         span[0] = cdrLittleEndian0;
         span[1] = cdrLittleEndian1;
         span[2] = serializationOptions0;
         span[3] = serializationOptions1;
-
+        */
+        
+        const int header = 0x00000100;
+        Unsafe.WriteUnaligned(ref span[0], header);
+        
         WriteBuffer2.Serialize(message, span[headerSize..]);
 
-        Rcl.PublishSerializedMessage(publisherHandle, messageBuffer.Handle);
+        Check(Rcl.PublishSerializedMessage(publisherHandle, messageBuffer.Handle));
 
         return serializedLength;
     }

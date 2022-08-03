@@ -56,7 +56,7 @@ public sealed class RosClient : IRosClient
     /// </summary>
     public ShutdownActionCall? ShutdownAction { get; set; }
 
-    public delegate void ParamUpdateActionCall(string callerId, string parameterKey, XmlRpcValue parameterValue);
+    public delegate void ParamUpdateActionCall(string callerId, string parameterKey, RosParameterValue parameterValue);
 
     /// <summary>
     /// Handler of 'paramUpdate' XML-RPC calls from the slave API
@@ -1459,9 +1459,11 @@ public sealed class RosClient : IRosClient
     public IReadOnlyList<PublisherState> GetPublisherStatistics() =>
         publishersByTopic.Values.Select(publisher => publisher.GetState()).ToArray();
 
-    public ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsAsync() => new(GetSubscriberStatistics());
+    public ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsAsync(CancellationToken token = default) =>
+        GetSubscriberStatistics().AsTaskResult();
 
-    public ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsAsync() => new(GetPublisherStatistics());
+    public ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsAsync(CancellationToken token = default) =>
+        GetPublisherStatistics().AsTaskResult();
 
     internal List<BusInfo> GetBusInfoRpc()
     {
@@ -1549,7 +1551,7 @@ public sealed class RosClient : IRosClient
         CancellationToken token = default)
         where T : IService, new()
     {
-        return TaskUtils.RunSync(() => CallServiceAsync(serviceName, service, persistent, token));
+        return TaskUtils.RunSync(() => CallServiceAsync(serviceName, service, persistent, token), token);
     }
 
     /// <summary>
@@ -1719,7 +1721,7 @@ public sealed class RosClient : IRosClient
     public bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
         where T : IService, new()
     {
-        return TaskUtils.RunSync(() => AdvertiseServiceAsync(serviceName, callback, token));
+        return TaskUtils.RunSync(() => AdvertiseServiceAsync(serviceName, callback, token), token);
     }
 
     /// <summary>
@@ -1789,7 +1791,7 @@ public sealed class RosClient : IRosClient
     /// <exception cref="ArgumentException">Thrown if name is null</exception>
     public void UnadvertiseService(string name, CancellationToken token = default)
     {
-        TaskUtils.RunSync(() => UnadvertiseServiceAsync(name, token));
+        TaskUtils.RunSync(() => UnadvertiseServiceAsync(name, token), token);
     }
 
     /// <summary>
@@ -1830,9 +1832,9 @@ public sealed class RosClient : IRosClient
     public ValueTask<string[]> GetParameterNamesAsync(CancellationToken token = default) =>
         Parameters.GetParameterNamesAsync(token);
 
-    public bool GetParameter(string key, out XmlRpcValue value) => Parameters.GetParameter(key, out value);
+    public bool GetParameter(string key, out RosParameterValue value) => Parameters.GetParameter(key, out value);
 
-    public ValueTask<(bool success, XmlRpcValue value)>
+    public ValueTask<(bool success, RosParameterValue value)>
         GetParameterAsync(string key, CancellationToken token = default) => Parameters.GetParameterAsync(key, token);
 
     internal bool TryGetLoopbackReceiver<T>(string topic, in Endpoint endpoint, out ILoopbackReceiver<T>? receiver)

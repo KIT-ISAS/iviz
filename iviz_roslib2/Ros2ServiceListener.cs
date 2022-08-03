@@ -4,10 +4,9 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib2;
 
-internal class Ros2ServiceListener : ISignalizable
+internal sealed class Ros2ServiceListener : Signalizable
 {
     readonly Func<IService> generator;
-    readonly SemaphoreSlim signal = new(0);
     readonly CancellationTokenSource runningTs = new();
     readonly Ros2Client client;
     readonly Func<IService, ValueTask> callback;
@@ -40,7 +39,7 @@ internal class Ros2ServiceListener : ISignalizable
     async ValueTask Run()
     {
         var cancellationToken = runningTs.Token;
-        using var serializedBuffer = new RclSerializedBuffer();
+        using var serializedBuffer = new RclBuffer();
 
         while (true)
         {
@@ -49,7 +48,7 @@ internal class Ros2ServiceListener : ISignalizable
         }
     }
 
-    void ProcessRequests(RclSerializedBuffer serializedBuffer)
+    void ProcessRequests(RclBuffer serializedBuffer)
     {
         while (ServiceServer.TryTakeRequest(serializedBuffer, out var span, out var requestId))
         {
@@ -93,7 +92,7 @@ internal class Ros2ServiceListener : ISignalizable
         }
     }
     
-    public async ValueTask DisposeAsync(CancellationToken token = default)
+    public async ValueTask DisposeAsync(CancellationToken token)
     {
         if (disposed) return;
         disposed = true;
@@ -106,11 +105,6 @@ internal class Ros2ServiceListener : ISignalizable
         client.RemoveServiceListener(this);
     }
 
-    void ISignalizable.Signal()
-    {
-        signal.Release();
-    }    
-    
     public override string ToString()
     {
         return $"[{nameof(Ros2ServiceListener)} {Service} [{ServiceType}] ]";

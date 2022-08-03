@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Iviz.Msgs;
 using Iviz.Tools;
 
@@ -41,16 +42,16 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
         }
     }
 
-    public bool TryTakeRequest(RclSerializedBuffer messageBuffer, out Span<byte> span, out RmwRequestId requestId)
+    public bool TryTakeRequest(RclBuffer messageBuffer, out Span<byte> span, out RmwRequestId requestId)
     {
-        int ret = Rcl.TakeRequest(serviceHandle, messageBuffer.Handle, out var serviceInfo, out var ptr,
+        int ret = Rcl.TakeRequest(Handle, messageBuffer.Handle, out var serviceInfo, out var ptr,
             out int length);
 
         switch ((RclRet)ret)
         {
             case RclRet.Ok:
                 const int headerSize = 4;
-                span = Rcl.CreateSpan(ptr + headerSize, length - 4);
+                span = Rcl.CreateByteSpan(ptr + headerSize, length - 4);
                 requestId = serviceInfo.requestId;
                 return true;
             case RclRet.SubscriptionTakeFailed:
@@ -59,31 +60,35 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
                 return false;
             default:
                 Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.TakeResponse));
-                span = default;
-                requestId = default;
-                return false;
+                goto case RclRet.SubscriptionTakeFailed;
         }
     }
 
     public void SendResponse(ISerializable response, in RmwRequestId requestId)
     {
-        using var messageBuffer = new RclSerializedBuffer();
+        using var messageBuffer = new RclBuffer();
         const int headerSize = 4;
 
+        int messageLength = response.Ros2MessageLength;
+        int serializedLength = messageLength + headerSize;
+
+        var span = messageBuffer.Resize(serializedLength);
+
+        /*
         const byte cdrLittleEndian0 = 0x00;
         const byte cdrLittleEndian1 = 0x01;
         const byte serializationOptions0 = 0x00;
         const byte serializationOptions1 = 0x00;
 
-        int messageLength = response.Ros2MessageLength;
-        int serializedLength = messageLength + headerSize;
-
-        var span = messageBuffer.EnsureSize(serializedLength);
         span[0] = cdrLittleEndian0;
         span[1] = cdrLittleEndian1;
         span[2] = serializationOptions0;
         span[3] = serializationOptions1;
-
+        */
+        
+        const int header = 0x00000100;
+        Unsafe.WriteUnaligned(ref span[0], header);
+        
         WriteBuffer2.Serialize(response, span[headerSize..]);
 
         Check(Rcl.SendResponse(Handle, messageBuffer.Handle, in requestId));

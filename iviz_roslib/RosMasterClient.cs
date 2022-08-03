@@ -361,11 +361,11 @@ public sealed class RosMasterClient : IDisposable
         return new UnregisterServiceResponse(response);
     }
 
-    internal XmlRpcValue[] MethodCall(string function, XmlRpcArg[] args)
+    internal RosParameterValue[] MethodCall(string function, XmlRpcArg[] args)
     {
         using var ts = new CancellationTokenSource(TimeoutInMs);
 
-        XmlRpcValue tmp;
+        RosParameterValue tmp;
         try
         {
             tmp = XmlRpcService.MethodCall(MasterUri, CallerUri, function, args, ts.Token);
@@ -375,7 +375,7 @@ public sealed class RosMasterClient : IDisposable
             throw new TimeoutException($"Call to '{function}' timed out");
         }
 
-        if (!tmp.TryGetArray(out XmlRpcValue[] result))
+        if (!tmp.TryGetArray(out RosParameterValue[] result))
         {
             throw new ParseException($"Expected type object[], got {tmp}");
         }
@@ -383,7 +383,7 @@ public sealed class RosMasterClient : IDisposable
         return result;
     }
 
-    internal async ValueTask<XmlRpcValue[]> MethodCallAsync(string function, XmlRpcArg[] args,
+    internal async ValueTask<RosParameterValue[]> MethodCallAsync(string function, XmlRpcArg[] args,
         CancellationToken token)
     {
         using var ts = token.CanBeCanceled
@@ -391,7 +391,7 @@ public sealed class RosMasterClient : IDisposable
             : new CancellationTokenSource();
         ts.CancelAfter(TimeoutInMs);
 
-        XmlRpcValue rpcValue;
+        RosParameterValue rpcValue;
         try
         {
             var freeConnection = rpcConnections.Min()!;
@@ -402,7 +402,7 @@ public sealed class RosMasterClient : IDisposable
             throw new TimeoutException($"Call to '{function}' timed out");
         }
 
-        if (!rpcValue.TryGetArray(out XmlRpcValue[] result))
+        if (!rpcValue.TryGetArray(out RosParameterValue[] result))
         {
             throw new ParseException($"Rpc Response: Expected type object[], got {rpcValue}");
         }
@@ -428,7 +428,7 @@ public abstract class BaseResponse : JsonToString
         hasParseError = true;
     }
 
-    protected bool TryGetValueFromArgs(XmlRpcValue[]? a, out XmlRpcValue value)
+    protected bool TryGetValueFromArgs(RosParameterValue[]? a, out RosParameterValue value)
     {
         if (a is null 
             || a.Length != 3 
@@ -456,14 +456,14 @@ public sealed class GetSystemStateResponse : BaseResponse
     public TopicTuple[] Subscribers { get; } = Empty;
     public TopicTuple[] Services { get; } = Empty;
 
-    internal GetSystemStateResponse(XmlRpcValue[]? a)
+    internal GetSystemStateResponse(RosParameterValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
             
-        if (!value.TryGetArray(out XmlRpcValue[] root) || root.Length != 3)
+        if (!value.TryGetArray(out RosParameterValue[] root) || root.Length != 3)
         {
             MarkError();
             return;
@@ -474,9 +474,9 @@ public sealed class GetSystemStateResponse : BaseResponse
         Services = CreateTuple(root[2]);
     }
 
-    TopicTuple[] CreateTuple(XmlRpcValue root)
+    TopicTuple[] CreateTuple(RosParameterValue root)
     {
-        if (!root.TryGetArray(out XmlRpcValue[] objTuples))
+        if (!root.TryGetArray(out RosParameterValue[] objTuples))
         {
             MarkError();
             return Empty;
@@ -486,10 +486,10 @@ public sealed class GetSystemStateResponse : BaseResponse
         int r = 0;
         foreach (var objTuple in objTuples)
         {
-            if (!objTuple.TryGetArray(out XmlRpcValue[] tuple) ||
+            if (!objTuple.TryGetArray(out RosParameterValue[] tuple) ||
                 tuple.Length != 2 ||
                 !tuple[0].TryGetString(out string topic) ||
-                !tuple[1].TryGetArray(out XmlRpcValue[] tmpMembers))
+                !tuple[1].TryGetArray(out RosParameterValue[] tmpMembers))
             {
                 MarkError();
                 return Empty;
@@ -534,7 +534,7 @@ public sealed class DefaultResponse : BaseResponse
     static readonly DefaultResponse MessageNotStringError = new(StatusCode.Error,
         "Expected string as second argument");
 
-    public static DefaultResponse Create(XmlRpcValue[] args)
+    public static DefaultResponse Create(RosParameterValue[] args)
     {
         if (args.Length != 3)
         {
@@ -561,7 +561,7 @@ public sealed class GetUriResponse : BaseResponse
 {
     public Uri? Uri { get; }
 
-    internal GetUriResponse(XmlRpcValue[]? a)
+    internal GetUriResponse(RosParameterValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
@@ -591,7 +591,7 @@ public sealed class LookupNodeResponse : BaseResponse
 {
     public Uri? Uri { get; }
 
-    internal LookupNodeResponse(XmlRpcValue[]? a)
+    internal LookupNodeResponse(RosParameterValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
@@ -624,14 +624,14 @@ public sealed class GetPublishedTopicsResponse : BaseResponse
 
     public (string name, string type)[] Topics { get; } = Empty;
 
-    internal GetPublishedTopicsResponse(XmlRpcValue[]? a)
+    internal GetPublishedTopicsResponse(RosParameterValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
             
-        if (!value.TryGetArray(out XmlRpcValue[] objTopics))
+        if (!value.TryGetArray(out RosParameterValue[] objTopics))
         {
             MarkError();
             return;
@@ -641,7 +641,7 @@ public sealed class GetPublishedTopicsResponse : BaseResponse
         int r = 0;
         foreach (var objTopic in objTopics)
         {
-            if (!objTopic.TryGetArray(out XmlRpcValue[] topic) ||
+            if (!objTopic.TryGetArray(out RosParameterValue[] topic) ||
                 topic.Length != 2 ||
                 !topic[0].TryGetString(out string topicName) ||
                 !topic[1].TryGetString(out string topicType))
@@ -664,7 +664,7 @@ public sealed class RegisterSubscriberResponse : BaseResponse
 
     public Uri[] Publishers { get; } = Empty;
 
-    internal RegisterSubscriberResponse(XmlRpcValue[]? a)
+    internal RegisterSubscriberResponse(RosParameterValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
@@ -700,7 +700,7 @@ public sealed class UnregisterSubscriberResponse : BaseResponse
 {
     public int NumUnsubscribed { get; }
 
-    internal UnregisterSubscriberResponse(XmlRpcValue[]? a)
+    internal UnregisterSubscriberResponse(RosParameterValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
@@ -723,14 +723,14 @@ public sealed class RegisterPublisherResponse : BaseResponse
 
     public string[] Subscribers { get; } = Empty;
 
-    internal RegisterPublisherResponse(XmlRpcValue[]? a)
+    internal RegisterPublisherResponse(RosParameterValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
             
-        if (!value.TryGetArray(out XmlRpcValue[] objSubscriberStrs))
+        if (!value.TryGetArray(out RosParameterValue[] objSubscriberStrs))
         {
             MarkError();
             return;
@@ -757,7 +757,7 @@ public sealed class UnregisterPublisherResponse : BaseResponse
 {
     public int NumUnregistered { get; }
 
-    internal UnregisterPublisherResponse(XmlRpcValue[]? a)
+    internal UnregisterPublisherResponse(RosParameterValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
@@ -778,7 +778,7 @@ public sealed class LookupServiceResponse : BaseResponse
 {
     public Uri? ServiceUri { get; }
 
-    internal LookupServiceResponse(XmlRpcValue[]? a)
+    internal LookupServiceResponse(RosParameterValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
@@ -800,7 +800,7 @@ public sealed class UnregisterServiceResponse : BaseResponse
 {
     public int NumUnregistered { get; }
 
-    internal UnregisterServiceResponse(XmlRpcValue[]? a)
+    internal UnregisterServiceResponse(RosParameterValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {

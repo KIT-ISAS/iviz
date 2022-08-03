@@ -1,4 +1,3 @@
-using System;
 using Iviz.Msgs;
 using Iviz.Tools;
 
@@ -9,7 +8,7 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
     readonly IntPtr contextHandle;
     readonly IntPtr nodeHandle;
     readonly IntPtr subscriptionHandle;
-    readonly RclSerializedBuffer messageBuffer;
+    readonly RclBuffer messageBuffer;
     bool disposed;
 
     public IntPtr Handle => disposed
@@ -20,7 +19,7 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
     public string TopicType { get; }
     public QosProfile Profile { get; }
 
-    public RclSubscriber(IntPtr contextHandle, IntPtr nodeHandle, string topic, string topicType, in QosProfile profile)
+    public RclSubscriber(IntPtr contextHandle, IntPtr nodeHandle, string topic, string topicType, QosProfile profile)
     {
         if (contextHandle == IntPtr.Zero) BuiltIns.ThrowArgumentNull(nameof(nodeHandle));
         if (nodeHandle == IntPtr.Zero) BuiltIns.ThrowArgumentNull(nameof(nodeHandle));
@@ -33,7 +32,7 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
         TopicType = topicType;
         Profile = profile;
 
-        int ret = Rcl.CreateSubscriptionHandle(out subscriptionHandle, nodeHandle, topic, topicType, profile);
+        int ret = Rcl.CreateSubscriptionHandle(out subscriptionHandle, nodeHandle, topic, topicType, profile.Profile);
         if (ret == -1)
         {
             throw new RosUnsupportedMessageException(topicType);
@@ -44,7 +43,7 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
             throw new RosRclException($"Subscription for topic '{topic}' [{topicType}] failed!", ret);
         }
 
-        messageBuffer = new RclSerializedBuffer();
+        messageBuffer = new RclBuffer();
     }
 
     void Check(int result) => Rcl.Check(contextHandle, result);
@@ -57,7 +56,7 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
         {
             case RclRet.Ok:
                 const int headerSize = 4;
-                span = Rcl.CreateSpan(ptr + headerSize, length - 4);
+                span = Rcl.CreateByteSpan(ptr + headerSize, length - 4);
                 return true;
             case RclRet.SubscriptionTakeFailed:
                 span = default;

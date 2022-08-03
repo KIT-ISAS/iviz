@@ -110,9 +110,9 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
 
     string GenerateId()
     {
-        Interlocked.Increment(ref totalSubscribers);
-        int prevNumSubscribers = totalSubscribers - 1;
-        return prevNumSubscribers == 0 ? Topic : $"{Topic}-{prevNumSubscribers.ToString()}";
+        int currentCount = Interlocked.Increment(ref totalSubscribers);
+        int lastId = currentCount - 1;
+        return lastId == 0 ? Topic : $"{Topic}-{lastId.ToString()}";
     }
 
     void AssertIsAlive()
@@ -284,7 +284,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
 
     internal void PublisherUpdateRcp(IEnumerable<Uri> publisherUris, CancellationToken token)
     {
-        TaskUtils.RunSync(() => PublisherUpdateRcpAsync(publisherUris, token).AwaitNoThrow(this));
+        TaskUtils.RunSync(() => PublisherUpdateRcpAsync(publisherUris, token).AwaitNoThrow(this), token);
     }
 
     internal bool TryGetLoopbackReceiver(in Endpoint endPoint, out ILoopbackReceiver<TMessage>? receiver) =>

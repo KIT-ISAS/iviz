@@ -7,61 +7,82 @@ internal sealed class RclWaitSet : IDisposable
 {
     readonly IntPtr contextHandle;
     readonly IntPtr waitSetHandle;
+
+    readonly int maxSubscriptions;
+    readonly int maxGuardConditions;
+    readonly int maxClients;
+    readonly int maxServers;
+    
     bool disposed;
 
     public RclWaitSet(IntPtr contextHandle, int maxSubscriptions, int maxGuardConditions, int maxClients,
         int maxServers)
     {
         this.contextHandle = contextHandle;
+        this.maxSubscriptions = maxSubscriptions;
+        this.maxGuardConditions = maxGuardConditions;
+        this.maxClients = maxClients;
+        this.maxServers = maxServers;
         waitSetHandle = Rcl.CreateWaitSet();
         Check(Rcl.WaitSetInit(contextHandle, waitSetHandle, maxSubscriptions, maxGuardConditions, 0, 
             maxClients, maxServers, 0));
     }
 
     public bool WaitFor(
-        Span<IntPtr> subscriptions, Span<IntPtr> guards,
-        Span<IntPtr> clients, Span<IntPtr> services,
-        out Span<long> triggeredSubscriptions, out Span<long> triggeredGuards,
-        out Span<long> triggeredClients, out Span<long> triggeredServices)
+        IntPtr[] subscriptions, IntPtr[] guards,
+        IntPtr[] clients, IntPtr[] servers,
+        out Span<IntPtr> triggeredSubscriptions, out Span<IntPtr> triggeredGuards,
+        out Span<IntPtr> triggeredClients, out Span<IntPtr> triggeredServers,
+        int timeoutInMs)
     {
         if (disposed)
         {
             throw new ObjectDisposedException(ToString());
         }
 
-        triggeredClients = default;
-        triggeredServices = default;
+        if (subscriptions.Length > maxSubscriptions
+            || guards.Length > maxGuardConditions
+            || clients.Length > maxClients
+            || servers.Length > maxServers)
+        {
+            throw new IndexOutOfRangeException("Handle sizes are larger than allocated!");
+        }
 
-        ref readonly IntPtr subscriptionHandles = ref MemoryMarshal.GetReference(subscriptions);
-        ref readonly IntPtr guardHandles = ref MemoryMarshal.GetReference(guards);
-        ref readonly IntPtr clientHandles = ref MemoryMarshal.GetReference(clients);
-        ref readonly IntPtr servicesHandles = ref MemoryMarshal.GetReference(services);
+        IntPtr dummy = default;
+        ref readonly IntPtr subscriptionHandles = ref (subscriptions.Length > 0 ? ref subscriptions[0] : ref dummy);
+        ref readonly IntPtr guardHandles = ref (guards.Length > 0 ? ref guards[0] : ref dummy);
+        ref readonly IntPtr clientHandles = ref (clients.Length > 0 ? ref clients[0] : ref dummy);
+        ref readonly IntPtr serviceHandles = ref (servers.Length > 0 ? ref servers[0] : ref dummy);
 
         Check(Rcl.WaitClearAndAdd(waitSetHandle,
             in subscriptionHandles, subscriptions.Length,
             in guardHandles, guards.Length,
             in clientHandles, clients.Length,
-            in servicesHandles, services.Length));
+            in serviceHandles, servers.Length));
 
-        int ret = Rcl.Wait(waitSetHandle, 5000,
+        int ret = Rcl.Wait(waitSetHandle, timeoutInMs,
             out var changedSubscriptionHandles,
-            out var changedGuardHandles);
+            out var changedGuardHandles,
+            out var changedClientHandles,
+            out var changedServiceHandles);
 
         switch ((RclRet)ret)
         {
             case RclRet.Timeout:
                 triggeredSubscriptions = default;
                 triggeredGuards = default;
+                triggeredClients = default;
+                triggeredServers = default;
                 return false;
             case RclRet.Ok:
-                triggeredSubscriptions = Rcl.CreateSpan<long>(changedSubscriptionHandles, subscriptions.Length);
-                triggeredGuards = Rcl.CreateSpan<long>(changedGuardHandles, guards.Length);
+                triggeredSubscriptions = Rcl.CreateIntPtrSpan(changedSubscriptionHandles, subscriptions.Length);
+                triggeredGuards = Rcl.CreateIntPtrSpan(changedGuardHandles, guards.Length);
+                triggeredClients = Rcl.CreateIntPtrSpan(changedClientHandles, clients.Length);
+                triggeredServers = Rcl.CreateIntPtrSpan(changedServiceHandles, servers.Length);
                 return true;
-            default:
+            default: 
                 Check(ret); // throws
-                triggeredSubscriptions = default;
-                triggeredGuards = default;
-                return false;
+                goto case RclRet.Timeout; // unreachable
         }
     }
 

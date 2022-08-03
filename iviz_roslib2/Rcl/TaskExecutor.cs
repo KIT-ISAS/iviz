@@ -8,10 +8,9 @@ namespace Iviz.Roslib2.Rcl;
 internal abstract class TaskExecutor
 {
     Task? task;
-    readonly CancellationTokenSource tokenSource = new();
     readonly ConcurrentQueue<Action> queue = new();
+    bool keepRunning = true;
 
-    protected abstract void Wait();
     protected abstract void Signal();
 
     protected void Start()
@@ -21,15 +20,22 @@ internal abstract class TaskExecutor
 
     void Run()
     {
-        while (!tokenSource.IsCancellationRequested)
+        var self = (AsyncRclClient)this;
+        
+        while (keepRunning)
         {
             try
             {
-                Wait();
+                self.Wait();
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: Unexpected exception in {1}! {2}", this, nameof(Wait), e);
+                Logger.LogErrorFormat("{0}: Unexpected exception in {1}! {2}", this, nameof(self.Wait), e);
+            }
+
+            if (queue.IsEmpty)
+            {
+                continue;
             }
 
             while (queue.TryDequeue(out var action))
@@ -38,7 +44,7 @@ internal abstract class TaskExecutor
             }
         }
         
-        if (queue.Count != 0)
+        if (!queue.IsEmpty)
         {
             Logger.LogErrorFormat("{0}: {1} tasks left in queue!", this, queue.Count);
         }
@@ -117,7 +123,7 @@ internal abstract class TaskExecutor
 
     protected void Stop()
     {
-        tokenSource.Cancel();
+        keepRunning = false;
     }
 
     public virtual ValueTask DisposeAsync(CancellationToken token)

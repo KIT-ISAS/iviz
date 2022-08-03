@@ -23,7 +23,7 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
     public int NumSubscribers => publisher.GetNumSubscribers();
     public bool LatchingEnabled { get; set; }
     public bool IsAlive => !CancellationToken.IsCancellationRequested;
-    public QosProfile Profile { get; } = QosProfile.Default();
+    public QosProfile Profile => publisher.Profile;
 
     internal Ros2Publisher(Ros2Client client, RclPublisher publisher)
     {

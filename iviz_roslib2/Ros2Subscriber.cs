@@ -5,7 +5,7 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib2;
 
-public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<TMessage>, ISignalizable
+public sealed class Ros2Subscriber<TMessage> : Ros2SubscriberHelper, IRos2Subscriber, IRosSubscriber<TMessage>
     where TMessage : IMessage, new()
 {
     static RosCallback<TMessage>[] EmptyCallback => Array.Empty<RosCallback<TMessage>>();
@@ -13,7 +13,6 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
     readonly Dictionary<string, RosCallback<TMessage>> callbacksById = new();
     readonly CancellationTokenSource runningTs = new();
     readonly Ros2Client client;
-    readonly SemaphoreSlim signal = new(0);
 
     RosCallback<TMessage>[] cachedCallbacks = EmptyCallback; // cache to iterate through callbacks quickly
     RclSubscriber? subscriber;
@@ -72,15 +71,13 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
         {
             while (rclSubscriber.TryTakeMessage(out var span, out receiverInfo.guid))
             {
+                UpdateReceiverInfo(receiverInfo.guid, span.Length);
                 if (IsPaused) continue;
                 var msg = ReadBuffer2.Deserialize(generator, span);
                 MessageCallback(msg, receiverInfo);
-                UpdateReceiverInfo(receiverInfo.guid, span.Length);
             }
         }
     }
-
-    void ISignalizable.Signal() => signal.Release();
 
     void UpdateReceiverInfo(in Guid guid, int lengthInBytes)
     {
@@ -111,51 +108,6 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
         Array.Sort(publisherStats, 0, numPublishers);
     }
 
-    static bool LinearSearch(PublisherStats[] arr, int length, in Guid key, out int index)
-    {
-        for (int i = 0; i < length; i++)
-        {
-            if (arr[i].guid == key)
-            {
-                index = i;
-                return true;
-            }
-        }
-
-        index = 0;
-        return false;
-    }
-
-
-    static bool BinarySearch(PublisherStats[] arr, int length, in Guid key, out int index)
-    {
-        int min = 0;
-        int max = length - 1;
-
-        while (min <= max)
-        {
-            int mid = (min + max) / 2;
-            ref readonly var guid = ref arr[mid].guid;
-
-            if (key == guid)
-            {
-                index = mid;
-                return true;
-            }
-
-            if (key < guid)
-            {
-                max = mid - 1;
-            }
-            else
-            {
-                min = mid + 1;
-            }
-        }
-
-        index = default;
-        return false;
-    }
 
     void MessageCallback(in TMessage msg, IRosConnection receiver)
     {
@@ -182,9 +134,9 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
 
     string GenerateId()
     {
-        Interlocked.Increment(ref totalSubscribers);
-        int prevNumSubscribers = totalSubscribers - 1;
-        return prevNumSubscribers == 0 ? Topic : $"{Topic}-{prevNumSubscribers.ToString()}";
+        int currentCount = Interlocked.Increment(ref totalSubscribers);
+        int lastId = currentCount - 1;
+        return lastId == 0 ? Topic : $"{Topic}-{lastId.ToString()}";
     }
 
     public SubscriberState GetState() => TaskUtils.RunSync(GetStateAsync);
@@ -337,11 +289,60 @@ public sealed class Ros2Subscriber<TMessage> : IRos2Subscriber, IRosSubscriber<T
 
         client.RemoveSubscriber(this);
     }
+}
 
-    struct PublisherStats
+public class Ros2SubscriberHelper : Signalizable
+{
+    protected struct PublisherStats
     {
         public Guid guid;
         public long bytesReceived;
         public int numReceived;
     }
+    
+    protected static bool LinearSearch(PublisherStats[] arr, int length, in Guid key, out int index)
+    {
+        for (int i = 0; i < length; i++)
+        {
+            if (arr[i].guid == key)
+            {
+                index = i;
+                return true;
+            }
+        }
+
+        index = 0;
+        return false;
+    }
+    
+    protected static bool BinarySearch(PublisherStats[] arr, int length, in Guid key, out int index)
+    {
+        int min = 0;
+        int max = length - 1;
+
+        while (min <= max)
+        {
+            int mid = (min + max) / 2;
+            ref readonly var guid = ref arr[mid].guid;
+
+            if (key == guid)
+            {
+                index = mid;
+                return true;
+            }
+
+            if (key < guid)
+            {
+                max = mid - 1;
+            }
+            else
+            {
+                min = mid + 1;
+            }
+        }
+
+        index = default;
+        return false;
+    }
+    
 }

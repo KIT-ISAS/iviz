@@ -1,8 +1,9 @@
 namespace Iviz.Roslib2.Rcl;
 
-internal interface ISignalizable
+public class Signalizable
 {
-    void Signal();
+    protected readonly SemaphoreSlim signal = new(0);
+    public void Signal() => signal.Release();
 }
 
 internal interface IHasHandle
