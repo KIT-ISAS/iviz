@@ -283,7 +283,7 @@
 					"@loader_path/Frameworks",
 				);
 				LLVM_LTO = YES;
-				MACH_O_TYPE = staticlib;
+				MACH_O_TYPE = mh_dylib;
 				OTHER_CFLAGS = "-fembed-bitcode";
 				PRELINK_LIBS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "isas.kit.edu.IvizOpencv-iOS";
@@ -326,7 +326,7 @@
 					"@loader_path/Frameworks",
 				);
 				LLVM_LTO = YES;
-				MACH_O_TYPE = staticlib;
+				MACH_O_TYPE = mh_dylib;
 				OTHER_CFLAGS = "-fembed-bitcode";
 				PRELINK_LIBS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "isas.kit.edu.IvizOpencv-iOS";
