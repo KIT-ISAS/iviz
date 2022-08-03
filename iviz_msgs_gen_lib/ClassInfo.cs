@@ -331,7 +331,7 @@ public sealed class ClassInfo
             {
                 $"public {readOnlyId}int Ros2MessageLength => 0;",
                 "",
-                $"public {readOnlyId}void AddRos2MessageLength(ref int c) {{ }}"
+                $"public {readOnlyId}void AddRos2MessageLength(ref int _) {{ }}"
             };
         }
 
@@ -349,7 +349,7 @@ public sealed class ClassInfo
         }
 
         var fields = new List<string>();
-        if (fixedSize != UnknownSizeAtCompileTime)
+        if (forceStruct && fixedSize != UnknownSizeAtCompileTime)
         {
             fields.Add($"public const int Ros2FixedMessageLength = {fixedSize};");
             fields.Add("");
@@ -609,10 +609,6 @@ public sealed class ClassInfo
 
         if ((version & RosVersion.Ros1) != 0)
         {
-            lines.Add(variables.Any()
-                ? $"{readOnlyId}ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => new {name}(ref b);"
-                : $"{readOnlyId}ISerializableRos1 ISerializableRos1.RosDeserializeBase(ref ReadBuffer b) => Singleton;");
-            lines.Add("");
             lines.Add(variables.Any()
                 ? $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer b) => new {name}(ref b);"
                 : $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer b) => Singleton;");
@@ -1078,7 +1074,7 @@ public sealed class ClassInfo
 
     static string Compress(string catDependencies)
     {
-        var inputBytes = Utf8.GetBytes(catDependencies);
+        byte[] inputBytes = Utf8.GetBytes(catDependencies);
 
         using var outputStream = new MemoryStream();
 

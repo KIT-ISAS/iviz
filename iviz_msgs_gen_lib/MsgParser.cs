@@ -108,8 +108,12 @@ namespace Iviz.MsgsGen
                 if (terms.Count >= 3 && terms[0] == "string" && terms[1] != "=" && terms[2][0] == '=')
                 {
                     int eqPosition = line.IndexOf("=", StringComparison.InvariantCulture);
-                    string constStr = line[(eqPosition + 1)..].Trim().Replace("\"", "\\\"");
-                    elements.Add(new ConstantElement("", "string", terms[1], constStr));
+                    string value = line[(eqPosition + 1)..].Trim();
+                    string valueTrimmed = value.Length >= 2 && value[0] == '\"' && value[^1] == '\"'
+                        ? value[1..^1]
+                        : value;
+                    string valueCs = valueTrimmed.Replace("\"", "\\\"");
+                    elements.Add(new ConstantElement("", "string", terms[1], valueCs));
                     continue;
                 }
 
