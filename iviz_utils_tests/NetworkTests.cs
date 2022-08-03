@@ -8,6 +8,7 @@ using Iviz.Msgs.Tf2Msgs;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Roslib;
 using Iviz.Roslib.XmlRpc;
+using Iviz.Tools;
 using NUnit.Framework;
 using Iviz.XmlRpc;
 using String = Iviz.Msgs.StdMsgs.String;
@@ -277,7 +278,7 @@ namespace Iviz.UtilsTests
 
             const string inValueStr = "test";
             Assert.True(await client.Parameters.SetParameterAsync("/iviz_utils_tests/a", inValueStr));
-            (bool success, XmlRpcValue value) = await client.Parameters.GetParameterAsync("/iviz_utils_tests/a");
+            (bool success, RosParameterValue value) = await client.Parameters.GetParameterAsync("/iviz_utils_tests/a");
             Assert.True(success && value.TryGetString(out string valueStr) && valueStr == inValueStr);
             Assert.True(await client.Parameters.DeleteParameterAsync("/iviz_utils_tests/a"));
 
