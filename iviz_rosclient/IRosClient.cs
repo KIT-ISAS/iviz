@@ -23,8 +23,11 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// The shared publisher for this topic, used by all advertisers from this client.
     /// Use this structure to publish messages to your topic.
     /// </param>
+    /// <param name="latchingEnabled">
+    /// Whether latching is enabled. When active, new subscribers will automatically receive a copy of the last message sent.
+    /// </param>
     /// <returns>An identifier that can be used to unadvertise from this publisher.</returns>        
-    string Advertise<T>(string topic, out IRosPublisher<T> publisher) where T : IMessage, new();
+    string Advertise<T>(string topic, out IRosPublisher<T> publisher, bool latchingEnabled = false) where T : IMessage, new();
 
     /// <summary>
     /// Advertises the given topic.
@@ -32,8 +35,11 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// <typeparam name="T">Message type.</typeparam>
     /// <param name="topic">Name of the topic.</param>
     /// <param name="token">An optional cancellation token</param>
+    /// <param name="latchingEnabled">
+    /// Whether latching is enabled. When active, new subscribers will automatically receive a copy of the last message sent.
+    /// </param> 
     /// <returns>A pair containing an identifier that can be used to unadvertise from this publisher, and the publisher object.</returns>
-    ValueTask<(string id, IRosPublisher<T> publisher)> AdvertiseAsync<T>(string topic,
+    ValueTask<(string id, IRosPublisher<T> publisher)> AdvertiseAsync<T>(string topic, bool latchingEnabled = false,
         CancellationToken token = default)
         where T : IMessage, new();
 
@@ -168,6 +174,11 @@ public interface IRosClient : IDisposable, IAsyncDisposable
 
     ValueTask DisposeAsync(CancellationToken token = default);
 
+    SystemState GetSystemState();
+
+    ValueTask<SystemState> GetSystemStateAsync(CancellationToken token = default);
+
+    /*
     string[] GetParameterNames();
 
     ValueTask<string[]> GetParameterNamesAsync(CancellationToken token = default);
@@ -176,8 +187,5 @@ public interface IRosClient : IDisposable, IAsyncDisposable
 
     ValueTask<(bool success, RosParameterValue value)>
         GetParameterAsync(string key, CancellationToken token = default);
-
-    SystemState GetSystemState();
-
-    ValueTask<SystemState> GetSystemStateAsync(CancellationToken token = default);
+    */
 }

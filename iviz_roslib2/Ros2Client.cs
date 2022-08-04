@@ -167,9 +167,12 @@ public sealed class Ros2Client : IRosClient
     }
 
     public ValueTask<(string id, Ros2Publisher<T> publisher)> AdvertiseAsync<T>(string topic,
-        CancellationToken token = default) where T : IMessage, new()
+        bool latchingEnabled = false, CancellationToken token = default) where T : IMessage, new()
     {
-        return AdvertiseAsync<T>(topic, QosProfile.Default, token);
+        return AdvertiseAsync<T>(topic, latchingEnabled
+                ? QosProfile.PublisherLatchingProfile
+                : QosProfile.Default,
+            token);
     }
 
     public async ValueTask<(string id, Ros2Publisher<T> publisher)> AdvertiseAsync<T>(string topic,
@@ -201,7 +204,7 @@ public sealed class Ros2Client : IRosClient
         return (validatedPublisher.Advertise(), validatedPublisher);
     }
 
-    string IRosClient.Advertise<T>(string topic, out IRosPublisher<T> publisher)
+    string IRosClient.Advertise<T>(string topic, out IRosPublisher<T> publisher, bool latchingEnabled)
     {
         string id = Advertise<T>(topic, out var newPublisher);
         publisher = newPublisher;
@@ -209,9 +212,9 @@ public sealed class Ros2Client : IRosClient
     }
 
     async ValueTask<(string id, IRosPublisher<T> publisher)> IRosClient.AdvertiseAsync<T>(string topic,
-        CancellationToken token)
+        bool latchingEnabled, CancellationToken token)
     {
-        return await AdvertiseAsync<T>(topic, token);
+        return await AdvertiseAsync<T>(topic, latchingEnabled, token);
     }
 
     async ValueTask<(string id, IRosSubscriber<T> subscriber)> IRosClient.SubscribeAsync<T>(string topic,
@@ -244,8 +247,14 @@ public sealed class Ros2Client : IRosClient
         return TaskUtils.RunSync(() => CallServiceAsync(serviceName, service, persistent, token));
     }
 
-    public async ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
+    public ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
         CancellationToken token = default) where T : IService, new()
+    {
+        return CallServiceAsync(serviceName, service, persistent, null, token);
+    }
+
+    public async ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
+        QosProfile? profile = null, CancellationToken token = default) where T : IService, new()
     {
         if (serviceName is null) BuiltIns.ThrowArgumentNull(nameof(serviceName));
         if (service is null) BuiltIns.ThrowArgumentNull(nameof(service));
@@ -253,7 +262,7 @@ public sealed class Ros2Client : IRosClient
         if (service.Response is null) BuiltIns.ThrowArgumentNull(nameof(service.Response));
 
         service.Request.RosValidate();
-        
+
         string resolvedServiceName = ResolveResourceName(serviceName);
         string serviceType = service.RosServiceType;
 
@@ -270,7 +279,8 @@ public sealed class Ros2Client : IRosClient
             var generator = (IDeserializable<IResponse>)new T().Response;
             serviceCaller = new Ros2ServiceCaller(this, generator);
             var rclServiceClient =
-                await Rcl.CreateServiceClientAsync(resolvedServiceName, serviceType, serviceCaller, token);
+                await Rcl.CreateServiceClientAsync(resolvedServiceName, serviceType, serviceCaller,
+                    profile ?? QosProfile.ServicesDefault, token);
             serviceCaller.ServiceClient = rclServiceClient;
             serviceCaller.Start();
 
@@ -331,8 +341,14 @@ public sealed class Ros2Client : IRosClient
         return TaskUtils.RunSync(() => AdvertiseServiceAsync<T>(serviceName, Callback, token), token);
     }
 
-    public async ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, ValueTask> callback,
+    public ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, ValueTask> callback,
         CancellationToken token = default) where T : IService, new()
+    {
+        return AdvertiseServiceAsync(serviceName, callback, null, token);
+    }
+
+    public async ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, ValueTask> callback,
+        QosProfile? profile = null, CancellationToken token = default) where T : IService, new()
     {
         if (serviceName is null) BuiltIns.ThrowArgumentNull(nameof(serviceName));
         if (callback is null) BuiltIns.ThrowArgumentNull(nameof(callback));
@@ -353,7 +369,8 @@ public sealed class Ros2Client : IRosClient
 
             var serviceListener = new Ros2ServiceListener(this, () => new T(), Callback);
             var rclServiceClient =
-                await Rcl.AdvertiseServiceAsync(resolvedServiceName, serviceType, serviceListener, token);
+                await Rcl.AdvertiseServiceAsync(resolvedServiceName, serviceType, serviceListener,
+                    profile ?? QosProfile.ServicesDefault, token);
             serviceListener.ServiceServer = rclServiceClient;
             serviceListener.Start();
 
@@ -422,12 +439,15 @@ public sealed class Ros2Client : IRosClient
 
     public bool IsServiceAvailable(string service)
     {
-        return false;
+        return TaskUtils.RunSync(() => IsServiceAvailableAsync(service));
     }
 
-    public ValueTask<bool> IsServiceAvailableAsync(string service, CancellationToken token = default) =>
-        new(IsServiceAvailable(service));
-
+    public async ValueTask<bool> IsServiceAvailableAsync(string service, CancellationToken token = default)
+    {
+        var services = await Rcl.GetServiceNamesAndTypesAsync(token);
+        return services.Any(type => type.Topic == service);
+    }
+    
     public TopicNameType[] GetSystemPublishedTopics() => TaskUtils.RunSync(GetSystemPublishedTopicsAsync);
 
     public ValueTask<TopicNameType[]> GetSystemPublishedTopicsAsync(CancellationToken token = default) =>

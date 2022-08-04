@@ -69,12 +69,16 @@ public sealed class Ros2Subscriber<TMessage> : Ros2SubscriberHelper, IRos2Subscr
 
         void ProcessMessages()
         {
-            while (rclSubscriber.TryTakeMessage(out var span, out receiverInfo.guid))
+            while (rclSubscriber.TryTakeMessage(out var span, out receiverInfo.guid, out bool moreRemaining))
             {
                 UpdateReceiverInfo(receiverInfo.guid, span.Length);
-                if (IsPaused) continue;
-                var msg = ReadBuffer2.Deserialize(generator, span);
-                MessageCallback(msg, receiverInfo);
+                if (!IsPaused)
+                {
+                    var msg = ReadBuffer2.Deserialize(generator, span);
+                    MessageCallback(msg, receiverInfo);
+                }
+
+                if (!moreRemaining) break;
             }
         }
     }
@@ -299,7 +303,7 @@ public class Ros2SubscriberHelper : Signalizable
         public long bytesReceived;
         public int numReceived;
     }
-    
+
     protected static bool LinearSearch(PublisherStats[] arr, int length, in Guid key, out int index)
     {
         for (int i = 0; i < length; i++)
@@ -314,7 +318,7 @@ public class Ros2SubscriberHelper : Signalizable
         index = 0;
         return false;
     }
-    
+
     protected static bool BinarySearch(PublisherStats[] arr, int length, in Guid key, out int index)
     {
         int min = 0;
@@ -344,5 +348,4 @@ public class Ros2SubscriberHelper : Signalizable
         index = default;
         return false;
     }
-    
 }

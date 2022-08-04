@@ -25,27 +25,18 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
 
     IRosPublisher IRosChannelWriter.Publisher => Publisher;
 
-    public bool LatchingEnabled
-    {
-        get => latchingEnabled;
-        set
-        {
-            latchingEnabled = value;
-            if (publisher != null)
-            {
-                Publisher.LatchingEnabled = value;
-            }
-        }
-    }
+    public bool LatchingEnabled { get; }
 
     public string Topic => Publisher.Topic;
 
-    public RosChannelWriter()
+    public RosChannelWriter(bool latchingEnabled = false)
     {
+        LatchingEnabled = latchingEnabled;
     }
 
-    public RosChannelWriter(IRosClient client, string topic)
+    public RosChannelWriter(IRosClient client, string topic, bool latchingEnabled = false)
     {
+        LatchingEnabled = latchingEnabled;
         Start(client, topic);
     }
 
@@ -64,8 +55,7 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
         }
         */
 
-        publisherId = client.Advertise(topic, out publisher);
-        publisher.LatchingEnabled = LatchingEnabled;
+        publisherId = client.Advertise(topic, out publisher, LatchingEnabled);
     }
 
     /*
@@ -104,8 +94,7 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
             BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
-        (publisherId, publisher) = await client.AdvertiseAsync<TMessage>(topic, token);
-        publisher.LatchingEnabled = LatchingEnabled;
+        (publisherId, publisher) = await client.AdvertiseAsync<TMessage>(topic, LatchingEnabled, token);
     }
 
     /*
@@ -268,14 +257,14 @@ public static class RosChannelWriterUtils
         bool latchingEnabled = false)
         where T : IMessage, new()
     {
-        return new RosChannelWriter<T>(client, topic) { LatchingEnabled = latchingEnabled };
+        return new RosChannelWriter<T>(client, topic, latchingEnabled);
     }
 
     public static async ValueTask<RosChannelWriter<T>> CreateWriterAsync<T>(this IRosClient client, string topic,
         bool latchingEnabled = false, CancellationToken token = default)
         where T : IMessage, new()
     {
-        var writer = new RosChannelWriter<T> { LatchingEnabled = latchingEnabled };
+        var writer = new RosChannelWriter<T>(latchingEnabled);
         await writer.StartAsync(client, topic, token);
         return writer;
     }

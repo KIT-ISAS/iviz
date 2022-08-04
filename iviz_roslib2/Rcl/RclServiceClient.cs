@@ -18,7 +18,8 @@ internal sealed class RclServiceClient : IDisposable, IHasHandle
         ? throw new ObjectDisposedException(ToString())
         : clientHandle;
 
-    public RclServiceClient(IntPtr contextHandle, IntPtr nodeHandle, string service, string serviceType)
+    public RclServiceClient(IntPtr contextHandle, IntPtr nodeHandle, string service, string serviceType,
+        QosProfile profile)
     {
         if (contextHandle == IntPtr.Zero) BuiltIns.ThrowArgumentNull(nameof(nodeHandle));
         if (nodeHandle == IntPtr.Zero) BuiltIns.ThrowArgumentNull(nameof(nodeHandle));
@@ -30,7 +31,7 @@ internal sealed class RclServiceClient : IDisposable, IHasHandle
         Service = service;
         ServiceType = serviceType;
 
-        int ret = Rcl.CreateClientHandle(out clientHandle, nodeHandle, service, serviceType);
+        int ret = Rcl.CreateClientHandle(out clientHandle, nodeHandle, service, serviceType, in profile.Profile);
         switch (ret)
         {
             case -1:
@@ -97,6 +98,12 @@ internal sealed class RclServiceClient : IDisposable, IHasHandle
     }
 
     void Check(int result) => Rcl.Check(contextHandle, result);
+
+    public bool IsServiceServerAvailable()
+    {
+        Check(Rcl.IsServiceServerAvailable(clientHandle, nodeHandle, out byte isAvailable));
+        return isAvailable != 0;
+    }
 
     public void Dispose()
     {

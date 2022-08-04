@@ -1096,9 +1096,10 @@ public sealed class RosClient : IRosClient
         return publisher.Advertise();
     }
 
-    string IRosClient.Advertise<T>(string topic, out IRosPublisher<T> publisher)
+    string IRosClient.Advertise<T>(string topic, out IRosPublisher<T> publisher, bool latchingEnabled)
     {
         string id = AdvertiseCore<T>(topic, out var newPublisher);
+        newPublisher.LatchingEnabled = latchingEnabled;
         publisher = newPublisher;
         return id;
     }
@@ -1189,9 +1190,11 @@ public sealed class RosClient : IRosClient
     }
 
     async ValueTask<(string id, IRosPublisher<T> publisher)> IRosClient.AdvertiseAsync<T>(string topic,
-        CancellationToken token)
+        bool latchingEnabled, CancellationToken token)
     {
-        return await AdvertiseAsyncCore<T>(topic, token);
+        var (id, publisher) = await AdvertiseAsyncCore<T>(topic, token);
+        publisher.LatchingEnabled = latchingEnabled;
+        return (id, publisher);
     }
 
     /// <summary>

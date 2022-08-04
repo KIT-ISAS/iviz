@@ -18,7 +18,8 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
         ? throw new ObjectDisposedException(ToString())
         : serviceHandle;
 
-    public RclServiceServer(IntPtr contextHandle, IntPtr nodeHandle, string service, string serviceType)
+    public RclServiceServer(IntPtr contextHandle, IntPtr nodeHandle, string service, string serviceType,
+        QosProfile profile)
     {
         if (contextHandle == IntPtr.Zero) BuiltIns.ThrowArgumentNull(nameof(nodeHandle));
         if (nodeHandle == IntPtr.Zero) BuiltIns.ThrowArgumentNull(nameof(nodeHandle));
@@ -30,7 +31,7 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
         Service = service;
         ServiceType = serviceType;
 
-        int ret = Rcl.CreateServiceHandle(out serviceHandle, nodeHandle, service, serviceType);
+        int ret = Rcl.CreateServiceHandle(out serviceHandle, nodeHandle, service, serviceType, in profile.Profile);
         switch (ret)
         {
             case -1:
@@ -85,10 +86,10 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
         span[2] = serializationOptions0;
         span[3] = serializationOptions1;
         */
-        
+
         const int header = 0x00000100;
         Unsafe.WriteUnaligned(ref span[0], header);
-        
+
         WriteBuffer2.Serialize(response, span[headerSize..]);
 
         Check(Rcl.SendResponse(Handle, messageBuffer.Handle, in requestId));
@@ -105,7 +106,7 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
     }
 
     ~RclServiceServer() => Logger.LogErrorFormat("{0} has not been disposed!", this);
-    
+
     public override string ToString()
     {
         return $"[{nameof(RclServiceServer)} {Service} [{ServiceType}] ]";

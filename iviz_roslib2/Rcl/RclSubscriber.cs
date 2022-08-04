@@ -32,7 +32,8 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
         TopicType = topicType;
         Profile = profile;
 
-        int ret = Rcl.CreateSubscriptionHandle(out subscriptionHandle, nodeHandle, topic, topicType, profile.Profile);
+        int ret = Rcl.CreateSubscriptionHandle(out subscriptionHandle, nodeHandle, topic, topicType,
+            in profile.Profile);
         if (ret == -1)
         {
             throw new RosUnsupportedMessageException(topicType);
@@ -48,9 +49,12 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
 
     void Check(int result) => Rcl.Check(contextHandle, result);
 
-    public bool TryTakeMessage(out Span<byte> span, out Guid guid)
+    public bool TryTakeMessage(out Span<byte> span, out Guid guid, out bool moreRemaining)
     {
-        int ret = Rcl.TakeSerializedMessage(Handle, messageBuffer.Handle, out IntPtr ptr, out int length, out guid);
+        int ret = Rcl.TakeSerializedMessage(Handle, messageBuffer.Handle, out IntPtr ptr, out int length, out guid,
+            out byte moreRemainingByte);
+
+        moreRemaining = moreRemainingByte != 0;
 
         switch ((RclRet)ret)
         {
@@ -67,7 +71,7 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
                 return false;
         }
     }
-    
+
     public int GetNumPublishers()
     {
         if (Rcl.GetPublisherCount(Handle, out int count) == Rcl.Ok)
@@ -78,7 +82,7 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
         Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.GetPublisherCount));
         return 0;
     }
-    
+
     public void Dispose()
     {
         if (disposed) return;

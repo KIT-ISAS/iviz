@@ -101,8 +101,9 @@ internal sealed class RclInternalWrapper : IRclWrapper
         Rcl.GetPublisherCount(subscriptionHandle, out count);
 
     public int TakeSerializedMessage(IntPtr subscriptionHandle, IntPtr serializedMessage, out IntPtr ptr,
-        out int length, out Guid gid) =>
-        Rcl.TakeSerializedMessage(subscriptionHandle, serializedMessage, out ptr, out length, out gid);
+        out int length, out Guid gid, out byte moreRemaining) =>
+        Rcl.TakeSerializedMessage(subscriptionHandle, serializedMessage, out ptr, out length, out gid,
+            out moreRemaining);
 
     public int DestroySerializedMessage(IntPtr messageHandle) =>
         Rcl.DestroySerializedMessage(messageHandle);
@@ -113,8 +114,9 @@ internal sealed class RclInternalWrapper : IRclWrapper
     public int EnsureSerializedMessageSize(IntPtr messageHandle, int size, out IntPtr ptr) =>
         Rcl.EnsureSerializedMessageSize(messageHandle, size, out ptr);
 
-    public int CreatePublisherHandle(out IntPtr publisherHandle, IntPtr nodeHandle, string topic, string type) =>
-        Rcl.CreatePublisherHandle(out publisherHandle, nodeHandle, topic, type);
+    public int CreatePublisherHandle(out IntPtr publisherHandle, IntPtr nodeHandle, string topic, string type,
+        in RmwQosProfile profile) =>
+        Rcl.CreatePublisherHandle(out publisherHandle, nodeHandle, topic, type, in profile);
 
     public int DestroyPublisherHandle(IntPtr publisherHandle, IntPtr nodeHandle) =>
         Rcl.DestroyPublisherHandle(publisherHandle, nodeHandle);
@@ -135,6 +137,11 @@ internal sealed class RclInternalWrapper : IRclWrapper
     public int GetTopicNamesAndTypes(IntPtr contextHandle, IntPtr nodeHandle,
         out IntPtr topicNamesHandle, out IntPtr topicTypesHandle, out int numTopicTypes) =>
         Rcl.GetTopicNamesAndTypes(contextHandle, nodeHandle,
+            out topicNamesHandle, out topicTypesHandle, out numTopicTypes);
+
+    public int GetServiceNamesAndTypes(IntPtr contextHandle, IntPtr nodeHandle,
+        out IntPtr topicNamesHandle, out IntPtr topicTypesHandle, out int numTopicTypes) =>
+        Rcl.GetServiceNamesAndTypes(contextHandle, nodeHandle,
             out topicNamesHandle, out topicTypesHandle, out numTopicTypes);
 
     public int GetServiceNamesAndTypesByNode(IntPtr contextHandle, IntPtr nodeHandle, string nodeName,
@@ -167,11 +174,15 @@ internal sealed class RclInternalWrapper : IRclWrapper
     public IntPtr GetGraphGuardCondition(IntPtr nodeHandle) =>
         Rcl.GetGraphGuardCondition(nodeHandle);
 
-    public int CreateClientHandle(out IntPtr serviceClientHandle, IntPtr nodeHandle, string service, string type) =>
-        Rcl.CreateClientHandle(out serviceClientHandle, nodeHandle, service, type);
+    public int CreateClientHandle(out IntPtr serviceClientHandle, IntPtr nodeHandle, string service, string type,
+        in RmwQosProfile profile) =>
+        Rcl.CreateClientHandle(out serviceClientHandle, nodeHandle, service, type, in profile);
 
     public int DestroyClientHandle(IntPtr clientHandle, IntPtr nodeHandle) =>
         Rcl.DestroyClientHandle(clientHandle, nodeHandle);
+
+    public int IsServiceServerAvailable(IntPtr clientHandle, IntPtr nodeHandle, out byte isAvailable) =>
+        Rcl.IsServiceServerAvailable(clientHandle, nodeHandle, out isAvailable);
 
     public int SendRequest(IntPtr clientHandle, IntPtr serializedMessageHandle, out long sequenceId) =>
         Rcl.SendRequest(clientHandle, serializedMessageHandle, out sequenceId);
@@ -180,8 +191,9 @@ internal sealed class RclInternalWrapper : IRclWrapper
         out IntPtr ptr, out int length) =>
         Rcl.TakeResponse(clientHandle, serializedMessageHandle, out requestHeader, out ptr, out length);
 
-    public int CreateServiceHandle(out IntPtr serviceHandle, IntPtr nodeHandle, string service, string type) =>
-        Rcl.CreateServiceHandle(out serviceHandle, nodeHandle, service, type);
+    public int CreateServiceHandle(out IntPtr serviceHandle, IntPtr nodeHandle, string service, string type,
+        in RmwQosProfile profile) =>
+        Rcl.CreateServiceHandle(out serviceHandle, nodeHandle, service, type, in profile);
 
     public int DestroyServiceHandle(IntPtr serviceHandle, IntPtr nodeHandle) =>
         Rcl.DestroyServiceHandle(serviceHandle, nodeHandle);
@@ -293,8 +305,7 @@ internal sealed class RclInternalWrapper : IRclWrapper
 
         [DllImport(Library, EntryPoint = "native_rcl_take_serialized_message")]
         public static extern int TakeSerializedMessage(IntPtr subscriptionHandle, IntPtr serializedMessage,
-            out IntPtr ptr,
-            out int length, out Guid gid);
+            out IntPtr ptr, out int length, out Guid gid, out byte moreRemaining);
 
         [DllImport(Library, EntryPoint = "native_rcl_destroy_serialized_message")]
         public static extern int DestroySerializedMessage(IntPtr messageHandle);
@@ -308,7 +319,8 @@ internal sealed class RclInternalWrapper : IRclWrapper
         [DllImport(Library, EntryPoint = "native_rcl_create_publisher_handle")]
         public static extern int CreatePublisherHandle(out IntPtr publisherHandle, IntPtr nodeHandle,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string topic,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string type);
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string type,
+            in RmwQosProfile profile);
 
         [DllImport(Library, EntryPoint = "native_rcl_destroy_publisher_handle")]
         public static extern int DestroyPublisherHandle(IntPtr publisherHandle, IntPtr nodeHandle);
@@ -329,6 +341,11 @@ internal sealed class RclInternalWrapper : IRclWrapper
         public static extern int GetTopicNamesAndTypes(IntPtr contextHandle, IntPtr nodeHandle,
             out IntPtr topicNamesHandle, out IntPtr topicTypesHandle, out int numTopicTypes);
 
+        [DllImport(Library, EntryPoint = "native_rcl_get_service_names_and_types")]
+        public static extern int GetServiceNamesAndTypes(IntPtr contextHandle, IntPtr nodeHandle,
+            out IntPtr topicNamesHandle, out IntPtr topicTypesHandle, out int numTopicTypes);
+
+        
         [DllImport(Library, EntryPoint = "native_rcl_get_service_names_and_types_by_node")]
         public static extern int GetServiceNamesAndTypesByNode(IntPtr contextHandle, IntPtr nodeHandle,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string nodeName,
@@ -362,10 +379,14 @@ internal sealed class RclInternalWrapper : IRclWrapper
         [DllImport(Library, EntryPoint = "native_rcl_create_client_handle")]
         public static extern int CreateClientHandle(out IntPtr serviceClientHandle, IntPtr nodeHandle,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string service,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string type);
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string type,
+            in RmwQosProfile profile);
 
         [DllImport(Library, EntryPoint = "native_rcl_destroy_client_handle")]
         public static extern int DestroyClientHandle(IntPtr clientHandle, IntPtr nodeHandle);
+
+        [DllImport(Library, EntryPoint = "native_rcl_is_service_server_available")]
+        public static extern int IsServiceServerAvailable(IntPtr clientHandle, IntPtr nodeHandle, out byte isAvailable);
 
         [DllImport(Library, EntryPoint = "native_rcl_send_request")]
         public static extern int SendRequest(IntPtr clientHandle, IntPtr serializedMessageHandle, out long sequenceId);
@@ -377,7 +398,8 @@ internal sealed class RclInternalWrapper : IRclWrapper
         [DllImport(Library, EntryPoint = "native_rcl_create_service_handle")]
         public static extern int CreateServiceHandle(out IntPtr serviceHandle, IntPtr nodeHandle,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string service,
-            [MarshalAs(UnmanagedType.LPUTF8Str)] string type);
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string type,
+            in RmwQosProfile profile);
 
         [DllImport(Library, EntryPoint = "native_rcl_destroy_service_handle")]
         public static extern int DestroyServiceHandle(IntPtr serviceHandle, IntPtr nodeHandle);

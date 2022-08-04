@@ -114,12 +114,7 @@ public interface IRosPublisher : IDisposable
     public PublisherState GetState();
 
     public ValueTask<PublisherState> GetStateAsync(CancellationToken token = default);
-
-    /// <summary>
-    /// Whether latching is enabled. When active, new subscribers will automatically receive a copy of the last message sent.
-    /// </summary>
-    public bool LatchingEnabled { get; set; }
-
+    
     public ValueTask DisposeAsync(CancellationToken token);
 }
 

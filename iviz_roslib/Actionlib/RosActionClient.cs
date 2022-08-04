@@ -134,8 +134,8 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable,
     public void Start(RosClient client, string newActionName)
     {
         ValidateStart(client, newActionName);
-        goalPublisher = new RosChannelWriter<TAGoal>(client, $"/{actionName}/goal") { LatchingEnabled = true };
-        cancelPublisher = new RosChannelWriter<GoalID>(client, $"/{actionName}/cancel") { LatchingEnabled = true };
+        goalPublisher = new RosChannelWriter<TAGoal>(client, $"/{actionName}/goal", true);
+        cancelPublisher = new RosChannelWriter<GoalID>(client, $"/{actionName}/cancel", true);
         feedbackSubscriber = new RosChannelReader<TAFeedback>(client, $"/{actionName}/feedback");
         resultSubscriber = new RosChannelReader<TAResult>(client, $"/{actionName}/result");
         mergedReader = new MergedChannelReader(feedbackSubscriber, resultSubscriber);

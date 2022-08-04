@@ -67,7 +67,7 @@ internal abstract class TaskExecutor
         {
             if (token.IsCancellationRequested)
             {
-                tcs.TrySetCanceled();
+                tcs.TrySetCanceled(token);
                 return;
             }
 
@@ -103,7 +103,7 @@ internal abstract class TaskExecutor
         {
             if (token.IsCancellationRequested)
             {
-                tcs.TrySetCanceled();
+                tcs.TrySetCanceled(token);
                 return;
             }
 

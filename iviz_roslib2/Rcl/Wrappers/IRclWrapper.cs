@@ -49,12 +49,15 @@ internal interface IRclWrapper
     public int GetPublisherCount(IntPtr subscriptionHandle, out int count);
 
     public int TakeSerializedMessage(IntPtr subscriptionHandle, IntPtr serializedMessage, out IntPtr ptr,
-        out int length, out Guid gid);
+        out int length, out Guid gid, out byte moreRemaining);
 
     public int DestroySerializedMessage(IntPtr messageHandle);
     public int CreateSerializedMessage(out IntPtr messageHandle);
     public int EnsureSerializedMessageSize(IntPtr messageHandle, int size, out IntPtr ptr);
-    public int CreatePublisherHandle(out IntPtr publisherHandle, IntPtr nodeHandle, string topic, string type);
+
+    public int CreatePublisherHandle(out IntPtr publisherHandle, IntPtr nodeHandle, string topic, string type,
+        in RmwQosProfile profile);
+
     public int DestroyPublisherHandle(IntPtr publisherHandle, IntPtr nodeHandle);
     public int GetSubscriptionCount(IntPtr publisherHandle, out int count);
     public int PublishSerializedMessage(IntPtr publisherHandle, IntPtr serializedMessageHandle);
@@ -64,6 +67,9 @@ internal interface IRclWrapper
         out IntPtr nodeNamespacesHandle, out int numNodeNamespaces);
 
     public int GetTopicNamesAndTypes(IntPtr contextHandle, IntPtr nodeHandle,
+        out IntPtr topicNamesHandle, out IntPtr topicTypesHandle, out int numTopicTypes);
+
+    public int GetServiceNamesAndTypes(IntPtr contextHandle, IntPtr nodeHandle,
         out IntPtr topicNamesHandle, out IntPtr topicTypesHandle, out int numTopicTypes);
 
     public int GetServiceNamesAndTypesByNode(IntPtr contextHandle, IntPtr nodeHandle, string nodeName,
@@ -80,14 +86,22 @@ internal interface IRclWrapper
     public int CountPublishers(IntPtr nodeHandle, string topic, out int count);
     public int CountSubscribers(IntPtr nodeHandle, string topic, out int count);
     public IntPtr GetGraphGuardCondition(IntPtr nodeHandle);
-    public int CreateClientHandle(out IntPtr serviceClientHandle, IntPtr nodeHandle, string service, string type);
+
+    public int CreateClientHandle(out IntPtr serviceClientHandle, IntPtr nodeHandle, string service, string type,
+        in RmwQosProfile profile);
+
     public int DestroyClientHandle(IntPtr clientHandle, IntPtr nodeHandle);
+    
+    public int IsServiceServerAvailable(IntPtr clientHandle, IntPtr nodeHandle, out byte isAvailable);
+    
     public int SendRequest(IntPtr clientHandle, IntPtr serializedMessageHandle, out long sequenceId);
 
     public int TakeResponse(IntPtr clientHandle, IntPtr serializedMessageHandle, out RmwServiceInfo requestHeader,
         out IntPtr ptr, out int length);
 
-    public int CreateServiceHandle(out IntPtr serviceHandle, IntPtr nodeHandle, string service, string type);
+    public int CreateServiceHandle(out IntPtr serviceHandle, IntPtr nodeHandle, string service, string type,
+        in RmwQosProfile profile);
+
     public int DestroyServiceHandle(IntPtr serviceHandle, IntPtr nodeHandle);
     public int SendResponse(IntPtr serviceHandle, IntPtr serializedMessageHandle, in RmwRequestId requestHeaderHandle);
 

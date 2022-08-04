@@ -81,14 +81,14 @@ internal sealed class RclClient : IDisposable
         return new RclPublisher(contextHandle, nodeHandle, topic, type, profile);
     }
 
-    public RclServiceClient CreateServerClient(string topic, string type)
+    public RclServiceClient CreateServerClient(string topic, string type, QosProfile profile)
     {
-        return new RclServiceClient(contextHandle, nodeHandle, topic, type);
+        return new RclServiceClient(contextHandle, nodeHandle, topic, type, profile);
     }
     
-    public RclServiceServer CreateServiceServer(string topic, string type)
+    public RclServiceServer CreateServiceServer(string topic, string type, QosProfile profile)
     {
-        return new RclServiceServer(contextHandle, nodeHandle, topic, type);
+        return new RclServiceServer(contextHandle, nodeHandle, topic, type, profile);
     }
     
     public NodeName[] GetNodeNames()
@@ -145,6 +145,30 @@ internal sealed class RclClient : IDisposable
 
         return topics;
     }
+    
+    public TopicNameType[] GetServiceNamesAndTypes()
+    {
+        Check(Rcl.GetServiceNamesAndTypes(contextHandle, nodeHandle,
+            out var topicNamesHandle, out var topicTypesHandle, out int numTopics));
+
+        if (numTopics == 0)
+        {
+            return Array.Empty<TopicNameType>();
+        }
+
+        var topics = new TopicNameType[numTopics];
+        var topicNamesSpan = Rcl.CreateIntPtrSpan(topicNamesHandle, numTopics);
+        var topicTypesSpan = Rcl.CreateIntPtrSpan(topicTypesHandle, numTopics);
+
+        for (int i = 0; i < numTopics; i++)
+        {
+            string topic = Rcl.ToString(topicNamesSpan[i]);
+            string type = Rcl.ToString(topicTypesSpan[i]).Replace("/srv", "");
+            topics[i] = new TopicNameType(topic, type);
+        }
+
+        return topics;
+    }
 
     public TopicNameType[] GetServiceNamesAndTypesByNode(string nodeName, string nodeNamespace)
     {
@@ -163,7 +187,7 @@ internal sealed class RclClient : IDisposable
         for (int i = 0; i < numServices; i++)
         {
             string topic = Rcl.ToString(serviceNamesSpan[i]);
-            string type = Rcl.ToString(serviceTypesSpan[i]).Replace("/msg", "");
+            string type = Rcl.ToString(serviceTypesSpan[i]).Replace("/srv", "");
             services[i] = new TopicNameType(topic, type);
         }
 

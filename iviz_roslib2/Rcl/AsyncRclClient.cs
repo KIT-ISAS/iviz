@@ -144,11 +144,11 @@ internal sealed class AsyncRclClient : TaskExecutor
     }
 
     public Task<RclServiceClient> CreateServiceClientAsync(string topic, string type, Signalizable signalizable,
-        CancellationToken token)
+        QosProfile profile, CancellationToken token)
     {
         return Post(() =>
         {
-            var serverClient = client.CreateServerClient(topic, type);
+            var serverClient = client.CreateServerClient(topic, type, profile);
             serviceClients.Add((serverClient, signalizable));
             RebuildServiceClients();
             return serverClient;
@@ -177,11 +177,11 @@ internal sealed class AsyncRclClient : TaskExecutor
     }
 
     public Task<RclServiceServer> AdvertiseServiceAsync(string topic, string type, Signalizable signalizable,
-        CancellationToken token)
+        QosProfile profile, CancellationToken token)
     {
         return Post(() =>
         {
-            var serviceServer = client.CreateServiceServer(topic, type);
+            var serviceServer = client.CreateServiceServer(topic, type, profile);
             serviceServers.Add((serviceServer, signalizable));
             RebuildServiceServers();
             return serviceServer;
@@ -204,7 +204,7 @@ internal sealed class AsyncRclClient : TaskExecutor
         }, token);
     }
 
-    public Task<NodeName[]> GetNodeNamesAsync(CancellationToken token = default)
+    public Task<NodeName[]> GetNodeNamesAsync(CancellationToken token)
     {
         return Post(client.GetNodeNames, token);
     }
@@ -212,6 +212,11 @@ internal sealed class AsyncRclClient : TaskExecutor
     public Task<TopicNameType[]> GetTopicNamesAndTypesAsync(CancellationToken token)
     {
         return Post(client.GetTopicNamesAndTypes, token);
+    }
+    
+    public Task<TopicNameType[]> GetServiceNamesAndTypesAsync(CancellationToken token)
+    {
+        return Post(client.GetServiceNamesAndTypes, token);
     }
 
     public Task<TopicNameType[]> GetPublishedTopicNamesAndTypesAsync(CancellationToken token)

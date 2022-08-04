@@ -29,7 +29,7 @@ internal sealed class RclPublisher : IDisposable
         TopicType = topicType;
         Profile = profile;
 
-        int ret = Rcl.CreatePublisherHandle(out publisherHandle, nodeHandle, topic, topicType);
+        int ret = Rcl.CreatePublisherHandle(out publisherHandle, nodeHandle, topic, topicType, in profile.Profile);
         switch (ret)
         {
             case -1:

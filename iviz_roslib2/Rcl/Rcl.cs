@@ -8,7 +8,6 @@ public enum RclWrapperType
 {
     Internal,
     Macos,
-    MacosFramework,
 }
 
 internal delegate void LoggingHandler(int severity, IntPtr name, long timestamp, IntPtr message);
@@ -24,7 +23,6 @@ internal static class Rcl
         wrapper = wrapperType switch
         {
             RclWrapperType.Macos => new RclMacosWrapper(),
-            RclWrapperType.MacosFramework => new RclMacosFrameworkWrapper(),
             RclWrapperType.Internal => new RclInternalWrapper(),
             _ => throw new IndexOutOfRangeException()
         };
@@ -157,8 +155,7 @@ internal static class Rcl
         Wrapper.GetErrorString(contextHandle);
 
     public static int CreateSubscriptionHandle(out IntPtr subscriptionHandle, IntPtr nodeHandle, string topic,
-        string type,
-        in RmwQosProfile profile) =>
+        string type, in RmwQosProfile profile) =>
         Wrapper.CreateSubscriptionHandle(out subscriptionHandle, nodeHandle, topic, type, in profile);
 
     public static bool IsMessageTypeSupported(string type) =>
@@ -174,8 +171,9 @@ internal static class Rcl
         Wrapper.GetPublisherCount(subscriptionHandle, out count);
 
     public static int TakeSerializedMessage(IntPtr subscriptionHandle, IntPtr serializedMessage, out IntPtr ptr,
-        out int length, out Guid gid) =>
-        Wrapper.TakeSerializedMessage(subscriptionHandle, serializedMessage, out ptr, out length, out gid);
+        out int length, out Guid gid, out byte moreRemaining) =>
+        Wrapper.TakeSerializedMessage(subscriptionHandle, serializedMessage, out ptr, out length, out gid,
+            out moreRemaining);
 
     public static int DestroySerializedMessage(IntPtr messageHandle) =>
         Wrapper.DestroySerializedMessage(messageHandle);
@@ -186,8 +184,9 @@ internal static class Rcl
     public static int EnsureSerializedMessageSize(IntPtr messageHandle, int size, out IntPtr ptr) =>
         Wrapper.EnsureSerializedMessageSize(messageHandle, size, out ptr);
 
-    public static int CreatePublisherHandle(out IntPtr publisherHandle, IntPtr nodeHandle, string topic, string type) =>
-        Wrapper.CreatePublisherHandle(out publisherHandle, nodeHandle, topic, type);
+    public static int CreatePublisherHandle(out IntPtr publisherHandle, IntPtr nodeHandle, string topic, string type,
+        in RmwQosProfile profile) =>
+        Wrapper.CreatePublisherHandle(out publisherHandle, nodeHandle, topic, type, in profile);
 
     public static int DestroyPublisherHandle(IntPtr publisherHandle, IntPtr nodeHandle) =>
         Wrapper.DestroyPublisherHandle(publisherHandle, nodeHandle);
@@ -208,6 +207,11 @@ internal static class Rcl
     public static int GetTopicNamesAndTypes(IntPtr contextHandle, IntPtr nodeHandle,
         out IntPtr topicNamesHandle, out IntPtr topicTypesHandle, out int numTopicTypes) =>
         Wrapper.GetTopicNamesAndTypes(contextHandle, nodeHandle,
+            out topicNamesHandle, out topicTypesHandle, out numTopicTypes);
+
+    public static int GetServiceNamesAndTypes(IntPtr contextHandle, IntPtr nodeHandle,
+        out IntPtr topicNamesHandle, out IntPtr topicTypesHandle, out int numTopicTypes) =>
+        Wrapper.GetServiceNamesAndTypes(contextHandle, nodeHandle,
             out topicNamesHandle, out topicTypesHandle, out numTopicTypes);
 
     public static int GetServiceNamesAndTypesByNode(IntPtr contextHandle, IntPtr nodeHandle, string nodeName,
@@ -240,11 +244,14 @@ internal static class Rcl
         Wrapper.GetGraphGuardCondition(nodeHandle);
 
     public static int CreateClientHandle(out IntPtr serviceClientHandle, IntPtr nodeHandle, string service,
-        string type) =>
-        Wrapper.CreateClientHandle(out serviceClientHandle, nodeHandle, service, type);
+        string type, in RmwQosProfile profile) =>
+        Wrapper.CreateClientHandle(out serviceClientHandle, nodeHandle, service, type, in profile);
 
     public static int DestroyClientHandle(IntPtr clientHandle, IntPtr nodeHandle) =>
         Wrapper.DestroyClientHandle(clientHandle, nodeHandle);
+
+    public static int IsServiceServerAvailable(IntPtr clientHandle, IntPtr nodeHandle, out byte isAvailable) =>
+        Wrapper.IsServiceServerAvailable(clientHandle, nodeHandle, out isAvailable);
 
     public static int SendRequest(IntPtr clientHandle, IntPtr serializedMessageHandle, out long sequenceId) =>
         Wrapper.SendRequest(clientHandle, serializedMessageHandle, out sequenceId);
@@ -254,8 +261,9 @@ internal static class Rcl
         out IntPtr ptr, out int length) =>
         Wrapper.TakeResponse(clientHandle, serializedMessageHandle, out requestHeader, out ptr, out length);
 
-    public static int CreateServiceHandle(out IntPtr serviceHandle, IntPtr nodeHandle, string service, string type) =>
-        Wrapper.CreateServiceHandle(out serviceHandle, nodeHandle, service, type);
+    public static int CreateServiceHandle(out IntPtr serviceHandle, IntPtr nodeHandle, string service, string type,
+        in RmwQosProfile profile) =>
+        Wrapper.CreateServiceHandle(out serviceHandle, nodeHandle, service, type, in profile);
 
     public static int DestroyServiceHandle(IntPtr serviceHandle, IntPtr nodeHandle) =>
         Wrapper.DestroyServiceHandle(serviceHandle, nodeHandle);

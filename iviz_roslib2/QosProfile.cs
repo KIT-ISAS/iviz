@@ -41,6 +41,7 @@ public sealed class QosProfile : JsonToString, IEquatable<QosProfile>
 
     static QosProfile? sensorProfile;
     static QosProfile? parametersProfile;
+    static QosProfile? publisherLatchingProfile;
     static QosProfile? defaultProfile;
     static QosProfile? servicesProfile;
     static QosProfile? systemProfile;
@@ -64,6 +65,13 @@ public sealed class QosProfile : JsonToString, IEquatable<QosProfile>
         10,
         ReliabilityPolicy.Reliable,
         DurabilityPolicy.Volatile
+    );
+
+    public static QosProfile PublisherLatchingProfile => publisherLatchingProfile ??= new QosProfile(
+        HistoryPolicy.KeepLast,
+        1,
+        ReliabilityPolicy.Reliable,
+        DurabilityPolicy.TransientLocal
     );
 
     public static QosProfile ServicesDefault => servicesProfile ??= new QosProfile(
