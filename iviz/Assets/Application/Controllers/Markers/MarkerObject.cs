@@ -1129,7 +1129,7 @@ namespace Iviz.Controllers
 
                 if (triangleMeshFailedIndex is { } failedIndex)
                 {
-                    description.Append(ErrorStr).Append("Index ").Append(failedIndex).Append(" has invalid values")
+                    description.Append(ErrorStr).Append("Index ").Append(failedIndex).Append(" has invalid values!")
                         .AppendLine();
                 }
             }

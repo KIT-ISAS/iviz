@@ -93,7 +93,7 @@ namespace Iviz.App
 
         static string ValidateFrameName(string frameName)
         {
-            if (frameName == "" || frameName[0] != '/')
+            if (frameName.Length == 0 || frameName[0] != '/')
             {
                 return frameName;
             }

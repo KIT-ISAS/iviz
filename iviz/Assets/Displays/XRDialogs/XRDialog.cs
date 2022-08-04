@@ -22,6 +22,7 @@ namespace Iviz.Displays.XR
         bool resetOrientation = true;
         Vector3? currentPosition;
         float scale = 1;
+        BindingType bindingType = BindingType.None;
 
         ISupportsColor? backgroundObject;
 
@@ -55,7 +56,16 @@ namespace Iviz.Displays.XR
 
         public event Action? Expired;
 
-        public BindingType BindingType { get; set; }
+        public BindingType BindingType
+        {
+            get => bindingType;
+            set
+            {
+                bindingType = value;
+                Connector.Visible = bindingType == BindingType.Tf;
+            }
+        }
+
         public Vector3 DialogDisplacement { get; set; }
         public Vector3 TfFrameOffset { get; set; }
         public Vector3 TfDisplacement { get; set; }
@@ -73,7 +83,6 @@ namespace Iviz.Displays.XR
 
         public bool Visible
         {
-            get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
 
@@ -123,7 +132,7 @@ namespace Iviz.Displays.XR
 
         public void Initialize()
         {
-            if (BindingType == BindingType.Tf)
+            if (BindingType is BindingType.Tf or BindingType.None)
             {
                 Transform.SetParentLocal(TfModule.OriginTransform);
                 Connector.Visible = true;
@@ -180,8 +189,7 @@ namespace Iviz.Displays.XR
 
             switch (BindingType)
             {
-                case BindingType.None:
-                case BindingType.Tf:
+                case BindingType.Tf or BindingType.None:
                 {
                     var absolutePivotPosition = Node.Transform.TransformPoint(TfFrameOffset);
                     var localFramePosition = TfModule.RelativeToOrigin(absolutePivotPosition);
@@ -241,7 +249,7 @@ namespace Iviz.Displays.XR
             Connector.Visible = false;
             Expired?.Invoke();
             Expired = null;
-            
+
             GameThread.AfterFramesUpdatedLate -= UpdatePose;
         }
 

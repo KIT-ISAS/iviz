@@ -60,6 +60,7 @@ namespace Iviz.Controllers
             connection.AdvertiseService<ResetModule>("~reset_module", ResetModuleAsync);
             connection.AdvertiseService<GetModules>("~get_modules", GetModulesAsync);
             connection.AdvertiseService<SetFixedFrame>("~set_fixed_frame", SetFixedFrameAsync);
+            
             //connection.AdvertiseService<GetFramePose>("get_frame_poses", GetFramePoseAsync);
             //connection.AdvertiseService<GetCaptureResolutions>("get_capture_resolutions", GetCaptureResolutions);
             //connection.AdvertiseService<StartCapture>("start_capture", StartCaptureAsync);
@@ -70,6 +71,7 @@ namespace Iviz.Controllers
             connection.AdvertiseService<LaunchDialog>("~launch_dialog", LaunchDialogAsync);
         }
 
+        /*
         static void GetLoggers(GetLoggers srv)
         {
             srv.Response.Loggers = new[]
@@ -95,7 +97,20 @@ namespace Iviz.Controllers
                 }
             }
         }
+        */
 
+        static async ValueTask AwaitAndLog(this ValueTask task, string name)
+        {
+            try
+            {
+                await task;
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{nameof(ControllerService)}: Error in {name}!", e);
+            }
+        }
+        
         static async ValueTask<T?> AwaitAndLog<T>(this ValueTask<T> task, string name)
         {
             try
@@ -123,7 +138,7 @@ namespace Iviz.Controllers
         {
             (string id, bool success, string? message) result = default;
 
-            if (string.IsNullOrWhiteSpace(moduleTypeStr))
+            if (moduleTypeStr.Length == 0)
             {
                 result.message = "Invalid module type";
                 return result;
@@ -159,7 +174,7 @@ namespace Iviz.Controllers
                 {
                     result.success = true;
                     result.id = requestedId;
-                    result.message = "** Module already exists";
+                    result.message = "Module already exists";
                 }
 
                 return result;
@@ -222,7 +237,7 @@ namespace Iviz.Controllers
             TryAddModuleFromTopicAsync(string topic, string requestedId)
         {
             (string id, bool success, string? message) result = default;
-            if (string.IsNullOrWhiteSpace(topic))
+            if (topic.Length == 0)
             {
                 result.message = "Invalid topic name";
                 return result;
@@ -233,8 +248,8 @@ namespace Iviz.Controllers
                     out var data))
             {
                 result.message = requestedId == data.Configuration.Id
-                    ? "** Module already exists"
-                    : "WW A module with that topic but different id already exists";
+                    ? "Module already exists"
+                    : "A module with that topic but different id already exists";
                 result.id = data.Configuration.Id;
                 result.success = true;
                 return result;
@@ -324,13 +339,13 @@ namespace Iviz.Controllers
             TryUpdateModuleAsync(string id, string[] fields, string config)
         {
             (bool success, string? message) result = default;
-            if (string.IsNullOrWhiteSpace(id))
+            if (id.Length == 0)
             {
                 result.message = "Empty configuration id!";
                 return result;
             }
 
-            if (string.IsNullOrWhiteSpace(config))
+            if (config.Length == 0)
             {
                 result.message = "Empty configuration text!";
                 return result;
@@ -432,7 +447,7 @@ namespace Iviz.Controllers
         static async ValueTask<(bool success, string? message)> TryResetModuleAsync(string id)
         {
             (bool success, string? message) result = default;
-            if (string.IsNullOrWhiteSpace(id))
+            if (id.Length == 0)
             {
                 result.message = "Empty configuration id!";
                 return result;
@@ -777,9 +792,9 @@ namespace Iviz.Controllers
             switch (srv.Request.Operation)
             {
                 case 0:
-                    return AddRobotAsync(srv);
+                    return AddRobotAsync(srv).AwaitAndLog(nameof(UpdateRobotAsync));
                 case 1:
-                    return RemoveRobotAsync(srv);
+                    return RemoveRobotAsync(srv).AwaitAndLog(nameof(UpdateRobotAsync));
                 default:
                     srv.Response.Success = false;
                     srv.Response.Message = "Unknown operation";
@@ -801,7 +816,7 @@ namespace Iviz.Controllers
             if (!ModuleDatas.TryGetFirst(data => data.Configuration.Id == id, out var moduleData))
             {
                 srv.Response.Success = true;
-                srv.Response.Message = $"WW There is no node with name '{id}'";
+                srv.Response.Message = $"There is no node with name '{id}'";
                 return;
             }
 
@@ -827,7 +842,7 @@ namespace Iviz.Controllers
                 srv.Response.Message = $"An exception was raised: {e.Message}";
             }
 
-            if (string.IsNullOrEmpty(srv.Response.Message))
+            if (srv.Response.Message.Length == 0)
             {
                 srv.Response.Success = true;
             }
@@ -891,13 +906,18 @@ namespace Iviz.Controllers
                 RosLogger.Error($"{nameof(ControllerService)}: Failed to create robot", e);
             }
 
-            if (string.IsNullOrEmpty(srv.Response.Message))
+            if (srv.Response.Message.Length == 0)
             {
                 srv.Response.Success = true;
             }
         }
 
-        static async ValueTask LaunchDialogAsync(LaunchDialog srv)
+        static ValueTask LaunchDialogAsync(LaunchDialog srv)
+        {
+            return TrySetLaunchDialogAsync(srv).AwaitAndLog(nameof(LaunchDialogAsync));
+        }
+
+        static async ValueTask TrySetLaunchDialogAsync(LaunchDialog srv)
         {
             if (string.IsNullOrEmpty(srv.Request.Dialog.Id))
             {
@@ -983,7 +1003,7 @@ namespace Iviz.Controllers
                 srv.Response.Message = $"An exception was raised: {e.Message}";
             }
 
-            if (string.IsNullOrEmpty(srv.Response.Message))
+            if (srv.Response.Message.Length == 0)
             {
                 srv.Response.Success = true;
                 srv.Response.Feedback = feedback;

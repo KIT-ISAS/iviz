@@ -237,20 +237,20 @@ namespace Iviz.Controllers
                 if (data.Length != info.Width * info.Height)
                 {
                     RosLogger.Error($"{this}: Size {info.Width.ToString()}x{info.Height.ToString()} " +
-                                    $"does not match data length {data.Length.ToString()}");
+                                    $"does not match data length {data.Length.ToString()}!");
                     return;
                 }
             }
 
             if (info.Resolution.IsInvalid() || info.Resolution < 0)
             {
-                RosLogger.Error($"{this}: {nameof(MapMetaData)} has invalid values");
+                RosLogger.Error($"{this}: {nameof(MapMetaData)} has invalid values!");
                 return;
             }
 
             if (info.Origin.IsInvalid())
             {
-                RosLogger.Error($"{this}: Origin has invalid values");
+                RosLogger.Error($"{this}: Origin has invalid values!");
                 return;
             }
 
