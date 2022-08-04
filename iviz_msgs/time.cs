@@ -16,11 +16,11 @@ public readonly struct time : IEquatable<time>, IComparable<time>
     static DateTime? unixEpoch;
     static DateTime UnixEpoch => (unixEpoch ??= new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
-    [DataMember(Name = "secs")] public readonly uint Secs;
+    [DataMember(Name = "secs")] public readonly int Secs;
     
-    [DataMember(Name = "nsecs")] public readonly uint Nsecs;
+    [DataMember(Name = "nsecs")] public readonly int Nsecs;
 
-    public time(uint secs, uint nsecs)
+    public time(int secs, int nsecs)
     {
         Secs = secs;
         Nsecs = nsecs;
@@ -32,8 +32,8 @@ public readonly struct time : IEquatable<time>, IComparable<time>
     public time(in DateTime time)
     {
         TimeSpan diff = time.ToUniversalTime() - UnixEpoch;
-        Secs = (uint)diff.TotalSeconds;
-        Nsecs = (uint)(diff.Ticks % 10000000) * 100;
+        Secs = (int)diff.TotalSeconds;
+        Nsecs = (int)(diff.Ticks % 10000000) * 100;
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ public readonly struct time : IEquatable<time>, IComparable<time>
 
     public static bool operator <=(time left, time right) => !(left > right);
 
-    public time WithSecs(uint secs) => new(secs, Nsecs);
+    public time WithSecs(int secs) => new(secs, Nsecs);
 
     public override string ToString()
     {
