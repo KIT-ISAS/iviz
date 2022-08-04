@@ -37,6 +37,7 @@
 #include "rmw_fastrtps_cpp/identifier.hpp"
 #include "rmw_fastrtps_shared_cpp/custom_client_info.hpp"
 #include "rmw_fastrtps_shared_cpp/custom_service_info.hpp"
+#include "rmw_fastrtps_shared_cpp/custom_subscriber_info.hpp"
 #include "rmw_fastrtps_shared_cpp/guid_utils.hpp"
 #include "rmw_fastrtps_shared_cpp/rmw_common.hpp"
 #include "rmw_fastrtps_shared_cpp/TypeSupport.hpp"
@@ -517,7 +518,9 @@ int32_t native_rcl_subscription_get_publisher_count(void *subscription_handle, i
     return ret;
 }
 
-int32_t native_rcl_take_serialized_message(void *subscription_handle, void *serialized_message, void **ptr, int32_t *length, void *gid)
+int32_t native_rcl_take_serialized_message(void *subscription_handle, void *serialized_message,
+                                           void **ptr, int32_t *length, void *gid,
+                                           uint8_t *more_remaining)
 {
     rcl_subscription_t * subscription = (rcl_subscription_t *)subscription_handle;
     rcl_serialized_message_t *message = (rcl_serialized_message_t *) serialized_message;
@@ -529,11 +532,17 @@ int32_t native_rcl_take_serialized_message(void *subscription_handle, void *seri
         *ptr = message->buffer;
         *length = (int) message->buffer_length;
         memcpy(gid, info.publisher_gid.data, RMW_GID_STORAGE_SIZE);
+        
+        
+        rmw_subscription_t *rmw_subscription = rcl_subscription_get_rmw_handle(subscription);
+        auto info = static_cast<CustomSubscriberInfo *>(rmw_subscription->data);
+        *more_remaining = info->subscriber_->get_unread_count() != 0;
     }
     else
     {
         *ptr = nullptr;
         *length = 0;
+        *more_remaining = false;
     }
     
     return ret;
@@ -576,7 +585,8 @@ int32_t native_rcl_destroy_serialized_message(void *message_handle)
 int32_t native_rcl_create_publisher_handle(void **publisher_handle,
                                            void *node_handle,
                                            const char *topic,
-                                           const char *type)
+                                           const char *type,
+                                           void *profile_handle)
 {
     auto it{ default_types.find( type ) };
     
@@ -593,6 +603,8 @@ int32_t native_rcl_create_publisher_handle(void **publisher_handle,
     *publisher = rcl_get_zero_initialized_publisher();
     
     rcl_publisher_options_t publisher_ops = rcl_publisher_get_default_options();
+    rmw_qos_profile_t *profile = (rmw_qos_profile_t*) profile_handle;
+    publisher_ops.qos = *profile;
     
     rcl_ret_t ret = rcl_publisher_init(publisher, node, ts, topic, &publisher_ops);
     
@@ -1069,7 +1081,8 @@ const void *native_rcl_get_graph_guard_condition(void *node_handle)
 int32_t native_rcl_create_client_handle(void **client_handle,
                                         void *node_handle,
                                         const char *service,
-                                        const char *type)
+                                        const char *type,
+                                        void *profile_handle)
 {
     rcl_node_t *node = (rcl_node_t *)node_handle;
     
@@ -1086,6 +1099,9 @@ int32_t native_rcl_create_client_handle(void **client_handle,
     *client = rcl_get_zero_initialized_client();
     
     rcl_client_options_t options = rcl_client_get_default_options();
+    rmw_qos_profile_t *profile = (rmw_qos_profile_t*) profile_handle;
+    options.qos = *profile;
+
     rcl_ret_t ret = rcl_client_init(client, node, ts, service, &options);
     if (ret != RCL_RET_OK)
     {
@@ -1104,6 +1120,17 @@ int32_t native_rcl_destroy_client_handle(void *client_handle, void *node_handle)
     free(client_handle);
     return ret;
 }
+
+int32_t native_rcl_is_service_server_available(void *client_handle, void *node_handle, uint8_t *is_available)
+{
+    rcl_client_t *client = (rcl_client_t *)client_handle;
+    rcl_node_t *node = (rcl_node_t *)node_handle;
+    bool is_available_bool;
+    rcl_ret_t ret = rcl_service_server_is_available(node, client, &is_available_bool);
+    *is_available = is_available_bool;
+    return ret;
+}
+
 
 int32_t native_rcl_send_request(void *client_handle, void* serialized_message_handle, int64_t *sequence_id)
 {
@@ -1216,7 +1243,8 @@ int32_t native_rcl_take_response(void *client_handle, void* serialized_message_h
 int32_t native_rcl_create_service_handle(void **service_handle,
                                          void *node_handle,
                                          const char *service,
-                                         const char *type)
+                                         const char *type,
+                                         void *profile_handle)
 {
     rcl_node_t *node = (rcl_node_t *)node_handle;
     
@@ -1233,6 +1261,9 @@ int32_t native_rcl_create_service_handle(void **service_handle,
     *server = rcl_get_zero_initialized_service();
     
     rcl_service_options_t options = rcl_service_get_default_options();
+    rmw_qos_profile_t *profile = (rmw_qos_profile_t*) profile_handle;
+    options.qos = *profile;
+
     rcl_ret_t ret = rcl_service_init(server, node, ts, service, &options);
     if (ret != RCL_RET_OK)
     {
@@ -1420,7 +1451,9 @@ int main_publish()
     
     rcl_publisher_t* publisher_handle;
     
-    ret = native_rcl_create_publisher_handle((void**)&publisher_handle, node_handle, "my_chatter", "tf2_msgs/TFMessage");
+    ret = native_rcl_create_publisher_handle((void**)&publisher_handle, node_handle,
+                                             "my_chatter", "tf2_msgs/TFMessage",
+                                             (void*)&rmw_qos_profile_default);
     if (ret != RCL_RET_OK)
     {
         std::cout << "failed to initialize publisher" << std::endl;
@@ -1541,9 +1574,11 @@ int main_subscribe()
         {
             int dummy;
             void *ptr;
+            uint8_t remaining;
             char gid[RMW_GID_STORAGE_SIZE];
             
-            ret = native_rcl_take_serialized_message(subscription_handle, message, &ptr, &dummy, gid);
+            ret = native_rcl_take_serialized_message(subscription_handle, message,
+                                                     &ptr, &dummy, gid, &remaining);
             if (ret != RCL_RET_OK)
             {
                 std::cout << rcl_get_error_string().str << std::endl;

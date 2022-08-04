@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <unistd.h>
+#include <stdint.h>
 
 extern "C"
 {
@@ -92,7 +92,8 @@ bool native_rcl_is_service_type_supported(const char *type);
 
 
 
-int32_t native_rcl_take_serialized_message(void *subscription_handle, void *serialized_message, void **ptr, int32_t *length, void *gid);
+int32_t native_rcl_take_serialized_message(void *subscription_handle, void *serialized_message,
+                                           void **ptr, int32_t *length, void *gid, uint8_t *more_remaining);
 
 int32_t native_rcl_create_serialized_message(void **message_handle);
 
@@ -104,7 +105,8 @@ int32_t native_rcl_destroy_serialized_message(void *message_handle);
 int32_t native_rcl_create_publisher_handle(void **publisher_handle,
                                            void *node_handle,
                                            const char *topic,
-                                           const char *type);
+                                           const char *type,
+                                           void *profile_handle);
 
 int32_t native_rcl_destroy_publisher_handle(void *publisher_handle, void *node_handle);
 
@@ -157,9 +159,12 @@ const void *native_rcl_get_graph_guard_condition(void *node_handle);
 int32_t native_rcl_create_client_handle(void **client_handle,
                                         void *node_handle,
                                         const char *service,
-                                        const char *type);
+                                        const char *type,
+                                        void *profile_handle);
 
 int32_t native_rcl_destroy_client_handle(void *client_handle, void *node_handle);
+
+int32_t native_rcl_is_service_server_available(void *client_handle, void *node_handle, uint8_t *is_available);
 
 int32_t native_rcl_send_request(void *client_handle, void* serialized_message_handle, int64_t *sequence_id);
 
@@ -169,7 +174,8 @@ int32_t native_rcl_take_response(void *client_handle, void* serialized_message_h
 int32_t native_rcl_create_service_handle(void **service_handle,
                                          void *node_handle,
                                          const char *service,
-                                         const char *type);
+                                         const char *type,
+                                         void *profile_handle);
 
 int32_t native_rcl_destroy_service_handle(void *service_handle, void *node_handle);
 
