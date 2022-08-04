@@ -24,16 +24,16 @@ internal readonly struct RmwQosProfile
     [DataMember] public readonly DurabilityPolicy Durability;
 
     /// The period at which messages are expected to be sent/received.
-    [DataMember] public readonly RmwQosProfileTime Deadline;
+    [DataMember] public readonly RmwTime Deadline;
 
     /// The age at which messages are considered expired and no longer valid.
-    [DataMember] public readonly RmwQosProfileTime Lifespan;
+    [DataMember] public readonly RmwTime Lifespan;
 
     /// Liveliness QoS policy setting.
     [DataMember] public readonly LivelinessPolicy Liveliness;
 
     /// The time within which the RMW node or publisher must show that it is alive.
-    [DataMember] public readonly RmwQosProfileTime LivelinessLeaseDuration;
+    [DataMember] public readonly RmwTime LivelinessLeaseDuration;
 
     /// If true, any ROS specific namespacing conventions will be circumvented.
     [DataMember] public readonly bool AvoidRosNamespaceConventions;
@@ -72,15 +72,18 @@ internal readonly struct RmwQosProfile
 }
 
 [DataContract, StructLayout(LayoutKind.Sequential)]
-public readonly struct RmwQosProfileTime
+internal readonly struct RmwTime
 {
     [DataMember] public readonly ulong Sec;
-    [DataMember] public readonly ulong Nsecs;
+    [DataMember] public readonly ulong Nsec;
 
-    public time AsTime() => new((uint)Sec, (uint)Nsecs);
-
-    public override int GetHashCode() => HashCode.Combine(Sec, Nsecs);
-    public bool Equals(in RmwQosProfileTime other) => Sec == other.Sec && Nsecs == other.Nsecs;
+    public time AsTime() => new((int)Sec, (int)Nsec);
+    public override int GetHashCode() => HashCode.Combine(Sec, Nsec);
+    public bool Equals(in RmwTime other) => Sec == other.Sec && Nsec == other.Nsec;
+    public override string ToString()
+    {
+        return $"{{\"secs\":{Sec.ToString()},\"nsecs\":{Nsec.ToString()}}}";
+    }
 }
 
 /// QoS history enumerations describing how samples endure
