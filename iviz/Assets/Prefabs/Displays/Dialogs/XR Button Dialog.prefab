@@ -60,7 +60,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1792426186100859367
 Transform:
   m_ObjectHideFlags: 0
@@ -161,11 +161,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _transform: {fileID: 9024825353754890542}
-  backgroundSize: {x: 0.22, y: 0.22}
   socketPosition: {x: 0, y: -0.145, z: 0}
   backgroundColor: {r: 0, g: 0.2, b: 0.5, a: 1}
   connector: {fileID: 586438443107256636}
-  background: {fileID: 0}
+  background: {fileID: 4564037378393581946}
   button: {fileID: 1379410029039570407}
 --- !u!1001 &586438442386524082
 PrefabInstance:
@@ -359,11 +358,6 @@ PrefabInstance:
       propertyPath: backgroundVisible
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2300080500092085110, guid: b5e124c759cf142be9e8c5e0ded7bde2,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -0.025
-      objectReference: {fileID: 0}
     - target: {fileID: 3276050070307701014, guid: b5e124c759cf142be9e8c5e0ded7bde2,
         type: 3}
       propertyPath: m_IsActive
@@ -476,6 +470,12 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1792426186100859367}
     m_Modifications:
+    - target: {fileID: 791139870075898096, guid: c3b1afd1b19444c57b708ecc2b861ad8,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: -3033667219593020291, guid: 16486bb45915d4084b4a578531c792ad,
+        type: 3}
     - target: {fileID: 791139870075898099, guid: c3b1afd1b19444c57b708ecc2b861ad8,
         type: 3}
       propertyPath: m_Name

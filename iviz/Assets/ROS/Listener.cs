@@ -138,7 +138,14 @@ namespace Iviz.Ros
                 GameThread.ListenersEveryFrame -= CallHandlerOnGameThread;
             }
 
-            Unsubscribe();
+            try
+            {
+                Unsubscribe();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Exception while disposing", e);
+            }
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Text;
 using System.Threading;
 using Iviz.Core;
@@ -42,7 +43,15 @@ namespace Iviz.Ros
         public void Dispose()
         {
             GameThread.EverySecond -= UpdateStats;
-            Connection.Unadvertise(this);
+
+            try
+            {
+                Connection.Unadvertise(this);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Exception while disposing", e);
+            }
         }
 
         public void Publish(in T msg)
@@ -77,7 +86,7 @@ namespace Iviz.Ros
 
             NumSubscribers = Connection.GetNumSubscribers(this);
         }
-        
+
         public void WriteDescriptionTo(StringBuilder description)
         {
             int numSubscribers = NumSubscribers;
@@ -86,7 +95,7 @@ namespace Iviz.Ros
                 description.Append("Off");
                 return;
             }
-            
+
             description.Append(numSubscribers).Append(" sub");
         }
 

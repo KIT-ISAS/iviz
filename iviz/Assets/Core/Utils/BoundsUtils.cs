@@ -1,8 +1,10 @@
 #nullable enable
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Iviz.Displays;
+using Iviz.Msgs;
 using UnityEngine;
 
 namespace Iviz.Core
@@ -167,6 +169,30 @@ namespace Iviz.Core
             intersection = Vector3.zero;
             normal = Vector3.zero;
             return false;
+        }
+
+        public static Rect Combine(this Span<Rect> bounds, float padding = 0)
+        {
+            if (bounds.Length == 0) BuiltIns.ThrowArgumentOutOfRange();
+            
+            float minX = float.MaxValue, minY = float.MaxValue;
+            float maxX = float.MinValue, maxY = float.MinValue;
+
+            foreach (var bound in bounds)
+            {
+                minX = Mathf.Min(bound.xMin, minX);
+                minY = Mathf.Min(bound.yMin, minY);
+                maxX = Mathf.Max(bound.xMax, maxX);
+                maxY = Mathf.Max(bound.yMax, maxY);
+            }
+
+            return Rect.MinMaxRect(minX - padding, minY - padding, maxX + padding, maxY + padding);
+        }
+
+        public static void Deconstruct(this Rect rect, out Vector2 center, out Vector2 size)
+        {
+            center = rect.center;
+            size = rect.size;
         }
     }
 }

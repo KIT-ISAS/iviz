@@ -57,22 +57,26 @@ namespace Iviz.Ros
         public async ValueTask AdvertiseAsync(IRosClient? client, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            if (client != null)
+            if (client == null)
             {
-                foreach (int t in ..NumRetries)
+                publisherId = null;
+                Publisher = null;
+                return;
+            }
+
+            foreach (int t in ..NumRetries)
+            {
+                try
                 {
-                    try
-                    {
-                        IRosPublisher publisher;
-                        (publisherId, publisher) = await client.AdvertiseAsync<T>(topic, token);
-                        Publisher = publisher;
-                        return;
-                    }
-                    catch (RoslibException e)
-                    {
-                        RosLogger.Error($"{this}: Failed to advertise topic '{topic}' (try {t.ToString()}): ", e);
-                        await Task.Delay(WaitBetweenRetriesInMs, token);
-                    }
+                    IRosPublisher publisher;
+                    (publisherId, publisher) = await client.AdvertiseAsync<T>(topic, token: token);
+                    Publisher = publisher;
+                    return;
+                }
+                catch (RoslibException e)
+                {
+                    RosLogger.Error($"{this}: Failed to advertise topic '{topic}' (try {t.ToString()}): ", e);
+                    await Task.Delay(WaitBetweenRetriesInMs, token);
                 }
             }
 
@@ -98,7 +102,7 @@ namespace Iviz.Ros
 
         public override string ToString()
         {
-            return $"[AdvertisedTopic '{topic}']";
+            return $"[{nameof(AdvertisedTopic<T>)} '{topic}']";
         }
     }
 }

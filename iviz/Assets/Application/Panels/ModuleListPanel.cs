@@ -199,11 +199,12 @@ namespace Iviz.App
 
             tfPublisher.Dispose();
             cameraPanelData?.Dispose();
+
+            GuiWidgetListener.DisposeDefaultHandler();
             connectionManager?.Dispose();
 
             tfModule?.Dispose();
 
-            GuiWidgetListener.DisposeDefaultHandler();
             instance = null;
         }
 

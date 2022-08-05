@@ -914,10 +914,10 @@ namespace Iviz.Controllers
 
         static ValueTask LaunchDialogAsync(LaunchDialog srv)
         {
-            return TrySetLaunchDialogAsync(srv).AwaitAndLog(nameof(LaunchDialogAsync));
+            return TryLaunchDialogAsync(srv).AwaitAndLog(nameof(LaunchDialogAsync));
         }
 
-        static async ValueTask TrySetLaunchDialogAsync(LaunchDialog srv)
+        static async ValueTask TryLaunchDialogAsync(LaunchDialog srv)
         {
             if (string.IsNullOrEmpty(srv.Request.Dialog.Id))
             {
@@ -928,9 +928,7 @@ namespace Iviz.Controllers
 
             if (srv.Request.Dialog.Scale.ApproximatelyZero())
             {
-                srv.Response.Success = false;
-                srv.Response.Message = "Cannot launch dialog with scale 0";
-                return;
+                srv.Request.Dialog.Scale = 1;
             }
 
             var feedback = new Feedback();
