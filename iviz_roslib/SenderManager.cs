@@ -12,7 +12,7 @@ using Nito.AsyncEx;
 
 namespace Iviz.Roslib;
 
-internal sealed class SenderManager<TMessage> where TMessage : IMessage
+internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage> where TMessage : IMessage
 {
     const int DefaultTimeoutInMs = 5000;
 
@@ -91,6 +91,8 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
     {
         set => latchedMessage = value ?? throw new NullReferenceException("Latched message cannot be null");
     }
+    
+    NullableMessage<TMessage> ILatchedMessageProvider<TMessage>.GetLatchedMessage() => latchedMessage;
 
     public SenderManager(RosPublisher<TMessage> publisher, TopicInfo topicInfo)
     {
@@ -124,7 +126,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
                     continue;
                 }
 
-                var sender = new TcpSender<TMessage>(client, topicInfo, latchedMessage);
+                var sender = new TcpSender<TMessage>(client, topicInfo, this);
                 if (ForceTcpNoDelay)
                 {
                     sender.TcpNoDelay = true;
@@ -186,7 +188,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
 
     public RpcUdpTopicResponse CreateUdpConnection(RpcUdpTopicRequest request, string hostname)
     {
-        var newSender = new UdpSender<TMessage>(request, topicInfo, latchedMessage, out byte[] responseHeader);
+        var newSender = new UdpSender<TMessage>(request, topicInfo, this, out byte[] responseHeader);
 
         if (publisher.TryGetLoopbackReceiver(newSender.RemoteEndpoint, out var loopbackReceiver))
         {
@@ -300,4 +302,10 @@ internal readonly struct NullableMessage<T>
     }
 
     public static implicit operator NullableMessage<T>(in T message) => new(message);
+}
+
+internal interface ILatchedMessageProvider<TMessage>
+{
+    bool HasLatchedMessage() => GetLatchedMessage().hasValue;
+    NullableMessage<TMessage> GetLatchedMessage();
 }

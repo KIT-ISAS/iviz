@@ -52,7 +52,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
     public int MaxPacketSize { get; }
     public ILoopbackReceiver<T>? LoopbackReceiver { private get; set; }
 
-    public UdpSender(RpcUdpTopicRequest request, TopicInfo topicInfo, NullableMessage<T> latchedMsg,
+    public UdpSender(RpcUdpTopicRequest request, TopicInfo topicInfo, ILatchedMessageProvider<T> provider,
         out byte[] responseHeader)
     {
         this.topicInfo = topicInfo;
@@ -123,22 +123,22 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
             $"md5sum={topicInfo.Md5Sum}",
             $"type={topicInfo.Type}",
             $"callerid={topicInfo.CallerId}",
-            latchedMsg.hasValue ? "latching=1" : "latching=0",
+            provider.HasLatchedMessage() ? "latching=1" : "latching=0",
             $"message_definition={topicInfo.MessageDependencies}",
         };
 
         responseHeader = StreamUtils.WriteHeaderToArray(responseHeaderContents);
 
-        task = TaskUtils.Run(() => StartSession(latchedMsg).AwaitNoThrow(this));
+        task = TaskUtils.Run(() => StartSession(provider).AwaitNoThrow(this));
     }
 
-    async ValueTask StartSession(NullableMessage<T> latchedMsg)
+    async ValueTask StartSession(ILatchedMessageProvider<T> provider)
     {
         Logger.LogDebugFormat("{0}: Started!", this);
 
         try
         {
-            await ProcessLoop(latchedMsg);
+            await ProcessLoop(provider);
         }
         catch (Exception e)
         {
@@ -166,17 +166,18 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
         senderQueue.FlushRemaining();
     }
 
-    async ValueTask ProcessLoop(NullableMessage<T> latchedMsg)
+    async ValueTask ProcessLoop(ILatchedMessageProvider<T> provider)
     {
-        if (latchedMsg.hasValue)
-        {
-            Publish(latchedMsg.value!);
-        }
-
         using var writeBuffer = new Rent<byte>(MaxPacketSize);
         writeBuffer[..UdpRosParams.HeaderLength].Fill(0);
 
         _ = TaskUtils.Run(KeepAliveMessages);
+
+        var latchedMsg = provider.GetLatchedMessage();
+        if (latchedMsg.hasValue)
+        {
+            Publish(latchedMsg.value!);
+        }
 
         while (KeepRunning)
         {
