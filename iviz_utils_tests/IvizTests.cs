@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.GridMapMsgs;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.StdMsgs;
@@ -26,12 +27,12 @@ namespace Iviz.UtilsTests;
 [Category("Iviz")]
 public class IvizTests
 {
-    static readonly Uri CallerUri = new Uri("http://localhost:7616");
+    //static readonly Uri CallerUri = new Uri("http://localhost:7616");
 
-    static readonly Uri MasterUri = new Uri("http://localhost:11311");
+    //static readonly Uri MasterUri = new Uri("http://localhost:11311");
 
-    //static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
-    //static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
+    static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
+    static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
 
     const string CallerId = "/iviz_util_tests";
 
@@ -507,7 +508,7 @@ public class IvizTests
     public void TestGridmap2()
     {
         using var writer = client.CreateWriter<GridMap>("/gridmap", true);
- 
+
         var ivizController = new IvizController(client, IvizId);
         ivizController.AddModuleFromTopic("/gridmap");
 
@@ -527,7 +528,7 @@ public class IvizTests
         writer.Write(msg);
         Thread.Sleep(3600 * 1000);
     }
-    
+
     [NotNull]
     static GridMap CreateGridmap(uint w, uint h)
     {
@@ -572,7 +573,7 @@ public class IvizTests
     public void TestGridmap3()
     {
         using var writer = client.CreateWriter<GridMap>("/gridmap");
-        
+
         var ivizController = new IvizController(client, IvizId);
         ivizController.AddModuleFromTopic("/gridmap");
 
@@ -580,7 +581,7 @@ public class IvizTests
         Thread.Sleep(100);
 
         uint w = 600, h = 600;
-        
+
         var msg = new GridMap
         {
             Info = new GridMapInfo
@@ -616,7 +617,7 @@ public class IvizTests
                 }
             }
         };
-        
+
         writer.Write(msg);
         Thread.Sleep(2000);
     }
@@ -839,7 +840,7 @@ public class IvizTests
         writer.Write(image);
         Thread.Sleep(2000);
     }
-    
+
     [Test, Ignore("SDF is disabled")]
     public void TestWorld()
     {
@@ -865,6 +866,199 @@ public class IvizTests
         var marker = RosMarkerHelper.CreateResource("package://aws-robomaker-hospital-world/worlds/hospital.world");
         writer.Write(marker);
         Thread.Sleep(5000);
+    }
+
+    [Test]
+    public void TestDialogs()
+    {
+        using var writer = client.CreateWriter<WidgetArray>("/dialogs", latchingEnabled: true);
+
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.AddModuleFromTopic("/dialogs");
+
+        var header = new Header(0, time.Now(), "dialogs");
+        
+        var widgetArray = new WidgetArray
+        {
+            Dialogs = new[]
+            {
+                new Dialog
+                {
+                    Header = header,
+                    Id = "1",
+                    Type = Dialog.TYPE_SHORT,
+                    Caption = "Abcd\nAbcd\nAbcd\nAbcdAbcd\nAbcd\nAbcd\nAbcd",
+                    Title = "Title",
+                    TfOffset = new Vector3(0, 0, 0),
+                    DialogDisplacement = new Vector3(0, 1, 0),
+                    BindingType = 1,
+                },
+                new Dialog
+                {
+                    Header = header,
+                    Id = "2",
+                    Type = Dialog.TYPE_SHORT,
+                    Caption =
+                        "AbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcd",
+                    Title = "Title",
+                    TfOffset = new Vector3(1, 0, 1),
+                    Scale = 0.5f,
+                },
+                new Dialog
+                {
+                    Header = header,
+                    Id = "3",
+                    Type = Dialog.TYPE_SHORT,
+                    Caption =
+                        "Abcd",
+                    Title = "Tralalala",
+                    TfOffset = new Vector3(2, 0, 1)
+                },
+                new Dialog
+                {
+                    Header = header,
+                    Id = "10",
+                    Type = Dialog.TYPE_NOTICE,
+                    Caption = "Abcd\nAbcd\nAbcd\nAbcdAbcd\nAbcd\nAbcd\nAbcd",
+                    Icon = Dialog.ICON_OK,
+                    TfOffset = new Vector3(0, 2, 1),
+                    BindingType = 1,
+                },
+                new Dialog
+                {
+                    Header = header,
+                    Id = "11",
+                    Type = Dialog.TYPE_NOTICE,
+                    Caption = "EVERYTHING WENT\nWRONG!",
+                    Icon = Dialog.ICON_CROSS,
+                    Scale = 0.5f,
+                    TfOffset = new Vector3(1, 2, 1),
+                },
+                new Dialog
+                {
+                    Header = header,
+                    Id = "20",
+                    Type = Dialog.TYPE_BUTTON,
+                    Caption = "Oh no",
+                    Icon = Dialog.ICON_QUESTION,
+                    TfOffset = new Vector3(0, 4, 1),
+                    BindingType = 1,
+                },
+                new Dialog
+                {
+                    Header = header,
+                    Id = "21",
+                    Type = Dialog.TYPE_BUTTON,
+                    Caption = "Oh no, but now with longer text!!",
+                    Icon = Dialog.ICON_WARN,
+                    Scale = 0.5f,
+                    TfOffset = new Vector3(1, 4, 1)
+                },
+                new Dialog
+                {
+                    Header = header,
+                    Id = "22",
+                    Type = Dialog.TYPE_BUTTON,
+                    Caption = "Oh no in red",
+                    Icon = Dialog.ICON_WARN,
+                    BackgroundColor = ColorRGBA.Red,
+                    TfOffset = new Vector3(2, 4, 1)
+                },
+                new Dialog
+                {
+                    Header = header,
+                    Id = "23",
+                    Type = Dialog.TYPE_BUTTON,
+                    Caption = "Oh no transparent",
+                    Icon = Dialog.ICON_WARN,
+                    BackgroundColor = ColorRGBA.Red.WithAlpha(0.5f),
+                    TfOffset = new Vector3(3, 4, 1)
+                },
+                new Dialog
+                {
+                    Header = header,
+                    Id = "30",
+                    Type = Dialog.TYPE_ICON,
+                    Title = "does",
+                    Caption = "Maybee",
+                    Icon = Dialog.ICON_WARN,
+                    Buttons = Dialog.BUTTONS_OK,
+                    TfOffset = new Vector3(0, 6, 1),
+                    BindingType = 1
+                },
+                new Dialog
+                {
+                    Header = header,
+                    Id = "31",
+                    Type = Dialog.TYPE_ICON,
+                    Title = "does this work",
+                    Caption = "with a much longer text? We need to try it out! Surely nothing can go wrong with this.",
+                    Icon = Dialog.ICON_WARN,
+                    Buttons = Dialog.BUTTONS_OKCANCEL,
+                    TfOffset = new Vector3(1, 6, 1),
+                },
+                new Dialog
+                {
+                    Header = header,
+                    Id = "32",
+                    Type = Dialog.TYPE_ICON,
+                    Title = "does this work",
+                    Caption = "with a bit shorter text? Maybe?",
+                    Icon = Dialog.ICON_WARN,
+                    Buttons = Dialog.BUTTONS_OK,
+                    TfOffset = new Vector3(3, 6, 1)
+                },
+                new Dialog
+                {
+                    Header = header,
+                    Id = "40",
+                    Type = Dialog.TYPE_PLAIN,
+                    Title = "Testing",
+                    Caption = "plain now. Will this ever end?",
+                    Buttons = Dialog.BUTTONS_OK,
+                    TfOffset = new Vector3(0, 8, 1),
+                    BindingType = 1,
+                },
+                new Dialog
+                {
+                    Header = header,
+                    Id = "41",
+                    Type = Dialog.TYPE_PLAIN,
+                    Title = "Testing",
+                    Caption = "What\nIf\nEverything\nGoes\nWrong\n!!!!",
+                    Buttons = Dialog.BUTTONS_OK,
+                    TfOffset = new Vector3(1, 8, 1),
+                    BindingType = 1,
+                },
+            }
+        };
+
+        writer.Write(widgetArray);
+        
+        Thread.Sleep(2000);
+    }
+
+    [Test]
+    public void TestDialogService()
+    {
+        var header = new Header(0, time.Now(), "dialogs");
+        var service = new LaunchDialog();
+        service.Request = new LaunchDialogRequest
+        {
+            Dialog = new Dialog
+            {
+                Header = header,
+                Id = "0",
+                Type = Dialog.TYPE_PLAIN,
+                Title = "Testing",
+                Caption = "services now!",
+                Buttons = Dialog.BUTTONS_OK,
+                TfOffset = new Vector3(1, 8, 1),
+                BindingType = 1,
+            }
+        };
+        client.CallService($"{IvizId}/launch_dialog", service);
+        Console.WriteLine(service.Response.Message);
     }
 
 

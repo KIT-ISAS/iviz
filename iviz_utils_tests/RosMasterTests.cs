@@ -70,9 +70,8 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using (var publisher = await client.CreateWriterAsync<String>(topicName))
+            await using (var publisher = await client.CreateWriterAsync<String>(topicName, true))
             {
-                publisher.LatchingEnabled = true;
 
                 var systemState = await client.GetSystemStateAsync();
                 Assert.True(
@@ -146,8 +145,7 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz_empty";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await client.CreateWriterAsync<Empty>(topicName);
-            publisher.LatchingEnabled = true;
+            await using var publisher = await client.CreateWriterAsync<Empty>(topicName, true);
 
             var systemState = await client.GetSystemStateAsync();
             Assert.True(
@@ -167,8 +165,7 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz_fixed";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await client.CreateWriterAsync<Pose>(topicName);
-            publisher.LatchingEnabled = true;
+            await using var publisher = await client.CreateWriterAsync<Pose>(topicName, true);
 
             var systemState = await client.GetSystemStateAsync();
             Assert.True(
@@ -190,8 +187,7 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz_false";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await client.CreateWriterAsync<Pose>(topicName);
-            publisher.LatchingEnabled = true;
+            await using var publisher = await client.CreateWriterAsync<Pose>(topicName, true); 
 
             var systemState = await client.GetSystemStateAsync();
             Assert.True(
@@ -207,7 +203,7 @@ namespace Iviz.UtilsTests
 
             var state = subscriber.Subscriber.GetState();
             Assert.True(state.Receivers.Count > 0);
-            
+
             var receiverState = (Ros1ReceiverState)state.Receivers[0];
             Assert.False(receiverState.IsAlive);
             Assert.NotNull(receiverState.ErrorDescription);
@@ -222,8 +218,8 @@ namespace Iviz.UtilsTests
             await using var subscriber = await client.CreateReaderAsync<Pose>(topicName);
             await Task.Delay(1000);
 
-            await using var publisher = await client.CreateWriterAsync<Pose>(topicName);
-            publisher.LatchingEnabled = true;
+            await using var publisher = await client.CreateWriterAsync<Pose>(topicName, true);
+
             publisher.Write(new());
 
             using var source = new CancellationTokenSource(5000);
