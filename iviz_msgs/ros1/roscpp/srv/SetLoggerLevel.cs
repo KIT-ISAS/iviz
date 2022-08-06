@@ -100,12 +100,13 @@ namespace Iviz.Msgs.Roscpp
     
         public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Logger) + WriteBuffer.GetStringSize(Level);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Logger);
-            WriteBuffer2.AddLength(ref c, Level);
+            c = WriteBuffer2.AddLength(c, Logger);
+            c = WriteBuffer2.AddLength(c, Level);
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -152,7 +153,7 @@ namespace Iviz.Msgs.Roscpp
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int _) { }
+        public int AddRos2MessageLength(int c) => c;
     
         public override string ToString() => Extensions.ToString(this);
     }

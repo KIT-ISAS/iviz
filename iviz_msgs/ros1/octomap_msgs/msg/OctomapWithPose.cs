@@ -66,13 +66,15 @@ namespace Iviz.Msgs.OctomapMsgs
     
         public int RosMessageLength => 56 + Header.RosMessageLength + Octomap.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Origin);
-            Octomap.AddRos2MessageLength(ref c);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align8(c);
+            c += 56; /* Origin */
+            c = Octomap.AddRos2MessageLength(c);
+            return c;
         }
     
         public const string MessageType = "octomap_msgs/OctomapWithPose";

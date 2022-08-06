@@ -62,13 +62,17 @@ namespace Iviz.Msgs.MeshMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 21;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, TextureIndex);
-            WriteBuffer2.AddLength(ref c, Color);
-            WriteBuffer2.AddLength(ref c, HasTexture);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* TextureIndex */
+            c += 16; /* Color */
+            c += 1; /* HasTexture */
+            return c;
         }
     
         public const string MessageType = "mesh_msgs/MeshMaterial";

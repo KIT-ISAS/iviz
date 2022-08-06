@@ -60,12 +60,13 @@ namespace Iviz.Msgs.DiagnosticMsgs
     
         public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Key) + WriteBuffer.GetStringSize(Value);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Key);
-            WriteBuffer2.AddLength(ref c, Value);
+            c = WriteBuffer2.AddLength(c, Key);
+            c = WriteBuffer2.AddLength(c, Value);
+            return c;
         }
     
         public const string MessageType = "diagnostic_msgs/KeyValue";

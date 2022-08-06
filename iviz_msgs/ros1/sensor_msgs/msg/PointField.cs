@@ -82,14 +82,17 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength => 13 + WriteBuffer.GetStringSize(Name);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Name);
-            WriteBuffer2.AddLength(ref c, Offset);
-            WriteBuffer2.AddLength(ref c, Datatype);
-            WriteBuffer2.AddLength(ref c, Count);
+            c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Offset */
+            c += 1; /* Datatype */
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Count */
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/PointField";

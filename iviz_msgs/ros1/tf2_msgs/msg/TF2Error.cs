@@ -63,12 +63,13 @@ namespace Iviz.Msgs.Tf2Msgs
     
         public int RosMessageLength => 5 + WriteBuffer.GetStringSize(ErrorString);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Error);
-            WriteBuffer2.AddLength(ref c, ErrorString);
+            c += 1; /* Error */
+            c = WriteBuffer2.AddLength(c, ErrorString);
+            return c;
         }
     
         public const string MessageType = "tf2_msgs/TF2Error";

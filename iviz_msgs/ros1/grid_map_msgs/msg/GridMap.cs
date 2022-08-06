@@ -116,16 +116,18 @@ namespace Iviz.Msgs.GridMapMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Info.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Layers);
-            WriteBuffer2.AddLength(ref c, BasicLayers);
-            WriteBuffer2.AddLength(ref c, Data);
-            WriteBuffer2.AddLength(ref c, OuterStartIndex);
-            WriteBuffer2.AddLength(ref c, InnerStartIndex);
+            c = Info.AddRos2MessageLength(c);
+            c = WriteBuffer2.AddLength(c, Layers);
+            c = WriteBuffer2.AddLength(c, BasicLayers);
+            c = WriteBuffer2.AddLength(c, Data);
+            c = WriteBuffer2.Align2(c);
+            c += 2; /* OuterStartIndex */
+            c += 2; /* InnerStartIndex */
+            return c;
         }
     
         public const string MessageType = "grid_map_msgs/GridMap";

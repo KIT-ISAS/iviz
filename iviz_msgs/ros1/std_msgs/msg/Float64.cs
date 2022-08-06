@@ -50,11 +50,15 @@ namespace Iviz.Msgs.StdMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 8;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Data);
+            c = WriteBuffer2.Align8(c);
+            c += 8; /* Data */
+            return c;
         }
     
         public const string MessageType = "std_msgs/Float64";

@@ -84,12 +84,13 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength => 8 + WriteBuffer.GetArraySize(Dialogs) + WriteBuffer.GetArraySize(Widgets);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Dialogs);
-            WriteBuffer2.AddLength(ref c, Widgets);
+            c = WriteBuffer2.AddLength(c, Dialogs);
+            c = WriteBuffer2.AddLength(c, Widgets);
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/WidgetArray";

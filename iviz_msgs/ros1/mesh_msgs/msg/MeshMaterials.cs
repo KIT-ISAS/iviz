@@ -124,14 +124,19 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Clusters);
-            WriteBuffer2.AddLength(ref c, Materials);
-            WriteBuffer2.AddLength(ref c, ClusterMaterials);
-            WriteBuffer2.AddLength(ref c, VertexTexCoords);
+            c = WriteBuffer2.AddLength(c, Clusters);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Materials length */
+            c += 21 * Materials.Length;
+            c += 4;  /* ClusterMaterials length */
+            c += 4 * ClusterMaterials.Length;
+            c += 4;  /* VertexTexCoords length */
+            c += 8 * VertexTexCoords.Length;
+            return c;
         }
     
         public const string MessageType = "mesh_msgs/MeshMaterials";

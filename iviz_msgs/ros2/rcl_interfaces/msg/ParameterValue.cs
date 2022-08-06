@@ -133,20 +133,31 @@ namespace Iviz.Msgs.RclInterfaces
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Type);
-            WriteBuffer2.AddLength(ref c, BoolValue);
-            WriteBuffer2.AddLength(ref c, IntegerValue);
-            WriteBuffer2.AddLength(ref c, DoubleValue);
-            WriteBuffer2.AddLength(ref c, StringValue);
-            WriteBuffer2.AddLength(ref c, ByteArrayValue);
-            WriteBuffer2.AddLength(ref c, BoolArrayValue);
-            WriteBuffer2.AddLength(ref c, IntegerArrayValue);
-            WriteBuffer2.AddLength(ref c, DoubleArrayValue);
-            WriteBuffer2.AddLength(ref c, StringArrayValue);
+            c += 1; /* Type */
+            c += 1; /* BoolValue */
+            c = WriteBuffer2.Align8(c);
+            c += 8; /* IntegerValue */
+            c += 8; /* DoubleValue */
+            c = WriteBuffer2.AddLength(c, StringValue);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* ByteArrayValue length */
+            c += 1 * ByteArrayValue.Length;
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* BoolArrayValue length */
+            c += 1 * BoolArrayValue.Length;
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* IntegerArrayValue length */
+            c = WriteBuffer2.Align8(c);
+            c += 8 * IntegerArrayValue.Length;
+            c += 4;  /* DoubleArrayValue length */
+            c = WriteBuffer2.Align8(c);
+            c += 8 * DoubleArrayValue.Length;
+            c = WriteBuffer2.AddLength(c, StringArrayValue);
+            return c;
         }
     
         public const string MessageType = "rcl_interfaces/ParameterValue";

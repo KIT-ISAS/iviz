@@ -115,14 +115,15 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Name);
-            WriteBuffer2.AddLength(ref c, Filename);
-            WriteBuffer2.AddLength(ref c, Includes);
-            WriteBuffer2.AddLength(ref c, Lights);
+            c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.AddLength(c, Filename);
+            c = WriteBuffer2.AddLength(c, Includes);
+            c = WriteBuffer2.AddLength(c, Lights);
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/Scene";

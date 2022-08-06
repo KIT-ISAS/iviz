@@ -75,13 +75,14 @@ namespace Iviz.Msgs.Tf2Msgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            GoalId.AddRos2MessageLength(ref c);
-            Goal.AddRos2MessageLength(ref c);
+            c = Header.AddRos2MessageLength(c);
+            c = GoalId.AddRos2MessageLength(c);
+            c = Goal.AddRos2MessageLength(c);
+            return c;
         }
     
         public const string MessageType = "tf2_msgs/LookupTransformActionGoal";

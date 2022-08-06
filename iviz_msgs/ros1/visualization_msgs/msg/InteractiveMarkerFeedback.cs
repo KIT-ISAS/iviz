@@ -123,19 +123,22 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, ClientId);
-            WriteBuffer2.AddLength(ref c, MarkerName);
-            WriteBuffer2.AddLength(ref c, ControlName);
-            WriteBuffer2.AddLength(ref c, EventType);
-            WriteBuffer2.AddLength(ref c, Pose);
-            WriteBuffer2.AddLength(ref c, MenuEntryId);
-            WriteBuffer2.AddLength(ref c, MousePoint);
-            WriteBuffer2.AddLength(ref c, MousePointValid);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.AddLength(c, ClientId);
+            c = WriteBuffer2.AddLength(c, MarkerName);
+            c = WriteBuffer2.AddLength(c, ControlName);
+            c += 1; /* EventType */
+            c = WriteBuffer2.Align8(c);
+            c += 56; /* Pose */
+            c += 4; /* MenuEntryId */
+            c = WriteBuffer2.Align8(c);
+            c += 24; /* MousePoint */
+            c += 1; /* MousePointValid */
+            return c;
         }
     
         public const string MessageType = "visualization_msgs/InteractiveMarkerFeedback";

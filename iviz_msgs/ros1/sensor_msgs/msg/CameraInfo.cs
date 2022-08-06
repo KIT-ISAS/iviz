@@ -228,21 +228,26 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Height);
-            WriteBuffer2.AddLength(ref c, Width);
-            WriteBuffer2.AddLength(ref c, DistortionModel);
-            WriteBuffer2.AddLength(ref c, D);
-            WriteBuffer2.AddLength(ref c, K, 9);
-            WriteBuffer2.AddLength(ref c, R, 9);
-            WriteBuffer2.AddLength(ref c, P, 12);
-            WriteBuffer2.AddLength(ref c, BinningX);
-            WriteBuffer2.AddLength(ref c, BinningY);
-            Roi.AddRos2MessageLength(ref c);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Height */
+            c += 4; /* Width */
+            c = WriteBuffer2.AddLength(c, DistortionModel);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* D length */
+            c = WriteBuffer2.Align8(c);
+            c += 8 * D.Length;
+            c += 9 * 8;
+            c += 9 * 8;
+            c += 12 * 8;
+            c += 4; /* BinningX */
+            c += 4; /* BinningY */
+            c += 17; /* Roi */
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/CameraInfo";

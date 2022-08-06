@@ -108,12 +108,14 @@ namespace Iviz.Msgs.RclInterfaces
     
         public int RosMessageLength => 12 + WriteBuffer.GetArraySize(Prefixes);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Prefixes);
-            WriteBuffer2.AddLength(ref c, Depth);
+            c = WriteBuffer2.AddLength(c, Prefixes);
+            c = WriteBuffer2.Align8(c);
+            c += 8; /* Depth */
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -167,11 +169,12 @@ namespace Iviz.Msgs.RclInterfaces
     
         public int RosMessageLength => 0 + Result.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Result.AddRos2MessageLength(ref c);
+            c = Result.AddRos2MessageLength(c);
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);

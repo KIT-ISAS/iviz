@@ -134,24 +134,26 @@ namespace Iviz.Msgs.RosgraphMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Topic);
-            WriteBuffer2.AddLength(ref c, NodePub);
-            WriteBuffer2.AddLength(ref c, NodeSub);
-            WriteBuffer2.AddLength(ref c, WindowStart);
-            WriteBuffer2.AddLength(ref c, WindowStop);
-            WriteBuffer2.AddLength(ref c, DeliveredMsgs);
-            WriteBuffer2.AddLength(ref c, DroppedMsgs);
-            WriteBuffer2.AddLength(ref c, Traffic);
-            WriteBuffer2.AddLength(ref c, PeriodMean);
-            WriteBuffer2.AddLength(ref c, PeriodStddev);
-            WriteBuffer2.AddLength(ref c, PeriodMax);
-            WriteBuffer2.AddLength(ref c, StampAgeMean);
-            WriteBuffer2.AddLength(ref c, StampAgeStddev);
-            WriteBuffer2.AddLength(ref c, StampAgeMax);
+            c = WriteBuffer2.AddLength(c, Topic);
+            c = WriteBuffer2.AddLength(c, NodePub);
+            c = WriteBuffer2.AddLength(c, NodeSub);
+            c = WriteBuffer2.Align4(c);
+            c += 8; /* WindowStart */
+            c += 8; /* WindowStop */
+            c += 4; /* DeliveredMsgs */
+            c += 4; /* DroppedMsgs */
+            c += 4; /* Traffic */
+            c += 8; /* PeriodMean */
+            c += 8; /* PeriodStddev */
+            c += 8; /* PeriodMax */
+            c += 8; /* StampAgeMean */
+            c += 8; /* StampAgeStddev */
+            c += 8; /* StampAgeMax */
+            return c;
         }
     
         public const string MessageType = "rosgraph_msgs/TopicStatistics";

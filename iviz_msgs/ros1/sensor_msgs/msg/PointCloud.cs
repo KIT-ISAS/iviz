@@ -94,13 +94,16 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Points);
-            WriteBuffer2.AddLength(ref c, Channels);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Points length */
+            c += 12 * Points.Length;
+            c = WriteBuffer2.AddLength(c, Channels);
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/PointCloud";

@@ -124,16 +124,18 @@ namespace Iviz.Msgs.GridMapMsgs
     
         public int RosMessageLength => 40 + WriteBuffer.GetStringSize(FrameId) + WriteBuffer.GetArraySize(Layers);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, FrameId);
-            WriteBuffer2.AddLength(ref c, PositionX);
-            WriteBuffer2.AddLength(ref c, PositionY);
-            WriteBuffer2.AddLength(ref c, LengthX);
-            WriteBuffer2.AddLength(ref c, LengthY);
-            WriteBuffer2.AddLength(ref c, Layers);
+            c = WriteBuffer2.AddLength(c, FrameId);
+            c = WriteBuffer2.Align8(c);
+            c += 8; /* PositionX */
+            c += 8; /* PositionY */
+            c += 8; /* LengthX */
+            c += 8; /* LengthY */
+            c = WriteBuffer2.AddLength(c, Layers);
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -187,11 +189,12 @@ namespace Iviz.Msgs.GridMapMsgs
     
         public int RosMessageLength => 0 + Map.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Map.AddRos2MessageLength(ref c);
+            c = Map.AddRos2MessageLength(c);
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);

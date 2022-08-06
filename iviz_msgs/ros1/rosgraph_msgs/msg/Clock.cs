@@ -53,11 +53,15 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 8;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Clock_);
+            c = WriteBuffer2.Align4(c);
+            c += 8; /* Clock_ */
+            return c;
         }
     
         public const string MessageType = "rosgraph_msgs/Clock";

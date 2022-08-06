@@ -139,19 +139,27 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Name);
-            WriteBuffer2.AddLength(ref c, Vertices);
-            WriteBuffer2.AddLength(ref c, Normals);
-            WriteBuffer2.AddLength(ref c, Tangents);
-            WriteBuffer2.AddLength(ref c, BiTangents);
-            WriteBuffer2.AddLength(ref c, TexCoords);
-            WriteBuffer2.AddLength(ref c, ColorChannels);
-            WriteBuffer2.AddLength(ref c, Faces);
-            WriteBuffer2.AddLength(ref c, MaterialIndex);
+            c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Vertices length */
+            c += 12 * Vertices.Length;
+            c += 4;  /* Normals length */
+            c += 12 * Normals.Length;
+            c += 4;  /* Tangents length */
+            c += 12 * Tangents.Length;
+            c += 4;  /* BiTangents length */
+            c += 12 * BiTangents.Length;
+            c = WriteBuffer2.AddLength(c, TexCoords);
+            c = WriteBuffer2.AddLength(c, ColorChannels);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Faces length */
+            c += 12 * Faces.Length;
+            c += 4; /* MaterialIndex */
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/Mesh";

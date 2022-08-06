@@ -101,11 +101,12 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength => 0 + CameraInfo.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            CameraInfo.AddRos2MessageLength(ref c);
+            c = CameraInfo.AddRos2MessageLength(c);
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -165,12 +166,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength => 5 + WriteBuffer.GetStringSize(StatusMessage);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Success);
-            WriteBuffer2.AddLength(ref c, StatusMessage);
+            c += 1; /* Success */
+            c = WriteBuffer2.AddLength(c, StatusMessage);
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);

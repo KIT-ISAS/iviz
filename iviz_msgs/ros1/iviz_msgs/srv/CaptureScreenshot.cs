@@ -92,11 +92,14 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 1;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Compress);
+            c += 1; /* Compress */
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -197,19 +200,23 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Success);
-            WriteBuffer2.AddLength(ref c, Message);
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Width);
-            WriteBuffer2.AddLength(ref c, Height);
-            WriteBuffer2.AddLength(ref c, Bpp);
-            WriteBuffer2.AddLength(ref c, Intrinsics, 9);
-            WriteBuffer2.AddLength(ref c, Pose);
-            WriteBuffer2.AddLength(ref c, Data);
+            c += 1; /* Success */
+            c = WriteBuffer2.AddLength(c, Message);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Width */
+            c += 4; /* Height */
+            c += 4; /* Bpp */
+            c = WriteBuffer2.Align8(c);
+            c += 9 * 8;
+            c += 56; /* Pose */
+            c += 4;  /* Data length */
+            c += 1 * Data.Length;
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);

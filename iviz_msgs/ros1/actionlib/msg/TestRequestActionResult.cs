@@ -66,13 +66,15 @@ namespace Iviz.Msgs.Actionlib
     
         public int RosMessageLength => 5 + Header.RosMessageLength + Status.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            Status.AddRos2MessageLength(ref c);
-            Result.AddRos2MessageLength(ref c);
+            c = Header.AddRos2MessageLength(c);
+            c = Status.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
+            c += 5; /* Result */
+            return c;
         }
     
         public const string MessageType = "actionlib/TestRequestActionResult";

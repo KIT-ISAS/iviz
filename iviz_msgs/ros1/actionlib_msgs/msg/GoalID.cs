@@ -62,12 +62,14 @@ namespace Iviz.Msgs.ActionlibMsgs
     
         public int RosMessageLength => 12 + WriteBuffer.GetStringSize(Id);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Stamp);
-            WriteBuffer2.AddLength(ref c, Id);
+            c = WriteBuffer2.Align4(c);
+            c += 8; /* Stamp */
+            c = WriteBuffer2.AddLength(c, Id);
+            return c;
         }
     
         public const string MessageType = "actionlib_msgs/GoalID";

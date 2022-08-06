@@ -54,11 +54,15 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 64;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, M, 16);
+            c = WriteBuffer2.Align4(c);
+            c += 16 * 4;
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/Matrix4";

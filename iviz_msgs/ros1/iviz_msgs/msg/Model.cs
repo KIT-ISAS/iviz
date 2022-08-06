@@ -131,16 +131,17 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Name);
-            WriteBuffer2.AddLength(ref c, Filename);
-            WriteBuffer2.AddLength(ref c, OrientationHint);
-            WriteBuffer2.AddLength(ref c, Meshes);
-            WriteBuffer2.AddLength(ref c, Materials);
-            WriteBuffer2.AddLength(ref c, Nodes);
+            c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.AddLength(c, Filename);
+            c = WriteBuffer2.AddLength(c, OrientationHint);
+            c = WriteBuffer2.AddLength(c, Meshes);
+            c = WriteBuffer2.AddLength(c, Materials);
+            c = WriteBuffer2.AddLength(c, Nodes);
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/Model";

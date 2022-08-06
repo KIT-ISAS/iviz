@@ -112,20 +112,23 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, VizId);
-            WriteBuffer2.AddLength(ref c, Id);
-            WriteBuffer2.AddLength(ref c, Type);
-            WriteBuffer2.AddLength(ref c, EntryId);
-            WriteBuffer2.AddLength(ref c, Angle);
-            WriteBuffer2.AddLength(ref c, Position);
-            WriteBuffer2.AddLength(ref c, Orientation);
-            WriteBuffer2.AddLength(ref c, Scale);
-            Trajectory.AddRos2MessageLength(ref c);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.AddLength(c, VizId);
+            c = WriteBuffer2.AddLength(c, Id);
+            c += 1; /* Type */
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* EntryId */
+            c = WriteBuffer2.Align8(c);
+            c += 8; /* Angle */
+            c += 24; /* Position */
+            c += 32; /* Orientation */
+            c += 24; /* Scale */
+            c = Trajectory.AddRos2MessageLength(c);
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/Feedback";

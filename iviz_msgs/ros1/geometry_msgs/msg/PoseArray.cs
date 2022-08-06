@@ -57,12 +57,16 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public int RosMessageLength => 4 + Header.RosMessageLength + 56 * Poses.Length;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Poses);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Poses length */
+            c = WriteBuffer2.Align8(c);
+            c += 56 * Poses.Length;
+            return c;
         }
     
         public const string MessageType = "geometry_msgs/PoseArray";

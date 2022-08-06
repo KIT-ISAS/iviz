@@ -84,12 +84,16 @@ namespace Iviz.Msgs.ShapeMsgs
     
         public int RosMessageLength => 5 + 8 * Dimensions.Length;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Type);
-            WriteBuffer2.AddLength(ref c, Dimensions);
+            c += 1; /* Type */
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Dimensions length */
+            c = WriteBuffer2.Align8(c);
+            c += 8 * Dimensions.Length;
+            return c;
         }
     
         public const string MessageType = "shape_msgs/SolidPrimitive";

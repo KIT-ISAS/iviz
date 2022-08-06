@@ -87,7 +87,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int _) { }
+        public int AddRos2MessageLength(int c) => c;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -140,11 +140,12 @@ namespace Iviz.Msgs.GridMapMsgs
     
         public int RosMessageLength => 0 + Info.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Info.AddRos2MessageLength(ref c);
+            c = Info.AddRos2MessageLength(c);
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);

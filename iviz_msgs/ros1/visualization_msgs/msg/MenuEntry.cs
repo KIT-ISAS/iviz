@@ -109,15 +109,17 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         public int RosMessageLength => 17 + WriteBuffer.GetStringSize(Title) + WriteBuffer.GetStringSize(Command);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Id);
-            WriteBuffer2.AddLength(ref c, ParentId);
-            WriteBuffer2.AddLength(ref c, Title);
-            WriteBuffer2.AddLength(ref c, Command);
-            WriteBuffer2.AddLength(ref c, CommandType);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Id */
+            c += 4; /* ParentId */
+            c = WriteBuffer2.AddLength(c, Title);
+            c = WriteBuffer2.AddLength(c, Command);
+            c += 1; /* CommandType */
+            return c;
         }
     
         public const string MessageType = "visualization_msgs/MenuEntry";

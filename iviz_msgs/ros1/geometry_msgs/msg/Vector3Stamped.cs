@@ -55,12 +55,14 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public int RosMessageLength => 24 + Header.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Vector);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align8(c);
+            c += 24; /* Vector */
+            return c;
         }
     
         public const string MessageType = "geometry_msgs/Vector3Stamped";

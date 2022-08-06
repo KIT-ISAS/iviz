@@ -110,14 +110,22 @@ namespace Iviz.Msgs.TrajectoryMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Transforms);
-            WriteBuffer2.AddLength(ref c, Velocities);
-            WriteBuffer2.AddLength(ref c, Accelerations);
-            WriteBuffer2.AddLength(ref c, TimeFromStart);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Transforms length */
+            c = WriteBuffer2.Align8(c);
+            c += 56 * Transforms.Length;
+            c += 4;  /* Velocities length */
+            c = WriteBuffer2.Align8(c);
+            c += 48 * Velocities.Length;
+            c += 4;  /* Accelerations length */
+            c = WriteBuffer2.Align8(c);
+            c += 48 * Accelerations.Length;
+            c += 8; /* TimeFromStart */
+            return c;
         }
     
         public const string MessageType = "trajectory_msgs/MultiDOFJointTrajectoryPoint";

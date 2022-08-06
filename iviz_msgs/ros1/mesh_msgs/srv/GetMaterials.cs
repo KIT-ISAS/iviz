@@ -92,11 +92,12 @@ namespace Iviz.Msgs.MeshMsgs
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uuid);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Uuid);
+            c = WriteBuffer2.AddLength(c, Uuid);
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -149,11 +150,12 @@ namespace Iviz.Msgs.MeshMsgs
     
         public int RosMessageLength => 0 + MeshMaterialsStamped.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            MeshMaterialsStamped.AddRos2MessageLength(ref c);
+            c = MeshMaterialsStamped.AddRos2MessageLength(c);
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);

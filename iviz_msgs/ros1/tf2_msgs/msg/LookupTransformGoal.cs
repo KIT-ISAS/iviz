@@ -91,17 +91,19 @@ namespace Iviz.Msgs.Tf2Msgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, TargetFrame);
-            WriteBuffer2.AddLength(ref c, SourceFrame);
-            WriteBuffer2.AddLength(ref c, SourceTime);
-            WriteBuffer2.AddLength(ref c, Timeout);
-            WriteBuffer2.AddLength(ref c, TargetTime);
-            WriteBuffer2.AddLength(ref c, FixedFrame);
-            WriteBuffer2.AddLength(ref c, Advanced);
+            c = WriteBuffer2.AddLength(c, TargetFrame);
+            c = WriteBuffer2.AddLength(c, SourceFrame);
+            c = WriteBuffer2.Align4(c);
+            c += 8; /* SourceTime */
+            c += 8; /* Timeout */
+            c += 8; /* TargetTime */
+            c = WriteBuffer2.AddLength(c, FixedFrame);
+            c += 1; /* Advanced */
+            return c;
         }
     
         public const string MessageType = "tf2_msgs/LookupTransformGoal";

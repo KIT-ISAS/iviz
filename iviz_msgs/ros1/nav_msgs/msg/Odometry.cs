@@ -77,14 +77,16 @@ namespace Iviz.Msgs.NavMsgs
     
         public int RosMessageLength => 684 + Header.RosMessageLength + WriteBuffer.GetStringSize(ChildFrameId);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, ChildFrameId);
-            Pose.AddRos2MessageLength(ref c);
-            Twist.AddRos2MessageLength(ref c);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.AddLength(c, ChildFrameId);
+            c = WriteBuffer2.Align8(c);
+            c += 344; /* Pose */
+            c += 336; /* Twist */
+            return c;
         }
     
         public const string MessageType = "nav_msgs/Odometry";

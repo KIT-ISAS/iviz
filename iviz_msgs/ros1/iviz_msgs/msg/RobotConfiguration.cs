@@ -114,21 +114,23 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, SourceParameter);
-            WriteBuffer2.AddLength(ref c, SavedRobotName);
-            WriteBuffer2.AddLength(ref c, FramePrefix);
-            WriteBuffer2.AddLength(ref c, FrameSuffix);
-            WriteBuffer2.AddLength(ref c, AttachedToTf);
-            WriteBuffer2.AddLength(ref c, RenderAsOcclusionOnly);
-            WriteBuffer2.AddLength(ref c, Tint);
-            WriteBuffer2.AddLength(ref c, Metallic);
-            WriteBuffer2.AddLength(ref c, Smoothness);
-            WriteBuffer2.AddLength(ref c, Id);
-            WriteBuffer2.AddLength(ref c, Visible);
+            c = WriteBuffer2.AddLength(c, SourceParameter);
+            c = WriteBuffer2.AddLength(c, SavedRobotName);
+            c = WriteBuffer2.AddLength(c, FramePrefix);
+            c = WriteBuffer2.AddLength(c, FrameSuffix);
+            c += 1; /* AttachedToTf */
+            c += 1; /* RenderAsOcclusionOnly */
+            c = WriteBuffer2.Align4(c);
+            c += 16; /* Tint */
+            c += 4; /* Metallic */
+            c += 4; /* Smoothness */
+            c = WriteBuffer2.AddLength(c, Id);
+            c += 1; /* Visible */
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/RobotConfiguration";

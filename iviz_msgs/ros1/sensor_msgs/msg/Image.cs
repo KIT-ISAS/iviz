@@ -108,17 +108,21 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Height);
-            WriteBuffer2.AddLength(ref c, Width);
-            WriteBuffer2.AddLength(ref c, Encoding);
-            WriteBuffer2.AddLength(ref c, IsBigendian);
-            WriteBuffer2.AddLength(ref c, Step);
-            WriteBuffer2.AddLength(ref c, Data);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Height */
+            c += 4; /* Width */
+            c = WriteBuffer2.AddLength(c, Encoding);
+            c += 1; /* IsBigendian */
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Step */
+            c += 4;  /* Data length */
+            c += 1 * Data.Length;
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/Image";

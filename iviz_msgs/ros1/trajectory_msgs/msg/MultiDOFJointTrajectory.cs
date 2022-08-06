@@ -95,13 +95,14 @@ namespace Iviz.Msgs.TrajectoryMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, JointNames);
-            WriteBuffer2.AddLength(ref c, Points);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.AddLength(c, JointNames);
+            c = WriteBuffer2.AddLength(c, Points);
+            return c;
         }
     
         public const string MessageType = "trajectory_msgs/MultiDOFJointTrajectory";

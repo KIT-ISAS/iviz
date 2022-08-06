@@ -114,19 +114,22 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength => 21 + WriteBuffer.GetStringSize(Path);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Path);
-            WriteBuffer2.AddLength(ref c, Index);
-            WriteBuffer2.AddLength(ref c, Type);
-            WriteBuffer2.AddLength(ref c, Mapping);
-            WriteBuffer2.AddLength(ref c, UvIndex);
-            WriteBuffer2.AddLength(ref c, BlendFactor);
-            WriteBuffer2.AddLength(ref c, Operation);
-            WriteBuffer2.AddLength(ref c, WrapModeU);
-            WriteBuffer2.AddLength(ref c, WrapModeV);
+            c = WriteBuffer2.AddLength(c, Path);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Index */
+            c += 1; /* Type */
+            c += 1; /* Mapping */
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* UvIndex */
+            c += 4; /* BlendFactor */
+            c += 1; /* Operation */
+            c += 1; /* WrapModeU */
+            c += 1; /* WrapModeV */
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/Texture";

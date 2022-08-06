@@ -191,27 +191,33 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Action);
-            WriteBuffer2.AddLength(ref c, Id);
-            WriteBuffer2.AddLength(ref c, Lifetime);
-            WriteBuffer2.AddLength(ref c, Scale);
-            WriteBuffer2.AddLength(ref c, Type);
-            WriteBuffer2.AddLength(ref c, Buttons);
-            WriteBuffer2.AddLength(ref c, Icon);
-            WriteBuffer2.AddLength(ref c, BackgroundColor);
-            WriteBuffer2.AddLength(ref c, Title);
-            WriteBuffer2.AddLength(ref c, Caption);
-            WriteBuffer2.AddLength(ref c, CaptionAlignment);
-            WriteBuffer2.AddLength(ref c, MenuEntries);
-            WriteBuffer2.AddLength(ref c, BindingType);
-            WriteBuffer2.AddLength(ref c, TfOffset);
-            WriteBuffer2.AddLength(ref c, DialogDisplacement);
-            WriteBuffer2.AddLength(ref c, TfDisplacement);
+            c = Header.AddRos2MessageLength(c);
+            c += 1; /* Action */
+            c = WriteBuffer2.AddLength(c, Id);
+            c = WriteBuffer2.Align4(c);
+            c += 8; /* Lifetime */
+            c = WriteBuffer2.Align8(c);
+            c += 8; /* Scale */
+            c += 1; /* Type */
+            c += 1; /* Buttons */
+            c += 1; /* Icon */
+            c = WriteBuffer2.Align4(c);
+            c += 16; /* BackgroundColor */
+            c = WriteBuffer2.AddLength(c, Title);
+            c = WriteBuffer2.AddLength(c, Caption);
+            c = WriteBuffer2.Align2(c);
+            c += 2; /* CaptionAlignment */
+            c = WriteBuffer2.AddLength(c, MenuEntries);
+            c += 1; /* BindingType */
+            c = WriteBuffer2.Align8(c);
+            c += 24; /* TfOffset */
+            c += 24; /* DialogDisplacement */
+            c += 24; /* TfDisplacement */
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/Dialog";

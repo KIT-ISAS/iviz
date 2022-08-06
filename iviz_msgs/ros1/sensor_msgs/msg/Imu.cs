@@ -98,17 +98,19 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength => 296 + Header.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Orientation);
-            WriteBuffer2.AddLength(ref c, OrientationCovariance, 9);
-            WriteBuffer2.AddLength(ref c, AngularVelocity);
-            WriteBuffer2.AddLength(ref c, AngularVelocityCovariance, 9);
-            WriteBuffer2.AddLength(ref c, LinearAcceleration);
-            WriteBuffer2.AddLength(ref c, LinearAccelerationCovariance, 9);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align8(c);
+            c += 32; /* Orientation */
+            c += 9 * 8;
+            c += 24; /* AngularVelocity */
+            c += 9 * 8;
+            c += 24; /* LinearAcceleration */
+            c += 9 * 8;
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/Imu";

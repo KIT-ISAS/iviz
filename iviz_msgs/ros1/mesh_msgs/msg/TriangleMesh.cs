@@ -172,19 +172,31 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Triangles);
-            WriteBuffer2.AddLength(ref c, Vertices);
-            WriteBuffer2.AddLength(ref c, VertexNormals);
-            WriteBuffer2.AddLength(ref c, VertexColors);
-            WriteBuffer2.AddLength(ref c, TriangleColors);
-            WriteBuffer2.AddLength(ref c, VertexTextureCoords);
-            WriteBuffer2.AddLength(ref c, FaceMaterials);
-            WriteBuffer2.AddLength(ref c, Textures);
-            WriteBuffer2.AddLength(ref c, Clusters);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Triangles length */
+            c += 12 * Triangles.Length;
+            c += 4;  /* Vertices length */
+            c = WriteBuffer2.Align8(c);
+            c += 24 * Vertices.Length;
+            c += 4;  /* VertexNormals length */
+            c = WriteBuffer2.Align8(c);
+            c += 24 * VertexNormals.Length;
+            c += 4;  /* VertexColors length */
+            c += 16 * VertexColors.Length;
+            c += 4;  /* TriangleColors length */
+            c += 16 * TriangleColors.Length;
+            c += 4;  /* VertexTextureCoords length */
+            c = WriteBuffer2.Align8(c);
+            c += 24 * VertexTextureCoords.Length;
+            c += 4;  /* FaceMaterials length */
+            c += 21 * FaceMaterials.Length;
+            c = WriteBuffer2.AddLength(c, Textures);
+            c = WriteBuffer2.AddLength(c, Clusters);
+            return c;
         }
     
         public const string MessageType = "mesh_msgs/TriangleMesh";

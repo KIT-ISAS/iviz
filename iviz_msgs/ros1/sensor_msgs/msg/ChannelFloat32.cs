@@ -77,12 +77,15 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Name) + 4 * Values.Length;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Name);
-            WriteBuffer2.AddLength(ref c, Values);
+            c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Values length */
+            c += 4 * Values.Length;
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/ChannelFloat32";

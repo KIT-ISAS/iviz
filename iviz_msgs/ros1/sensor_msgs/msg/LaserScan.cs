@@ -125,20 +125,24 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, AngleMin);
-            WriteBuffer2.AddLength(ref c, AngleMax);
-            WriteBuffer2.AddLength(ref c, AngleIncrement);
-            WriteBuffer2.AddLength(ref c, TimeIncrement);
-            WriteBuffer2.AddLength(ref c, ScanTime);
-            WriteBuffer2.AddLength(ref c, RangeMin);
-            WriteBuffer2.AddLength(ref c, RangeMax);
-            WriteBuffer2.AddLength(ref c, Ranges);
-            WriteBuffer2.AddLength(ref c, Intensities);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* AngleMin */
+            c += 4; /* AngleMax */
+            c += 4; /* AngleIncrement */
+            c += 4; /* TimeIncrement */
+            c += 4; /* ScanTime */
+            c += 4; /* RangeMin */
+            c += 4; /* RangeMax */
+            c += 4;  /* Ranges length */
+            c += 4 * Ranges.Length;
+            c += 4;  /* Intensities length */
+            c += 4 * Intensities.Length;
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/LaserScan";

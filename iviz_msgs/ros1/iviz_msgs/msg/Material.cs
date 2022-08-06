@@ -112,21 +112,23 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength => 41 + WriteBuffer.GetStringSize(Name) + WriteBuffer.GetArraySize(Textures);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Name);
-            WriteBuffer2.AddLength(ref c, Ambient);
-            WriteBuffer2.AddLength(ref c, Diffuse);
-            WriteBuffer2.AddLength(ref c, Emissive);
-            WriteBuffer2.AddLength(ref c, Opacity);
-            WriteBuffer2.AddLength(ref c, BumpScaling);
-            WriteBuffer2.AddLength(ref c, Shininess);
-            WriteBuffer2.AddLength(ref c, ShininessStrength);
-            WriteBuffer2.AddLength(ref c, Reflectivity);
-            WriteBuffer2.AddLength(ref c, BlendMode);
-            WriteBuffer2.AddLength(ref c, Textures);
+            c = WriteBuffer2.AddLength(c, Name);
+            c += 4; /* Ambient */
+            c += 4; /* Diffuse */
+            c += 4; /* Emissive */
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Opacity */
+            c += 4; /* BumpScaling */
+            c += 4; /* Shininess */
+            c += 4; /* ShininessStrength */
+            c += 4; /* Reflectivity */
+            c += 1; /* BlendMode */
+            c = WriteBuffer2.AddLength(c, Textures);
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/Material";

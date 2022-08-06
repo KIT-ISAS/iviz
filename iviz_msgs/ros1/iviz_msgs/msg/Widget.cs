@@ -143,22 +143,26 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Action);
-            WriteBuffer2.AddLength(ref c, Id);
-            WriteBuffer2.AddLength(ref c, Type);
-            WriteBuffer2.AddLength(ref c, Pose);
-            WriteBuffer2.AddLength(ref c, Color);
-            WriteBuffer2.AddLength(ref c, SecondaryColor);
-            WriteBuffer2.AddLength(ref c, Scale);
-            WriteBuffer2.AddLength(ref c, SecondaryScale);
-            WriteBuffer2.AddLength(ref c, Caption);
-            Boundary.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, SecondaryBoundaries);
+            c = Header.AddRos2MessageLength(c);
+            c += 1; /* Action */
+            c = WriteBuffer2.AddLength(c, Id);
+            c += 1; /* Type */
+            c = WriteBuffer2.Align8(c);
+            c += 56; /* Pose */
+            c += 16; /* Color */
+            c += 16; /* SecondaryColor */
+            c = WriteBuffer2.Align8(c);
+            c += 8; /* Scale */
+            c += 8; /* SecondaryScale */
+            c = WriteBuffer2.AddLength(c, Caption);
+            c = WriteBuffer2.Align8(c);
+            c += 80; /* Boundary */
+            c = WriteBuffer2.AddLength(c, SecondaryBoundaries);
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/Widget";

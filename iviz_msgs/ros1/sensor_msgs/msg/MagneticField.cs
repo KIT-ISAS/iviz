@@ -80,13 +80,15 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength => 96 + Header.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, MagneticField_);
-            WriteBuffer2.AddLength(ref c, MagneticFieldCovariance, 9);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align8(c);
+            c += 24; /* MagneticField_ */
+            c += 9 * 8;
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/MagneticField";

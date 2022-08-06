@@ -73,14 +73,17 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength => 76 + WriteBuffer.GetStringSize(Name) + 4 * Meshes.Length;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Name);
-            WriteBuffer2.AddLength(ref c, Parent);
-            Transform.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Meshes);
+            c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Parent */
+            c += 64; /* Transform */
+            c += 4;  /* Meshes length */
+            c += 4 * Meshes.Length;
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/Node";

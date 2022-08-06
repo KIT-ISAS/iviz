@@ -137,23 +137,30 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Ns);
-            WriteBuffer2.AddLength(ref c, Id);
-            WriteBuffer2.AddLength(ref c, Type);
-            WriteBuffer2.AddLength(ref c, Action);
-            WriteBuffer2.AddLength(ref c, Position);
-            WriteBuffer2.AddLength(ref c, Scale);
-            WriteBuffer2.AddLength(ref c, OutlineColor);
-            WriteBuffer2.AddLength(ref c, Filled);
-            WriteBuffer2.AddLength(ref c, FillColor);
-            WriteBuffer2.AddLength(ref c, Lifetime);
-            WriteBuffer2.AddLength(ref c, Points);
-            WriteBuffer2.AddLength(ref c, OutlineColors);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.AddLength(c, Ns);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Id */
+            c += 4; /* Type */
+            c += 4; /* Action */
+            c = WriteBuffer2.Align8(c);
+            c += 24; /* Position */
+            c += 4; /* Scale */
+            c += 16; /* OutlineColor */
+            c += 1; /* Filled */
+            c = WriteBuffer2.Align4(c);
+            c += 16; /* FillColor */
+            c += 8; /* Lifetime */
+            c += 4;  /* Points length */
+            c = WriteBuffer2.Align8(c);
+            c += 24 * Points.Length;
+            c += 4;  /* OutlineColors length */
+            c += 16 * OutlineColors.Length;
+            return c;
         }
     
         public const string MessageType = "visualization_msgs/ImageMarker";

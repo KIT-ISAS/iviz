@@ -58,12 +58,13 @@ namespace Iviz.Msgs.Roscpp
     
         public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Name) + WriteBuffer.GetStringSize(Level);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Name);
-            WriteBuffer2.AddLength(ref c, Level);
+            c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.AddLength(c, Level);
+            return c;
         }
     
         public const string MessageType = "roscpp/Logger";

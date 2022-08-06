@@ -67,12 +67,16 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 336;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            Accel.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Covariance, 36);
+            c = WriteBuffer2.Align8(c);
+            c += 48; /* Accel */
+            c += 36 * 8;
+            return c;
         }
     
         public const string MessageType = "geometry_msgs/AccelWithCovariance";

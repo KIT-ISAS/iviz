@@ -51,11 +51,12 @@ namespace Iviz.Msgs.NavMsgs
     
         public int RosMessageLength => 0 + Map.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Map.AddRos2MessageLength(ref c);
+            c = Map.AddRos2MessageLength(c);
+            return c;
         }
     
         public const string MessageType = "nav_msgs/GetMapResult";

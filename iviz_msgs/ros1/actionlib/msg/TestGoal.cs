@@ -50,11 +50,15 @@ namespace Iviz.Msgs.Actionlib
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 4;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Goal);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Goal */
+            return c;
         }
     
         public const string MessageType = "actionlib/TestGoal";

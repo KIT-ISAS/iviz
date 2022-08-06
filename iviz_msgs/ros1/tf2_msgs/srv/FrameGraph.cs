@@ -87,7 +87,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int _) { }
+        public int AddRos2MessageLength(int c) => c;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -138,11 +138,12 @@ namespace Iviz.Msgs.Tf2Msgs
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(FrameYaml);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, FrameYaml);
+            c = WriteBuffer2.AddLength(c, FrameYaml);
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);

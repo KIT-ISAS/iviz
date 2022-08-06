@@ -72,12 +72,13 @@ namespace Iviz.Msgs.DiagnosticMsgs
     
         public int RosMessageLength => 4 + Header.RosMessageLength + WriteBuffer.GetArraySize(Status);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Status);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.AddLength(c, Status);
+            return c;
         }
     
         public const string MessageType = "diagnostic_msgs/DiagnosticArray";

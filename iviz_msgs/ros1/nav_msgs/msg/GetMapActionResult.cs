@@ -75,13 +75,14 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            Status.AddRos2MessageLength(ref c);
-            Result.AddRos2MessageLength(ref c);
+            c = Header.AddRos2MessageLength(c);
+            c = Status.AddRos2MessageLength(c);
+            c = Result.AddRos2MessageLength(c);
+            return c;
         }
     
         public const string MessageType = "nav_msgs/GetMapActionResult";

@@ -104,15 +104,23 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Name);
-            WriteBuffer2.AddLength(ref c, Position);
-            WriteBuffer2.AddLength(ref c, Velocity);
-            WriteBuffer2.AddLength(ref c, Effort);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Position length */
+            c = WriteBuffer2.Align8(c);
+            c += 8 * Position.Length;
+            c += 4;  /* Velocity length */
+            c = WriteBuffer2.Align8(c);
+            c += 8 * Velocity.Length;
+            c += 4;  /* Effort length */
+            c = WriteBuffer2.Align8(c);
+            c += 8 * Effort.Length;
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/JointState";

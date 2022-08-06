@@ -93,11 +93,14 @@ namespace Iviz.Msgs.StdSrvs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 1;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Data);
+            c += 1; /* Data */
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -157,12 +160,13 @@ namespace Iviz.Msgs.StdSrvs
     
         public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Success);
-            WriteBuffer2.AddLength(ref c, Message);
+            c += 1; /* Success */
+            c = WriteBuffer2.AddLength(c, Message);
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);

@@ -109,19 +109,22 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Type);
-            WriteBuffer2.AddLength(ref c, Code);
-            WriteBuffer2.AddLength(ref c, Corners, 4);
-            WriteBuffer2.AddLength(ref c, CameraIntrinsic, 9);
-            WriteBuffer2.AddLength(ref c, CameraPose);
-            WriteBuffer2.AddLength(ref c, HasReliablePose);
-            WriteBuffer2.AddLength(ref c, MarkerSizeInMm);
-            WriteBuffer2.AddLength(ref c, PoseRelativeToCamera);
+            c = Header.AddRos2MessageLength(c);
+            c += 1; /* Type */
+            c = WriteBuffer2.AddLength(c, Code);
+            c = WriteBuffer2.Align8(c);
+            c += 4 * 24;
+            c += 9 * 8;
+            c += 56; /* CameraPose */
+            c += 1; /* HasReliablePose */
+            c = WriteBuffer2.Align8(c);
+            c += 8; /* MarkerSizeInMm */
+            c += 56; /* PoseRelativeToCamera */
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/ARMarker";

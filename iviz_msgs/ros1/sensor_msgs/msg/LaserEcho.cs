@@ -54,11 +54,14 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength => 4 + 4 * Echoes.Length;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Echoes);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Echoes length */
+            c += 4 * Echoes.Length;
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/LaserEcho";

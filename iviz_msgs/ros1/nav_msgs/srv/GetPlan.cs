@@ -113,13 +113,15 @@ namespace Iviz.Msgs.NavMsgs
     
         public int RosMessageLength => 4 + Start.RosMessageLength + Goal.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Start.AddRos2MessageLength(ref c);
-            Goal.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Tolerance);
+            c = Start.AddRos2MessageLength(c);
+            c = Goal.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Tolerance */
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -172,11 +174,12 @@ namespace Iviz.Msgs.NavMsgs
     
         public int RosMessageLength => 0 + Plan.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Plan.AddRos2MessageLength(ref c);
+            c = Plan.AddRos2MessageLength(c);
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);

@@ -88,19 +88,21 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength => 46 + WriteBuffer.GetStringSize(Name);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Name);
-            WriteBuffer2.AddLength(ref c, Type);
-            WriteBuffer2.AddLength(ref c, CastShadows);
-            WriteBuffer2.AddLength(ref c, Diffuse);
-            WriteBuffer2.AddLength(ref c, Range);
-            WriteBuffer2.AddLength(ref c, Position);
-            WriteBuffer2.AddLength(ref c, Direction);
-            WriteBuffer2.AddLength(ref c, InnerAngle);
-            WriteBuffer2.AddLength(ref c, OuterAngle);
+            c = WriteBuffer2.AddLength(c, Name);
+            c += 1; /* Type */
+            c += 1; /* CastShadows */
+            c += 4; /* Diffuse */
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Range */
+            c += 12; /* Position */
+            c += 12; /* Direction */
+            c += 4; /* InnerAngle */
+            c += 4; /* OuterAngle */
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/Light";

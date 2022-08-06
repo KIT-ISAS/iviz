@@ -75,12 +75,16 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 4;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Status);
-            WriteBuffer2.AddLength(ref c, Service);
+            c += 1; /* Status */
+            c = WriteBuffer2.Align2(c);
+            c += 2; /* Service */
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/NavSatStatus";

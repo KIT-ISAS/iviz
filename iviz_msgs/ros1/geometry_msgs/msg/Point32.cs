@@ -66,7 +66,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public readonly void AddRos2MessageLength(ref int c) => WriteBuffer2.AddLength(ref c, this);
+        public readonly int AddRos2MessageLength(int c) => WriteBuffer2.Align4(c) + Ros2FixedMessageLength;
         
     
         public const string MessageType = "geometry_msgs/Point32";

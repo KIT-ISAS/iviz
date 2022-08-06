@@ -67,13 +67,15 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength => 12 + Header.RosMessageLength + WriteBuffer.GetStringSize(Source);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, TimeRef);
-            WriteBuffer2.AddLength(ref c, Source);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
+            c += 8; /* TimeRef */
+            c = WriteBuffer2.AddLength(c, Source);
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/TimeReference";

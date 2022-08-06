@@ -66,13 +66,15 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         public int RosMessageLength => 60 + Header.RosMessageLength + WriteBuffer.GetStringSize(Name);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Pose);
-            WriteBuffer2.AddLength(ref c, Name);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align8(c);
+            c += 56; /* Pose */
+            c = WriteBuffer2.AddLength(c, Name);
+            return c;
         }
     
         public const string MessageType = "visualization_msgs/InteractiveMarkerPose";

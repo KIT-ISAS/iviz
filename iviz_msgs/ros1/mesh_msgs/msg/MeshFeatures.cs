@@ -71,12 +71,13 @@ namespace Iviz.Msgs.MeshMsgs
     
         public int RosMessageLength => 8 + WriteBuffer.GetStringSize(MapUuid) + WriteBuffer.GetArraySize(Features);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, MapUuid);
-            WriteBuffer2.AddLength(ref c, Features);
+            c = WriteBuffer2.AddLength(c, MapUuid);
+            c = WriteBuffer2.AddLength(c, Features);
+            return c;
         }
     
         public const string MessageType = "mesh_msgs/MeshFeatures";

@@ -104,13 +104,17 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 9;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, ResolutionX);
-            WriteBuffer2.AddLength(ref c, ResolutionY);
-            WriteBuffer2.AddLength(ref c, WithHolograms);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* ResolutionX */
+            c += 4; /* ResolutionY */
+            c += 1; /* WithHolograms */
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -168,12 +172,13 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Success);
-            WriteBuffer2.AddLength(ref c, Message);
+            c += 1; /* Success */
+            c = WriteBuffer2.AddLength(c, Message);
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);

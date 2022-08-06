@@ -101,16 +101,18 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength => 17 + Header.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, RadiationType);
-            WriteBuffer2.AddLength(ref c, FieldOfView);
-            WriteBuffer2.AddLength(ref c, MinRange);
-            WriteBuffer2.AddLength(ref c, MaxRange);
-            WriteBuffer2.AddLength(ref c, Range_);
+            c = Header.AddRos2MessageLength(c);
+            c += 1; /* RadiationType */
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* FieldOfView */
+            c += 4; /* MinRange */
+            c += 4; /* MaxRange */
+            c += 4; /* Range_ */
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/Range";

@@ -80,13 +80,17 @@ namespace Iviz.Msgs.RclInterfaces
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 24;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, FromValue);
-            WriteBuffer2.AddLength(ref c, ToValue);
-            WriteBuffer2.AddLength(ref c, Step);
+            c = WriteBuffer2.Align8(c);
+            c += 8; /* FromValue */
+            c += 8; /* ToValue */
+            c += 8; /* Step */
+            return c;
         }
     
         public const string MessageType = "rcl_interfaces/IntegerRange";

@@ -58,12 +58,13 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public int RosMessageLength => 0 + Header.RosMessageLength + Polygon.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            Polygon.AddRos2MessageLength(ref c);
+            c = Header.AddRos2MessageLength(c);
+            c = Polygon.AddRos2MessageLength(c);
+            return c;
         }
     
         public const string MessageType = "geometry_msgs/PolygonStamped";

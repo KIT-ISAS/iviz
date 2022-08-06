@@ -66,13 +66,15 @@ namespace Iviz.Msgs.Actionlib
     
         public int RosMessageLength => 16 + Header.RosMessageLength + GoalId.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            GoalId.AddRos2MessageLength(ref c);
-            Goal.AddRos2MessageLength(ref c);
+            c = Header.AddRos2MessageLength(c);
+            c = GoalId.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align8(c);
+            c += 16; /* Goal */
+            return c;
         }
     
         public const string MessageType = "actionlib/TwoIntsActionGoal";

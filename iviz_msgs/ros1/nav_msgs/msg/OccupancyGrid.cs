@@ -70,13 +70,16 @@ namespace Iviz.Msgs.NavMsgs
     
         public int RosMessageLength => 80 + Header.RosMessageLength + Data.Length;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            Info.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Data);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
+            c += 80; /* Info */
+            c += 4;  /* Data length */
+            c += 1 * Data.Length;
+            return c;
         }
     
         public const string MessageType = "nav_msgs/OccupancyGrid";

@@ -81,15 +81,19 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 17;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, XOffset);
-            WriteBuffer2.AddLength(ref c, YOffset);
-            WriteBuffer2.AddLength(ref c, Height);
-            WriteBuffer2.AddLength(ref c, Width);
-            WriteBuffer2.AddLength(ref c, DoRectify);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* XOffset */
+            c += 4; /* YOffset */
+            c += 4; /* Height */
+            c += 4; /* Width */
+            c += 1; /* DoRectify */
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/RegionOfInterest";

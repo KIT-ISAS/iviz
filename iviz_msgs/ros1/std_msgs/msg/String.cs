@@ -50,11 +50,12 @@ namespace Iviz.Msgs.StdMsgs
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Data);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Data);
+            c = WriteBuffer2.AddLength(c, Data);
+            return c;
         }
     
         public const string MessageType = "std_msgs/String";

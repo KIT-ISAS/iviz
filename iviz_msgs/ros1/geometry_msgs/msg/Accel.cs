@@ -57,12 +57,16 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 48;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Linear);
-            WriteBuffer2.AddLength(ref c, Angular);
+            c = WriteBuffer2.Align8(c);
+            c += 24; /* Linear */
+            c += 24; /* Angular */
+            return c;
         }
     
         public const string MessageType = "geometry_msgs/Accel";

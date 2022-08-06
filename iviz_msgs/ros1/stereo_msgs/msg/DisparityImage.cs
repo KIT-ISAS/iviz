@@ -102,18 +102,20 @@ namespace Iviz.Msgs.StereoMsgs
     
         public int RosMessageLength => 37 + Header.RosMessageLength + Image.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            Image.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, F);
-            WriteBuffer2.AddLength(ref c, T);
-            ValidWindow.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, MinDisparity);
-            WriteBuffer2.AddLength(ref c, MaxDisparity);
-            WriteBuffer2.AddLength(ref c, DeltaD);
+            c = Header.AddRos2MessageLength(c);
+            c = Image.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* F */
+            c += 4; /* T */
+            c += 17; /* ValidWindow */
+            c += 4; /* MinDisparity */
+            c += 4; /* MaxDisparity */
+            c += 4; /* DeltaD */
+            return c;
         }
     
         public const string MessageType = "stereo_msgs/DisparityImage";

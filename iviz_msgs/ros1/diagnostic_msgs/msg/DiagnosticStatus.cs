@@ -106,15 +106,16 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Level);
-            WriteBuffer2.AddLength(ref c, Name);
-            WriteBuffer2.AddLength(ref c, Message);
-            WriteBuffer2.AddLength(ref c, HardwareId);
-            WriteBuffer2.AddLength(ref c, Values);
+            c += 1; /* Level */
+            c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.AddLength(c, Message);
+            c = WriteBuffer2.AddLength(c, HardwareId);
+            c = WriteBuffer2.AddLength(c, Values);
+            return c;
         }
     
         public const string MessageType = "diagnostic_msgs/DiagnosticStatus";

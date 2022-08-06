@@ -100,18 +100,30 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, IsValid);
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Palm);
-            WriteBuffer2.AddLength(ref c, Thumb);
-            WriteBuffer2.AddLength(ref c, Index);
-            WriteBuffer2.AddLength(ref c, Middle);
-            WriteBuffer2.AddLength(ref c, Ring);
-            WriteBuffer2.AddLength(ref c, Little);
+            c += 1; /* IsValid */
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align8(c);
+            c += 56; /* Palm */
+            c += 4;  /* Thumb length */
+            c = WriteBuffer2.Align8(c);
+            c += 56 * Thumb.Length;
+            c += 4;  /* Index length */
+            c = WriteBuffer2.Align8(c);
+            c += 56 * Index.Length;
+            c += 4;  /* Middle length */
+            c = WriteBuffer2.Align8(c);
+            c += 56 * Middle.Length;
+            c += 4;  /* Ring length */
+            c = WriteBuffer2.Align8(c);
+            c += 56 * Ring.Length;
+            c += 4;  /* Little length */
+            c = WriteBuffer2.Align8(c);
+            c += 56 * Little.Length;
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/XRHandState";

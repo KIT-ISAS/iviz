@@ -57,7 +57,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int _) { }
+        public int AddRos2MessageLength(int c) => c;
     
         public const string MessageType = "rcl_interfaces/ParameterType";
     

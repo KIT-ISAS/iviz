@@ -63,11 +63,12 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Markers);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Markers);
+            c = WriteBuffer2.AddLength(c, Markers);
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/ARMarkerArray";

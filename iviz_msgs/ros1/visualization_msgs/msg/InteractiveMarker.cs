@@ -131,17 +131,20 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Pose);
-            WriteBuffer2.AddLength(ref c, Name);
-            WriteBuffer2.AddLength(ref c, Description);
-            WriteBuffer2.AddLength(ref c, Scale);
-            WriteBuffer2.AddLength(ref c, MenuEntries);
-            WriteBuffer2.AddLength(ref c, Controls);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align8(c);
+            c += 56; /* Pose */
+            c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.AddLength(c, Description);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Scale */
+            c = WriteBuffer2.AddLength(c, MenuEntries);
+            c = WriteBuffer2.AddLength(c, Controls);
+            return c;
         }
     
         public const string MessageType = "visualization_msgs/InteractiveMarker";

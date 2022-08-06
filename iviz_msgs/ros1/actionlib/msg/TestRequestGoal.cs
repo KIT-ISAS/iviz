@@ -91,18 +91,22 @@ namespace Iviz.Msgs.Actionlib
     
         public int RosMessageLength => 38 + WriteBuffer.GetStringSize(ResultText);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, TerminateStatus);
-            WriteBuffer2.AddLength(ref c, IgnoreCancel);
-            WriteBuffer2.AddLength(ref c, ResultText);
-            WriteBuffer2.AddLength(ref c, TheResult);
-            WriteBuffer2.AddLength(ref c, IsSimpleClient);
-            WriteBuffer2.AddLength(ref c, DelayAccept);
-            WriteBuffer2.AddLength(ref c, DelayTerminate);
-            WriteBuffer2.AddLength(ref c, PauseStatus);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* TerminateStatus */
+            c += 1; /* IgnoreCancel */
+            c = WriteBuffer2.AddLength(c, ResultText);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* TheResult */
+            c += 1; /* IsSimpleClient */
+            c = WriteBuffer2.Align4(c);
+            c += 8; /* DelayAccept */
+            c += 8; /* DelayTerminate */
+            c += 8; /* PauseStatus */
+            return c;
         }
     
         public const string MessageType = "actionlib/TestRequestGoal";

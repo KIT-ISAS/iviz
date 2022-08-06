@@ -65,13 +65,15 @@ namespace Iviz.Msgs.StdMsgs
     
         public int RosMessageLength => 12 + WriteBuffer.GetStringSize(Label);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Label);
-            WriteBuffer2.AddLength(ref c, Size);
-            WriteBuffer2.AddLength(ref c, Stride);
+            c = WriteBuffer2.AddLength(c, Label);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Size */
+            c += 4; /* Stride */
+            return c;
         }
     
         public const string MessageType = "std_msgs/MultiArrayDimension";

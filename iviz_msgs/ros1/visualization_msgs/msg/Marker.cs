@@ -168,25 +168,32 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Ns);
-            WriteBuffer2.AddLength(ref c, Id);
-            WriteBuffer2.AddLength(ref c, Type);
-            WriteBuffer2.AddLength(ref c, Action);
-            WriteBuffer2.AddLength(ref c, Pose);
-            WriteBuffer2.AddLength(ref c, Scale);
-            WriteBuffer2.AddLength(ref c, Color);
-            WriteBuffer2.AddLength(ref c, Lifetime);
-            WriteBuffer2.AddLength(ref c, FrameLocked);
-            WriteBuffer2.AddLength(ref c, Points);
-            WriteBuffer2.AddLength(ref c, Colors);
-            WriteBuffer2.AddLength(ref c, Text);
-            WriteBuffer2.AddLength(ref c, MeshResource);
-            WriteBuffer2.AddLength(ref c, MeshUseEmbeddedMaterials);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.AddLength(c, Ns);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Id */
+            c += 4; /* Type */
+            c += 4; /* Action */
+            c = WriteBuffer2.Align8(c);
+            c += 56; /* Pose */
+            c += 24; /* Scale */
+            c += 16; /* Color */
+            c += 8; /* Lifetime */
+            c += 1; /* FrameLocked */
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Points length */
+            c = WriteBuffer2.Align8(c);
+            c += 24 * Points.Length;
+            c += 4;  /* Colors length */
+            c += 16 * Colors.Length;
+            c = WriteBuffer2.AddLength(c, Text);
+            c = WriteBuffer2.AddLength(c, MeshResource);
+            c += 1; /* MeshUseEmbeddedMaterials */
+            return c;
         }
     
         public const string MessageType = "visualization_msgs/Marker";

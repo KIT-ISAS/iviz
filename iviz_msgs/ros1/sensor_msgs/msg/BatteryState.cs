@@ -182,26 +182,31 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Voltage);
-            WriteBuffer2.AddLength(ref c, Temperature);
-            WriteBuffer2.AddLength(ref c, Current);
-            WriteBuffer2.AddLength(ref c, Charge);
-            WriteBuffer2.AddLength(ref c, Capacity);
-            WriteBuffer2.AddLength(ref c, DesignCapacity);
-            WriteBuffer2.AddLength(ref c, Percentage);
-            WriteBuffer2.AddLength(ref c, PowerSupplyStatus);
-            WriteBuffer2.AddLength(ref c, PowerSupplyHealth);
-            WriteBuffer2.AddLength(ref c, PowerSupplyTechnology);
-            WriteBuffer2.AddLength(ref c, Present);
-            WriteBuffer2.AddLength(ref c, CellVoltage);
-            WriteBuffer2.AddLength(ref c, CellTemperature);
-            WriteBuffer2.AddLength(ref c, Location);
-            WriteBuffer2.AddLength(ref c, SerialNumber);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Voltage */
+            c += 4; /* Temperature */
+            c += 4; /* Current */
+            c += 4; /* Charge */
+            c += 4; /* Capacity */
+            c += 4; /* DesignCapacity */
+            c += 4; /* Percentage */
+            c += 1; /* PowerSupplyStatus */
+            c += 1; /* PowerSupplyHealth */
+            c += 1; /* PowerSupplyTechnology */
+            c += 1; /* Present */
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* CellVoltage length */
+            c += 4 * CellVoltage.Length;
+            c += 4;  /* CellTemperature length */
+            c += 4 * CellTemperature.Length;
+            c = WriteBuffer2.AddLength(c, Location);
+            c = WriteBuffer2.AddLength(c, SerialNumber);
+            return c;
         }
     
         public const string MessageType = "sensor_msgs/BatteryState";

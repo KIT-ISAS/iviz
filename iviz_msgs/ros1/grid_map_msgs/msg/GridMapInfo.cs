@@ -68,15 +68,17 @@ namespace Iviz.Msgs.GridMapMsgs
     
         public int RosMessageLength => 80 + Header.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Resolution);
-            WriteBuffer2.AddLength(ref c, LengthX);
-            WriteBuffer2.AddLength(ref c, LengthY);
-            WriteBuffer2.AddLength(ref c, Pose);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align8(c);
+            c += 8; /* Resolution */
+            c += 8; /* LengthX */
+            c += 8; /* LengthY */
+            c += 56; /* Pose */
+            return c;
         }
     
         public const string MessageType = "grid_map_msgs/GridMapInfo";

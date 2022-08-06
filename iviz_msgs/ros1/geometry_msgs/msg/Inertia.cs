@@ -86,18 +86,22 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 80;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, M);
-            WriteBuffer2.AddLength(ref c, Com);
-            WriteBuffer2.AddLength(ref c, Ixx);
-            WriteBuffer2.AddLength(ref c, Ixy);
-            WriteBuffer2.AddLength(ref c, Ixz);
-            WriteBuffer2.AddLength(ref c, Iyy);
-            WriteBuffer2.AddLength(ref c, Iyz);
-            WriteBuffer2.AddLength(ref c, Izz);
+            c = WriteBuffer2.Align8(c);
+            c += 8; /* M */
+            c += 24; /* Com */
+            c += 8; /* Ixx */
+            c += 8; /* Ixy */
+            c += 8; /* Ixz */
+            c += 8; /* Iyy */
+            c += 8; /* Iyz */
+            c += 8; /* Izz */
+            return c;
         }
     
         public const string MessageType = "geometry_msgs/Inertia";

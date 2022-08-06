@@ -69,12 +69,15 @@ namespace Iviz.Msgs.MeshMsgs
     
         public int RosMessageLength => 28 + 4 * Descriptor.Length;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Location);
-            WriteBuffer2.AddLength(ref c, Descriptor);
+            c = WriteBuffer2.Align8(c);
+            c += 24; /* Location */
+            c += 4;  /* Descriptor length */
+            c += 4 * Descriptor.Length;
+            return c;
         }
     
         public const string MessageType = "mesh_msgs/Feature";

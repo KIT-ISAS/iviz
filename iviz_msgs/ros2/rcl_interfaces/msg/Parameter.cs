@@ -64,12 +64,13 @@ namespace Iviz.Msgs.RclInterfaces
     
         public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Name) + Value.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Name);
-            Value.AddRos2MessageLength(ref c);
+            c = WriteBuffer2.AddLength(c, Name);
+            c = Value.AddRos2MessageLength(c);
+            return c;
         }
     
         public const string MessageType = "rcl_interfaces/Parameter";

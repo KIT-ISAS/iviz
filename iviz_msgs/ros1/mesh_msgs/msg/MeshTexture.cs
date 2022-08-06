@@ -66,13 +66,15 @@ namespace Iviz.Msgs.MeshMsgs
     
         public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Uuid) + Image.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Uuid);
-            WriteBuffer2.AddLength(ref c, TextureIndex);
-            Image.AddRos2MessageLength(ref c);
+            c = WriteBuffer2.AddLength(c, Uuid);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* TextureIndex */
+            c = Image.AddRos2MessageLength(c);
+            return c;
         }
     
         public const string MessageType = "mesh_msgs/MeshTexture";

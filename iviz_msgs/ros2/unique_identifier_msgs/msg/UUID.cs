@@ -57,11 +57,14 @@ namespace Iviz.Msgs.UniqueIdentifierMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 16;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Uuid, 16);
+            c += 16 * 1;
+            return c;
         }
     
         public const string MessageType = "unique_identifier_msgs/UUID";

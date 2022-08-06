@@ -143,18 +143,20 @@ namespace Iviz.Msgs.RosgraphMsgs
             }
         }
         
-        public readonly int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public readonly int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public readonly void AddRos2MessageLength(ref int c)
+        public readonly int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Level);
-            WriteBuffer2.AddLength(ref c, Name);
-            WriteBuffer2.AddLength(ref c, Msg);
-            WriteBuffer2.AddLength(ref c, File);
-            WriteBuffer2.AddLength(ref c, Function);
-            WriteBuffer2.AddLength(ref c, Line);
-            WriteBuffer2.AddLength(ref c, Topics);
+            c = Header.AddRos2MessageLength(c);
+            c += 1; /* Level */
+            c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.AddLength(c, Msg);
+            c = WriteBuffer2.AddLength(c, File);
+            c = WriteBuffer2.AddLength(c, Function);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* Line */
+            c = WriteBuffer2.AddLength(c, Topics);
+            return c;
         }
     
         public const string MessageType = "rosgraph_msgs/Log";

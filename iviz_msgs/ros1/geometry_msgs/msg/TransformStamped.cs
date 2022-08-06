@@ -78,13 +78,15 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public readonly int RosMessageLength => 60 + Header.RosMessageLength + WriteBuffer.GetStringSize(ChildFrameId);
         
-        public readonly int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public readonly int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public readonly void AddRos2MessageLength(ref int c)
+        public readonly int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, ChildFrameId);
-            WriteBuffer2.AddLength(ref c, Transform);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.AddLength(c, ChildFrameId);
+            c = WriteBuffer2.Align8(c);
+            c += 56; /* Transform */
+            return c;
         }
     
         public const string MessageType = "geometry_msgs/TransformStamped";

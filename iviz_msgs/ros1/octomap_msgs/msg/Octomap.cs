@@ -81,15 +81,18 @@ namespace Iviz.Msgs.OctomapMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Binary);
-            WriteBuffer2.AddLength(ref c, Id);
-            WriteBuffer2.AddLength(ref c, Resolution);
-            WriteBuffer2.AddLength(ref c, Data);
+            c = Header.AddRos2MessageLength(c);
+            c += 1; /* Binary */
+            c = WriteBuffer2.AddLength(c, Id);
+            c = WriteBuffer2.Align8(c);
+            c += 8; /* Resolution */
+            c += 4;  /* Data length */
+            c += 1 * Data.Length;
+            return c;
         }
     
         public const string MessageType = "octomap_msgs/Octomap";

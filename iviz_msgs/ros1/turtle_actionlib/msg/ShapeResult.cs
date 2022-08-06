@@ -57,12 +57,16 @@ namespace Iviz.Msgs.TurtleActionlib
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 8;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, InteriorAngle);
-            WriteBuffer2.AddLength(ref c, Apothem);
+            c = WriteBuffer2.Align4(c);
+            c += 4; /* InteriorAngle */
+            c += 4; /* Apothem */
+            return c;
         }
     
         public const string MessageType = "turtle_actionlib/ShapeResult";

@@ -84,14 +84,15 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Uuid);
-            WriteBuffer2.AddLength(ref c, Type);
-            MeshVertexCosts.AddRos2MessageLength(ref c);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.AddLength(c, Uuid);
+            c = WriteBuffer2.AddLength(c, Type);
+            c = MeshVertexCosts.AddRos2MessageLength(c);
+            return c;
         }
     
         public const string MessageType = "mesh_msgs/MeshVertexCostsStamped";

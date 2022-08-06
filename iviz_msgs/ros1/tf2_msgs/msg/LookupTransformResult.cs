@@ -57,12 +57,13 @@ namespace Iviz.Msgs.Tf2Msgs
     
         public int RosMessageLength => 0 + Transform.RosMessageLength + Error.RosMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Transform.AddRos2MessageLength(ref c);
-            Error.AddRos2MessageLength(ref c);
+            c = Transform.AddRos2MessageLength(c);
+            c = Error.AddRos2MessageLength(c);
+            return c;
         }
     
         public const string MessageType = "tf2_msgs/LookupTransformResult";

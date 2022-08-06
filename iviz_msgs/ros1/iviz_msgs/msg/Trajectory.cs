@@ -58,12 +58,17 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength => 8 + 56 * Poses.Length + 8 * Timestamps.Length;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Poses);
-            WriteBuffer2.AddLength(ref c, Timestamps);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Poses length */
+            c = WriteBuffer2.Align8(c);
+            c += 56 * Poses.Length;
+            c += 4;  /* Timestamps length */
+            c += 8 * Timestamps.Length;
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/Trajectory";

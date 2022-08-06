@@ -44,7 +44,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int _) { }
+        public int AddRos2MessageLength(int c) => c;
     
         public const string MessageType = "tf2_msgs/LookupTransformFeedback";
     

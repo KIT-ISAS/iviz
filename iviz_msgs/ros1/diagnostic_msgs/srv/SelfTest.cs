@@ -87,7 +87,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int _) { }
+        public int AddRos2MessageLength(int c) => c;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -165,13 +165,14 @@ namespace Iviz.Msgs.DiagnosticMsgs
     
         public int RosMessageLength => 9 + WriteBuffer.GetStringSize(Id) + WriteBuffer.GetArraySize(Status);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Id);
-            WriteBuffer2.AddLength(ref c, Passed);
-            WriteBuffer2.AddLength(ref c, Status);
+            c = WriteBuffer2.AddLength(c, Id);
+            c += 1; /* Passed */
+            c = WriteBuffer2.AddLength(c, Status);
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);

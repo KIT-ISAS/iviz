@@ -101,12 +101,16 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public const int Ros2FixedMessageLength = 48;
         
-        public void AddRos2MessageLength(ref int c)
+        public int Ros2MessageLength => Ros2FixedMessageLength;
+        
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Min);
-            WriteBuffer2.AddLength(ref c, Max);
+            c = WriteBuffer2.Align8(c);
+            c += 24; /* Min */
+            c += 24; /* Max */
+            return c;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -153,7 +157,7 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public int Ros2MessageLength => 0;
         
-        public void AddRos2MessageLength(ref int _) { }
+        public int AddRos2MessageLength(int c) => c;
     
         public override string ToString() => Extensions.ToString(this);
     }

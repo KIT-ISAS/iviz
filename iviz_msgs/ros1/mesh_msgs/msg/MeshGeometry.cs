@@ -89,13 +89,20 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Vertices);
-            WriteBuffer2.AddLength(ref c, VertexNormals);
-            WriteBuffer2.AddLength(ref c, Faces);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Vertices length */
+            c = WriteBuffer2.Align8(c);
+            c += 24 * Vertices.Length;
+            c += 4;  /* VertexNormals length */
+            c = WriteBuffer2.Align8(c);
+            c += 24 * VertexNormals.Length;
+            c += 4;  /* Faces length */
+            c += 12 * Faces.Length;
+            return c;
         }
     
         public const string MessageType = "mesh_msgs/MeshGeometry";

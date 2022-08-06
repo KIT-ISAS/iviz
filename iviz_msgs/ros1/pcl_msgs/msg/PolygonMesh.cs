@@ -90,13 +90,14 @@ namespace Iviz.Msgs.PclMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            Cloud.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Polygons);
+            c = Header.AddRos2MessageLength(c);
+            c = Cloud.AddRos2MessageLength(c);
+            c = WriteBuffer2.AddLength(c, Polygons);
+            return c;
         }
     
         public const string MessageType = "pcl_msgs/PolygonMesh";

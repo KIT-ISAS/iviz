@@ -71,12 +71,13 @@ namespace Iviz.Msgs.ActionlibMsgs
     
         public int RosMessageLength => 4 + Header.RosMessageLength + WriteBuffer.GetArraySize(StatusList);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            Header.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, StatusList);
+            c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.AddLength(c, StatusList);
+            return c;
         }
     
         public const string MessageType = "actionlib_msgs/GoalStatusArray";

@@ -51,11 +51,14 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         public int RosMessageLength => 4 + 4 * Sequence.Length;
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Sequence);
+            c = WriteBuffer2.Align4(c);
+            c += 4;  /* Sequence length */
+            c += 4 * Sequence.Length;
+            return c;
         }
     
         public const string MessageType = "actionlib_tutorials/FibonacciResult";

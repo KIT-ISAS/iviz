@@ -89,14 +89,16 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Uri);
-            Pose.AddRos2MessageLength(ref c);
-            Material.AddRos2MessageLength(ref c);
-            WriteBuffer2.AddLength(ref c, Package);
+            c = WriteBuffer2.AddLength(c, Uri);
+            c = WriteBuffer2.Align4(c);
+            c += 64; /* Pose */
+            c = Material.AddRos2MessageLength(c);
+            c = WriteBuffer2.AddLength(c, Package);
+            return c;
         }
     
         public const string MessageType = "iviz_msgs/Include";

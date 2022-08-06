@@ -134,16 +134,18 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, ServerId);
-            WriteBuffer2.AddLength(ref c, SeqNum);
-            WriteBuffer2.AddLength(ref c, Type);
-            WriteBuffer2.AddLength(ref c, Markers);
-            WriteBuffer2.AddLength(ref c, Poses);
-            WriteBuffer2.AddLength(ref c, Erases);
+            c = WriteBuffer2.AddLength(c, ServerId);
+            c = WriteBuffer2.Align8(c);
+            c += 8; /* SeqNum */
+            c += 1; /* Type */
+            c = WriteBuffer2.AddLength(c, Markers);
+            c = WriteBuffer2.AddLength(c, Poses);
+            c = WriteBuffer2.AddLength(c, Erases);
+            return c;
         }
     
         public const string MessageType = "visualization_msgs/InteractiveMarkerUpdate";

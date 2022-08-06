@@ -81,12 +81,14 @@ namespace Iviz.Msgs.StdMsgs
     
         public readonly int RosMessageLength => 16 + WriteBuffer.GetStringSize(FrameId);
         
-        public readonly int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public readonly int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public readonly void AddRos2MessageLength(ref int c)
+        public readonly int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Stamp);
-            WriteBuffer2.AddLength(ref c, FrameId);
+            c = WriteBuffer2.Align4(c);
+            c += 8; /* Stamp */
+            c = WriteBuffer2.AddLength(c, FrameId);
+            return c;
         }
     
         public const string MessageType = "std_msgs/Header";

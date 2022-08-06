@@ -58,11 +58,12 @@ namespace Iviz.Msgs.Tf
     
         public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Transforms);
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Transforms);
+            c = WriteBuffer2.AddLength(c, Transforms);
+            return c;
         }
     
         public const string MessageType = "tf/tfMessage";

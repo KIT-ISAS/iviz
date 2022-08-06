@@ -128,15 +128,17 @@ namespace Iviz.Msgs.RclInterfaces
             }
         }
         
-        public int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public void AddRos2MessageLength(ref int c)
+        public int AddRos2MessageLength(int c)
         {
-            WriteBuffer2.AddLength(ref c, Stamp);
-            WriteBuffer2.AddLength(ref c, Node);
-            WriteBuffer2.AddLength(ref c, NewParameters);
-            WriteBuffer2.AddLength(ref c, ChangedParameters);
-            WriteBuffer2.AddLength(ref c, DeletedParameters);
+            c = WriteBuffer2.Align4(c);
+            c += 8; /* Stamp */
+            c = WriteBuffer2.AddLength(c, Node);
+            c = WriteBuffer2.AddLength(c, NewParameters);
+            c = WriteBuffer2.AddLength(c, ChangedParameters);
+            c = WriteBuffer2.AddLength(c, DeletedParameters);
+            return c;
         }
     
         public const string MessageType = "rcl_interfaces/ParameterEvent";
