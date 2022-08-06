@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.GridMapMsgs;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.StdMsgs;
@@ -213,6 +214,11 @@ public class IvizTests
 
         markers.Add(RosMarkerHelper.CreateCylinder(id: 5, pose: Pose.Identity.WithPosition(2, 1, 0),
             color: ColorRGBA.Blue, scale: (1, 0.5, 0.5)));
+
+        var marker = RosMarkerHelper.CreateCylinder(id: 66, pose: Pose.Identity.WithPosition(3, 1, 0),
+            color: ColorRGBA.Grey, scale: (0.5, 0.5, 0.5));
+        marker.Lifetime = TimeSpan.FromSeconds(3);
+        markers.Add(marker);
 
         markers.Add(RosMarkerHelper.CreateTextViewFacing(id: 6, position: (0, 2, 0), color: ColorRGBA.Blue, scale: 2,
             text: "lol"));
@@ -513,7 +519,6 @@ public class IvizTests
 
         writer.WaitForAnySubscriber();
         Thread.Sleep(100);
-        uint s = 0;
         const int w = 100;
         const int h = 100;
 
@@ -864,6 +869,29 @@ public class IvizTests
 
         var marker = RosMarkerHelper.CreateResource("package://aws-robomaker-hospital-world/worlds/hospital.world");
         writer.Write(marker);
+        Thread.Sleep(5000);
+    }
+
+    [Test]
+    public void TestDialogs()
+    {
+        using var writer = client.CreateWriter<Dialog>("/dialogs", latchingEnabled: true);
+        var dialog = new Dialog
+        {
+            Header = new Header(0, time.Now(), "map"),
+            Id = "dialog",
+            Scale = 1,
+            Type = Dialog.TYPE_PLAIN,
+            Buttons = Dialog.BUTTONS_OK,
+            Icon = Dialog.ICON_OK,
+            Title = "Abcd",
+            Caption = "Def",
+            CaptionAlignment = 0,
+            TfOffset = default,
+            DialogDisplacement = default,
+            TfDisplacement = default
+        };
+        writer.Write(dialog);
         Thread.Sleep(5000);
     }
 
