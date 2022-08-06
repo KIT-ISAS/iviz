@@ -64,7 +64,7 @@ namespace Iviz.Ros
                     try
                     {
                         IRosPublisher publisher;
-                        (publisherId, publisher) = await client.AdvertiseAsync<T>(topic, token);
+                        (publisherId, publisher) = await client.AdvertiseAsync<T>(topic, token: token);
                         Publisher = publisher;
                         return;
                     }

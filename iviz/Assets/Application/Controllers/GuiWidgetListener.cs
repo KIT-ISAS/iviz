@@ -514,8 +514,8 @@ namespace Iviz.Controllers
 
         static time SecsToTime(float time)
         {
-            uint numSecs = (uint)time;
-            uint numNSecs = (uint)((time - numSecs) * 10_000_000);
+            int numSecs = (int)time;
+            int numNSecs = (int)((time - numSecs) * 10_000_000);
             return new time(numSecs, numNSecs);
         }
 

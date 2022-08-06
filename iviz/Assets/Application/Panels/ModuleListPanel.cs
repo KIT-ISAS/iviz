@@ -207,9 +207,6 @@ namespace Iviz.App
             instance = null;
         }
 
-        static string MasterUriToString(Uri? uri) =>
-            uri != null && uri.AbsolutePath.Length != 0 ? $"{uri.Host}:{uri.Port.ToString()}" : "";
-
         void Start()
         {
             Thread.CurrentThread.CurrentCulture = BuiltIns.Culture;

@@ -255,11 +255,13 @@ namespace Iviz.Ros
                     RosLogger.Internal("Resubscribing and readvertising...");
                     token.ThrowIfCancellationRequested();
 
+                    /*
                     var (success, hosts) = await currentClient.GetParameterAsync("/iviz/hosts", token);
                     if (success)
                     {
                         AddHostsParamFromArg(hosts);
                     }
+                    */
 
                     AddConfigHostAliases();
 
@@ -1114,7 +1116,7 @@ namespace Iviz.Ros
                 try
                 {
                     using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, internalToken);
-                    cachedParameters = await Client.GetParameterNamesAsync(tokenSource.Token);
+                    //cachedParameters = await Client.GetParameterNamesAsync(tokenSource.Token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -1149,7 +1151,8 @@ namespace Iviz.Ros
                 using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
                 tokenSource.CancelAfter(timeoutInMs);
                 (bool success, RosParameterValue param) =
-                    await Client.GetParameterAsync(parameter, tokenSource.Token);
+                    //await Client.GetParameterAsync(parameter, tokenSource.Token);
+                    (true, default);
                 if (!success)
                 {
                     return (default, $"'{parameter}' not found");

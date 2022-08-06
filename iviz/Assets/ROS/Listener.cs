@@ -221,14 +221,15 @@ namespace Iviz.Ros
                 return;
             }
 
-            int messageCount = messageQueue.Count;
-            if (messageCount == 0)
+            if (messageQueue.IsEmpty)
             {
                 return;
             }
             
             messageHelper.Clear();
 
+            int messageCount = messageQueue.Count;
+            
             foreach (int _ in ..messageCount) // copy a fixed amount, in case messages are still being added
             {
                 if (messageQueue.TryDequeue(out T t))
