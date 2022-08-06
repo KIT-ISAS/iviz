@@ -14,7 +14,6 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
     IRosPublisher<TMessage>? publisher;
     string? publisherId;
     bool disposed;
-    bool latchingEnabled;
 
     public bool Started => publisher != null;
 

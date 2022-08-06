@@ -224,7 +224,7 @@ namespace Iviz.UtilsTests
 
             public void RosSerialize(ref WriteBuffer2 b) => throw new RosInvalidMessageForVersion();
             public int Ros2MessageLength => throw new RosInvalidMessageForVersion();
-            public void AddRos2MessageLength(ref int offset) => throw new RosInvalidMessageForVersion();
+            public int AddRos2MessageLength(int offset) => throw new RosInvalidMessageForVersion();
         }
     }
 }

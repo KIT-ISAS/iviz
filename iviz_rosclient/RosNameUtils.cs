@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using Iviz.Tools;
 
@@ -16,15 +17,15 @@ public static class RosNameUtils
         }
 
         char c0 = name[0];
-        if (c0 is not '/' && c0 is not '~' && !char.IsLetter(c0))
+        if (c0 is not ('/' or '~') && !char.IsLetter(c0))
         {
             return false;
         }
-
+        
         foreach (int i in 1..name.Length)
         {
             char c = name[i];
-            if (!char.IsLetterOrDigit(c) && c is not '_' && c is not '/')
+            if (!char.IsLetterOrDigit(c) && c is not ('_' or '/'))
             {
                 return false;
             }
@@ -44,7 +45,7 @@ public static class RosNameUtils
         }
 
         char c0 = name[0];
-        if (!char.IsLetter(c0) && c0 is not '/' && c0 is not '~')
+        if (!char.IsLetter(c0) && c0 is not ('/' or '~'))
         {
             throw new RosInvalidResourceNameException(
                 $"Resource name '{name}' is not valid. It must start with an alphanumeric character, " +
@@ -54,7 +55,7 @@ public static class RosNameUtils
         foreach (int i in 1..name.Length)
         {
             char c = name[i];
-            if (!char.IsLetterOrDigit(c) && c is not '_' && c is not '/')
+            if (!char.IsLetterOrDigit(c) && c is not ('_' or '/'))
             {
                 throw new RosInvalidResourceNameException(
                     $"Resource name '{name}' is not valid. It must only contain alphanumeric characters, " +
