@@ -25,9 +25,9 @@ internal sealed class AsyncRclClient : TaskExecutor
 
     public string FullName => client.FullName;
 
-    public static bool IsMessageTypeSupported(string message) => Rcl.IsMessageTypeSupported(message);
+    public static bool IsMessageTypeSupported(string message) => Rcl.Impl.IsMessageTypeSupported(message);
 
-    public static bool IsServiceTypeSupported(string message) => Rcl.IsServiceTypeSupported(message);
+    public static bool IsServiceTypeSupported(string message) => Rcl.Impl.IsServiceTypeSupported(message);
 
     public AsyncRclClient(string name, string @namespace = "")
     {

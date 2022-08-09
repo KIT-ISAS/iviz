@@ -23,8 +23,8 @@ internal sealed class RclWaitSet : IDisposable
         this.maxGuardConditions = maxGuardConditions;
         this.maxClients = maxClients;
         this.maxServers = maxServers;
-        waitSetHandle = Rcl.CreateWaitSet();
-        Check(Rcl.WaitSetInit(contextHandle, waitSetHandle, maxSubscriptions, maxGuardConditions, 0, 
+        waitSetHandle = Rcl.Impl.CreateWaitSet();
+        Check(Rcl.Impl.WaitSetInit(contextHandle, waitSetHandle, maxSubscriptions, maxGuardConditions, 0, 
             maxClients, maxServers, 0));
     }
 
@@ -54,13 +54,13 @@ internal sealed class RclWaitSet : IDisposable
         ref readonly IntPtr clientHandles = ref (clients.Length > 0 ? ref clients[0] : ref dummy);
         ref readonly IntPtr serviceHandles = ref (servers.Length > 0 ? ref servers[0] : ref dummy);
 
-        Check(Rcl.WaitClearAndAdd(waitSetHandle,
+        Check(Rcl.Impl.WaitClearAndAdd(waitSetHandle,
             in subscriptionHandles, subscriptions.Length,
             in guardHandles, guards.Length,
             in clientHandles, clients.Length,
             in serviceHandles, servers.Length));
 
-        int ret = Rcl.Wait(waitSetHandle, timeoutInMs,
+        int ret = Rcl.Impl.Wait(waitSetHandle, timeoutInMs,
             out var changedSubscriptionHandles,
             out var changedGuardHandles,
             out var changedClientHandles,
@@ -93,7 +93,7 @@ internal sealed class RclWaitSet : IDisposable
         if (disposed) return;
         disposed = true;
         GC.SuppressFinalize(this);
-        Rcl.DestroyWaitSet(waitSetHandle);
+        Rcl.Impl.DestroyWaitSet(waitSetHandle);
     }
 
     public override string ToString() => $"[{nameof(RclWaitSet)}]";

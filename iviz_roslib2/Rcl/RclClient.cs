@@ -1,4 +1,5 @@
 using Iviz.Roslib;
+using Iviz.Roslib2.Rcl.Wrappers;
 using Iviz.Tools;
 
 namespace Iviz.Roslib2.Rcl;
@@ -19,41 +20,41 @@ internal sealed class RclClient : IDisposable
         set
         {
             loggingHandler = value;
-            Rcl.SetLoggingHandler(loggingHandler);
+            Rcl.Impl.SetLoggingHandler(loggingHandler);
         }
     }
 
     public static void SetLoggingLevel(RclLogSeverity severity)
     {
-        Rcl.SetLoggingLevel((int)severity);
+        Rcl.Impl.SetLoggingLevel((int)severity);
     }
 
-    public static void SetRclWrapperType(RclWrapperType wrapperType)
+    public static void SetRclWrapper(IRclWrapper wrapper)
     {
-        Rcl.SetRclWrapperType(wrapperType);
+        Rcl.SetRclWrapper(wrapper);
     }
 
     public static bool SetDdsProfilePath(string path)
     {
-        return Rcl.SetDdsProfilePath(path);
+        return Rcl.Impl.SetDdsProfilePath(path);
     }
 
     public RclClient(string name, string @namespace = "")
     {
-        contextHandle = Rcl.CreateContext();
-        Check(Rcl.Init(contextHandle));
+        contextHandle = Rcl.Impl.CreateContext();
+        Check(Rcl.Impl.Init(contextHandle));
 
         if (!loggingInitialized)
         {
-            Rcl.InitLogging();
+            Rcl.Impl.InitLogging();
             SetLoggingLevel(RclLogSeverity.Info);
             LoggingHandler = ConsoleLoggingHandler;
             loggingInitialized = true;
         }
 
-        Check(Rcl.CreateNode(contextHandle, out nodeHandle, name, @namespace));
+        Check(Rcl.Impl.CreateNode(contextHandle, out nodeHandle, name, @namespace));
 
-        FullName = Rcl.ToString(Rcl.GetFullyQualifiedNodeName(nodeHandle));
+        FullName = Rcl.ToString(Rcl.Impl.GetFullyQualifiedNodeName(nodeHandle));
     }
 
     public RclWaitSet CreateWaitSet(int maxSubscriptions, int maxGuardConditions, int maxClients, int maxServers)
@@ -68,7 +69,7 @@ internal sealed class RclClient : IDisposable
 
     public IntPtr GetGraphGuardCondition()
     {
-        return Rcl.GetGraphGuardCondition(nodeHandle);
+        return Rcl.Impl.GetGraphGuardCondition(nodeHandle);
     }
 
     public RclSubscriber CreateSubscriber(string topic, string type, QosProfile profile)
@@ -93,7 +94,7 @@ internal sealed class RclClient : IDisposable
     
     public NodeName[] GetNodeNames()
     {
-        Check(Rcl.GetNodeNames(contextHandle, nodeHandle,
+        Check(Rcl.Impl.GetNodeNames(contextHandle, nodeHandle,
             out var nodeNamesHandle, out int numNodeNames,
             out var nodeNamespacesHandle, out int numNodeNamespaces));
 
@@ -124,7 +125,7 @@ internal sealed class RclClient : IDisposable
 
     public TopicNameType[] GetTopicNamesAndTypes()
     {
-        Check(Rcl.GetTopicNamesAndTypes(contextHandle, nodeHandle,
+        Check(Rcl.Impl.GetTopicNamesAndTypes(contextHandle, nodeHandle,
             out var topicNamesHandle, out var topicTypesHandle, out int numTopics));
 
         if (numTopics == 0)
@@ -148,7 +149,7 @@ internal sealed class RclClient : IDisposable
     
     public TopicNameType[] GetServiceNamesAndTypes()
     {
-        Check(Rcl.GetServiceNamesAndTypes(contextHandle, nodeHandle,
+        Check(Rcl.Impl.GetServiceNamesAndTypes(contextHandle, nodeHandle,
             out var topicNamesHandle, out var topicTypesHandle, out int numTopics));
 
         if (numTopics == 0)
@@ -172,7 +173,7 @@ internal sealed class RclClient : IDisposable
 
     public TopicNameType[] GetServiceNamesAndTypesByNode(string nodeName, string nodeNamespace)
     {
-        Check(Rcl.GetServiceNamesAndTypesByNode(contextHandle, nodeHandle,
+        Check(Rcl.Impl.GetServiceNamesAndTypesByNode(contextHandle, nodeHandle,
             nodeName, nodeNamespace, out var serviceNamesHandle, out var serviceTypesHandle, out int numServices));
 
         if (numServices == 0)
@@ -196,7 +197,7 @@ internal sealed class RclClient : IDisposable
 
     public EndpointInfo[] GetSubscriberInfo(string topic)
     {
-        Check(Rcl.GetSubscribersInfoByTopic(contextHandle, nodeHandle, topic,
+        Check(Rcl.Impl.GetSubscribersInfoByTopic(contextHandle, nodeHandle, topic,
             out var nodeNamesHandle, out var nodeNamespacesHandle,
             out var topicTypesHandle, out var gidHandle, out var profilesHandle, out int numNodes));
 
@@ -227,19 +228,19 @@ internal sealed class RclClient : IDisposable
 
     public int CountPublishers(string topic)
     {
-        Check(Rcl.CountPublishers(nodeHandle, topic, out int count));
+        Check(Rcl.Impl.CountPublishers(nodeHandle, topic, out int count));
         return count;
     }
 
     public int CountSubscribers(string topic)
     {
-        Check(Rcl.CountSubscribers(nodeHandle, topic, out int count));
+        Check(Rcl.Impl.CountSubscribers(nodeHandle, topic, out int count));
         return count;
     }
 
     public EndpointInfo[] GetPublisherInfo(string topic)
     {
-        Check(Rcl.GetPublishersInfoByTopic(contextHandle, nodeHandle, topic,
+        Check(Rcl.Impl.GetPublishersInfoByTopic(contextHandle, nodeHandle, topic,
             out var nodeNamesHandle, out var nodeNamespacesHandle,
             out var topicTypesHandle, out var gidHandle, out var profilesHandle, out int numNodes));
 
@@ -273,9 +274,9 @@ internal sealed class RclClient : IDisposable
         if (disposed) return;
         disposed = true;
         GC.SuppressFinalize(this);
-        Rcl.DestroyNode(nodeHandle);
-        Rcl.Shutdown(contextHandle);
-        Rcl.DestroyContext(contextHandle);
+        Rcl.Impl.DestroyNode(nodeHandle);
+        Rcl.Impl.Shutdown(contextHandle);
+        Rcl.Impl.DestroyContext(contextHandle);
     }
 
     [MonoPInvokeCallback(typeof(LoggingHandler))]

@@ -1,110 +1,110 @@
 namespace Iviz.Roslib2.Rcl.Wrappers;
 
-internal interface IRclWrapper
+public interface IRclWrapper
 {
-    public bool SetDdsProfilePath(string path);
-    public IntPtr CreateContext();
-    public void DestroyContext(IntPtr context);
-    public int Init(IntPtr context);
-    public int Shutdown(IntPtr contextHandle);
-    public int InitLogging();
-    public void SetLoggingLevel(int level);
-    public void SetLoggingHandler(LoggingHandler? handler);
-    public int CreateNode(IntPtr contextHandle, out IntPtr nodeHandle, string name, string @namespace);
-    public int DestroyNode(IntPtr nodeHandle);
+    bool SetDdsProfilePath(string path);
+    IntPtr CreateContext();
+    void DestroyContext(IntPtr context);
+    int Init(IntPtr context);
+    int Shutdown(IntPtr contextHandle);
+    int InitLogging();
+    void SetLoggingLevel(int level);
+    void SetLoggingHandler(LoggingHandler? handler);
+    int CreateNode(IntPtr contextHandle, out IntPtr nodeHandle, string name, string @namespace);
+    int DestroyNode(IntPtr nodeHandle);
 
-    public IntPtr GetFullyQualifiedNodeName(IntPtr nodeHandle);
+    IntPtr GetFullyQualifiedNodeName(IntPtr nodeHandle);
 
-    public IntPtr CreateGuard(IntPtr contextHandle);
-    public int DestroyGuard(IntPtr guardHandle);
-    public int TriggerGuard(IntPtr guardHandle);
+    IntPtr CreateGuard(IntPtr contextHandle);
+    int DestroyGuard(IntPtr guardHandle);
+    int TriggerGuard(IntPtr guardHandle);
 
-    public IntPtr CreateWaitSet();
+    IntPtr CreateWaitSet();
 
-    public int WaitSetInit(IntPtr contextHandle, IntPtr waitSetHandle, int numberOfSubscriptions,
+    int WaitSetInit(IntPtr contextHandle, IntPtr waitSetHandle, int numberOfSubscriptions,
         int numberOfGuardConditions, int numberOfTimers, int numberOfClients, int numberOfServices,
         int numberOfEvents);
 
-    public int Wait(IntPtr waitSetHandle, int timeoutInMs,
+    int Wait(IntPtr waitSetHandle, int timeoutInMs,
         out IntPtr subscriptionHandles,
         out IntPtr guardHandles,
         out IntPtr clientHandles,
         out IntPtr serviceHandles);
 
-    public int WaitClearAndAdd(IntPtr waitSetHandle,
+    int WaitClearAndAdd(IntPtr waitSetHandle,
         in IntPtr subscriptionHandles, int numSubscriptionHandles,
         in IntPtr guardHandles, int numGuardHandles,
         in IntPtr clientHandles, int numClientHandles,
         in IntPtr serviceHandles, int numServiceHandles);
 
-    public int DestroyWaitSet(IntPtr waitSetHandle);
+    int DestroyWaitSet(IntPtr waitSetHandle);
     IntPtr GetErrorString(IntPtr contextHandle);
 
-    public int CreateSubscriptionHandle(out IntPtr subscriptionHandle, IntPtr nodeHandle, string topic, string type,
+    int CreateSubscriptionHandle(out IntPtr subscriptionHandle, IntPtr nodeHandle, string topic, string type,
         in RmwQosProfile profile);
 
-    public bool IsMessageTypeSupported(string type);
-    public bool IsServiceTypeSupported(string type);
-    public int DestroySubscriptionHandle(IntPtr subscriptionHandle, IntPtr nodeHandle);
-    public int GetPublisherCount(IntPtr subscriptionHandle, out int count);
+    bool IsMessageTypeSupported(string type);
+    bool IsServiceTypeSupported(string type);
+    int DestroySubscriptionHandle(IntPtr subscriptionHandle, IntPtr nodeHandle);
+    int GetPublisherCount(IntPtr subscriptionHandle, out int count);
 
-    public int TakeSerializedMessage(IntPtr subscriptionHandle, IntPtr serializedMessage, out IntPtr ptr,
+    int TakeSerializedMessage(IntPtr subscriptionHandle, IntPtr serializedMessage, out IntPtr ptr,
         out int length, out Guid gid, out byte moreRemaining);
 
-    public int DestroySerializedMessage(IntPtr messageHandle);
-    public int CreateSerializedMessage(out IntPtr messageHandle);
-    public int EnsureSerializedMessageSize(IntPtr messageHandle, int size, out IntPtr ptr);
+    int DestroySerializedMessage(IntPtr messageHandle);
+    int CreateSerializedMessage(out IntPtr messageHandle);
+    int EnsureSerializedMessageSize(IntPtr messageHandle, int size, out IntPtr ptr);
 
-    public int CreatePublisherHandle(out IntPtr publisherHandle, IntPtr nodeHandle, string topic, string type,
+    int CreatePublisherHandle(out IntPtr publisherHandle, IntPtr nodeHandle, string topic, string type,
         in RmwQosProfile profile);
 
-    public int DestroyPublisherHandle(IntPtr publisherHandle, IntPtr nodeHandle);
-    public int GetSubscriptionCount(IntPtr publisherHandle, out int count);
-    public int PublishSerializedMessage(IntPtr publisherHandle, IntPtr serializedMessageHandle);
+    int DestroyPublisherHandle(IntPtr publisherHandle, IntPtr nodeHandle);
+    int GetSubscriptionCount(IntPtr publisherHandle, out int count);
+    int PublishSerializedMessage(IntPtr publisherHandle, IntPtr serializedMessageHandle);
 
-    public int GetNodeNames(IntPtr contextHandle, IntPtr nodeHandle,
+    int GetNodeNames(IntPtr contextHandle, IntPtr nodeHandle,
         out IntPtr nodeNamesHandle, out int numNodeNames,
         out IntPtr nodeNamespacesHandle, out int numNodeNamespaces);
 
-    public int GetTopicNamesAndTypes(IntPtr contextHandle, IntPtr nodeHandle,
+    int GetTopicNamesAndTypes(IntPtr contextHandle, IntPtr nodeHandle,
         out IntPtr topicNamesHandle, out IntPtr topicTypesHandle, out int numTopicTypes);
 
-    public int GetServiceNamesAndTypes(IntPtr contextHandle, IntPtr nodeHandle,
+    int GetServiceNamesAndTypes(IntPtr contextHandle, IntPtr nodeHandle,
         out IntPtr topicNamesHandle, out IntPtr topicTypesHandle, out int numTopicTypes);
 
-    public int GetServiceNamesAndTypesByNode(IntPtr contextHandle, IntPtr nodeHandle, string nodeName,
+    int GetServiceNamesAndTypesByNode(IntPtr contextHandle, IntPtr nodeHandle, string nodeName,
         string nodeNamespace, out IntPtr serviceNamesHandle, out IntPtr serviceTypesHandle, out int numNodeNamespaces);
 
-    public int GetPublishersInfoByTopic(IntPtr contextHandle, IntPtr nodeHandle, string topic,
+    int GetPublishersInfoByTopic(IntPtr contextHandle, IntPtr nodeHandle, string topic,
         out IntPtr nodeNamesHandle, out IntPtr nodeNamespacesHandle, out IntPtr topicTypesHandle,
         out IntPtr gidHandle, out IntPtr profilesHandle, out int numNodes);
 
-    public int GetSubscribersInfoByTopic(IntPtr contextHandle, IntPtr nodeHandle, string topic,
+    int GetSubscribersInfoByTopic(IntPtr contextHandle, IntPtr nodeHandle, string topic,
         out IntPtr nodeNamesHandle, out IntPtr nodeNamespacesHandle, out IntPtr topicTypesHandle,
         out IntPtr gidHandle, out IntPtr profilesHandle, out int numNodes);
 
-    public int CountPublishers(IntPtr nodeHandle, string topic, out int count);
-    public int CountSubscribers(IntPtr nodeHandle, string topic, out int count);
-    public IntPtr GetGraphGuardCondition(IntPtr nodeHandle);
+    int CountPublishers(IntPtr nodeHandle, string topic, out int count);
+    int CountSubscribers(IntPtr nodeHandle, string topic, out int count);
+    IntPtr GetGraphGuardCondition(IntPtr nodeHandle);
 
-    public int CreateClientHandle(out IntPtr serviceClientHandle, IntPtr nodeHandle, string service, string type,
+    int CreateClientHandle(out IntPtr serviceClientHandle, IntPtr nodeHandle, string service, string type,
         in RmwQosProfile profile);
 
-    public int DestroyClientHandle(IntPtr clientHandle, IntPtr nodeHandle);
+    int DestroyClientHandle(IntPtr clientHandle, IntPtr nodeHandle);
     
-    public int IsServiceServerAvailable(IntPtr clientHandle, IntPtr nodeHandle, out byte isAvailable);
+    int IsServiceServerAvailable(IntPtr clientHandle, IntPtr nodeHandle, out byte isAvailable);
     
-    public int SendRequest(IntPtr clientHandle, IntPtr serializedMessageHandle, out long sequenceId);
+    int SendRequest(IntPtr clientHandle, IntPtr serializedMessageHandle, out long sequenceId);
 
-    public int TakeResponse(IntPtr clientHandle, IntPtr serializedMessageHandle, out RmwServiceInfo requestHeader,
+    int TakeResponse(IntPtr clientHandle, IntPtr serializedMessageHandle, out RmwServiceInfo requestHeader,
         out IntPtr ptr, out int length);
 
-    public int CreateServiceHandle(out IntPtr serviceHandle, IntPtr nodeHandle, string service, string type,
+    int CreateServiceHandle(out IntPtr serviceHandle, IntPtr nodeHandle, string service, string type,
         in RmwQosProfile profile);
 
-    public int DestroyServiceHandle(IntPtr serviceHandle, IntPtr nodeHandle);
-    public int SendResponse(IntPtr serviceHandle, IntPtr serializedMessageHandle, in RmwRequestId requestHeaderHandle);
+    int DestroyServiceHandle(IntPtr serviceHandle, IntPtr nodeHandle);
+    int SendResponse(IntPtr serviceHandle, IntPtr serializedMessageHandle, in RmwRequestId requestHeaderHandle);
 
-    public int TakeRequest(IntPtr serviceHandle, IntPtr serializedMessageHandle, out RmwServiceInfo requestHeaderHandle,
+    int TakeRequest(IntPtr serviceHandle, IntPtr serializedMessageHandle, out RmwServiceInfo requestHeaderHandle,
         out IntPtr ptr, out int length);
 }

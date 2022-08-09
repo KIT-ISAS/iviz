@@ -6,7 +6,7 @@ namespace Iviz.Roslib2.Rcl;
 
 /// ROS MiddleWare quality of service profile
 [DataContract, StructLayout(LayoutKind.Sequential)]
-internal readonly struct RmwQosProfile
+public readonly struct RmwQosProfile
 {
     /// Default size of the rmw queue when history is set to KeepLast,
     /// 0 indicates it is currently not set.
@@ -72,7 +72,7 @@ internal readonly struct RmwQosProfile
 }
 
 [DataContract, StructLayout(LayoutKind.Sequential)]
-internal readonly struct RmwTime
+public readonly struct RmwTime
 {
     [DataMember] public readonly ulong Sec;
     [DataMember] public readonly ulong Nsec;

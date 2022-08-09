@@ -1,3 +1,4 @@
+using Iviz.Roslib2.Rcl.Wrappers;
 using Iviz.Tools;
 
 namespace Iviz.Roslib2.Rcl;
@@ -13,12 +14,12 @@ internal sealed class RclGuardCondition : IDisposable
 
     public RclGuardCondition(IntPtr contextHandle)
     {
-        guardHandle = Rcl.CreateGuard(contextHandle);
+        guardHandle = Rcl.Impl.CreateGuard(contextHandle);
     }
 
     public void Trigger()
     {
-        Rcl.TriggerGuard(Handle);
+        Rcl.Impl.TriggerGuard(Handle);
     }
 
     public void Dispose()
@@ -26,7 +27,7 @@ internal sealed class RclGuardCondition : IDisposable
         if (disposed) return;
         disposed = true;
         GC.SuppressFinalize(this);
-        Rcl.DestroyGuard(guardHandle);
+        Rcl.Impl.DestroyGuard(guardHandle);
     }
 
     public override string ToString() => $"[{nameof(RclGuardCondition)}]";

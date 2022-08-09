@@ -31,7 +31,7 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
         Service = service;
         ServiceType = serviceType;
 
-        int ret = Rcl.CreateServiceHandle(out serviceHandle, nodeHandle, service, serviceType, in profile.Profile);
+        int ret = Rcl.Impl.CreateServiceHandle(out serviceHandle, nodeHandle, service, serviceType, in profile.Profile);
         switch (ret)
         {
             case -1:
@@ -45,7 +45,7 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
 
     public bool TryTakeRequest(RclBuffer messageBuffer, out Span<byte> span, out RmwRequestId requestId)
     {
-        int ret = Rcl.TakeRequest(Handle, messageBuffer.Handle, out var serviceInfo, out var ptr,
+        int ret = Rcl.Impl.TakeRequest(Handle, messageBuffer.Handle, out var serviceInfo, out var ptr,
             out int length);
 
         switch ((RclRet)ret)
@@ -60,7 +60,7 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
                 requestId = default;
                 return false;
             default:
-                Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.TakeResponse));
+                Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.Impl.TakeResponse));
                 goto case RclRet.SubscriptionTakeFailed;
         }
     }
@@ -92,7 +92,7 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
 
         WriteBuffer2.Serialize(response, span[headerSize..]);
 
-        Check(Rcl.SendResponse(Handle, messageBuffer.Handle, in requestId));
+        Check(Rcl.Impl.SendResponse(Handle, messageBuffer.Handle, in requestId));
     }
 
     void Check(int result) => Rcl.Check(contextHandle, result);
@@ -102,7 +102,7 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
         if (disposed) return;
         disposed = true;
         GC.SuppressFinalize(this);
-        Rcl.DestroyServiceHandle(serviceHandle, nodeHandle);
+        Rcl.Impl.DestroyServiceHandle(serviceHandle, nodeHandle);
     }
 
     ~RclServiceServer() => Logger.LogErrorFormat("{0} has not been disposed!", this);

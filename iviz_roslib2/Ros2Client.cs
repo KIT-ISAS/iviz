@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Iviz.Msgs;
 using Iviz.Roslib;
 using Iviz.Roslib2.Rcl;
+using Iviz.Roslib2.Rcl.Wrappers;
 using Iviz.Tools;
 using Nito.AsyncEx;
 
@@ -42,9 +43,14 @@ public sealed class Ros2Client : IRosClient
         };
     }
 
-    public Ros2Client(string callerId, string? @namespace = null, RclWrapperType wrapperType = RclWrapperType.Internal)
+    public Ros2Client(string callerId, string? @namespace = null, IRclWrapper? wrapperType = null)
     {
-        RclClient.SetRclWrapperType(wrapperType);
+        RclClient.SetRclWrapper(wrapperType ??
+#if NETSTANDARD2_1
+                                throw new ArgumentNullException(nameof(wrapperType)));
+#else
+                                new RclInternalWrapper());
+#endif
 
         namespacePrefix = @namespace == null ? "/" : $"/{@namespace}/";
         Rcl = new AsyncRclClient(callerId, @namespace ?? "");
@@ -447,7 +453,7 @@ public sealed class Ros2Client : IRosClient
         var services = await Rcl.GetServiceNamesAndTypesAsync(token);
         return services.Any(type => type.Topic == service);
     }
-    
+
     public TopicNameType[] GetSystemPublishedTopics() => TaskUtils.RunSync(GetSystemPublishedTopicsAsync);
 
     public ValueTask<TopicNameType[]> GetSystemPublishedTopicsAsync(CancellationToken token = default) =>

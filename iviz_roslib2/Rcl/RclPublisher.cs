@@ -29,7 +29,7 @@ internal sealed class RclPublisher : IDisposable
         TopicType = topicType;
         Profile = profile;
 
-        int ret = Rcl.CreatePublisherHandle(out publisherHandle, nodeHandle, topic, topicType, in profile.Profile);
+        int ret = Rcl.Impl.CreatePublisherHandle(out publisherHandle, nodeHandle, topic, topicType, in profile.Profile);
         switch (ret)
         {
             case -1:
@@ -52,7 +52,7 @@ internal sealed class RclPublisher : IDisposable
         int serializedLength = messageLength + headerSize;
 
         var span = messageBuffer.Resize(serializedLength);
-        
+
         /*
         const byte cdrLittleEndian0 = 0x00;
         const byte cdrLittleEndian1 = 0x01;
@@ -64,20 +64,20 @@ internal sealed class RclPublisher : IDisposable
         span[2] = serializationOptions0;
         span[3] = serializationOptions1;
         */
-        
+
         const int header = 0x00000100;
         Unsafe.WriteUnaligned(ref span[0], header);
-        
+
         WriteBuffer2.Serialize(message, span[headerSize..]);
 
-        Check(Rcl.PublishSerializedMessage(publisherHandle, messageBuffer.Handle));
+        Check(Rcl.Impl.PublishSerializedMessage(publisherHandle, messageBuffer.Handle));
 
         return serializedLength;
     }
 
     public int GetNumSubscribers()
     {
-        if (Rcl.GetSubscriptionCount(publisherHandle, out int count) == Rcl.Ok)
+        if (Rcl.Impl.GetSubscriptionCount(publisherHandle, out int count) == Rcl.Ok)
         {
             return count;
         }
@@ -91,7 +91,7 @@ internal sealed class RclPublisher : IDisposable
         if (disposed) return;
         disposed = true;
         GC.SuppressFinalize(this);
-        Rcl.DestroyPublisherHandle(publisherHandle, nodeHandle);
+        Rcl.Impl.DestroyPublisherHandle(publisherHandle, nodeHandle);
         messageBuffer.Dispose();
     }
 

@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 namespace Iviz.Roslib2.Rcl;
 
 [StructLayout(LayoutKind.Sequential)]
-internal readonly struct RmwServiceInfo
+public readonly struct RmwServiceInfo
 {
     readonly long sourceTimestamp;
     readonly long receivedTimestamp;
@@ -11,7 +11,7 @@ internal readonly struct RmwServiceInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal readonly struct RmwRequestId
+public readonly struct RmwRequestId
 {
     readonly long writerGuidA;
     readonly long writerGuidB;

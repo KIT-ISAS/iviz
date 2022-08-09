@@ -16,7 +16,7 @@ internal sealed class RclBuffer : IDisposable
 
     public RclBuffer()
     {
-        Rcl.Check(Rcl.CreateSerializedMessage(out handle));
+        Rcl.Check(Rcl.Impl.CreateSerializedMessage(out handle));
     }
 
     public Span<byte> Resize(int size)
@@ -32,7 +32,7 @@ internal sealed class RclBuffer : IDisposable
             return Rcl.CreateByteSpan(serializedMessage.buffer, sizeAlign4);
         }
 
-        Rcl.EnsureSerializedMessageSize(Handle, sizeAlign4, out IntPtr ptr); // allocate new memory
+        Rcl.Impl.EnsureSerializedMessageSize(Handle, sizeAlign4, out IntPtr ptr); // allocate new memory
         return Rcl.CreateByteSpan(ptr, sizeAlign4);
     }
 
@@ -41,7 +41,7 @@ internal sealed class RclBuffer : IDisposable
         if (disposed) return;
         disposed = true;
         GC.SuppressFinalize(this);
-        Rcl.DestroySerializedMessage(handle);
+        Rcl.Impl.DestroySerializedMessage(handle);
     }
 
     ~RclBuffer() => Logger.LogErrorFormat("{0} has not been disposed!", this);

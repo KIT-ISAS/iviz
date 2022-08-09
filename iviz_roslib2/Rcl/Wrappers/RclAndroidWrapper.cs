@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace Iviz.Roslib2.Rcl.Wrappers;
 
-public sealed class RclMacosWrapper : IRclWrapper
+public sealed class RclAndroidWrapper : IRclWrapper
 {
     public bool SetDdsProfilePath(string path) =>
         Rcl.SetDdsProfilePath(path);
@@ -207,7 +207,7 @@ public sealed class RclMacosWrapper : IRclWrapper
 
     static class Rcl
     {
-        const string Library = "iviz_ros2_rcl_macos";
+        const string Library = "iviz_ros2_rcl_android";
 
         [DllImport(Library, EntryPoint = "native_rcl_set_dds_profile_path")]
         public static extern bool SetDdsProfilePath([MarshalAs(UnmanagedType.LPUTF8Str)] string path);

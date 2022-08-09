@@ -32,7 +32,7 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
         TopicType = topicType;
         Profile = profile;
 
-        int ret = Rcl.CreateSubscriptionHandle(out subscriptionHandle, nodeHandle, topic, topicType,
+        int ret = Rcl.Impl.CreateSubscriptionHandle(out subscriptionHandle, nodeHandle, topic, topicType,
             in profile.Profile);
         if (ret == -1)
         {
@@ -51,7 +51,7 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
 
     public bool TryTakeMessage(out Span<byte> span, out Guid guid, out bool moreRemaining)
     {
-        int ret = Rcl.TakeSerializedMessage(Handle, messageBuffer.Handle, out IntPtr ptr, out int length, out guid,
+        int ret = Rcl.Impl.TakeSerializedMessage(Handle, messageBuffer.Handle, out IntPtr ptr, out int length, out guid,
             out byte moreRemainingByte);
 
         moreRemaining = moreRemainingByte != 0;
@@ -66,7 +66,7 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
                 span = default;
                 return false;
             default:
-                Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.TakeSerializedMessage));
+                Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.Impl.TakeSerializedMessage));
                 span = default;
                 return false;
         }
@@ -74,12 +74,12 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
 
     public int GetNumPublishers()
     {
-        if (Rcl.GetPublisherCount(Handle, out int count) == Rcl.Ok)
+        if (Rcl.Impl.GetPublisherCount(Handle, out int count) == Rcl.Ok)
         {
             return count;
         }
 
-        Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.GetPublisherCount));
+        Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.Impl.GetPublisherCount));
         return 0;
     }
 
@@ -89,7 +89,7 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
         disposed = true;
         GC.SuppressFinalize(this);
         messageBuffer.Dispose();
-        Rcl.DestroySubscriptionHandle(subscriptionHandle, nodeHandle);
+        Rcl.Impl.DestroySubscriptionHandle(subscriptionHandle, nodeHandle);
     }
 
     public override string ToString() => $"[{nameof(RclSubscriber)} {Topic} [{TopicType}] ]";

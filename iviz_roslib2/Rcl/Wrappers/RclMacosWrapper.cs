@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace Iviz.Roslib2.Rcl.Wrappers;
 
-internal sealed class RclMacosWrapper : IRclWrapper
+public sealed class RclMacosWrapper : IRclWrapper
 {
     public bool SetDdsProfilePath(string path) =>
         Rcl.SetDdsProfilePath(path);

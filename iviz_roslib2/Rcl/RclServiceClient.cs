@@ -31,7 +31,7 @@ internal sealed class RclServiceClient : IDisposable, IHasHandle
         Service = service;
         ServiceType = serviceType;
 
-        int ret = Rcl.CreateClientHandle(out clientHandle, nodeHandle, service, serviceType, in profile.Profile);
+        int ret = Rcl.Impl.CreateClientHandle(out clientHandle, nodeHandle, service, serviceType, in profile.Profile);
         switch (ret)
         {
             case -1:
@@ -70,12 +70,12 @@ internal sealed class RclServiceClient : IDisposable, IHasHandle
 
         WriteBuffer2.Serialize(request, span[headerSize..]);
 
-        Check(Rcl.SendRequest(Handle, messageBuffer.Handle, out sequenceNumber));
+        Check(Rcl.Impl.SendRequest(Handle, messageBuffer.Handle, out sequenceNumber));
     }
 
     public bool TryTakeResponse(RclBuffer messageBuffer, out Span<byte> span, out long sequenceNumber)
     {
-        int ret = Rcl.TakeResponse(Handle, messageBuffer.Handle, out var requestHeader, out var ptr,
+        int ret = Rcl.Impl.TakeResponse(Handle, messageBuffer.Handle, out var requestHeader, out var ptr,
             out int length);
 
         switch ((RclRet)ret)
@@ -90,7 +90,7 @@ internal sealed class RclServiceClient : IDisposable, IHasHandle
                 sequenceNumber = 0;
                 return false;
             default:
-                Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.TakeResponse));
+                Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.Impl.TakeResponse));
                 span = default;
                 sequenceNumber = 0;
                 return false;
@@ -101,7 +101,7 @@ internal sealed class RclServiceClient : IDisposable, IHasHandle
 
     public bool IsServiceServerAvailable()
     {
-        Check(Rcl.IsServiceServerAvailable(clientHandle, nodeHandle, out byte isAvailable));
+        Check(Rcl.Impl.IsServiceServerAvailable(clientHandle, nodeHandle, out byte isAvailable));
         return isAvailable != 0;
     }
 
@@ -110,7 +110,7 @@ internal sealed class RclServiceClient : IDisposable, IHasHandle
         if (disposed) return;
         disposed = true;
         GC.SuppressFinalize(this);
-        Rcl.DestroyClientHandle(clientHandle, nodeHandle);
+        Rcl.Impl.DestroyClientHandle(clientHandle, nodeHandle);
     }
 
     ~RclServiceClient() => Logger.LogErrorFormat("{0} has not been disposed!", this);
