@@ -875,29 +875,6 @@ public class IvizTests
     [Test]
     public void TestDialogs()
     {
-        using var writer = client.CreateWriter<Dialog>("/dialogs", latchingEnabled: true);
-        var dialog = new Dialog
-        {
-            Header = new Header(0, time.Now(), "map"),
-            Id = "dialog",
-            Scale = 1,
-            Type = Dialog.TYPE_PLAIN,
-            Buttons = Dialog.BUTTONS_OK,
-            Icon = Dialog.ICON_OK,
-            Title = "Abcd",
-            Caption = "Def",
-            CaptionAlignment = 0,
-            TfOffset = default,
-            DialogDisplacement = default,
-            TfDisplacement = default
-        };
-        writer.Write(dialog);
-        Thread.Sleep(5000);
-    }
-
-    [Test]
-    public void TestDialogs()
-    {
         using var writer = client.CreateWriter<WidgetArray>("/dialogs", latchingEnabled: true);
 
         var ivizController = new IvizController(client, IvizId);
