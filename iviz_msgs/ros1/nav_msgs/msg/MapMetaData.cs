@@ -76,17 +76,8 @@ namespace Iviz.Msgs.NavMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int c)
-        {
-            c = WriteBuffer2.Align4(c);
-            c += 8; /* MapLoadTime */
-            c += 4; /* Resolution */
-            c += 4; /* Width */
-            c += 4; /* Height */
-            c = WriteBuffer2.Align8(c);
-            c += 56; /* Origin */
-            return c;
-        }
+        public int AddRos2MessageLength(int c) => WriteBuffer2.Align4(c) + Ros2FixedMessageLength;
+        
     
         public const string MessageType = "nav_msgs/MapMetaData";
     

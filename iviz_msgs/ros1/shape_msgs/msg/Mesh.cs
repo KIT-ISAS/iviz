@@ -79,9 +79,9 @@ namespace Iviz.Msgs.ShapeMsgs
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Triangles length */
+            c += 4;  // Triangles length
             c += 12 * Triangles.Length;
-            c += 4;  /* Vertices length */
+            c += 4;  // Vertices length
             c = WriteBuffer2.Align8(c);
             c += 24 * Vertices.Length;
             return c;

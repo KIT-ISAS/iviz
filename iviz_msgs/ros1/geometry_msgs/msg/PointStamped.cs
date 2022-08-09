@@ -61,7 +61,7 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 24; /* Point */
+            c += 24;  // Point
             return c;
         }
     

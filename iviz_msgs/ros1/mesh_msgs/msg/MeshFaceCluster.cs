@@ -65,7 +65,7 @@ namespace Iviz.Msgs.MeshMsgs
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* FaceIndices length */
+            c += 4;  // FaceIndices length
             c += 4 * FaceIndices.Length;
             c = WriteBuffer2.AddLength(c, Label);
             return c;

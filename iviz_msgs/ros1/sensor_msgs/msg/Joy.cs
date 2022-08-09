@@ -83,9 +83,9 @@ namespace Iviz.Msgs.SensorMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Axes length */
+            c += 4;  // Axes length
             c += 4 * Axes.Length;
-            c += 4;  /* Buttons length */
+            c += 4;  // Buttons length
             c += 4 * Buttons.Length;
             return c;
         }

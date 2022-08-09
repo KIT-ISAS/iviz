@@ -131,13 +131,13 @@ namespace Iviz.Msgs.VisualizationMsgs
             c = WriteBuffer2.AddLength(c, ClientId);
             c = WriteBuffer2.AddLength(c, MarkerName);
             c = WriteBuffer2.AddLength(c, ControlName);
-            c += 1; /* EventType */
+            c += 1;  // EventType
             c = WriteBuffer2.Align8(c);
-            c += 56; /* Pose */
-            c += 4; /* MenuEntryId */
+            c += 56;  // Pose
+            c += 4;  // MenuEntryId
             c = WriteBuffer2.Align8(c);
-            c += 24; /* MousePoint */
-            c += 1; /* MousePointValid */
+            c += 24;  // MousePoint
+            c += 1;  // MousePointValid
             return c;
         }
     

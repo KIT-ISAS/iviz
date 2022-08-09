@@ -55,7 +55,7 @@ namespace Iviz.Msgs.IvizMsgs
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Colors length */
+            c += 4;  // Colors length
             c += 4 * Colors.Length;
             return c;
         }

@@ -80,7 +80,7 @@ public unsafe partial struct WriteBuffer2
         c = Align4(c) + sizeof(int);
         foreach (var message in array)
         {
-            c += message.AddRos2MessageLength(c);
+            c = message.AddRos2MessageLength(c);
         }
 
         return c;
@@ -89,13 +89,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int AddLength(int c, string? s)
     {
-        c = Align4(c) + sizeof(int);
-        if (string.IsNullOrEmpty(s))
-        { 
-            return c + 1;
-        }
-
-        return c + BuiltIns.UTF8.GetByteCount(s) + 1;
+        return Align4(c) + (s is not {Length: not 0}
+            ? sizeof(int) + 1
+            : sizeof(int) + 1 + BuiltIns.UTF8.GetByteCount(s));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,7 +100,7 @@ public unsafe partial struct WriteBuffer2
         c = Align4(c) + sizeof(int);
         foreach (string b in bs)
         {
-            c += AddLength(c, b);
+            c = AddLength(c, b);
         }
 
         return c;
@@ -259,7 +255,7 @@ public unsafe partial struct WriteBuffer2
         }
 
         int count = BuiltIns.UTF8.GetByteCount(val);
-        ThrowIfOutOfRange(4 + count + 1);
+        ThrowIfOutOfRange(4 + 1 + count);
         WriteInt(count + 1);
         fixed (char* valPtr = val)
         {
@@ -655,7 +651,7 @@ public unsafe partial struct WriteBuffer2
         c = Align4(c) + sizeof(int);
         foreach (var message in b)
         {
-            c += message.AddRos2MessageLength(c);
+            c = message.AddRos2MessageLength(c);
         }
 
         return c;

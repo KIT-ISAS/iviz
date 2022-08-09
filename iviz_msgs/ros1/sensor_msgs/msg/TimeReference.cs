@@ -73,7 +73,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 8; /* TimeRef */
+            c += 8;  // TimeRef
             c = WriteBuffer2.AddLength(c, Source);
             return c;
         }

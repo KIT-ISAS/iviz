@@ -79,9 +79,9 @@ namespace Iviz.Msgs.IvizMsgs
         {
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.Align4(c);
-            c += 4; /* Parent */
-            c += 64; /* Transform */
-            c += 4;  /* Meshes length */
+            c += 4;  // Parent
+            c += 64;  // Transform
+            c += 4;  // Meshes length
             c += 4 * Meshes.Length;
             return c;
         }

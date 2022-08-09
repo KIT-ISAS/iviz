@@ -144,21 +144,21 @@ namespace Iviz.Msgs.VisualizationMsgs
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.AddLength(c, Ns);
             c = WriteBuffer2.Align4(c);
-            c += 4; /* Id */
-            c += 4; /* Type */
-            c += 4; /* Action */
+            c += 4;  // Id
+            c += 4;  // Type
+            c += 4;  // Action
             c = WriteBuffer2.Align8(c);
-            c += 24; /* Position */
-            c += 4; /* Scale */
-            c += 16; /* OutlineColor */
-            c += 1; /* Filled */
+            c += 24;  // Position
+            c += 4;  // Scale
+            c += 16;  // OutlineColor
+            c += 1;  // Filled
             c = WriteBuffer2.Align4(c);
-            c += 16; /* FillColor */
-            c += 8; /* Lifetime */
-            c += 4;  /* Points length */
+            c += 16;  // FillColor
+            c += 8;  // Lifetime
+            c += 4;  // Points length
             c = WriteBuffer2.Align8(c);
             c += 24 * Points.Length;
-            c += 4;  /* OutlineColors length */
+            c += 4;  // OutlineColors length
             c += 16 * OutlineColors.Length;
             return c;
         }

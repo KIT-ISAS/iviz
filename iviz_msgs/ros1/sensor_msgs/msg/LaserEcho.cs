@@ -59,7 +59,7 @@ namespace Iviz.Msgs.SensorMsgs
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Echoes length */
+            c += 4;  // Echoes length
             c += 4 * Echoes.Length;
             return c;
         }

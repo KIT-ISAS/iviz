@@ -91,7 +91,7 @@ namespace Iviz.Msgs.MeshMsgs
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.AddLength(c, Uuid);
             c = Cluster.AddRos2MessageLength(c);
-            c += 1; /* @override */
+            c += 1;  // @override
             return c;
         }
     

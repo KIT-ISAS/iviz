@@ -119,14 +119,14 @@ namespace Iviz.Msgs.IvizMsgs
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.AddLength(c, VizId);
             c = WriteBuffer2.AddLength(c, Id);
-            c += 1; /* Type */
+            c += 1;  // Type
             c = WriteBuffer2.Align4(c);
-            c += 4; /* EntryId */
+            c += 4;  // EntryId
             c = WriteBuffer2.Align8(c);
-            c += 8; /* Angle */
-            c += 24; /* Position */
-            c += 32; /* Orientation */
-            c += 24; /* Scale */
+            c += 8;  // Angle
+            c += 24;  // Position
+            c += 32;  // Orientation
+            c += 24;  // Scale
             c = Trajectory.AddRos2MessageLength(c);
             return c;
         }

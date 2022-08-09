@@ -68,13 +68,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int c)
-        {
-            c = WriteBuffer2.Align8(c);
-            c += 56; /* Pose */
-            c += 36 * 8;
-            return c;
-        }
+        public int AddRos2MessageLength(int c) => WriteBuffer2.Align8(c) + Ros2FixedMessageLength;
+        
     
         public const string MessageType = "geometry_msgs/PoseWithCovariance";
     

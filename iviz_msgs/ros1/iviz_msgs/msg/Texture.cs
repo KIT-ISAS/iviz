@@ -120,15 +120,15 @@ namespace Iviz.Msgs.IvizMsgs
         {
             c = WriteBuffer2.AddLength(c, Path);
             c = WriteBuffer2.Align4(c);
-            c += 4; /* Index */
-            c += 1; /* Type */
-            c += 1; /* Mapping */
+            c += 4;  // Index
+            c += 1;  // Type
+            c += 1;  // Mapping
             c = WriteBuffer2.Align4(c);
-            c += 4; /* UvIndex */
-            c += 4; /* BlendFactor */
-            c += 1; /* Operation */
-            c += 1; /* WrapModeU */
-            c += 1; /* WrapModeV */
+            c += 4;  // UvIndex
+            c += 4;  // BlendFactor
+            c += 1;  // Operation
+            c += 1;  // WrapModeU
+            c += 1;  // WrapModeV
             return c;
         }
     

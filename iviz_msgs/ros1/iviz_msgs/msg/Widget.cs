@@ -148,19 +148,19 @@ namespace Iviz.Msgs.IvizMsgs
         public int AddRos2MessageLength(int c)
         {
             c = Header.AddRos2MessageLength(c);
-            c += 1; /* Action */
+            c += 1;  // Action
             c = WriteBuffer2.AddLength(c, Id);
-            c += 1; /* Type */
+            c += 1;  // Type
             c = WriteBuffer2.Align8(c);
-            c += 56; /* Pose */
-            c += 16; /* Color */
-            c += 16; /* SecondaryColor */
+            c += 56;  // Pose
+            c += 16;  // Color
+            c += 16;  // SecondaryColor
             c = WriteBuffer2.Align8(c);
-            c += 8; /* Scale */
-            c += 8; /* SecondaryScale */
+            c += 8;  // Scale
+            c += 8;  // SecondaryScale
             c = WriteBuffer2.AddLength(c, Caption);
             c = WriteBuffer2.Align8(c);
-            c += 80; /* Boundary */
+            c += 80;  // Boundary
             c = WriteBuffer2.AddLength(c, SecondaryBoundaries);
             return c;
         }

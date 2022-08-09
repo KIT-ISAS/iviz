@@ -83,7 +83,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Values length */
+            c += 4;  // Values length
             c += 4 * Values.Length;
             return c;
         }

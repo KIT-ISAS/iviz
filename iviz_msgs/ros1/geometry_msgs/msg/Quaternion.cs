@@ -93,5 +93,9 @@ namespace Iviz.Msgs.GeometryMsgs
         public static implicit operator Quaternion(in (Vector3 p, double W) q) => new Quaternion(q.p.X, q.p.Y, q.p.Z, q.W);
         public static Quaternion AngleAxis(double angleInRad, in Vector3 axis) => Extensions.AngleAxis(angleInRad, axis);
         public static Quaternion Rodrigues(in Vector3 rod) => Extensions.Rodrigues(rod);
+        public static bool operator !=(in Quaternion a, in Quaternion b) => !(a == b);
+        public static bool operator ==(in Quaternion a, in Quaternion b) => a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
+        public override bool Equals(object? b) => b is Quaternion pb && this == pb;
+        public override int GetHashCode() => System.HashCode.Combine(X, Y, Z, W);
     }
 }

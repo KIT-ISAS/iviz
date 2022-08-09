@@ -163,7 +163,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int AddRos2MessageLength(int c)
         {
-            c += 1; /* Success */
+            c += 1;  // Success
             c = WriteBuffer2.AddLength(c, Message);
             return c;
         }

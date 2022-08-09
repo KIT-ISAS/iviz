@@ -69,7 +69,7 @@ namespace Iviz.Msgs.StdMsgs
         {
             c = Layout.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Data length */
+            c += 4;  // Data length
             c = WriteBuffer2.Align8(c);
             c += 8 * Data.Length;
             return c;

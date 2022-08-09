@@ -142,17 +142,17 @@ namespace Iviz.Msgs.RosgraphMsgs
             c = WriteBuffer2.AddLength(c, NodePub);
             c = WriteBuffer2.AddLength(c, NodeSub);
             c = WriteBuffer2.Align4(c);
-            c += 8; /* WindowStart */
-            c += 8; /* WindowStop */
-            c += 4; /* DeliveredMsgs */
-            c += 4; /* DroppedMsgs */
-            c += 4; /* Traffic */
-            c += 8; /* PeriodMean */
-            c += 8; /* PeriodStddev */
-            c += 8; /* PeriodMax */
-            c += 8; /* StampAgeMean */
-            c += 8; /* StampAgeStddev */
-            c += 8; /* StampAgeMax */
+            c += 8;  // WindowStart
+            c += 8;  // WindowStop
+            c += 4;  // DeliveredMsgs
+            c += 4;  // DroppedMsgs
+            c += 4;  // Traffic
+            c += 8;  // PeriodMean
+            c += 8;  // PeriodStddev
+            c += 8;  // PeriodMax
+            c += 8;  // StampAgeMean
+            c += 8;  // StampAgeStddev
+            c += 8;  // StampAgeMax
             return c;
         }
     

@@ -76,8 +76,8 @@ namespace Iviz.Msgs.NavMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 80; /* Info */
-            c += 4;  /* Data length */
+            c += 80;  // Info
+            c += 4;  // Data length
             c += 1 * Data.Length;
             return c;
         }

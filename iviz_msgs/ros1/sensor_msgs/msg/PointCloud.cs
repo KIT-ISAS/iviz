@@ -100,7 +100,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Points length */
+            c += 4;  // Points length
             c += 12 * Points.Length;
             c = WriteBuffer2.AddLength(c, Channels);
             return c;

@@ -106,5 +106,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly double Norm => System.Math.Sqrt(SquaredNorm);
         public readonly Vector3 Normalized => this / Norm;
         public static implicit operator Vector3(in (double X, double Y, double Z) p) => new(p.X, p.Y, p.Z);
+        public override bool Equals(object? b) => b is Vector3 pb && this == pb;
+        public override int GetHashCode() => System.HashCode.Combine(X, Y, Z);
     }
 }

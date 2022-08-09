@@ -169,10 +169,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int AddRos2MessageLength(int c)
         {
-            c += 1; /* Success */
+            c += 1;  // Success
             c = WriteBuffer2.AddLength(c, Message);
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Resolutions length */
+            c += 4;  // Resolutions length
             c += 8 * Resolutions.Length;
             return c;
         }

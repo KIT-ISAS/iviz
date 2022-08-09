@@ -75,8 +75,8 @@ namespace Iviz.Msgs.SensorMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 8; /* RelativeHumidity_ */
-            c += 8; /* Variance */
+            c += 8;  // RelativeHumidity_
+            c += 8;  // Variance
             return c;
         }
     

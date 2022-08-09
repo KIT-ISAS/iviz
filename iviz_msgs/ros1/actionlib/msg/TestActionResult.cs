@@ -73,7 +73,7 @@ namespace Iviz.Msgs.Actionlib
             c = Header.AddRos2MessageLength(c);
             c = Status.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4; /* Result */
+            c += 4;  // Result
             return c;
         }
     

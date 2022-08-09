@@ -120,7 +120,7 @@ namespace Iviz.Msgs.NavMsgs
             c = Start.AddRos2MessageLength(c);
             c = Goal.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4; /* Tolerance */
+            c += 4;  // Tolerance
             return c;
         }
     

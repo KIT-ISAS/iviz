@@ -130,10 +130,10 @@ namespace Iviz.Msgs.GridMapMsgs
         {
             c = WriteBuffer2.AddLength(c, FrameId);
             c = WriteBuffer2.Align8(c);
-            c += 8; /* PositionX */
-            c += 8; /* PositionY */
-            c += 8; /* LengthX */
-            c += 8; /* LengthY */
+            c += 8;  // PositionX
+            c += 8;  // PositionY
+            c += 8;  // LengthX
+            c += 8;  // LengthY
             c = WriteBuffer2.AddLength(c, Layers);
             return c;
         }

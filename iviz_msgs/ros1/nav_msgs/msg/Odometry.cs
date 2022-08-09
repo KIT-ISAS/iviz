@@ -84,8 +84,8 @@ namespace Iviz.Msgs.NavMsgs
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.AddLength(c, ChildFrameId);
             c = WriteBuffer2.Align8(c);
-            c += 344; /* Pose */
-            c += 336; /* Twist */
+            c += 344;  // Pose
+            c += 336;  // Twist
             return c;
         }
     

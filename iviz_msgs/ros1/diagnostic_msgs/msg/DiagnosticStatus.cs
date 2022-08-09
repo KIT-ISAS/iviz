@@ -110,7 +110,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public int AddRos2MessageLength(int c)
         {
-            c += 1; /* Level */
+            c += 1;  // Level
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.AddLength(c, Message);
             c = WriteBuffer2.AddLength(c, HardwareId);

@@ -170,7 +170,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int AddRos2MessageLength(int c)
         {
-            c += 1; /* Success */
+            c += 1;  // Success
             c = WriteBuffer2.AddLength(c, StatusMessage);
             return c;
         }

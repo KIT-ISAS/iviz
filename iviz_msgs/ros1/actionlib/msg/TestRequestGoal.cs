@@ -96,16 +96,16 @@ namespace Iviz.Msgs.Actionlib
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align4(c);
-            c += 4; /* TerminateStatus */
-            c += 1; /* IgnoreCancel */
+            c += 4;  // TerminateStatus
+            c += 1;  // IgnoreCancel
             c = WriteBuffer2.AddLength(c, ResultText);
             c = WriteBuffer2.Align4(c);
-            c += 4; /* TheResult */
-            c += 1; /* IsSimpleClient */
+            c += 4;  // TheResult
+            c += 1;  // IsSimpleClient
             c = WriteBuffer2.Align4(c);
-            c += 8; /* DelayAccept */
-            c += 8; /* DelayTerminate */
-            c += 8; /* PauseStatus */
+            c += 8;  // DelayAccept
+            c += 8;  // DelayTerminate
+            c += 8;  // PauseStatus
             return c;
         }
     

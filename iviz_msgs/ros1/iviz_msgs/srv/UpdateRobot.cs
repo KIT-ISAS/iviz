@@ -133,7 +133,7 @@ namespace Iviz.Msgs.IvizMsgs
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align4(c);
-            c += 4; /* Operation */
+            c += 4;  // Operation
             c = WriteBuffer2.AddLength(c, Id);
             c = Configuration.AddRos2MessageLength(c);
             c = WriteBuffer2.AddLength(c, ValidFields);
@@ -199,7 +199,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int AddRos2MessageLength(int c)
         {
-            c += 1; /* Success */
+            c += 1;  // Success
             c = WriteBuffer2.AddLength(c, Message);
             return c;
         }

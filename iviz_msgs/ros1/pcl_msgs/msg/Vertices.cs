@@ -56,7 +56,7 @@ namespace Iviz.Msgs.PclMsgs
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Vertices_ length */
+            c += 4;  // Vertices_ length
             c += 4 * Vertices_.Length;
             return c;
         }

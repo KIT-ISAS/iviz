@@ -117,16 +117,16 @@ namespace Iviz.Msgs.IvizMsgs
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.AddLength(c, Name);
-            c += 4; /* Ambient */
-            c += 4; /* Diffuse */
-            c += 4; /* Emissive */
+            c += 4;  // Ambient
+            c += 4;  // Diffuse
+            c += 4;  // Emissive
             c = WriteBuffer2.Align4(c);
-            c += 4; /* Opacity */
-            c += 4; /* BumpScaling */
-            c += 4; /* Shininess */
-            c += 4; /* ShininessStrength */
-            c += 4; /* Reflectivity */
-            c += 1; /* BlendMode */
+            c += 4;  // Opacity
+            c += 4;  // BumpScaling
+            c += 4;  // Shininess
+            c += 4;  // ShininessStrength
+            c += 4;  // Reflectivity
+            c += 1;  // BlendMode
             c = WriteBuffer2.AddLength(c, Textures);
             return c;
         }

@@ -159,13 +159,13 @@ namespace Iviz.Msgs.SensorMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4; /* AngleMin */
-            c += 4; /* AngleMax */
-            c += 4; /* AngleIncrement */
-            c += 4; /* TimeIncrement */
-            c += 4; /* ScanTime */
-            c += 4; /* RangeMin */
-            c += 4; /* RangeMax */
+            c += 4;  // AngleMin
+            c += 4;  // AngleMax
+            c += 4;  // AngleIncrement
+            c += 4;  // TimeIncrement
+            c += 4;  // ScanTime
+            c += 4;  // RangeMin
+            c += 4;  // RangeMax
             c = WriteBuffer2.AddLength(c, Ranges);
             c = WriteBuffer2.AddLength(c, Intensities);
             return c;

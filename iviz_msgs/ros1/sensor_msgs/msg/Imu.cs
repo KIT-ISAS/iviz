@@ -104,12 +104,12 @@ namespace Iviz.Msgs.SensorMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 32; /* Orientation */
-            c += 9 * 8;
-            c += 24; /* AngularVelocity */
-            c += 9 * 8;
-            c += 24; /* LinearAcceleration */
-            c += 9 * 8;
+            c += 32;  // Orientation
+            c += 8 * 9;
+            c += 24;  // AngularVelocity
+            c += 8 * 9;
+            c += 24;  // LinearAcceleration
+            c += 8 * 9;
             return c;
         }
     

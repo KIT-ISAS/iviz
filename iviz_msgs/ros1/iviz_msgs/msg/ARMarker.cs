@@ -114,16 +114,16 @@ namespace Iviz.Msgs.IvizMsgs
         public int AddRos2MessageLength(int c)
         {
             c = Header.AddRos2MessageLength(c);
-            c += 1; /* Type */
+            c += 1;  // Type
             c = WriteBuffer2.AddLength(c, Code);
             c = WriteBuffer2.Align8(c);
-            c += 4 * 24;
-            c += 9 * 8;
-            c += 56; /* CameraPose */
-            c += 1; /* HasReliablePose */
+            c += 24 * 4;
+            c += 8 * 9;
+            c += 56;  // CameraPose
+            c += 1;  // HasReliablePose
             c = WriteBuffer2.Align8(c);
-            c += 8; /* MarkerSizeInMm */
-            c += 56; /* PoseRelativeToCamera */
+            c += 8;  // MarkerSizeInMm
+            c += 56;  // PoseRelativeToCamera
             return c;
         }
     

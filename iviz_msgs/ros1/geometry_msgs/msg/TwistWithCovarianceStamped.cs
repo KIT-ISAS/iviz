@@ -64,7 +64,7 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 336; /* Twist */
+            c += 336;  // Twist
             return c;
         }
     

@@ -86,8 +86,8 @@ namespace Iviz.Msgs.SensorMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 24; /* MagneticField_ */
-            c += 9 * 8;
+            c += 24;  // MagneticField_
+            c += 8 * 9;
             return c;
         }
     

@@ -133,7 +133,7 @@ namespace Iviz.Msgs.RclInterfaces
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align4(c);
-            c += 8; /* Stamp */
+            c += 8;  // Stamp
             c = WriteBuffer2.AddLength(c, Node);
             c = WriteBuffer2.AddLength(c, NewParameters);
             c = WriteBuffer2.AddLength(c, ChangedParameters);

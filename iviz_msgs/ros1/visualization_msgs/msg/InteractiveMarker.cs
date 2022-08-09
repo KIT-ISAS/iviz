@@ -137,11 +137,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 56; /* Pose */
+            c += 56;  // Pose
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.AddLength(c, Description);
             c = WriteBuffer2.Align4(c);
-            c += 4; /* Scale */
+            c += 4;  // Scale
             c = WriteBuffer2.AddLength(c, MenuEntries);
             c = WriteBuffer2.AddLength(c, Controls);
             return c;

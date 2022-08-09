@@ -61,13 +61,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int c)
-        {
-            c = WriteBuffer2.Align4(c);
-            c += 4; /* U */
-            c += 4; /* V */
-            return c;
-        }
+        public int AddRos2MessageLength(int c) => WriteBuffer2.Align4(c) + Ros2FixedMessageLength;
+        
     
         public const string MessageType = "mesh_msgs/MeshVertexTexCoords";
     

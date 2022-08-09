@@ -167,7 +167,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public int AddRos2MessageLength(int c)
         {
-            c += 1; /* Success */
+            c += 1;  // Success
             return c;
         }
     

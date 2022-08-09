@@ -62,12 +62,8 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int c)
-        {
-            c = WriteBuffer2.Align8(c);
-            c += 4 * 8;
-            return c;
-        }
+        public int AddRos2MessageLength(int c) => WriteBuffer2.Align8(c) + Ros2FixedMessageLength;
+        
     
         public const string MessageType = "shape_msgs/Plane";
     

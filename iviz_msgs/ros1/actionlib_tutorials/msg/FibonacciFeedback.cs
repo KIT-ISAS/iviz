@@ -56,7 +56,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Sequence length */
+            c += 4;  // Sequence length
             c += 4 * Sequence.Length;
             return c;
         }

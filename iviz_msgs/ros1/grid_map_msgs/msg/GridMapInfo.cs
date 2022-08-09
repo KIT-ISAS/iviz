@@ -74,10 +74,10 @@ namespace Iviz.Msgs.GridMapMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 8; /* Resolution */
-            c += 8; /* LengthX */
-            c += 8; /* LengthY */
-            c += 56; /* Pose */
+            c += 8;  // Resolution
+            c += 8;  // LengthX
+            c += 8;  // LengthY
+            c += 56;  // Pose
             return c;
         }
     

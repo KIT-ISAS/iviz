@@ -60,13 +60,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int c)
-        {
-            c = WriteBuffer2.Align8(c);
-            c += 56; /* Center */
-            c += 24; /* Size */
-            return c;
-        }
+        public int AddRos2MessageLength(int c) => WriteBuffer2.Align8(c) + Ros2FixedMessageLength;
+        
     
         public const string MessageType = "iviz_msgs/BoundingBox";
     

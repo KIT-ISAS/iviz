@@ -63,10 +63,10 @@ namespace Iviz.Msgs.MeshMsgs
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Positions length */
+            c += 4;  // Positions length
             c = WriteBuffer2.Align8(c);
             c += 24 * Positions.Length;
-            c += 4;  /* Vectors length */
+            c += 4;  // Vectors length
             c = WriteBuffer2.Align8(c);
             c += 24 * Vectors.Length;
             return c;

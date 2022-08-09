@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Tools;
 
 namespace Iviz.Msgs;
@@ -144,8 +145,8 @@ public unsafe ref struct WriteBuffer
 
         Advance(size);
     }
-
-    public void SerializeArray<T>(T[] val) where T : IMessage
+    
+    public void SerializeArray(TransformStamped[] val)
     {
         WriteInt(val.Length);
         for (int i = 0; i < val.Length; i++)
@@ -154,10 +155,37 @@ public unsafe ref struct WriteBuffer
         }
     }
 
-    public void SerializeArray<T>(T[] val, int count) where T : IMessage
+    public void SerializeArray(IMessage[] val)
+    {
+        WriteInt(val.Length);
+        for (int i = 0; i < val.Length; i++)
+        {
+            val[i].RosSerialize(ref this);
+        }
+    }
+
+    public void SerializeArray(IMessage[] val, int count)
     {
         ThrowIfWrongSize(val, count);
+        for (int i = 0; i < count; i++)
+        {
+            val[i].RosSerialize(ref this);
+        }
+    }
+    
+    public void SerializeArrayGeneric<T>(T[] val) where T : IMessage
+    {
+        WriteInt(val.Length);
         for (int i = 0; i < val.Length; i++)
+        {
+            val[i].RosSerialize(ref this);
+        }
+    }
+    
+    public void SerializeArrayGeneric<T>(T[] val, int count) where T : IMessage
+    {
+        ThrowIfWrongSize(val, count);
+        for (int i = 0; i < count; i++)
         {
             val[i].RosSerialize(ref this);
         }
@@ -218,7 +246,7 @@ public unsafe ref struct WriteBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetStringSize(string? s)
     {
-        return s == null ? 0 : BuiltIns.UTF8.GetByteCount(s);
+        return s is not {Length: not 0} ? 0 : BuiltIns.UTF8.GetByteCount(s);
     }        
 
     /// <summary>

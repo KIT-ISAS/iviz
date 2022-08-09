@@ -91,7 +91,7 @@ namespace Iviz.Msgs.SensorMsgs
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.AddLength(c, Format);
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Data length */
+            c += 4;  // Data length
             c += 1 * Data.Length;
             return c;
         }

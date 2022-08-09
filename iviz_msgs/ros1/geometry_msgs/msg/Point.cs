@@ -98,5 +98,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly double SquaredNorm => X * X + Y * Y + Z * Z;
         public readonly double Norm => System.Math.Sqrt(SquaredNorm);
         public readonly Vector3 Normalized => this / Norm;
+        public override bool Equals(object? b) => b is Point pb && this == pb;
+        public override int GetHashCode() => System.HashCode.Combine(X, Y, Z);
     }
 }

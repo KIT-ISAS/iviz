@@ -98,7 +98,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         public int AddRos2MessageLength(int c)
         {
             c = GoalId.AddRos2MessageLength(c);
-            c += 1; /* Status */
+            c += 1;  // Status
             c = WriteBuffer2.AddLength(c, Text);
             return c;
         }

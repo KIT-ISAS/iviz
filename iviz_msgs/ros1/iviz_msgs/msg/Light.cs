@@ -93,15 +93,15 @@ namespace Iviz.Msgs.IvizMsgs
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.AddLength(c, Name);
-            c += 1; /* Type */
-            c += 1; /* CastShadows */
-            c += 4; /* Diffuse */
+            c += 1;  // Type
+            c += 1;  // CastShadows
+            c += 4;  // Diffuse
             c = WriteBuffer2.Align4(c);
-            c += 4; /* Range */
-            c += 12; /* Position */
-            c += 12; /* Direction */
-            c += 4; /* InnerAngle */
-            c += 4; /* OuterAngle */
+            c += 4;  // Range
+            c += 12;  // Position
+            c += 12;  // Direction
+            c += 4;  // InnerAngle
+            c += 4;  // OuterAngle
             return c;
         }
     

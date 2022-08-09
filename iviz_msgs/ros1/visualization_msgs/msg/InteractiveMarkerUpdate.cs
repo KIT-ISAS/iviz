@@ -140,8 +140,8 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             c = WriteBuffer2.AddLength(c, ServerId);
             c = WriteBuffer2.Align8(c);
-            c += 8; /* SeqNum */
-            c += 1; /* Type */
+            c += 8;  // SeqNum
+            c += 1;  // Type
             c = WriteBuffer2.AddLength(c, Markers);
             c = WriteBuffer2.AddLength(c, Poses);
             c = WriteBuffer2.AddLength(c, Erases);

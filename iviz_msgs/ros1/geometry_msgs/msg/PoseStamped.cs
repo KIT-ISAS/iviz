@@ -61,7 +61,7 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 56; /* Pose */
+            c += 56;  // Pose
             return c;
         }
     

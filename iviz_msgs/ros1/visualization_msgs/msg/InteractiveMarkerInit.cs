@@ -92,7 +92,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             c = WriteBuffer2.AddLength(c, ServerId);
             c = WriteBuffer2.Align8(c);
-            c += 8; /* SeqNum */
+            c += 8;  // SeqNum
             c = WriteBuffer2.AddLength(c, Markers);
             return c;
         }

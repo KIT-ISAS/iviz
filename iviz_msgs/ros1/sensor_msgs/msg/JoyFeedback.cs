@@ -74,14 +74,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int c)
-        {
-            c += 1; /* Type */
-            c += 1; /* Id */
-            c = WriteBuffer2.Align4(c);
-            c += 4; /* Intensity */
-            return c;
-        }
+        public int AddRos2MessageLength(int c) => c + Ros2FixedMessageLength;
+        
     
         public const string MessageType = "sensor_msgs/JoyFeedback";
     

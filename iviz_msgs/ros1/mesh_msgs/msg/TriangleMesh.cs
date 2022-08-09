@@ -177,23 +177,23 @@ namespace Iviz.Msgs.MeshMsgs
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Triangles length */
+            c += 4;  // Triangles length
             c += 12 * Triangles.Length;
-            c += 4;  /* Vertices length */
+            c += 4;  // Vertices length
             c = WriteBuffer2.Align8(c);
             c += 24 * Vertices.Length;
-            c += 4;  /* VertexNormals length */
+            c += 4;  // VertexNormals length
             c = WriteBuffer2.Align8(c);
             c += 24 * VertexNormals.Length;
-            c += 4;  /* VertexColors length */
+            c += 4;  // VertexColors length
             c += 16 * VertexColors.Length;
-            c += 4;  /* TriangleColors length */
+            c += 4;  // TriangleColors length
             c += 16 * TriangleColors.Length;
-            c += 4;  /* VertexTextureCoords length */
+            c += 4;  // VertexTextureCoords length
             c = WriteBuffer2.Align8(c);
             c += 24 * VertexTextureCoords.Length;
-            c += 4;  /* FaceMaterials length */
-            c += 21 * FaceMaterials.Length;
+            c += 4;  // FaceMaterials length
+            c += (21 + 3) * FaceMaterials.Length - 3;
             c = WriteBuffer2.AddLength(c, Textures);
             c = WriteBuffer2.AddLength(c, Clusters);
             return c;

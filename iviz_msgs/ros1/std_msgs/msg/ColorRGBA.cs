@@ -94,5 +94,9 @@ namespace Iviz.Msgs.StdMsgs
         public static implicit operator ColorRGBA(in ((float R, float G, float B) p, float A) q) => new(q.p.R, q.p.G, q.p.B, q.A);
         public static implicit operator ColorRGBA(in (float R, float G, float B) p) => new(p.R, p.G, p.B, 1);
         public (float R, float G, float B) RGB { readonly get => (R, G, B); set => (R, G, B) = value; }
+        public static bool operator !=(in ColorRGBA a, in ColorRGBA b) => !(a == b);
+        public static bool operator ==(in ColorRGBA a, in ColorRGBA b) => a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A;
+        public override bool Equals(object? b) => b is ColorRGBA pb && this == pb;
+        public override int GetHashCode() => System.HashCode.Combine(R, G, B, A);
     }
 }

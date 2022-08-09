@@ -99,7 +99,7 @@ namespace Iviz.Msgs.StdMsgs
         {
             c = WriteBuffer2.AddLength(c, Dim);
             c = WriteBuffer2.Align4(c);
-            c += 4; /* DataOffset */
+            c += 4;  // DataOffset
             return c;
         }
     

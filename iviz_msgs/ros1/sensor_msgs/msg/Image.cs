@@ -114,13 +114,13 @@ namespace Iviz.Msgs.SensorMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4; /* Height */
-            c += 4; /* Width */
+            c += 4;  // Height
+            c += 4;  // Width
             c = WriteBuffer2.AddLength(c, Encoding);
-            c += 1; /* IsBigendian */
+            c += 1;  // IsBigendian
             c = WriteBuffer2.Align4(c);
-            c += 4; /* Step */
-            c += 4;  /* Data length */
+            c += 4;  // Step
+            c += 4;  // Data length
             c += 1 * Data.Length;
             return c;
         }

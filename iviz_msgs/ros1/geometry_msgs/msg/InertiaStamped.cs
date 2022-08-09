@@ -63,7 +63,7 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 80; /* Inertia */
+            c += 80;  // Inertia
             return c;
         }
     

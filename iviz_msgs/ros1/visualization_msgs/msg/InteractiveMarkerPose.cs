@@ -72,7 +72,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 56; /* Pose */
+            c += 56;  // Pose
             c = WriteBuffer2.AddLength(c, Name);
             return c;
         }

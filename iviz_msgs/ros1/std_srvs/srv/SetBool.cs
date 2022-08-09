@@ -99,7 +99,7 @@ namespace Iviz.Msgs.StdSrvs
         
         public int AddRos2MessageLength(int c)
         {
-            c += 1; /* Data */
+            c += 1;  // Data
             return c;
         }
     
@@ -164,7 +164,7 @@ namespace Iviz.Msgs.StdSrvs
         
         public int AddRos2MessageLength(int c)
         {
-            c += 1; /* Success */
+            c += 1;  // Success
             c = WriteBuffer2.AddLength(c, Message);
             return c;
         }

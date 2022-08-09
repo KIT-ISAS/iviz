@@ -71,8 +71,8 @@ namespace Iviz.Msgs.StdMsgs
         {
             c = WriteBuffer2.AddLength(c, Label);
             c = WriteBuffer2.Align4(c);
-            c += 4; /* Size */
-            c += 4; /* Stride */
+            c += 4;  // Size
+            c += 4;  // Stride
             return c;
         }
     

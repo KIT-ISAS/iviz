@@ -58,12 +58,8 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int c)
-        {
-            c = WriteBuffer2.Align4(c);
-            c += 3 * 4;
-            return c;
-        }
+        public int AddRos2MessageLength(int c) => WriteBuffer2.Align4(c) + Ros2FixedMessageLength;
+        
     
         public const string MessageType = "shape_msgs/MeshTriangle";
     

@@ -125,8 +125,8 @@ namespace Iviz.Msgs.GridMapMsgs
             c = WriteBuffer2.AddLength(c, BasicLayers);
             c = WriteBuffer2.AddLength(c, Data);
             c = WriteBuffer2.Align2(c);
-            c += 2; /* OuterStartIndex */
-            c += 2; /* InnerStartIndex */
+            c += 2;  // OuterStartIndex
+            c += 2;  // InnerStartIndex
             return c;
         }
     

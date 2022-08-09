@@ -145,20 +145,20 @@ namespace Iviz.Msgs.IvizMsgs
         {
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Vertices length */
+            c += 4;  // Vertices length
             c += 12 * Vertices.Length;
-            c += 4;  /* Normals length */
+            c += 4;  // Normals length
             c += 12 * Normals.Length;
-            c += 4;  /* Tangents length */
+            c += 4;  // Tangents length
             c += 12 * Tangents.Length;
-            c += 4;  /* BiTangents length */
+            c += 4;  // BiTangents length
             c += 12 * BiTangents.Length;
             c = WriteBuffer2.AddLength(c, TexCoords);
             c = WriteBuffer2.AddLength(c, ColorChannels);
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Faces length */
+            c += 4;  // Faces length
             c += 12 * Faces.Length;
-            c += 4; /* MaterialIndex */
+            c += 4;  // MaterialIndex
             return c;
         }
     

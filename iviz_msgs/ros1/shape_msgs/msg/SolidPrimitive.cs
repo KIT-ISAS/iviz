@@ -88,9 +88,9 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public int AddRos2MessageLength(int c)
         {
-            c += 1; /* Type */
+            c += 1;  // Type
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Dimensions length */
+            c += 4;  // Dimensions length
             c = WriteBuffer2.Align8(c);
             c += 8 * Dimensions.Length;
             return c;

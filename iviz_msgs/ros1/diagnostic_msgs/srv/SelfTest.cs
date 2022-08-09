@@ -170,7 +170,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.AddLength(c, Id);
-            c += 1; /* Passed */
+            c += 1;  // Passed
             c = WriteBuffer2.AddLength(c, Status);
             return c;
         }

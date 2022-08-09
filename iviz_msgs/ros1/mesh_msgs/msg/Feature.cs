@@ -74,8 +74,8 @@ namespace Iviz.Msgs.MeshMsgs
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align8(c);
-            c += 24; /* Location */
-            c += 4;  /* Descriptor length */
+            c += 24;  // Location
+            c += 4;  // Descriptor length
             c += 4 * Descriptor.Length;
             return c;
         }

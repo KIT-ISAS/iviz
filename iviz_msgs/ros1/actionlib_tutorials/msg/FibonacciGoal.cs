@@ -55,12 +55,8 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int c)
-        {
-            c = WriteBuffer2.Align4(c);
-            c += 4; /* Order */
-            return c;
-        }
+        public int AddRos2MessageLength(int c) => WriteBuffer2.Align4(c) + Ros2FixedMessageLength;
+        
     
         public const string MessageType = "actionlib_tutorials/FibonacciGoal";
     

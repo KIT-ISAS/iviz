@@ -62,7 +62,7 @@ namespace Iviz.Msgs.PclMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Values length */
+            c += 4;  // Values length
             c += 4 * Values.Length;
             return c;
         }

@@ -106,12 +106,12 @@ namespace Iviz.Msgs.SensorMsgs
         public int AddRos2MessageLength(int c)
         {
             c = Header.AddRos2MessageLength(c);
-            c += 1; /* RadiationType */
+            c += 1;  // RadiationType
             c = WriteBuffer2.Align4(c);
-            c += 4; /* FieldOfView */
-            c += 4; /* MinRange */
-            c += 4; /* MaxRange */
-            c += 4; /* Range_ */
+            c += 4;  // FieldOfView
+            c += 4;  // MinRange
+            c += 4;  // MaxRange
+            c += 4;  // Range_
             return c;
         }
     

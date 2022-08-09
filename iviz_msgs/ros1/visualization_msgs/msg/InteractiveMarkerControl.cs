@@ -165,12 +165,12 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.Align8(c);
-            c += 32; /* Orientation */
-            c += 1; /* OrientationMode */
-            c += 1; /* InteractionMode */
-            c += 1; /* AlwaysVisible */
+            c += 32;  // Orientation
+            c += 1;  // OrientationMode
+            c += 1;  // InteractionMode
+            c += 1;  // AlwaysVisible
             c = WriteBuffer2.AddLength(c, Markers);
-            c += 1; /* IndependentMarkerOrientation */
+            c += 1;  // IndependentMarkerOrientation
             c = WriteBuffer2.AddLength(c, Description);
             return c;
         }

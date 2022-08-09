@@ -89,19 +89,19 @@ namespace Iviz.Msgs.TrajectoryMsgs
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Positions length */
+            c += 4;  // Positions length
             c = WriteBuffer2.Align8(c);
             c += 8 * Positions.Length;
-            c += 4;  /* Velocities length */
+            c += 4;  // Velocities length
             c = WriteBuffer2.Align8(c);
             c += 8 * Velocities.Length;
-            c += 4;  /* Accelerations length */
+            c += 4;  // Accelerations length
             c = WriteBuffer2.Align8(c);
             c += 8 * Accelerations.Length;
-            c += 4;  /* Effort length */
+            c += 4;  // Effort length
             c = WriteBuffer2.Align8(c);
             c += 8 * Effort.Length;
-            c += 8; /* TimeFromStart */
+            c += 8;  // TimeFromStart
             return c;
         }
     

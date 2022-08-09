@@ -122,14 +122,14 @@ namespace Iviz.Msgs.IvizMsgs
             c = WriteBuffer2.AddLength(c, SavedRobotName);
             c = WriteBuffer2.AddLength(c, FramePrefix);
             c = WriteBuffer2.AddLength(c, FrameSuffix);
-            c += 1; /* AttachedToTf */
-            c += 1; /* RenderAsOcclusionOnly */
+            c += 1;  // AttachedToTf
+            c += 1;  // RenderAsOcclusionOnly
             c = WriteBuffer2.Align4(c);
-            c += 16; /* Tint */
-            c += 4; /* Metallic */
-            c += 4; /* Smoothness */
+            c += 16;  // Tint
+            c += 4;  // Metallic
+            c += 4;  // Smoothness
             c = WriteBuffer2.AddLength(c, Id);
-            c += 1; /* Visible */
+            c += 1;  // Visible
             return c;
         }
     

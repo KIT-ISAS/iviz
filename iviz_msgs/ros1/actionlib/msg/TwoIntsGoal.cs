@@ -60,13 +60,8 @@ namespace Iviz.Msgs.Actionlib
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int c)
-        {
-            c = WriteBuffer2.Align8(c);
-            c += 8; /* A */
-            c += 8; /* B */
-            return c;
-        }
+        public int AddRos2MessageLength(int c) => WriteBuffer2.Align8(c) + Ros2FixedMessageLength;
+        
     
         public const string MessageType = "actionlib/TwoIntsGoal";
     

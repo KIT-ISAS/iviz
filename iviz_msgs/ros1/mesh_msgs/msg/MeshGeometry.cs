@@ -94,13 +94,13 @@ namespace Iviz.Msgs.MeshMsgs
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Vertices length */
+            c += 4;  // Vertices length
             c = WriteBuffer2.Align8(c);
             c += 24 * Vertices.Length;
-            c += 4;  /* VertexNormals length */
+            c += 4;  // VertexNormals length
             c = WriteBuffer2.Align8(c);
             c += 24 * VertexNormals.Length;
-            c += 4;  /* Faces length */
+            c += 4;  // Faces length
             c += 12 * Faces.Length;
             return c;
         }

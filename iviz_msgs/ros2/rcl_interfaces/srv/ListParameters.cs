@@ -114,7 +114,7 @@ namespace Iviz.Msgs.RclInterfaces
         {
             c = WriteBuffer2.AddLength(c, Prefixes);
             c = WriteBuffer2.Align8(c);
-            c += 8; /* Depth */
+            c += 8;  // Depth
             return c;
         }
     

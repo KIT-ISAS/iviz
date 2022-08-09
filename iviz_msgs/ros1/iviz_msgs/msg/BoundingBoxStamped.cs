@@ -63,7 +63,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 80; /* Boundary */
+            c += 80;  // Boundary
             return c;
         }
     

@@ -130,11 +130,12 @@ namespace Iviz.Msgs.MeshMsgs
         {
             c = WriteBuffer2.AddLength(c, Clusters);
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Materials length */
-            c += 21 * Materials.Length;
-            c += 4;  /* ClusterMaterials length */
+            c += 4;  // Materials length
+            c += (21 + 3) * Materials.Length - 3;
+            c = WriteBuffer2.Align4(c);
+            c += 4;  // ClusterMaterials length
             c += 4 * ClusterMaterials.Length;
-            c += 4;  /* VertexTexCoords length */
+            c += 4;  // VertexTexCoords length
             c += 8 * VertexTexCoords.Length;
             return c;
         }

@@ -104,7 +104,7 @@ namespace Iviz.Msgs.MeshMsgs
         {
             c = WriteBuffer2.AddLength(c, Uuid);
             c = WriteBuffer2.Align4(c);
-            c += 4; /* TextureIndex */
+            c += 4;  // TextureIndex
             return c;
         }
     

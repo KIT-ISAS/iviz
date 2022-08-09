@@ -88,14 +88,8 @@ namespace Iviz.Msgs.RclInterfaces
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int c)
-        {
-            c = WriteBuffer2.Align8(c);
-            c += 8; /* FromValue */
-            c += 8; /* ToValue */
-            c += 8; /* Step */
-            return c;
-        }
+        public int AddRos2MessageLength(int c) => WriteBuffer2.Align8(c) + Ros2FixedMessageLength;
+        
     
         public const string MessageType = "rcl_interfaces/FloatingPointRange";
     

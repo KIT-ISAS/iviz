@@ -111,13 +111,13 @@ namespace Iviz.Msgs.SensorMsgs
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* Position length */
+            c += 4;  // Position length
             c = WriteBuffer2.Align8(c);
             c += 8 * Position.Length;
-            c += 4;  /* Velocity length */
+            c += 4;  // Velocity length
             c = WriteBuffer2.Align8(c);
             c += 8 * Velocity.Length;
-            c += 4;  /* Effort length */
+            c += 4;  // Effort length
             c = WriteBuffer2.Align8(c);
             c += 8 * Effort.Length;
             return c;

@@ -142,15 +142,15 @@ namespace Iviz.Msgs.RclInterfaces
         public int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.AddLength(c, Name);
-            c += 1; /* Type */
+            c += 1;  // Type
             c = WriteBuffer2.AddLength(c, Description);
             c = WriteBuffer2.AddLength(c, AdditionalConstraints);
-            c += 1; /* ReadOnly */
+            c += 1;  // ReadOnly
             c = WriteBuffer2.Align4(c);
-            c += 4;  /* FloatingPointRange length */
+            c += 4;  // FloatingPointRange length
             c = WriteBuffer2.Align8(c);
             c += 24 * FloatingPointRange.Length;
-            c += 4;  /* IntegerRange length */
+            c += 4;  // IntegerRange length
             c = WriteBuffer2.Align8(c);
             c += 24 * IntegerRange.Length;
             return c;

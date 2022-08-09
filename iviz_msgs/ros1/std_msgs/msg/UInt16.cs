@@ -54,12 +54,8 @@ namespace Iviz.Msgs.StdMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int c)
-        {
-            c = WriteBuffer2.Align2(c);
-            c += 2; /* Data */
-            return c;
-        }
+        public int AddRos2MessageLength(int c) => WriteBuffer2.Align2(c) + Ros2FixedMessageLength;
+        
     
         public const string MessageType = "std_msgs/UInt16";
     

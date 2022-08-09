@@ -86,7 +86,7 @@ namespace Iviz.Msgs.StdMsgs
         public readonly int AddRos2MessageLength(int c)
         {
             c = WriteBuffer2.Align4(c);
-            c += 8; /* Stamp */
+            c += 8;  // Stamp
             c = WriteBuffer2.AddLength(c, FrameId);
             return c;
         }

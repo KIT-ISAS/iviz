@@ -196,27 +196,27 @@ namespace Iviz.Msgs.IvizMsgs
         public int AddRos2MessageLength(int c)
         {
             c = Header.AddRos2MessageLength(c);
-            c += 1; /* Action */
+            c += 1;  // Action
             c = WriteBuffer2.AddLength(c, Id);
             c = WriteBuffer2.Align4(c);
-            c += 8; /* Lifetime */
+            c += 8;  // Lifetime
             c = WriteBuffer2.Align8(c);
-            c += 8; /* Scale */
-            c += 1; /* Type */
-            c += 1; /* Buttons */
-            c += 1; /* Icon */
+            c += 8;  // Scale
+            c += 1;  // Type
+            c += 1;  // Buttons
+            c += 1;  // Icon
             c = WriteBuffer2.Align4(c);
-            c += 16; /* BackgroundColor */
+            c += 16;  // BackgroundColor
             c = WriteBuffer2.AddLength(c, Title);
             c = WriteBuffer2.AddLength(c, Caption);
             c = WriteBuffer2.Align2(c);
-            c += 2; /* CaptionAlignment */
+            c += 2;  // CaptionAlignment
             c = WriteBuffer2.AddLength(c, MenuEntries);
-            c += 1; /* BindingType */
+            c += 1;  // BindingType
             c = WriteBuffer2.Align8(c);
-            c += 24; /* TfOffset */
-            c += 24; /* DialogDisplacement */
-            c += 24; /* TfDisplacement */
+            c += 24;  // TfOffset
+            c += 24;  // DialogDisplacement
+            c += 24;  // TfDisplacement
             return c;
         }
     
