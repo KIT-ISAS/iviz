@@ -1,12 +1,13 @@
 #nullable enable
 
+using System;
 using Iviz.Core;
 using TMPro;
 using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public sealed class XRNoticeDialog : XRDialog, IDialogWithCaption, IDialogWithAlignment, IDialogWithIcon
+    public sealed class XRNoticeDialog : XRDialog, IDialogWithCaption, IDialogWithIcon
     {
         [SerializeField] TMP_Text? caption;
         [SerializeField] XRIconPlane? iconObject;
@@ -16,12 +17,11 @@ namespace Iviz.Displays.XR
 
         public string Caption
         {
-            set => CaptionObject.text = value;
-        }
-
-        public CaptionAlignmentType CaptionAlignment
-        {
-            set => CaptionObject.alignment = (TextAlignmentOptions)value;
+            set
+            {
+                CaptionObject.text = value;
+                UpdateSize();
+            }
         }
 
         public XRIcon Icon
@@ -29,9 +29,20 @@ namespace Iviz.Displays.XR
             set => IconObject.Icon = value;
         }
 
-        public override bool Interactable
+        void UpdateSize()
         {
-            set { } // no interactable components
+            Span<Rect> bounds = stackalloc[]
+            {
+                GetIconBounds(IconObject),
+                GetCaptionBounds(CaptionObject),
+            };
+            
+            const float padding = 0.15f;
+            var (center, size) = bounds.Combine(padding);
+
+            Background.Transform.localPosition = center;
+            Background.Size = size;
+            SocketPosition = new Vector3(0, center.y - size.y / 2, 0);
         }
     }
 }

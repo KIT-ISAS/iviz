@@ -4,32 +4,32 @@ using System;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Resources;
+using TMPro;
 using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
     public abstract class XRDialog : MonoBehaviour, IDialog
     {
-        [SerializeField] Transform? _transform;
-        [SerializeField] Vector2 backgroundSize = new Vector2(1, 1);
-        [SerializeField] Vector3 socketPosition = Vector3.zero;
         [SerializeField] Color backgroundColor = Resource.Colors.DefaultBackgroundColor;
         [SerializeField] XRDialogConnector? connector;
         [SerializeField] GameObject? background;
 
+        Transform? mTransform;
         FrameNode? node;
         string? pivotFrameId;
         bool resetOrientation = true;
         Vector3? currentPosition;
         float scale = 1;
         BindingType bindingType = BindingType.None;
-
-        ISupportsColor? backgroundObject;
+        RoundedPlaneDisplay? backgroundObject;
 
         FrameNode Node => node ??= new FrameNode("Dialog Node");
         XRDialogConnector Connector => connector.AssertNotNull(nameof(connector));
 
-        ISupportsColor Background
+        protected Vector3 SocketPosition { get; set; }
+
+        protected RoundedPlaneDisplay Background
         {
             get
             {
@@ -38,11 +38,9 @@ namespace Iviz.Displays.XR
                     return backgroundObject;
                 }
 
-                if (background != null && background.TryGetComponent<ISupportsColor>(out var newBackgroundObject))
-                {
-                    backgroundObject = newBackgroundObject;
-                    return backgroundObject;
-                }
+                background!.SetActive(false);
+                var backgroundScale3 = background.transform.localScale;
+                var backgroundSize = new Vector2(backgroundScale3.x, backgroundScale3.y);
 
                 var display = ResourcePool.RentDisplay<RoundedPlaneDisplay>(Transform);
                 display.Size = backgroundSize;
@@ -52,8 +50,6 @@ namespace Iviz.Displays.XR
             }
         }
 
-        public abstract bool Interactable { set; }
-
         public event Action? Expired;
 
         public BindingType BindingType
@@ -62,7 +58,7 @@ namespace Iviz.Displays.XR
             set
             {
                 bindingType = value;
-                Connector.Visible = bindingType == BindingType.Tf;
+                UpdateConnectorVisible();
             }
         }
 
@@ -105,7 +101,7 @@ namespace Iviz.Displays.XR
                     Node.AttachTo(pivotFrameId);
                     currentPosition = null;
                     resetOrientation = true;
-                    Connector.Visible = pivotFrameId != null;
+                    UpdateConnectorVisible();
                     return;
                 }
 
@@ -114,10 +110,15 @@ namespace Iviz.Displays.XR
             }
         }
 
-        Transform Transform => _transform != null ? _transform : (_transform = transform);
+        void UpdateConnectorVisible()
+        {
+            Connector.Visible = BindingType == BindingType.Tf && pivotFrameId != null;
+        }
+
+        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         internal Vector3 ConnectorStart =>
-            TfModule.RelativeToOrigin(Transform.TransformPoint(socketPosition));
+            TfModule.RelativeToOrigin(Transform.TransformPoint(SocketPosition));
 
         internal Vector3 ConnectorEnd
         {
@@ -135,7 +136,6 @@ namespace Iviz.Displays.XR
             if (BindingType is BindingType.Tf or BindingType.None)
             {
                 Transform.SetParentLocal(TfModule.OriginTransform);
-                Connector.Visible = true;
             }
 
             resetOrientation = true;
@@ -191,11 +191,20 @@ namespace Iviz.Displays.XR
             {
                 case BindingType.Tf or BindingType.None:
                 {
+                    /*
+                    var framePosition = TfModule.RelativeToOrigin(Node.Transform.TransformPoint(TfFrameOffset));
+                    return TfDisplacement.MaxAbsCoeff() == 0
+                        ? framePosition
+                        : framePosition + GetFlatCameraRotationRelativeTo(framePosition) * TfDisplacement;
+                        */
+
+
                     var absolutePivotPosition = Node.Transform.TransformPoint(TfFrameOffset);
                     var localFramePosition = TfModule.RelativeToOrigin(absolutePivotPosition);
                     var localCameraRotation = GetFlatCameraRotationRelativeTo(localFramePosition);
                     var localTargetPosition =
-                        localFramePosition + localCameraRotation * DialogDisplacement - socketPosition;
+                        localFramePosition + localCameraRotation * (TfDisplacement + DialogDisplacement) -
+                        SocketPosition;
                     absoluteTargetPosition = TfModule.OriginTransform.TransformPoint(localTargetPosition);
                     break;
                 }
@@ -311,6 +320,99 @@ namespace Iviz.Displays.XR
                     button3.Caption = "Cancel";
                     break;
             }
+        }
+
+        public static Rect GetCaptionBounds(TMP_Text text)
+        {
+            var captionTransform = text.rectTransform;
+            var captionPosition = captionTransform.anchoredPosition;
+            var captionScale = captionTransform.localScale;
+            float captionWidth = Mathf.Min(text.preferredWidth, captionTransform.sizeDelta.x) *
+                                 captionScale.x;
+            float captionHeight = text.preferredHeight * captionScale.y;
+
+            return Rect.MinMaxRect(
+                captionPosition.x - captionWidth / 2,
+                captionPosition.y - captionHeight,
+                captionPosition.x + captionWidth / 2,
+                captionPosition.y);
+        }
+
+        public static Rect GetCaptionBoundsLeft(TMP_Text text)
+        {
+            var captionTransform = text.rectTransform;
+            var captionPosition = captionTransform.anchoredPosition;
+            var captionScale = captionTransform.localScale;
+            float sizeDeltaX = captionTransform.sizeDelta.x * captionScale.x;
+            float captionWidth = Mathf.Min(text.preferredWidth * captionScale.x, sizeDeltaX);
+            float captionHeight = text.preferredHeight * captionScale.y;
+
+            return Rect.MinMaxRect(
+                captionPosition.x - sizeDeltaX / 2,
+                captionPosition.y - captionHeight,
+                captionPosition.x - sizeDeltaX / 2 + captionWidth,
+                captionPosition.y);
+        }
+
+        protected static Rect GetTitleBounds(TMP_Text text)
+        {
+            var textTransform = text.rectTransform;
+            var titlePosition = textTransform.anchoredPosition;
+            var titleScale = textTransform.localScale;
+            float titleWidth = text.preferredWidth * titleScale.x;
+            float titleHeight = text.preferredHeight * titleScale.y;
+
+            return Rect.MinMaxRect(
+                titlePosition.x - titleWidth / 2,
+                titlePosition.y - titleHeight / 2,
+                titlePosition.x + titleWidth / 2,
+                titlePosition.y + titleHeight / 2);
+        }
+
+        protected static Rect GetTitleBoundsLeft(TMP_Text text)
+        {
+            var textTransform = text.rectTransform;
+            var titlePosition = textTransform.anchoredPosition;
+            var titleScale = textTransform.localScale;
+            float sizeDeltaX = textTransform.sizeDelta.x * titleScale.x;
+            ;
+            float titleWidth = text.preferredWidth * titleScale.x;
+            float titleHeight = text.preferredHeight * titleScale.y;
+
+            return Rect.MinMaxRect(
+                titlePosition.x - sizeDeltaX / 2,
+                titlePosition.y - titleHeight / 2,
+                titlePosition.x - sizeDeltaX / 2 + titleWidth,
+                titlePosition.y + titleHeight / 2);
+        }
+
+        public static Rect GetIconBounds(MonoBehaviour icon)
+        {
+            var iconTransform = icon.transform;
+            var iconScale = iconTransform.localScale;
+            var iconPosition = iconTransform.localPosition;
+            float iconWidth = iconScale.x;
+            float iconHeight = iconScale.z;
+
+            return Rect.MinMaxRect(
+                iconPosition.x - iconWidth / 2,
+                iconPosition.y - iconHeight / 2,
+                iconPosition.x + iconWidth / 2,
+                iconPosition.y + iconHeight / 2);
+        }
+
+        protected static Rect GetButtonBounds(XRButton button)
+        {
+            var (center, size) = button.Bounds;
+            float buttonScale = button.Transform.localScale.x;
+            var scaledCenter = center * buttonScale + button.Transform.localPosition;
+            var scaledSize = size * buttonScale;
+
+            return Rect.MinMaxRect(
+                scaledCenter.x - scaledSize.x / 2,
+                scaledCenter.y - scaledSize.y / 2,
+                scaledCenter.x + scaledSize.x / 2,
+                scaledCenter.y + scaledSize.y / 2);
         }
     }
 }

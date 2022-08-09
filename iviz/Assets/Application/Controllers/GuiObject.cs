@@ -40,7 +40,7 @@ namespace Iviz.Controllers
                 {
                     widget.Interactable = value;
                 }
-                else if (display is IDialog dialog)
+                else if (display is IDialogIsInteractable dialog)
                 {
                     dialog.Interactable = value;
                 }
@@ -155,6 +155,7 @@ namespace Iviz.Controllers
                 ThrowHelper.ThrowMissingAssetField("Gui object does not have a dialog!");
             }
 
+            dialog.BindingType = (BindingType)msg.BindingType;
             dialog.Scale = msg.Scale == 0 ? 1f : (float)msg.Scale;
             dialog.PivotFrameId = msg.Header.FrameId;
             dialog.TfFrameOffset = msg.TfOffset.Ros2Unity();

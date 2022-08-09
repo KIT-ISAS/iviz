@@ -35,9 +35,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.4179, y: 0.1132}
-  m_SizeDelta: {x: 55.70878, y: 24.199753}
-  m_Pivot: {x: 0.000000011175871, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0.06}
+  m_SizeDelta: {x: 54, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &6298192817679098082
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -100,7 +100,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Abcd
+  m_text: AbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcdAbcd
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: bd3d58aaf88944f3093f13d950b96860, type: 2}
   m_sharedMaterial: {fileID: 518525549465842797, guid: bd3d58aaf88944f3093f13d950b96860,
@@ -135,7 +135,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -164,7 +164,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 1
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 3.0317354, z: 0, w: 4.16679}
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   _SortingLayer: 0
@@ -284,9 +284,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.4089, y: 0.2143}
-  m_SizeDelta: {x: 54.5108, y: 11.9621}
-  m_Pivot: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0.12458426}
+  m_SizeDelta: {x: 54, y: 11.9621}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &1683998854227993718
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -349,7 +349,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Error
+  m_text: Title
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: aa1b19b70aaaec64ca679106ea501e96, type: 2}
   m_sharedMaterial: {fileID: -4067124225677523749, guid: aa1b19b70aaaec64ca679106ea501e96,
@@ -437,7 +437,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6258707198505295089
 Transform:
   m_ObjectHideFlags: 0
@@ -447,7 +447,7 @@ Transform:
   m_GameObject: {fileID: 8214205372093170329}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.86137, y: 0.5, z: 1}
+  m_LocalScale: {x: 0.86137, y: 0.4375, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 205409857698953685}
@@ -508,11 +508,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _transform: {fileID: 9024825353754890542}
-  backgroundSize: {x: 0.86, y: 0.5}
   socketPosition: {x: 0, y: -0.3, z: 0}
   backgroundColor: {r: 0, g: 0.2, b: 0.5, a: 1}
   connector: {fileID: 586438443107256636}
-  background: {fileID: 0}
+  background: {fileID: 8214205372093170329}
   title: {fileID: 1008052830234413160}
   caption: {fileID: 7950096136613215624}
 --- !u!1001 &586438442386524082
@@ -619,6 +618,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 791139870075898096, guid: c3b1afd1b19444c57b708ecc2b861ad8,
         type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 791139870075898096, guid: c3b1afd1b19444c57b708ecc2b861ad8,
+        type: 3}
       propertyPath: m_CastShadows
       value: 0
       objectReference: {fileID: 0}
@@ -717,6 +721,12 @@ PrefabInstance:
       propertyPath: m_CastShadows
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 791139870075898096, guid: c3b1afd1b19444c57b708ecc2b861ad8,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: -3033667219593020291, guid: 16486bb45915d4084b4a578531c792ad,
+        type: 3}
     - target: {fileID: 791139870075898099, guid: c3b1afd1b19444c57b708ecc2b861ad8,
         type: 3}
       propertyPath: m_Name

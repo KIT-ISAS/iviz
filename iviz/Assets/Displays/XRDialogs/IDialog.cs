@@ -9,7 +9,7 @@ namespace Iviz.Displays.XR
 {
     public interface IDialog : IDisplay
     {
-        bool Interactable { set; }
+        BindingType BindingType { set; }
         event Action? Expired;
         float Scale { set; }
         Color Color { set; }
@@ -18,6 +18,11 @@ namespace Iviz.Displays.XR
         Vector3 TfDisplacement { set; }
         string PivotFrameId { set; }
         void Initialize();
+    }
+
+    public interface IDialogIsInteractable
+    {
+        bool Interactable { set; }
     }
     
     public interface IDialogWithTitle

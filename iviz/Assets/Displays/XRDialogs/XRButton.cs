@@ -32,13 +32,13 @@ namespace Iviz.Displays.XR
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
         Transform IHasBounds.BoundsTransform => BoxCollider.transform;
         Bounds? IHasBounds.Bounds => Bounds;
-        Bounds Bounds => BoxCollider.GetLocalBounds();
         MeshMarkerDisplay Cylinder => cylinder.AssertNotNull(nameof(cylinder));
         XRIconPlane IconObject => iconPlane.AssertNotNull(nameof(iconPlane));
 
         StaticBoundsControl BoundsControl =>
             boundsControl ??= new StaticBoundsControl(this) { FrameColumnWidth = 0.01f };
 
+        public Bounds Bounds => BoxCollider.GetLocalBounds();
         public Transform Transform => this.EnsureHasTransform(ref m_Transform);
         public event Action? BoundsChanged;
         public event Action? Clicked;
@@ -77,6 +77,7 @@ namespace Iviz.Displays.XR
             {
                 caption = value;
                 Text.text = value;
+                UpdateSize();
             }
         }
 
@@ -120,6 +121,7 @@ namespace Iviz.Displays.XR
                 Cylinder.EmissiveColor = Color.black;
                 IconObject.EmissiveColor = Color.white.WithValue(0.5f);
             };
+            BoundsControl.FrameColumnWidth = 0.0025f;
 
             Background.Size = new Vector2(1, 1);
             Background.Radius = 0.3f;
@@ -157,22 +159,20 @@ namespace Iviz.Displays.XR
             BoundsChanged = null;
             Clicked = null;
         }
-    }
 
-    public enum XRIcon
-    {
-        None = Msgs.IvizMsgs.Dialog.ICON_NONE,
-        Cross = Msgs.IvizMsgs.Dialog.ICON_CROSS,
-        Ok = Msgs.IvizMsgs.Dialog.ICON_OK,
-        Forward = Msgs.IvizMsgs.Dialog.ICON_FORWARD,
-        Backward = Msgs.IvizMsgs.Dialog.ICON_BACKWARD,
-        Dialog = Msgs.IvizMsgs.Dialog.ICON_DIALOG,
-        Up = Msgs.IvizMsgs.Dialog.ICON_UP,
-        Down = Msgs.IvizMsgs.Dialog.ICON_DOWN,
-        Info = Msgs.IvizMsgs.Dialog.ICON_INFO,
-        Warn = Msgs.IvizMsgs.Dialog.ICON_WARN,
-        Error = Msgs.IvizMsgs.Dialog.ICON_ERROR,
-        Dialogs = Msgs.IvizMsgs.Dialog.ICON_DIALOGS,
-        Question = Msgs.IvizMsgs.Dialog.ICON_QUESTION,
+        void UpdateSize()
+        {
+            Span<Rect> bounds = stackalloc[]
+            {
+                XRDialog.GetIconBounds(Cylinder),
+                XRDialog.GetCaptionBounds(Text),
+            };
+            
+            const float padding = 0.1f;
+            var (center, size) = bounds.Combine(padding);
+
+            BoxCollider.SetLocalBounds(new Bounds(center, new Vector3(size.x, size.y, 0.1f)));
+            BoundsChanged?.Invoke();
+        }
     }
 }

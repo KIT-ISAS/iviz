@@ -6,17 +6,22 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public sealed class XRButtonDialog : XRDialog, IDialogWithCaption, IDialogWithIcon, IDialogCanBeClicked
+    public sealed class XRButtonDialog : XRDialog, IDialogWithCaption, IDialogWithIcon, IDialogCanBeClicked,
+        IDialogIsInteractable
     {
         [SerializeField] XRButton? button;
 
         XRButton Button => button.AssertNotNull(nameof(button));
 
         public event Action<int>? Clicked;
-        
+
         public string Caption
         {
-            set => Button.Caption = value;
+            set
+            {
+                Button.Caption = value;
+                UpdateSize();
+            }
         }
 
         public XRIcon Icon
@@ -24,7 +29,7 @@ namespace Iviz.Displays.XR
             set => Button.Icon = value;
         }
 
-        public override bool Interactable
+        public bool Interactable
         {
             set => Button.Interactable = value;
         }
@@ -39,6 +44,16 @@ namespace Iviz.Displays.XR
         {
             base.Suspend();
             Clicked = null;
+        }
+
+        void UpdateSize()
+        {
+            var (center, size) = GetButtonBounds(Button);
+
+            const float padding = 0.05f;
+            Background.Transform.localPosition = center;
+            Background.Size = size + padding * Vector2.one;
+            SocketPosition = new Vector3(0, center.y - size.y / 2 - padding, 0);
         }
     }
 }

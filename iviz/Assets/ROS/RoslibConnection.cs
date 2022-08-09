@@ -255,13 +255,15 @@ namespace Iviz.Ros
                     RosLogger.Internal("Resubscribing and readvertising...");
                     token.ThrowIfCancellationRequested();
 
-                    /*
-                    var (success, hosts) = await currentClient.GetParameterAsync("/iviz/hosts", token);
-                    if (success)
+                    var ros1Client = currentClient as RosClient;
+                    if (ros1Client != null)
                     {
-                        AddHostsParamFromArg(hosts);
+                        var (success, hosts) = await ros1Client.GetParameterAsync("/iviz/hosts", token);
+                        if (success)
+                        {
+                            AddHostsParamFromArg(hosts);
+                        }
                     }
-                    */
 
                     AddConfigHostAliases();
 
@@ -296,9 +298,9 @@ namespace Iviz.Ros
 
                     RosLogger.Internal("Finished resubscribing and readvertising!");
 
-                    if (currentVersion == RosVersion.ROS1)
+                    if (ros1Client != null)
                     {
-                        watchdogTask = WatchdogTask(((RosClient)currentClient).RosMasterClient, token);
+                        watchdogTask = WatchdogTask(ros1Client.RosMasterClient, token);
                         ntpTask = NtpCheckerTask(MasterUri.Host, token);
                     }
                 });
@@ -1105,6 +1107,7 @@ namespace Iviz.Ros
         public string[] GetSystemParameterList(CancellationToken token = default)
         {
             var internalToken = runningTs.Token;
+            
             TaskUtils.Run(async () =>
             {
                 if (!Connected || token.IsCancellationRequested || internalToken.IsCancellationRequested)
@@ -1113,10 +1116,15 @@ namespace Iviz.Ros
                     return;
                 }
 
+                if (Client is not RosClient ros1Client)
+                {
+                    return;
+                }
+
                 try
                 {
                     using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, internalToken);
-                    //cachedParameters = await Client.GetParameterNamesAsync(tokenSource.Token);
+                    cachedParameters = await ros1Client.GetParameterNamesAsync(tokenSource.Token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -1146,13 +1154,17 @@ namespace Iviz.Ros
                 return (default, "Not connected");
             }
 
+            if (Client is not RosClient ros1Client)
+            {
+                return (default, "Only supported in ROS1");
+            }
+
             try
             {
                 using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
                 tokenSource.CancelAfter(timeoutInMs);
                 (bool success, RosParameterValue param) =
-                    //await Client.GetParameterAsync(parameter, tokenSource.Token);
-                    (true, default);
+                    await ros1Client.GetParameterAsync(parameter, tokenSource.Token);
                 if (!success)
                 {
                     return (default, $"'{parameter}' not found");

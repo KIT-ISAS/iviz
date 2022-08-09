@@ -1,12 +1,14 @@
 #nullable enable
 
+using System;
 using Iviz.Core;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Iviz.Displays.XR
 {
-    public sealed class XRShortDialog : XRDialog, IDialogWithCaption, IDialogWithTitle, IDialogWithAlignment
+    public sealed class XRShortDialog : XRDialog, IDialogWithCaption, IDialogWithTitle
     {
         [SerializeField] TMP_Text? title;
         [SerializeField] TMP_Text? caption;
@@ -16,7 +18,11 @@ namespace Iviz.Displays.XR
 
         public string Caption
         {
-            set => CaptionObject.text = value;
+            set
+            {
+                CaptionObject.text = value;
+                UpdateSize();
+            }
         }
 
         public string Title
@@ -24,14 +30,20 @@ namespace Iviz.Displays.XR
             set => TitleObject.text = value;
         }
 
-        public CaptionAlignmentType CaptionAlignment
+        void UpdateSize()
         {
-            set => CaptionObject.alignment = (TextAlignmentOptions)value;
+            Span<Rect> bounds = stackalloc[]
+            {
+                GetTitleBounds(TitleObject),
+                GetCaptionBounds(CaptionObject)
+            };
+
+            const float padding = 0.1f;
+            var (center, size) = bounds.Combine(padding);
+
+            Background.Transform.localPosition = center; // - padding / 4 * Vector2.up;
+            Background.Size = size;
+            SocketPosition = new Vector3(0, center.y - size.y / 2, 0);
         }
-        
-        public override bool Interactable
-        {
-            set { } // no interactable components
-        }        
     }
 }

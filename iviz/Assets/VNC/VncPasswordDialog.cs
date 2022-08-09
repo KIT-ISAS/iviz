@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public sealed class VncPasswordDialog : XRDialog
+    public sealed class VncPasswordDialog : XRDialog, IDialogIsInteractable
     {
         [SerializeField] TMP_Text? title;
         [SerializeField] TMP_InputField? password;
@@ -29,7 +29,7 @@ namespace Iviz.Displays.XR
             set => PasswordObject.text = value;
         }
         
-        public override bool Interactable
+        public bool Interactable
         {
             set
             {

@@ -245,12 +245,12 @@ public class NetworkTests
     }
     */
 
-    [Test]
-    public async Task TestChannelsWithEmptyMessageAsync()
-    {
-        const string topicName = "/my_test_topic_xyz_empty";
-        await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-        await using var publisher = await client.CreateWriterAsync<Empty>(topicName, true);
+        [Test]
+        public async Task TestChannelsWithEmptyMessageAsync()
+        {
+            const string topicName = "/my_test_topic_xyz_empty";
+            await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
+            await using var publisher = await client.CreateWriterAsync<Empty>(topicName, true);
 
         var systemState = await client.GetSystemStateAsync();
         Assert.True(

@@ -69,14 +69,14 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
             BytesDropped = bytesDropped
         };
 
-    public TcpSender(TcpClient client, TopicInfo topicInfo, NullableMessage<T> latchedMsg)
+    public TcpSender(TcpClient client, TopicInfo topicInfo, ILatchedMessageProvider<T> provider)
     {
         this.topicInfo = topicInfo;
         senderQueue = new SenderQueue<T>(this);
         TcpClient = client;
         Endpoint = new Endpoint((IPEndPoint)TcpClient.Client.LocalEndPoint!);
         RemoteEndpoint = new Endpoint((IPEndPoint)TcpClient.Client.RemoteEndPoint!);
-        task = TaskUtils.Run(() => StartSession(latchedMsg).AwaitNoThrow(this), runningTs.Token);
+        task = TaskUtils.Run(() => StartSession(provider).AwaitNoThrow(this), runningTs.Token);
     }
 
     public async ValueTask DisposeAsync(CancellationToken token)
@@ -228,13 +228,13 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         }
     }
 
-    async ValueTask StartSession(NullableMessage<T> latchedMsg)
+    async ValueTask StartSession(ILatchedMessageProvider<T> provider)
     {
         Logger.LogDebugFormat("{0}: Started!", this);
 
         try
         {
-            await ProcessLoop(latchedMsg);
+            await ProcessLoop(provider);
         }
         catch (Exception e)
         {
@@ -262,12 +262,13 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         senderQueue.FlushRemaining();
     }
 
-    async ValueTask ProcessLoop(NullableMessage<T> latchedMsg)
+    async ValueTask ProcessLoop(ILatchedMessageProvider<T> provider)
     {
         using var writeBuffer = new ResizableRent();
 
-        await ProcessHandshake(latchedMsg.hasValue);
+        await ProcessHandshake(provider.HasLatchedMessage());
 
+        var latchedMsg = provider.GetLatchedMessage();
         if (latchedMsg.hasValue)
         {
             Publish(latchedMsg.value!);
@@ -304,15 +305,14 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
                 writeBuffer.EnsureCapacity(msgLength + 4);
 
                 writeBuffer[..4].WriteInt(msgLength);
-                
+
                 WriteBuffer.Serialize(msg, writeBuffer[4..]);
-                
+
                 await TcpClient.WriteChunkAsync(writeBuffer.Array, msgLength + 4, runningTs.Token);
 
                 numSent++;
                 bytesSent += msgLength + 4;
                 msgSignal?.TrySetResult();
-
             }
         }
         catch (Exception e)

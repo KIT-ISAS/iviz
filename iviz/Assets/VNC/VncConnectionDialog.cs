@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public sealed class VncConnectionDialog : XRDialog
+    public sealed class VncConnectionDialog : XRDialog, IDialogIsInteractable
     {
         [SerializeField] TMP_Text? title;
         [SerializeField] TMP_InputField? hostname;
@@ -43,7 +43,7 @@ namespace Iviz.Displays.XR
             set => SetupButtons(Button1, Button2, Button3, value);
         }
 
-        public override bool Interactable
+        public bool Interactable
         {
             set
             {
