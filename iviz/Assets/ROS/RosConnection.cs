@@ -6,9 +6,24 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Tools;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Iviz.Ros
 {
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum RosVersion
+    {
+        ROS1,
+        ROS2
+    }
+
+    public enum RosRequestType
+    {
+        CachedOnly,
+        CachedButRequestInBackground,
+    }
+    
     /// <summary>
     /// Partial implementation of a ROS connection. The rest is in <see cref="RoslibConnection"/>.
     /// Here we only handle initializing connections and task queues.
@@ -22,6 +37,8 @@ namespace Iviz.Ros
 
         public static event Action<ConnectionState>? ConnectionStateChanged;
         public static event Action<bool>? ConnectionWarningStateChanged;
+
+        public const bool IsRos2VersionSupported = Settings.IsAndroid || Settings.IsIPhone || Settings.IsMacOS;
 
         readonly SemaphoreSlim signal = new(0);
         readonly Task task;
@@ -186,11 +203,5 @@ namespace Iviz.Ros
         }
         
         public sealed override string ToString() => $"[{nameof(RosConnection)}]";
-    }
-
-    public enum RequestType
-    {
-        CachedOnly,
-        CachedButRequestInBackground,
     }
 }

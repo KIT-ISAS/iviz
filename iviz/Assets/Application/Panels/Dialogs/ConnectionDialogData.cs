@@ -157,7 +157,7 @@ namespace Iviz.App
             panel.LineLog.Active = true;
             panel.ServerMode.State = RosManager.Server.IsActive;
 
-            if (!RoslibConnection.IsRos2VersionSupported)
+            if (!RosConnection.IsRos2VersionSupported)
             {
                 RosVersion = RosVersion.ROS1;
                 panel.RosVersion1.Interactable = false;
@@ -211,7 +211,7 @@ namespace Iviz.App
             };
             panel.RosVersion1.Clicked += () =>
             {
-                if (!RoslibConnection.IsRos2VersionSupported)
+                if (!RosConnection.IsRos2VersionSupported)
                 {
                     RosLogger.Internal("ROS2 is not supported on this platform.");
                     return;

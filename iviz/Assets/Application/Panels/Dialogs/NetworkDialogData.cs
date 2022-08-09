@@ -10,6 +10,7 @@ using Iviz.Roslib;
 using Iviz.Roslib2;
 using Iviz.Roslib2.Rcl;
 using Iviz.Tools;
+using static Iviz.Ros.RoslibConnection;
 
 namespace Iviz.App
 {
@@ -41,14 +42,14 @@ namespace Iviz.App
             {
                 try
                 {
-                    if (RosManager.Connection.Client is RosClient client)
+                    switch (RosManager.Connection.Client)
                     {
-                        GenerateReportRos1(description, client);
-                    }
-                    else if (RoslibConnection.IsRos2VersionSupported &&
-                             RosManager.Connection.Client is Ros2Client client2)
-                    {
-                        GenerateReportRos2(description, client2);
+                        case RosClient client:
+                            GenerateReportRos1(description, client);
+                            break;
+                        case Ros2Client client2:
+                            GenerateReportRos2(description, client2);
+                            break;
                     }
                 }
                 catch (InvalidOperationException)
@@ -254,8 +255,9 @@ namespace Iviz.App
 
         static void GenerateReportRos2(StringBuilder builder, Ros2Client client)
         {
-            if (!RoslibConnection.IsRos2VersionSupported)
+            if (!RosConnection.IsRos2VersionSupported)
             {
+                builder.Append("<b>Error:</b> ROS version not supported!");
                 return;
             }
             
@@ -391,22 +393,22 @@ namespace Iviz.App
                     _ => "ReliabilityPolicy: Unknown (" + (int)profile.Reliability + ")"
                 });
 
-                builder.Append(" | ");
                 builder.Append(profile.Durability switch
                 {
-                    DurabilityPolicy.SystemDefault => "DurabilityPolicy: Default",
-                    DurabilityPolicy.Volatile => "Volatile",
-                    DurabilityPolicy.TransientLocal => "TransientLocal",
-                    _ => "DurabilityPolicy: Unknown (" + (int)profile.Durability + ")"
+                    DurabilityPolicy.SystemDefault => " | DurabilityPolicy: Default",
+                    DurabilityPolicy.Volatile => " | Volatile",
+                    DurabilityPolicy.TransientLocal => " | TransientLocal",
+                    DurabilityPolicy.Unknown => "",
+                    _ => " | DurabilityPolicy: Unknown (" + (int)profile.Durability + ")"
                 });
 
-                builder.Append(" | ");
                 builder.Append(profile.History switch
                 {
-                    HistoryPolicy.SystemDefault => "HistoryPolicy: Default",
-                    HistoryPolicy.KeepAll => "KeepAll",
-                    HistoryPolicy.KeepLast => $"KeepLast({profile.Depth.ToString()})",
-                    _ => "HistoryPolicy: Unknown (" + (int)profile.History + ")"
+                    HistoryPolicy.SystemDefault => " | HistoryPolicy: Default",
+                    HistoryPolicy.KeepAll => " | KeepAll",
+                    HistoryPolicy.KeepLast => $" | KeepLast({profile.Depth.ToString()})",
+                    HistoryPolicy.Unknown => "",
+                    _ => " | HistoryPolicy: Unknown (" + (int)profile.History + ")"
                 });
             }
         }

@@ -262,7 +262,7 @@ namespace Iviz.Controllers
             }
 
             string? GetCachedPublishedType() =>
-                Connection.GetSystemPublishedTopicTypes(RequestType.CachedOnly)
+                Connection.GetSystemPublishedTopicTypes(RosRequestType.CachedOnly)
                     .TryGetFirst(topicInfo => topicInfo.Topic == topic, out var topicType)
                     ? topicType.Type
                     : null;

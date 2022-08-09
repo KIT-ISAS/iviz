@@ -26,7 +26,8 @@ namespace Iviz.App
 
         void Awake()
         {
-            bool isPhoneDevice = Settings.IsMobile && Screen.width / (float)Screen.height > 1.6f; // is phone not tablet
+            bool isPhoneDevice = Settings.IsMobile && 
+                                 Screen.width / (float)Screen.height > 1.6f; // is phone not tablet
 
             if (isPhoneDevice)
             {
@@ -39,9 +40,9 @@ namespace Iviz.App
                 // landscape tablet mode! 
                 Scaler.referenceResolution = new Vector2(1100, 720);
                 Scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
-            }            
+            }
         }
-        
+
         void Start()
         {
             UpdateSize();
@@ -51,12 +52,15 @@ namespace Iviz.App
         {
             currentOrientation = Screen.orientation;
             currentResolution = CurrentResolution();
-            
+
             float fullSize = FullCanvas.rect.width;
             float scale = fullSize / Screen.width;
 
-            float leftSafeSize = Screen.safeArea.min.x * scale;
-            float rightSafeSize = Screen.safeArea.max.x * scale;
+            float safeAreaMin = Mathf.Max(Screen.safeArea.min.x, Screen.width * 0.025f);
+            float safeAreaMax = Mathf.Min(Screen.safeArea.max.x, Screen.width * 0.975f);
+
+            float leftSafeSize = safeAreaMin * scale;
+            float rightSafeSize = safeAreaMax * scale;
             float safeSize = rightSafeSize - leftSafeSize;
 
             Canvas.anchoredPosition = new Vector2(leftSafeSize, 0);
@@ -67,13 +71,13 @@ namespace Iviz.App
             LeftBlack.sizeDelta = LeftBlack.sizeDelta.WithX(leftWidth);
 
             float rightWidth = (fullSize - safeSize) * 1.5f;
-            RightBlack.anchoredPosition = new Vector2(safeSize + rightWidth/2, 0);
+            RightBlack.anchoredPosition = new Vector2(safeSize + rightWidth / 2, 0);
             RightBlack.sizeDelta = RightBlack.sizeDelta.WithX(rightWidth);
         }
 
         void Update()
         {
-            if (Screen.orientation != currentOrientation || CurrentResolution()  == currentResolution)
+            if (Screen.orientation != currentOrientation || CurrentResolution() == currentResolution)
             {
                 UpdateSize();
             }

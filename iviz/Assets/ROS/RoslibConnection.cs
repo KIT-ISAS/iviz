@@ -23,13 +23,6 @@ using Random = System.Random;
 
 namespace Iviz.Ros
 {
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum RosVersion
-    {
-        ROS1,
-        ROS2
-    }
-
     public sealed class RoslibConnection : RosConnection, Iviz.Displays.IServiceProvider
     {
         static TopicNameType[] EmptyTopics => Array.Empty<TopicNameType>();
@@ -96,8 +89,6 @@ namespace Iviz.Ros
                 RosVersionChanged?.Invoke(version);
             }
         }
-
-        public const bool IsRos2VersionSupported = Settings.IsAndroid || Settings.IsIPhone || Settings.IsMacOS;
 
         public IRosClient Client => client ?? throw new InvalidOperationException("Client not connected");
 
@@ -1033,9 +1024,9 @@ namespace Iviz.Ros
         }
 
         public TopicNameType[] GetSystemPublishedTopicTypes(
-            RequestType type = RequestType.CachedButRequestInBackground)
+            RosRequestType type = RosRequestType.CachedButRequestInBackground)
         {
-            if (type == RequestType.CachedButRequestInBackground)
+            if (type == RosRequestType.CachedButRequestInBackground)
             {
                 TaskUtils.Run(() => GetSystemPublishedTopicTypesAsync().AsTask(), runningTs.Token);
             }
@@ -1070,9 +1061,9 @@ namespace Iviz.Ros
             return cachedPublishedTopics;
         }
 
-        public TopicNameType[] GetSystemTopicTypes(RequestType type = RequestType.CachedButRequestInBackground)
+        public TopicNameType[] GetSystemTopicTypes(RosRequestType type = RosRequestType.CachedButRequestInBackground)
         {
-            if (type == RequestType.CachedButRequestInBackground)
+            if (type == RosRequestType.CachedButRequestInBackground)
             {
                 TaskUtils.Run(() => GetSystemTopicTypesAsync().AsTask(), runningTs.Token);
             }
@@ -1188,9 +1179,9 @@ namespace Iviz.Ros
             }
         }
 
-        public SystemState? GetSystemState(RequestType type = RequestType.CachedButRequestInBackground)
+        public SystemState? GetSystemState(RosRequestType type = RosRequestType.CachedButRequestInBackground)
         {
-            if (type == RequestType.CachedButRequestInBackground)
+            if (type == RosRequestType.CachedButRequestInBackground)
             {
                 TaskUtils.Run(() => GetSystemStateAsync().AsTask(), runningTs.Token);
             }
