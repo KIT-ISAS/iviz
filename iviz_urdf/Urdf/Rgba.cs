@@ -18,7 +18,7 @@ namespace Iviz.Urdf
         internal Rgba(XmlAttribute? attr)
         {
             string s = Utils.ParseString(attr);
-            string[] elems = s.Split(Utils.Separator, StringSplitOptions.RemoveEmptyEntries);
+            string[] elems = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (elems.Length != 4)
             {
                 throw new MalformedUrdfException(attr);

@@ -7,8 +7,6 @@ namespace Iviz.Sdf
 {
     public sealed class Vector3d
     {
-        internal static readonly char[] Separator = {' '};
-
         public double X { get; }
         public double Y { get; }
         public double Z { get; }
@@ -20,7 +18,7 @@ namespace Iviz.Sdf
                 throw new MalformedSdfException();
             }
 
-            string[] elems = node.InnerText.Split(Separator, StringSplitOptions.RemoveEmptyEntries);
+            string[] elems = node.InnerText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (elems.Length != 3)
             {
                 throw new MalformedSdfException(node);

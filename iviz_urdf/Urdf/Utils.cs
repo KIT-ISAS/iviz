@@ -8,8 +8,6 @@ namespace Iviz.Urdf
     {
         public static CultureInfo Culture => BuiltIns.Culture;
 
-        public static readonly char[] Separator = {' '};
-        
         public static float ParseFloat(XmlAttribute? attr)
         {
             if (attr is null)

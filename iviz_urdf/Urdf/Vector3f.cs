@@ -36,7 +36,7 @@ namespace Iviz.Urdf
             }
 
             string s = Utils.ParseString(attr);
-            string[] elems = s.Split(Utils.Separator, StringSplitOptions.RemoveEmptyEntries);
+            string[] elems = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (elems.Length != 3)
             {
                 throw new MalformedUrdfException(attr);
@@ -81,7 +81,7 @@ namespace Iviz.Urdf
         public override bool Equals(object? obj) =>
             ReferenceEquals(this, obj) || obj is Vector3f other && Equals(other);
 
-        public override int GetHashCode() => (X, Y, Z).GetHashCode();
+        public override int GetHashCode() => HashCode.Combine(X, Y, Z);
 
         public static bool operator ==(Vector3f? left, Vector3f? right) => Equals(left, right);
 
