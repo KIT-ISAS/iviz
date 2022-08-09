@@ -18,6 +18,9 @@ namespace Iviz.MsgsGen
         int fixedSizeReq = ClassInfo.UninitializedSize;
         int fixedSizeResp = ClassInfo.UninitializedSize;
 
+        int fixedRos2SizeReq = ClassInfo.UninitializedSize;
+        int fixedRos2SizeResp = ClassInfo.UninitializedSize;
+
         string? md5;
 
         public ServiceInfo(string package, string path)
@@ -75,11 +78,13 @@ namespace Iviz.MsgsGen
             if (fixedSizeReq == ClassInfo.UninitializedSize)
             {
                 fixedSizeReq = ClassInfo.DoCheckFixedSize(variablesReq);
+                fixedRos2SizeReq = ClassInfo.DoCheckRos2FixedSize(variablesReq).fixedSize;
             }
 
             if (fixedSizeResp == ClassInfo.UninitializedSize)
             {
                 fixedSizeResp = ClassInfo.DoCheckFixedSize(variablesResp);
+                fixedRos2SizeResp = ClassInfo.DoCheckRos2FixedSize(variablesResp).fixedSize;
             }
         }
 
@@ -88,6 +93,7 @@ namespace Iviz.MsgsGen
             IReadOnlyCollection<VariableElement> variables,
             string service,
             int fixedSize,
+            int ros2FixedSize,
             bool isRequest
         )
         {
@@ -128,8 +134,8 @@ namespace Iviz.MsgsGen
             IEnumerable<string> lengthProperty =
                 ClassInfo.CreateLengthProperty1(variables, fixedSize, false)
                     .Append("")
-                    .Concat(ClassInfo.CreateLengthProperty2(variables, fixedSize, false, false));
- 
+                    .Concat(ClassInfo.CreateLengthProperty2(variables, ros2FixedSize, false));
+
             foreach (string entry in lengthProperty)
             {
                 lines.Add($"    {entry}");
@@ -280,7 +286,8 @@ namespace Iviz.MsgsGen
             str.AppendNewLine("    }");
             str.AppendNewLine();
 
-            IEnumerable<string> linesReq = CreateClassContent(elementsReq, variablesReq, Name, fixedSizeReq, true);
+            IEnumerable<string> linesReq =
+                CreateClassContent(elementsReq, variablesReq, Name, fixedSizeReq, fixedRos2SizeReq, true);
             foreach (string entry in linesReq)
             {
                 str.Append("    ").AppendNewLine(entry);
@@ -288,7 +295,8 @@ namespace Iviz.MsgsGen
 
             str.AppendNewLine();
 
-            IEnumerable<string> linesResp = CreateClassContent(elementsResp, variablesResp, Name, fixedSizeResp, false);
+            IEnumerable<string> linesResp = CreateClassContent(elementsResp, variablesResp, Name, fixedSizeResp,
+                fixedRos2SizeResp, false);
             foreach (string entry in linesResp)
             {
                 str.Append("    ").AppendNewLine(entry);

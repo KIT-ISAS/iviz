@@ -63,7 +63,7 @@ public sealed class MessageFixedArrayField<T> : IField<T[]> where T : IMessage, 
 
     public void RosSerialize(ref WriteBuffer b)
     {
-        b.SerializeArray(Value, Count);
+        b.SerializeArrayGeneric(Value, Count);
     }
 
     public void RosDeserializeInPlace(ref ReadBuffer b)

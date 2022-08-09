@@ -47,7 +47,7 @@ public sealed class MessageArrayField<T> : IField<T[]> where T : IMessage, IDese
 
     public void RosSerialize(ref WriteBuffer b)
     {
-        b.SerializeArray(Value);
+        b.SerializeArrayGeneric(Value);
     }
 
     public void RosDeserializeInPlace(ref ReadBuffer b)

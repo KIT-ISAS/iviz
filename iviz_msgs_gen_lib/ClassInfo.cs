@@ -79,6 +79,25 @@ public sealed class ClassInfo
         "string"
     };
 
+    static readonly Dictionary<string, int> BuiltInAlignments = new()
+    {
+        { "bool", 1 },
+        { "int8", 1 },
+        { "uint8", 1 },
+        { "int16", 2 },
+        { "uint16", 2 },
+        { "int32", 4 },
+        { "uint32", 4 },
+        { "int64", 8 },
+        { "uint64", 8 },
+        { "float32", 4 },
+        { "float64", 8 },
+        { "time", 4 },
+        { "duration", 4 },
+        { "char", 1 },
+        { "byte", 1 }
+    };
+
     static readonly UTF8Encoding Utf8 = new(false);
 
     readonly ActionMessageType actionMessageType;
@@ -91,15 +110,19 @@ public sealed class ClassInfo
 
     bool? requiresDispose;
 
-    public int FixedSize { get; internal set; } = UninitializedSize;
-    public bool HasFixedSize => FixedSize != UnknownSizeAtCompileTime && FixedSize != UninitializedSize;
+    public int Ros1FixedSize { get; internal set; } = UninitializedSize;
+    public bool HasFixedSize => Ros1FixedSize != UnknownSizeAtCompileTime && Ros1FixedSize != UninitializedSize;
+
+    public int Ros2FixedSize { get; internal set; } = UninitializedSize;
+    public int Ros2HeadAlignment { get; internal set; } = UninitializedSize;
+
     public ReadOnlyCollection<IElement> Elements { get; }
     public string RosPackage { get; }
     public string CsPackage { get; }
     public string Name { get; }
     public bool ForceStruct { get; }
     readonly bool isBlittable;
-    public bool IsBlittable => isBlittable || (ForceStruct && FixedSize >= 0);
+    public bool IsBlittable => isBlittable || (ForceStruct && Ros1FixedSize >= 0);
     public string FullRosName => $"{RosPackage}/{Name}";
 
     public ClassInfo(string packageName, string messageFilePath, bool forceStruct = false) :
@@ -283,23 +306,21 @@ public sealed class ClassInfo
         int fixedSize = 0;
         foreach (VariableElement variable in variables)
         {
-            if (!variable.IsDynamicSizeArray)
+            if (variable.IsDynamicSizeArray)
             {
-                if (BuiltInsSizes.TryGetValue(variable.RosClassType, out int size))
-                {
-                    fixedSize += variable.IsFixedSizeArray ? size * variable.ArraySize : size;
-                }
-                else if (variable.ClassInfo != null &&
-                         variable.ClassInfo.CheckFixedSize() != UnknownSizeAtCompileTime)
-                {
-                    fixedSize += variable.IsFixedSizeArray
-                        ? size * variable.ClassInfo.FixedSize
-                        : variable.ClassInfo.FixedSize;
-                }
-                else
-                {
-                    return UnknownSizeAtCompileTime;
-                }
+                return UnknownSizeAtCompileTime;
+            }
+
+            if (BuiltInsSizes.TryGetValue(variable.RosClassType, out int size))
+            {
+                fixedSize += variable.IsFixedSizeArray ? size * variable.ArraySize : size;
+            }
+            else if (variable.ClassInfo != null &&
+                     variable.ClassInfo.CheckFixedSize() != UnknownSizeAtCompileTime)
+            {
+                fixedSize += variable.IsFixedSizeArray
+                    ? size * variable.ClassInfo.Ros1FixedSize
+                    : variable.ClassInfo.Ros1FixedSize;
             }
             else
             {
@@ -312,16 +333,86 @@ public sealed class ClassInfo
 
     internal int CheckFixedSize()
     {
-        if (FixedSize == UninitializedSize)
+        if (Ros1FixedSize == UninitializedSize)
         {
-            FixedSize = DoCheckFixedSize(variables);
+            Ros1FixedSize = DoCheckFixedSize(variables);
         }
 
-        return FixedSize;
+        return Ros1FixedSize;
+    }
+
+    internal static (int fixedSize, int headAlignment) DoCheckRos2FixedSize(
+        VariableElement[] variables)
+    {
+        int fixedSize = 0;
+        if (variables.Length == 0)
+        {
+            return (0, 1);
+        }
+
+        int headAlignment = UninitializedSize;
+        for (int i = 0; i < variables.Length; i++)
+        {
+            var variable = variables[i];
+
+            if (variable.IsDynamicSizeArray)
+            {
+                return (UnknownSizeAtCompileTime, UninitializedSize);
+            }
+
+            if (BuiltInsSizes.TryGetValue(variable.RosClassType, out int size))
+            {
+                int alignment = BuiltInAlignments[variable.RosClassType];
+                int alignmentMask = alignment - 1;
+                fixedSize = (fixedSize + alignmentMask) & ~alignmentMask;
+                fixedSize += variable.IsFixedSizeArray ? size * variable.ArraySize : size;
+
+                if (i == 0)
+                {
+                    headAlignment = alignment;
+                }
+            }
+            else if (variable.ClassInfo != null &&
+                     variable.ClassInfo.CheckRos2FixedSize() != UnknownSizeAtCompileTime)
+            {
+                int alignment = variable.ClassInfo.Ros2HeadAlignment;
+
+                int alignmentMask = alignment - 1;
+                if (alignmentMask != -1)
+                {
+                    fixedSize = (fixedSize + alignmentMask) & ~alignmentMask;
+                }
+
+                fixedSize += variable.IsFixedSizeArray
+                    ? size * variable.ClassInfo.Ros1FixedSize
+                    : variable.ClassInfo.Ros1FixedSize;
+
+                if (i == 0)
+                {
+                    headAlignment = alignment;
+                }
+            }
+            else
+            {
+                return (UnknownSizeAtCompileTime, UninitializedSize);
+            }
+        }
+
+        return (fixedSize, headAlignment);
+    }
+
+    internal int CheckRos2FixedSize()
+    {
+        if (Ros2FixedSize == UninitializedSize)
+        {
+            (Ros2FixedSize, Ros2HeadAlignment) = DoCheckRos2FixedSize(variables);
+        }
+
+        return Ros2FixedSize;
     }
 
     internal static IEnumerable<string> CreateLengthProperty2(IReadOnlyCollection<VariableElement> variables,
-        int fixedSize, bool forceStruct, bool isBlittable)
+        int fixedSize, bool forceStruct, int ros2HeadAlignment = UninitializedSize)
     {
         string readOnlyId = forceStruct ? "readonly " : "";
 
@@ -331,11 +422,11 @@ public sealed class ClassInfo
             {
                 $"public {readOnlyId}int Ros2MessageLength => 0;",
                 "",
-                $"public {readOnlyId}void AddRos2MessageLength(ref int _) {{ }}"
+                $"public {readOnlyId}int AddRos2MessageLength(int c) => c;"
             };
         }
 
-        if (isBlittable)
+        if (ros2HeadAlignment != UninitializedSize)
         {
             return new[]
             {
@@ -343,13 +434,15 @@ public sealed class ClassInfo
                 "",
                 $"public {readOnlyId}int Ros2MessageLength => Ros2FixedMessageLength;",
                 "",
-                $"public {readOnlyId}void AddRos2MessageLength(ref int c) => WriteBuffer2.AddLength(ref c, this);",
+                ros2HeadAlignment != 1
+                    ? $"public {readOnlyId}int AddRos2MessageLength(int c) => WriteBuffer2.Align{ros2HeadAlignment}(c) + Ros2FixedMessageLength;"
+                    : $"public {readOnlyId}int AddRos2MessageLength(int c) => c + Ros2FixedMessageLength;",
                 "",
             };
         }
 
         var fields = new List<string>();
-        if (forceStruct && fixedSize != UnknownSizeAtCompileTime)
+        if (fixedSize != UnknownSizeAtCompileTime)
         {
             fields.Add($"public const int Ros2FixedMessageLength = {fixedSize};");
             fields.Add("");
@@ -357,12 +450,14 @@ public sealed class ClassInfo
         }
         else
         {
-            fields.Add($"public {readOnlyId}int Ros2MessageLength => WriteBuffer2.GetRosMessageLength(this);");
+            fields.Add($"public {readOnlyId}int Ros2MessageLength => AddRos2MessageLength(0);");
         }
 
         fields.Add("");
 
-        fields.Add($"public {readOnlyId}void AddRos2MessageLength(ref int c)");
+        int currentAlignment = -1;
+
+        fields.Add($"public {readOnlyId}int AddRos2MessageLength(int c)");
         fields.Add("{");
         foreach (var variable in variables)
         {
@@ -371,28 +466,99 @@ public sealed class ClassInfo
                 continue;
             }
 
-            if (BuiltInTypes.Contains(variable.RosClassType) || variable.ClassIsBlittable)
+            if (BuiltInsSizes.TryGetValue(variable.RosClassType, out int tmpFieldFixedSize))
+            {
+                int fieldFixedSize = tmpFieldFixedSize;
+                int fieldAlignment = BuiltInAlignments[variable.RosClassType];
+                WriteFixedSize(fieldAlignment, fieldFixedSize);
+            }
+            else if (variable.ClassInfo is { Ros2FixedSize: > 0 } classInfo)
+            {
+                int fieldAlignment = classInfo.Ros2HeadAlignment;
+                int fieldFixedSize = classInfo.Ros2FixedSize;
+                WriteFixedSize(fieldAlignment, fieldFixedSize);
+            }
+            else if (BuiltInTypes.Contains(variable.RosClassType) || variable.ClassIsBlittable)
             {
                 if (!variable.IsFixedSizeArray)
                 {
-                    fields.Add($"    WriteBuffer2.AddLength(ref c, {variable.CsFieldName});");
+                    fields.Add($"    c = WriteBuffer2.AddLength(c, {variable.CsFieldName});");
                 }
                 else
                 {
                     fields.Add(
-                        $"    WriteBuffer2.AddLength(ref c, {variable.CsFieldName}, {variable.FixedArraySize});");
+                        $"    c = WriteBuffer2.AddLength(c, {variable.CsFieldName}, {variable.FixedArraySize});");
                 }
+
+                currentAlignment = -1;
             }
             else if (variable.IsArray)
             {
-                fields.Add($"    WriteBuffer2.AddLength(ref c, {variable.CsFieldName});");
+                fields.Add($"    c = WriteBuffer2.AddLength(c, {variable.CsFieldName});");
+                currentAlignment = -1;
             }
             else
             {
-                fields.Add($"    {variable.CsFieldName}.AddRos2MessageLength(ref c);");
+                fields.Add($"    c = {variable.CsFieldName}.AddRos2MessageLength(c);");
+                currentAlignment = -1;
+            }
+
+            // ------------------
+
+            void WriteFixedSize(int fieldAlignment, int fieldFixedSize)
+            {
+                int selfPadding;
+                if (fieldAlignment > 1)
+                {
+                    int fieldAlignmentMask = fieldAlignment - 1;
+                    int selfAlignedFixedSize = (fieldFixedSize + fieldAlignmentMask) & (~fieldAlignmentMask);
+                    selfPadding = selfAlignedFixedSize - fieldFixedSize;
+                }
+                else
+                {
+                    selfPadding = 0;
+                }
+
+                if (variable.IsFixedSizeArray)
+                {
+                    WriteAlign(fieldAlignment);
+                    fields.Add(selfPadding == 0
+                        ? $"    c += {fieldFixedSize} * {variable.FixedArraySize};"
+                        : $"    c += ({fieldFixedSize} + {selfPadding}) * {variable.FixedArraySize} - {selfPadding};");
+                }
+                else if (variable.IsDynamicSizeArray)
+                {
+                    WriteAlign(4);
+                    fields.Add($"    c += 4;  // {variable.CsFieldName} length");
+                    currentAlignment = 4;
+                    WriteAlign(fieldAlignment);
+
+                    fields.Add(selfPadding == 0
+                        ? $"    c += {fieldFixedSize} * {variable.CsFieldName}.Length;"
+                        : $"    c += ({fieldFixedSize} + {selfPadding}) * {variable.CsFieldName}.Length - {selfPadding};");
+                }
+                else
+                {
+                    WriteAlign(fieldAlignment);
+                    fields.Add($"    c += {fieldFixedSize};  // {variable.CsFieldName}");
+                }
+
+                currentAlignment = fieldFixedSize % fieldAlignment == 0 
+                    ? fieldAlignment 
+                    : -1;
+            }
+
+            void WriteAlign(int fieldAlignment)
+            {
+                if (fieldAlignment > 1 && (currentAlignment == -1 || fieldAlignment > currentAlignment))
+                {
+                    fields.Add($"    c = WriteBuffer2.Align{fieldAlignment}(c);");
+                    currentAlignment = fieldAlignment;
+                }
             }
         }
 
+        fields.Add($"    return c;");
         fields.Add("}");
 
         return fields;
@@ -453,7 +619,7 @@ public sealed class ClassInfo
                 {
                     if (variable.ClassInfo != null && variable.ClassHasFixedSize)
                     {
-                        fieldSize += variable.ClassInfo.FixedSize;
+                        fieldSize += variable.ClassInfo.Ros1FixedSize;
                     }
                     else if (variable.CsClassType == "string")
                     {
@@ -476,9 +642,9 @@ public sealed class ClassInfo
                         fieldSize += 4;
                     }
 
-                    if (variable.ClassInfo != null && variable.ClassInfo.FixedSize != UnknownSizeAtCompileTime)
+                    if (variable.ClassInfo != null && variable.ClassInfo.Ros1FixedSize != UnknownSizeAtCompileTime)
                     {
-                        fieldsWithSize.Add($"{variable.ClassInfo.FixedSize} * {variable.CsFieldName}.Length");
+                        fieldsWithSize.Add($"{variable.ClassInfo.Ros1FixedSize} * {variable.CsFieldName}.Length");
                     }
                     else if (variable.ClassIsBlittable)
                     {
@@ -671,14 +837,14 @@ public sealed class ClassInfo
 
             if (!variable.ClassIsStruct)
             {
-                return variable.ClassInfo is { FixedSize: 0 }
+                return variable.ClassInfo is { Ros1FixedSize: 0 }
                     ? $"{variable.CsFieldName} = {variable.CsClassType}.Singleton;"
                     : $"{variable.CsFieldName} = new {variable.CsClassType}();";
             }
         }
-        
-        return forceInit 
-            ? $"{variable.CsFieldName} = default;" 
+
+        return forceInit
+            ? $"{variable.CsFieldName} = default;"
             : null;
     }
 
@@ -783,7 +949,7 @@ public sealed class ClassInfo
                     switch (variable.ArraySize)
                     {
                         case VariableElement.NotAnArray:
-                            if (variable.ClassInfo is { FixedSize: 0 })
+                            if (variable.ClassInfo is { Ros1FixedSize: 0 })
                             {
                                 lines.Add(
                                     $"    {prefix}{variable.CsFieldName} = {variable.CsClassType}.Singleton;");
@@ -1199,15 +1365,16 @@ public sealed class ClassInfo
         lines.Add("");
 
         CheckFixedSize();
+        CheckRos2FixedSize();
 
         var lengthProperty = version switch
         {
-            RosVersion.Ros1 => CreateLengthProperty1(variables, FixedSize, ForceStruct),
-            RosVersion.Ros2 => CreateLengthProperty2(variables, FixedSize, ForceStruct, IsBlittable),
+            RosVersion.Ros1 => CreateLengthProperty1(variables, Ros1FixedSize, ForceStruct),
+            RosVersion.Ros2 => CreateLengthProperty2(variables, Ros2FixedSize, ForceStruct, Ros2HeadAlignment),
             RosVersion.Common =>
-                CreateLengthProperty1(variables, FixedSize, ForceStruct)
+                CreateLengthProperty1(variables, Ros1FixedSize, ForceStruct)
                     .Append("")
-                    .Concat(CreateLengthProperty2(variables, FixedSize, ForceStruct, IsBlittable)),
+                    .Concat(CreateLengthProperty2(variables, Ros2FixedSize, ForceStruct, Ros2HeadAlignment)),
             _ => throw new IndexOutOfRangeException()
         };
 

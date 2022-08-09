@@ -26,6 +26,8 @@ namespace Iviz.MsgsGen
                 "public readonly double SquaredNorm => X * X + Y * Y + Z * Z;",
                 "public readonly double Norm => System.Math.Sqrt(SquaredNorm);",
                 "public readonly Vector3 Normalized => this / Norm;",
+                "public override bool Equals(object? b) => b is Point pb && this == pb;",
+                "public override int GetHashCode() => System.HashCode.Combine(X, Y, Z);",
             },
 
             ["geometry_msgs/Vector3"] = new[]
@@ -48,6 +50,8 @@ namespace Iviz.MsgsGen
                 "public readonly double Norm => System.Math.Sqrt(SquaredNorm);",
                 "public readonly Vector3 Normalized => this / Norm;",
                 "public static implicit operator Vector3(in (double X, double Y, double Z) p) => new(p.X, p.Y, p.Z);",
+                "public override bool Equals(object? b) => b is Vector3 pb && this == pb;",
+                "public override int GetHashCode() => System.HashCode.Combine(X, Y, Z);",
             },
 
             ["geometry_msgs/Quaternion"] = new[]
@@ -63,6 +67,10 @@ namespace Iviz.MsgsGen
                 "public static implicit operator Quaternion(in (Vector3 p, double W) q) => new Quaternion(q.p.X, q.p.Y, q.p.Z, q.W);",
                 "public static Quaternion AngleAxis(double angleInRad, in Vector3 axis) => Extensions.AngleAxis(angleInRad, axis);",
                 "public static Quaternion Rodrigues(in Vector3 rod) => Extensions.Rodrigues(rod);",
+                "public static bool operator !=(in Quaternion a, in Quaternion b) => !(a == b);",
+                "public static bool operator ==(in Quaternion a, in Quaternion b) => a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;",
+                "public override bool Equals(object? b) => b is Quaternion pb && this == pb;",
+                "public override int GetHashCode() => System.HashCode.Combine(X, Y, Z, W);",
             },
 
             ["geometry_msgs/Transform"] = new[]
@@ -109,6 +117,10 @@ namespace Iviz.MsgsGen
                 "public static implicit operator ColorRGBA(in ((float R, float G, float B) p, float A) q) => new(q.p.R, q.p.G, q.p.B, q.A);",
                 "public static implicit operator ColorRGBA(in (float R, float G, float B) p) => new(p.R, p.G, p.B, 1);",
                 "public (float R, float G, float B) RGB { readonly get => (R, G, B); set => (R, G, B) = value; }",
+                "public static bool operator !=(in ColorRGBA a, in ColorRGBA b) => !(a == b);",
+                "public static bool operator ==(in ColorRGBA a, in ColorRGBA b) => a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A;",
+                "public override bool Equals(object? b) => b is ColorRGBA pb && this == pb;",
+                "public override int GetHashCode() => System.HashCode.Combine(R, G, B, A);",
             },
 
             ["iviz_msgs/Vector3f"] = new[]

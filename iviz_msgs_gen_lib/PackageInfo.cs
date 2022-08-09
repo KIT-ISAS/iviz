@@ -136,6 +136,7 @@ namespace Iviz.MsgsGen
             foreach (var classInfo in messages.Values)
             {
                 classInfo.CheckFixedSize();
+                classInfo.CheckRos2FixedSize();
             }
 
             foreach (var classInfo in services.Values)
