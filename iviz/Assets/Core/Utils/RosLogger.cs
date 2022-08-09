@@ -32,7 +32,7 @@ namespace Iviz.Core
 
         public static void Error(object? t)
         {
-            PublishExternal((string?)t, LogLevel.Error);
+            PublishExternal(t?.ToString(), LogLevel.Error);
         }
 
         public static void Error(object? t, Exception? e)

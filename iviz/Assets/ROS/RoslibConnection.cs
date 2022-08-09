@@ -12,6 +12,7 @@ using Iviz.Ntp;
 using Iviz.Roslib;
 using Iviz.Roslib.XmlRpc;
 using Iviz.Roslib2;
+using Iviz.Roslib2.Rcl.Wrappers;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
 using Iviz.Tools;
@@ -74,7 +75,7 @@ namespace Iviz.Ros
                     return;
                 }
 
-                if (!IsRosVersionSupported(value))
+                if (version == RosVersion.ROS2 && !IsRos2VersionSupported)
                 {
                     throw new InvalidOperationException("ROS version not supported!");
                 }
@@ -82,8 +83,8 @@ namespace Iviz.Ros
                 RosLogger.Internal(
                     value switch
                     {
-                        RosVersion.ROS1 => "ROS version changed to ROS1. You can connect now.",
-                        RosVersion.ROS2 => "ROS version changed to ROS2 (experimental). You can connect now.",
+                        RosVersion.ROS1 => "ROS version changed to ROS1/Noetic. You can connect now.",
+                        RosVersion.ROS2 => "ROS version changed to ROS2/Foxy (experimental). You can connect now.",
                         _ => throw new IndexOutOfRangeException("Invalid ROS version")
                     }
                 );
@@ -96,15 +97,7 @@ namespace Iviz.Ros
             }
         }
 
-        public static bool IsRosVersionSupported(RosVersion rosVersion)
-        {
-            return rosVersion switch
-            {
-                RosVersion.ROS1 => true,
-                RosVersion.ROS2 => Settings.IsMacOS || Settings.IsIPhone,
-                _ => false
-            };
-        }
+        public const bool IsRos2VersionSupported = Settings.IsAndroid || Settings.IsIPhone || Settings.IsMacOS;
 
         public IRosClient Client => client ?? throw new InvalidOperationException("Client not connected");
 
@@ -243,9 +236,16 @@ namespace Iviz.Ros
                     newClient.RosMasterClient.TimeoutInMs = rpcTimeoutInMs;
                     client = newClient;
                 }
+                else if (IsRos2VersionSupported)
+                {
+                    client = new Ros2Client(MyId, wrapperType: 
+                        Settings.IsAndroid 
+                            ? new RclAndroidWrapper() 
+                            : new RclInternalWrapper());
+                }
                 else
                 {
-                    client = new Ros2Client(MyId);
+                    throw new InvalidOperationException("Error: ROS2 not supported!"); // should be unreachable
                 }
 
                 var currentClient = client;
@@ -1107,7 +1107,7 @@ namespace Iviz.Ros
         public string[] GetSystemParameterList(CancellationToken token = default)
         {
             var internalToken = runningTs.Token;
-            
+
             TaskUtils.Run(async () =>
             {
                 if (!Connected || token.IsCancellationRequested || internalToken.IsCancellationRequested)
@@ -1163,8 +1163,7 @@ namespace Iviz.Ros
             {
                 using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
                 tokenSource.CancelAfter(timeoutInMs);
-                (bool success, RosParameterValue param) =
-                    await ros1Client.GetParameterAsync(parameter, tokenSource.Token);
+                var (success, param) = await ros1Client.GetParameterAsync(parameter, tokenSource.Token);
                 if (!success)
                 {
                     return (default, $"'{parameter}' not found");

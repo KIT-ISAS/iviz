@@ -71,23 +71,23 @@ namespace Iviz.ImageDecoders
     public sealed class TurboJpegUnityWrapper : ITurboJpeg
     {
         public IntPtr InitDecompressorInstance() =>
-#if UNITY_IOS
-            TurboJpegNativeIOS.InitDecompressorInstance();
+#if UNITY_IOS || UNITY_ANDROID
+            TurboJpegNativeMobile.InitDecompressorInstance();
 #else
             TurboJpegNative.InitDecompressorInstance();
 #endif
 
         public int DestroyInstance(IntPtr handle) =>
-#if UNITY_IOS
-            TurboJpegNativeIOS.DestroyInstance(handle);
+#if UNITY_IOS || UNITY_ANDROID
+            TurboJpegNativeMobile.DestroyInstance(handle);
 #else
             TurboJpegNative.DestroyInstance(handle);
 #endif
 
         public int DecompressHeader(IntPtr handle, IntPtr jpegBuf, ulong jpegSize, out int width,
             out int height, out int subsampling, out int colorspace) =>
-#if UNITY_IOS
-            TurboJpegNativeIOS.DecompressHeader(handle, jpegBuf, jpegSize, out width, out height, out subsampling,
+#if UNITY_IOS || UNITY_ANDROID
+            TurboJpegNativeMobile.DecompressHeader(handle, jpegBuf, jpegSize, out width, out height, out subsampling,
                 out colorspace);
 #else
             TurboJpegNative.DecompressHeader(handle, jpegBuf, jpegSize, out width, out height, out subsampling,
@@ -96,26 +96,26 @@ namespace Iviz.ImageDecoders
 
         public int Decompress(IntPtr handle, IntPtr jpegBuf, ulong jpegSize, IntPtr dstBuf, int width,
             int pitch, int height, int pixelFormat, int flags) =>
-#if UNITY_IOS
-            TurboJpegNativeIOS.Decompress(handle, jpegBuf, jpegSize, dstBuf, width, pitch, height, pixelFormat, flags);
+#if UNITY_IOS || UNITY_ANDROID
+            TurboJpegNativeMobile.Decompress(handle, jpegBuf, jpegSize, dstBuf, width, pitch, height, pixelFormat,
+                flags);
 #else
             TurboJpegNative.Decompress(handle, jpegBuf, jpegSize, dstBuf, width, pitch, height, pixelFormat, flags);
 #endif
 
         public IntPtr GetLastError() =>
-#if UNITY_IOS
-            TurboJpegNativeIOS.GetLastError();
+#if UNITY_IOS || UNITY_ANDROID
+            TurboJpegNativeMobile.GetLastError();
 #else
             TurboJpegNative.GetLastError();
 #endif
 
         public IntPtr GetLastError(IntPtr handle) =>
-#if UNITY_IOS
-            TurboJpegNativeIOS.GetLastError(handle);
+#if UNITY_IOS || UNITY_ANDROID
+            TurboJpegNativeMobile.GetLastError(handle);
 #else
             TurboJpegNative.GetLastError(handle);
 #endif
-
     }
 
     /// <summary>
@@ -148,14 +148,15 @@ namespace Iviz.ImageDecoders
             int width, int pitch, int height, int pixelFormat, int flags);
     }
 
-#if UNITY_IOS
     /// <summary>
     /// Native bindings for the turbojpeg decoder, iOS version.
     /// Names (entry points) changed because Unity has its own version of turbojpeg and the names would collide.
     /// </summary>
-    internal static class TurboJpegNativeIOS
+    internal static class TurboJpegNativeMobile
     {
-        const string Library = "__Internal";
+        const string Library = Settings.IsIPhone
+            ? "__Internal"
+            : "iviz_jpegturbo";
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl, EntryPoint = "IvizInitDecompress")]
         public static extern IntPtr InitDecompressorInstance();
@@ -177,5 +178,4 @@ namespace Iviz.ImageDecoders
         public static extern int Decompress(IntPtr handle, IntPtr jpegBuf, ulong jpegSize, IntPtr dstBuf,
             int width, int pitch, int height, int pixelFormat, int flags);
     }
-#endif
 }

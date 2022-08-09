@@ -231,9 +231,7 @@ namespace Iviz.Controllers
             Listener = Config.Type switch
             {
                 Image.MessageType => new Listener<Image>(Config.Topic, Handler),
-#if !UNITY_ANDROID
                 CompressedImage.MessageType => new Listener<CompressedImage>(Config.Topic, HandlerCompressed),
-#endif
                 _ => throw new InvalidOperationException("Invalid message type")
             };
 

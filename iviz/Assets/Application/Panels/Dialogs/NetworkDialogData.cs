@@ -41,14 +41,14 @@ namespace Iviz.App
             {
                 try
                 {
-                    switch (RosManager.Connection.Client)
+                    if (RosManager.Connection.Client is RosClient client)
                     {
-                        case RosClient client:
-                            GenerateReportRos1(description, client);
-                            break;
-                        case Ros2Client client2:
-                            GenerateReportRos2(description, client2);
-                            break;
+                        GenerateReportRos1(description, client);
+                    }
+                    else if (RoslibConnection.IsRos2VersionSupported &&
+                             RosManager.Connection.Client is Ros2Client client2)
+                    {
+                        GenerateReportRos2(description, client2);
                     }
                 }
                 catch (InvalidOperationException)
@@ -254,6 +254,11 @@ namespace Iviz.App
 
         static void GenerateReportRos2(StringBuilder builder, Ros2Client client)
         {
+            if (!RoslibConnection.IsRos2VersionSupported)
+            {
+                return;
+            }
+            
             var subscriberStats = client.GetSubscriberStatistics().Cast<Ros2SubscriberState>();
             var publisherStats = client.GetPublisherStatistics().Cast<Ros2PublisherState>();
 

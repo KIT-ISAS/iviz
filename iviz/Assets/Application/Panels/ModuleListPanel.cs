@@ -15,6 +15,8 @@ using Iviz.Controllers.XR;
 using Iviz.Core;
 using Iviz.Core.Configurations;
 using Iviz.Displays;
+using Iviz.ImageDecoders;
+using Iviz.MarkerDetection;
 using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -23,6 +25,7 @@ using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Logger = UnityEngine.Logger;
 
 namespace Iviz.App
 {
@@ -213,8 +216,6 @@ namespace Iviz.App
             Thread.CurrentThread.CurrentCulture = BuiltIns.Culture;
             Settings.SettingsManager = new SettingsManager();
             
-            // SafeAreaPanel.UpdateSize();
-
             if (Settings.IsHololens)
             {
                 XRUtils.SetupForHololens();

@@ -6,12 +6,15 @@ using Iviz.Core;
 
 namespace Iviz.MarkerDetection
 {
-#if UNITY_IOS
-    internal static class CvNative
+#if UNITY_IOS || UNITY_ANDROID
+    public static class CvNative
     {
         public const bool IsEnabled = true;
 
-        const string Library = "__Internal";
+        const string Library =
+            Settings.IsIPhone
+                ? "__Internal"
+                : "iviz_opencv";
 
         public delegate void Callback(string s);
 

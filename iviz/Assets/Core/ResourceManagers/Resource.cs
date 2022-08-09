@@ -94,9 +94,7 @@ namespace Iviz.Resources
             {
                 { PointCloud2.MessageType, ModuleType.PointCloud },
                 { Image.MessageType, ModuleType.Image },
-#if !UNITY_ANDROID
                 { CompressedImage.MessageType, ModuleType.Image },
-#endif
                 { Marker.MessageType, ModuleType.Marker },
                 { MarkerArray.MessageType, ModuleType.Marker },
                 { InteractiveMarkerUpdate.MessageType, ModuleType.InteractiveMarker },

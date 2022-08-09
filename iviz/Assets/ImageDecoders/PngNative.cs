@@ -78,7 +78,7 @@ namespace Iviz.ImageDecoders
         /// The name of the libpng library, excluding any platform-dependent prefixes (such as <c>lib</c>) and suffixes (such as <c>.so</c>).
         /// </summary>
         const string Library =
-            Settings.IsIPhone
+            Settings.IsMobile
                 ? "__Internal"
                 : "png16";
 
