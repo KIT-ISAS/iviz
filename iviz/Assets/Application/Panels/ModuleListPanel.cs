@@ -20,6 +20,7 @@ using Iviz.MarkerDetection;
 using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Roslib2.Rcl.Wrappers;
 using Iviz.Tools;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -179,38 +180,6 @@ namespace Iviz.App
 
         public int NumMastersInCache => Dialogs.ConnectionData.LastMasterUris.Count;
         
-        public void Dispose()
-        {
-            GameThread.LateEverySecond -= UpdateFpsStats;
-            GameThread.EveryFrame -= UpdateFpsCounter;
-            GameThread.EveryTenthOfASecond -= UpdateCameraStats;
-
-            foreach (var moduleData in moduleDatas)
-            {
-                moduleData.Dispose();
-            }
-
-            foreach (var dialogData in Dialogs.DialogDatas)
-            {
-                dialogData.Dispose();
-            }
-
-            foreach (var imageData in imageDatas)
-            {
-                imageData.Dispose();
-            }
-
-            tfPublisher.Dispose();
-            cameraPanelData?.Dispose();
-
-            GuiWidgetListener.DisposeDefaultHandler();
-            connectionManager?.Dispose();
-
-            tfModule?.Dispose();
-
-            instance = null;
-        }
-
         void Start()
         {
             Thread.CurrentThread.CurrentCulture = BuiltIns.Culture;
@@ -259,6 +228,38 @@ namespace Iviz.App
             InitFinished = null;
 
             TryOnceToConnect();
+        }
+
+        public void Dispose()
+        {
+            GameThread.LateEverySecond -= UpdateFpsStats;
+            GameThread.EveryFrame -= UpdateFpsCounter;
+            GameThread.EveryTenthOfASecond -= UpdateCameraStats;
+
+            foreach (var moduleData in moduleDatas)
+            {
+                moduleData.Dispose();
+            }
+
+            foreach (var dialogData in Dialogs.DialogDatas)
+            {
+                dialogData.Dispose();
+            }
+
+            foreach (var imageData in imageDatas)
+            {
+                imageData.Dispose();
+            }
+
+            tfPublisher.Dispose();
+            cameraPanelData?.Dispose();
+
+            GuiWidgetListener.DisposeDefaultHandler();
+            connectionManager?.Dispose();
+
+            tfModule?.Dispose();
+
+            instance = null;
         }
 
         void InitializeCallbacks()
@@ -436,7 +437,10 @@ namespace Iviz.App
                     return;
                 }
 
-                RosLogger.Internal("Trying to connect to previous ROS server.");
+                RosLogger.Internal(
+                    Connection.MyUri.Host == "localhost"
+                    ? "Trying to connect to local ROS server."
+                    : "Trying to connect to previous ROS server.");
                 if ((Settings.IsMacOS || Settings.IsMobile)
                     && Connection.MyUri.Host == Connection.MasterUri.Host)
                 {

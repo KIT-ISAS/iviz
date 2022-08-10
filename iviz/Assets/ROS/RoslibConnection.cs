@@ -219,24 +219,23 @@ namespace Iviz.Ros
 
                 var token = runningTs.Token;
 
-                if (currentVersion == RosVersion.ROS1)
+                switch (currentVersion)
                 {
-                    var newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
-                    newClient.ShutdownAction = OnShutdown;
-                    await newClient.CheckOwnUriAsync(token);
-                    newClient.RosMasterClient.TimeoutInMs = rpcTimeoutInMs;
-                    client = newClient;
-                }
-                else if (IsRos2VersionSupported)
-                {
-                    client = new Ros2Client(MyId, wrapperType: 
-                        Settings.IsAndroid 
-                            ? new RclAndroidWrapper() 
-                            : new RclInternalWrapper());
-                }
-                else
-                {
-                    throw new InvalidOperationException("Error: ROS2 not supported!"); // should be unreachable
+                    case RosVersion.ROS1:
+                        var newRos1Client = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
+                        newRos1Client.ShutdownAction = OnShutdown;
+                        newRos1Client.RosMasterClient.TimeoutInMs = rpcTimeoutInMs;
+                        await newRos1Client.CheckOwnUriAsync(token);
+                        client = newRos1Client;
+                        break;
+                    case RosVersion.ROS2 when IsRos2VersionSupported:
+                        client = new Ros2Client(MyId, wrapperType: 
+                            Settings.IsAndroid 
+                                ? new RclAndroidWrapper() 
+                                : new RclInternalWrapper());
+                        break;
+                    default:
+                        throw new InvalidOperationException("Error: ROS2 not supported!"); // should be unreachable
                 }
 
                 var currentClient = client;
