@@ -5,12 +5,12 @@ namespace Iviz.Roslib2;
 
 public static class Ros2Parameters
 {
-    public static string ServiceNameForDescribeParameters(string node) => $"/{node}/describe_parameters";
-    public static string ServiceNameForGetParameterTypes(string node) => $"/{node}/get_parameter_types";
-    public static string ServiceNameForGetParameters(string node) => $"/{node}/get_parameters";
-    public static string ServiceNameForListParameters(string node) => $"/{node}/list_parameters";
-    public static string ServiceNameForSetParameters(string node) => $"/{node}/set_parameters";
-    public static string ServiceNameForSetParametersAtomically(string node) => $"/{node}/set_parameters_atomically";
+    public static string ServiceNameForDescribeParameters(string node) => $"{node}/describe_parameters";
+    public static string ServiceNameForGetParameterTypes(string node) => $"{node}/get_parameter_types";
+    public static string ServiceNameForGetParameters(string node) => $"{node}/get_parameters";
+    public static string ServiceNameForListParameters(string node) => $"{node}/list_parameters";
+    public static string ServiceNameForSetParameters(string node) => $"{node}/set_parameters";
+    public static string ServiceNameForSetParametersAtomically(string node) => $"{node}/set_parameters_atomically";
     
     public static byte AsValueType(RosValue.Type type)
     {

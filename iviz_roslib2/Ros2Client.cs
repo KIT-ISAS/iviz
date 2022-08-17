@@ -29,6 +29,7 @@ public sealed class Ros2Client : IRosClient
     Cache<SystemState> cachedSystemState;
 
     internal AsyncRclClient Rcl { get; }
+
     public string CallerId => Rcl.FullName;
 
     string ResolveResourceName(string name)
@@ -510,7 +511,7 @@ public sealed class Ros2Client : IRosClient
                 ? value.AsTaskResult()
                 : Task.FromException<RosValue>(new RosParameterNotFoundException()).AsValueTask();
         }
-        
+
         return ParameterClient.GetParameterAsync(node, key, token);
     }
 

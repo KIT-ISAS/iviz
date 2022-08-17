@@ -19,7 +19,8 @@ public sealed class Ros2Subscriber<TMessage> : Ros2SubscriberHelper, IRos2Subscr
     RosCallback<TMessage>[] cachedCallbacks = EmptyCallback; // cache to iterate through callbacks quickly
     RclSubscriber? subscriber;
     Task? task;
-
+    PublisherStats[] publisherStats = new PublisherStats[32];
+    int numPublishers;
     int totalSubscribers;
     bool disposed;
 
@@ -52,7 +53,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2SubscriberHelper, IRos2Subscr
     {
         var token = CancellationToken;
         var rclSubscriber = Subscriber;
-        var generator = (IDeserializable<TMessage>) new TMessage();
+        var generator = (IDeserializable<TMessage>)new TMessage();
         var receiverInfo = new Ros2Receiver(Topic, TopicType);
         var messageHandler = new RclDeserializeHandler<TMessage>(generator);
         using var gcHandle = new GCHandleWrapper(messageHandler);
@@ -67,7 +68,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2SubscriberHelper, IRos2Subscr
                 continue;
             }
 
-            UpdateReceiverInfo(receiverInfo.guid, messageHandler.messageLength);
+            UpdateReceiverInfo(receiverInfo.guid, messageHandler.messageLength, ref numPublishers, ref publisherStats);
             if (messageHandler.paused)
             {
                 messageHandler.Reset();
@@ -121,52 +122,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2SubscriberHelper, IRos2Subscr
 
     public async ValueTask<SubscriberState> GetStateAsync(CancellationToken token)
     {
-        await client.Rcl.GetPublisherInfoAsync(Topic, token);
-
-        var publishers = await client.Rcl.GetPublisherInfoAsync(Topic, token);
-
-        var knownPublishers = publishers.ToDictionary(static info => info.Guid);
-
-        var contactedPublishers =
-            publisherStats.Take(numPublishers).ToDictionary(static stats => stats.guid);
-
-        var receiverStates = new List<Ros2ReceiverState>(knownPublishers.Count);
-
-        foreach (var publisher in knownPublishers.Values)
-        {
-            var state = contactedPublishers.TryGetValue(publisher.Guid, out var stats)
-                ? new Ros2ReceiverState(publisher.Guid, publisher.Profile)
-                {
-                    RemoteId = publisher.NodeName.ToString(),
-                    BytesReceived = stats.bytesReceived,
-                    NumReceived = stats.numReceived,
-                    TopicType = publisher.TopicType
-                }
-                : new Ros2ReceiverState(publisher.Guid, publisher.Profile)
-                {
-                    RemoteId = publisher.NodeName.ToString(),
-                    BytesReceived = 0,
-                    NumReceived = 0,
-                    TopicType = publisher.TopicType
-                };
-
-            receiverStates.Add(state);
-        }
-
-        var missingPublishers = contactedPublishers
-            .Where(key => !knownPublishers.ContainsKey(key.Key))
-            .Select(pair => pair.Value);
-
-        receiverStates.AddRange(
-            missingPublishers.Select(
-                static stats => new Ros2ReceiverState
-                {
-                    RemoteId = null,
-                    BytesReceived = stats.bytesReceived,
-                    NumReceived = 0,
-                    TopicType = null
-                }));
-
+        var receiverStates = await GetStateAsync(client, Topic, publisherStats, numPublishers, token);
         return new Ros2SubscriberState(Topic, TopicType, callbacksById.Keys.ToArray(), receiverStates, Profile);
     }
 
@@ -280,10 +236,8 @@ public class Ros2SubscriberHelper : Signalizable
         public int CompareTo(PublisherStats other) => guid.CompareTo(other.guid);
     }
 
-    protected PublisherStats[] publisherStats = new PublisherStats[32];
-    protected int numPublishers;
-
-    protected void UpdateReceiverInfo(in Guid guid, int lengthInBytes)
+    protected static void UpdateReceiverInfo(in Guid guid, int lengthInBytes,
+        ref int numPublishers, ref PublisherStats[] publisherStats)
     {
         bool success = numPublishers <= 3
             ? LinearSearch(publisherStats, numPublishers, guid, out int index)
@@ -297,10 +251,10 @@ public class Ros2SubscriberHelper : Signalizable
             return;
         }
 
-        AddNewEntry(in guid, lengthInBytes);
+        AddNewEntry(in guid, lengthInBytes, ref numPublishers, ref publisherStats);
     }
 
-    void AddNewEntry(in Guid guid, int lengthInBytes)
+    static void AddNewEntry(in Guid guid, int lengthInBytes, ref int numPublishers, ref PublisherStats[] publisherStats)
     {
         if (numPublishers == publisherStats.Length)
         {
@@ -359,5 +313,55 @@ public class Ros2SubscriberHelper : Signalizable
 
         index = default;
         return false;
+    }
+
+    protected static async ValueTask<List<Ros2ReceiverState>> GetStateAsync(
+        Ros2Client client, string topic, PublisherStats[] publisherStats, int numPublishers, CancellationToken token)
+    {
+        var publishers = await client.Rcl.GetPublisherInfoAsync(topic, token);
+
+        var knownPublishers = publishers.ToDictionary(static info => info.Guid);
+
+        var contactedPublishers =
+            publisherStats.Take(numPublishers).ToDictionary(static stats => stats.guid);
+
+        var receiverStates = new List<Ros2ReceiverState>(knownPublishers.Count);
+
+        foreach (var publisher in knownPublishers.Values)
+        {
+            var state = contactedPublishers.TryGetValue(publisher.Guid, out var stats)
+                ? new Ros2ReceiverState(publisher.Guid, publisher.Profile)
+                {
+                    RemoteId = publisher.NodeName.ToString(),
+                    BytesReceived = stats.bytesReceived,
+                    NumReceived = stats.numReceived,
+                    TopicType = publisher.TopicType
+                }
+                : new Ros2ReceiverState(publisher.Guid, publisher.Profile)
+                {
+                    RemoteId = publisher.NodeName.ToString(),
+                    BytesReceived = 0,
+                    NumReceived = 0,
+                    TopicType = publisher.TopicType
+                };
+
+            receiverStates.Add(state);
+        }
+
+        var missingPublishers = contactedPublishers
+            .Where(key => !knownPublishers.ContainsKey(key.Key))
+            .Select(pair => pair.Value);
+
+        receiverStates.AddRange(
+            missingPublishers.Select(
+                static stats => new Ros2ReceiverState
+                {
+                    RemoteId = null,
+                    BytesReceived = stats.bytesReceived,
+                    NumReceived = 0,
+                    TopicType = null
+                }));
+
+        return receiverStates;
     }
 }

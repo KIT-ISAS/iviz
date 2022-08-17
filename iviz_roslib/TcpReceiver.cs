@@ -364,7 +364,6 @@ internal class TcpReceiverStaticHelper
 
         return length;
     }
-    
 
     protected static void CheckBufferSize(TcpClient client, int rcvLength, ref int receiveBufferSize)
     {
@@ -381,7 +380,5 @@ internal class TcpReceiverStaticHelper
 
         receiveBufferSize = recommendedSize;
         client.Client.ReceiveBufferSize = recommendedSize;
-        //Logger.LogDebugFormat("{0}: Large message received. Changing buffer size to {1} kB.", this,
-        //    recommendedSize / 1024);
     }    
 }

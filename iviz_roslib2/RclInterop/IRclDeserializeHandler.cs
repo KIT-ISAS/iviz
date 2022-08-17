@@ -20,18 +20,16 @@ internal sealed class RclDeserializeHandler<TMessage> : IRclDeserializeHandler w
         Reset();
     }
 
-    public void DeserializeFrom(IntPtr ptr, int length)
+    public unsafe void DeserializeFrom(IntPtr ptr, int length)
     {
+        const int headerSize = 4;
+        int size = length - headerSize;
         messageLength = length;
 
-        if (paused)
-        {
-            return;
-        }
-
-        const int headerSize = 4;
-        var buffer = Rcl.CreateReadOnlyByteSpan(ptr + headerSize, length - headerSize);
-        message = ReadBuffer2.Deserialize(generator, buffer);
+        if (paused) return;
+        
+        var b = new ReadBuffer2((byte*)ptr + headerSize, size);
+        message = generator.RosDeserialize(ref b);
     }
 
     public void Reset()

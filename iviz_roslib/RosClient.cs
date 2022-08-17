@@ -179,7 +179,7 @@ public sealed class RosClient : IRosClient
         string? ns = namespaceOverride ?? EnvironmentRosNamespace;
         namespacePrefix = ns == null ? "/" : $"/{ns}/";
 
-        if (ownId![0] != '/')
+        if (ownId[0] != '/')
         {
             ownId = $"{namespacePrefix}{ownId}";
         }
