@@ -65,11 +65,12 @@ namespace Iviz.Msgs.StdMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Layout.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Data length
+            c += 4; // Data length
             c += 2 * Data.Length;
             return c;
         }

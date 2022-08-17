@@ -68,7 +68,7 @@ namespace Iviz.Msgs.IvizMsgs
             Header.RosSerialize(ref b);
             b.Serialize(Type);
             b.Serialize(Code);
-            b.SerializeStructArray(Corners, 4);
+            b.SerializeStructArray(Corners);
             b.SerializeStructArray(CameraIntrinsic, 9);
             b.Serialize(in CameraPose);
             b.Serialize(HasReliablePose);
@@ -81,7 +81,7 @@ namespace Iviz.Msgs.IvizMsgs
             Header.RosSerialize(ref b);
             b.Serialize(Type);
             b.Serialize(Code);
-            b.SerializeStructArray(Corners, 4);
+            b.SerializeStructArray(Corners);
             b.SerializeStructArray(CameraIntrinsic, 9);
             b.Serialize(in CameraPose);
             b.Serialize(HasReliablePose);
@@ -111,19 +111,20 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
-            c += 1;  // Type
+            c += 1; // Type
             c = WriteBuffer2.AddLength(c, Code);
             c = WriteBuffer2.Align8(c);
-            c += 24 * 4;
-            c += 8 * 9;
-            c += 56;  // CameraPose
-            c += 1;  // HasReliablePose
+            c += 24 * 4; // Corners
+            c += 8 * 9; // CameraIntrinsic
+            c += 56; // CameraPose
+            c += 1; // HasReliablePose
             c = WriteBuffer2.Align8(c);
-            c += 8;  // MarkerSizeInMm
-            c += 56;  // PoseRelativeToCamera
+            c += 8; // MarkerSizeInMm
+            c += 56; // PoseRelativeToCamera
             return c;
         }
     

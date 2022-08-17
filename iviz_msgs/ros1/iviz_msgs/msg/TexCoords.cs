@@ -7,14 +7,14 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class TexCoords : IDeserializable<TexCoords>, IMessage
     {
-        [DataMember (Name = "coords")] public Vector3f[] Coords;
+        [DataMember (Name = "coords")] public GeometryMsgs.Point32[] Coords;
     
         public TexCoords()
         {
-            Coords = System.Array.Empty<Vector3f>();
+            Coords = System.Array.Empty<GeometryMsgs.Point32>();
         }
         
-        public TexCoords(Vector3f[] Coords)
+        public TexCoords(GeometryMsgs.Point32[] Coords)
         {
             this.Coords = Coords;
         }
@@ -52,10 +52,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Coords length
+            c += 4; // Coords length
             c += 12 * Coords.Length;
             return c;
         }
@@ -71,8 +72,11 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAEwtLTS7JLzJOi45VSM7PL0op5uKypTLg8g12t1LILMusis8tTi/WD4NayZWWk59YYmyk" +
-                "UAFnVcJZVVxcANOhs6WbAAAA";
+                "H4sIAAAAAAAAE61QTUvEQAy991c88KIgK+zeBE8exIMg6E1Epp1sG2wnZZK61l9vptvdk0fnlEnyvtKS" +
+                "DGR5/hi01Ztn4WS77ds7GpEctaru/vlVTy8Pt2j/Uq0u8NqxunSywElhHWEUZWNJkD2C/3wTnLDPRNAx" +
+                "NHR5YOuw26Jm07I1ZmpYHXK1ccZHX1d4S4aBIkWYYFLCoolDR5m+KBcZ5bon51ajEAvRamsDOM/J3MqU" +
+                "YlhceccJxyyDWAEbZRkph5p7tnmBnpADqYaWCiSScpuOZix8EqYRvY+PiYqrBHUNTq2je1mDFT+KYJDU" +
+                "0DWClkuUIzXBEy0HWjzf9zLFol3tewkeAd/naj5XP9UvIXnll/wBAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

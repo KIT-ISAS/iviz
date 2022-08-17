@@ -247,15 +247,16 @@ namespace Iviz.Msgs.HriMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // FAU length
+            c += 4; // FAU length
             c += 4 * FAU.Length;
-            c += 4;  // Intensity length
+            c += 4; // Intensity length
             c += 4 * Intensity.Length;
-            c += 4;  // Confidence length
+            c += 4; // Confidence length
             c += 4 * Confidence.Length;
             return c;
         }

@@ -75,18 +75,42 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.SerializeArray(Clusters);
-            b.SerializeArray(Materials);
+            b.Serialize(Clusters.Length);
+            foreach (var t in Clusters)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Materials.Length);
+            foreach (var t in Materials)
+            {
+                t.RosSerialize(ref b);
+            }
             b.SerializeStructArray(ClusterMaterials);
-            b.SerializeArray(VertexTexCoords);
+            b.Serialize(VertexTexCoords.Length);
+            foreach (var t in VertexTexCoords)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
-            b.SerializeArray(Clusters);
-            b.SerializeArray(Materials);
+            b.Serialize(Clusters.Length);
+            foreach (var t in Clusters)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Materials.Length);
+            foreach (var t in Materials)
+            {
+                t.RosSerialize(ref b);
+            }
             b.SerializeStructArray(ClusterMaterials);
-            b.SerializeArray(VertexTexCoords);
+            b.Serialize(VertexTexCoords.Length);
+            foreach (var t in VertexTexCoords)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -126,16 +150,22 @@ namespace Iviz.Msgs.MeshMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c = WriteBuffer2.AddLength(c, Clusters);
+            int c = d;
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Materials length
+            c += 4; // Clusters.Length
+            foreach (var t in Clusters)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Materials length
             c += (21 + 3) * Materials.Length - 3;
             c = WriteBuffer2.Align4(c);
-            c += 4;  // ClusterMaterials length
+            c += 4; // ClusterMaterials length
             c += 4 * ClusterMaterials.Length;
-            c += 4;  // VertexTexCoords length
+            c += 4; // VertexTexCoords length
             c += 8 * VertexTexCoords.Length;
             return c;
         }

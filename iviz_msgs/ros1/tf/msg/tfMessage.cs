@@ -43,12 +43,20 @@ namespace Iviz.Msgs.Tf
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.SerializeArray(Transforms);
+            b.Serialize(Transforms.Length);
+            foreach (var t in Transforms)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
-            b.SerializeArray(Transforms);
+            b.Serialize(Transforms.Length);
+            foreach (var t in Transforms)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -60,9 +68,15 @@ namespace Iviz.Msgs.Tf
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c = WriteBuffer2.AddLength(c, Transforms);
+            int c = d;
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Transforms.Length
+            foreach (var t in Transforms)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

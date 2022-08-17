@@ -100,16 +100,17 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 32;  // Orientation
-            c += 8 * 9;
-            c += 24;  // AngularVelocity
-            c += 8 * 9;
-            c += 24;  // LinearAcceleration
-            c += 8 * 9;
+            c += 32; // Orientation
+            c += 8 * 9; // OrientationCovariance
+            c += 24; // AngularVelocity
+            c += 8 * 9; // AngularVelocityCovariance
+            c += 24; // LinearAcceleration
+            c += 8 * 9; // LinearAccelerationCovariance
             return c;
         }
     

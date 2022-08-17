@@ -105,11 +105,12 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.Align8(c);
-            c += 24;  // Min
-            c += 24;  // Max
+            c += 24; // Min
+            c += 24; // Max
             return c;
         }
     

@@ -197,16 +197,18 @@ public static class BuiltIns
     // so we do a simple check and if it's ascii, we do a quick conversion that gets auto-vectorized in il2cpp
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [SkipLocalsInit]
-    internal static unsafe string GetStringSimple(byte* spanPtr, int length)
+    internal static unsafe string GetStringSimple(byte* srcPtr, int length)
     {
-        if (!CheckIfAllAscii(spanPtr, length))
+        if (length > 64 || !CheckIfAllAscii(srcPtr, length))
         {
-            return UTF8.GetString(spanPtr, length);
+            return UTF8.GetString(srcPtr, length);
         }
 
-        char* buffer = stackalloc char[64];
-        ConvertToChar(spanPtr, (ushort*)buffer, length);
-        return new string(buffer, 0, length);
+        char* strPtr = stackalloc char[64];
+        ushort* dstPtr = (ushort*)strPtr;
+
+        ConvertToChar(srcPtr, dstPtr, length);
+        return new string(strPtr, 0, length);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -214,13 +216,59 @@ public static class BuiltIns
     {
         int result = 0;
         for (int i = 0; i < size; i++) result |= ptr[i];
-        return (result & 0x80) == 0;
+        return result < 128;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static unsafe void ConvertToChar(byte* src, ushort* dst, int size)
     {
         for (int i = 0; i < size; i++) dst[i] = src[i];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [SkipLocalsInit]
+    internal static unsafe int GetByteCount(string str)
+    {
+        int length = str.Length;
+        if (length <= 64)
+        {
+            fixed (char* strPtr = str)
+            {
+                if (CheckIfAllAscii((ushort*)strPtr, length))
+                {
+                    return length;
+                }
+            }
+        }
+
+        return UTF8.GetByteCount(str);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [SkipLocalsInit]
+    internal static unsafe bool CanWriteStringSimple(char* strPtr, int length)
+    {
+        if (length > 64)
+        {
+            return false;
+        }
+
+        ushort* srcPtr = (ushort*)strPtr;
+        return CheckIfAllAscii(srcPtr, length);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static unsafe void WriteStringSimple(char* strPtr, byte* dstPtr, int size)
+    {
+        for (int i = 0; i < size; i++) dstPtr[i] = (byte)strPtr[i];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static unsafe bool CheckIfAllAscii(ushort* ptr, int size)
+    {
+        int result = 0;
+        for (int i = 0; i < size; i++) result |= ptr[i];
+        return result < 128;
     }
 
     [DoesNotReturn, AssertionMethod]

@@ -1,8 +1,8 @@
 string name
-Vector3f[] vertices
-Vector3f[] normals
-Vector3f[] tangents
-Vector3f[] bi_tangents
+geometry_msgs/Point32[] vertices
+geometry_msgs/Point32[] normals
+geometry_msgs/Point32[] tangents
+geometry_msgs/Point32[] bi_tangents
 TexCoords[] tex_coords
 ColorChannel[] color_channels
 Triangle[] faces

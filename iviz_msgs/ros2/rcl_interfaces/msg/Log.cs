@@ -141,17 +141,18 @@ namespace Iviz.Msgs.RclInterfaces
         
         public readonly int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public readonly int AddRos2MessageLength(int c)
+        public readonly int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.Align4(c);
-            c += 8;  // Stamp
-            c += 1;  // Level
+            c += 8; // Stamp
+            c += 1; // Level
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.AddLength(c, Msg);
             c = WriteBuffer2.AddLength(c, File);
             c = WriteBuffer2.AddLength(c, Function);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Line
+            c += 4; // Line
             return c;
         }
     

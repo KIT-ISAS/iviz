@@ -69,7 +69,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.Serialize(Name);
             b.Serialize(Message);
             b.Serialize(HardwareId);
-            b.SerializeArray(Values);
+            b.Serialize(Values.Length);
+            foreach (var t in Values)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
@@ -78,7 +82,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.Serialize(Name);
             b.Serialize(Message);
             b.Serialize(HardwareId);
-            b.SerializeArray(Values);
+            b.Serialize(Values.Length);
+            foreach (var t in Values)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -108,13 +116,19 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c += 1;  // Level
+            int c = d;
+            c += 1; // Level
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.AddLength(c, Message);
             c = WriteBuffer2.AddLength(c, HardwareId);
-            c = WriteBuffer2.AddLength(c, Values);
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Values.Length
+            foreach (var t in Values)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

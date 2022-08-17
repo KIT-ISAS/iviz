@@ -184,25 +184,26 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Voltage
-            c += 4;  // Temperature
-            c += 4;  // Current
-            c += 4;  // Charge
-            c += 4;  // Capacity
-            c += 4;  // DesignCapacity
-            c += 4;  // Percentage
-            c += 1;  // PowerSupplyStatus
-            c += 1;  // PowerSupplyHealth
-            c += 1;  // PowerSupplyTechnology
-            c += 1;  // Present
+            c += 4; // Voltage
+            c += 4; // Temperature
+            c += 4; // Current
+            c += 4; // Charge
+            c += 4; // Capacity
+            c += 4; // DesignCapacity
+            c += 4; // Percentage
+            c += 1; // PowerSupplyStatus
+            c += 1; // PowerSupplyHealth
+            c += 1; // PowerSupplyTechnology
+            c += 1; // Present
             c = WriteBuffer2.Align4(c);
-            c += 4;  // CellVoltage length
+            c += 4; // CellVoltage length
             c += 4 * CellVoltage.Length;
-            c += 4;  // CellTemperature length
+            c += 4; // CellTemperature length
             c += 4 * CellTemperature.Length;
             c = WriteBuffer2.AddLength(c, Location);
             c = WriteBuffer2.AddLength(c, SerialNumber);

@@ -44,12 +44,20 @@ namespace Iviz.Msgs.SensorMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.SerializeArray(Array);
+            b.Serialize(Array.Length);
+            foreach (var t in Array)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
-            b.SerializeArray(Array);
+            b.Serialize(Array.Length);
+            foreach (var t in Array)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -66,10 +74,11 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Array length
+            c += 4; // Array length
             c += 8 * Array.Length;
             return c;
         }

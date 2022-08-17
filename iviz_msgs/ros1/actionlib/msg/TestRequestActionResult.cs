@@ -68,12 +68,13 @@ namespace Iviz.Msgs.Actionlib
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = Status.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 5;  // Result
+            c += 5; // Result
             return c;
         }
     

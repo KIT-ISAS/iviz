@@ -79,14 +79,15 @@ namespace Iviz.Msgs.HriMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.Align4(c);
-            c += 4;  // ZCR
-            c += 4;  // RMS
-            c += 4;  // Pitch
-            c += 4;  // HNR
-            c += 4;  // MFCC length
+            c += 4; // ZCR
+            c += 4; // RMS
+            c += 4; // Pitch
+            c += 4; // HNR
+            c += 4; // MFCC length
             c += 4 * MFCC.Length;
             return c;
         }

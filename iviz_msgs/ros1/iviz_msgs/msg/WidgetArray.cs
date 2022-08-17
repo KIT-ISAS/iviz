@@ -56,14 +56,30 @@ namespace Iviz.Msgs.IvizMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.SerializeArray(Dialogs);
-            b.SerializeArray(Widgets);
+            b.Serialize(Dialogs.Length);
+            foreach (var t in Dialogs)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Widgets.Length);
+            foreach (var t in Widgets)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
-            b.SerializeArray(Dialogs);
-            b.SerializeArray(Widgets);
+            b.Serialize(Dialogs.Length);
+            foreach (var t in Dialogs)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Widgets.Length);
+            foreach (var t in Widgets)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -86,10 +102,21 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c = WriteBuffer2.AddLength(c, Dialogs);
-            c = WriteBuffer2.AddLength(c, Widgets);
+            int c = d;
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Dialogs.Length
+            foreach (var t in Dialogs)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Widgets.Length
+            foreach (var t in Widgets)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

@@ -62,14 +62,22 @@ namespace Iviz.Msgs.SensorMsgs
         {
             Header.RosSerialize(ref b);
             b.SerializeStructArray(Points);
-            b.SerializeArray(Channels);
+            b.Serialize(Channels.Length);
+            foreach (var t in Channels)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.SerializeStructArray(Points);
-            b.SerializeArray(Channels);
+            b.Serialize(Channels.Length);
+            foreach (var t in Channels)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -96,13 +104,18 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Points length
+            c += 4; // Points length
             c += 12 * Points.Length;
-            c = WriteBuffer2.AddLength(c, Channels);
+            c += 4; // Channels.Length
+            foreach (var t in Channels)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

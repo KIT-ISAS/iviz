@@ -69,16 +69,32 @@ namespace Iviz.Msgs.TrajectoryMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeStructArray(Transforms);
-            b.SerializeArray(Velocities);
-            b.SerializeArray(Accelerations);
+            b.Serialize(Velocities.Length);
+            foreach (var t in Velocities)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Accelerations.Length);
+            foreach (var t in Accelerations)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(TimeFromStart);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Transforms);
-            b.SerializeArray(Velocities);
-            b.SerializeArray(Accelerations);
+            b.Serialize(Velocities.Length);
+            foreach (var t in Velocities)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Accelerations.Length);
+            foreach (var t in Accelerations)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(TimeFromStart);
         }
         
@@ -112,19 +128,20 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Transforms length
+            c += 4; // Transforms length
             c = WriteBuffer2.Align8(c);
             c += 56 * Transforms.Length;
-            c += 4;  // Velocities length
+            c += 4; // Velocities length
             c = WriteBuffer2.Align8(c);
             c += 48 * Velocities.Length;
-            c += 4;  // Accelerations length
+            c += 4; // Accelerations length
             c = WriteBuffer2.Align8(c);
             c += 48 * Accelerations.Length;
-            c += 8;  // TimeFromStart
+            c += 8; // TimeFromStart
             return c;
         }
     

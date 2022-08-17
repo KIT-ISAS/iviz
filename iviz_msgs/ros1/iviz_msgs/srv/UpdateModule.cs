@@ -127,8 +127,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, Id);
             c = WriteBuffer2.AddLength(c, Fields);
             c = WriteBuffer2.AddLength(c, Config);
@@ -194,9 +195,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c += 1;  // Success
+            int c = d;
+            c += 1; // Success
             c = WriteBuffer2.AddLength(c, Message);
             return c;
         }

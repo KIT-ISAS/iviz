@@ -83,14 +83,15 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
-            c += 1;  // Binary
+            c += 1; // Binary
             c = WriteBuffer2.AddLength(c, Id);
             c = WriteBuffer2.Align8(c);
-            c += 8;  // Resolution
-            c += 4;  // Data length
+            c += 8; // Resolution
+            c += 4; // Data length
             c += 1 * Data.Length;
             return c;
         }

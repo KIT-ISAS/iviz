@@ -142,14 +142,22 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
             b.Serialize(Id);
             b.Serialize(Passed);
-            b.SerializeArray(Status);
+            b.Serialize(Status.Length);
+            foreach (var t in Status)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Id);
             b.Serialize(Passed);
-            b.SerializeArray(Status);
+            b.Serialize(Status.Length);
+            foreach (var t in Status)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -167,11 +175,17 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, Id);
-            c += 1;  // Passed
-            c = WriteBuffer2.AddLength(c, Status);
+            c += 1; // Passed
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Status.Length
+            foreach (var t in Status)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

@@ -86,12 +86,13 @@ namespace Iviz.Msgs.MeshMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.AddLength(c, Uuid);
             c = Cluster.AddRos2MessageLength(c);
-            c += 1;  // @override
+            c += 1; // @override
             return c;
         }
     

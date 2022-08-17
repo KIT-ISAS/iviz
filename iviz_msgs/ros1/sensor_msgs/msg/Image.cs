@@ -35,12 +35,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Full row length in bytes </summary>
         [DataMember (Name = "step")] public uint Step;
         /// <summary> [Rent] actual matrix data, size is (step * rows) </summary>
-        [DataMember (Name = "data")] public Tools.SharedRent<byte> Data;
+        [DataMember (Name = "data")] public Tools.SharedRent Data;
     
         public Image()
         {
             Encoding = "";
-            Data = Tools.SharedRent<byte>.Empty;
+            Data = Tools.SharedRent.Empty;
         }
         
         public Image(ref ReadBuffer b)
@@ -110,17 +110,18 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Height
-            c += 4;  // Width
+            c += 4; // Height
+            c += 4; // Width
             c = WriteBuffer2.AddLength(c, Encoding);
-            c += 1;  // IsBigendian
+            c += 1; // IsBigendian
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Step
-            c += 4;  // Data length
+            c += 4; // Step
+            c += 4; // Data length
             c += 1 * Data.Length;
             return c;
         }

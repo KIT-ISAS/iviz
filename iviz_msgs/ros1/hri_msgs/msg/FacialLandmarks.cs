@@ -136,7 +136,11 @@ namespace Iviz.Msgs.HriMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(Landmarks);
+            b.Serialize(Landmarks.Length);
+            foreach (var t in Landmarks)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(Height);
             b.Serialize(Width);
         }
@@ -144,7 +148,11 @@ namespace Iviz.Msgs.HriMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(Landmarks);
+            b.Serialize(Landmarks.Length);
+            foreach (var t in Landmarks)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(Height);
             b.Serialize(Width);
         }
@@ -163,14 +171,15 @@ namespace Iviz.Msgs.HriMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Landmarks length
+            c += 4; // Landmarks length
             c += 12 * Landmarks.Length;
-            c += 4;  // Height
-            c += 4;  // Width
+            c += 4; // Height
+            c += 4; // Width
             return c;
         }
     

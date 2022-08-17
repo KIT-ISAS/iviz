@@ -127,20 +127,21 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // AngleMin
-            c += 4;  // AngleMax
-            c += 4;  // AngleIncrement
-            c += 4;  // TimeIncrement
-            c += 4;  // ScanTime
-            c += 4;  // RangeMin
-            c += 4;  // RangeMax
-            c += 4;  // Ranges length
+            c += 4; // AngleMin
+            c += 4; // AngleMax
+            c += 4; // AngleIncrement
+            c += 4; // TimeIncrement
+            c += 4; // ScanTime
+            c += 4; // RangeMin
+            c += 4; // RangeMax
+            c += 4; // Ranges length
             c += 4 * Ranges.Length;
-            c += 4;  // Intensities length
+            c += 4; // Intensities length
             c += 4 * Intensities.Length;
             return c;
         }

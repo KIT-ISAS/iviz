@@ -114,14 +114,15 @@ namespace Iviz.Msgs.HriMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, Id1);
-            c += 1;  // Id1Type
+            c += 1; // Id1Type
             c = WriteBuffer2.AddLength(c, Id2);
-            c += 1;  // Id2Type
+            c += 1; // Id2Type
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Confidence
+            c += 4; // Confidence
             return c;
         }
     

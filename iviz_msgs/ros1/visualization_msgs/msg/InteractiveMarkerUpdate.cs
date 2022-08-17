@@ -85,8 +85,16 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(ServerId);
             b.Serialize(SeqNum);
             b.Serialize(Type);
-            b.SerializeArray(Markers);
-            b.SerializeArray(Poses);
+            b.Serialize(Markers.Length);
+            foreach (var t in Markers)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Poses.Length);
+            foreach (var t in Poses)
+            {
+                t.RosSerialize(ref b);
+            }
             b.SerializeArray(Erases);
         }
         
@@ -95,8 +103,16 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(ServerId);
             b.Serialize(SeqNum);
             b.Serialize(Type);
-            b.SerializeArray(Markers);
-            b.SerializeArray(Poses);
+            b.Serialize(Markers.Length);
+            foreach (var t in Markers)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Poses.Length);
+            foreach (var t in Poses)
+            {
+                t.RosSerialize(ref b);
+            }
             b.SerializeArray(Erases);
         }
         
@@ -136,14 +152,25 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, ServerId);
             c = WriteBuffer2.Align8(c);
-            c += 8;  // SeqNum
-            c += 1;  // Type
-            c = WriteBuffer2.AddLength(c, Markers);
-            c = WriteBuffer2.AddLength(c, Poses);
+            c += 8; // SeqNum
+            c += 1; // Type
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Markers.Length
+            foreach (var t in Markers)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Poses.Length
+            foreach (var t in Poses)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             c = WriteBuffer2.AddLength(c, Erases);
             return c;
         }

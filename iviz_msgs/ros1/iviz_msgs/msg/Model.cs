@@ -77,9 +77,21 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Name);
             b.Serialize(Filename);
             b.Serialize(OrientationHint);
-            b.SerializeArray(Meshes);
-            b.SerializeArray(Materials);
-            b.SerializeArray(Nodes);
+            b.Serialize(Meshes.Length);
+            foreach (var t in Meshes)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Materials.Length);
+            foreach (var t in Materials)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Nodes.Length);
+            foreach (var t in Nodes)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
@@ -87,9 +99,21 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Name);
             b.Serialize(Filename);
             b.Serialize(OrientationHint);
-            b.SerializeArray(Meshes);
-            b.SerializeArray(Materials);
-            b.SerializeArray(Nodes);
+            b.Serialize(Meshes.Length);
+            foreach (var t in Meshes)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Materials.Length);
+            foreach (var t in Materials)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Nodes.Length);
+            foreach (var t in Nodes)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -133,14 +157,30 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.AddLength(c, Filename);
             c = WriteBuffer2.AddLength(c, OrientationHint);
-            c = WriteBuffer2.AddLength(c, Meshes);
-            c = WriteBuffer2.AddLength(c, Materials);
-            c = WriteBuffer2.AddLength(c, Nodes);
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Meshes.Length
+            foreach (var t in Meshes)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Materials.Length
+            foreach (var t in Materials)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Nodes.Length
+            foreach (var t in Nodes)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     
@@ -155,19 +195,23 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE71WXW/aMBR9z6+ItB+wFdqum9SHkBiwli8lgQ5VU2SCAU/kQ3agtL9+14kTHPV1wAO2" +
-                "z3Xsc4/vvbaoOSt2ZkFyaoi2v2UHqo9LzmhRk5qVRbpnRW14VOxf/5g5NFQYHqkpZ+QgEdUVhl9uKAAF" +
-                "NMIwnv/zz/Di2U+TndhHmoud+CoJdWwb5kua1SUfb4HCifKaZcBCw4qS55KlBtWk2IGXA2zN0h5O6Nku" +
-                "S74Rci49p1kzMOzyUHJ7T4qCSgEyOUyzdgwfgRjF7iCV2BLJ4QjyjUe9TikrNvR8fX06n4ztoSSSwLnv" +
-                "vfe9j+vz6EXUVVZKXn1z/ajacxuPuiO71fbjURMCTyZX7U61a9WSGxyCCsouGEnXWXed7AYZqzJAuT1x" +
-                "ke+kDppaCzcxn81vA9xyHJzgJQLDnTHIcyWqSfK1rFH9eMO226O42GnOhGAn2gd7WZGM1ZfgXx/zKhUZ" +
-                "OcDSPSig2rGCCvEZSYEFLXb1vjdxuj1AUIOLsKw6VKijmzSHGijLR33ktC0esneDiFN7KjLJKkSpH/hI" +
-                "k7fBHDydLuJWXA2OQ2QvXCsCfKTjljfByJeHNNZh5OE4bs/oXsfnCM/mcvbDkEfkWW4M8ONgzzn2sY9i" +
-                "afiuG4LQsnGyAvhpSD0OXctGXkvoh25z5b6eFUq/Bv5GaOoiO8GBL00Dnxf+Lz94afCRoQywRIj9WTqN" +
-                "Ai9dLDX1OksczlGk69cZ7JWLfQfpEnamSfBbU7BDwRlfV7DDL7weOlpBmHqQKzh0VxolQCFZNCoAxItJ" +
-                "Ell2orEA1MFL7CCNg5zpBUEyVyvcazie+chReM/gJbLCVP5p+zeY7VpeqHFoQA9HUaAr0aAOsi23IdGl" +
-                "dUUgp9oy1F6O7ez6veoCOSdVJbO0nXQ8qUu0z+Qm6eC6hftFfVFWlDfPFzV+46Rq0jI9fkJO189L+TYa" +
-                "VLHWk4pwWcKgMnJ2vjdrTgqxhYdKa768t25RmyWDTtHXu0fY2/xi8vINxP9bctMw/gFNR3oxNwoAAA==";
+                "H4sIAAAAAAAAE71W34+jNhB+56+wdC+tVF17e3s/pXtggWxQgaBA9ro6VcgBJ3ELNrKdbPb++s6AoY6u" +
+                "+9bdPAT7G3vmm/HM2NooLvZE0I55ehzveMvcuVScCUMNl6I6cGG8lOnDtz9JBx+mvZQapjhtEbFD7WWy" +
+                "YQAI+GjP+/I//7y0uP1M+Il/rzq9178ioYntwHzPZMeMehzFuQTWb6+Az4kpw2ug9NQCIVWH/J+SGyr2" +
+                "EIynF2x5Na8p2TmQUjUaN7JzVQ8TL5CtVMGBCsEwaDVOq3qcwyYIoNi3GL0dRarHQfUc24qLhp2fK6b/" +
+                "6Zb3ipQHroEppAEXmpgDI73UHFOCyB2hMIOVhAuyU4wR3QPznx64ORBgvuVG46pesZpr2PLza9AYw3JN" +
+                "AJJdxxrWECPJUTMy2CQPB6YYnBaa0XzbMtCtDaMNKrK0XhMCeiZyVpNohkRF3aCwV7KTBjdD8GTPFN3y" +
+                "lpvHYeu0E/JY0z3DLZCtfC9GMob+zcixJy2IR4+QlSAabECiwe5WWseQjybUEClq9guhGiOBQaopeDQE" +
+                "aOActPLYoG1v10qKp3qeR4/z6Puz18ucmE+msU3VZ2fi1sJYGNY8jF7KPCQ41thHoux3b79b+6XPT2Sq" +
+                "+qna6TTYToP6BdqobTHW7ZskysIqjBb+JinJF/LbBe6HYVzGdxEI3ngXzdcGldBuixfHPG/4bgcVPs9Z" +
+                "x6G2T2xOfAlFBsU5z7fHrq90TVsstwnUcAVxATX5I1IBCyb25jCLFNu1rDbgIqi1hwqXW1N1cDFhfzZH" +
+                "xcbujKMXyDhr05Ip7/OoylZZ5IR3wMJ4sdgUY3AduMijYJP4a8CvXNxPb+Iow0N668JRGhfFeEbXLr6M" +
+                "4tslrn53yWOd+kkB8PsLm8s4i7OoQMEHV7DK/SAu7wH+eEm9yBM/iNKR0CdXlqDd1M/Rrwt/19EiiYIy" +
+                "XmUouvB5k/2erb4O+JVnBaAij7PbarFepdXmzoneJCnyZbR24zcJgvskzsLIDeEkuln94URwQsGZzI3g" +
+                "hP/L691Ea5VXKdRKnCf3DiVAoVgcKgAUm5ty7QelwwLQML6Lw8jhgCvT1apcWg3XDh7fZlFo8ZnB17Wf" +
+                "V/jn2B+wIPHT3OEwgGm8Xq/cSAxoGAV+MpCYyrqnUFNjGxpfH+Nq89hPidzRvscqHRcdT/aVMlfyUHTw" +
+                "njFyarLDbYxXtZ0/KNoPZVkdf0BOz1+X+GC96GKjJz1V2MKgMyp+viZGUaF38Eb0povSPoJfojcjgymi" +
+                "3968B9vkFVHyAYL/l1TwqPgHVmxGr8wLAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

@@ -81,8 +81,9 @@ namespace Iviz.Msgs.TurtleActionlib
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = ActionGoal.AddRos2MessageLength(c);
             c = ActionResult.AddRos2MessageLength(c);
             c = ActionFeedback.AddRos2MessageLength(c);

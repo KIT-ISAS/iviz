@@ -8,10 +8,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class Mesh : IDeserializable<Mesh>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
-        [DataMember (Name = "vertices")] public Vector3f[] Vertices;
-        [DataMember (Name = "normals")] public Vector3f[] Normals;
-        [DataMember (Name = "tangents")] public Vector3f[] Tangents;
-        [DataMember (Name = "bi_tangents")] public Vector3f[] BiTangents;
+        [DataMember (Name = "vertices")] public GeometryMsgs.Point32[] Vertices;
+        [DataMember (Name = "normals")] public GeometryMsgs.Point32[] Normals;
+        [DataMember (Name = "tangents")] public GeometryMsgs.Point32[] Tangents;
+        [DataMember (Name = "bi_tangents")] public GeometryMsgs.Point32[] BiTangents;
         [DataMember (Name = "tex_coords")] public TexCoords[] TexCoords;
         [DataMember (Name = "color_channels")] public ColorChannel[] ColorChannels;
         [DataMember (Name = "faces")] public Triangle[] Faces;
@@ -20,10 +20,10 @@ namespace Iviz.Msgs.IvizMsgs
         public Mesh()
         {
             Name = "";
-            Vertices = System.Array.Empty<Vector3f>();
-            Normals = System.Array.Empty<Vector3f>();
-            Tangents = System.Array.Empty<Vector3f>();
-            BiTangents = System.Array.Empty<Vector3f>();
+            Vertices = System.Array.Empty<GeometryMsgs.Point32>();
+            Normals = System.Array.Empty<GeometryMsgs.Point32>();
+            Tangents = System.Array.Empty<GeometryMsgs.Point32>();
+            BiTangents = System.Array.Empty<GeometryMsgs.Point32>();
             TexCoords = System.Array.Empty<TexCoords>();
             ColorChannels = System.Array.Empty<ColorChannel>();
             Faces = System.Array.Empty<Triangle>();
@@ -82,8 +82,16 @@ namespace Iviz.Msgs.IvizMsgs
             b.SerializeStructArray(Normals);
             b.SerializeStructArray(Tangents);
             b.SerializeStructArray(BiTangents);
-            b.SerializeArray(TexCoords);
-            b.SerializeArray(ColorChannels);
+            b.Serialize(TexCoords.Length);
+            foreach (var t in TexCoords)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(ColorChannels.Length);
+            foreach (var t in ColorChannels)
+            {
+                t.RosSerialize(ref b);
+            }
             b.SerializeStructArray(Faces);
             b.Serialize(MaterialIndex);
         }
@@ -95,8 +103,16 @@ namespace Iviz.Msgs.IvizMsgs
             b.SerializeStructArray(Normals);
             b.SerializeStructArray(Tangents);
             b.SerializeStructArray(BiTangents);
-            b.SerializeArray(TexCoords);
-            b.SerializeArray(ColorChannels);
+            b.Serialize(TexCoords.Length);
+            foreach (var t in TexCoords)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(ColorChannels.Length);
+            foreach (var t in ColorChannels)
+            {
+                t.RosSerialize(ref b);
+            }
             b.SerializeStructArray(Faces);
             b.Serialize(MaterialIndex);
         }
@@ -141,24 +157,34 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Vertices length
+            c += 4; // Vertices length
             c += 12 * Vertices.Length;
-            c += 4;  // Normals length
+            c += 4; // Normals length
             c += 12 * Normals.Length;
-            c += 4;  // Tangents length
+            c += 4; // Tangents length
             c += 12 * Tangents.Length;
-            c += 4;  // BiTangents length
+            c += 4; // BiTangents length
             c += 12 * BiTangents.Length;
-            c = WriteBuffer2.AddLength(c, TexCoords);
-            c = WriteBuffer2.AddLength(c, ColorChannels);
+            c += 4; // TexCoords.Length
+            foreach (var t in TexCoords)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Faces length
+            c += 4; // ColorChannels.Length
+            foreach (var t in ColorChannels)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Faces length
             c += 12 * Faces.Length;
-            c += 4;  // MaterialIndex
+            c += 4; // MaterialIndex
             return c;
         }
     
@@ -173,10 +199,13 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE71SOw7CMAzdc4rcAKldEBJTByYmEAtCkZu6JVLqSEmoSk9PCknU7kAWPz/H8ufZeauo" +
-                "4wQ9sgtKb2zZXm98QOuVRLfkyNge9IryQB2SX3G1Epk+41gZYxs3/8VRyLfDKqONre5AhDpE5OwK+fFD" +
-                "klUhX2OItDD38FDky4L34DGEtFDU4MjY/suPHU+HHVeDmkTvOrdJM7FWG5gbGDN6ZjT9vo+8xOWW4yZ/" +
-                "Xnwp1Ue3skiS/at8WbxPYMtttF20dbTwBxHiUaZjhATqBCRjL5ZmGPZNAwAA";
+                "H4sIAAAAAAAAE71TO2scQQzu51cI0tgQHHAaE0h1RUgRCNidCYt2V7crPDNaRjr7zr8+mn0cKXJdLtuM" +
+                "tNInfXqpFc4DZEwUBpJEVk5N0kE//RTO9vn++Re8UjHuSC86ZCkJ42W7YR4o22WHlpuzzxMddyKl1wqk" +
+                "Y9PNSthJlLIbMWeKbumq2nSL7qDCjo/klj1Wqoc5NCQ0clNsOPd0DOHrP/7Cj8dvX+CvZYUP8DSyOtNs" +
+                "yFnBRoJJlI0lg+wBXXNP4Az7QgQ6OfObN7YRnHnLptVrKtSxOuT2ziN+d3cF/yUpUU89mMBBCeac8DZS" +
+                "IZ9WTaPcRvLYaoR9DbTSugPwOBu5NVLucWblfzzgVCSJVbA3TyYq2HJkO83QDZlIFQeqkJ6Uh7yQMXwh" +
+                "OEwQ3bxUVFllUM/hi+boKGthlY8CGkju6COg1k7UJnXoFc0Nmjnvohz6mjvso2Cd6vEsnc7S+5Vmy6/8" +
+                "vsz1vJgX13hd1asz+fMWlsNY07v0v9L7gtcbe4CyvsP6tuuL1yeyXf127bgJ7SZ0IfwGBH9cG+IEAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

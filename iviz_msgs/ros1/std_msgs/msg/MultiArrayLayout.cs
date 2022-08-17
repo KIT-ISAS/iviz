@@ -71,13 +71,21 @@ namespace Iviz.Msgs.StdMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.SerializeArray(Dim);
+            b.Serialize(Dim.Length);
+            foreach (var t in Dim)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(DataOffset);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
-            b.SerializeArray(Dim);
+            b.Serialize(Dim.Length);
+            foreach (var t in Dim)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(DataOffset);
         }
         
@@ -95,11 +103,17 @@ namespace Iviz.Msgs.StdMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c = WriteBuffer2.AddLength(c, Dim);
+            int c = d;
             c = WriteBuffer2.Align4(c);
-            c += 4;  // DataOffset
+            c += 4; // Dim.Length
+            foreach (var t in Dim)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
+            c = WriteBuffer2.Align4(c);
+            c += 4; // DataOffset
             return c;
         }
     

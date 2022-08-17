@@ -206,8 +206,8 @@ namespace Iviz.MsgsGen
                     }
                     else
                     {
-                        result = RentHint
-                            ? $"public Tools.SharedRent<{CsClassType}> {CsFieldName};"
+                        result = RentHint && CsClassType == "byte"
+                            ? $"public Tools.SharedRent {CsFieldName};"
                             : $"public {CsClassType}[] {CsFieldName};";
                     }
                 }

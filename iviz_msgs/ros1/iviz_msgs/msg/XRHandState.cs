@@ -102,25 +102,26 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c += 1;  // IsValid
+            int c = d;
+            c += 1; // IsValid
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 56;  // Palm
-            c += 4;  // Thumb length
+            c += 56; // Palm
+            c += 4; // Thumb length
             c = WriteBuffer2.Align8(c);
             c += 56 * Thumb.Length;
-            c += 4;  // Index length
+            c += 4; // Index length
             c = WriteBuffer2.Align8(c);
             c += 56 * Index.Length;
-            c += 4;  // Middle length
+            c += 4; // Middle length
             c = WriteBuffer2.Align8(c);
             c += 56 * Middle.Length;
-            c += 4;  // Ring length
+            c += 4; // Ring length
             c = WriteBuffer2.Align8(c);
             c += 56 * Ring.Length;
-            c += 4;  // Little length
+            c += 4; // Little length
             c = WriteBuffer2.Align8(c);
             c += 56 * Little.Length;
             return c;

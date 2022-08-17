@@ -142,14 +142,22 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Serialize(Success);
             b.Serialize(Message);
-            b.SerializeArray(Resolutions);
+            b.Serialize(Resolutions.Length);
+            foreach (var t in Resolutions)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
             b.Serialize(Message);
-            b.SerializeArray(Resolutions);
+            b.Serialize(Resolutions.Length);
+            foreach (var t in Resolutions)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -167,12 +175,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c += 1;  // Success
+            int c = d;
+            c += 1; // Success
             c = WriteBuffer2.AddLength(c, Message);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Resolutions length
+            c += 4; // Resolutions length
             c += 8 * Resolutions.Length;
             return c;
         }

@@ -65,9 +65,10 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c += 1;  // Error
+            int c = d;
+            c += 1; // Error
             c = WriteBuffer2.AddLength(c, ErrorString);
             return c;
         }

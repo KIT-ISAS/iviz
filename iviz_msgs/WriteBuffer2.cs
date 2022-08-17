@@ -8,7 +8,7 @@ using Iviz.Tools;
 namespace Iviz.Msgs;
 
 /// <summary>
-/// Contains utilities to serialize ROS 2 messages into a byte array. 
+/// Contains utilities to serialize ROS 2/CDR messages into a byte array. 
 /// </summary>
 public unsafe partial struct WriteBuffer2
 {
@@ -33,7 +33,7 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     readonly void ThrowIfOutOfRange(int off)
     {
-        if (off < 0 || off > remaining)
+        if ((uint)off > (uint)remaining)
         {
             BuiltIns.ThrowBufferOverflow(off, remaining);
         }
@@ -54,13 +54,13 @@ public unsafe partial struct WriteBuffer2
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    void Align2() => Advance(((int.MaxValue - 1) - offset) & 1);
+    void Align2() => Advance((-offset) & 1);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    void Align4() => Advance(((int.MaxValue - 3) - offset) & 3);
+    void Align4() => Advance((-offset) & 3);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    void Align8() => Advance(((int.MaxValue - 7) - offset) & 7);
+    void Align8() => Advance((-offset) & 7);
 
 
     #region advance
@@ -75,7 +75,7 @@ public unsafe partial struct WriteBuffer2
     public static int Align8(int c) => (c + 7) & ~7;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int AddLength(int c, ISerializable[] array)
+    public static int AddLength(int c, ISerializable[] array) // used by tests
     {
         c = Align4(c) + sizeof(int);
         foreach (var message in array)
@@ -89,14 +89,16 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int AddLength(int c, string? s)
     {
-        return Align4(c) + (s is not {Length: not 0}
-            ? sizeof(int) + 1
-            : sizeof(int) + 1 + BuiltIns.UTF8.GetByteCount(s));
+        int d = Align4(c) + sizeof(int) + 1; // trailing '\0'
+        return s is not { Length: not 0 }
+            ? d
+            : d + BuiltIns.GetByteCount(s);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int AddLength(int c, string[] bs)
+    public static int AddLength(int d, string[] bs)
     {
+        int c = d;
         c = Align4(c) + sizeof(int);
         foreach (string b in bs)
         {
@@ -254,16 +256,30 @@ public unsafe partial struct WriteBuffer2
             return;
         }
 
-        int count = BuiltIns.UTF8.GetByteCount(val);
-        ThrowIfOutOfRange(4 + 1 + count);
-        WriteInt(count + 1);
+        
         fixed (char* valPtr = val)
         {
-            BuiltIns.UTF8.GetBytes(valPtr, val.Length, ptr + offset, remaining);
+            int length = val.Length;
+            if (BuiltIns.CanWriteStringSimple(valPtr, length))
+            {
+                int lengthPlus1 = length + 1;
+                ThrowIfOutOfRange(4 + lengthPlus1);
+                WriteInt(lengthPlus1);
+                BuiltIns.WriteStringSimple(valPtr, ptr + offset, length);
+                ptr[offset + length] = 0;
+                Advance(lengthPlus1);
+            }
+            else
+            {
+                int byteCount = BuiltIns.UTF8.GetByteCount(val);
+                int byteCountPlus1 = byteCount + 1;
+                ThrowIfOutOfRange(4 + byteCountPlus1);
+                WriteInt(byteCountPlus1);
+                BuiltIns.UTF8.GetBytes(valPtr, val.Length, ptr + offset, remaining);
+                ptr[offset + byteCount] = 0;
+                Advance(byteCountPlus1);
+            }
         }
-
-        ptr[offset + count] = 0;
-        Advance(count + 1);
     }
 
     public void SerializeArray(string[] val)
@@ -336,7 +352,6 @@ public unsafe partial struct WriteBuffer2
     {
         WriteInt(val.Length);
         if (val.Length == 0) return;
-        Align2();
         SerializeStructArrayCore(val);
     }
 
@@ -353,7 +368,6 @@ public unsafe partial struct WriteBuffer2
     {
         WriteInt(val.Length);
         if (val.Length == 0) return;
-        Align2();
         SerializeStructArrayCore(val);
     }
 
@@ -370,7 +384,6 @@ public unsafe partial struct WriteBuffer2
     {
         WriteInt(val.Length);
         if (val.Length == 0) return;
-        Align4();
         SerializeStructArrayCore(val);
     }
 
@@ -387,7 +400,6 @@ public unsafe partial struct WriteBuffer2
     {
         WriteInt(val.Length);
         if (val.Length == 0) return;
-        Align4();
         SerializeStructArrayCore(val);
     }
 
@@ -404,7 +416,6 @@ public unsafe partial struct WriteBuffer2
     {
         WriteInt(val.Length);
         if (val.Length == 0) return;
-        Align4();
         SerializeStructArrayCore(val);
     }
 
@@ -498,7 +509,6 @@ public unsafe partial struct WriteBuffer2
     {
         WriteInt(val.Length);
         if (val.Length == 0) return;
-        Align4();
         SerializeStructArrayCore(val);
     }
 
@@ -534,7 +544,6 @@ public unsafe partial struct WriteBuffer2
     {
         WriteInt(val.Length);
         if (val.Length == 0) return;
-        Align4();
         SerializeStructArrayCore(val);
     }
 
@@ -547,20 +556,10 @@ public unsafe partial struct WriteBuffer2
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SerializeStructArray(Vector3f[] val)
-    {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
-        Align4();
-        SerializeStructArrayCore(val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(Triangle[] val)
     {
         WriteInt(val.Length);
         if (val.Length == 0) return;
-        Align4();
         SerializeStructArrayCore(val);
     }
 
@@ -569,11 +568,38 @@ public unsafe partial struct WriteBuffer2
     {
         WriteInt(val.Length);
         if (val.Length == 0) return;
-        Align4();
         SerializeStructArrayCore(val);
     }
 
     #endregion
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    void SerializeStructArrayCore(byte[] val)
+    {
+        int size = val.Length * sizeof(byte);
+        ThrowIfOutOfRange(size);
+
+        fixed (byte* valPtr = val)
+        {
+            Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
+        }
+
+        Advance(size);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    void SerializeStructArrayCore(Point32[] val)
+    {
+        int size = val.Length * Point32.Ros2FixedMessageLength;
+        ThrowIfOutOfRange(size);
+
+        fixed (Point32* valPtr = val)
+        {
+            Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
+        }
+
+        Advance(size);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     void SerializeStructArrayCore<T>(T[] val) where T : unmanaged
@@ -589,7 +615,7 @@ public unsafe partial struct WriteBuffer2
         Advance(size);
     }
 
-    public void SerializeStructArray(SharedRent<byte> val)
+    public void SerializeStructArray(SharedRent val)
     {
         const int sizeOfT = 1;
         int size = val.Length * sizeOfT;
@@ -645,19 +671,6 @@ public unsafe partial struct WriteBuffer2
 
 public unsafe partial struct WriteBuffer2
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int AddLength(int c, TransformStamped[] b)
-    {
-        c = Align4(c) + sizeof(int);
-        foreach (var message in b)
-        {
-            c = message.AddRos2MessageLength(c);
-        }
-
-        return c;
-    }
-
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Serialize(in Vector3 val)
     {
@@ -738,26 +751,6 @@ public unsafe partial struct WriteBuffer2
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Serialize(in Vector2f val)
-    {
-        Align4();
-        const int size = Vector2f.Ros2FixedMessageLength;
-        ThrowIfOutOfRange(size);
-        *(Vector2f*)(ptr + offset) = val;
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Serialize(in Vector3f val)
-    {
-        Align4();
-        const int size = Vector3f.Ros2FixedMessageLength;
-        ThrowIfOutOfRange(size);
-        *(Vector3f*)(ptr + offset) = val;
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Serialize(in Triangle val)
     {
         Align4();
@@ -765,14 +758,5 @@ public unsafe partial struct WriteBuffer2
         ThrowIfOutOfRange(size);
         *(Triangle*)(ptr + offset) = val;
         Advance(size);
-    }
-
-    public void SerializeArray(TransformStamped[] val)
-    {
-        WriteInt(val.Length);
-        for (int i = 0; i < val.Length; i++)
-        {
-            val[i].RosSerialize(ref this);
-        }
     }
 }

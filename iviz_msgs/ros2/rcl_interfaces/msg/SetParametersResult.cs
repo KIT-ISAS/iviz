@@ -62,9 +62,10 @@ namespace Iviz.Msgs.RclInterfaces
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c += 1;  // Successful
+            int c = d;
+            c += 1; // Successful
             c = WriteBuffer2.AddLength(c, Reason);
             return c;
         }

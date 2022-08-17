@@ -79,18 +79,42 @@ namespace Iviz.Msgs.RclInterfaces
         {
             b.Serialize(Stamp);
             b.Serialize(Node);
-            b.SerializeArray(NewParameters);
-            b.SerializeArray(ChangedParameters);
-            b.SerializeArray(DeletedParameters);
+            b.Serialize(NewParameters.Length);
+            foreach (var t in NewParameters)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(ChangedParameters.Length);
+            foreach (var t in ChangedParameters)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(DeletedParameters.Length);
+            foreach (var t in DeletedParameters)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Stamp);
             b.Serialize(Node);
-            b.SerializeArray(NewParameters);
-            b.SerializeArray(ChangedParameters);
-            b.SerializeArray(DeletedParameters);
+            b.Serialize(NewParameters.Length);
+            foreach (var t in NewParameters)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(ChangedParameters.Length);
+            foreach (var t in ChangedParameters)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(DeletedParameters.Length);
+            foreach (var t in DeletedParameters)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -130,14 +154,30 @@ namespace Iviz.Msgs.RclInterfaces
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.Align4(c);
-            c += 8;  // Stamp
+            c += 8; // Stamp
             c = WriteBuffer2.AddLength(c, Node);
-            c = WriteBuffer2.AddLength(c, NewParameters);
-            c = WriteBuffer2.AddLength(c, ChangedParameters);
-            c = WriteBuffer2.AddLength(c, DeletedParameters);
+            c = WriteBuffer2.Align4(c);
+            c += 4; // NewParameters.Length
+            foreach (var t in NewParameters)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
+            c = WriteBuffer2.Align4(c);
+            c += 4; // ChangedParameters.Length
+            foreach (var t in ChangedParameters)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
+            c = WriteBuffer2.Align4(c);
+            c += 4; // DeletedParameters.Length
+            foreach (var t in DeletedParameters)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

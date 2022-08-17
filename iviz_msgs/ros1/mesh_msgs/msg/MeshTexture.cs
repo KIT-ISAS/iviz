@@ -68,11 +68,12 @@ namespace Iviz.Msgs.MeshMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, Uuid);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // TextureIndex
+            c += 4; // TextureIndex
             c = Image.AddRos2MessageLength(c);
             return c;
         }

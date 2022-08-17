@@ -95,8 +95,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Dialog.AddRos2MessageLength(c);
             return c;
         }
@@ -167,9 +168,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c += 1;  // Success
+            int c = d;
+            c += 1; // Success
             c = WriteBuffer2.AddLength(c, Message);
             c = Feedback.AddRos2MessageLength(c);
             return c;

@@ -72,12 +72,13 @@ namespace Iviz.Msgs.NavMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 80;  // Info
-            c += 4;  // Data length
+            c += 80; // Info
+            c += 4; // Data length
             c += 1 * Data.Length;
             return c;
         }

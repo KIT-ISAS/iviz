@@ -105,8 +105,9 @@ namespace Iviz.Msgs.NavMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Map.AddRos2MessageLength(c);
             c = InitialPose.AddRos2MessageLength(c);
             return c;
@@ -165,9 +166,10 @@ namespace Iviz.Msgs.NavMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c += 1;  // Success
+            int c = d;
+            c += 1; // Success
             return c;
         }
     

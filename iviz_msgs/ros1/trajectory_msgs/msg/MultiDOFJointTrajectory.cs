@@ -59,14 +59,22 @@ namespace Iviz.Msgs.TrajectoryMsgs
         {
             Header.RosSerialize(ref b);
             b.SerializeArray(JointNames);
-            b.SerializeArray(Points);
+            b.Serialize(Points.Length);
+            foreach (var t in Points)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.SerializeArray(JointNames);
-            b.SerializeArray(Points);
+            b.Serialize(Points.Length);
+            foreach (var t in Points)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -97,11 +105,17 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.AddLength(c, JointNames);
-            c = WriteBuffer2.AddLength(c, Points);
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Points.Length
+            foreach (var t in Points)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

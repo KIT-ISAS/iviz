@@ -49,13 +49,21 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(MapUuid);
-            b.SerializeArray(Features);
+            b.Serialize(Features.Length);
+            foreach (var t in Features)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(MapUuid);
-            b.SerializeArray(Features);
+            b.Serialize(Features.Length);
+            foreach (var t in Features)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -73,10 +81,16 @@ namespace Iviz.Msgs.MeshMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, MapUuid);
-            c = WriteBuffer2.AddLength(c, Features);
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Features.Length
+            foreach (var t in Features)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

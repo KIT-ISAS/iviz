@@ -67,7 +67,11 @@ namespace Iviz.Msgs.GridMapMsgs
             Info.RosSerialize(ref b);
             b.SerializeArray(Layers);
             b.SerializeArray(BasicLayers);
-            b.SerializeArray(Data);
+            b.Serialize(Data.Length);
+            foreach (var t in Data)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(OuterStartIndex);
             b.Serialize(InnerStartIndex);
         }
@@ -77,7 +81,11 @@ namespace Iviz.Msgs.GridMapMsgs
             Info.RosSerialize(ref b);
             b.SerializeArray(Layers);
             b.SerializeArray(BasicLayers);
-            b.SerializeArray(Data);
+            b.Serialize(Data.Length);
+            foreach (var t in Data)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(OuterStartIndex);
             b.Serialize(InnerStartIndex);
         }
@@ -118,15 +126,21 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Info.AddRos2MessageLength(c);
             c = WriteBuffer2.AddLength(c, Layers);
             c = WriteBuffer2.AddLength(c, BasicLayers);
-            c = WriteBuffer2.AddLength(c, Data);
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Data.Length
+            foreach (var t in Data)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             c = WriteBuffer2.Align2(c);
-            c += 2;  // OuterStartIndex
-            c += 2;  // InnerStartIndex
+            c += 2; // OuterStartIndex
+            c += 2; // InnerStartIndex
             return c;
         }
     

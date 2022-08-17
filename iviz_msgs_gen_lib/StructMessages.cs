@@ -14,8 +14,6 @@ public static class StructMessages
         "geometry_msgs/Transform",
         "std_msgs/ColorRGBA",
         "iviz_msgs/Color32",
-        "iviz_msgs/Vector2f",
-        "iviz_msgs/Vector3f",
         "iviz_msgs/Triangle",
     };
 

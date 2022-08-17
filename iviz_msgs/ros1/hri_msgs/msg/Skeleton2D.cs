@@ -72,13 +72,21 @@ namespace Iviz.Msgs.HriMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(Skeleton);
+            b.Serialize(Skeleton.Length);
+            foreach (var t in Skeleton)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(Skeleton);
+            b.Serialize(Skeleton.Length);
+            foreach (var t in Skeleton)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -95,11 +103,12 @@ namespace Iviz.Msgs.HriMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Skeleton length
+            c += 4; // Skeleton length
             c += 12 * Skeleton.Length;
             return c;
         }

@@ -83,7 +83,7 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// Custom iviz code
         public static Transform Identity => new(Vector3.Zero, Quaternion.Identity);
-        public static implicit operator Pose(in Transform p) => Extensions.AsPose(in p);
+        public static implicit operator Pose(in Transform p) => p.AsPose();
         public readonly Transform Inverse => new(-(Rotation.Inverse * Translation), Rotation.Inverse);
         public static Transform operator *(in Transform t, in Transform q) =>
                 new Transform(t.Translation + t.Rotation * q.Translation, t.Rotation * q.Rotation);

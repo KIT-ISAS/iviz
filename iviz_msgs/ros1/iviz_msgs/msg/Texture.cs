@@ -116,19 +116,20 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, Path);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Index
-            c += 1;  // Type
-            c += 1;  // Mapping
+            c += 4; // Index
+            c += 1; // Type
+            c += 1; // Mapping
             c = WriteBuffer2.Align4(c);
-            c += 4;  // UvIndex
-            c += 4;  // BlendFactor
-            c += 1;  // Operation
-            c += 1;  // WrapModeU
-            c += 1;  // WrapModeV
+            c += 4; // UvIndex
+            c += 4; // BlendFactor
+            c += 1; // Operation
+            c += 1; // WrapModeU
+            c += 1; // WrapModeV
             return c;
         }
     

@@ -98,7 +98,11 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(SecondaryScale);
             b.Serialize(Caption);
             Boundary.RosSerialize(ref b);
-            b.SerializeArray(SecondaryBoundaries);
+            b.Serialize(SecondaryBoundaries.Length);
+            foreach (var t in SecondaryBoundaries)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
@@ -114,7 +118,11 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(SecondaryScale);
             b.Serialize(Caption);
             Boundary.RosSerialize(ref b);
-            b.SerializeArray(SecondaryBoundaries);
+            b.Serialize(SecondaryBoundaries.Length);
+            foreach (var t in SecondaryBoundaries)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -145,23 +153,28 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
-            c += 1;  // Action
+            c += 1; // Action
             c = WriteBuffer2.AddLength(c, Id);
-            c += 1;  // Type
+            c += 1; // Type
             c = WriteBuffer2.Align8(c);
-            c += 56;  // Pose
-            c += 16;  // Color
-            c += 16;  // SecondaryColor
+            c += 56; // Pose
+            c += 16; // Color
+            c += 16; // SecondaryColor
             c = WriteBuffer2.Align8(c);
-            c += 8;  // Scale
-            c += 8;  // SecondaryScale
+            c += 8; // Scale
+            c += 8; // SecondaryScale
             c = WriteBuffer2.AddLength(c, Caption);
             c = WriteBuffer2.Align8(c);
-            c += 80;  // Boundary
-            c = WriteBuffer2.AddLength(c, SecondaryBoundaries);
+            c += 80; // Boundary
+            c += 4; // SecondaryBoundaries.Length
+            foreach (var t in SecondaryBoundaries)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

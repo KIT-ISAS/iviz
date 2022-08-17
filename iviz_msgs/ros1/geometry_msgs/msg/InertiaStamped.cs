@@ -59,11 +59,12 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 80;  // Inertia
+            c += 80; // Inertia
             return c;
         }
     

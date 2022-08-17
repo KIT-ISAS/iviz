@@ -119,7 +119,11 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(OrientationMode);
             b.Serialize(InteractionMode);
             b.Serialize(AlwaysVisible);
-            b.SerializeArray(Markers);
+            b.Serialize(Markers.Length);
+            foreach (var t in Markers)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(IndependentMarkerOrientation);
             b.Serialize(Description);
         }
@@ -131,7 +135,11 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(OrientationMode);
             b.Serialize(InteractionMode);
             b.Serialize(AlwaysVisible);
-            b.SerializeArray(Markers);
+            b.Serialize(Markers.Length);
+            foreach (var t in Markers)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(IndependentMarkerOrientation);
             b.Serialize(Description);
         }
@@ -161,16 +169,22 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.Align8(c);
-            c += 32;  // Orientation
-            c += 1;  // OrientationMode
-            c += 1;  // InteractionMode
-            c += 1;  // AlwaysVisible
-            c = WriteBuffer2.AddLength(c, Markers);
-            c += 1;  // IndependentMarkerOrientation
+            c += 32; // Orientation
+            c += 1; // OrientationMode
+            c += 1; // InteractionMode
+            c += 1; // AlwaysVisible
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Markers.Length
+            foreach (var t in Markers)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
+            c += 1; // IndependentMarkerOrientation
             c = WriteBuffer2.AddLength(c, Description);
             return c;
         }

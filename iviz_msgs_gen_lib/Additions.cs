@@ -76,7 +76,7 @@ namespace Iviz.MsgsGen
             ["geometry_msgs/Transform"] = new[]
             {
                 "public static Transform Identity => new(Vector3.Zero, Quaternion.Identity);",
-                "public static implicit operator Pose(in Transform p) => Extensions.AsPose(in p);",
+                "public static implicit operator Pose(in Transform p) => p.AsPose();",
                 "public readonly Transform Inverse => new(-(Rotation.Inverse * Translation), Rotation.Inverse);",
                 "public static Transform operator *(in Transform t, in Transform q) =>",
                 "        new Transform(t.Translation + t.Rotation * q.Translation, t.Rotation * q.Rotation);",
@@ -91,7 +91,7 @@ namespace Iviz.MsgsGen
             ["geometry_msgs/Pose"] = new[]
             {
                 "public static Pose Identity => new(Point.Zero, Quaternion.Identity);",
-                "public static implicit operator Transform(in Pose p) => Extensions.AsTransform(in p);",
+                "public static implicit operator Transform(in Pose p) => p.AsTransform();",
                 "public static implicit operator Pose(in (Point position, Quaternion orientation) p) => new(p.position, p.orientation);",
             },
 
@@ -123,47 +123,28 @@ namespace Iviz.MsgsGen
                 "public override int GetHashCode() => System.HashCode.Combine(R, G, B, A);",
             },
 
-            ["iviz_msgs/Vector3f"] = new[]
+            ["geometry_msgs/Point32"] = new[]
             {
-                "public static Vector3f Zero => new();",
-                "public static Vector3f One => new(1, 1, 1);",
-                "public static Vector3f UnitX => new(1, 0, 0);",
-                "public static Vector3f UnitY => new(0, 1, 0);",
-                "public static Vector3f UnitZ => new(0, 0, 1);",
-                "public static implicit operator GeometryMsgs.Point(in Vector3f p) => new(p.X, p.Y, p.Z);",
-                "public static implicit operator GeometryMsgs.Vector3(in Vector3f p) => new(p.X, p.Y, p.Z);",
-                "public static implicit operator Vector3f(in GeometryMsgs.Vector3 p) => new((float)p.X, (float)p.Y, (float)p.Z);",
-                "public static Vector3f operator +(in Vector3f v, in Vector3f w) => new(v.X + w.X, v.Y + w.Y, v.Z + w.Z);",
-                "public static Vector3f operator -(in Vector3f v, in Vector3f w) => new(v.X - w.X, v.Y - w.Y, v.Z - w.Z);",
-                "public static Vector3f operator *(float f, in Vector3f v) => new(f * v.X, f * v.Y, f * v.Z);",
-                "public static Vector3f operator *(in Vector3f v, float f) => new(f * v.X, f * v.Y, f * v.Z);",
-                "public static Vector3f operator /(in Vector3f v, float f) => new(v.X / f, v.Y / f, v.Z / f);",
-                "public static Vector3f operator -(in Vector3f v) => new(-v.X, -v.Y, -v.Z);",
-                "public readonly float Dot(in Vector3f v) => X * v.X + Y * v.Y + Z * v.Z;",
+                "public static Point32 Zero => new();",
+                "public static Point32 One => new(1, 1, 1);",
+                "public static Point32 UnitX => new(1, 0, 0);",
+                "public static Point32 UnitY => new(0, 1, 0);",
+                "public static Point32 UnitZ => new(0, 0, 1);",
+                "public static implicit operator Point(in Point32 p) => new(p.X, p.Y, p.Z);",
+                "public static implicit operator Vector3(in Point32 p) => new(p.X, p.Y, p.Z);",
+                "public static implicit operator Point32(in Vector3 p) => new((float)p.X, (float)p.Y, (float)p.Z);",
+                "public static Point32 operator +(in Point32 v, in Point32 w) => new(v.X + w.X, v.Y + w.Y, v.Z + w.Z);",
+                "public static Point32 operator -(in Point32 v, in Point32 w) => new(v.X - w.X, v.Y - w.Y, v.Z - w.Z);",
+                "public static Point32 operator *(float f, in Point32 v) => new(f * v.X, f * v.Y, f * v.Z);",
+                "public static Point32 operator *(in Point32 v, float f) => new(f * v.X, f * v.Y, f * v.Z);",
+                "public static Point32 operator /(in Point32 v, float f) => new(v.X / f, v.Y / f, v.Z / f);",
+                "public static Point32 operator -(in Point32 v) => new(-v.X, -v.Y, -v.Z);",
+                "public readonly float Dot(in Point32 v) => X * v.X + Y * v.Y + Z * v.Z;",
                 "public readonly float SquaredNorm => Dot(this);",
                 "public readonly float Norm => (float)System.Math.Sqrt(SquaredNorm);",
-                "public readonly Vector3f Normalized => this / Norm;",
-                "public readonly Vector3f Cross(in Vector3f v) => new(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);",
-                "public static implicit operator Vector3f(in (float X, float Y, float Z) p) => new(p.X, p.Y, p.Z);",
-            },
-
-            ["iviz_msgs/Vector2f"] = new[]
-            {
-                "public static Vector2f Zero => new(0, 0);",
-                "public static Vector2f One => new(1, 1);",
-                "public static Vector2f UnitX => new(1, 0);",
-                "public static Vector2f UnitY => new(0, 1);",
-                "public static Vector2f operator +(in Vector2f v, in Vector2f w) => new(v.X + w.X, v.Y + w.Y);",
-                "public static Vector2f operator -(in Vector2f v, in Vector2f w) => new(v.X - w.X, v.Y - w.Y);",
-                "public static Vector2f operator *(float f, in Vector2f v) => new(f * v.X, f * v.Y);",
-                "public static Vector2f operator *(in Vector2f v, float f) => new(f * v.X, f * v.Y);",
-                "public static Vector2f operator /(in Vector2f v, float f) => new(v.X / f, v.Y / f);",
-                "public static Vector2f operator -(in Vector2f v) => new(-v.X, -v.Y);",
-                "public readonly float Dot(in Vector2f v) => X * v.X + Y * v.Y;",
-                "public readonly float SquaredNorm => Dot(this);",
-                "public readonly float Norm => (float)System.Math.Sqrt(SquaredNorm);",
-                "public readonly Vector2f Normalized => this / Norm;",
-                "public static implicit operator Vector2f(in (float X, float Y) p) => new(p.X, p.Y);",
+                "public readonly Point32 Normalized => this / Norm;",
+                "public readonly Point32 Cross(in Point32 v) => new(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);",
+                "public static implicit operator Point32(in (float X, float Y, float Z) p) => new(p.X, p.Y, p.Z);",
             },
 
             ["std_msgs/Header"] = new[]

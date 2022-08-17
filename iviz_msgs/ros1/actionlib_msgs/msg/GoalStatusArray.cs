@@ -50,13 +50,21 @@ namespace Iviz.Msgs.ActionlibMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(StatusList);
+            b.Serialize(StatusList.Length);
+            foreach (var t in StatusList)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(StatusList);
+            b.Serialize(StatusList.Length);
+            foreach (var t in StatusList)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -73,10 +81,16 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.AddLength(c, StatusList);
+            c = WriteBuffer2.Align4(c);
+            c += 4; // StatusList.Length
+            foreach (var t in StatusList)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

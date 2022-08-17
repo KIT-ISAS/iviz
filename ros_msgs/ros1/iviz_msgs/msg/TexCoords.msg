@@ -1,1 +1,1 @@
-Vector3f[] coords
+geometry_msgs/Point32[] coords

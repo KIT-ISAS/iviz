@@ -8,8 +8,8 @@ uint8 type
 bool cast_shadows
 Color32 diffuse
 float32 range
-Vector3f position
-Vector3f direction
+geometry_msgs/Point32 position
+geometry_msgs/Point32 direction
 float32 inner_angle
 float32 outer_angle
 

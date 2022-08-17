@@ -90,8 +90,16 @@ namespace Iviz.Msgs.RclInterfaces
             b.Serialize(Description);
             b.Serialize(AdditionalConstraints);
             b.Serialize(ReadOnly);
-            b.SerializeArray(FloatingPointRange);
-            b.SerializeArray(IntegerRange);
+            b.Serialize(FloatingPointRange.Length);
+            foreach (var t in FloatingPointRange)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(IntegerRange.Length);
+            foreach (var t in IntegerRange)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
@@ -101,8 +109,16 @@ namespace Iviz.Msgs.RclInterfaces
             b.Serialize(Description);
             b.Serialize(AdditionalConstraints);
             b.Serialize(ReadOnly);
-            b.SerializeArray(FloatingPointRange);
-            b.SerializeArray(IntegerRange);
+            b.Serialize(FloatingPointRange.Length);
+            foreach (var t in FloatingPointRange)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(IntegerRange.Length);
+            foreach (var t in IntegerRange)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -139,18 +155,19 @@ namespace Iviz.Msgs.RclInterfaces
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, Name);
-            c += 1;  // Type
+            c += 1; // Type
             c = WriteBuffer2.AddLength(c, Description);
             c = WriteBuffer2.AddLength(c, AdditionalConstraints);
-            c += 1;  // ReadOnly
+            c += 1; // ReadOnly
             c = WriteBuffer2.Align4(c);
-            c += 4;  // FloatingPointRange length
+            c += 4; // FloatingPointRange length
             c = WriteBuffer2.Align8(c);
             c += 24 * FloatingPointRange.Length;
-            c += 4;  // IntegerRange length
+            c += 4; // IntegerRange length
             c = WriteBuffer2.Align8(c);
             c += 24 * IntegerRange.Length;
             return c;

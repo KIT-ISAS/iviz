@@ -57,14 +57,22 @@ namespace Iviz.Msgs.PclMsgs
         {
             Header.RosSerialize(ref b);
             Cloud.RosSerialize(ref b);
-            b.SerializeArray(Polygons);
+            b.Serialize(Polygons.Length);
+            foreach (var t in Polygons)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             Cloud.RosSerialize(ref b);
-            b.SerializeArray(Polygons);
+            b.Serialize(Polygons.Length);
+            foreach (var t in Polygons)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -92,11 +100,17 @@ namespace Iviz.Msgs.PclMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = Cloud.AddRos2MessageLength(c);
-            c = WriteBuffer2.AddLength(c, Polygons);
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Polygons.Length
+            foreach (var t in Polygons)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

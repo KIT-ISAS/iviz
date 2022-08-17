@@ -96,9 +96,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c += 1;  // Compress
+            int c = d;
+            c += 1; // Compress
             return c;
         }
     
@@ -202,19 +203,20 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c += 1;  // Success
+            int c = d;
+            c += 1; // Success
             c = WriteBuffer2.AddLength(c, Message);
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Width
-            c += 4;  // Height
-            c += 4;  // Bpp
+            c += 4; // Width
+            c += 4; // Height
+            c += 4; // Bpp
             c = WriteBuffer2.Align8(c);
-            c += 8 * 9;
-            c += 56;  // Pose
-            c += 4;  // Data length
+            c += 8 * 9; // Intrinsics
+            c += 56; // Pose
+            c += 4; // Data length
             c += 1 * Data.Length;
             return c;
         }

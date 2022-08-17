@@ -48,13 +48,21 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(in Location);
-            b.SerializeArray(Descriptor);
+            b.Serialize(Descriptor.Length);
+            foreach (var t in Descriptor)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(in Location);
-            b.SerializeArray(Descriptor);
+            b.Serialize(Descriptor.Length);
+            foreach (var t in Descriptor)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -71,11 +79,12 @@ namespace Iviz.Msgs.MeshMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.Align8(c);
-            c += 24;  // Location
-            c += 4;  // Descriptor length
+            c += 24; // Location
+            c += 4; // Descriptor length
             c += 4 * Descriptor.Length;
             return c;
         }

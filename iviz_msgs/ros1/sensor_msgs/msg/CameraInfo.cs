@@ -230,23 +230,24 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Height
-            c += 4;  // Width
+            c += 4; // Height
+            c += 4; // Width
             c = WriteBuffer2.AddLength(c, DistortionModel);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // D length
+            c += 4; // D length
             c = WriteBuffer2.Align8(c);
             c += 8 * D.Length;
-            c += 8 * 9;
-            c += 8 * 9;
-            c += 8 * 12;
-            c += 4;  // BinningX
-            c += 4;  // BinningY
-            c += 17;  // Roi
+            c += 8 * 9; // K
+            c += 8 * 9; // R
+            c += 8 * 12; // P
+            c += 4; // BinningX
+            c += 4; // BinningY
+            c += 17; // Roi
             return c;
         }
     

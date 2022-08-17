@@ -170,29 +170,30 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.AddLength(c, Ns);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Id
-            c += 4;  // Type
-            c += 4;  // Action
+            c += 4; // Id
+            c += 4; // Type
+            c += 4; // Action
             c = WriteBuffer2.Align8(c);
-            c += 56;  // Pose
-            c += 24;  // Scale
-            c += 16;  // Color
-            c += 8;  // Lifetime
-            c += 1;  // FrameLocked
+            c += 56; // Pose
+            c += 24; // Scale
+            c += 16; // Color
+            c += 8; // Lifetime
+            c += 1; // FrameLocked
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Points length
+            c += 4; // Points length
             c = WriteBuffer2.Align8(c);
             c += 24 * Points.Length;
-            c += 4;  // Colors length
+            c += 4; // Colors length
             c += 16 * Colors.Length;
             c = WriteBuffer2.AddLength(c, Text);
             c = WriteBuffer2.AddLength(c, MeshResource);
-            c += 1;  // MeshUseEmbeddedMaterials
+            c += 1; // MeshUseEmbeddedMaterials
             return c;
         }
     

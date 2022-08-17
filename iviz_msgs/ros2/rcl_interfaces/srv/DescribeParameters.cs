@@ -99,8 +99,9 @@ namespace Iviz.Msgs.RclInterfaces
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, Names);
             return c;
         }
@@ -150,12 +151,20 @@ namespace Iviz.Msgs.RclInterfaces
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.SerializeArray(Descriptors);
+            b.Serialize(Descriptors.Length);
+            foreach (var t in Descriptors)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
-            b.SerializeArray(Descriptors);
+            b.Serialize(Descriptors.Length);
+            foreach (var t in Descriptors)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -172,9 +181,15 @@ namespace Iviz.Msgs.RclInterfaces
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c = WriteBuffer2.AddLength(c, Descriptors);
+            int c = d;
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Descriptors.Length
+            foreach (var t in Descriptors)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

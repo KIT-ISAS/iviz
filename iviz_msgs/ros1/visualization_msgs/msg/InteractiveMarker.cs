@@ -85,8 +85,16 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(Name);
             b.Serialize(Description);
             b.Serialize(Scale);
-            b.SerializeArray(MenuEntries);
-            b.SerializeArray(Controls);
+            b.Serialize(MenuEntries.Length);
+            foreach (var t in MenuEntries)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Controls.Length);
+            foreach (var t in Controls)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
@@ -96,8 +104,16 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(Name);
             b.Serialize(Description);
             b.Serialize(Scale);
-            b.SerializeArray(MenuEntries);
-            b.SerializeArray(Controls);
+            b.Serialize(MenuEntries.Length);
+            foreach (var t in MenuEntries)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Controls.Length);
+            foreach (var t in Controls)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -133,17 +149,27 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
-            c += 56;  // Pose
+            c += 56; // Pose
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.AddLength(c, Description);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Scale
-            c = WriteBuffer2.AddLength(c, MenuEntries);
-            c = WriteBuffer2.AddLength(c, Controls);
+            c += 4; // Scale
+            c += 4; // MenuEntries.Length
+            foreach (var t in MenuEntries)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Controls.Length
+            foreach (var t in Controls)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

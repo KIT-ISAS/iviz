@@ -457,8 +457,9 @@ public sealed class ClassInfo
 
         int currentAlignment = -1;
 
-        fields.Add($"public {readOnlyId}int AddRos2MessageLength(int c)");
+        fields.Add($"public {readOnlyId}int AddRos2MessageLength(int d)");
         fields.Add("{");
+        fields.Add("    int c = d;"); // weird bug fix
         foreach (var variable in variables)
         {
             if ((variable.Version & RosVersion.Ros2) == 0)
@@ -494,7 +495,14 @@ public sealed class ClassInfo
             }
             else if (variable.IsArray)
             {
-                fields.Add($"    c = WriteBuffer2.AddLength(c, {variable.CsFieldName});");
+                WriteAlign(4);
+                fields.Add($"    c += 4; // {variable.CsFieldName}.Length");
+                fields.Add($"    foreach (var t in {variable.CsFieldName})");
+                fields.Add($"    {{");
+                fields.Add($"        c = t.AddRos2MessageLength(c);");
+                fields.Add($"    }}");
+
+                //fields.Add($"    c = WriteBuffer2.AddLength(c, {variable.CsFieldName});");
                 currentAlignment = -1;
             }
             else
@@ -523,13 +531,13 @@ public sealed class ClassInfo
                 {
                     WriteAlign(fieldAlignment);
                     fields.Add(selfPadding == 0
-                        ? $"    c += {fieldFixedSize} * {variable.FixedArraySize};"
-                        : $"    c += ({fieldFixedSize} + {selfPadding}) * {variable.FixedArraySize} - {selfPadding};");
+                        ? $"    c += {fieldFixedSize} * {variable.FixedArraySize}; // {variable.CsFieldName}"
+                        : $"    c += ({fieldFixedSize} + {selfPadding}) * {variable.FixedArraySize} - {selfPadding}; // {variable.CsFieldName}");
                 }
                 else if (variable.IsDynamicSizeArray)
                 {
                     WriteAlign(4);
-                    fields.Add($"    c += 4;  // {variable.CsFieldName} length");
+                    fields.Add($"    c += 4; // {variable.CsFieldName} length");
                     currentAlignment = 4;
                     WriteAlign(fieldAlignment);
 
@@ -540,7 +548,7 @@ public sealed class ClassInfo
                 else
                 {
                     WriteAlign(fieldAlignment);
-                    fields.Add($"    c += {fieldFixedSize};  // {variable.CsFieldName}");
+                    fields.Add($"    c += {fieldFixedSize}; // {variable.CsFieldName}");
                 }
 
                 currentAlignment = fieldFixedSize % fieldAlignment == 0 
@@ -814,7 +822,7 @@ public sealed class ClassInfo
             if (variable.IsDynamicSizeArray)
             {
                 return variable.RentHint
-                    ? $"{variable.CsFieldName} = Tools.SharedRent<{variable.CsClassType}>.Empty;"
+                    ? $"{variable.CsFieldName} = Tools.SharedRent.Empty;"
                     : $"{variable.CsFieldName} = System.Array.Empty<{variable.CsClassType}>();";
             }
 
@@ -1131,6 +1139,42 @@ public sealed class ClassInfo
                     {
                         if (variable.ArraySize == 0)
                         {
+                            if (variable.ClassIsBlittable)
+                            {
+                                lines.Add($"    b.SerializeStructArray({variable.CsFieldName});");
+                            }
+                            else
+                            {
+                                lines.Add($"    b.Serialize({variable.CsFieldName}.Length);");
+                                lines.Add($"    foreach (var t in {variable.CsFieldName})");
+                                lines.Add($"    {{");
+                                lines.Add($"        t.RosSerialize(ref b);");
+                                lines.Add($"    }}");
+                            }
+                        }
+                        else
+                        {
+                            /*
+                            lines.Add(variable.ClassIsBlittable
+                                ? $"    b.SerializeStructArray({variable.CsFieldName}, {variable.ArraySize});"
+                                : $"    b.SerializeArray({variable.CsFieldName}, {variable.ArraySize});");
+                                */
+                            if (variable.ClassIsBlittable)
+                            {
+                                lines.Add($"    b.SerializeStructArray({variable.CsFieldName});");
+                            }
+                            else
+                            {
+                                lines.Add($"    foreach (int i = 0; i < {variable.ArraySize}; i++)");
+                                lines.Add($"    {{");
+                                lines.Add($"        {variable.CsFieldName}[i].RosSerialize(ref b);");
+                                lines.Add($"    }}");
+                            }                            
+                        }
+
+                        /*
+                        if (variable.ArraySize == 0)
+                        {
                             lines.Add(variable.ClassIsBlittable
                                 ? $"    b.SerializeStructArray({variable.CsFieldName});"
                                 : $"    b.SerializeArray({variable.CsFieldName});");
@@ -1141,6 +1185,7 @@ public sealed class ClassInfo
                                 ? $"    b.SerializeStructArray({variable.CsFieldName}, {variable.ArraySize});"
                                 : $"    b.SerializeArray({variable.CsFieldName}, {variable.ArraySize});");
                         }
+                        */
                     }
                 }
             }

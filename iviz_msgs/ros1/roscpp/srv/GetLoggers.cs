@@ -131,12 +131,20 @@ namespace Iviz.Msgs.Roscpp
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.SerializeArray(Loggers);
+            b.Serialize(Loggers.Length);
+            foreach (var t in Loggers)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
-            b.SerializeArray(Loggers);
+            b.Serialize(Loggers.Length);
+            foreach (var t in Loggers)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -153,9 +161,15 @@ namespace Iviz.Msgs.Roscpp
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c = WriteBuffer2.AddLength(c, Loggers);
+            int c = d;
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Loggers.Length
+            foreach (var t in Loggers)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

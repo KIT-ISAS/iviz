@@ -108,8 +108,16 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(ScanTime);
             b.Serialize(RangeMin);
             b.Serialize(RangeMax);
-            b.SerializeArray(Ranges);
-            b.SerializeArray(Intensities);
+            b.Serialize(Ranges.Length);
+            foreach (var t in Ranges)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Intensities.Length);
+            foreach (var t in Intensities)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
@@ -122,8 +130,16 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(ScanTime);
             b.Serialize(RangeMin);
             b.Serialize(RangeMax);
-            b.SerializeArray(Ranges);
-            b.SerializeArray(Intensities);
+            b.Serialize(Ranges.Length);
+            foreach (var t in Ranges)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Intensities.Length);
+            foreach (var t in Intensities)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -155,19 +171,29 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // AngleMin
-            c += 4;  // AngleMax
-            c += 4;  // AngleIncrement
-            c += 4;  // TimeIncrement
-            c += 4;  // ScanTime
-            c += 4;  // RangeMin
-            c += 4;  // RangeMax
-            c = WriteBuffer2.AddLength(c, Ranges);
-            c = WriteBuffer2.AddLength(c, Intensities);
+            c += 4; // AngleMin
+            c += 4; // AngleMax
+            c += 4; // AngleIncrement
+            c += 4; // TimeIncrement
+            c += 4; // ScanTime
+            c += 4; // RangeMin
+            c += 4; // RangeMax
+            c += 4; // Ranges.Length
+            foreach (var t in Ranges)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Intensities.Length
+            foreach (var t in Intensities)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

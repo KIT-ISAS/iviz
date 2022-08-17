@@ -60,13 +60,14 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Poses length
+            c += 4; // Poses length
             c = WriteBuffer2.Align8(c);
             c += 56 * Poses.Length;
-            c += 4;  // Timestamps length
+            c += 4; // Timestamps length
             c += 8 * Timestamps.Length;
             return c;
         }

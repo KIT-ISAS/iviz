@@ -87,5 +87,27 @@ namespace Iviz.Msgs.GeometryMsgs
                 "AQAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        /// Custom iviz code
+        public static Point32 Zero => new();
+        public static Point32 One => new(1, 1, 1);
+        public static Point32 UnitX => new(1, 0, 0);
+        public static Point32 UnitY => new(0, 1, 0);
+        public static Point32 UnitZ => new(0, 0, 1);
+        public static implicit operator Point(in Point32 p) => new(p.X, p.Y, p.Z);
+        public static implicit operator Vector3(in Point32 p) => new(p.X, p.Y, p.Z);
+        public static implicit operator Point32(in Vector3 p) => new((float)p.X, (float)p.Y, (float)p.Z);
+        public static Point32 operator +(in Point32 v, in Point32 w) => new(v.X + w.X, v.Y + w.Y, v.Z + w.Z);
+        public static Point32 operator -(in Point32 v, in Point32 w) => new(v.X - w.X, v.Y - w.Y, v.Z - w.Z);
+        public static Point32 operator *(float f, in Point32 v) => new(f * v.X, f * v.Y, f * v.Z);
+        public static Point32 operator *(in Point32 v, float f) => new(f * v.X, f * v.Y, f * v.Z);
+        public static Point32 operator /(in Point32 v, float f) => new(v.X / f, v.Y / f, v.Z / f);
+        public static Point32 operator -(in Point32 v) => new(-v.X, -v.Y, -v.Z);
+        public readonly float Dot(in Point32 v) => X * v.X + Y * v.Y + Z * v.Z;
+        public readonly float SquaredNorm => Dot(this);
+        public readonly float Norm => (float)System.Math.Sqrt(SquaredNorm);
+        public readonly Point32 Normalized => this / Norm;
+        public readonly Point32 Cross(in Point32 v) => new(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
+        public static implicit operator Point32(in (float X, float Y, float Z) p) => new(p.X, p.Y, p.Z);
     }
 }

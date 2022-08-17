@@ -30,14 +30,14 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Length of a row in bytes </summary>
         [DataMember (Name = "row_step")] public uint RowStep;
         /// <summary> [Rent] Actual point data, size is (row_step*height) </summary>
-        [DataMember (Name = "data")] public Tools.SharedRent<byte> Data;
+        [DataMember (Name = "data")] public Tools.SharedRent Data;
         /// <summary> True if there are no invalid points </summary>
         [DataMember (Name = "is_dense")] public bool IsDense;
     
         public PointCloud2()
         {
             Fields = System.Array.Empty<PointField>();
-            Data = Tools.SharedRent<byte>.Empty;
+            Data = Tools.SharedRent.Empty;
         }
         
         public PointCloud2(ref ReadBuffer b)
@@ -83,7 +83,11 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.Serialize(Height);
             b.Serialize(Width);
-            b.SerializeArray(Fields);
+            b.Serialize(Fields.Length);
+            foreach (var t in Fields)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(IsBigendian);
             b.Serialize(PointStep);
             b.Serialize(RowStep);
@@ -96,7 +100,11 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.Serialize(Height);
             b.Serialize(Width);
-            b.SerializeArray(Fields);
+            b.Serialize(Fields.Length);
+            foreach (var t in Fields)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(IsBigendian);
             b.Serialize(PointStep);
             b.Serialize(RowStep);
@@ -128,20 +136,25 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Height
-            c += 4;  // Width
-            c = WriteBuffer2.AddLength(c, Fields);
-            c += 1;  // IsBigendian
+            c += 4; // Height
+            c += 4; // Width
+            c += 4; // Fields.Length
+            foreach (var t in Fields)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
+            c += 1; // IsBigendian
             c = WriteBuffer2.Align4(c);
-            c += 4;  // PointStep
-            c += 4;  // RowStep
-            c += 4;  // Data length
+            c += 4; // PointStep
+            c += 4; // RowStep
+            c += 4; // Data length
             c += 1 * Data.Length;
-            c += 1;  // IsDense
+            c += 1; // IsDense
             return c;
         }
     

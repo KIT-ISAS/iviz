@@ -53,10 +53,11 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Points length
+            c += 4; // Points length
             c += 12 * Points.Length;
             return c;
         }

@@ -126,14 +126,15 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, FrameId);
             c = WriteBuffer2.Align8(c);
-            c += 8;  // PositionX
-            c += 8;  // PositionY
-            c += 8;  // LengthX
-            c += 8;  // LengthY
+            c += 8; // PositionX
+            c += 8; // PositionY
+            c += 8; // LengthX
+            c += 8; // LengthY
             c = WriteBuffer2.AddLength(c, Layers);
             return c;
         }
@@ -191,8 +192,9 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Map.AddRos2MessageLength(c);
             return c;
         }

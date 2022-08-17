@@ -33,7 +33,7 @@ public unsafe ref struct WriteBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     readonly void ThrowIfOutOfRange(int off)
     {
-        if (off < 0 || off > remaining)
+        if ((uint)off > (uint)remaining)
         {
             BuiltIns.ThrowBufferOverflow(off, remaining);
         }
@@ -73,15 +73,25 @@ public unsafe ref struct WriteBuffer
             return;
         }
 
-        int count = BuiltIns.UTF8.GetByteCount(val);
-        WriteInt(count);
-        ThrowIfOutOfRange(count);
         fixed (char* valPtr = val)
         {
-            BuiltIns.UTF8.GetBytes(valPtr, val.Length, ptr + offset, remaining);
+            int length = val.Length;
+            if (BuiltIns.CanWriteStringSimple(valPtr, length))
+            {
+                WriteInt(length);
+                ThrowIfOutOfRange(length);
+                BuiltIns.WriteStringSimple(valPtr, ptr + offset, length);
+                Advance(length);
+            }
+            else
+            {
+                int byteCount = BuiltIns.UTF8.GetByteCount(val);
+                WriteInt(byteCount);
+                ThrowIfOutOfRange(byteCount);
+                BuiltIns.UTF8.GetBytes(valPtr, val.Length, ptr + offset, remaining);
+                Advance(byteCount);
+            }
         }
-
-        Advance(count);
     }
 
     public void SerializeArray(string[] val)
@@ -101,6 +111,36 @@ public unsafe ref struct WriteBuffer
             Serialize(str);
         }
     }
+    
+    public void SerializeStructArray(byte[] val)
+    {
+        const int sizeOfT = sizeof(byte);
+        int size = val.Length * sizeOfT;
+        ThrowIfOutOfRange(4 + size);
+
+        WriteInt(val.Length);
+        fixed (byte* valPtr = val)
+        {
+            Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
+        }
+
+        Advance(size);
+    }
+    
+    public void SerializeStructArray(Point32[] val)
+    {
+        const int sizeOfT = Point32.RosFixedMessageLength;
+        int size = val.Length * sizeOfT;
+        ThrowIfOutOfRange(4 + size);
+
+        WriteInt(val.Length);
+        fixed (Point32* valPtr = val)
+        {
+            Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
+        }
+
+        Advance(size);
+    }
 
     public void SerializeStructArray<T>(T[] val) where T : unmanaged
     {
@@ -117,14 +157,14 @@ public unsafe ref struct WriteBuffer
         Advance(size);
     }
 
-    public void SerializeStructArray<T>(SharedRent<T> val) where T : unmanaged
+    public void SerializeStructArray(SharedRent val)
     {
-        int sizeOfT = Unsafe.SizeOf<T>();
+        const int sizeOfT = sizeof(byte);
         int size = val.Length * sizeOfT;
         ThrowIfOutOfRange(4 + size);
 
         WriteInt(val.Length);
-        fixed (T* valPtr = val.Array)
+        fixed (byte* valPtr = val.Array)
         {
             Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
         }
@@ -191,14 +231,8 @@ public unsafe ref struct WriteBuffer
         }
     }
         
-    /// Returns the size in bytes of a message array when deserialized in ROS
-    public static int GetArraySize<T>(T[]? array) where T : struct, IMessage
+    public static int GetArraySize(TransformStamped[] array)
     {
-        if (array == null)
-        {
-            return 0;
-        }
-
         int size = 0;
         for (int i = 0; i < array.Length; i++)
         {
@@ -209,13 +243,8 @@ public unsafe ref struct WriteBuffer
     }
 
     /// Returns the size in bytes of a message array when serialized in ROS
-    public static int GetArraySize(IMessage[]? array)
+    public static int GetArraySize(IMessage[] array)
     {
-        if (array == null)
-        {
-            return 0;
-        }
-
         int size = 0;
         for (int i = 0; i < array.Length; i++)
         {
@@ -246,7 +275,7 @@ public unsafe ref struct WriteBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetStringSize(string? s)
     {
-        return s is not {Length: not 0} ? 0 : BuiltIns.UTF8.GetByteCount(s);
+        return s is not {Length: not 0} ? 0 : BuiltIns.GetByteCount(s);
     }        
 
     /// <summary>

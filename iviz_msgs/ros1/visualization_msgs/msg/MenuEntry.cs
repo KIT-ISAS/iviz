@@ -111,14 +111,15 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Id
-            c += 4;  // ParentId
+            c += 4; // Id
+            c += 4; // ParentId
             c = WriteBuffer2.AddLength(c, Title);
             c = WriteBuffer2.AddLength(c, Command);
-            c += 1;  // CommandType
+            c += 1; // CommandType
             return c;
         }
     

@@ -83,8 +83,16 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.SerializeArray(JointNames);
             b.SerializeStructArray(Transforms);
-            b.SerializeArray(Twist);
-            b.SerializeArray(Wrench);
+            b.Serialize(Twist.Length);
+            foreach (var t in Twist)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Wrench.Length);
+            foreach (var t in Wrench)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
@@ -92,8 +100,16 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.SerializeArray(JointNames);
             b.SerializeStructArray(Transforms);
-            b.SerializeArray(Twist);
-            b.SerializeArray(Wrench);
+            b.Serialize(Twist.Length);
+            foreach (var t in Twist)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Wrench.Length);
+            foreach (var t in Wrench)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -133,18 +149,19 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.AddLength(c, JointNames);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Transforms length
+            c += 4; // Transforms length
             c = WriteBuffer2.Align8(c);
             c += 56 * Transforms.Length;
-            c += 4;  // Twist length
+            c += 4; // Twist length
             c = WriteBuffer2.Align8(c);
             c += 48 * Twist.Length;
-            c += 4;  // Wrench length
+            c += 4; // Wrench length
             c = WriteBuffer2.Align8(c);
             c += 48 * Wrench.Length;
             return c;

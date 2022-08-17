@@ -81,7 +81,11 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(ShininessStrength);
             b.Serialize(Reflectivity);
             b.Serialize(BlendMode);
-            b.SerializeArray(Textures);
+            b.Serialize(Textures.Length);
+            foreach (var t in Textures)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
@@ -96,7 +100,11 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(ShininessStrength);
             b.Serialize(Reflectivity);
             b.Serialize(BlendMode);
-            b.SerializeArray(Textures);
+            b.Serialize(Textures.Length);
+            foreach (var t in Textures)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -114,20 +122,26 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, Name);
-            c += 4;  // Ambient
-            c += 4;  // Diffuse
-            c += 4;  // Emissive
+            c += 4; // Ambient
+            c += 4; // Diffuse
+            c += 4; // Emissive
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Opacity
-            c += 4;  // BumpScaling
-            c += 4;  // Shininess
-            c += 4;  // ShininessStrength
-            c += 4;  // Reflectivity
-            c += 1;  // BlendMode
-            c = WriteBuffer2.AddLength(c, Textures);
+            c += 4; // Opacity
+            c += 4; // BumpScaling
+            c += 4; // Shininess
+            c += 4; // ShininessStrength
+            c += 4; // Reflectivity
+            c += 1; // BlendMode
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Textures.Length
+            foreach (var t in Textures)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

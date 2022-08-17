@@ -51,13 +51,21 @@ namespace Iviz.Msgs.ShapeMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.SerializeArray(Triangles);
+            b.Serialize(Triangles.Length);
+            foreach (var t in Triangles)
+            {
+                t.RosSerialize(ref b);
+            }
             b.SerializeStructArray(Vertices);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
-            b.SerializeArray(Triangles);
+            b.Serialize(Triangles.Length);
+            foreach (var t in Triangles)
+            {
+                t.RosSerialize(ref b);
+            }
             b.SerializeStructArray(Vertices);
         }
         
@@ -76,12 +84,13 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.Align4(c);
-            c += 4;  // Triangles length
+            c += 4; // Triangles length
             c += 12 * Triangles.Length;
-            c += 4;  // Vertices length
+            c += 4; // Vertices length
             c = WriteBuffer2.Align8(c);
             c += 24 * Vertices.Length;
             return c;

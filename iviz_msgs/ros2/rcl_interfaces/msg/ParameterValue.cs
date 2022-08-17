@@ -135,25 +135,26 @@ namespace Iviz.Msgs.RclInterfaces
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c += 1;  // Type
-            c += 1;  // BoolValue
+            int c = d;
+            c += 1; // Type
+            c += 1; // BoolValue
             c = WriteBuffer2.Align8(c);
-            c += 8;  // IntegerValue
-            c += 8;  // DoubleValue
+            c += 8; // IntegerValue
+            c += 8; // DoubleValue
             c = WriteBuffer2.AddLength(c, StringValue);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // ByteArrayValue length
+            c += 4; // ByteArrayValue length
             c += 1 * ByteArrayValue.Length;
             c = WriteBuffer2.Align4(c);
-            c += 4;  // BoolArrayValue length
+            c += 4; // BoolArrayValue length
             c += 1 * BoolArrayValue.Length;
             c = WriteBuffer2.Align4(c);
-            c += 4;  // IntegerArrayValue length
+            c += 4; // IntegerArrayValue length
             c = WriteBuffer2.Align8(c);
             c += 8 * IntegerArrayValue.Length;
-            c += 4;  // DoubleArrayValue length
+            c += 4; // DoubleArrayValue length
             c = WriteBuffer2.Align8(c);
             c += 8 * DoubleArrayValue.Length;
             c = WriteBuffer2.AddLength(c, StringArrayValue);

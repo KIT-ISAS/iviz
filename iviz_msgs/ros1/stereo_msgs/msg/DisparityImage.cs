@@ -104,18 +104,19 @@ namespace Iviz.Msgs.StereoMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = Header.AddRos2MessageLength(c);
             c = Image.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
-            c += 4;  // F
-            c += 4;  // T
-            c += 17;  // ValidWindow
+            c += 4; // F
+            c += 4; // T
+            c += 17; // ValidWindow
             c = WriteBuffer2.Align4(c);
-            c += 4;  // MinDisparity
-            c += 4;  // MaxDisparity
-            c += 4;  // DeltaD
+            c += 4; // MinDisparity
+            c += 4; // MaxDisparity
+            c += 4; // DeltaD
             return c;
         }
     

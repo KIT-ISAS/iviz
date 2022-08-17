@@ -94,8 +94,9 @@ namespace Iviz.Msgs.MeshMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
+            int c = d;
             c = WriteBuffer2.AddLength(c, Uuid);
             return c;
         }
@@ -142,12 +143,20 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.SerializeArray(Clusters);
+            b.Serialize(Clusters.Length);
+            foreach (var t in Clusters)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
-            b.SerializeArray(Clusters);
+            b.Serialize(Clusters.Length);
+            foreach (var t in Clusters)
+            {
+                t.RosSerialize(ref b);
+            }
         }
         
         public void RosValidate()
@@ -164,9 +173,15 @@ namespace Iviz.Msgs.MeshMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int d)
         {
-            c = WriteBuffer2.AddLength(c, Clusters);
+            int c = d;
+            c = WriteBuffer2.Align4(c);
+            c += 4; // Clusters.Length
+            foreach (var t in Clusters)
+            {
+                c = t.AddRos2MessageLength(c);
+            }
             return c;
         }
     

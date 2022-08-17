@@ -33,7 +33,7 @@ public unsafe struct ReadBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     readonly void ThrowIfOutOfRange(int off)
     {
-        if (off < 0 || off > remaining)
+        if ((uint)off > (uint)remaining)
         {
             BuiltIns.ThrowBufferOverflow(off, remaining);
         }
@@ -42,7 +42,7 @@ public unsafe struct ReadBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     int ReadInt()
     {
-        this.Deserialize(out int i);
+        Deserialize(out int i);
         return i;
     }
 
@@ -60,9 +60,7 @@ public unsafe struct ReadBuffer
 
         ThrowIfOutOfRange(count);
         byte* srcPtr = ptr + offset;
-        val = count <= 64
-            ? BuiltIns.GetStringSimple(srcPtr, count)
-            : BuiltIns.UTF8.GetString(srcPtr, count);
+        val = BuiltIns.GetStringSimple(srcPtr, count);
 
         Advance(count);
     }
@@ -301,29 +299,11 @@ public unsafe struct ReadBuffer
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize(out Vector3f t)
-    {
-        const int size = Vector3f.RosFixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Vector3f*)(ptr + offset);
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Triangle t)
     {
         const int size = Triangle.RosFixedMessageLength;
         ThrowIfOutOfRange(size);
         t = *(Triangle*)(ptr + offset);
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize(out Vector2f t)
-    {
-        const int size = Triangle.RosFixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Vector2f*)(ptr + offset);
         Advance(size);
     }
 
@@ -338,6 +318,50 @@ public unsafe struct ReadBuffer
 
     #endregion
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(out byte[] val)
+    {
+        int count = ReadInt();
+        if (count == 0)
+        {
+            val = Array.Empty<byte>();
+            return;
+        }
+
+        ThrowIfOutOfRange(count);
+
+        val = new byte[count];
+        fixed (byte* valPtr = val)
+        {
+            Unsafe.CopyBlock(valPtr, ptr + offset, (uint)count);
+        }
+
+        Advance(count);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(out Point32[] val)
+    {
+        int count = ReadInt();
+        if (count == 0)
+        {
+            val = Array.Empty<Point32>();
+            return;
+        }
+
+        int size = count * Point32.RosFixedMessageLength;
+        ThrowIfOutOfRange(size);
+
+        val = new Point32[count];
+        fixed (Point32* valPtr = val)
+        {
+            Unsafe.CopyBlock(valPtr, ptr + offset, (uint)size);
+        }
+
+        Advance(size);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray<T>(out T[] val) where T : unmanaged
     {
         int count = ReadInt();
@@ -351,47 +375,42 @@ public unsafe struct ReadBuffer
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray<T>(int count, out T[] val) where T : unmanaged
     {
         int sizeOfT = sizeof(T);
         int size = count * sizeOfT;
         ThrowIfOutOfRange(size);
 
-#if NET5_0_OR_GREATER
-        val = GC.AllocateUninitializedArray<T>(count);
-#else
         val = new T[count];
-#endif
-
-        byte* srcPtr = ptr + offset;
         fixed (T* valPtr = val)
         {
-            Unsafe.CopyBlock(valPtr, srcPtr, (uint)size);
+            Unsafe.CopyBlock(valPtr, ptr + offset, (uint)size);
         }
 
         Advance(size);
     }
 
-    public void DeserializeStructRent(out SharedRent<byte> val)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+    public void DeserializeStructRent(out SharedRent val)
     {
         int count = ReadInt();
         if (count == 0)
         {
-            val = SharedRent<byte>.Empty;
+            val = SharedRent.Empty;
             return;
         }
 
         ThrowIfOutOfRange(count);
 
-        val = new SharedRent<byte>(count);
+        val = new SharedRent(count);
 
         byte* srcPtr = ptr + offset;
         fixed (byte* valPtr = val.Array)
         {
             Unsafe.CopyBlock(valPtr, srcPtr, (uint)count);
         }
-
-        //src.CopyTo(MemoryMarshal.AsBytes(val.AsSpan()));
+        
         Advance(count);
     }
 
@@ -405,6 +424,7 @@ public unsafe struct ReadBuffer
         return Array.Empty<T>();
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeArray<T>(out T[] val) where T : IMessageRos1, new()
     {
         int count = ReadInt();
@@ -423,29 +443,6 @@ public unsafe struct ReadBuffer
         BuiltIns.ThrowImplausibleBufferSize();
         val = Array.Empty<T>(); // unreachable
     }
-
-    /*
-    /// <summary>
-    /// Deserializes a message of the given type from the buffer array.  
-    /// </summary>
-    /// <param name="generator">
-    /// An arbitrary instance of the type T. Can be anything, such as new T().
-    /// This is a (rather unclean) workaround to the fact that C# cannot invoke static functions from generics.
-    /// So instead of using T.Deserialize(), we need an instance to do this.
-    /// </param>
-    /// <param name="buffer">
-    /// The source byte array. 
-    /// </param>
-    /// <returns>The deserialized message.</returns>
-    public static ISerializableRos1 Deserialize(ISerializable generator, ReadOnlySpan<byte> buffer)
-    {
-        fixed (byte* bufferPtr = buffer)
-        {
-            var b = new ReadBuffer(bufferPtr, buffer.Length);
-            return generator.RosDeserializeBase(ref b);
-        }
-    }
-    */
 
     /// <summary>
     /// Deserializes a message of the given type from the buffer array.  
