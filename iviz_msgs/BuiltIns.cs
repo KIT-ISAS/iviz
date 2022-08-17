@@ -197,7 +197,7 @@ public static class BuiltIns
     // so we do a simple check and if it's ascii, we do a quick conversion that gets auto-vectorized in il2cpp
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [SkipLocalsInit]
-    internal static unsafe string GetStringSimple(byte* srcPtr, int length)
+    internal static unsafe string GetString(byte* srcPtr, int length)
     {
         if (length > 64 || !CheckIfAllAscii(srcPtr, length))
         {
@@ -245,22 +245,16 @@ public static class BuiltIns
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [SkipLocalsInit]
     internal static unsafe bool CanWriteStringSimple(char* strPtr, int length)
     {
-        if (length > 64)
-        {
-            return false;
-        }
-
-        ushort* srcPtr = (ushort*)strPtr;
-        return CheckIfAllAscii(srcPtr, length);
+        return length <= 64 && CheckIfAllAscii((ushort*)strPtr, length);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static unsafe void WriteStringSimple(char* strPtr, byte* dstPtr, int size)
     {
-        for (int i = 0; i < size; i++) dstPtr[i] = (byte)strPtr[i];
+        ushort* srcPtr = (ushort*)strPtr;
+        for (int i = 0; i < size; i++) dstPtr[i] = (byte)srcPtr[i];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -67,7 +67,8 @@ public unsafe ref struct WriteBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Serialize(string val)
     {
-        if (val.Length == 0)
+        int length = val.Length;
+        if (length == 0)
         {
             WriteInt(0);
             return;
@@ -75,7 +76,6 @@ public unsafe ref struct WriteBuffer
 
         fixed (char* valPtr = val)
         {
-            int length = val.Length;
             if (BuiltIns.CanWriteStringSimple(valPtr, length))
             {
                 WriteInt(length);

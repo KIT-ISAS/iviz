@@ -60,7 +60,7 @@ public unsafe struct ReadBuffer
 
         ThrowIfOutOfRange(count);
         byte* srcPtr = ptr + offset;
-        val = BuiltIns.GetStringSimple(srcPtr, count);
+        val = BuiltIns.GetString(srcPtr, count);
 
         Advance(count);
     }

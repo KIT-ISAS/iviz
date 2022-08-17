@@ -16,7 +16,7 @@ public unsafe partial struct WriteBuffer2
     int offset;
     int remaining;
 
-    WriteBuffer2(byte* ptr, int length)
+    public WriteBuffer2(byte* ptr, int length)
     {
         this.ptr = ptr;
         offset = 0;
@@ -247,7 +247,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Serialize(string val)
     {
-        if (val.Length == 0)
+        int length = val.Length;
+
+        if (length == 0)
         {
             ThrowIfOutOfRange(5);
             WriteInt(1);
@@ -255,11 +257,9 @@ public unsafe partial struct WriteBuffer2
             Advance(1);
             return;
         }
-
         
         fixed (char* valPtr = val)
         {
-            int length = val.Length;
             if (BuiltIns.CanWriteStringSimple(valPtr, length))
             {
                 int lengthPlus1 = length + 1;

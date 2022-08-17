@@ -20,7 +20,7 @@ public unsafe partial struct ReadBuffer2
     int offset;
     int remaining;
 
-    ReadBuffer2(byte* ptr, int length)
+    public ReadBuffer2(byte* ptr, int length)
     {
         this.ptr = ptr;
         offset = 0;
@@ -72,7 +72,7 @@ public unsafe partial struct ReadBuffer2
 
         int countWithoutZero = count - 1;
         byte* srcPtr = ptr + offset;
-        val = BuiltIns.GetStringSimple(srcPtr, countWithoutZero);
+        val = BuiltIns.GetString(srcPtr, countWithoutZero);
 
         Advance(count);
     }
