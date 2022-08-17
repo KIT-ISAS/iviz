@@ -58,9 +58,9 @@ public class NetworkTests
 
         Assert.IsTrue(response.TryGetArray(out var responseArray));
         Assert.IsTrue(responseArray.Length == 3);
-        Assert.IsTrue(responseArray[0].TryGetInteger(out int successCode) && successCode == 1);
-        Assert.IsTrue(responseArray[1].TryGetString(out _));
-        Assert.IsTrue(responseArray[2].TryGetString(out string retMasterUri) &&
+        Assert.IsTrue(responseArray[0].TryGet(out int successCode) && successCode == 1);
+        Assert.IsTrue(responseArray[1].TryGet(out string _));
+        Assert.IsTrue(responseArray[2].TryGet(out string retMasterUri) &&
                       Uri.TryCreate(retMasterUri, UriKind.Absolute, out _));
     }
 
@@ -76,9 +76,9 @@ public class NetworkTests
 
         Assert.IsTrue(response.TryGetArray(out var responseArray));
         Assert.IsTrue(responseArray.Length == 3);
-        Assert.IsTrue(responseArray[0].TryGetInteger(out int successCode) && successCode == 1);
-        Assert.IsTrue(responseArray[1].TryGetString(out _));
-        Assert.IsTrue(responseArray[2].TryGetString(out string retMasterUri) &&
+        Assert.IsTrue(responseArray[0].TryGet(out int successCode) && successCode == 1);
+        Assert.IsTrue(responseArray[1].TryGet(out string _));
+        Assert.IsTrue(responseArray[2].TryGet(out string retMasterUri) &&
                       Uri.TryCreate(retMasterUri, UriKind.Absolute, out _));
     }
 
@@ -245,12 +245,12 @@ public class NetworkTests
     }
     */
 
-        [Test]
-        public async Task TestChannelsWithEmptyMessageAsync()
-        {
-            const string topicName = "/my_test_topic_xyz_empty";
-            await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await client.CreateWriterAsync<Empty>(topicName, true);
+    [Test]
+    public async Task TestChannelsWithEmptyMessageAsync()
+    {
+        const string topicName = "/my_test_topic_xyz_empty";
+        await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
+        await using var publisher = await client.CreateWriterAsync<Empty>(topicName, true);
 
         var systemState = await client.GetSystemStateAsync();
         Assert.True(
@@ -275,30 +275,30 @@ public class NetworkTests
 
         const string inValueStr = "test";
         Assert.True(await client.Parameters.SetParameterAsync("/iviz_utils_tests/a", inValueStr));
-        (bool success, RosParameterValue value) = await client.Parameters.GetParameterAsync("/iviz_utils_tests/a");
-        Assert.True(success && value.TryGetString(out string valueStr) && valueStr == inValueStr);
+        var value = await client.Parameters.GetParameterAsync("/iviz_utils_tests/a");
+        Assert.True(value.TryGet(out string valueStr) && valueStr == inValueStr);
         Assert.True(await client.Parameters.DeleteParameterAsync("/iviz_utils_tests/a"));
 
         const int inValueInt = 1;
         Assert.True(await client.Parameters.SetParameterAsync("/iviz_utils_tests/a", inValueInt));
-        (success, value) = await client.Parameters.GetParameterAsync("/iviz_utils_tests/a");
-        Assert.True(success && value.TryGetInteger(out int valueInt) && valueInt == inValueInt);
+        value = await client.Parameters.GetParameterAsync("/iviz_utils_tests/a");
+        Assert.True(value.TryGet(out int valueInt) && valueInt == inValueInt);
         Assert.True(await client.Parameters.DeleteParameterAsync("/iviz_utils_tests/a"));
 
         string[] inValueArray = { "a", "b" };
         Assert.True(await client.Parameters.SetParameterAsync("/iviz_utils_tests/a", inValueArray));
-        (success, value) = await client.Parameters.GetParameterAsync("/iviz_utils_tests/a");
-        Assert.True(success && value.TryGetArray(out var valueArray)
-                            && valueArray.Length == inValueArray.Length
-                            && valueArray[0].TryGetString(out string valueStr0) && valueStr0 == inValueArray[0]
-                            && valueArray[1].TryGetString(out string valueStr1) && valueStr1 == inValueArray[1]);
+        value = await client.Parameters.GetParameterAsync("/iviz_utils_tests/a");
+        Assert.True(value.TryGetArray(out var valueArray)
+                    && valueArray.Length == inValueArray.Length
+                    && valueArray[0].TryGet(out string valueStr0) && valueStr0 == inValueArray[0]
+                    && valueArray[1].TryGet(out string valueStr1) && valueStr1 == inValueArray[1]);
 
 
         string[] inEmptyValueArray = Array.Empty<string>();
         Assert.True(await client.Parameters.SetParameterAsync("/iviz_utils_tests/a", inEmptyValueArray));
-        (success, value) = await client.Parameters.GetParameterAsync("/iviz_utils_tests/a");
-        Assert.True(success && value.TryGetArray(out var emptyValueArray)
-                            && emptyValueArray.Length == 0);
+        value = await client.Parameters.GetParameterAsync("/iviz_utils_tests/a");
+        Assert.True(value.TryGetArray(out var emptyValueArray)
+                    && emptyValueArray.Length == 0);
         Assert.True(await client.Parameters.DeleteParameterAsync("/iviz_utils_tests/a"));
     }
 }

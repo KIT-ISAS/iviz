@@ -1,4 +1,6 @@
 using System;
+using System.Runtime.InteropServices;
+using System.Threading;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
@@ -68,4 +70,15 @@ public class Message2Tests
         Assert.IsTrue(WriteBuffer2.AddLength(0, mms) == 4 + 2 * (MeshMaterial.Ros2FixedMessageLength + 3) - 3);
         Assert.IsTrue(WriteBuffer2.AddLength(1, mms) == 4 + 4 + 2 * (MeshMaterial.Ros2FixedMessageLength + 3) - 3);
     }
+
+    /*
+    [Test]
+    public void TestMessageConsistencyN()
+    {
+        object k = new object();
+        GCHandle handle = GCHandle.Alloc(k, GCHandleType.Pinned);
+        Thread.Sleep(1000);
+        handle.Free();
+    }
+    */
 }
