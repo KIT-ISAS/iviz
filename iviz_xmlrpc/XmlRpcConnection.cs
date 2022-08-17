@@ -49,7 +49,7 @@ public sealed class XmlRpcConnection : IDisposable, IComparable<XmlRpcConnection
         this.remoteUri = remoteUri ?? throw new ArgumentNullException(nameof(remoteUri));
     }
 
-    public async ValueTask<RosParameterValue> MethodCallAsync(Uri callerUri, string method, XmlRpcArg[] args,
+    public async ValueTask<RosValue> MethodCallAsync(Uri callerUri, string method, XmlRpcArg[] args,
         CancellationToken token = default)
     {
         if (disposed)

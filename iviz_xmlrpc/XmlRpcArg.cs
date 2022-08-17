@@ -10,8 +10,7 @@ using Iviz.Tools;
 namespace Iviz.XmlRpc;
 
 /// <summary>
-/// A simplified version of <see cref="RosParameterValue"/>.
-/// It converts a value directly to an XML-RPC string and stores that.
+/// A simplified version of <see cref="RosValue"/> that stores the value directly as an XML-RPC string.
 /// </summary>
 public readonly struct XmlRpcArg
 {
@@ -249,19 +248,19 @@ public readonly struct XmlRpcArg
 
     public static implicit operator XmlRpcArg((XmlRpcArg, XmlRpcArg, XmlRpcArg) f) => new(f);
 
-    public static implicit operator XmlRpcArg(RosParameterValue f) => f.ValueType switch
+    public static implicit operator XmlRpcArg(RosValue f) => f.ValueType switch
     {
-        RosParameterValue.Type.Integer => f.TryGetInteger(out int l) ? l : ThrowCannotHappen(),
-        RosParameterValue.Type.Empty => throw new InvalidOperationException("Empty object"),
-        RosParameterValue.Type.Double => f.TryGetDouble(out double l) ? l : ThrowCannotHappen(),
-        RosParameterValue.Type.Boolean => f.TryGetBoolean(out bool l) ? l : ThrowCannotHappen(),
-        RosParameterValue.Type.DateTime => f.TryGetDateTime(out DateTime l) ? l : ThrowCannotHappen(),
-        RosParameterValue.Type.String => f.TryGetString(out string l) ? l : ThrowCannotHappen(),
-        RosParameterValue.Type.Array => f.TryGetArray(out var l)
+        RosValue.Type.Integer => f.TryGet(out int l) ? l : ThrowCannotHappen(),
+        RosValue.Type.Empty => throw new InvalidOperationException("Empty object"),
+        RosValue.Type.Double => f.TryGet(out double l) ? l : ThrowCannotHappen(),
+        RosValue.Type.Boolean => f.TryGet(out bool l) ? l : ThrowCannotHappen(),
+        RosValue.Type.DateTime => f.TryGet(out DateTime l) ? l : ThrowCannotHappen(),
+        RosValue.Type.String => f.TryGet(out string l) ? l : ThrowCannotHappen(),
+        RosValue.Type.Array => f.TryGetArray(out var l)
             ? l.Select(wrapper => (XmlRpcArg)wrapper).ToArray()
             : ThrowCannotHappen(),
-        RosParameterValue.Type.Base64 => f.TryGetBase64(out byte[] l) ? l : ThrowCannotHappen(),
-        RosParameterValue.Type.Struct => f.TryGetStruct(out var l)
+        RosValue.Type.ByteArray => f.TryGet(out byte[] l) ? l : ThrowCannotHappen(),
+        RosValue.Type.Struct => f.TryGetStruct(out var l)
             ? l.Select(entry => (entry.Key, (XmlRpcArg)entry.Value)).ToArray()
             : ThrowCannotHappen(),
         _ => throw new ArgumentOutOfRangeException()

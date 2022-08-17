@@ -26,7 +26,7 @@ public static class XmlRpcService
         }
     }
 
-    static RosParameterValue Parse(XmlNode? value)
+    static RosValue Parse(XmlNode? value)
     {
         if (value == null)
         {
@@ -36,13 +36,13 @@ public static class XmlRpcService
         Assert(value.Name, "value");
         if (!value.HasChildNodes)
         {
-            return new RosParameterValue(value.InnerText);
+            return new RosValue(value.InnerText);
         }
 
         XmlNode? primitive = value.FirstChild;
         if (primitive is XmlText)
         {
-            return new RosParameterValue(primitive.InnerText);
+            return new RosValue(primitive.InnerText);
         }
 
         switch (primitive?.Name)
@@ -52,25 +52,25 @@ public static class XmlRpcService
             case "double":
                 return double.TryParse(primitive.InnerText, NumberStyles.Number, Defaults.Culture,
                     out double @double)
-                    ? new RosParameterValue(@double)
+                    ? new RosValue(@double)
                     : throw new ParseException($"Could not parse '{primitive.InnerText}' as double!");
             case "i4" or "int":
                 return int.TryParse(primitive.InnerText, NumberStyles.Number, Defaults.Culture, out int @int)
-                    ? new RosParameterValue(@int)
+                    ? new RosValue(@int)
                     : throw new ParseException($"Could not parse '{primitive.InnerText}' as integer!");
             case "boolean":
-                return new RosParameterValue(primitive.InnerText == "1");
+                return new RosValue(primitive.InnerText == "1");
             case "string":
-                return new RosParameterValue(primitive.InnerText);
+                return new RosValue(primitive.InnerText);
             case "array" when primitive.FirstChild?.Name != "data":
                 throw new ParseException($"Expected 'data' but received '{primitive.FirstChild?.Name}'");
             case "array":
-                return new RosParameterValue(primitive.FirstChild!.ChildNodes.Cast<XmlNode?>().Select(Parse).ToArray());
+                return new RosValue(primitive.FirstChild!.ChildNodes.Cast<XmlNode?>().Select(Parse).ToArray());
             case "dateTime.iso8601":
                 return DateTime.TryParseExact(primitive.InnerText, "yyyy-MM-ddTHH:mm:ssZ",
                     CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt)
-                    ? new RosParameterValue(dt)
-                    : new RosParameterValue(DateTime.MinValue);
+                    ? new RosValue(dt)
+                    : new RosValue(DateTime.MinValue);
             case "base64":
                 return TryParseDate(primitive);
             case "struct":
@@ -80,11 +80,11 @@ public static class XmlRpcService
         }
     }
 
-    static RosParameterValue TryParseDate(XmlNode primitive)
+    static RosValue TryParseDate(XmlNode primitive)
     {
         try
         {
-            return new RosParameterValue(Convert.FromBase64String(primitive.InnerText));
+            return new RosValue(Convert.FromBase64String(primitive.InnerText));
         }
         catch (FormatException e)
         {
@@ -92,9 +92,9 @@ public static class XmlRpcService
         }
     }
 
-    static RosParameterValue TryParseStruct(XmlNode primitive)
+    static RosValue TryParseStruct(XmlNode primitive)
     {
-        var structValue = new List<(string, RosParameterValue)>();
+        var structValue = new List<(string, RosValue)>();
         foreach (XmlNode? member in primitive.ChildNodes)
         {
             if (member is not { Name: "member" })
@@ -103,7 +103,7 @@ public static class XmlRpcService
             }
 
             string? entryName = null;
-            RosParameterValue entryValue = default;
+            RosValue entryValue = default;
             foreach (XmlNode? entry in member.ChildNodes)
             {
                 switch (entry?.Name)
@@ -128,7 +128,7 @@ public static class XmlRpcService
             structValue.Add((entryName, entryValue));
         }
 
-        return new RosParameterValue(structValue.ToArray());                
+        return new RosValue(structValue.ToArray());                
     }
         
     internal static Rent<byte> CreateRequest(string method, XmlRpcArg[] args)
@@ -152,7 +152,7 @@ public static class XmlRpcService
         return str.AsRent();
     }
 
-    internal static RosParameterValue ProcessResponseOfMethodCall(string inData)
+    internal static RosValue ProcessResponseOfMethodCall(string inData)
     {
         var document = new XmlDocument();
         try
@@ -215,7 +215,7 @@ public static class XmlRpcService
     /// <returns>The result of the remote call.</returns>
     /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>
     /// <exception cref="RpcConnectionException">An error happened during the connection.</exception>
-    public static async ValueTask<RosParameterValue> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
+    public static async ValueTask<RosValue> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
         XmlRpcArg[] args,
         CancellationToken token = default)
     {
@@ -258,7 +258,7 @@ public static class XmlRpcService
     /// <param name="token">Optional cancellation token</param>
     /// <returns>The result of the remote call.</returns>
     /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>        
-    public static RosParameterValue MethodCall(Uri remoteUri, Uri callerUri, string method, XmlRpcArg[] args,
+    public static RosValue MethodCall(Uri remoteUri, Uri callerUri, string method, XmlRpcArg[] args,
         CancellationToken token = default)
     {
         return TaskUtils.RunSync(() => MethodCallAsync(remoteUri, callerUri, method, args, token));
@@ -278,8 +278,8 @@ public static class XmlRpcService
     /// <exception cref="ParseException">Thrown if the request could not be understood</exception>
     public static async ValueTask MethodResponseAsync(
         HttpListenerContext httpContext,
-        IReadOnlyDictionary<string, Func<RosParameterValue[], XmlRpcArg>> methods,
-        IReadOnlyDictionary<string, Func<RosParameterValue[], CancellationToken, ValueTask>>? lateCallbacks = null,
+        IReadOnlyDictionary<string, Func<RosValue[], XmlRpcArg>> methods,
+        IReadOnlyDictionary<string, Func<RosValue[], CancellationToken, ValueTask>>? lateCallbacks = null,
         CancellationToken token = default)
     {
         if (httpContext is null) BaseUtils.ThrowArgumentNull(nameof(httpContext));
@@ -356,7 +356,7 @@ public static class XmlRpcService
         }
     }
 
-    static (string methodName, RosParameterValue[] args) ProcessResponseOfMethodResponse(string inData)
+    static (string methodName, RosValue[] args) ProcessResponseOfMethodResponse(string inData)
     {
         var document = new XmlDocument();
 
@@ -381,7 +381,7 @@ public static class XmlRpcService
         }
 
         string? methodName = null;
-        RosParameterValue[]? args = null;
+        RosValue[]? args = null;
         XmlNode? child = root.FirstChild;
         do
         {
@@ -393,11 +393,11 @@ public static class XmlRpcService
                 {
                     if (child.ChildNodes.Count == 0)
                     {
-                        args = Array.Empty<RosParameterValue>();
+                        args = Array.Empty<RosValue>();
                         break;
                     }
 
-                    args = new RosParameterValue[child.ChildNodes.Count];
+                    args = new RosValue[child.ChildNodes.Count];
                     for (int i = 0; i < child.ChildNodes.Count; i++)
                     {
                         XmlNode? param = child.ChildNodes[i];
