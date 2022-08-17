@@ -42,8 +42,6 @@ public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMe
         [Transform.MessageType] = new MessageGenerator<Transform>(),
         [ColorRGBA.MessageType] = new MessageGenerator<ColorRGBA>(),
         [Color32.MessageType] = new MessageGenerator<Color32>(),
-        [Vector2f.MessageType] = new MessageGenerator<Vector2f>(),
-        [Vector3f.MessageType] = new MessageGenerator<Vector3f>(),
         [Triangle.MessageType] = new MessageGenerator<Triangle>(),
 
         [Header.MessageType] = new MessageGenerator<Header>(),

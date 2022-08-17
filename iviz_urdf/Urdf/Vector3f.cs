@@ -72,7 +72,7 @@ namespace Iviz.Urdf
 
         public static implicit operator Vector3(Vector3f v) => (v.X, v.Y, v.Z);
         public static implicit operator Point(Vector3f v) => (v.X, v.Y, v.Z);
-        public static implicit operator Msgs.IvizMsgs.Vector3f(Vector3f v) => (v.X, v.Y, v.Z);
+        public static implicit operator Point32(Vector3f v) => new(v.X, v.Y, v.Z);
 
         public bool Equals(Vector3f? other) =>
             !ReferenceEquals(null, other) &&

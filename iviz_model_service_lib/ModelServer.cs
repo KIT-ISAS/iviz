@@ -6,6 +6,7 @@ using System.IO;
 using System.Xml;
 using Assimp;
 using Iviz.Msgs;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Tools;
@@ -497,11 +498,11 @@ public sealed class ModelServer : IDisposable
         }
     }
 
-    static Vector3f ToVector3(Vector3D v) => new(v.X, v.Y, v.Z);
+    static Point32 ToVector3(Vector3D v) => new(v.X, v.Y, v.Z);
 
-    static Vector3f ToVector3(Sdf.Vector3d v) => new((float)v.X, (float)v.Y, (float)v.Z);
+    static Point32 ToVector3(Sdf.Vector3d v) => new((float)v.X, (float)v.Y, (float)v.Z);
 
-    static Vector3f ToVector3UV(Vector3D v) => new(v.X, 1 - v.Y, v.Z);
+    static Point32 ToVector3UV(Vector3D v) => new(v.X, 1 - v.Y, v.Z);
 
     static Color32 ToColor(Color4D color)
     {
