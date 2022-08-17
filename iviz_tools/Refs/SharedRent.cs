@@ -6,15 +6,15 @@ using System.Threading;
 
 namespace Iviz.Tools;
 
-public class SharedRent<T> : IDisposable where T : unmanaged
+public class SharedRent : IDisposable 
 {
-    static SharedRent<T>? empty;
-    public static SharedRent<T> Empty => empty ??= new SharedRent<T>(0);
+    static SharedRent? empty;
+    public static SharedRent Empty => empty ??= new SharedRent(0);
 
     volatile int refCount;
 
     public readonly int Length;
-    public readonly T[] Array;
+    public readonly byte[] Array;
     readonly bool isOwn;
 
     public SharedRent(int length)
@@ -25,11 +25,11 @@ public class SharedRent<T> : IDisposable where T : unmanaged
                 Rent.ThrowArgumentNegative();
                 goto case 0; // unreachable
             case 0:
-                Array = System.Array.Empty<T>();
+                Array = System.Array.Empty<byte>();
                 Length = 0;
                 break;
             default:
-                Array = ArrayPool<T>.Shared.Rent(length);
+                Array = ArrayPool<byte>.Shared.Rent(length);
                 Length = length;
                 break;
         }
@@ -38,14 +38,14 @@ public class SharedRent<T> : IDisposable where T : unmanaged
         refCount = 1;
     }
 
-    SharedRent(T[] array)
+    SharedRent(byte[] array)
     {
         Array = array;
         Length = array.Length;
         isOwn = false;
     }
 
-    public SharedRent<T> Share()
+    public SharedRent Share()
     {
         Interlocked.Increment(ref refCount);
         return this;
@@ -60,21 +60,21 @@ public class SharedRent<T> : IDisposable where T : unmanaged
 
         if (isOwn && Array.Length != 0)
         {
-            ArrayPool<T>.Shared.Return(Array);
+            ArrayPool<byte>.Shared.Return(Array);
         }
     }
 
-    public Span<T> AsSpan() => Array.AsSpan(0, Length);
-    public ReadOnlySpan<T> AsReadOnlySpan() => AsSpan();
-    public Memory<T> AsMemory() => new(Array, 0, Length);
-    public ArraySegment<T> AsArraySegment() => new(Array, 0, Length);
-    public Span<T> Slice(int start, int count) => AsSpan().Slice(start, count);
-    public RentEnumerator<T> GetEnumerator() => new(Array, Length);
-    public override string ToString() => $"[{nameof(SharedRent<T>)} Length={Length.ToString()}]";
-    public Span<T> this[Range range] => AsSpan()[range];
-    public static implicit operator Span<T>(SharedRent<T> rent) => rent.AsSpan();
-    public static implicit operator ReadOnlySpan<T>(SharedRent<T> rent) => rent.AsSpan();
-    public static implicit operator Memory<T>(SharedRent<T> rent) => rent.AsMemory();
-    public static implicit operator ReadOnlyMemory<T>(SharedRent<T> rent) => rent.AsMemory();
-    public static implicit operator SharedRent<T>(T[] array) => new(array);
+    public Span<byte> AsSpan() => new(Array, 0, Length);
+    public ReadOnlySpan<byte> AsReadOnlySpan() => new(Array, 0, Length);
+    public Memory<byte> AsMemory() => new(Array, 0, Length);
+    public ArraySegment<byte> AsArraySegment() => new(Array, 0, Length);
+    public Span<byte> Slice(int start, int count) => new(Array, start, count);
+    public RentEnumerator<byte> GetEnumerator() => new(Array, Length);
+    public override string ToString() => $"[{nameof(SharedRent)} Length={Length.ToString()}]";
+    public Span<byte> this[Range range] => AsSpan()[range];
+    public static implicit operator Span<byte>(SharedRent rent) => rent.AsSpan();
+    public static implicit operator ReadOnlySpan<byte>(SharedRent rent) => rent.AsReadOnlySpan();
+    public static implicit operator Memory<byte>(SharedRent rent) => rent.AsMemory();
+    public static implicit operator ReadOnlyMemory<byte>(SharedRent rent) => new(rent.Array, 0, rent.Length);
+    public static implicit operator SharedRent(byte[] array) => new(array);
 }

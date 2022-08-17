@@ -29,31 +29,37 @@ public static class Logger
     }
 
     [StringFormatMethod("format")]
-    public static void LogDebugFormat<TT, TU>(string format, TT? arg1, TU? arg2)
+    public static void LogDebugFormat<TU>(string format, object? arg1, TU? arg2)
     {
         LogDebugCallback?.Invoke(string.Format(format, arg1, arg2));
     }
 
     [StringFormatMethod("format")]
-    public static void LogDebugFormat<TT>(string format, TT? arg1, Exception? arg2)
+    public static void LogDebugFormat(string format, object? arg1, string? arg2)
+    {
+        LogDebugCallback?.Invoke(string.Format(format, arg1, arg2));
+    }
+
+    [StringFormatMethod("format")]
+    public static void LogDebugFormat(string format, object? arg1, Exception? arg2)
     {
         LogDebugCallback?.Invoke(string.Format(format, arg1, ExceptionToString(arg2)));
     }
 
     [StringFormatMethod("format")]
-    public static void LogDebugFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
+    public static void LogDebugFormat<TU, TV>(string format, object? arg1, TU? arg2, TV? arg3)
     {
         LogDebugCallback?.Invoke(string.Format(format, arg1, arg2, arg3));
     }
 
     [StringFormatMethod("format")]
-    public static void LogDebugFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
+    public static void LogDebugFormat<TU>(string format, object? arg1, TU? arg2, Exception? arg3)
     {
         LogDebugCallback?.Invoke(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
     }
 
     [StringFormatMethod("format")]
-    public static void LogDebugFormat<TT, TU, TV, TW>(string format, TT? arg1, TU? arg2, TV? arg3, TW? arg4)
+    public static void LogDebugFormat<TU, TV, TW>(string format, object? arg1, TU? arg2, TV? arg3, TW? arg4)
     {
         LogDebugCallback?.Invoke(string.Format(format, arg1, arg2, arg3, arg4));
     }
@@ -87,25 +93,31 @@ public static class Logger
     }
 
     [StringFormatMethod("format")]
-    public static void LogFormat<TT, TU>(string format, TT? arg1, TU? arg2)
+    public static void LogFormat<TU>(string format, object? arg1, TU? arg2)
     {
         LogCallback?.Invoke(string.Format(format, arg1, arg2));
     }
 
     [StringFormatMethod("format")]
-    public static void LogFormat<TT>(string format, TT? arg1, Exception? arg2)
+    public static void LogFormat(string format, object? arg1, string? arg2)
+    {
+        LogCallback?.Invoke(string.Format(format, arg1, arg2));
+    }
+    
+    [StringFormatMethod("format")]
+    public static void LogFormat(string format, object? arg1, Exception? arg2)
     {
         LogCallback?.Invoke(string.Format(format, arg1, ExceptionToString(arg2)));
     }
 
     [StringFormatMethod("format")]
-    public static void LogFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
+    public static void LogFormat<TU, TV>(string format, object? arg1, TU? arg2, TV? arg3)
     {
         LogCallback?.Invoke(string.Format(format, arg1, arg2, arg3));
     }
 
     [StringFormatMethod("format")]
-    public static void LogFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
+    public static void LogFormat<TU>(string format, object? arg1, TU? arg2, Exception? arg3)
     {
         LogCallback?.Invoke(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
     }
@@ -139,25 +151,31 @@ public static class Logger
     }
 
     [StringFormatMethod("format")]
-    public static void LogErrorFormat<TT>(string format, TT? arg1, Exception? arg2)
+    public static void LogErrorFormat(string format, object? arg1, Exception? arg2)
     {
         LogErrorCallback?.Invoke(string.Format(format, arg1, ExceptionToString(arg2)));
     }
 
     [StringFormatMethod("format")]
-    public static void LogErrorFormat<TT, TU>(string format, TT? arg1, TU? arg2)
+    public static void LogErrorFormat<TU>(string format, object? arg1, TU? arg2)
+    {
+        LogErrorCallback?.Invoke(string.Format(format, arg1, arg2));
+    }
+    
+    [StringFormatMethod("format")]
+    public static void LogErrorFormat(string format, object? arg1, string? arg2)
     {
         LogErrorCallback?.Invoke(string.Format(format, arg1, arg2));
     }
 
     [StringFormatMethod("format")]
-    public static void LogErrorFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
+    public static void LogErrorFormat<TU, TV>(string format, object? arg1, TU? arg2, TV? arg3)
     {
         LogErrorCallback?.Invoke(string.Format(format, arg1, arg2, arg3));
     }
 
     [StringFormatMethod("format")]
-    public static void LogErrorFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
+    public static void LogErrorFormat<TU>(string format, object? arg1, TU? arg2, Exception? arg3)
     {
         LogErrorCallback?.Invoke(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
     }
