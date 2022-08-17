@@ -264,7 +264,7 @@ namespace Iviz.App
         }
 
         public bool IsActive(DialogData dialogData) => selectedDialogData == dialogData || dialogData.Detached;
-
+        
         public override string ToString() => $"[{nameof(DialogPanelManager)}]";
     }
 }

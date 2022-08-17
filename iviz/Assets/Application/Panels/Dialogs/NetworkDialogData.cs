@@ -8,7 +8,7 @@ using Iviz.Core;
 using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Roslib2;
-using Iviz.Roslib2.Rcl;
+using Iviz.Roslib2.RclInterop;
 using Iviz.Tools;
 using static Iviz.Ros.RoslibConnection;
 
@@ -373,8 +373,8 @@ namespace Iviz.App
 
                     if (sender.TopicType != stat.Type)
                     {
-                        builder.Append(
-                            $"        <color=red>Topic type mismatch. Expects [{sender.TopicType}].</color>");
+                        builder.Append($"        <color=red>Topic type mismatch. " +
+                                       $"Expects [{sender.TopicType}].</color>");
                     }
 
                     builder.AppendLine();

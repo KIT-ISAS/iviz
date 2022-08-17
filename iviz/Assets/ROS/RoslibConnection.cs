@@ -12,12 +12,10 @@ using Iviz.Ntp;
 using Iviz.Roslib;
 using Iviz.Roslib.XmlRpc;
 using Iviz.Roslib2;
-using Iviz.Roslib2.Rcl.Wrappers;
+using Iviz.Roslib2.RclInterop.Wrappers;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
 using Iviz.Tools;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using UnityEngine;
 using Random = System.Random;
 
@@ -49,10 +47,17 @@ namespace Iviz.Ros
 
         Task? watchdogTask;
         Task? ntpTask;
+
+        RosVersion version = RosVersion.ROS1;
+
+        // ROS1 stuff
         Uri? masterUri;
         string? myId;
         Uri? myUri;
-        RosVersion version = RosVersion.ROS1;
+
+        // ROS2 stuff
+        int domainId;
+        Endpoint? discoveryServer;
 
         bool Connected => client != null;
 
@@ -122,6 +127,26 @@ namespace Iviz.Ros
             }
         }
 
+        public Endpoint? DiscoveryServer
+        {
+            get => discoveryServer;
+            set
+            {
+                discoveryServer = value;
+                Disconnect();
+            }
+        }
+
+        public int DomainId
+        {
+            get => domainId;
+            set
+            {
+                domainId = value;
+                Disconnect();
+            }
+        }
+
         public BagListener? BagListener
         {
             get => bagListener;
@@ -169,24 +194,27 @@ namespace Iviz.Ros
 
         protected override async ValueTask<bool> ConnectAsync()
         {
-            if (MasterUri == null ||
-                MasterUri.Scheme != "http")
-            {
-                RosLogger.Internal("Connection request failed. Invalid master uri.");
-                return false;
-            }
-
             if (MyId == null)
             {
                 RosLogger.Internal("Connection request failed. Invalid id.");
                 return false;
             }
 
-            if (MyUri == null ||
-                MyUri.Scheme != "http")
+            if (version == RosVersion.ROS1)
             {
-                RosLogger.Internal("Connection request failed. Invalid own uri.");
-                return false;
+                if (MasterUri == null ||
+                    MasterUri.Scheme != "http")
+                {
+                    RosLogger.Internal("Connection request failed. Invalid master uri.");
+                    return false;
+                }
+
+                if (MyUri == null ||
+                    MyUri.Scheme != "http")
+                {
+                    RosLogger.Internal("Connection request failed. Invalid own uri.");
+                    return false;
+                }
             }
 
             if (Connected)
@@ -200,7 +228,7 @@ namespace Iviz.Ros
                 var currentVersion = version;
                 const int rpcTimeoutInMs = 3000;
 
-                //Tools.Logger.LogDebugCallback = RosLogger.Debug;
+                Tools.Logger.LogDebugCallback = RosLogger.Debug;
                 if (Settings.IsStandalone)
                 {
                     Tools.Logger.LogErrorCallback = RosLogger.Debug;
@@ -229,10 +257,17 @@ namespace Iviz.Ros
                         client = newRos1Client;
                         break;
                     case RosVersion.ROS2 when IsRos2VersionSupported:
-                        client = new Ros2Client(MyId, wrapperType: 
-                            Settings.IsAndroid 
-                                ? new RclAndroidWrapper() 
+
+                        SetEnvironmentVariable("FASTRTPS_DEFAULT_PROFILES_FILE", Settings.Ros2Folder + "/profiles.xml");
+                        SetEnvironmentVariable("ROS_DISCOVERY_SERVER", DiscoveryServer?.Description());
+
+                        var newRos2Client = new Ros2Client(MyId,
+                            domainId: DomainId,
+                            wrapperType: Settings.IsAndroid
+                                ? new RclAndroidWrapper()
                                 : new RclInternalWrapper());
+                        await newRos2Client.InitializeParameterServerAsync(token);
+                        client = newRos2Client;
                         break;
                     default:
                         throw new InvalidOperationException("Error: ROS2 not supported!"); // should be unreachable
@@ -248,10 +283,14 @@ namespace Iviz.Ros
                     var ros1Client = currentClient as RosClient;
                     if (ros1Client != null)
                     {
-                        var (success, hosts) = await ros1Client.GetParameterAsync("/iviz/hosts", token);
-                        if (success)
+                        try
                         {
+                            var hosts = await ros1Client.GetParameterAsync("/iviz/hosts", token);
                             AddHostsParamFromArg(hosts);
+                        }
+                        catch
+                        {
+                            RosLogger.Debug($"[{nameof(RosConnection)}]: Failed to retrieve /iviz/hosts");
                         }
                     }
 
@@ -291,11 +330,11 @@ namespace Iviz.Ros
                     if (ros1Client != null)
                     {
                         watchdogTask = WatchdogTask(ros1Client.RosMasterClient, token);
-                        ntpTask = NtpCheckerTask(MasterUri.Host, token);
+                        ntpTask = NtpCheckerTask(ros1Client.MasterUri.Host, token);
                     }
                 });
 
-                RosLogger.Debug($"{this}: Connected!");
+                RosLogger.Debug($"[{nameof(RosConnection)}]: Connected!");
                 RosLogger.Internal("<b>Connected!</b>");
 
                 if (currentVersion == RosVersion.ROS1)
@@ -325,10 +364,10 @@ namespace Iviz.Ros
                         break;
                     }
                     case OperationCanceledException:
-                        RosLogger.Info($"{this}: Connection cancelled!");
+                        RosLogger.Info($"[{nameof(RosConnection)}]: Connection cancelled!");
                         break;
                     default:
-                        RosLogger.Error($"{this}: Exception during {nameof(ConnectAsync)}(): ", e);
+                        RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(ConnectAsync)}: ", e);
                         break;
                 }
             }
@@ -337,7 +376,22 @@ namespace Iviz.Ros
             return false;
         }
 
-        static void AddHostsParamFromArg(RosParameterValue hostsObj)
+        static void SetEnvironmentVariable(string variable, string? value)
+        {
+            RosLogger.Info($"[{nameof(RosConnection)}]: Setting environment variable {variable}=" +
+                           $"{(value != null ? $"\"{value}\"" : "(none)")}");
+
+            try
+            {
+                Environment.SetEnvironmentVariable(variable, value);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(SetEnvironmentVariable)}: ", e);
+            }
+        }
+
+        static void AddHostsParamFromArg(RosValue hostsObj)
         {
             if (hostsObj.IsEmpty)
             {
@@ -346,7 +400,7 @@ namespace Iviz.Ros
 
             if (!hostsObj.TryGetArray(out var array))
             {
-                RosLogger.Error($"{nameof(RoslibConnection)}: Error reading /iviz/hosts. " +
+                RosLogger.Error($"[{nameof(RosConnection)}]: Error reading /iviz/hosts. " +
                                 $"Expected array of string pairs.");
                 return;
             }
@@ -356,11 +410,11 @@ namespace Iviz.Ros
             {
                 if (!entry.TryGetArray(out var pair) ||
                     pair.Length != 2 ||
-                    !pair[0].TryGetString(out string hostname) ||
-                    !pair[1].TryGetString(out string address))
+                    !pair[0].TryGet(out string hostname) ||
+                    !pair[1].TryGet(out string address))
                 {
                     RosLogger.Error(
-                        $"{nameof(RoslibConnection)}: Error reading /iviz/hosts entry '{entry.ToString()}'. " +
+                        $"[{nameof(RosConnection)}]: Error reading /iviz/hosts entry '{entry.ToString()}'. " +
                         $"Expected a pair of strings.");
                     return;
                 }
@@ -371,7 +425,7 @@ namespace Iviz.Ros
             ConnectionUtils.GlobalResolver.Clear();
             foreach (var (key, value) in hosts)
             {
-                RosLogger.Info($"{nameof(RoslibConnection)}: Adding custom host {key} -> {value}");
+                RosLogger.Info($"[{nameof(RosConnection)}]: Adding custom host {key} -> {value}");
                 ConnectionUtils.GlobalResolver[key] = value;
             }
         }
@@ -483,8 +537,7 @@ namespace Iviz.Ros
                     {
                         // we haven't seen the master in a while, but no error has been thrown
                         // by the routine that checks every 5 seconds. maybe the app was suspended?
-                        RosLogger.Internal(
-                            "Haven't seen the master in a while. We may be out of sync. Restarting!");
+                        RosLogger.Internal("Haven't seen the master in a while. We may be out of sync. Restarting!");
                         connection.Disconnect();
                         break;
                     }
@@ -657,7 +710,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Exception during {nameof(Advertise)}()", e);
+                    RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(Advertise)}", e);
                 }
             });
         }
@@ -671,7 +724,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info($"{this}: Advertising {advertiser.Topic} [{advertiser.Type}].");
+            RosLogger.Info($"[{nameof(RosConnection)}]: Advertising {advertiser.Topic} [{advertiser.Type}].");
 
             var newAdvertisedTopic = new AdvertisedTopic<T>(advertiser.Topic);
 
@@ -684,7 +737,7 @@ namespace Iviz.Ros
                 var publisher = newAdvertisedTopic.Publisher;
                 if (publisher == null)
                 {
-                    RosLogger.Error($"{this}: Failed to advertise topic '{advertiser.Topic}'");
+                    RosLogger.Error($"[{nameof(RosConnection)}]: Failed to advertise topic '{advertiser.Topic}'");
                     return;
                 }
 
@@ -733,7 +786,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Exception during {nameof(AdvertiseService)}()", e);
+                    RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(AdvertiseService)}", e);
                 }
             });
         }
@@ -748,7 +801,8 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info($"{this}: Advertising service {serviceName} [{BuiltIns.GetServiceType<T>()}].");
+            RosLogger.Info(
+                $"[{nameof(RosConnection)}]: Advertising service {serviceName} [{BuiltIns.GetServiceType<T>()}].");
 
             var newAdvertisedService = new AdvertisedService<T>(serviceName, callback);
             servicesByTopic.Add(serviceName, newAdvertisedService);
@@ -823,8 +877,8 @@ namespace Iviz.Ros
 
             if (basePublisher is not IRosPublisher<T> publisher)
             {
-                RosLogger.Error($"{this}: Publisher type does not match! Message is " + typeof(T).Name +
-                                ", publisher is " + basePublisher.GetType().Name);
+                RosLogger.Error($"[{nameof(RosConnection)}]: Publisher type does not match! Message is "
+                                + typeof(T).Name + ", publisher is " + basePublisher.GetType().Name);
                 return;
             }
 
@@ -838,7 +892,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Exception during {nameof(Publish)}()", e);
+                RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(Publish)}", e);
             }
         }
 
@@ -859,7 +913,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Exception during {nameof(Subscribe)}()", e);
+                    RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(Subscribe)}", e);
                 }
             });
         }
@@ -873,7 +927,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info($"{this}: Subscribing to {listener.Topic} [{listener.Type}].");
+            RosLogger.Info($"[{nameof(RosConnection)}]: Subscribing to {listener.Topic} [{listener.Type}].");
 
             var newSubscribedTopic = new SubscribedTopic<T>(listener.Topic, listener.TransportHint);
             subscribersByTopic.Add(listener.Topic, newSubscribedTopic);
@@ -913,7 +967,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Exception during {nameof(Unadvertise)}()", e);
+                    RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(Unadvertise)}", e);
                 }
             });
         }
@@ -959,7 +1013,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Exception during {nameof(Unsubscribe)}()", e);
+                    RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(Unsubscribe)}", e);
                 }
             });
         }
@@ -1000,7 +1054,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Exception during {nameof(UnadvertiseService)}()", e);
+                    RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(UnadvertiseService)}", e);
                 }
             });
         }
@@ -1012,7 +1066,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info($"{this}: Unadvertising service {serviceName}.");
+            RosLogger.Info($"[{nameof(RosConnection)}]: Unadvertising service {serviceName}.");
 
             if (Connected)
             {
@@ -1054,7 +1108,8 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Exception during {nameof(GetSystemPublishedTopicTypesAsync)}()", e);
+                RosLogger.Error(
+                    $"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemPublishedTopicTypesAsync)}", e);
             }
 
             return cachedPublishedTopics;
@@ -1090,7 +1145,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Exception during {nameof(GetSystemTopicTypesAsync)}()", e);
+                RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemTopicTypesAsync)}", e);
             }
         }
 
@@ -1122,15 +1177,15 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Exception during {nameof(GetSystemParameterList)}()", e);
+                    RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemParameterList)}", e);
                 }
             }, internalToken);
 
             return cachedParameters;
         }
 
-        public async ValueTask<(RosParameterValue result, string? errorMsg)> GetParameterAsync(string parameter,
-            int timeoutInMs, CancellationToken token = default)
+        public async ValueTask<(RosValue result, string? errorMsg)> GetParameterAsync(string parameter,
+            int timeoutInMs, string? nodeName = null, CancellationToken token = default)
         {
             ThrowHelper.ThrowIfNull(parameter, nameof(parameter));
 
@@ -1153,12 +1208,7 @@ namespace Iviz.Ros
             {
                 using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
                 tokenSource.CancelAfter(timeoutInMs);
-                var (success, param) = await ros1Client.GetParameterAsync(parameter, tokenSource.Token);
-                if (!success)
-                {
-                    return (default, $"'{parameter}' not found");
-                }
-
+                var param = await ros1Client.GetParameterAsync(parameter, tokenSource.Token);
                 return (param, null);
             }
             catch (OperationCanceledException)
@@ -1173,7 +1223,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Exception during {nameof(GetParameterAsync)}()", e);
+                RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetParameterAsync)}", e);
                 return (default, "Unknown error");
             }
         }
@@ -1209,7 +1259,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Exception during {nameof(GetSystemStateAsync)}()", e);
+                RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemStateAsync)}", e);
             }
         }
 

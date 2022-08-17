@@ -10,12 +10,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Tools;
+using Iviz.Urdf;
 using UnityEngine;
 using Color32 = UnityEngine.Color32;
 using Object = UnityEngine.Object;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Displays
 {
@@ -90,11 +94,11 @@ namespace Iviz.Displays
                 var meshDiffuseTexCoords =
                     diffuseTexture != null && diffuseTexture.UvIndex < mesh.TexCoords.Length
                         ? mesh.TexCoords[diffuseTexture.UvIndex].Coords
-                        : Array.Empty<Vector3f>();
+                        : Array.Empty<Point32>();
                 var meshBumpTexCoords =
                     bumpTexture != null && bumpTexture.UvIndex < mesh.TexCoords.Length
                         ? mesh.TexCoords[bumpTexture.UvIndex].Coords
-                        : Array.Empty<Vector3f>();
+                        : Array.Empty<Point32>();
 
                 if (mesh.Tangents.Length != 0)
                 {
@@ -122,11 +126,11 @@ namespace Iviz.Displays
                     try
                     {
                         meshResource.Set(
-                            MemoryMarshal.Cast<Vector3f, Vector3>(mesh.Vertices),
-                            MemoryMarshal.Cast<Vector3f, Vector3>(mesh.Normals),
+                            MemoryMarshal.Cast<Point32, Vector3>(mesh.Vertices),
+                            MemoryMarshal.Cast<Point32, Vector3>(mesh.Normals),
                             tangents,
-                            MemoryMarshal.Cast<Vector3f, Vector3>(meshDiffuseTexCoords),
-                            MemoryMarshal.Cast<Vector3f, Vector3>(meshBumpTexCoords),
+                            MemoryMarshal.Cast<Point32, Vector3>(meshDiffuseTexCoords),
+                            MemoryMarshal.Cast<Point32, Vector3>(meshBumpTexCoords),
                             MemoryMarshal.Cast<Triangle, int>(mesh.Faces),
                             MemoryMarshal.Cast<Iviz.Msgs.IvizMsgs.Color32, Color32>(meshColors)
                         );

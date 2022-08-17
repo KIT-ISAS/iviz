@@ -2,17 +2,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Common;
 using Iviz.Core;
-using Iviz.Msgs.IvizMsgs;
 using Iviz.Tools;
-using UnityEngine;
-using Debug = UnityEngine.Debug;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
+
+using Vector2f = UnityEngine.Vector2;
+using Vector3f = UnityEngine.Vector3;
 
 namespace Iviz.MarkerDetection
 {
@@ -26,7 +25,7 @@ namespace Iviz.MarkerDetection
         readonly Task? task;
         readonly CancellationTokenSource tokenSource = new();
 
-        public event Action<Screenshot, IReadOnlyList<IDetectedMarker>>? MarkerDetected;
+        public event Action<Screenshot, IReadOnlyList<DetectedMarker>>? MarkerDetected;
 
         public int DelayBetweenCapturesInMs { get; set; } = 3000;
 
@@ -169,7 +168,7 @@ namespace Iviz.MarkerDetection
                     RaiseOnMarkerDetected(screenshot, newQrMarkers);
                     return ARMarkerType.QrCode;
                 case (true, true):
-                    RaiseOnMarkerDetected(screenshot, newArucoMarkers.Concat<IDetectedMarker>(newQrMarkers).ToList());
+                    RaiseOnMarkerDetected(screenshot, newArucoMarkers.Concat<DetectedMarker>(newQrMarkers).ToList());
                     return ARMarkerType.Aruco;
                 case (false, false):
                     return null;
@@ -242,7 +241,7 @@ namespace Iviz.MarkerDetection
                 Settings.ScreenCaptureManager?.CaptureColorAsync(250, token) ?? default);
         }
 
-        void RaiseOnMarkerDetected(Screenshot screenshot, IReadOnlyList<IDetectedMarker> detectedMarkers)
+        void RaiseOnMarkerDetected(Screenshot screenshot, IReadOnlyList<DetectedMarker> detectedMarkers)
         {
             GameThread.Post(() =>
             {

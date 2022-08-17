@@ -12,6 +12,7 @@ namespace Iviz.App
 
         protected static ModuleListPanel ModuleListPanel => ModuleListPanel.Instance;
         protected static DialogPanelManager DialogPanelManager => ModuleListPanel.DialogPanelManager;
+        public bool IsPanelActive => DialogPanelManager.IsActive(this);
 
         bool detached;
         
@@ -55,6 +56,17 @@ namespace Iviz.App
 
         public virtual void Dispose()
         {
+        }
+        
+        public void ResetPanel()
+        {
+            if (!IsPanelActive)
+            {
+                return;
+            }
+
+            Panel.ClearSubscribers();
+            SetupPanel();
         }
 
         protected void ResetPanelPosition()

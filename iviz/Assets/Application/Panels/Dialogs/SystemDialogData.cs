@@ -22,7 +22,7 @@ namespace Iviz.App
         const string EmptyTopText = "<b>State:</b> Disconnected. Nothing to show!";
         const string EmptyBottomText = "(Click on an item for more information)";
 
-        readonly JsonConverter[] JsonConverter = { new RosParameterValue.JsonConverter() };
+        readonly JsonConverter[] JsonConverter = { new RosValue.JsonConverter() };
 
         readonly SystemDialogPanel panel;
         readonly SortedSet<string> hostsBuffer = new();
@@ -31,7 +31,7 @@ namespace Iviz.App
         uint? descriptionHash;
         string? nodeAddress;
         string? providerAddress;
-        RosParameterValue paramValue;
+        RosValue paramValue;
 
         public override IDialogPanel Panel => panel;
         public HostAlias?[] HostAliases { get; set; } = Array.Empty<HostAlias?>();
@@ -93,6 +93,7 @@ namespace Iviz.App
             var systemState = RosManager.Connection.GetSystemState();
             if (systemState == null)
             {
+                descriptionHash = null;
                 panel.TextTop.text = EmptyTopText;
                 panel.TextBottom.text = EmptyBottomText;
                 return;
@@ -142,6 +143,7 @@ namespace Iviz.App
             var systemState = RosManager.Connection.GetSystemState();
             if (systemState == null)
             {
+                descriptionHash = null;
                 panel.TextTop.text = EmptyTopText;
                 panel.TextBottom.text = EmptyBottomText;
                 return;
@@ -166,6 +168,7 @@ namespace Iviz.App
         {
             if (!RosManager.IsConnected)
             {
+                descriptionHash = null;
                 panel.TextTop.text = EmptyTopText;
                 panel.TextBottom.text = EmptyBottomText;
                 return;
@@ -190,6 +193,7 @@ namespace Iviz.App
             var systemState = RosManager.Connection.GetSystemState();
             if (systemState == null)
             {
+                descriptionHash = null;
                 panel.TextTop.text = EmptyTopText;
                 panel.TextBottom.text = EmptyBottomText;
                 return;
@@ -344,7 +348,7 @@ namespace Iviz.App
                 {
                     return;
                 }
-                
+
                 try
                 {
                     var response = await client.RosMasterClient.LookupServiceAsync(service, token);
@@ -379,7 +383,7 @@ namespace Iviz.App
                 description.Append("<b>Value:</b>").AppendLine();
 
                 string value = JsonConvert.SerializeObject(paramValue, Formatting.Indented, JsonConverter);
-                if (paramValue.ValueType != RosParameterValue.Type.String)
+                if (paramValue.ValueType != RosValue.Type.String)
                 {
                     description.Append(value);
                 }
@@ -412,7 +416,8 @@ namespace Iviz.App
             try
             {
                 (paramValue, _) =
-                    await RosManager.Connection.GetParameterAsync(param, 5000, token).ConfigureAwait(false);
+                    await RosManager.Connection.GetParameterAsync(param, 5000, token: token)
+                        .ConfigureAwait(false);
                 GameThread.Post(() => UpdateParametersLink(param));
             }
             catch (OperationCanceledException)
@@ -500,7 +505,7 @@ namespace Iviz.App
             {
                 return;
             }
-            
+
             try
             {
                 var response = await client.RosMasterClient.LookupNodeAsync(node, token);

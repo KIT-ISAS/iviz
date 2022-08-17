@@ -19,7 +19,8 @@ namespace Iviz.App
     {
         const int DefaultPort = 7613;
 
-        static readonly Uri LocalhostMaster = new("http://127.0.0.1:11311/");
+        static Uri? localhostMaster;
+        static Uri LocalhostMaster => localhostMaster ??= new Uri("http://127.0.0.1:11311/");
 
         static Uri DefaultMasterUri => RosClient.TryGetMasterUri();
         static Uri DefaultMyUri => RosClient.TryGetCallerUri(DefaultPort);
@@ -27,10 +28,14 @@ namespace Iviz.App
 
         readonly ConnectionDialogPanel panel;
         readonly List<Uri> lastMasterUris = new();
+        readonly List<Endpoint?> lastDiscoveryServers = new() { null };
 
         Uri? masterUri = DefaultMasterUri;
         Uri? myUri = DefaultMyUri;
         string? myId = DefaultMyId;
+
+        int domainId = 0;
+        Endpoint? discoveryServer;
         RosVersion rosVersion;
 
         public override IDialogPanel Panel => panel;
@@ -41,6 +46,16 @@ namespace Iviz.App
             set
             {
                 masterUri = value;
+                
+                RosManager.Connection.MasterUri = value;
+                RosManager.Connection.KeepReconnecting = false;
+                if (value != null)
+                {
+                    RosLogger.Internal(RosManager.Server.IsActive
+                        ? $"Changing master uri to local master '{value}'."
+                        : $"Changing master uri to '{value}'.");
+                }
+
                 MasterUriChanged?.Invoke(value);
             }
         }
@@ -51,6 +66,14 @@ namespace Iviz.App
             set
             {
                 myUri = value;
+                
+                RosManager.Connection.MyUri = value;
+                RosManager.Connection.KeepReconnecting = false;
+                if (value != null)
+                {
+                    RosLogger.Internal($"Changing caller uri to '{value}'.");
+                }
+                
                 MyUriChanged?.Invoke(value);
             }
         }
@@ -61,6 +84,15 @@ namespace Iviz.App
             set
             {
                 myId = value;
+                
+                RosManager.Connection.MyId = value;
+                RosManager.Connection.KeepReconnecting = false;
+
+                if (value != null)
+                {
+                    RosLogger.Internal($"Changing my ROS id to '{value}'.");
+                }
+
                 MyIdChanged?.Invoke(value);
             }
         }
@@ -79,11 +111,65 @@ namespace Iviz.App
             }
         }
 
+        public List<Endpoint?> LastDiscoveryServers
+        {
+            get => lastDiscoveryServers;
+            set
+            {
+                lastDiscoveryServers.Clear();
+                lastDiscoveryServers.AddRange(value);
+                if (!lastDiscoveryServers.Contains(null))
+                {
+                    lastDiscoveryServers.Add(null);
+                }
+            }
+        }
+
+        public Endpoint? DiscoveryServer
+        {
+            get => discoveryServer;
+            set
+            {
+                if (discoveryServer == value)
+                {
+                    return;
+                }
+
+                discoveryServer = value;
+                
+                RosManager.Connection.DiscoveryServer = value;
+                RosLogger.Internal(value is { } endpoint
+                    ? $"Setting ROS2 discovery server to {endpoint.Description()}."
+                    : "Disabling ROS2 discovery server.");
+                
+                DiscoveryServerChanged?.Invoke(value);
+            }
+        }
+
+        public int DomainId
+        {
+            get => domainId;
+            set
+            {
+                domainId = Mathf.Clamp(value, 0, 9);
+                
+                RosManager.Connection.DomainId = value;
+                RosLogger.Internal($"Setting ROS2 domain id to {value.ToString()}.");
+                
+                DomainIdChanged?.Invoke(value);
+            }
+        }
+
         public RosVersion RosVersion
         {
             get => rosVersion;
             set
             {
+                if (rosVersion == value)
+                {
+                    return;
+                }
+                
                 rosVersion = value;
                 switch (value)
                 {
@@ -99,6 +185,20 @@ namespace Iviz.App
                         break;
                 }
 
+                if (RosManager.Connection.BagListener != null)
+                {
+                    RosLogger.Internal("Closing rosbag due to ROS version change.");
+                    ModuleListPanel.Instance.ShutdownRosbag();
+                }
+
+                if (RosManager.Server.IsActive)
+                {
+                    RosManager.Server.Dispose();
+                    OnMasterDisconnected();
+                    RosLogger.Internal("Finished removing ROS1 master node.");
+                }
+
+                RosManager.Connection.RosVersion = value;
                 RosVersionChanged?.Invoke(value);
             }
         }
@@ -108,6 +208,8 @@ namespace Iviz.App
         public event Action<string?>? MyIdChanged;
         public event Action<bool>? MasterActiveChanged;
         public event Action<RosVersion>? RosVersionChanged;
+        public event Action<int>? DomainIdChanged;
+        public event Action<Endpoint?>? DiscoveryServerChanged;
 
         public ConnectionDialogData()
         {
@@ -143,8 +245,23 @@ namespace Iviz.App
             }
         }
 
+        public void UpdateLastDiscoveryServers()
+        {
+            if (DiscoveryServer == null)
+            {
+                return;
+            }
+
+            if (!lastDiscoveryServers.Contains(DiscoveryServer))
+            {
+                lastDiscoveryServers.Add(DiscoveryServer);
+            }
+        }
+
         public override void SetupPanel()
         {
+            const string noneStr = "(none)";
+
             panel.MyUri.Value = MyUri == null ? "" : MyUri.ToString();
             panel.MyUri.SetHints(RosClient.GetCallerUriCandidates(DefaultPort).Select(uri => uri.ToString()));
             panel.MyId.Value = MyId ?? "";
@@ -157,6 +274,11 @@ namespace Iviz.App
             panel.LineLog.Active = true;
             panel.ServerMode.State = RosManager.Server.IsActive;
 
+            panel.DomainId.Index = DomainId;
+            panel.DiscoveryServer.Value = DiscoveryServer?.Description() ?? "";
+            panel.DiscoveryServer.SetHints(LastDiscoveryServers.Select(
+                endpoint => endpoint?.Description() ?? noneStr));
+
             if (!RosConnection.IsRos2VersionSupported)
             {
                 RosVersion = RosVersion.ROS1;
@@ -168,52 +290,118 @@ namespace Iviz.App
             panel.MyUri.Submit += text =>
             {
                 string trimmed = text.Trim();
-                var newUri = (Uri.TryCreate(trimmed, UriKind.Absolute, out Uri uri) && uri.Scheme == "http")
-                    ? uri
-                    : null;
-                MyUri = newUri;
+                if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri))
+                {
+                    RosLogger.Internal("<b>Error:</b> Failed to set own uri. Reason: Uri is not valid.");
+                    MyUri = null;
+                    return;
+                }
+
+                if (uri.Scheme != "http")
+                {
+                    RosLogger.Internal("<b>Error:</b> Failed to set own uri. Reason: Scheme must be 'http'.");
+                    MyUri = null;
+                    return;
+                }
+
+                MyUri = uri;
             };
             panel.MasterUri.Submit += text =>
             {
                 string trimmed = text.Trim();
-                MasterUri = (Uri.TryCreate(trimmed, UriKind.Absolute, out Uri uri) && uri.Scheme == "http")
-                    ? uri
-                    : null;
-                if (MasterUri == null)
+                if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri))
                 {
+                    RosLogger.Internal("<b>Error:</b> Failed to set master uri. Reason: Uri is not valid.");
+                    MasterUri = null;
                     return;
                 }
 
-                var newCallerUri = RosClient.TryGetCallerUriFor(MasterUri, DefaultPort);
-                if (newCallerUri == null)
+                if (uri.Scheme != "http")
                 {
+                    RosLogger.Internal("<b>Error:</b> Failed to set master uri. Reason: Scheme must be 'http'.");
+                    MasterUri = null;
                     return;
+                }
+
+                var newCallerUri = RosClient.TryGetCallerUriFor(uri, DefaultPort);
+                if (newCallerUri != null)
+                {
+                    panel.MyUri.Value = newCallerUri.ToString();
                 }
 
                 MyUri = newCallerUri;
-                panel.MyUri.Value = newCallerUri.ToString();
             };
-            panel.MyId.Submit += text =>
+            panel.MyId.Submit += SetMyId;
+            panel.MyId2.Submit += SetMyId;
+
+            void SetMyId(string text)
             {
                 string trimmed = text.Trim();
-                MyId = RosNameUtils.IsValidResourceName(trimmed) ? trimmed : null;
-            };
-            panel.MyId2.Submit += text =>
-            {
-                string trimmed = text.Trim();
-                MyId = RosNameUtils.IsValidResourceName(trimmed) ? trimmed : null;
-            };
+                if (RosNameUtils.IsValidResourceName(trimmed) && trimmed[0] is not ('/' or '~'))
+                {
+                    MyId = trimmed;
+                }
+                else
+                {
+                    RosLogger.Internal(
+                        "<b>Error:</b> Failed to set caller id. Reason: Id is not a valid resource name.");
+                    RosLogger.Internal("First character must be alphanumeric [a-z A-Z]");
+                    RosLogger.Internal("Remaining characters must be alphanumeric, digits, '_' or '/'");
+                    MyId = null;
+                }
+            }
+
             panel.ServerMode.Clicked += () =>
             {
                 _ = !RosManager.Server.IsActive
                     ? TryCreateMasterAsync()
                     : TryDisposeMasterAsync();
             };
+
+            panel.DomainId.ValueChanged += (i, _) => DomainId = i;
+
+            panel.DiscoveryServer.Submit += text =>
+            {
+                if (text.Length == 0)
+                {
+                    DiscoveryServer = null;
+                    return;
+                }
+
+                if (text == noneStr)
+                {
+                    DiscoveryServer = null;
+                    panel.DiscoveryServer.Value = "";
+                    return;
+                }
+
+                string trimmed = text.Trim();
+                string[] split = trimmed.Split(":");
+
+                if (split.Length != 2)
+                {
+                    RosLogger.Internal("<b>Error:</b> Failed to set discovery server. " +
+                                       "Reason: Value should have the form 'address:port'");
+                    DiscoveryServer = null;
+                    return;
+                }
+
+                if (!ushort.TryParse(split[1], out ushort port))
+                {
+                    RosLogger.Internal("<b>Error:</b> Failed to set discovery server. " +
+                                       "Reason: Port is not valid.");
+                    DiscoveryServer = null;
+                    return;
+                }
+
+                DiscoveryServer = new Endpoint(split[0].Trim(), port);
+            };
+
             panel.RosVersion1.Clicked += () =>
             {
                 if (!RosConnection.IsRos2VersionSupported)
                 {
-                    RosLogger.Internal("ROS2 is not supported on this platform.");
+                    RosLogger.Internal("<b>Error:</b> ROS2 is not supported on this platform.");
                     return;
                 }
 
@@ -245,6 +433,7 @@ namespace Iviz.App
             RosLogger.Internal("Master node removed. Switched to <b>client mode</b>.");
             panel.ServerMode.State = false;
             panel.MasterUri.Interactable = true;
+            RosManager.Connection.Disconnect();
             MasterActiveChanged?.Invoke(false);
         }
 
@@ -255,7 +444,7 @@ namespace Iviz.App
                 RosLogger.Internal("Cannot create ROS master when using ROS2.");
                 return;
             }
-            
+
             const string defaultPort = "11311";
             string ownHost = MyUri?.Host ?? RosClient.TryGetCallerUri().Host;
             string ownMasterUriStr = $"http://{ownHost}:{defaultPort}/";
@@ -283,6 +472,51 @@ namespace Iviz.App
             MasterActiveChanged?.Invoke(true);
 
             RosManager.Connection.TryOnceToConnect();
+        }
+        
+        public void TryStartupConnection()
+        {
+            if (MyId == null)
+            {
+                return;
+            }
+
+            if (RosVersion == RosVersion.ROS1)
+            {
+                if (MasterUri == null || MyUri == null)
+                {
+                    return;
+                }
+
+                RosLogger.Internal(
+                    MyUri.Host == "localhost"
+                        ? "Trying to connect to local ROS server."
+                        : "Trying to connect to previous ROS server.");
+                if ((Settings.IsMacOS || Settings.IsMobile) && MyUri.Host == MasterUri.Host)
+                {
+                    _ = TryCreateMasterAsync(); // create master and connect
+                    return;
+                }
+            }
+
+            RosManager.Connection.TryOnceToConnect();
+        }
+
+        public void ToggleConnection(bool value)
+        {
+            var connection = RosManager.Connection;
+            if (value)
+            {
+                RosLogger.Internal(RosManager.IsConnected ? "Reconnection requested." : "Connection requested.");
+                connection.Disconnect();
+                connection.KeepReconnecting = true;            
+            }
+            else
+            {
+                RosLogger.Internal(RosManager.IsConnected ? "Disconnection requested." : "Already disconnected.");
+                connection.KeepReconnecting = false;
+                connection.Disconnect();                
+            }
         }
 
         public async Task TryResetConnectionsAsync()

@@ -433,7 +433,7 @@ namespace Iviz.Controllers
                 Id = widget.Id,
                 Type = (byte)FeedbackType.OrientationChanged,
                 Angle = angleInRad,
-                Orientation = Extensions.AngleAxis(angleInRad, default(VectorUnitZ))
+                Orientation = Extensions.AngleAxisZ(angleInRad)
             });
         }
 

@@ -113,7 +113,6 @@ namespace Iviz.Controllers
             var (position, rotation) = TfModule.RelativeToFixedFrame(pose);
 
             var tableRosToUnity = new Quaternion(0.5f, -0.5f, 0.5f, 0.5f);
-            // Quaternion.AngleAxis(-90, Vector3.up) * Quaternion.AngleAxis(90, Vector3.right);
 
             var mTransform = highlighter.transform;
             mTransform.parent = TfModule.FixedFrame.Transform;

@@ -17,8 +17,8 @@ namespace Iviz.App
 
         RectTransform FullCanvas => fullCanvas.AssertNotNull(nameof(fullCanvas));
         RectTransform Canvas => canvas.AssertNotNull(nameof(canvas));
-        RectTransform LeftBlack => leftBlack.AssertNotNull(nameof(leftBlack));
-        RectTransform RightBlack => rightBlack.AssertNotNull(nameof(rightBlack));
+        public RectTransform LeftBlack => leftBlack.AssertNotNull(nameof(leftBlack));
+        public RectTransform RightBlack => rightBlack.AssertNotNull(nameof(rightBlack));
         CanvasScaler Scaler => scaler.AssertNotNull(nameof(scaler));
 
         ScreenOrientation currentOrientation;

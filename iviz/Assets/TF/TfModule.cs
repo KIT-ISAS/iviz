@@ -54,7 +54,7 @@ namespace Iviz.Controllers.TF
         public static bool HasInstance => instance != null;
 
         public static TfModule Instance =>
-            instance ?? throw new NullReferenceException("No TFModule has been set!");
+            instance ?? throw new NullReferenceException("No TfModule has been set!");
 
         public static TfFrame RootFrame => Instance.rootFrame;
         public static TfFrame OriginFrame => Instance.originFrame;

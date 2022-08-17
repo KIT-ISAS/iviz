@@ -3,7 +3,7 @@
 using System;
 using System.Runtime.Serialization;
 using Iviz.Msgs;
-using Iviz.Msgs.IvizMsgs;
+using Iviz.Msgs.GeometryMsgs;
 using UnityEngine;
 
 namespace Iviz.Common
@@ -34,7 +34,7 @@ namespace Iviz.Common
 
         public Intrinsic Scale(float f) => new(Fx * f, Cx * f, Fy * f, Cy * f);
 
-        public Vector3f Unproject(double u, double v) => new(((float)u - Cx) / Fx, ((float)v - Cy) / Fy, 1);
+        public Point32 Unproject(double u, double v) => new(((float)u - Cx) / Fx, ((float)v - Cy) / Fy, 1);
 
         public double[] ToArray() => new double[] { Fx, 0, Cx, 0, Fy, Cy, 0, 0, 1 };
 

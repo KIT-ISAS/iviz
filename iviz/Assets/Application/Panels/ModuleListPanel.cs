@@ -15,18 +15,15 @@ using Iviz.Controllers.XR;
 using Iviz.Core;
 using Iviz.Core.Configurations;
 using Iviz.Displays;
-using Iviz.ImageDecoders;
-using Iviz.MarkerDetection;
 using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
-using Iviz.Roslib2.Rcl.Wrappers;
+using Iviz.Roslib;
 using Iviz.Tools;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using Logger = UnityEngine.Logger;
 
 namespace Iviz.App
 {
@@ -151,6 +148,8 @@ namespace Iviz.App
                 DataPanelCanvas.SetActive(value);
                 DialogPanelManager.Active = value;
                 ARToolbarPanel.Visible = !value;
+                SafeAreaPanel.LeftBlack.gameObject.SetActive(value);
+                SafeAreaPanel.RightBlack.gameObject.SetActive(value);
             }
         }
 
@@ -179,12 +178,12 @@ namespace Iviz.App
         }
 
         public int NumMastersInCache => Dialogs.ConnectionData.LastMasterUris.Count;
-        
+
         void Start()
         {
             Thread.CurrentThread.CurrentCulture = BuiltIns.Culture;
             Settings.SettingsManager = new SettingsManager();
-            
+
             if (Settings.IsHololens)
             {
                 XRUtils.SetupForHololens();
@@ -227,7 +226,7 @@ namespace Iviz.App
             InitFinished?.Invoke();
             InitFinished = null;
 
-            TryOnceToConnect();
+            Dialogs.ConnectionData.TryStartupConnection();
         }
 
         public void Dispose()
@@ -291,92 +290,24 @@ namespace Iviz.App
             UpperCanvas.ShowConsole.onClick.AddListener(Dialogs.ConsoleData.Show);
             UpperCanvas.ShowSettings.onClick.AddListener(Dialogs.SettingsData.Show);
             UpperCanvas.ShowEcho.onClick.AddListener(Dialogs.EchoData.Show);
+
             UpperCanvas.RecordBag.onClick.AddListener(OnStartRecordBag);
             UpperCanvas.ShowSystem.onClick.AddListener(Dialogs.SystemData.Show);
 
             var connectionData = Dialogs.ConnectionData;
-            UpdateMasterUriStr();
             UpperCanvas.MasterUriButton.Clicked += connectionData.Show;
+            connectionData.MyIdChanged += _ => OnRosInfoChanged();
+            connectionData.RosVersionChanged += _ => OnRosInfoChanged();
 
-            Connection.MasterUri = connectionData.MasterUri;
-            Connection.MyUri = connectionData.MyUri;
-            Connection.MyId = connectionData.MyId;
+            OnRosInfoChanged();
+
             KeepReconnecting = false;
 
-            connectionData.MasterUriChanged += uri =>
-            {
-                Connection.MasterUri = uri;
-                KeepReconnecting = false;
-                if (uri == null)
-                {
-                    RosLogger.Internal("<b>Error:</b> Failed to set master uri. Reason: Uri is not valid.");
-                }
-                else if (RosManager.Server.IsActive)
-                {
-                    RosLogger.Internal($"Changing master uri to local master '{uri}'");
-                }
-                else
-                {
-                    RosLogger.Internal($"Changing master uri to '{uri}'");
-                }
-            };
-            connectionData.MyIdChanged += id =>
-            {
-                if (id == null)
-                {
-                    RosLogger.Internal(
-                        "<b>Error:</b> Failed to set caller id. Reason: Id is not a valid resource name.");
-                    RosLogger.Internal("First character must be alphanumeric [a-z A-Z] or a '/'");
-                    RosLogger.Internal("Remaining characters must be alphanumeric, digits, '_' or '/'");
-
-                    UpdateMasterUriStr();
-                    return;
-                }
-
-                Connection.MyId = id;
-                KeepReconnecting = false;
-                UpdateMasterUriStr();
-                RosLogger.Internal($"Changing my ROS id to '{id}'");
-            };
-            connectionData.MyUriChanged += uri =>
-            {
-                Connection.MyUri = uri;
-                KeepReconnecting = false;
-                RosLogger.Internal(uri == null
-                    ? "<b>Error:</b> Failed to set caller uri. Reason: Uri is not valid."
-                    : $"Changing caller uri to '{uri}'"
-                );
-            };
-            connectionData.RosVersionChanged += version =>
-            {
-                Connection.RosVersion = version;
-                UpdateMasterUriStr();
-            };
-
-            Connection.RosVersion = connectionData.RosVersion;
-
-            UpperCanvas.StopButton.Clicked += () =>
-            {
-                RosLogger.Internal(
-                    RosManager.IsConnected
-                        ? "Disconnection requested."
-                        : "Already disconnected."
-                );
-                KeepReconnecting = false;
-                Connection.Disconnect();
-            };
-            UpperCanvas.ConnectButton.Clicked += () =>
-            {
-                RosLogger.Internal(
-                    RosManager.IsConnected ? "Reconnection requested." : "Connection requested."
-                );
-                Connection.Disconnect();
-                KeepReconnecting = true;
-            };
+            UpperCanvas.StopButton.Clicked += () => connectionData.ToggleConnection(false);
+            UpperCanvas.ConnectButton.Clicked += () => connectionData.ToggleConnection(true);
 
             BottomCanvas.CameraButtonClicked += CameraModuleData.ToggleShowPanel;
 
-            connectionData.MasterActiveChanged += _ => Connection.Disconnect();
             RosConnection.ConnectionStateChanged += OnConnectionStateChanged;
             RosConnection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
             GameThread.LateEverySecond += UpdateFpsStats;
@@ -414,42 +345,26 @@ namespace Iviz.App
             RootCanvas.ProcessCanvasForXR();
         }
 
-        void UpdateMasterUriStr()
+        void OnRosInfoChanged()
         {
             var connectionData = Dialogs.ConnectionData;
             string rosId = (connectionData.RosVersion == RosVersion.ROS1 ? "ROS1" : "ROS2");
             UpperCanvas.MasterUriStr.Text = connectionData.MyId == null
                 ? $"<u>(?)</u>\n<color=grey>{rosId}</color>"
                 : $"<u>{connectionData.MyId}</u>\n<color=grey>{rosId}</color>";
-        }
 
-        void TryOnceToConnect()
-        {
-            if (Connection.MyId == null)
+            if (connectionData.RosVersion == RosVersion.ROS1)
             {
-                return;
+                UpperCanvas.RecordBag.enabled = true;
+                UpperCanvas.RecordBagImage.color = Color.black;
+                UpperCanvas.RecordBagText.color = Color.black;
             }
-
-            if (Connection.RosVersion == RosVersion.ROS1)
+            else
             {
-                if (Connection.MasterUri == null || Connection.MyUri == null)
-                {
-                    return;
-                }
-
-                RosLogger.Internal(
-                    Connection.MyUri.Host == "localhost"
-                    ? "Trying to connect to local ROS server."
-                    : "Trying to connect to previous ROS server.");
-                if ((Settings.IsMacOS || Settings.IsMobile)
-                    && Connection.MyUri.Host == Connection.MasterUri.Host)
-                {
-                    _ = Dialogs.ConnectionData.TryCreateMasterAsync(); // create master and connect
-                    return;
-                }
+                UpperCanvas.RecordBag.enabled = false;
+                UpperCanvas.RecordBagImage.color = Color.grey;
+                UpperCanvas.RecordBagText.color = Color.grey;
             }
-
-            Connection.TryOnceToConnect();
         }
 
         public static void CallAfterInitialized(Action action)
@@ -518,9 +433,15 @@ namespace Iviz.App
         {
             UpperCanvas.Status.rectTransform.localRotation = Quaternion.identity;
 
-            if (Connection.MasterUri == null ||
-                Connection.MyUri == null ||
-                Connection.MyId == null)
+            if (Connection.MasterUri == null)
+            {
+                UpperCanvas.StatusSprite = UpperCanvas.QuestionSprite;
+                return;
+            }
+
+            if (Connection.RosVersion == RosVersion.ROS1 &&
+                (Connection.MyUri == null ||
+                 Connection.MyId == null))
             {
                 UpperCanvas.StatusSprite = UpperCanvas.QuestionSprite;
                 return;
@@ -531,9 +452,17 @@ namespace Iviz.App
                 case ConnectionState.Connected:
                     GameThread.EveryTenthOfASecond -= RotateSprite;
                     UpperCanvas.StatusSprite = UpperCanvas.ConnectedSprite;
-                    UpperCanvas.TopPanel.color = RosManager.Server.IsActive
-                        ? Resource.Colors.ConnectionPanelOwnMaster
-                        : Resource.Colors.ConnectionPanelConnected;
+                    if (Connection.RosVersion == RosVersion.ROS1)
+                    {
+                        UpperCanvas.TopPanel.color = RosManager.Server.IsActive
+                            ? Resource.Colors.ConnectionPanelOwnMaster
+                            : Resource.Colors.ConnectionPanelConnected;
+                    }
+                    else
+                    {
+                        UpperCanvas.TopPanel.color = Resource.Colors.ConnectionPanelConnected;
+                    }
+
                     SaveSimpleConfiguration();
                     break;
                 case ConnectionState.Disconnected:
@@ -716,6 +645,13 @@ namespace Iviz.App
                     connectionData.LastMasterUris = config.LastMasterUris;
                 }
 
+                connectionData.DomainId = config.DomainId;
+                connectionData.DiscoveryServer = config.DiscoveryServer;
+                if (config.LastDiscoveryServers.Count != 0)
+                {
+                    connectionData.LastDiscoveryServers = config.LastDiscoveryServers;
+                }
+
                 Settings.SettingsManager.Config = config.Settings;
 
                 var validHostAliases = config.HostAliases
@@ -749,17 +685,22 @@ namespace Iviz.App
 
         async void SaveSimpleConfiguration()
         {
-            Dialogs.ConnectionData.UpdateLastMasterUris();
+            var connectionData = Dialogs.ConnectionData;
+            connectionData.UpdateLastMasterUris();
+            connectionData.UpdateLastDiscoveryServers();
 
             var config = new ConnectionConfiguration
             {
-                RosVersion = Dialogs.ConnectionData.RosVersion,
-                MasterUri = Dialogs.ConnectionData.MasterUri?.ToString() ?? "",
-                MyUri = Dialogs.ConnectionData.MyUri?.ToString() ?? "",
-                MyId = Dialogs.ConnectionData.MyId ?? "",
-                LastMasterUris = new List<Uri>(Dialogs.ConnectionData.LastMasterUris),
+                RosVersion = connectionData.RosVersion,
+                MasterUri = connectionData.MasterUri?.ToString() ?? "",
+                MyUri = connectionData.MyUri?.ToString() ?? "",
+                MyId = connectionData.MyId ?? "",
+                LastMasterUris = new List<Uri>(connectionData.LastMasterUris),
                 Settings = Settings.SettingsManager.Config,
                 HostAliases = Dialogs.SystemData.HostAliases,
+                DomainId = connectionData.DomainId,
+                DiscoveryServer = connectionData.DiscoveryServer,
+                LastDiscoveryServers = new List<Endpoint?>(connectionData.LastDiscoveryServers)
             };
 
             try
@@ -879,13 +820,18 @@ namespace Iviz.App
                 return;
             }
 
-            Dialogs.ConnectionData.LastMasterUris = new List<Uri>();
+            var connectionData = Dialogs.ConnectionData;
+            connectionData.LastMasterUris = new List<Uri>();
+            connectionData.LastDiscoveryServers = new List<Endpoint?>();
+            connectionData.ResetPanel();
 
             try
             {
                 string inText = await FileUtils.ReadAllTextAsync(path, token);
                 var config = JsonUtils.DeserializeObject<ConnectionConfiguration>(inText);
                 config.LastMasterUris.Clear();
+                config.LastDiscoveryServers.Clear();
+                config.MasterUri = "";
 
                 string outText = BuiltIns.ToJsonString(config);
                 await FileUtils.WriteAllTextAsync(path, outText, token);
@@ -1082,7 +1028,7 @@ namespace Iviz.App
 
         public void FlushTfDialog()
         {
-            if (DialogPanelManager.IsActive(Dialogs.TfTreeData))
+            if (Dialogs.TfTreeData.IsPanelActive)
             {
                 Dialogs.TfTreeData.UpdatePanel();
             }

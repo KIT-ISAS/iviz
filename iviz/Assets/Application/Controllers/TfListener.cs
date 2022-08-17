@@ -255,9 +255,9 @@ namespace Iviz.Controllers
             }
 
             var transforms = new TransformStamped[count];
-            foreach (ref var transform in transforms.AsSpan())
+            for (int i = 0; i < count; i++)
             {
-                outgoingMessages.TryDequeue(out transform);
+                outgoingMessages.TryDequeue(out transforms[i]);
             }
 
             if (RosManager.IsConnected)

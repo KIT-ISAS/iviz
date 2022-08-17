@@ -430,7 +430,7 @@ namespace Iviz.Controllers
 
         static bool arMarkerWarningShown;
 
-        void OnMarkerDetected(Screenshot screenshot, IReadOnlyList<IDetectedMarker> markers)
+        void OnMarkerDetected(Screenshot screenshot, IReadOnlyList<DetectedMarker> markers)
         {
             if (!(TfModule.RootScale - 1).ApproximatelyZero())
             {
@@ -440,7 +440,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            ARMarker ToMarker(IDetectedMarker marker) => new()
+            ARMarker ToMarker(DetectedMarker marker) => new()
             {
                 Type = (byte)marker.Type,
                 Header = new Header(markerSeq++, screenshot.Timestamp, TfModule.FixedFrameId),
@@ -449,7 +449,7 @@ namespace Iviz.Controllers
                     .Unity2RosPose()
                     .ToCameraFrame(),
                 Corners = marker.Corners
-                    .Select(corner => new Msgs.GeometryMsgs.Vector3(corner.X, corner.Y, 0))
+                    .Select(corner => ((Vector3)corner).ToRos())
                     .ToArray(),
                 CameraIntrinsic = screenshot.Intrinsic.ToArray(),
             };

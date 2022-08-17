@@ -43,17 +43,17 @@ namespace Iviz.App.Tests
                 0, 0,
                 texture.width - 1, 0);
             DrawLine(texture,
-                (int) qr.Corners[0].X, texture.height - 1 - (int) qr.Corners[0].Y,
-                (int) qr.Corners[1].X, texture.height - 1 - (int) qr.Corners[1].Y, Color.blue);
+                (int) qr.Corners[0].x, texture.height - 1 - (int) qr.Corners[0].y,
+                (int) qr.Corners[1].x, texture.height - 1 - (int) qr.Corners[1].y, Color.blue);
             DrawLine(texture,
-                (int) qr.Corners[1].X, texture.height - 1 - (int) qr.Corners[1].Y,
-                (int) qr.Corners[2].X, texture.height - 1 - (int) qr.Corners[2].Y);
+                (int) qr.Corners[1].x, texture.height - 1 - (int) qr.Corners[1].y,
+                (int) qr.Corners[2].x, texture.height - 1 - (int) qr.Corners[2].y);
             DrawLine(texture,
-                (int) qr.Corners[2].X, texture.height - 1 - (int) qr.Corners[2].Y,
-                (int) qr.Corners[3].X, texture.height - 1 - (int) qr.Corners[3].Y);
+                (int) qr.Corners[2].x, texture.height - 1 - (int) qr.Corners[2].y,
+                (int) qr.Corners[3].x, texture.height - 1 - (int) qr.Corners[3].y);
             DrawLine(texture,
-                (int) qr.Corners[3].X, texture.height - 1 - (int) qr.Corners[3].Y,
-                (int) qr.Corners[0].X, texture.height - 1 - (int) qr.Corners[0].Y);
+                (int) qr.Corners[3].x, texture.height - 1 - (int) qr.Corners[3].y,
+                (int) qr.Corners[0].x, texture.height - 1 - (int) qr.Corners[0].y);
 
 
             var detectedMarker = new ARMarker
@@ -62,7 +62,7 @@ namespace Iviz.App.Tests
                 Header = new Header(0, default, TfModule.FixedFrameId),
                 Code = qr.Code,
                 CameraPose = TfModule.RelativeToFixedFrame(Pose.identity).Unity2RosPose().ToCameraFrame(),
-                Corners = qr.Corners.Select(v => new Vector3(v.X, v.Y, 0)).ToArray(),
+                Corners = qr.Corners.Select(v => new Vector3(v.x, v.y, 0)).ToArray(),
                 CameraIntrinsic = new Intrinsic(3000, texture.width / 2f, 3000, texture.height / 2f).ToArray(),
             };
 

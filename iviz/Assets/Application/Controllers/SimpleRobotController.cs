@@ -328,7 +328,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            RosParameterValue parameterValue;
+            RosValue parameterValue;
             string? errorMsg;
             try
             {
@@ -356,7 +356,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (!parameterValue.TryGetString(out string robotDescription))
+            if (!parameterValue.TryGet(out string robotDescription))
             {
                 RosLogger.Debug($"{this}: Parameter '{value}' was not string!");
                 HelpText = "<b>Error:</b> Expected string parameter";

@@ -182,7 +182,7 @@ namespace Iviz.Ros
                 await action().AwaitNoThrow(this);
             }
         }
-
+        
         public void TryOnceToConnect()
         {
             if (connectionState != ConnectionState.Disconnected)

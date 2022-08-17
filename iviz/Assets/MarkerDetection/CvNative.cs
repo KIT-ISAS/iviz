@@ -1,7 +1,6 @@
 #nullable enable
 using System;
 using System.Runtime.InteropServices;
-using AOT;
 using Iviz.Core;
 
 namespace Iviz.MarkerDetection

@@ -130,7 +130,7 @@ namespace Iviz.Core
             if (publishedThisSec == MaxPublishedPerSecond)
             {
                 UnityEngine.Debug.LogWarning($"{nameof(RosLogger)}: Already published " +
-                                             MaxPublishedPerSecond.ToString() + " messages this second. " +
+                                             MaxPublishedPerSecond + " messages this second. " +
                                              "Suppressing the rest.");
                 return;
             }

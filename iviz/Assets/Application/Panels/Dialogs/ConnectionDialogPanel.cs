@@ -3,6 +3,7 @@
 using Iviz.Core;
 using Iviz.Ros;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Iviz.App
 {
@@ -17,6 +18,9 @@ namespace Iviz.App
         [SerializeField] SimpleButtonWidget? close;
         [SerializeField] ToggleButtonWidget? serverMode;
         [SerializeField] LineLog? lineLog;
+
+        [SerializeField] DropdownWidget? domainId;
+        [SerializeField] InputFieldWithHintsWidget? discoveryServer;
 
         [SerializeField] InputFieldWithHintsWidget? myId2;
         [SerializeField] SimpleButtonWidget? rosVersion1;
@@ -33,6 +37,10 @@ namespace Iviz.App
         public LineLog LineLog => lineLog.AssertNotNull(nameof(lineLog));
         public ToggleButtonWidget ServerMode => serverMode.AssertNotNull(nameof(serverMode));
 
+        public DropdownWidget DomainId => domainId.AssertNotNull(nameof(domainId));
+        public InputFieldWithHintsWidget DiscoveryServer => discoveryServer.AssertNotNull(nameof(discoveryServer));
+
+        
         public InputFieldWithHintsWidget MyId2 => myId2.AssertNotNull(nameof(myId2));
         public SimpleButtonWidget RosVersion1 => rosVersion1.AssertNotNull(nameof(rosVersion1));
         public SimpleButtonWidget RosVersion2 => rosVersion2.AssertNotNull(nameof(rosVersion2));
@@ -45,6 +53,13 @@ namespace Iviz.App
             ServerMode.InactiveText = "Master\nOff";
             ServerMode.ActiveText = "Master\nOn";
             ServerMode.State = RosManager.Server.IsActive;
+
+            DomainId.SetOptions(new[]
+            {
+                "0", "1", "2", "3", "4",
+                "5", "6", "7", "8", "9",
+            });
+            
         }
 
         public override void ClearSubscribers()
@@ -54,6 +69,9 @@ namespace Iviz.App
             MyId.ClearSubscribers();
             ServerMode.ClearSubscribers();
             Close.ClearSubscribers();
+            
+            DomainId.ClearSubscribers();
+            DiscoveryServer.ClearSubscribers();
             
             MyId2.ClearSubscribers();
             RosVersion1.ClearSubscribers();

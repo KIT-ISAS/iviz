@@ -1,16 +1,18 @@
 #nullable enable
 
 using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
-using Iviz.Msgs.IvizMsgs;
 using Iviz.Tools;
-using Newtonsoft.Json;
+using Pose = Iviz.Msgs.GeometryMsgs.Pose;
+using Quaternion = Iviz.Msgs.GeometryMsgs.Quaternion;
+using Vector2f = UnityEngine.Vector2;
+using Vector3 = Iviz.Msgs.GeometryMsgs.Vector3;
+using Vector3f = UnityEngine.Vector3;
 
 namespace Iviz.MarkerDetection
 {
@@ -118,7 +120,7 @@ namespace Iviz.MarkerDetection
             }
         }
 
-        public DetectedQrMarker[] DetectQrMarkers()
+        public DetectedMarker[] DetectQrMarkers()
         {
             CvNative.IvizDetectQrMarkers(ContextPtr);
 
@@ -130,7 +132,7 @@ namespace Iviz.MarkerDetection
 
             if (numDetected == 0)
             {
-                return Array.Empty<DetectedQrMarker>();
+                return Array.Empty<DetectedMarker>();
             }
 
             using var pointers = new Rent<IntPtr>(numDetected);
@@ -146,20 +148,20 @@ namespace Iviz.MarkerDetection
 
             var srcCorners = MemoryMarshal.Cast<float, Vector2f>(corners);
 
-            var markers = new DetectedQrMarker[numDetected];
+            var markers = new DetectedMarker[numDetected];
             foreach (int i in ..numDetected)
             {
                 var strBytes = pointers[i].AsSpan(pointerLengths[i]);
                 string code = BuiltIns.UTF8.GetString(strBytes);
                 var vectorCorners = new Vector2f[4];
                 srcCorners.Slice(4 * i, 4).CopyTo(vectorCorners);
-                markers[i] = new DetectedQrMarker(code, vectorCorners);
+                markers[i] = new DetectedMarker(code, vectorCorners);
             }
 
             return markers;
         }
 
-        public DetectedArucoMarker[] DetectArucoMarkers()
+        public DetectedMarker[] DetectArucoMarkers()
         {
             CvNative.IvizDetectArucoMarkers(ContextPtr);
 
@@ -171,7 +173,7 @@ namespace Iviz.MarkerDetection
 
             if (numDetected == 0)
             {
-                return Array.Empty<DetectedArucoMarker>();
+                return Array.Empty<DetectedMarker>();
             }
 
             using var indices = new Rent<int>(numDetected);
@@ -185,12 +187,12 @@ namespace Iviz.MarkerDetection
                 throw new CvMarkerException();
             }
 
-            var markers = new DetectedArucoMarker[numDetected];
+            var markers = new DetectedMarker[numDetected];
             foreach (int i in ..numDetected)
             {
                 var vectorCorners = new Vector2f[4];
                 srcCorners.Slice(4 * i, 4).CopyTo(vectorCorners);
-                markers[i] = new DetectedArucoMarker(indices[i], vectorCorners);
+                markers[i] = new DetectedMarker(indices[i], vectorCorners);
             }
 
             return markers;
@@ -324,32 +326,26 @@ namespace Iviz.MarkerDetection
         DictApriltag36H11
     };
 
-    public interface IDetectedMarker
-    {
-        string Code { get; }
-        Vector2f[] Corners { get; }
-        ARMarkerType Type { get; }
-    }
-
     [DataContract]
-    public sealed class DetectedArucoMarker : IDetectedMarker
+    public sealed class DetectedMarker
     {
-        [DataMember] public ARMarkerType Type => ARMarkerType.Aruco;
         [DataMember] public string Code { get; }
         [DataMember] public Vector2f[] Corners { get; }
+        [DataMember] public ARMarkerType Type { get; }
 
-        internal DetectedArucoMarker(int id, Vector2f[] corners) => (Code, Corners) = (id.ToString(), corners);
-        public override string ToString() => BuiltIns.ToJsonString(this, false);
-    }
-
-    [DataContract]
-    public sealed class DetectedQrMarker : IDetectedMarker
-    {
-        [DataMember] public ARMarkerType Type => ARMarkerType.QrCode;
-        [DataMember] public string Code { get; }
-        [DataMember] public Vector2f[] Corners { get; }
-
-        internal DetectedQrMarker(string code, Vector2f[] corners) => (Code, Corners) = (code, corners);
-        public override string ToString() => BuiltIns.ToJsonString(this, false);
+        DetectedMarker(string code, Vector2f[] corners, ARMarkerType type)
+        {
+            Code = code;
+            Corners = corners;
+            Type = type;
+        }
+        
+        public DetectedMarker(int id, Vector2f[] corners) : this(id.ToString(), corners, ARMarkerType.Aruco)
+        {
+        }
+        
+        public DetectedMarker(string code, Vector2f[] corners) : this(code, corners, ARMarkerType.QrCode)
+        {
+        }
     }
 }

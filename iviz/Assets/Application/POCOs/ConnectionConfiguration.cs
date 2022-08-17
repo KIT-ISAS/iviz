@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using Iviz.Common;
 using Iviz.Core.Configurations;
 using Iviz.Ros;
+using Iviz.Roslib;
 using Iviz.Roslib.Utils;
 
 namespace Iviz.App
@@ -20,5 +21,8 @@ namespace Iviz.App
         [DataMember] public SettingsConfiguration Settings { get; set; } = new();
         [DataMember] public HostAlias?[] HostAliases { get; set; } = Array.Empty<HostAlias?>();
         [DataMember] public RosVersion RosVersion { get; set; }
+        [DataMember] public int DomainId { get; set; }
+        [DataMember] public Endpoint? DiscoveryServer { get; set; }
+        [DataMember] public List<Endpoint?> LastDiscoveryServers { get; set; } = new();
     }
 }

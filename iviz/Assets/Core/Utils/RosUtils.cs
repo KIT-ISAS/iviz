@@ -7,6 +7,7 @@ using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
+using Iviz.Roslib;
 using Iviz.Tools;
 using Unity.Mathematics;
 using UnityEngine;
@@ -76,16 +77,6 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Unity2RosRpy(this in Vector3 v) => (v * -Mathf.Deg2Rad).Unity2Ros();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Ros2Unity(this in Vector3f p)
-        {
-            Vector3 q;
-            q.x = -p.Y;
-            q.y = p.Z;
-            q.z = p.X;
-            return q;
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 ToUnity(this in Msgs.GeometryMsgs.Vector3 p)
@@ -379,6 +370,8 @@ namespace Iviz.Core
         {
             AppendBandwidth((StringBuilder)description, bytesPerSecond);
         }
+
+        public static string Description(this in Endpoint endpoint) => endpoint.Hostname + ":" + endpoint.Port;
 
         public static StringBuilder AppendBandwidth(this StringBuilder description, long bytesPerSecond)
         {

@@ -212,7 +212,7 @@ namespace Iviz.Core
                 var inputInt = input.Cast<byte, uint>();
                 for (int i = 0; i < inputInt.Length; i++)
                 {
-                    // 8 independent bytes, values are either 0, 1, or 2
+                    // 4 independent bytes, values are either 0, 1, or 2
                     // 0 -> 0
                     // 1 -> 128
                     // 2 -> 255

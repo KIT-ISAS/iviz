@@ -43,9 +43,10 @@ namespace Iviz.ImageDecoders
 
             this.readBuffer = readBuffer;
 
-            Span<byte> header = stackalloc byte[8];
-            readBuffer.AsSpan(0, 8).CopyTo(header);
-            position = 8;
+            const int headerSize = 8;
+            Span<byte> header = stackalloc byte[headerSize];
+            readBuffer.AsSpan(0, headerSize).CopyTo(header);
+            position = headerSize;
 
             IntPtr headerPtr = (IntPtr)Unsafe.AsPointer(ref header[0]);
             if (PngNative.png_sig_cmp(headerPtr, 0, 8) != 0)

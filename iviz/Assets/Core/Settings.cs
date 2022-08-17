@@ -166,6 +166,7 @@ namespace Iviz.Core
         static string? resourcesPath;
         static string? savedRobotsPath;
         static string? resourcesFilePath;
+        static string? ros2Folder;
 
         static Camera? mainCamera;
         static Transform? mainCameraTransform;
@@ -181,6 +182,7 @@ namespace Iviz.Core
         public static string SavedFolder => savedFolder ??= PersistentDataPath + "/saved";
         public static string BagsFolder => bagsFolder ??= PersistentDataPath + "/bags";
         public static string VncFolder => vncFolder ??= PersistentDataPath + "/vnc";
+        public static string Ros2Folder => ros2Folder ??= PersistentDataPath + "/ros2";
 
         public static string SimpleConfigurationPath =>
             simpleConfigurationPath ??= $"{PersistentDataPath}/connection.json";

@@ -204,17 +204,17 @@ namespace Iviz.Controllers
             float sizeInM = sizeInMm / 1000f;
             var intrinsic = new Intrinsic(marker.CameraIntrinsic);
             var corners = marker.Corners;
-            ReadOnlySpan<Vector2f> imageCorners = stackalloc[]
+            ReadOnlySpan<UnityEngine.Vector2> imageCorners = stackalloc[]
             {
-                ToVector2f(corners[0]),
-                ToVector2f(corners[1]),
-                ToVector2f(corners[2]),
-                ToVector2f(corners[3])
+                ToVector2(corners[0]),
+                ToVector2(corners[1]),
+                ToVector2(corners[2]),
+                ToVector2(corners[3])
             };
 
             return MarkerDetector.SolvePnp(imageCorners, intrinsic, sizeInM);
 
-            static Vector2f ToVector2f(in Msgs.GeometryMsgs.Vector3 v) => new((float)v.X, (float)v.Y);
+            static UnityEngine.Vector2 ToVector2(in Msgs.GeometryMsgs.Vector3 v) => new((float)v.X, (float)v.Y);
         }
 
         public override string ToString() => $"[{nameof(ARMarkerManager)}]";

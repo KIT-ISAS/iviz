@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,9 +12,10 @@ namespace Iviz.App
         [SerializeField] Sprite? activeSprite;
         [SerializeField] Sprite? inactiveSprite;
 
-        [SerializeField] string activeText = ""; 
+        [SerializeField] string activeText = "";
         [SerializeField] string inactiveText = "";
-        [SerializeField] Text? text;
+        [SerializeField] Text? text; // TODO: remove this
+        [SerializeField] TMP_Text? tmpText;
 
         bool state;
 
@@ -50,9 +52,14 @@ namespace Iviz.App
             {
                 state = value;
                 Sprite = state ? activeSprite : inactiveSprite;
-                if (text != null)
+                if (text != null) // TODO: remove this
                 {
                     text.text = state ? activeText : inactiveText;
+                }
+
+                if (tmpText != null)
+                {
+                    tmpText.text = state ? activeText : inactiveText;
                 }
             }
         }

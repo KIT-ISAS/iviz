@@ -520,7 +520,7 @@ namespace Iviz.Core
         public static void Deconstruct(this in Ray r, out Vector3 origin, out Vector3 direction) =>
             (origin, direction) = (r.origin, r.direction);
 
-        public static void TryReturn(this SharedRent<byte> memory)
+        public static void TryReturn(this SharedRent memory)
         {
             memory.Dispose();
         }
