@@ -20,8 +20,8 @@ public sealed class RosMasterServer : IDisposable
     public const int DefaultPort = 11311;
 
     readonly AsyncLock rosLock = new();
-    readonly Dictionary<string, Func<RosParameterValue[], XmlRpcArg>> methods;
-    readonly Dictionary<string, Func<RosParameterValue[], CancellationToken, ValueTask>> lateCallbacks;
+    readonly Dictionary<string, Func<RosValue[], XmlRpcArg>> methods;
+    readonly Dictionary<string, Func<RosValue[], CancellationToken, ValueTask>> lateCallbacks;
     readonly Dictionary<string, Dictionary<string, Uri>> publishersByTopic = new();
     readonly Dictionary<string, Dictionary<string, Uri>> subscribersByTopic = new();
     readonly Dictionary<string, (string Id, Uri Uri)> serviceProviders = new();
@@ -56,7 +56,7 @@ public sealed class RosMasterServer : IDisposable
         MasterUri = masterUri;
         MasterCallerId = callerId;
 
-        methods = new Dictionary<string, Func<RosParameterValue[], XmlRpcArg>>
+        methods = new Dictionary<string, Func<RosValue[], XmlRpcArg>>
         {
             ["getPid"] = GetPid,
             ["getUri"] = GetUri,
@@ -82,7 +82,7 @@ public sealed class RosMasterServer : IDisposable
             ["system.multicall"] = SystemMulticall,
         };
 
-        lateCallbacks = new Dictionary<string, Func<RosParameterValue[], CancellationToken, ValueTask>>
+        lateCallbacks = new Dictionary<string, Func<RosValue[], CancellationToken, ValueTask>>
         {
             ["registerPublisher"] = RegisterPublisherLateCallback,
             ["unregisterPublisher"] = RegisterPublisherLateCallback
@@ -218,24 +218,24 @@ public sealed class RosMasterServer : IDisposable
         }
     }
 
-    static XmlRpcArg GetPid(RosParameterValue[] _)
+    static XmlRpcArg GetPid(RosValue[] _)
     {
         return OkResponse(ConnectionUtils.GetProcessId());
     }
 
-    XmlRpcArg GetUri(RosParameterValue[] _)
+    XmlRpcArg GetUri(RosValue[] _)
     {
         return OkResponse(MasterUri);
     }
 
-    XmlRpcArg RegisterPublisher(RosParameterValue[] args)
+    XmlRpcArg RegisterPublisher(RosValue[] args)
     {
         using var myLock = rosLock.Lock(Token);
         if (args.Length != 4 ||
-            !args[0].TryGetString(out string callerId) ||
-            !args[1].TryGetString(out string topic) ||
-            !args[2].TryGetString(out string topicType) ||
-            !args[3].TryGetString(out string callerApi))
+            !args[0].TryGet(out string callerId) ||
+            !args[1].TryGet(out string topic) ||
+            !args[2].TryGet(out string topicType) ||
+            !args[3].TryGet(out string callerApi))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -265,14 +265,14 @@ public sealed class RosMasterServer : IDisposable
         return OkResponse(new XmlRpcArg(currentSubscribers));
     }
 
-    ValueTask RegisterPublisherLateCallback(RosParameterValue[] args, CancellationToken token)
+    ValueTask RegisterPublisherLateCallback(RosValue[] args, CancellationToken token)
     {
         XmlRpcArg[] methodArgs;
         Uri[] subscribersToNotify;
 
         using (rosLock.Lock(token))
         {
-            if (!args[1].TryGetString(out string topic) ||
+            if (!args[1].TryGet(out string topic) ||
                 !subscribersByTopic.TryGetValue(topic, out var subscribers))
             {
                 return default;
@@ -315,14 +315,14 @@ public sealed class RosMasterServer : IDisposable
         }
     }
 
-    XmlRpcArg RegisterSubscriber(RosParameterValue[] args)
+    XmlRpcArg RegisterSubscriber(RosValue[] args)
     {
         using var myLock = rosLock.Lock(Token);
 
         if (args.Length != 4 ||
-            !args[0].TryGetString(out string callerId) ||
-            !args[1].TryGetString(out string topic) ||
-            !args[3].TryGetString(out string callerApi))
+            !args[0].TryGet(out string callerId) ||
+            !args[1].TryGet(out string topic) ||
+            !args[3].TryGet(out string callerApi))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -348,14 +348,14 @@ public sealed class RosMasterServer : IDisposable
         return OkResponse(new XmlRpcArg(currentPublishers));
     }
 
-    XmlRpcArg UnregisterSubscriber(RosParameterValue[] args)
+    XmlRpcArg UnregisterSubscriber(RosValue[] args)
     {
         using var myLock = rosLock.Lock(Token);
 
         if (args.Length != 3 ||
-            !args[0].TryGetString(out string callerId) ||
-            !args[1].TryGetString(out string topic) ||
-            !args[2].TryGetString(out string callerApi))
+            !args[0].TryGet(out string callerId) ||
+            !args[1].TryGet(out string topic) ||
+            !args[2].TryGet(out string callerApi))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -380,14 +380,14 @@ public sealed class RosMasterServer : IDisposable
         return OkResponse(1);
     }
 
-    XmlRpcArg UnregisterPublisher(RosParameterValue[] args)
+    XmlRpcArg UnregisterPublisher(RosValue[] args)
     {
         using var myLock = rosLock.Lock(Token);
 
         if (args.Length != 3 ||
-            !args[0].TryGetString(out string callerId) ||
-            !args[1].TryGetString(out string topic) ||
-            !args[2].TryGetString(out string callerApi))
+            !args[0].TryGet(out string callerId) ||
+            !args[1].TryGet(out string topic) ||
+            !args[2].TryGet(out string callerApi))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -417,14 +417,14 @@ public sealed class RosMasterServer : IDisposable
         return OkResponse(1);
     }
 
-    XmlRpcArg RegisterService(RosParameterValue[] args)
+    XmlRpcArg RegisterService(RosValue[] args)
     {
         using var myLock = rosLock.Lock(Token);
 
         if (args.Length != 4 ||
-            !args[0].TryGetString(out string callerId) ||
-            !args[1].TryGetString(out string service) ||
-            !args[2].TryGetString(out string serviceApi))
+            !args[0].TryGet(out string callerId) ||
+            !args[1].TryGet(out string service) ||
+            !args[2].TryGet(out string serviceApi))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -441,13 +441,13 @@ public sealed class RosMasterServer : IDisposable
         return DefaultOkResponse;
     }
 
-    XmlRpcArg UnregisterService(RosParameterValue[] args)
+    XmlRpcArg UnregisterService(RosValue[] args)
     {
         using var myLock = rosLock.Lock(Token);
 
         if (args.Length != 3 ||
-            !args[1].TryGetString(out string service) ||
-            !args[2].TryGetString(out string serviceApi))
+            !args[1].TryGet(out string service) ||
+            !args[2].TryGet(out string serviceApi))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -467,12 +467,12 @@ public sealed class RosMasterServer : IDisposable
         return OkResponse(1);
     }
 
-    XmlRpcArg LookupNode(RosParameterValue[] args)
+    XmlRpcArg LookupNode(RosValue[] args)
     {
         using var myLock = rosLock.Lock(Token);
 
         if (args.Length != 2 ||
-            !args[1].TryGetString(out string node))
+            !args[1].TryGet(out string node))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -491,12 +491,12 @@ public sealed class RosMasterServer : IDisposable
             : OkResponse(uri);
     }
 
-    XmlRpcArg LookupService(RosParameterValue[] args)
+    XmlRpcArg LookupService(RosValue[] args)
     {
         using var myLock = rosLock.Lock(Token);
 
         if (args.Length != 2 ||
-            !args[1].TryGetString(out string service))
+            !args[1].TryGet(out string service))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -506,7 +506,7 @@ public sealed class RosMasterServer : IDisposable
             : ErrorResponse($"No service with name '{service}'");
     }
 
-    XmlRpcArg GetPublishedTopics(RosParameterValue[] _)
+    XmlRpcArg GetPublishedTopics(RosValue[] _)
     {
         using var myLock = rosLock.Lock(Token);
 
@@ -515,7 +515,7 @@ public sealed class RosMasterServer : IDisposable
         return OkResponse(new XmlRpcArg(topics));
     }
 
-    XmlRpcArg GetTopicTypes(RosParameterValue[] _)
+    XmlRpcArg GetTopicTypes(RosValue[] _)
     {
         using var myLock = rosLock.Lock(Token);
 
@@ -524,7 +524,7 @@ public sealed class RosMasterServer : IDisposable
         return OkResponse(new XmlRpcArg(topics));
     }
 
-    XmlRpcArg GetSystemState(RosParameterValue[] _)
+    XmlRpcArg GetSystemState(RosValue[] _)
     {
         using var myLock = rosLock.Lock(Token);
 
@@ -541,12 +541,12 @@ public sealed class RosMasterServer : IDisposable
         return OkResponse(((XmlRpcArg)publishers, (XmlRpcArg)subscribers, (XmlRpcArg)providers));
     }
 
-    XmlRpcArg DeleteParam(RosParameterValue[] args)
+    XmlRpcArg DeleteParam(RosValue[] args)
     {
         using var myLock = rosLock.Lock(Token);
 
         if (args.Length != 2 ||
-            !args[1].TryGetString(out string key))
+            !args[1].TryGet(out string key))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -555,7 +555,7 @@ public sealed class RosMasterServer : IDisposable
         return DefaultOkResponse;
     }
 
-    XmlRpcArg SetParam(RosParameterValue[] args)
+    XmlRpcArg SetParam(RosValue[] args)
     {
         Uri[] subscribersToNotify;
         XmlRpcArg[] methodArgs;
@@ -563,7 +563,7 @@ public sealed class RosMasterServer : IDisposable
         using (rosLock.Lock(Token))
         {
             if (args.Length != 3 ||
-                !args[1].TryGetString(out string key))
+                !args[1].TryGet(out string key))
             {
                 return ErrorResponse("Failed to parse arguments");
             }
@@ -578,9 +578,9 @@ public sealed class RosMasterServer : IDisposable
                 key = "/" + key;
             }
 
-            if (args[2].TryGetArray(out RosParameterValue[] argObj) &&
+            if (args[2].TryGetArray(out RosValue[] argObj) &&
                 argObj.Length != 0 &&
-                argObj[0].TryGetStruct(out (string, RosParameterValue)[] argEntries))
+                argObj[0].TryGetStruct(out (string, RosValue)[] argEntries))
             {
                 try
                 {
@@ -622,9 +622,9 @@ public sealed class RosMasterServer : IDisposable
         return DefaultOkResponse;
     }
 
-    void AddDictionaryOfParams((string, RosParameterValue)[] entries, string prefix)
+    void AddDictionaryOfParams((string, RosValue)[] entries, string prefix)
     {
-        foreach ((string name, RosParameterValue value) in entries)
+        foreach ((string name, RosValue value) in entries)
         {
             string key = $"{prefix}/{name}";
 
@@ -672,12 +672,12 @@ public sealed class RosMasterServer : IDisposable
         }
     }
 
-    XmlRpcArg GetParam(RosParameterValue[] args)
+    XmlRpcArg GetParam(RosValue[] args)
     {
         using var myLock = rosLock.Lock();
 
         if (args.Length != 2 ||
-            !args[1].TryGetString(out string key))
+            !args[1].TryGet(out string key))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -713,19 +713,19 @@ public sealed class RosMasterServer : IDisposable
         return OkResponse(arg);
     }
 
-    XmlRpcArg GetParamNames(RosParameterValue[] args)
+    XmlRpcArg GetParamNames(RosValue[] args)
     {
         using var myLock = rosLock.Lock(Token);
 
         return OkResponse(new XmlRpcArg(parameters.Keys));
     }
 
-    XmlRpcArg HasParam(RosParameterValue[] args)
+    XmlRpcArg HasParam(RosValue[] args)
     {
         using var myLock = rosLock.Lock(Token);
 
         if (args.Length != 2 ||
-            !args[1].TryGetString(out string key))
+            !args[1].TryGet(out string key))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -735,13 +735,13 @@ public sealed class RosMasterServer : IDisposable
         return OkResponse(success);
     }
 
-    XmlRpcArg SubscribeParam(RosParameterValue[] args)
+    XmlRpcArg SubscribeParam(RosValue[] args)
     {
         using var myLock = rosLock.Lock();
 
         if (args.Length != 3 ||
-            !args[1].TryGetString(out string key) ||
-            !args[2].TryGetString(out string callerApi))
+            !args[1].TryGet(out string key) ||
+            !args[2].TryGet(out string callerApi))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -766,13 +766,13 @@ public sealed class RosMasterServer : IDisposable
         return OkResponse(response);
     }
 
-    XmlRpcArg UnsubscribeParam(RosParameterValue[] args)
+    XmlRpcArg UnsubscribeParam(RosValue[] args)
     {
         using var myLock = rosLock.Lock(Token);
 
         if (args.Length != 3 ||
-            !args[1].TryGetString(out string key) ||
-            !args[2].TryGetString(out string callerApi))
+            !args[1].TryGet(out string key) ||
+            !args[2].TryGet(out string callerApi))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -791,13 +791,13 @@ public sealed class RosMasterServer : IDisposable
         return OkResponse(numUnsubscribed);
     }
 
-    XmlRpcArg SearchParam(RosParameterValue[] args)
+    XmlRpcArg SearchParam(RosValue[] args)
     {
         using var myLock = rosLock.Lock(Token);
 
         if (args.Length != 2 ||
-            !args[0].TryGetString(out string callerId) ||
-            !args[1].TryGetString(out string key))
+            !args[0].TryGet(out string callerId) ||
+            !args[1].TryGet(out string key))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -826,10 +826,10 @@ public sealed class RosMasterServer : IDisposable
         return FailResponse;
     }
 
-    XmlRpcArg SystemMulticall(RosParameterValue[] args)
+    XmlRpcArg SystemMulticall(RosValue[] args)
     {
         if (args.Length != 1 ||
-            !args[0].TryGetArray(out RosParameterValue[] calls))
+            !args[0].TryGetArray(out RosValue[] calls))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -837,20 +837,20 @@ public sealed class RosMasterServer : IDisposable
         var responses = new List<XmlRpcArg>(calls.Length);
         foreach (var callObject in calls)
         {
-            if (!callObject.TryGetStruct(out (string ElementName, RosParameterValue Element)[] call))
+            if (!callObject.TryGetStruct(out (string ElementName, RosValue Element)[] call))
             {
                 return ErrorResponse("Failed to parse arguments");
             }
 
             string? methodName = null;
-            RosParameterValue[]? arguments = null;
-            foreach ((string elementName, RosParameterValue element) in call)
+            RosValue[]? arguments = null;
+            foreach ((string elementName, RosValue element) in call)
             {
                 switch (elementName)
                 {
                     case "methodName":
                     {
-                        if (!element.TryGetString(out string elementStr))
+                        if (!element.TryGet(out string elementStr))
                         {
                             return ErrorResponse("Failed to parse methodname tag, not a string");
                         }
@@ -860,7 +860,7 @@ public sealed class RosMasterServer : IDisposable
                     }
                     case "params":
                     {
-                        if (!element.TryGetArray(out RosParameterValue[] elementObjs) ||
+                        if (!element.TryGetArray(out RosValue[] elementObjs) ||
                             elementObjs.Length == 0)
                         {
                             return ErrorResponse("Failed to parse params tag, not an array");

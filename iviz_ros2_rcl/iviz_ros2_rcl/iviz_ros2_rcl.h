@@ -6,14 +6,25 @@
 extern "C"
 {
 
+typedef void (*CdrDeserializeCallback)(void *message_context, const void *ptr, int32_t length);
+
+typedef void (*CdrSerializeCallback)(const void *message_context, void *ptr, int32_t length);
+
+typedef int32_t (*CdrGetSerializedSizeCallback)(const void *message_context);
+
+
 bool native_rcl_set_dds_profile_path(const char *path);
+
+void native_rcl_set_message_callbacks(CdrDeserializeCallback new_cdr_deserialize_callback,
+                                      CdrSerializeCallback new_cdr_serialize_callback,
+                                      CdrGetSerializedSizeCallback new_cdr_get_serialized_size_callback);
 
 void *native_rcl_create_context();
 
 void native_rcl_destroy_context(void *context);
 
 
-int32_t native_rcl_init(void *context);
+int32_t native_rcl_init(void *context, int32_t domain_id);
 
 int32_t native_rcl_shutdown(void *context_handle);
 
@@ -92,8 +103,13 @@ bool native_rcl_is_service_type_supported(const char *type);
 
 
 
-int32_t native_rcl_take_serialized_message(void *subscription_handle, void *serialized_message,
-                                           void **ptr, int32_t *length, void *gid, uint8_t *more_remaining);
+int32_t native_rcl_take_serialized_message(const void *subscription_handle,
+                                           void *serialized_message,
+                                           void **ptr, int32_t *length,
+                                           void *gid, uint8_t *more_remaining);
+
+int32_t native_rcl_take(const void *subscription_handle, void *message_context, void *gid, uint8_t *more_remaining);
+
 
 int32_t native_rcl_create_serialized_message(void **message_handle);
 
@@ -112,7 +128,7 @@ int32_t native_rcl_destroy_publisher_handle(void *publisher_handle, void *node_h
 
 int32_t native_rcl_publisher_get_subscription_count(void *subscription_handle, int32_t *count);
 
-int32_t native_rcl_publish(void *publisher_handle, void *raw_ros_message);
+int32_t native_rcl_publish(void *publisher_handle, void *message_context);
 
 int32_t native_rcl_publish_serialized_message(void *publisher_handle, void *serialized_message_handle);
 

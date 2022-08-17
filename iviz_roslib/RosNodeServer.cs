@@ -16,10 +16,10 @@ internal sealed class RosNodeServer
     static readonly XmlRpcArg DefaultOkResponse = OkResponse(0);
 
     readonly RosClient client;
-    readonly Dictionary<string, Func<RosParameterValue[], CancellationToken, ValueTask>> lateCallbacks;
+    readonly Dictionary<string, Func<RosValue[], CancellationToken, ValueTask>> lateCallbacks;
     readonly HttpListener listener;
 
-    readonly Dictionary<string, Func<RosParameterValue[], XmlRpcArg>> methods;
+    readonly Dictionary<string, Func<RosValue[], XmlRpcArg>> methods;
     readonly CancellationTokenSource runningTs = new();
 
     Task? task;
@@ -31,7 +31,7 @@ internal sealed class RosNodeServer
 
         listener = new HttpListener(client.CallerUri.Port);
 
-        methods = new Dictionary<string, Func<RosParameterValue[], XmlRpcArg>>
+        methods = new Dictionary<string, Func<RosValue[], XmlRpcArg>>
         {
             ["getBusStats"] = GetBusStats,
             ["getBusInfo"] = GetBusInfo,
@@ -46,7 +46,7 @@ internal sealed class RosNodeServer
             ["system.multicall"] = SystemMulticall,
         };
 
-        lateCallbacks = new Dictionary<string, Func<RosParameterValue[], CancellationToken, ValueTask>>
+        lateCallbacks = new Dictionary<string, Func<RosValue[], CancellationToken, ValueTask>>
         {
             ["publisherUpdate"] = PublisherUpdateLateCallback
         };
@@ -132,9 +132,9 @@ internal sealed class RosNodeServer
 
     static XmlRpcArg FailureResponse(string msg) => new(StatusCode.Failure, msg, 0);
 
-    static XmlRpcArg GetBusStats(RosParameterValue[] _) => ErrorResponse("Not implemented yet");
+    static XmlRpcArg GetBusStats(RosValue[] _) => ErrorResponse("Not implemented yet");
 
-    XmlRpcArg GetBusInfo(RosParameterValue[] _)
+    XmlRpcArg GetBusInfo(RosValue[] _)
     {
         var busInfo = client.GetBusInfoRpc();
         XmlRpcArg[][] response = busInfo.Select(BusInfoToArg).ToArray();
@@ -164,12 +164,12 @@ internal sealed class RosNodeServer
         };
     }
 
-    XmlRpcArg GetMasterUri(RosParameterValue[] _)
+    XmlRpcArg GetMasterUri(RosValue[] _)
     {
         return OkResponse(client.MasterUri);
     }
 
-    XmlRpcArg Shutdown(RosParameterValue[] args)
+    XmlRpcArg Shutdown(RosValue[] args)
     {
         if (client.ShutdownAction == null)
         {
@@ -177,8 +177,8 @@ internal sealed class RosNodeServer
         }
 
         if (args.Length < 2 ||
-            !args[0].TryGetString(out string callerId) ||
-            !args[1].TryGetString(out string reason))
+            !args[0].TryGet(out string callerId) ||
+            !args[1].TryGet(out string reason))
         {
             return ErrorResponse("Failed to parse arguments");
         }
@@ -188,24 +188,24 @@ internal sealed class RosNodeServer
         return DefaultOkResponse;
     }
 
-    static XmlRpcArg GetPid(RosParameterValue[] _)
+    static XmlRpcArg GetPid(RosValue[] _)
     {
         return OkResponse(ConnectionUtils.GetProcessId());
     }
 
-    XmlRpcArg GetSubscriptions(RosParameterValue[] _)
+    XmlRpcArg GetSubscriptions(RosValue[] _)
     {
         var subscriptions = client.GetSubscriptionsRpc();
         return OkResponse(new XmlRpcArg(subscriptions.Select(info => (info.Topic, info.Type)).ToArray()));
     }
 
-    XmlRpcArg GetPublications(RosParameterValue[] _)
+    XmlRpcArg GetPublications(RosValue[] _)
     {
         var publications = client.GetPublicationsRpc();
         return OkResponse(new XmlRpcArg(publications.Select(info => (info.Topic, info.Type)).ToArray()));
     }
 
-    XmlRpcArg ParamUpdate(RosParameterValue[] args)
+    XmlRpcArg ParamUpdate(RosValue[] args)
     {
         if (client.ParamUpdateAction == null)
         {
@@ -213,8 +213,8 @@ internal sealed class RosNodeServer
         }
 
         if (args.Length < 3 ||
-            !args[0].TryGetString(out string callerId) ||
-            !args[1].TryGetString(out string parameterKey) ||
+            !args[0].TryGet(out string callerId) ||
+            !args[1].TryGet(out string parameterKey) ||
             args[2].IsEmpty)
         {
             return ErrorResponse("Failed to parse arguments");
@@ -225,16 +225,16 @@ internal sealed class RosNodeServer
         return DefaultOkResponse;
     }
 
-    static XmlRpcArg PublisherUpdate(RosParameterValue[] args)
+    static XmlRpcArg PublisherUpdate(RosValue[] args)
     {
         // processing happens in PublisherUpdateLateCallback
         return DefaultOkResponse;
     }
 
-    async ValueTask PublisherUpdateLateCallback(RosParameterValue[] args, CancellationToken token)
+    async ValueTask PublisherUpdateLateCallback(RosValue[] args, CancellationToken token)
     {
         if (args.Length < 3 ||
-            !args[1].TryGetString(out string topic) ||
+            !args[1].TryGet(out string topic) ||
             !args[2].TryGetArray(out var publishers))
         {
             return;
@@ -243,7 +243,7 @@ internal sealed class RosNodeServer
         var publisherUris = new List<Uri>();
         foreach (var publisherObj in publishers)
         {
-            if (!publisherObj.TryGetString(out string publisherStr) ||
+            if (!publisherObj.TryGet(out string publisherStr) ||
                 !Uri.TryCreate(publisherStr, UriKind.Absolute, out Uri? publisherUri))
             {
                 Logger.LogFormat("{0}: Invalid uri '{1}'", this, publisherObj);
@@ -263,11 +263,11 @@ internal sealed class RosNodeServer
         }
     }
 
-    XmlRpcArg RequestTopic(RosParameterValue[] args)
+    XmlRpcArg RequestTopic(RosValue[] args)
     {
         if (args.Length < 3 ||
-            !args[0].TryGetString(out string callerId) ||
-            !args[1].TryGetString(out string topic) ||
+            !args[0].TryGet(out string callerId) ||
+            !args[1].TryGet(out string topic) ||
             !args[2].TryGetArray(out var protocols))
         {
             return ErrorResponse("Failed to parse arguments");
@@ -295,7 +295,7 @@ internal sealed class RosNodeServer
             return ErrorResponse("Array is empty");
         }
 
-        if (!entries[0].TryGetString(out var protocolType))
+        if (!entries[0].TryGet(out string protocolType))
         {
             return ErrorResponse("Expected string as the first protocol entry");
         }
@@ -308,10 +308,10 @@ internal sealed class RosNodeServer
         else if (protocolType == RosUtils.ProtocolUdpRosName)
         {
             if (entries.Length < 5
-                || !entries[1].TryGetBase64(out byte[] rosHeader)
-                || !entries[2].TryGetString(out string hostname)
-                || !entries[3].TryGetInteger(out int port)
-                || !entries[4].TryGetInteger(out int maxPacketSize))
+                || !entries[1].TryGet(out byte[] rosHeader)
+                || !entries[2].TryGet(out string hostname)
+                || !entries[3].TryGet(out int port)
+                || !entries[4].TryGet(out int maxPacketSize))
             {
                 return ErrorResponse("Failed to parse UDP entries");
             }
@@ -373,7 +373,7 @@ internal sealed class RosNodeServer
         }
     }
 
-    XmlRpcArg SystemMulticall(RosParameterValue[] args)
+    XmlRpcArg SystemMulticall(RosValue[] args)
     {
         if (args.Length != 1 ||
             !args[0].TryGetArray(out var calls))
@@ -390,14 +390,14 @@ internal sealed class RosNodeServer
             }
 
             string? methodName = null;
-            RosParameterValue[]? arguments = null;
-            foreach ((string key, RosParameterValue value) in call)
+            RosValue[]? arguments = null;
+            foreach ((string key, RosValue value) in call)
             {
                 switch (key)
                 {
                     case "methodName":
                     {
-                        if (!value.TryGetString(out string elementStr))
+                        if (!value.TryGet(out string elementStr))
                         {
                             return ErrorResponse("Failed to parse method name");
                         }
@@ -407,7 +407,7 @@ internal sealed class RosNodeServer
                     }
                     case "params":
                     {
-                        if (!value.TryGetArray(out RosParameterValue[] elementObjs) ||
+                        if (!value.TryGetArray(out RosValue[] elementObjs) ||
                             elementObjs.Length == 0)
                         {
                             return ErrorResponse("Failed to parse arguments");

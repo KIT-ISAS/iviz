@@ -116,7 +116,7 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// <typeparam name="T">Service type.</typeparam>
     /// <returns>Whether the call succeeded.</returns>
     /// <exception cref="TaskCanceledException">The operation timed out.</exception>
-    T CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
+    void CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
         where T : IService, new();
 
     /// <summary>
@@ -131,7 +131,7 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// <param name="token">A cancellation token</param>
     /// <typeparam name="T">Service type.</typeparam>
     /// <returns>Whether the call succeeded.</returns>
-    ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
+    ValueTask CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
         CancellationToken token = default)
         where T : IService, new();
 

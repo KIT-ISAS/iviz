@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using Iviz.Roslib;
 using Iviz.Tools;
 
-namespace Iviz.Roslib2.Rcl;
+namespace Iviz.Roslib2.RclInterop;
 
 internal sealed class AsyncRclClient : TaskExecutor
 {
@@ -25,13 +25,13 @@ internal sealed class AsyncRclClient : TaskExecutor
 
     public string FullName => client.FullName;
 
-    public static bool IsMessageTypeSupported(string message) => Rcl.Impl.IsMessageTypeSupported(message);
+    public static bool IsMessageTypeSupported(string _) => true;
 
-    public static bool IsServiceTypeSupported(string message) => Rcl.Impl.IsServiceTypeSupported(message);
+    public static bool IsServiceTypeSupported(string _) => true;
 
-    public AsyncRclClient(string name, string @namespace = "")
+    public AsyncRclClient(string name, string @namespace, int domainId)
     {
-        client = new RclClient(name, @namespace);
+        client = new RclClient(name, @namespace, domainId);
         waitSet = client.CreateWaitSet(32, 2, 32, 32);
         guard = client.CreateGuardCondition();
 
@@ -94,7 +94,7 @@ internal sealed class AsyncRclClient : TaskExecutor
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static bool IsNotZero(IntPtr ptr) => Unsafe.As<IntPtr, nint>(ref ptr) != 0;
-    
+
     void RebuildSubscribers()
     {
         subscriberHandles = subscribers.Select(tuple => tuple.handler.Handle).ToArray();
@@ -119,8 +119,8 @@ internal sealed class AsyncRclClient : TaskExecutor
             subscriber.Dispose();
             if (subscribers.RemoveAll(tuple => tuple.handler == subscriber) != 1)
             {
-                Logger.LogErrorFormat("{0}: {2} failed to find subscriber for topic {1}",
-                    this, subscriber.Topic, nameof(UnsubscribeAsync));
+                Logger.LogErrorFormat("{0}: " + nameof(UnsubscribeAsync) + " failed to find subscriber for topic {1}",
+                    this, subscriber.Topic);
                 return;
             }
 
@@ -162,8 +162,9 @@ internal sealed class AsyncRclClient : TaskExecutor
             serviceClient.Dispose();
             if (serviceClients.RemoveAll(tuple => tuple.handler == serviceClient) != 1)
             {
-                Logger.LogErrorFormat("{0}: {2} failed to find service client for service {1}",
-                    this, serviceClient.Service, nameof(DisposeServiceClientAsync));
+                Logger.LogErrorFormat(
+                    "{0}: " + nameof(DisposeServiceClientAsync) + " failed to find service client for service {1}",
+                    this, serviceClient.Service);
                 return;
             }
 
@@ -195,8 +196,9 @@ internal sealed class AsyncRclClient : TaskExecutor
             serviceServer.Dispose();
             if (serviceServers.RemoveAll(tuple => tuple.handler == serviceServer) != 1)
             {
-                Logger.LogErrorFormat("{0}: {2} failed to find service server for service {1}",
-                    this, serviceServer.Service, nameof(UnadvertiseServiceAsync));
+                Logger.LogErrorFormat(
+                    "{0}: " + nameof(UnadvertiseServiceAsync) + " failed to find service server for service {1}",
+                    this, serviceServer.Service);
                 return;
             }
 
@@ -213,7 +215,7 @@ internal sealed class AsyncRclClient : TaskExecutor
     {
         return Post(client.GetTopicNamesAndTypes, token);
     }
-    
+
     public Task<TopicNameType[]> GetServiceNamesAndTypesAsync(CancellationToken token)
     {
         return Post(client.GetServiceNamesAndTypes, token);

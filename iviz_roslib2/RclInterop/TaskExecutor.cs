@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Iviz.Tools;
 
-namespace Iviz.Roslib2.Rcl;
+namespace Iviz.Roslib2.RclInterop;
 
 internal abstract class TaskExecutor
 {
@@ -15,13 +15,26 @@ internal abstract class TaskExecutor
 
     protected void Start()
     {
-        task = Task.Run(Run);
+        task = Task.Run(() =>
+        {
+            try
+            {
+                Run();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: " + nameof(Run) + " finished with exception {1}", this, e);
+            }
+        });
     }
 
     void Run()
     {
         var self = (AsyncRclClient)this;
-        
+
         while (keepRunning)
         {
             try
@@ -30,7 +43,7 @@ internal abstract class TaskExecutor
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: Unexpected exception in {1}! {2}", this, nameof(self.Wait), e);
+                Logger.LogErrorFormat("{0}: Unexpected exception in " + nameof(self.Wait) + "! {1}", this, e);
             }
 
             if (queue.IsEmpty)
@@ -43,7 +56,7 @@ internal abstract class TaskExecutor
                 action();
             }
         }
-        
+
         if (!queue.IsEmpty)
         {
             Logger.LogErrorFormat("{0}: {1} tasks left in queue!", this, queue.Count);
@@ -56,7 +69,7 @@ internal abstract class TaskExecutor
         {
             return Task.FromException(new ObjectDisposedException(ToString()));
         }
-        
+
         if (token.IsCancellationRequested)
         {
             return Task.FromCanceled(token);

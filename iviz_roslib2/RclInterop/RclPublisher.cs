@@ -2,14 +2,14 @@ using System.Runtime.CompilerServices;
 using Iviz.Msgs;
 using Iviz.Tools;
 
-namespace Iviz.Roslib2.Rcl;
+namespace Iviz.Roslib2.RclInterop;
 
 internal sealed class RclPublisher : IDisposable
 {
     readonly IntPtr contextHandle;
     readonly IntPtr nodeHandle;
     readonly IntPtr publisherHandle;
-    readonly RclBuffer messageBuffer;
+    //readonly SerializedMessage messageBuffer;
     bool disposed;
 
     public string Topic { get; }
@@ -30,13 +30,13 @@ internal sealed class RclPublisher : IDisposable
         Profile = profile;
 
         int ret = Rcl.Impl.CreatePublisherHandle(out publisherHandle, nodeHandle, topic, topicType, in profile.Profile);
-        switch (ret)
+        switch ((RclRet)ret)
         {
-            case -1:
-                throw new RosUnsupportedMessageException(topicType);
-            case Rcl.Ok:
-                messageBuffer = new RclBuffer();
+            case RclRet.Ok:
+                //messageBuffer = new SerializedMessage();
                 break;
+            case RclRet.InvalidMsgType:
+                throw new RosUnsupportedMessageException(topicType);
             default:
                 throw new RosRclException($"Advertisement for topic '{topic}' [{topicType}] failed!", ret);
         }
@@ -44,7 +44,8 @@ internal sealed class RclPublisher : IDisposable
 
     void Check(int result) => Rcl.Check(contextHandle, result);
 
-    public int Publish<T>(in T message) where T : IMessage
+    /*
+    public int PublishSerialized<T>(in T message) where T : IMessage
     {
         const int headerSize = 4;
 
@@ -53,19 +54,7 @@ internal sealed class RclPublisher : IDisposable
 
         var span = messageBuffer.Resize(serializedLength);
 
-        /*
-        const byte cdrLittleEndian0 = 0x00;
-        const byte cdrLittleEndian1 = 0x01;
-        const byte serializationOptions0 = 0x00;
-        const byte serializationOptions1 = 0x00;
-
-        span[0] = cdrLittleEndian0;
-        span[1] = cdrLittleEndian1;
-        span[2] = serializationOptions0;
-        span[3] = serializationOptions1;
-        */
-
-        const int header = 0x00000100;
+        const int header = 0x00000100; // CDR_LE { 0x00, 0x01}, serialization options { 0x00, 0x00 } 
         Unsafe.WriteUnaligned(ref span[0], header);
 
         WriteBuffer2.Serialize(message, span[headerSize..]);
@@ -74,10 +63,16 @@ internal sealed class RclPublisher : IDisposable
 
         return serializedLength;
     }
+    */
+    
+    public void Publish(IntPtr messageContextHandler)
+    {
+        Check(Rcl.Impl.Publish(publisherHandle, messageContextHandler));
+    }
 
     public int GetNumSubscribers()
     {
-        if (Rcl.Impl.GetSubscriptionCount(publisherHandle, out int count) == Rcl.Ok)
+        if (Rcl.Impl.GetSubscriptionCount(publisherHandle, out int count) == (int)RclRet.Ok)
         {
             return count;
         }
@@ -92,7 +87,7 @@ internal sealed class RclPublisher : IDisposable
         disposed = true;
         GC.SuppressFinalize(this);
         Rcl.Impl.DestroyPublisherHandle(publisherHandle, nodeHandle);
-        messageBuffer.Dispose();
+        //messageBuffer.Dispose();
     }
 
     public override string ToString() => $"[{nameof(RclPublisher)} {Topic} [{TopicType}] ]";

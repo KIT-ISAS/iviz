@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using Iviz.Msgs;
 
-namespace Iviz.Roslib2.Rcl;
+namespace Iviz.Roslib2.RclInterop;
 
 /// ROS MiddleWare quality of service profile
 [DataContract, StructLayout(LayoutKind.Sequential)]

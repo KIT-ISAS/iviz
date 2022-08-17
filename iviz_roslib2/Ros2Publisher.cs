@@ -1,6 +1,7 @@
+using System.Collections.Concurrent;
 using Iviz.Msgs;
 using Iviz.Roslib;
-using Iviz.Roslib2.Rcl;
+using Iviz.Roslib2.RclInterop;
 using Iviz.Tools;
 
 namespace Iviz.Roslib2;
@@ -11,6 +12,11 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
     readonly RclPublisher publisher;
     readonly List<string> ids = new();
     readonly CancellationTokenSource runningTs = new();
+
+    readonly SemaphoreSlim signal = new(0);
+    readonly ConcurrentQueue<TMessage> queue = new();
+    readonly Task task;
+
     int totalPublishers;
     bool disposed;
 
@@ -21,7 +27,6 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
     public string Topic => publisher.Topic;
     public string TopicType => publisher.TopicType;
     public int NumSubscribers => publisher.GetNumSubscribers();
-    public bool LatchingEnabled { get; set; }
     public bool IsAlive => !CancellationToken.IsCancellationRequested;
     public QosProfile Profile => publisher.Profile;
 
@@ -29,6 +34,7 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
     {
         this.client = client;
         this.publisher = publisher;
+        task = Task.Run(() => Run().AwaitNoThrow(this));
     }
 
     void AssertIsAlive()
@@ -36,6 +42,26 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
         if (!IsAlive)
         {
             throw new ObjectDisposedException("this", "This is not a valid publisher");
+        }
+    }
+
+    async Task Run()
+    {
+        var token = CancellationToken;
+        var handler = new RclSerializeHandler<TMessage>();
+        using var handle = new GCHandleWrapper(handler);
+
+        while (true)
+        {
+            await signal.WaitAsync(token);
+            while (queue.TryDequeue(out var message))
+            {
+                handler.message = message;
+                publisher.Publish(handle.ptr);
+
+                numSent++;
+                bytesSent += handler.messageLength;
+            }
         }
     }
 
@@ -126,14 +152,11 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
 
     public void Publish(in TMessage message)
     {
-        if (message is null) BuiltIns.ThrowArgumentNull(nameof(message));
-
         AssertIsAlive();
         message.RosValidate();
 
-        int newBytesSent = publisher.Publish(message);
-        Interlocked.Increment(ref numSent);
-        Interlocked.Add(ref bytesSent, newBytesSent);
+        queue.Enqueue(message);
+        signal.Release();
     }
 
     public ValueTask PublishAsync(in TMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
@@ -160,7 +183,7 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
         {
             return PublishAsync(tMessage, policy, token);
         }
-        
+
         RosInvalidMessageTypeException.Throw();
         return default; // unreachable
     }
@@ -170,15 +193,17 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
         TaskUtils.RunSync(DisposeAsync, default);
     }
 
-    public ValueTask DisposeAsync(CancellationToken token = default)
+    public async ValueTask DisposeAsync(CancellationToken token = default)
     {
-        if (disposed) return default;
+        if (disposed) return;
         disposed = true;
-        
-        runningTs.Cancel();
-        ids.Clear();
 
+        runningTs.Cancel();
+
+        await task.AwaitNoThrow(2000, this, token);
+        await client.Rcl.DisposePublisher(publisher, default).AwaitNoThrow(this);
+
+        ids.Clear();
         client.RemovePublisher(this);
-        return client.Rcl.DisposePublisher(publisher, default).AwaitNoThrow(this).AsValueTask();
     }
 }

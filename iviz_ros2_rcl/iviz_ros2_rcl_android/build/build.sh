@@ -1,0 +1,15 @@
+NDK=/Applications/Unity/Hub/Editor/2021.3.2f1/PlaybackEngines/AndroidPlayer/NDK/
+ABI=arm64-v8a
+MINSDKVERSION=21
+ANDROID_NATIVE_API_LEVEL=android-21
+ANDROID_TOOLCHAIN_NAME=aarch64-linux-android-clang
+
+cmake \
+    -DCMAKE_TOOLCHAIN_FILE=$NDK/build/cmake/android.toolchain.cmake \
+    -DANDROID_ABI=$ABI \
+    -DANDROID_NATIVE_API_LEVEL=${ANDROID_NATIVE_API_LEVEL} \
+    -DANDROID_FUNCTION_LEVEL_LINKING=OFF \
+    -DANDROID_PLATFORM=android-$MINSDKVERSION \
+    -DANDROID_TOOLCHAIN_NAME=${ANDROID_TOOLCHAIN_NAME} \
+    ..
+make

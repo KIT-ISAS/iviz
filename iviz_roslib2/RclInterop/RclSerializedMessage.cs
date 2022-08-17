@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace Iviz.Roslib2.Rcl;
+namespace Iviz.Roslib2.RclInterop;
 
 [StructLayout(LayoutKind.Sequential)]
 internal struct RclSerializedMessage

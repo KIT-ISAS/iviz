@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using Iviz.Msgs;
-using Iviz.Roslib2.Rcl;
+using Iviz.Roslib2.RclInterop;
 using Iviz.Tools;
 
 namespace Iviz.Roslib2;
@@ -49,7 +49,7 @@ internal sealed class Ros2ServiceCaller : Signalizable
     async ValueTask Run()
     {
         var cancellationToken = runningTs.Token;
-        using var serializedBuffer = new RclBuffer();
+        using var serializedBuffer = new SerializedMessage();
 
         while (true)
         {
@@ -58,7 +58,7 @@ internal sealed class Ros2ServiceCaller : Signalizable
         }
     }
 
-    void ProcessResponses(RclBuffer serializedBuffer)
+    void ProcessResponses(SerializedMessage serializedBuffer)
     {
         var rclServiceClient = ServiceClient;
         while (rclServiceClient.TryTakeResponse(serializedBuffer, out var span, out long sequenceNumber))

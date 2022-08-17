@@ -1,11 +1,17 @@
-namespace Iviz.Roslib2.Rcl.Wrappers;
+namespace Iviz.Roslib2.RclInterop.Wrappers;
 
 public interface IRclWrapper
 {
     bool SetDdsProfilePath(string path);
+
+    void SetMessageCallbacks(
+        CdrDeserializeCallback? cdrDeserializeCallback, 
+        CdrSerializeCallback? cdrSerializeCallback,
+        CdrGetSerializedSizeCallback? cdrGetSerializedSizeCallback);
+
     IntPtr CreateContext();
-    void DestroyContext(IntPtr context);
-    int Init(IntPtr context);
+    void DestroyContext(IntPtr contextHandle);
+    int Init(IntPtr contextHandle, int domainId);
     int Shutdown(IntPtr contextHandle);
     int InitLogging();
     void SetLoggingLevel(int level);
@@ -51,6 +57,8 @@ public interface IRclWrapper
     int TakeSerializedMessage(IntPtr subscriptionHandle, IntPtr serializedMessage, out IntPtr ptr,
         out int length, out Guid gid, out byte moreRemaining);
 
+    public int Take(IntPtr subscriptionHandle, IntPtr messageContextHandle, out Guid guid, out byte moreRemaining);
+
     int DestroySerializedMessage(IntPtr messageHandle);
     int CreateSerializedMessage(out IntPtr messageHandle);
     int EnsureSerializedMessageSize(IntPtr messageHandle, int size, out IntPtr ptr);
@@ -60,6 +68,7 @@ public interface IRclWrapper
 
     int DestroyPublisherHandle(IntPtr publisherHandle, IntPtr nodeHandle);
     int GetSubscriptionCount(IntPtr publisherHandle, out int count);
+    int Publish(IntPtr publisherHandle, IntPtr messageContextHandle);
     int PublishSerializedMessage(IntPtr publisherHandle, IntPtr serializedMessageHandle);
 
     int GetNodeNames(IntPtr contextHandle, IntPtr nodeHandle,
@@ -91,9 +100,9 @@ public interface IRclWrapper
         in RmwQosProfile profile);
 
     int DestroyClientHandle(IntPtr clientHandle, IntPtr nodeHandle);
-    
+
     int IsServiceServerAvailable(IntPtr clientHandle, IntPtr nodeHandle, out byte isAvailable);
-    
+
     int SendRequest(IntPtr clientHandle, IntPtr serializedMessageHandle, out long sequenceId);
 
     int TakeResponse(IntPtr clientHandle, IntPtr serializedMessageHandle, out RmwServiceInfo requestHeader,

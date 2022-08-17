@@ -1,7 +1,8 @@
-namespace Iviz.Roslib2.Rcl;
+namespace Iviz.Roslib2.RclInterop;
 
 public enum RclRet
 {
+    InvalidMsgType = -1, // iviz addition
     Ok = 0,
     Error = 1,
     Timeout = 2,

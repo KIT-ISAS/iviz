@@ -1,4 +1,4 @@
-namespace Iviz.Roslib2.Rcl;
+namespace Iviz.Roslib2.RclInterop;
 
 public enum RclLogSeverity
 {

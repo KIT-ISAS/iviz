@@ -1,7 +1,7 @@
-using Iviz.Roslib2.Rcl.Wrappers;
+using Iviz.Roslib2.RclInterop.Wrappers;
 using Iviz.Tools;
 
-namespace Iviz.Roslib2.Rcl;
+namespace Iviz.Roslib2.RclInterop;
 
 internal sealed class RclGuardCondition : IDisposable
 {

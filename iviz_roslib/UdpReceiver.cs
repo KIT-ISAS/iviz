@@ -333,8 +333,8 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
 
         receiveBufferSize = recommendedSize;
         UdpClient.Client.ReceiveBufferSize = recommendedSize;
-        Logger.LogDebugFormat("{0}: Large message received. Changing buffer size to {1} kB.", this,
-            recommendedSize / 1024);
+        //Logger.LogDebugFormat("{0}: Large message received. Changing buffer size to {1} kB.", this,
+        //    recommendedSize / 1024);
     }
 
     void ILoopbackReceiver<TMessage>.Post(in TMessage message, int rcvLength)

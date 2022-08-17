@@ -20,7 +20,7 @@ public readonly struct Guid : IEquatable<Guid>, IComparable<Guid>
     public override int GetHashCode()
     {
         ulong l = a ^ b /*^ c*/;
-        ulong ll = (l >> 32) ^ (l & (uint.MaxValue - 1));
+        ulong ll = (l >> 32) ^ l;
         return (int)ll;
     }
 
@@ -56,7 +56,7 @@ public readonly struct Guid : IEquatable<Guid>, IComparable<Guid>
 
     public override string ToString()
     {
-        Span<char> array = stackalloc char[24 + 24 + 23];
+        Span<char> array = stackalloc char[24 + 24 + 23]; // 'xx:' times 24 - 1
 
         int o = 0;
 

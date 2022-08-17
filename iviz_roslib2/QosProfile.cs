@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 using Iviz.Roslib.Utils;
-using Iviz.Roslib2.Rcl;
+using Iviz.Roslib2.RclInterop;
 
 namespace Iviz.Roslib2;
 

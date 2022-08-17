@@ -1,28 +1,19 @@
 using Iviz.Roslib;
-using Iviz.Roslib2.Rcl.Wrappers;
+using Iviz.Roslib2.RclInterop.Wrappers;
 using Iviz.Tools;
 
-namespace Iviz.Roslib2.Rcl;
+namespace Iviz.Roslib2.RclInterop;
 
 internal sealed class RclClient : IDisposable
 {
     static bool loggingInitialized;
-    static LoggingHandler? loggingHandler;
 
     readonly IntPtr contextHandle;
     readonly IntPtr nodeHandle;
     bool disposed;
-    
-    public string FullName { get; }
 
-    public static LoggingHandler? LoggingHandler
-    {
-        set
-        {
-            loggingHandler = value;
-            Rcl.Impl.SetLoggingHandler(loggingHandler);
-        }
-    }
+    public int DomainId { get; }
+    public string FullName { get; }
 
     public static void SetLoggingLevel(RclLogSeverity severity)
     {
@@ -39,16 +30,18 @@ internal sealed class RclClient : IDisposable
         return Rcl.Impl.SetDdsProfilePath(path);
     }
 
-    public RclClient(string name, string @namespace = "")
+    public RclClient(string name, string @namespace, int domainId)
     {
         contextHandle = Rcl.Impl.CreateContext();
-        Check(Rcl.Impl.Init(contextHandle));
+        DomainId = domainId;
+        Check(Rcl.Impl.Init(contextHandle, domainId));
 
         if (!loggingInitialized)
         {
             Rcl.Impl.InitLogging();
             SetLoggingLevel(RclLogSeverity.Info);
-            LoggingHandler = ConsoleLoggingHandler;
+            Rcl.SetLoggingHandler();
+            Rcl.SetMessageCallbacks(); 
             loggingInitialized = true;
         }
 
@@ -86,12 +79,12 @@ internal sealed class RclClient : IDisposable
     {
         return new RclServiceClient(contextHandle, nodeHandle, topic, type, profile);
     }
-    
+
     public RclServiceServer CreateServiceServer(string topic, string type, QosProfile profile)
     {
         return new RclServiceServer(contextHandle, nodeHandle, topic, type, profile);
     }
-    
+
     public NodeName[] GetNodeNames()
     {
         Check(Rcl.Impl.GetNodeNames(contextHandle, nodeHandle,
@@ -146,7 +139,7 @@ internal sealed class RclClient : IDisposable
 
         return topics;
     }
-    
+
     public TopicNameType[] GetServiceNamesAndTypes()
     {
         Check(Rcl.Impl.GetServiceNamesAndTypes(contextHandle, nodeHandle,
@@ -279,34 +272,6 @@ internal sealed class RclClient : IDisposable
         Rcl.Impl.DestroyContext(contextHandle);
     }
 
-    [MonoPInvokeCallback(typeof(LoggingHandler))]
-    static void ConsoleLoggingHandler(int severity, IntPtr name, long timestamp, IntPtr message)
-    {
-        switch (severity)
-        {
-            case <= (int)RclLogSeverity.Debug:
-                if (Logger.LogDebugCallback != null)
-                {
-                    Logger.LogDebugFormat("[{0}] {1}", Rcl.ToString(name), Rcl.ToString(message));
-                }
-
-                break;
-            case <= (int)RclLogSeverity.Warn:
-                if (Logger.LogCallback != null)
-                {
-                    Logger.LogFormat("[{0}] {1}", Rcl.ToString(name), Rcl.ToString(message));
-                }
-
-                break;
-            case <= (int)RclLogSeverity.Fatal:
-                if (Logger.LogErrorCallback != null)
-                {
-                    Logger.LogErrorFormat("[{0}] {1}", Rcl.ToString(name), Rcl.ToString(message));
-                }
-
-                break;
-        }
-    }
 
     void Check(int result) => Rcl.Check(contextHandle, result);
 

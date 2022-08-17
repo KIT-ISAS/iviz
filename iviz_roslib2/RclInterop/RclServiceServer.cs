@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using Iviz.Msgs;
 using Iviz.Tools;
 
-namespace Iviz.Roslib2.Rcl;
+namespace Iviz.Roslib2.RclInterop;
 
 internal sealed class RclServiceServer : IDisposable, IHasHandle
 {
@@ -32,18 +32,18 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
         ServiceType = serviceType;
 
         int ret = Rcl.Impl.CreateServiceHandle(out serviceHandle, nodeHandle, service, serviceType, in profile.Profile);
-        switch (ret)
+        switch ((RclRet)ret)
         {
-            case -1:
+            case RclRet.InvalidMsgType:
                 throw new RosUnsupportedMessageException(serviceType);
-            case Rcl.Ok:
+            case RclRet.Ok:
                 break;
             default:
                 throw new RosRclException($"Creating service server '{service}' [{serviceType}] failed!", ret);
         }
     }
 
-    public bool TryTakeRequest(RclBuffer messageBuffer, out Span<byte> span, out RmwRequestId requestId)
+    public bool TryTakeRequest(SerializedMessage messageBuffer, out ReadOnlySpan<byte> span, out RmwRequestId requestId)
     {
         int ret = Rcl.Impl.TakeRequest(Handle, messageBuffer.Handle, out var serviceInfo, out var ptr,
             out int length);
@@ -52,7 +52,7 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
         {
             case RclRet.Ok:
                 const int headerSize = 4;
-                span = Rcl.CreateByteSpan(ptr + headerSize, length - 4);
+                span = Rcl.CreateReadOnlyByteSpan(ptr + headerSize, length - 4);
                 requestId = serviceInfo.requestId;
                 return true;
             case RclRet.SubscriptionTakeFailed:
@@ -60,14 +60,14 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
                 requestId = default;
                 return false;
             default:
-                Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.Impl.TakeResponse));
+                Logger.LogErrorFormat("{0}: " + nameof(Rcl.Impl.TakeResponse) + " failed!", this);
                 goto case RclRet.SubscriptionTakeFailed;
         }
     }
 
     public void SendResponse(ISerializable response, in RmwRequestId requestId)
     {
-        using var messageBuffer = new RclBuffer();
+        using var messageBuffer = new SerializedMessage();
         const int headerSize = 4;
 
         int messageLength = response.Ros2MessageLength;
@@ -75,19 +75,7 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
 
         var span = messageBuffer.Resize(serializedLength);
 
-        /*
-        const byte cdrLittleEndian0 = 0x00;
-        const byte cdrLittleEndian1 = 0x01;
-        const byte serializationOptions0 = 0x00;
-        const byte serializationOptions1 = 0x00;
-
-        span[0] = cdrLittleEndian0;
-        span[1] = cdrLittleEndian1;
-        span[2] = serializationOptions0;
-        span[3] = serializationOptions1;
-        */
-
-        const int header = 0x00000100;
+        const int header = 0x00000100; // CDR_LE { 0x00, 0x01}, serialization options { 0x00, 0x00 } 
         Unsafe.WriteUnaligned(ref span[0], header);
 
         WriteBuffer2.Serialize(response, span[headerSize..]);

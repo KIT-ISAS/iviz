@@ -2,8 +2,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using Iviz.Msgs;
 using Iviz.Roslib;
-using Iviz.Roslib2.Rcl;
-using Iviz.Roslib2.Rcl.Wrappers;
+using Iviz.Roslib2.RclInterop;
+using Iviz.Roslib2.RclInterop.Wrappers;
 using Iviz.Tools;
 using Nito.AsyncEx;
 
@@ -43,7 +43,10 @@ public sealed class Ros2Client : IRosClient
         };
     }
 
-    public Ros2Client(string callerId, string? @namespace = null, IRclWrapper? wrapperType = null)
+    public Ros2ParameterClient ParameterClient { get; }
+    public Ros2ParameterServer ParameterServer { get; }
+
+    public Ros2Client(string callerId, string? @namespace = null, int domainId = 0, IRclWrapper? wrapperType = null)
     {
         RclClient.SetRclWrapper(wrapperType ??
 #if NETSTANDARD2_1
@@ -53,17 +56,29 @@ public sealed class Ros2Client : IRosClient
 #endif
 
         namespacePrefix = @namespace == null ? "/" : $"/{@namespace}/";
-        Rcl = new AsyncRclClient(callerId, @namespace ?? "");
+        Rcl = new AsyncRclClient(callerId, @namespace ?? "", domainId);
+        ParameterClient = new Ros2ParameterClient(this);
+        ParameterServer = new Ros2ParameterServer(this);
     }
 
     public static void SetLoggingLevel(RclLogSeverity severity) => RclClient.SetLoggingLevel(severity);
 
-    public static bool SetDdsProfilePath(string filename)
+    static bool SetDdsProfilePath(string filename)
     {
         if (string.IsNullOrEmpty(filename)) BuiltIns.ThrowArgumentNull(nameof(filename));
         if (!File.Exists(filename)) throw new FileNotFoundException("DDS profile path not found", filename);
 
         return RclClient.SetDdsProfilePath(filename);
+    }
+
+    public void InitializeParameterServer()
+    {
+        TaskUtils.RunSync(ParameterServer.RegisterServicesAsync);
+    }
+
+    public ValueTask InitializeParameterServerAsync(CancellationToken token = default)
+    {
+        return ParameterServer.RegisterServicesAsync(token);
     }
 
     public bool TryGetSubscriber(string topic, [NotNullWhen(true)] out IRos2Subscriber? subscriber)
@@ -245,21 +260,20 @@ public sealed class Ros2Client : IRosClient
         publishersByTopic.TryRemove(subscriber.Topic, out _);
     }
 
-    public T CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
+    public void CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
         where T : IService, new()
     {
         using var timeoutTs = new CancellationTokenSource(timeoutInMs);
         var token = timeoutTs.Token;
-        return TaskUtils.RunSync(() => CallServiceAsync(serviceName, service, persistent, token));
+        TaskUtils.RunSync(() => CallServiceAsync(serviceName, service, persistent, token: token), token);
     }
 
-    public ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
-        CancellationToken token = default) where T : IService, new()
+    ValueTask IRosClient.CallServiceAsync<T>(string serviceName, T service, bool persistent, CancellationToken token)
     {
-        return CallServiceAsync(serviceName, service, persistent, null, token);
+        return CallServiceAsync(serviceName, service, persistent, token: token);
     }
 
-    public async ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
+    public async ValueTask CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
         QosProfile? profile = null, CancellationToken token = default) where T : IService, new()
     {
         if (serviceName is null) BuiltIns.ThrowArgumentNull(nameof(serviceName));
@@ -321,8 +335,6 @@ public sealed class Ros2Client : IRosClient
                 await serviceCaller.DisposeAsync(token);
             }
         }
-
-        return service;
     }
 
     internal void RemoveServiceCaller(Ros2ServiceCaller caller)
@@ -464,26 +476,42 @@ public sealed class Ros2Client : IRosClient
     public ValueTask<TopicNameType[]> GetSystemTopicsAsync(CancellationToken token = default) =>
         Rcl.GetTopicNamesAndTypesAsync(token).AsValueTask();
 
-    public string[] GetParameterNames()
+    public string[] GetParameterNames(string? node = null)
     {
-        return Array.Empty<string>();
+        return node is null
+            ? ParameterServer.Parameters.Keys.ToArray()
+            : TaskUtils.RunSync(() => GetParameterNamesAsync(node));
     }
 
-    public ValueTask<string[]> GetParameterNamesAsync(CancellationToken token = default)
+    public ValueTask<string[]> GetParameterNamesAsync(string? node = null, CancellationToken token = default)
     {
-        return GetParameterNames().AsTaskResult();
+        return node is null
+            ? ParameterServer.Parameters.Keys.ToArray().AsTaskResult()
+            : ParameterClient.GetParameterNamesAsync(node, token);
     }
 
-    public bool GetParameter(string key, out RosParameterValue value)
+    public RosValue GetParameter(string key, string? node = null)
     {
-        value = default;
-        return false;
+        if (node == null)
+        {
+            return ParameterServer.Parameters.TryGetValue(key, out var value)
+                ? value
+                : throw new RosParameterNotFoundException();
+        }
+
+        return TaskUtils.RunSync(() => GetParameterAsync(key, node));
     }
 
-    public ValueTask<(bool success, RosParameterValue value)> GetParameterAsync(string key,
-        CancellationToken token = default)
+    public ValueTask<RosValue> GetParameterAsync(string key, string? node = null, CancellationToken token = default)
     {
-        return new ValueTask<(bool, RosParameterValue)>((false, default));
+        if (node == null)
+        {
+            return ParameterServer.Parameters.TryGetValue(key, out var value)
+                ? value.AsTaskResult()
+                : Task.FromException<RosValue>(new RosParameterNotFoundException()).AsValueTask();
+        }
+        
+        return ParameterClient.GetParameterAsync(node, key, token);
     }
 
     public SystemState GetSystemState()

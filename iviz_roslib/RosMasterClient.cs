@@ -361,11 +361,11 @@ public sealed class RosMasterClient : IDisposable
         return new UnregisterServiceResponse(response);
     }
 
-    internal RosParameterValue[] MethodCall(string function, XmlRpcArg[] args)
+    internal RosValue[] MethodCall(string function, XmlRpcArg[] args)
     {
         using var ts = new CancellationTokenSource(TimeoutInMs);
 
-        RosParameterValue tmp;
+        RosValue tmp;
         try
         {
             tmp = XmlRpcService.MethodCall(MasterUri, CallerUri, function, args, ts.Token);
@@ -375,7 +375,7 @@ public sealed class RosMasterClient : IDisposable
             throw new TimeoutException($"Call to '{function}' timed out");
         }
 
-        if (!tmp.TryGetArray(out RosParameterValue[] result))
+        if (!tmp.TryGetArray(out RosValue[] result))
         {
             throw new ParseException($"Expected type object[], got {tmp}");
         }
@@ -383,7 +383,7 @@ public sealed class RosMasterClient : IDisposable
         return result;
     }
 
-    internal async ValueTask<RosParameterValue[]> MethodCallAsync(string function, XmlRpcArg[] args,
+    internal async ValueTask<RosValue[]> MethodCallAsync(string function, XmlRpcArg[] args,
         CancellationToken token)
     {
         using var ts = token.CanBeCanceled
@@ -391,7 +391,7 @@ public sealed class RosMasterClient : IDisposable
             : new CancellationTokenSource();
         ts.CancelAfter(TimeoutInMs);
 
-        RosParameterValue rpcValue;
+        RosValue rpcValue;
         try
         {
             var freeConnection = rpcConnections.Min()!;
@@ -402,7 +402,7 @@ public sealed class RosMasterClient : IDisposable
             throw new TimeoutException($"Call to '{function}' timed out");
         }
 
-        if (!rpcValue.TryGetArray(out RosParameterValue[] result))
+        if (!rpcValue.TryGetArray(out var result))
         {
             throw new ParseException($"Rpc Response: Expected type object[], got {rpcValue}");
         }
@@ -414,26 +414,28 @@ public sealed class RosMasterClient : IDisposable
 public abstract class BaseResponse : JsonToString
 {
     bool hasParseError;
-    protected int responseCode;
+    protected int? responseCode;
 
     public string StatusMessage { get; protected set; } = "";
     public bool IsValid => responseCode == StatusCode.Success && !hasParseError;
     public bool IsFailure => responseCode == StatusCode.Failure;
+    public bool HasParseError => hasParseError;
+    public bool IsSuccess => responseCode == StatusCode.Success;
 
     protected void MarkError()
     {
         Logger.LogFormat("[{0}]: Failed to parse response", GetType().Name);
-        responseCode = StatusCode.Error;
+        responseCode = null;
         StatusMessage = "Failed to parse response";
         hasParseError = true;
     }
 
-    protected bool TryGetValueFromArgs(RosParameterValue[]? a, out RosParameterValue value)
+    protected bool TryGetValueFromArgs(RosValue[]? a, out RosValue value)
     {
         if (a is null 
             || a.Length != 3 
-            || !a[0].TryGetInteger(out int code) 
-            || !a[1].TryGetString(out string statusMessage))
+            || !a[0].TryGet(out int code) 
+            || !a[1].TryGet(out string statusMessage))
         {
             MarkError();
             value = default;
@@ -456,14 +458,14 @@ public sealed class GetSystemStateResponse : BaseResponse
     public TopicTuple[] Subscribers { get; } = Empty;
     public TopicTuple[] Services { get; } = Empty;
 
-    internal GetSystemStateResponse(RosParameterValue[]? a)
+    internal GetSystemStateResponse(RosValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
             
-        if (!value.TryGetArray(out RosParameterValue[] root) || root.Length != 3)
+        if (!value.TryGetArray(out RosValue[] root) || root.Length != 3)
         {
             MarkError();
             return;
@@ -474,9 +476,9 @@ public sealed class GetSystemStateResponse : BaseResponse
         Services = CreateTuple(root[2]);
     }
 
-    TopicTuple[] CreateTuple(RosParameterValue root)
+    TopicTuple[] CreateTuple(RosValue root)
     {
-        if (!root.TryGetArray(out RosParameterValue[] objTuples))
+        if (!root.TryGetArray(out RosValue[] objTuples))
         {
             MarkError();
             return Empty;
@@ -486,10 +488,10 @@ public sealed class GetSystemStateResponse : BaseResponse
         int r = 0;
         foreach (var objTuple in objTuples)
         {
-            if (!objTuple.TryGetArray(out RosParameterValue[] tuple) ||
+            if (!objTuple.TryGetArray(out RosValue[] tuple) ||
                 tuple.Length != 2 ||
-                !tuple[0].TryGetString(out string topic) ||
-                !tuple[1].TryGetArray(out RosParameterValue[] tmpMembers))
+                !tuple[0].TryGet(out string topic) ||
+                !tuple[1].TryGetArray(out RosValue[] tmpMembers))
             {
                 MarkError();
                 return Empty;
@@ -498,7 +500,7 @@ public sealed class GetSystemStateResponse : BaseResponse
             string[] members = new string[tmpMembers.Length];
             for (int i = 0; i < members.Length; i++)
             {
-                if (!tmpMembers[i].TryGetString(out string member))
+                if (!tmpMembers[i].TryGet(out string member))
                 {
                     MarkError();
                     return Empty;
@@ -534,14 +536,14 @@ public sealed class DefaultResponse : BaseResponse
     static readonly DefaultResponse MessageNotStringError = new(StatusCode.Error,
         "Expected string as second argument");
 
-    public static DefaultResponse Create(RosParameterValue[] args)
+    public static DefaultResponse Create(RosValue[] args)
     {
         if (args.Length != 3)
         {
             return ParseError;
         }
 
-        if (!args[0].TryGetInteger(out int code))
+        if (!args[0].TryGet(out int code))
         {
             return CodeNotIntError;
         }
@@ -551,7 +553,7 @@ public sealed class DefaultResponse : BaseResponse
             return Success;
         }
 
-        return !args[1].TryGetString(out string message)
+        return !args[1].TryGet(out string message)
             ? MessageNotStringError
             : new DefaultResponse(code, message);
     }
@@ -561,14 +563,14 @@ public sealed class GetUriResponse : BaseResponse
 {
     public Uri? Uri { get; }
 
-    internal GetUriResponse(RosParameterValue[]? a)
+    internal GetUriResponse(RosValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
             
-        if (!value.TryGetString(out string uriStr))
+        if (!value.TryGet(out string uriStr))
         {
             MarkError();
             return;
@@ -591,14 +593,14 @@ public sealed class LookupNodeResponse : BaseResponse
 {
     public Uri? Uri { get; }
 
-    internal LookupNodeResponse(RosParameterValue[]? a)
+    internal LookupNodeResponse(RosValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
 
-        if (!value.TryGetString(out string uriStr))
+        if (!value.TryGet(out string uriStr))
         {
             MarkError();
             return;
@@ -624,14 +626,14 @@ public sealed class GetPublishedTopicsResponse : BaseResponse
 
     public (string name, string type)[] Topics { get; } = Empty;
 
-    internal GetPublishedTopicsResponse(RosParameterValue[]? a)
+    internal GetPublishedTopicsResponse(RosValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
             
-        if (!value.TryGetArray(out RosParameterValue[] objTopics))
+        if (!value.TryGetArray(out RosValue[] objTopics))
         {
             MarkError();
             return;
@@ -641,10 +643,10 @@ public sealed class GetPublishedTopicsResponse : BaseResponse
         int r = 0;
         foreach (var objTopic in objTopics)
         {
-            if (!objTopic.TryGetArray(out RosParameterValue[] topic) ||
+            if (!objTopic.TryGetArray(out RosValue[] topic) ||
                 topic.Length != 2 ||
-                !topic[0].TryGetString(out string topicName) ||
-                !topic[1].TryGetString(out string topicType))
+                !topic[0].TryGet(out string topicName) ||
+                !topic[1].TryGet(out string topicType))
             {
                 MarkError();
                 return;
@@ -664,7 +666,7 @@ public sealed class RegisterSubscriberResponse : BaseResponse
 
     public Uri[] Publishers { get; } = Empty;
 
-    internal RegisterSubscriberResponse(RosParameterValue[]? a)
+    internal RegisterSubscriberResponse(RosValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
@@ -681,7 +683,7 @@ public sealed class RegisterSubscriberResponse : BaseResponse
         int r = 0;
         foreach (var objUriStr in objUriStrings)
         {
-            if (!objUriStr.TryGetString(out string uriStr) ||
+            if (!objUriStr.TryGet(out string uriStr) ||
                 !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? publisher))
             {
                 Logger.LogFormat("{0}: Invalid uri '{1}'", this, objUriStr.ToString());
@@ -700,14 +702,14 @@ public sealed class UnregisterSubscriberResponse : BaseResponse
 {
     public int NumUnsubscribed { get; }
 
-    internal UnregisterSubscriberResponse(RosParameterValue[]? a)
+    internal UnregisterSubscriberResponse(RosValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
             
-        if (!value.TryGetInteger(out int numUnsubscribed))
+        if (!value.TryGet(out int numUnsubscribed))
         {
             MarkError();
             return;
@@ -723,14 +725,14 @@ public sealed class RegisterPublisherResponse : BaseResponse
 
     public string[] Subscribers { get; } = Empty;
 
-    internal RegisterPublisherResponse(RosParameterValue[]? a)
+    internal RegisterPublisherResponse(RosValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
             
-        if (!value.TryGetArray(out RosParameterValue[] objSubscriberStrs))
+        if (!value.TryGetArray(out RosValue[] objSubscriberStrs))
         {
             MarkError();
             return;
@@ -740,7 +742,7 @@ public sealed class RegisterPublisherResponse : BaseResponse
         int r = 0;
         foreach (var objSubscriberStr in objSubscriberStrs)
         {
-            if (!objSubscriberStr.TryGetString(out string subscriberStr))
+            if (!objSubscriberStr.TryGet(out string subscriberStr))
             {
                 MarkError();
                 return;
@@ -757,14 +759,14 @@ public sealed class UnregisterPublisherResponse : BaseResponse
 {
     public int NumUnregistered { get; }
 
-    internal UnregisterPublisherResponse(RosParameterValue[]? a)
+    internal UnregisterPublisherResponse(RosValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
             
-        if (!value.TryGetInteger(out int numUnregistered))
+        if (!value.TryGet(out int numUnregistered))
         {
             MarkError();
             return;
@@ -778,14 +780,14 @@ public sealed class LookupServiceResponse : BaseResponse
 {
     public Uri? ServiceUri { get; }
 
-    internal LookupServiceResponse(RosParameterValue[]? a)
+    internal LookupServiceResponse(RosValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
             
-        if (!value.TryGetString(out string uriStr) ||
+        if (!value.TryGet(out string uriStr) ||
             !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
         {
             MarkError();
@@ -800,14 +802,14 @@ public sealed class UnregisterServiceResponse : BaseResponse
 {
     public int NumUnregistered { get; }
 
-    internal UnregisterServiceResponse(RosParameterValue[]? a)
+    internal UnregisterServiceResponse(RosValue[]? a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
             
-        if (!value.TryGetInteger(out int numUnregistered))
+        if (!value.TryGet(out int numUnregistered))
         {
             MarkError();
             return;

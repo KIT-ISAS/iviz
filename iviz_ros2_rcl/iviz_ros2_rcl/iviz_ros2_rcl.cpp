@@ -14,6 +14,7 @@
 #include <vector>
 
 #include <fastrtps/Domain.h>
+#include <fastdds/dds/domain/DomainParticipant.hpp>
 
 #include <iostream>
 #include <rcl/error_handling.h>
@@ -21,13 +22,16 @@
 #include <rcl/graph.h>
 #include <rcl/rcl.h>
 
-#include <rcutils/logging.h>
+#include <rosidl_typesupport_fastrtps_cpp/message_type_support.h>
+#include <rosidl_typesupport_fastrtps_cpp/service_type_support.h>
 
+#include <rcutils/logging.h>
 #include <rosidl_runtime_c/string_functions.h>
 
 #include "fastcdr/Cdr.h"
 #include "fastcdr/FastBuffer.h"
 #include "fastdds/rtps/common/WriteParams.h"
+#include "fastdds/dds/subscriber/SampleInfo.hpp"
 
 #include <cassert>
 #include "rmw/rmw.h"
@@ -42,68 +46,8 @@
 #include "rmw_fastrtps_shared_cpp/rmw_common.hpp"
 #include "rmw_fastrtps_shared_cpp/TypeSupport.hpp"
 
-#include <std_msgs/msg/string.h>
-#include <std_msgs/msg/color_rgba.h>
-
-#include <tf2_msgs/msg/tf_message.h>
-
 #include <rcl_interfaces/msg/log.h>
-
 #include <rcl_interfaces/srv/describe_parameters.h>
-#include <rcl_interfaces/srv/get_parameter_types.h>
-#include <rcl_interfaces/srv/get_parameters.h>
-#include <rcl_interfaces/srv/list_parameters.h>
-#include <rcl_interfaces/srv/set_parameters.h>
-#include <rcl_interfaces/srv/set_parameters_atomically.h>
-
-
-#include <geometry_msgs/msg/transform.h>
-#include <geometry_msgs/msg/transform_stamped.h>
-#include <geometry_msgs/msg/pose.h>
-#include <geometry_msgs/msg/pose_stamped.h>
-#include <geometry_msgs/msg/point.h>
-#include <geometry_msgs/msg/point_stamped.h>
-#include <geometry_msgs/msg/wrench.h>
-#include <geometry_msgs/msg/wrench_stamped.h>
-#include <geometry_msgs/msg/twist.h>
-#include <geometry_msgs/msg/twist_stamped.h>
-
-#include <nav_msgs/msg/odometry.h>
-#include <nav_msgs/msg/occupancy_grid.h>
-
-#include <sensor_msgs/msg/point_cloud2.h>
-#include <sensor_msgs/msg/image.h>
-#include <sensor_msgs/msg/compressed_image.h>
-#include <sensor_msgs/msg/laser_scan.h>
-#include <sensor_msgs/msg/camera_info.h>
-#include <sensor_msgs/msg/joy.h>
-
-#include <visualization_msgs/msg/marker.h>
-#include <visualization_msgs/msg/interactive_marker.h>
-#include <visualization_msgs/msg/interactive_marker_feedback.h>
-#include <visualization_msgs/msg/interactive_marker_update.h>
-#include <visualization_msgs/msg/interactive_marker_init.h>
-
-#include <iviz_msgs/msg/xr_gaze_state.h>
-#include <iviz_msgs/msg/xr_hand_state.h>
-#include <iviz_msgs/msg/ar_marker_array.h>
-#include <iviz_msgs/msg/widget_array.h>
-
-#include <iviz_msgs/srv/get_model_resource.h>
-#include <iviz_msgs/srv/get_model_texture.h>
-#include <iviz_msgs/srv/get_file.h>
-#include <iviz_msgs/srv/get_sdf.h>
-#include <iviz_msgs/srv/add_module.h>
-#include <iviz_msgs/srv/add_module_from_topic.h>
-#include <iviz_msgs/srv/get_modules.h>
-#include <iviz_msgs/srv/update_module.h>
-#include <iviz_msgs/srv/reset_module.h>
-#include <iviz_msgs/srv/set_fixed_frame.h>
-
-#include <iviz_msgs/srv/update_robot.h>
-#include <iviz_msgs/srv/launch_dialog.h>
-
-#include <grid_map_msgs/msg/grid_map.h>
 
 
 static char log_buffer[2048];
@@ -111,6 +55,59 @@ static char log_buffer[2048];
 static void empty_handler(int severity, const char *name, rcutils_time_point_value_t timestamp, const char *message) { }
 
 static void (*rcl_external_logger) (int severity, const char *name, rcutils_time_point_value_t timestamp, const char *message) = empty_handler;
+
+
+
+static CdrDeserializeCallback cdr_deserialize_callback;
+
+static CdrSerializeCallback cdr_serialize_callback;
+
+static CdrGetSerializedSizeCallback cdr_get_serialized_size_callback;
+
+
+
+static bool cdr_deserialize(eprosima::fastcdr::Cdr &cdr, void *message_context)
+{
+    if (cdr_deserialize_callback != nullptr)
+    {
+        size_t buffer_size = cdr.__getBuffer().getBufferSize();
+        cdr_deserialize_callback(message_context, cdr.__getBuffer().getBuffer(), (int32_t) buffer_size);
+        cdr.reset();
+        cdr.jump(buffer_size);
+    }
+    
+    return true;
+}
+
+static bool cdr_serialize(const void *message_context, eprosima::fastcdr::Cdr &cdr)
+{
+    if (cdr_serialize_callback != nullptr)
+    {
+        size_t buffer_size = cdr.__getBuffer().getBufferSize();
+        cdr_serialize_callback(message_context, cdr.__getBuffer().getBuffer(), (int32_t) buffer_size);
+        cdr.reset();
+        cdr.jump(buffer_size);
+    }
+    
+    return true;
+}
+
+static uint32_t cdr_get_serialized_size(const void *message_context)
+{
+    if (cdr_get_serialized_size_callback != nullptr)
+    {
+        return cdr_get_serialized_size_callback(message_context);
+    }
+    
+    return 0;
+}
+
+static size_t cdr_max_serialized_size(bool &full_bounded)
+{
+    full_bounded = false;
+    return 1; // just some random value
+}
+
 
 struct interop_context
 {
@@ -128,11 +125,108 @@ struct interop_context
     std::vector<rmw_qos_profile_t> profiles {32};
 };
 
+struct iviz_message_type_support
+{
+    std::string message_namespace;
+    std::string message_name;
+    rosidl_message_type_support_t message_support;
+    message_type_support_callbacks_t message_callbacks;
 
+    iviz_message_type_support(const std::string &message_namespace, const std::string &message_name)
+    {
+        this->message_namespace = message_namespace;
+        this->message_name = message_name;
+        
+        const rosidl_message_type_support_t *ts = ROSIDL_GET_MSG_TYPE_SUPPORT(rcl_interfaces, msg, Log);
+        
+        message_support.typesupport_identifier = ts->typesupport_identifier;
+        message_support.data = &message_callbacks;
+        message_support.func = ts->func;
+
+        message_callbacks.message_namespace_ = this->message_namespace.data();
+        message_callbacks.message_name_ = this->message_name.data();
+        message_callbacks.cdr_serialize = cdr_serialize;
+        message_callbacks.cdr_deserialize = cdr_deserialize;
+        message_callbacks.get_serialized_size = cdr_get_serialized_size;
+        message_callbacks.max_serialized_size = cdr_max_serialized_size;
+    }
+};
+
+struct iviz_service_type_support
+{
+    std::string service_namespace;
+    std::string service_name;
+    rosidl_service_type_support_t service_support;
+    service_type_support_callbacks_t service_callbacks;
+    
+    std::string request_namespace;
+    std::string request_name;
+    rosidl_message_type_support_t request_support;
+    message_type_support_callbacks_t request_callbacks;
+
+    std::string response_namespace;
+    std::string response_name;
+    rosidl_message_type_support_t response_support;
+    message_type_support_callbacks_t response_callbacks;
+
+    
+    iviz_service_type_support(const std::string &service_namespace, const std::string &service_name)
+    {
+        this->service_namespace = service_namespace;
+        this->service_name = service_name;
+        
+        const rosidl_service_type_support_t *service_ts = ROSIDL_GET_SRV_TYPE_SUPPORT(rcl_interfaces, srv, DescribeParameters);
+
+        service_support.typesupport_identifier = service_ts->typesupport_identifier;
+        service_support.data = &service_callbacks;
+        service_support.func = service_ts->func;
+
+        const service_type_support_callbacks_t *ts_callbacks = (service_type_support_callbacks_t*) service_ts->data;
+        const rosidl_message_type_support_t *ts_request = ts_callbacks->request_members_;
+        const rosidl_message_type_support_t *ts_response = ts_callbacks->response_members_;
+
+        //const message_type_support_callbacks_t *callbacks_1 = (message_type_support_callbacks_t*)ts_request->data;
+        //const message_type_support_callbacks_t *callbacks_2 = (message_type_support_callbacks_t*)ts_response->data;
+        
+        service_callbacks.service_namespace_ = this->service_namespace.data();
+        service_callbacks.service_name_ = this->service_name.data();
+        service_callbacks.request_members_ = &request_support;
+        service_callbacks.response_members_ = &response_support;
+            
+        request_support.typesupport_identifier = ts_request->typesupport_identifier;
+        request_support.data = &request_callbacks;
+        request_support.func = ts_request->func;
+        
+        this->request_name = service_name + "_Request";
+        this->request_namespace = service_namespace;
+        request_callbacks.message_name_ = this->request_name.data();
+        request_callbacks.message_namespace_ = this->request_namespace.data();
+        request_callbacks.cdr_deserialize = cdr_deserialize;
+        request_callbacks.cdr_serialize = cdr_serialize;
+        request_callbacks.get_serialized_size = cdr_get_serialized_size;
+        request_callbacks.max_serialized_size = cdr_max_serialized_size;
+
+        response_support.typesupport_identifier = ts_response->typesupport_identifier;
+        response_support.data = &response_callbacks;
+        response_support.func = ts_response->func;
+
+        this->response_name = service_name + "_Response";
+        this->response_namespace = service_namespace;
+        response_callbacks.message_name_ = this->response_name.data();
+        response_callbacks.message_namespace_ = this->response_namespace.data();
+        response_callbacks.cdr_deserialize = cdr_deserialize;
+        response_callbacks.cdr_serialize = cdr_serialize;
+        response_callbacks.get_serialized_size = cdr_get_serialized_size;
+        response_callbacks.max_serialized_size = cdr_max_serialized_size;
+    }
+};
+
+
+/*
 #define MSGTYPE(a, b) (rosidl_message_type_support_t*) ROSIDL_GET_MSG_TYPE_SUPPORT(a, msg, b)
 #define ENTRY(a, b) {#a "/" #b, MSGTYPE(a, b)}
 
-static std::map<std::string, rosidl_message_type_support_t*> default_types
+static std::map<std::string, rosidl_message_type_support_t*> default_types_old
 {
     ENTRY(std_msgs, String),
     ENTRY(tf2_msgs, TFMessage),
@@ -161,13 +255,17 @@ static std::map<std::string, rosidl_message_type_support_t*> default_types
     ENTRY(visualization_msgs, InteractiveMarkerInit),
     ENTRY(visualization_msgs, InteractiveMarkerUpdate),
     ENTRY(grid_map_msgs, GridMap),
-
+    
     ENTRY(iviz_msgs, XRGazeState),
     ENTRY(iviz_msgs, XRHandState),
     ENTRY(iviz_msgs, ARMarkerArray),
     ENTRY(iviz_msgs, WidgetArray),
 };
+ */
 
+static std::map<std::string, iviz_message_type_support*> custom_message_types;
+
+/*
 #define SRVTYPE(a, b) (rosidl_service_type_support_t*) ROSIDL_GET_SRV_TYPE_SUPPORT(a, srv, b)
 #define SRVENTRY(a, b) {#a "/" #b, SRVTYPE(a, b)}
 
@@ -194,6 +292,10 @@ static std::map<std::string, rosidl_service_type_support_t*> default_service_typ
     SRVENTRY(iviz_msgs, UpdateRobot),
     SRVENTRY(iviz_msgs, LaunchDialog),
 };
+ */
+
+static std::map<std::string, iviz_service_type_support*> custom_service_types;
+
 
 extern "C"
 {
@@ -203,6 +305,16 @@ static void IgnoreRet(rcl_ret_t) {}
 bool native_rcl_set_dds_profile_path(const char *path)
 {
     return eprosima::fastrtps::Domain::loadXMLProfilesFile(path);
+}
+
+
+void native_rcl_set_message_callbacks(CdrDeserializeCallback new_cdr_deserialize_callback,
+                                      CdrSerializeCallback new_cdr_serialize_callback,
+                                      CdrGetSerializedSizeCallback new_cdr_get_serialized_size_callback)
+{
+    cdr_deserialize_callback = new_cdr_deserialize_callback;
+    cdr_serialize_callback = new_cdr_serialize_callback;
+    cdr_get_serialized_size_callback = new_cdr_get_serialized_size_callback;
 }
 
 void *native_rcl_create_context()
@@ -215,7 +327,7 @@ void native_rcl_destroy_context(void *context)
     delete (interop_context*) context;
 }
 
-int32_t native_rcl_init(void *context_handle)
+int32_t native_rcl_init(void *context_handle, int32_t domain_id)
 {
     int num_args = 0;
     
@@ -231,6 +343,7 @@ int32_t native_rcl_init(void *context_handle)
     }
     
     rmw_init_options_t *rmw_init_options = rcl_init_options_get_rmw_init_options(&init_options);
+    rmw_init_options->domain_id = domain_id;
     rmw_init_options->localhost_only = RMW_LOCALHOST_ONLY_DISABLED;
     
     const char ** arg_values = NULL;
@@ -460,12 +573,14 @@ const char* native_rcl_get_error_string(void *context_handle)
 
 bool native_rcl_is_message_type_supported(const char *type)
 {
-    return default_types.count(type) != 0;
+    //return default_types.count(type) != 0;
+    return true;
 }
 
 bool native_rcl_is_service_type_supported(const char *type)
 {
-    return default_service_types.count(type) != 0;
+    //return default_service_types.count(type) != 0;
+    return true;
 }
 
 int32_t native_rcl_create_subscription_handle(void **subscription_handle,
@@ -476,14 +591,36 @@ int32_t native_rcl_create_subscription_handle(void **subscription_handle,
 {
     rcl_node_t *node = (rcl_node_t *)node_handle;
     
-    auto it{ default_types.find( type ) };
+    //auto it{ default_types.find( type ) };
+    auto it { custom_message_types.find(type) };
     
-    if (it == default_types.end())
+    const rosidl_message_type_support_t *ts;
+    if (it == custom_message_types.end())
     {
-        return -1;
+        std::string short_type_name = type;
+        size_t index = short_type_name.find("/");
+        if (index == std::string::npos)
+        {
+            std::cout << "Invalid message name '" << short_type_name << "'!" << std::endl; // can't really recover from this
+            return -1;
+        }
+        else
+        {
+            std::string message_namespace = short_type_name.substr(0, index) + "::msg";
+            std::string message_name = short_type_name.substr(index + 1);
+
+            auto its = new iviz_message_type_support(message_namespace, message_name);
+            ts = &its->message_support;
+            custom_message_types[type] = its;
+        }
+    }
+    else
+    {
+        //const rosidl_message_type_support_t *ts = it->second;
+        ts = &it->second->message_support;
     }
     
-    const rosidl_message_type_support_t *ts = it->second;
+    //const rosidl_message_type_support_t *ts = it->second;
     
     rcl_subscription_t *subscription = (rcl_subscription_t *)malloc(sizeof(rcl_subscription_t));
     *subscription = rcl_get_zero_initialized_subscription();
@@ -518,11 +655,11 @@ int32_t native_rcl_subscription_get_publisher_count(void *subscription_handle, i
     return ret;
 }
 
-int32_t native_rcl_take_serialized_message(void *subscription_handle, void *serialized_message,
+int32_t native_rcl_take_serialized_message(const void *subscription_handle, void *serialized_message,
                                            void **ptr, int32_t *length, void *gid,
                                            uint8_t *more_remaining)
 {
-    rcl_subscription_t * subscription = (rcl_subscription_t *)subscription_handle;
+    const rcl_subscription_t * subscription = (const rcl_subscription_t *)subscription_handle;
     rcl_serialized_message_t *message = (rcl_serialized_message_t *) serialized_message;
     
     rmw_message_info_t info;
@@ -547,6 +684,23 @@ int32_t native_rcl_take_serialized_message(void *subscription_handle, void *seri
     
     return ret;
 }
+
+int32_t native_rcl_take(const void *subscription_handle, void *message_context, void *gid, uint8_t *more_remaining)
+{
+    const rcl_subscription_t * subscription = (const rcl_subscription_t *)subscription_handle;
+    
+    rmw_message_info_t message_info;
+    rcl_ret_t ret = rcl_take(subscription, message_context, &message_info, nullptr);
+
+    if (ret != RCL_RET_OK)
+    {
+        return ret;
+    }
+    
+    memcpy(gid, message_info.publisher_gid.data, RMW_GID_STORAGE_SIZE);
+    return RCL_RET_OK;
+}
+
 
 int32_t native_rcl_create_serialized_message(void** message_handle)
 {
@@ -588,16 +742,34 @@ int32_t native_rcl_create_publisher_handle(void **publisher_handle,
                                            const char *type,
                                            void *profile_handle)
 {
-    auto it{ default_types.find( type ) };
+    auto it { custom_message_types.find(type) };
     
-    if (it == default_types.end())
+    const rosidl_message_type_support_t *ts;
+    if (it == custom_message_types.end())
     {
-        return -1;
+        std::string short_type_name = type;
+        size_t index = short_type_name.find("/");
+        if (index == std::string::npos)
+        {
+            std::cout << "Invalid message name '" << short_type_name << "'!" << std::endl; // can't really recover from this
+            return -1;
+        }
+        else
+        {
+            std::string message_namespace = short_type_name.substr(0, index) + "::msg";
+            std::string message_name = short_type_name.substr(index + 1);
+
+            auto its = new iviz_message_type_support(message_namespace, message_name);
+            ts = &its->message_support;
+            custom_message_types[type] = its;
+        }
+    }
+    else
+    {
+        ts = &it->second->message_support;
     }
     
     rcl_node_t *node = (rcl_node_t *)node_handle;
-    
-    const rosidl_message_type_support_t *ts = it->second;
     
     rcl_publisher_t *publisher = (rcl_publisher_t *)malloc(sizeof(rcl_publisher_t));
     *publisher = rcl_get_zero_initialized_publisher();
@@ -632,10 +804,10 @@ int32_t native_rcl_publisher_get_subscription_count(void *publisher_handle, int3
     return ret;
 }
 
-int32_t native_rcl_publish(void *publisher_handle, void *raw_ros_message)
+int32_t native_rcl_publish(void *publisher_handle, void *message_context)
 {
     rcl_publisher_t * publisher = (rcl_publisher_t *)publisher_handle;
-    return rcl_publish(publisher, raw_ros_message, nullptr);
+    return rcl_publish(publisher, message_context, nullptr);
 }
 
 int32_t native_rcl_publish_serialized_message(void *publisher_handle, void *serialized_message_handle)
@@ -1086,14 +1258,33 @@ int32_t native_rcl_create_client_handle(void **client_handle,
 {
     rcl_node_t *node = (rcl_node_t *)node_handle;
     
-    auto it{ default_service_types.find( type ) };
+    auto it { custom_service_types.find(type) };
     
-    if (it == default_service_types.end())
+    const rosidl_service_type_support_t *ts;
+    if (it == custom_service_types.end())
     {
-        return -1;
+        std::string short_type_name = type;
+        size_t index = short_type_name.find("/");
+        if (index == std::string::npos)
+        {
+            std::cout << "Invalid message name '" << short_type_name << "'!" << std::endl;
+            return -1;
+        }
+        else
+        {
+            std::string service_namespace = short_type_name.substr(0, index) + "::srv";
+            std::string service_name = short_type_name.substr(index + 1);
+
+            auto its = new iviz_service_type_support(service_namespace, service_name);
+            ts = &its->service_support;
+            custom_service_types[type] = its;
+        }
+    }
+    else
+    {
+        ts = &it->second->service_support;
     }
     
-    const rosidl_service_type_support_t *ts = it->second;
     
     rcl_client_t *client = (rcl_client_t *)malloc(sizeof(rcl_client_t));
     *client = rcl_get_zero_initialized_client();
@@ -1101,7 +1292,7 @@ int32_t native_rcl_create_client_handle(void **client_handle,
     rcl_client_options_t options = rcl_client_get_default_options();
     rmw_qos_profile_t *profile = (rmw_qos_profile_t*) profile_handle;
     options.qos = *profile;
-
+    
     rcl_ret_t ret = rcl_client_init(client, node, ts, service, &options);
     if (ret != RCL_RET_OK)
     {
@@ -1248,14 +1439,32 @@ int32_t native_rcl_create_service_handle(void **service_handle,
 {
     rcl_node_t *node = (rcl_node_t *)node_handle;
     
-    auto it{ default_service_types.find( type ) };
+    auto it { custom_service_types.find(type) };
     
-    if (it == default_service_types.end())
+    const rosidl_service_type_support_t *ts;
+    if (it == custom_service_types.end())
     {
-        return -1;
+        std::string short_type_name = type;
+        size_t index = short_type_name.find("/");
+        if (index == std::string::npos)
+        {
+            std::cout << "Invalid message name '" << short_type_name << "'!" << std::endl;
+            return -1;
+        }
+        else
+        {
+            std::string service_namespace = short_type_name.substr(0, index) + "::srv";
+            std::string service_name = short_type_name.substr(index + 1);
+
+            auto its = new iviz_service_type_support(service_namespace, service_name);
+            ts = &its->service_support;
+            custom_service_types[type] = its;
+        }
     }
-    
-    const rosidl_service_type_support_t *ts = it->second;
+    else
+    {
+        ts = &it->second->service_support;
+    }
     
     rcl_service_t *server = (rcl_service_t *)malloc(sizeof(rcl_service_t));
     *server = rcl_get_zero_initialized_service();
@@ -1263,7 +1472,7 @@ int32_t native_rcl_create_service_handle(void **service_handle,
     rcl_service_options_t options = rcl_service_get_default_options();
     rmw_qos_profile_t *profile = (rmw_qos_profile_t*) profile_handle;
     options.qos = *profile;
-
+    
     rcl_ret_t ret = rcl_service_init(server, node, ts, service, &options);
     if (ret != RCL_RET_OK)
     {
@@ -1422,6 +1631,7 @@ int32_t native_rcl_take_request(void *service_handle, void* serialized_message_h
 
 
 
+
 void default_handler(int severity, const char *name, rcutils_time_point_value_t timestamp, const char *message)
 {
     std::cout << "[" << name << "] " << message << std::endl;
@@ -1434,7 +1644,7 @@ int main_publish()
     
     interop_context context;
     
-    native_rcl_init(&context);
+    native_rcl_init(&context, 0);
     native_rcl_init_logging();
     
     native_rcl_set_logging_level(RCUTILS_LOG_SEVERITY_DEBUG);
@@ -1460,27 +1670,6 @@ int main_publish()
     }
     
     /*
-     //geometry_msgs__msg__TransformStamped v;
-     geometry_msgs__msg__PolygonStamped v;
-     geometry_msgs__msg__PolygonStamped__init(&v);
-     
-     rosidl_runtime_c__String a;
-     rosidl_runtime_c__String__init(&a);
-     rosidl_runtime_c__String__assign(&a, "abcd");
-     
-     rosidl_runtime_c__String b;
-     rosidl_runtime_c__String__init(&b);
-     rosidl_runtime_c__String__assign(&b, "childr");
-     
-     
-     geometry_msgs__msg__Point32__Sequence s;
-     geometry_msgs__msg__Point32__Sequence__init(&s, 5);
-     s.data[0].y = 1;
-     
-     v.header.frame_id = a;
-     v.polygon.points = s;
-     */
-    
     tf2_msgs__msg__TFMessage v;
     tf2_msgs__msg__TFMessage__init(&v);
     
@@ -1493,18 +1682,6 @@ int main_publish()
     v.transforms.data[0].child_frame_id = a;
     
     
-    /*
-     v.child_frame_id = b;
-     v.transform.translation.x = 1;
-     v.transform.translation.y = 0;
-     v.transform.translation.z = 1;
-     
-     v.transform.rotation.x = 0;
-     v.transform.rotation.y = 0;
-     v.transform.rotation.z = 0;
-     v.transform.rotation.w = 1;
-     */
-    
     
     
     while (native_rcl_ok(&context))
@@ -1513,6 +1690,7 @@ int main_publish()
         native_rcl_publish(publisher_handle, &v);
         usleep(1000 * 1000);
     }
+     */
     
     
     return 0;
@@ -1525,7 +1703,7 @@ int main_subscribe()
     
     interop_context context;
     
-    native_rcl_init(&context);
+    native_rcl_init(&context, 0);
     
     rcl_node_t *node_handle;
     rcl_ret_t ret = native_rcl_create_node_handle(&context, (void**)&node_handle, "test", "");
@@ -1537,8 +1715,8 @@ int main_subscribe()
     
     
     rcl_subscription_t* subscription_handle;
+    rmw_qos_profile_t profile = rmw_qos_profile_system_default;
     
-    rmw_qos_profile_t profile;
     ret = native_rcl_create_subscription_handle((void**)&subscription_handle, node_handle, "chatter", "std_msgs/String",
                                                 &profile);
     
@@ -1551,6 +1729,8 @@ int main_subscribe()
     
     rcl_serialized_message_t* message;
     native_rcl_create_serialized_message((void**)&message);
+    
+    //ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String);
     
     while (native_rcl_ok(&context))
     {
@@ -1601,9 +1781,104 @@ int main_subscribe()
     return 0;
 }
 
+
+int main_subscribe_2()
+{
+    std::cout << "running..." << std::endl;
+    
+    interop_context context;
+    
+    native_rcl_init(&context, 0);
+    
+    rcl_node_t *node_handle;
+    rcl_ret_t ret = native_rcl_create_node_handle(&context, (void**)&node_handle, "test", "");
+    if (ret != RCL_RET_OK)
+    {
+        std::cout << "failed to create node" << std::endl;
+        return 1;
+    }
+    
+    auto service = new iviz_service_type_support("iviz_msgs", "GetModelResource");
+    
+    
+    rcl_subscription_t* subscription_handle;
+    rmw_qos_profile_t profile = rmw_qos_profile_system_default;
+    ret = native_rcl_create_subscription_handle((void**)&subscription_handle, node_handle, "chatter_int", "std_msgs/Int32",
+                                                &profile);
+
+    if (ret != RCL_RET_OK)
+    {
+        std::cout << "failed to initialize subscription" << std::endl;
+    }
+    
+    std::cout << "started!" << std::endl;
+    
+    rcl_serialized_message_t* message;
+    native_rcl_create_serialized_message((void**)&message);
+    
+    //ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String);
+    
+    //tf2_msgs__msg__TFMessage;
+    //std_msgs__msg__String string;
+    
+    
+    while (native_rcl_ok(&context))
+    {
+        rcl_wait_set_t* wait_set_handle = (rcl_wait_set_t*) native_rcl_create_wait_set();
+        
+        native_rcl_wait_set_init(&context, wait_set_handle, 1, 0, 0, 0, 0, 0);
+        native_rcl_wait_set_clear(wait_set_handle);
+        
+        native_rcl_wait_set_add_subscription((void*)wait_set_handle, (void*)subscription_handle);
+        
+        void **dummy;
+        ret = native_rcl_wait(wait_set_handle, 5000, &dummy, &dummy, &dummy, &dummy);
+        std::cout << ret << std::endl;
+        if (ret == RCL_RET_TIMEOUT)
+        {
+            native_rcl_destroy_wait_set(wait_set_handle);
+            continue;
+        }
+        
+        //if (wait_set_handle->subscriptions[0] != nullptr)
+        {
+            int dummy;
+            void *ptr;
+            uint8_t remaining;
+            char gid[RMW_GID_STORAGE_SIZE];
+            
+            //ret = native_rcl_take_serialized_message(subscription_handle, message,
+            //                                         &ptr, &dummy, gid, &remaining);
+            
+
+            
+            ret = rcl_take(subscription_handle, (void*)1, nullptr, nullptr);
+            
+            if (ret != RCL_RET_OK)
+            {
+                std::cout << rcl_get_error_string().str << std::endl;
+            }
+            
+            std::cout << "got message! " << ret << " size " << message->buffer_length << std::endl;
+        }
+        
+        native_rcl_destroy_wait_set(wait_set_handle);
+    }
+    
+    usleep(3000 * 1000);
+    
+    
+    native_rcl_destroy_subscription_handle(subscription_handle, node_handle);
+    native_rcl_destroy_node_handle(node_handle);
+    
+    std::cout << "alright! " << native_rcl_get_error_string(&context) << std::endl;
+    
+    return 0;
+}
+
 int main(int argc, const char * argv[])
 {
-    main_publish();
+    main_subscribe_2();
 }
 
 

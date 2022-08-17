@@ -56,7 +56,7 @@ public sealed class RosClient : IRosClient
     /// </summary>
     public ShutdownActionCall? ShutdownAction { get; set; }
 
-    public delegate void ParamUpdateActionCall(string callerId, string parameterKey, RosParameterValue parameterValue);
+    public delegate void ParamUpdateActionCall(string callerId, string parameterKey, RosValue value);
 
     /// <summary>
     /// Handler of 'paramUpdate' XML-RPC calls from the slave API
@@ -137,7 +137,7 @@ public sealed class RosClient : IRosClient
     /// <summary>
     /// Wrapper for XML-RPC calls to the master.
     /// </summary>
-    public ParameterClient Parameters { get; private set; }
+    public RosParameterClient Parameters { get; private set; }
 
     /// <summary>
     /// URI of the master node.
@@ -195,7 +195,7 @@ public sealed class RosClient : IRosClient
         CallerUri = ownUri;
 
         RosMasterClient = new RosMasterClient(masterUri, CallerId, CallerUri, 3);
-        Parameters = new ParameterClient(RosMasterClient);
+        Parameters = new RosParameterClient(RosMasterClient);
     }
 
     /// <summary>
@@ -251,7 +251,7 @@ public sealed class RosClient : IRosClient
 
             // caller uri has changed;
             RosMasterClient = new RosMasterClient(MasterUri, CallerId, CallerUri, 3);
-            Parameters = new ParameterClient(RosMasterClient);
+            Parameters = new RosParameterClient(RosMasterClient);
         }
 
 
@@ -330,7 +330,7 @@ public sealed class RosClient : IRosClient
 
             // own uri has changed;
             client.RosMasterClient = new RosMasterClient(client.MasterUri, client.CallerId, client.CallerUri);
-            client.Parameters = new ParameterClient(client.RosMasterClient);
+            client.Parameters = new RosParameterClient(client.RosMasterClient);
         }
 
         Logger.LogDebugFormat("{0}: Initialized.", client);
@@ -346,7 +346,7 @@ public sealed class RosClient : IRosClient
         }
         catch
         {
-            Logger.LogDebugFormat("{0}: EnsureCleanState failed.", client);
+            Logger.LogDebugFormat("{0}: " + nameof(EnsureCleanSlateAsync) + " failed.", client);
             await client.listener.DisposeAsync();
             throw;
         }
@@ -1523,11 +1523,11 @@ public sealed class RosClient : IRosClient
     /// <typeparam name="T">Service type.</typeparam>
     /// <returns>Whether the call succeeded.</returns>
     /// <exception cref="TaskCanceledException">The operation timed out.</exception>
-    public T CallService<T>(string serviceName, T service, bool persistent, int timeoutInMs)
+    public void CallService<T>(string serviceName, T service, bool persistent, int timeoutInMs)
         where T : IService, new()
     {
         using var timeoutTs = new CancellationTokenSource(timeoutInMs);
-        return CallService(serviceName, service, persistent, timeoutTs.Token);
+        CallService(serviceName, service, persistent, timeoutTs.Token);
     }
 
     public TU CallService<TT, TU>(string serviceName, IRequest<TT, TU> request,
@@ -1550,11 +1550,11 @@ public sealed class RosClient : IRosClient
     /// <returns>Whether the call succeeded.</returns>
     /// <exception cref="TaskCanceledException">Thrown if the operation timed out.</exception>
     /// <exception cref="RosServiceCallFailed">Thrown if the server could not process the call.</exception>
-    public T CallService<T>(string serviceName, T service, bool persistent = false,
+    public void CallService<T>(string serviceName, T service, bool persistent = false,
         CancellationToken token = default)
         where T : IService, new()
     {
-        return TaskUtils.RunSync(() => CallServiceAsync(serviceName, service, persistent, token), token);
+        TaskUtils.RunSync(() => CallServiceAsync(serviceName, service, persistent, token), token);
     }
 
     /// <summary>
@@ -1567,13 +1567,13 @@ public sealed class RosClient : IRosClient
     /// <typeparam name="T">Service type.</typeparam>
     /// <exception cref="TaskCanceledException">Thrown if the timeout expired.</exception>
     /// <exception cref="RosServiceCallFailed">Thrown if the server could not process the call.</exception>
-    public async ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent,
+    public async ValueTask CallServiceAsync<T>(string serviceName, T service, bool persistent,
         int timeoutInMs) where T : IService, new()
     {
         using var timeoutTs = new CancellationTokenSource(timeoutInMs);
         try
         {
-            return await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token);
+            await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token);
         }
         catch (OperationCanceledException)
         {
@@ -1603,7 +1603,7 @@ public sealed class RosClient : IRosClient
     /// <param name="token">A cancellation token</param>
     /// <typeparam name="T">Service type.</typeparam>
     /// <returns>Whether the call succeeded.</returns>
-    public async ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
+    public async ValueTask CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
         CancellationToken token = default)
         where T : IService, new()
     {
@@ -1624,7 +1624,7 @@ public sealed class RosClient : IRosClient
                 try
                 {
                     await existingCaller.ExecuteAsync(service, token);
-                    return service;
+                    return;
                 }
                 catch (Exception e)
                 {
@@ -1657,7 +1657,7 @@ public sealed class RosClient : IRosClient
                 callersByService.TryAdd(resolvedServiceName, serviceCaller);
                 await serviceCaller.StartAsync(serviceUri, persistent, token);
                 await serviceCaller.ExecuteAsync(service, token);
-                return service;
+                return;
             }
             catch (Exception e)
             {
@@ -1683,7 +1683,6 @@ public sealed class RosClient : IRosClient
             using var serviceCaller = new RosServiceCaller(serviceInfo);
             await serviceCaller.StartAsync(serviceUri, persistent, token);
             await serviceCaller.ExecuteAsync(service, token);
-            return service;
         }
         catch (Exception e) when (e is SocketException or IOException)
         {
@@ -1835,10 +1834,10 @@ public sealed class RosClient : IRosClient
     public ValueTask<string[]> GetParameterNamesAsync(CancellationToken token = default) =>
         Parameters.GetParameterNamesAsync(token);
 
-    public bool GetParameter(string key, out RosParameterValue value) => Parameters.GetParameter(key, out value);
+    public RosValue GetParameter(string key) => Parameters.GetParameter(key);
 
-    public ValueTask<(bool success, RosParameterValue value)>
-        GetParameterAsync(string key, CancellationToken token = default) => Parameters.GetParameterAsync(key, token);
+    public ValueTask<RosValue> GetParameterAsync(string key, CancellationToken token = default) =>
+        Parameters.GetParameterAsync(key, token);
 
     internal bool TryGetLoopbackReceiver<T>(string topic, in Endpoint endpoint, out ILoopbackReceiver<T>? receiver)
         where T : IMessage

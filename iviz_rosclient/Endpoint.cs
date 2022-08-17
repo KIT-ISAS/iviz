@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace Iviz.Roslib;
 
@@ -13,6 +14,7 @@ public readonly struct Endpoint : IEquatable<Endpoint>
     [DataMember] public string Hostname { get; }
     [DataMember] public int Port { get; }
 
+    [JsonConstructor]
     public Endpoint(string hostname, int port) =>
         (Hostname, Port) = (hostname ?? throw new ArgumentNullException(nameof(hostname)), port);
 

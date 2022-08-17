@@ -1,20 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Roslib.XmlRpc;
 using Iviz.Tools;
 using Iviz.XmlRpc;
-using TopicTuple = System.Tuple<string, string>;
-using TopicTuples = System.Tuple<string, string[]>;
 
-namespace Iviz.Roslib.XmlRpc;
+namespace Iviz.Roslib;
 
 /// <summary>
 /// Contains utilities to access data from a ROS parameter server.
 /// </summary>
-public sealed class ParameterClient
+public sealed class RosParameterClient
 {
     readonly RosMasterClient backend;
 
@@ -22,62 +19,50 @@ public sealed class ParameterClient
     public Uri CallerUri => backend.CallerUri;
     public string CallerId => backend.CallerId;
 
-    public ParameterClient(RosMasterClient backend)
+    public RosParameterClient(RosMasterClient backend)
     {
         this.backend = backend;
     }
 
     public override string ToString()
     {
-        return $"[ParameterClient masterUri={MasterUri} callerUri={CallerUri} callerId={CallerId}]";
+        return $"[{nameof(RosParameterClient)} masterUri={MasterUri} callerUri={CallerUri} callerId={CallerId}]";
     }
 
     public bool SetParameter(string key, XmlRpcArg value)
     {
-        if (key == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(key));
-        }
-
+        if (key == null) BuiltIns.ThrowArgumentNull(nameof(key));
         value.ThrowIfEmpty();
+
         return SetParam(key, value).IsValid;
     }
 
     public async ValueTask<bool> SetParameterAsync(string key, XmlRpcArg value, CancellationToken token = default)
     {
-        if (key == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(key));
-        }
-
+        if (key == null) BuiltIns.ThrowArgumentNull(nameof(key));
         value.ThrowIfEmpty();
+
         return (await SetParamAsync(key, value, token)).IsValid;
     }
 
-    public bool GetParameter(string key, out RosParameterValue value)
+    public RosValue GetParameter(string key)
     {
-        if (key == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(key));
-        }
+        if (key == null) BuiltIns.ThrowArgumentNull(nameof(key));
 
         var response = GetParam(key);
-        bool success = response.IsValid;
-        value = success ? response.ParameterValue : default;
-        return success;
+        if (response.HasParseError) throw new ParseException("Failed to parse response");
+        if (!response.IsSuccess) throw new RosParameterNotFoundException();
+        return response.Value;
     }
 
-    public async ValueTask<(bool success, RosParameterValue value)> GetParameterAsync(string key,
-        CancellationToken token = default)
+    public async ValueTask<RosValue> GetParameterAsync(string key, CancellationToken token = default)
     {
-        if (key == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(key));
-        }
+        if (key == null) BuiltIns.ThrowArgumentNull(nameof(key));
 
         var response = await GetParamAsync(key, token);
-        bool success = response.IsValid;
-        return (success, success ? response.ParameterValue : default);
+        if (response.HasParseError) throw new ParseException("Failed to parse response");
+        if (!response.IsSuccess) throw new RosParameterNotFoundException();
+        return response.Value;
     }
 
     public string[] GetParameterNames()
@@ -135,50 +120,34 @@ public sealed class ParameterClient
 
     public async ValueTask<bool> HasParameterAsync(string key, CancellationToken token = default)
     {
-        if (key == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(key));
-        }
+        if (key == null) BuiltIns.ThrowArgumentNull(nameof(key));
 
         return (await HasParamAsync(key, token)).HasParam;
     }
 
     public bool SubscribeParameter(string key)
     {
-        if (key == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(key));
-        }
-
+        if (key == null) BuiltIns.ThrowArgumentNull(nameof(key));
         return SubscribeParam(key).IsValid;
     }
 
     public async ValueTask<bool> SubscribeParameterAsync(string key, CancellationToken token = default)
     {
-        if (key == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(key));
-        }
+        if (key == null) BuiltIns.ThrowArgumentNull(nameof(key));
 
         return (await SubscribeParamAsync(key, token)).IsValid;
     }
 
     public bool UnsubscribeParameter(string key)
     {
-        if (key == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(key));
-        }
+        if (key == null) BuiltIns.ThrowArgumentNull(nameof(key));
 
         return UnsubscribeParam(key).IsValid;
     }
 
     public async ValueTask<bool> UnsubscribeParameterAsync(string key, CancellationToken token = default)
     {
-        if (key == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(key));
-        }
+        if (key == null) BuiltIns.ThrowArgumentNull(nameof(key));
 
         return (await UnsubscribeParamAsync(key, token)).IsValid;
     }
@@ -296,26 +265,26 @@ public sealed class ParameterClient
         return new GetParamNamesResponse(response);
     }
 
-    RosParameterValue[] MethodCall(string function, XmlRpcArg[] args)
+    RosValue[] MethodCall(string function, XmlRpcArg[] args)
     {
         return backend.MethodCall(function, args);
     }
 
-    ValueTask<RosParameterValue[]> MethodCallAsync(string function, XmlRpcArg[] args, CancellationToken token = default)
+    ValueTask<RosValue[]> MethodCallAsync(string function, XmlRpcArg[] args, CancellationToken token = default)
     {
         return backend.MethodCallAsync(function, args, token);
     }
 
     internal sealed class GetParamResponse : BaseResponse
     {
-        public RosParameterValue ParameterValue { get; }
+        public RosValue Value { get; }
 
-        internal GetParamResponse(RosParameterValue[]? a)
+        internal GetParamResponse(RosValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !a[0].TryGetInteger(out int code) ||
-                !a[1].TryGetString(out string statusMessage))
+                !a[0].TryGet(out int code) ||
+                !a[1].TryGet(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -329,7 +298,7 @@ public sealed class ParameterClient
                 return;
             }
 
-            ParameterValue = a[2];
+            Value = a[2];
         }
     }
 
@@ -337,12 +306,12 @@ public sealed class ParameterClient
     {
         public string? FoundKey { get; }
 
-        internal SearchParamResponse(RosParameterValue[]? a)
+        internal SearchParamResponse(RosValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !a[0].TryGetInteger(out int code) ||
-                !a[1].TryGetString(out string statusMessage))
+                !a[0].TryGet(out int code) ||
+                !a[1].TryGet(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -356,7 +325,7 @@ public sealed class ParameterClient
                 return;
             }
 
-            if (!a[2].TryGetString(out string foundKeyStr))
+            if (!a[2].TryGet(out string foundKeyStr))
             {
                 MarkError();
                 return;
@@ -368,14 +337,14 @@ public sealed class ParameterClient
 
     internal sealed class SubscribeParamResponse : BaseResponse
     {
-        public RosParameterValue ParameterValue { get; }
+        public RosValue Value { get; }
 
-        internal SubscribeParamResponse(RosParameterValue[]? a)
+        internal SubscribeParamResponse(RosValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !a[0].TryGetInteger(out int code) ||
-                !a[1].TryGetString(out string statusMessage))
+                !a[0].TryGet(out int code) ||
+                !a[1].TryGet(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -389,7 +358,7 @@ public sealed class ParameterClient
                 return;
             }
 
-            ParameterValue = a[2];
+            Value = a[2];
         }
     }
 
@@ -397,12 +366,12 @@ public sealed class ParameterClient
     {
         public int NumUnsubscribed { get; }
 
-        internal UnsubscribeParamResponse(RosParameterValue[]? a)
+        internal UnsubscribeParamResponse(RosValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !a[0].TryGetInteger(out int code) ||
-                !a[1].TryGetString(out string statusMessage))
+                !a[0].TryGet(out int code) ||
+                !a[1].TryGet(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -416,7 +385,7 @@ public sealed class ParameterClient
                 return;
             }
 
-            if (!a[2].TryGetInteger(out int numUnsubscribed))
+            if (!a[2].TryGet(out int numUnsubscribed))
             {
                 MarkError();
                 return;
@@ -430,12 +399,12 @@ public sealed class ParameterClient
     {
         public bool HasParam { get; }
 
-        internal HasParamResponse(RosParameterValue[]? a)
+        internal HasParamResponse(RosValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !a[0].TryGetInteger(out int code) ||
-                !a[1].TryGetString(out string statusMessage))
+                !a[0].TryGet(out int code) ||
+                !a[1].TryGet(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -449,7 +418,7 @@ public sealed class ParameterClient
                 return;
             }
 
-            if (!a[2].TryGetBoolean(out bool hasParam))
+            if (!a[2].TryGet(out bool hasParam))
             {
                 MarkError();
                 return;
@@ -463,12 +432,12 @@ public sealed class ParameterClient
     {
         public string[] ParameterNameList { get; } = Array.Empty<string>();
 
-        internal GetParamNamesResponse(RosParameterValue[]? a)
+        internal GetParamNamesResponse(RosValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !a[0].TryGetInteger(out int code) ||
-                !a[1].TryGetString(out string statusMessage))
+                !a[0].TryGet(out int code) ||
+                !a[1].TryGet(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -482,7 +451,7 @@ public sealed class ParameterClient
                 return;
             }
 
-            if (!a[2].TryGetArray(out RosParameterValue[] objNameList))
+            if (!a[2].TryGetArray(out RosValue[] objNameList))
             {
                 MarkError();
                 return;
@@ -492,7 +461,7 @@ public sealed class ParameterClient
             int r = 0;
             foreach (var objName in objNameList)
             {
-                if (!objName.TryGetString(out string name))
+                if (!objName.TryGet(out string name))
                 {
                     MarkError();
                     return;

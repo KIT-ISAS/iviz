@@ -2810,6 +2810,8 @@ namespace eprosima
 
                         return *this;
                     }
+            
+                const FastBuffer &__getBuffer() { return m_cdrBuffer; }
 
             private:
 

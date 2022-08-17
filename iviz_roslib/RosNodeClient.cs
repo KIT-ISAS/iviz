@@ -100,10 +100,10 @@ public sealed class RosNodeClient
         return new GetPidResponse(response);
     }
 
-    RosParameterValue[] MethodCall(string function, XmlRpcArg[] args)
+    RosValue[] MethodCall(string function, XmlRpcArg[] args)
     {
         var wrapper = XmlRpcService.MethodCall(Uri, CallerUri, function, args);
-        if (wrapper.TryGetArray(out RosParameterValue[] response))
+        if (wrapper.TryGetArray(out RosValue[] response))
         {
             return response;
         }
@@ -112,12 +112,12 @@ public sealed class RosNodeClient
                                   $"Expected type object[], got {wrapper}");
     }
 
-    async ValueTask<RosParameterValue[]> MethodCallAsync(string function, XmlRpcArg[] args, CancellationToken token)
+    async ValueTask<RosValue[]> MethodCallAsync(string function, XmlRpcArg[] args, CancellationToken token)
     {
         using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
         tokenSource.CancelAfter(TimeoutInMs);
 
-        RosParameterValue wrapper;
+        RosValue wrapper;
         try
         {
             wrapper = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, tokenSource.Token);
@@ -132,7 +132,7 @@ public sealed class RosNodeClient
             throw;
         }
 
-        if (wrapper.TryGetArray(out RosParameterValue[] response))
+        if (wrapper.TryGetArray(out RosValue[] response))
         {
             return response;
         }
@@ -149,14 +149,14 @@ public sealed class RequestTopicResponse : BaseResponse
     public Endpoint? TcpResponse { get; }
     public RpcUdpTopicResponse? UdpResponse { get; }
 
-    internal RequestTopicResponse(RosParameterValue[] a)
+    internal RequestTopicResponse(RosValue[] a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
 
-        if (!value.TryGetArray(out RosParameterValue[] protocolInfo))
+        if (!value.TryGetArray(out RosValue[] protocolInfo))
         {
             MarkError();
             return;
@@ -169,7 +169,7 @@ public sealed class RequestTopicResponse : BaseResponse
             return;
         }
 
-        if (!protocolInfo[0].TryGetString(out string type))
+        if (!protocolInfo[0].TryGet(out string type))
         {
             MarkError();
             return;
@@ -179,8 +179,8 @@ public sealed class RequestTopicResponse : BaseResponse
         {
             case RosUtils.ProtocolTcpRosName:
                 if (protocolInfo.Length < 3
-                    || !protocolInfo[1].TryGetString(out string hostname)
-                    || !protocolInfo[2].TryGetInteger(out int port))
+                    || !protocolInfo[1].TryGet(out string hostname)
+                    || !protocolInfo[2].TryGet(out int port))
                 {
                     MarkError();
                     return;
@@ -190,11 +190,11 @@ public sealed class RequestTopicResponse : BaseResponse
                 break;
             case RosUtils.ProtocolUdpRosName:
                 if (protocolInfo.Length < 6
-                    || !protocolInfo[1].TryGetString(out hostname)
-                    || !protocolInfo[2].TryGetInteger(out port)
-                    || !protocolInfo[3].TryGetInteger(out int connectionId)
-                    || !protocolInfo[4].TryGetInteger(out int maxPacketSize)
-                    || !protocolInfo[5].TryGetBase64(out byte[] header))
+                    || !protocolInfo[1].TryGet(out hostname)
+                    || !protocolInfo[2].TryGet(out port)
+                    || !protocolInfo[3].TryGet(out int connectionId)
+                    || !protocolInfo[4].TryGet(out int maxPacketSize)
+                    || !protocolInfo[5].TryGet(out byte[] header))
                 {
                     MarkError();
                     return;
@@ -210,14 +210,14 @@ public sealed class GetMasterUriResponse : BaseResponse
 {
     public Uri? Uri { get; }
 
-    internal GetMasterUriResponse(RosParameterValue[] a)
+    internal GetMasterUriResponse(RosValue[] a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
 
-        if (!value.TryGetString(out string uriStr)
+        if (!value.TryGet(out string uriStr)
             || !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
         {
             MarkError();
@@ -232,14 +232,14 @@ public sealed class GetPidResponse : BaseResponse
 {
     public int Pid { get; }
 
-    internal GetPidResponse(RosParameterValue[] a)
+    internal GetPidResponse(RosValue[] a)
     {
         if (!TryGetValueFromArgs(a, out var value))
         {
             return;
         }
 
-        if (!value.TryGetInteger(out int pid))
+        if (!value.TryGet(out int pid))
         {
             MarkError();
             return;

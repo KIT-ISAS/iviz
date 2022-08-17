@@ -1,20 +1,24 @@
 using System.Runtime.InteropServices;
 
-namespace Iviz.Roslib2.Rcl.Wrappers;
+namespace Iviz.Roslib2.RclInterop.Wrappers;
 
 public sealed class RclMacosWrapper : IRclWrapper
 {
     public bool SetDdsProfilePath(string path) =>
         Rcl.SetDdsProfilePath(path);
 
+    public void SetMessageCallbacks(CdrDeserializeCallback? cdrDeserializeCallback,
+        CdrSerializeCallback? cdrSerializeCallback, CdrGetSerializedSizeCallback? cdrGetSerializedSizeCallback) =>
+        Rcl.SetMessageCallbacks(cdrDeserializeCallback, cdrSerializeCallback, cdrGetSerializedSizeCallback);
+
     public IntPtr CreateContext() =>
         Rcl.CreateContext();
 
-    public void DestroyContext(IntPtr context) =>
-        Rcl.DestroyContext(context);
+    public void DestroyContext(IntPtr contextHandle) =>
+        Rcl.DestroyContext(contextHandle);
 
-    public int Init(IntPtr context) =>
-        Rcl.Init(context);
+    public int Init(IntPtr contextHandle, int domainId) =>
+        Rcl.Init(contextHandle, domainId);
 
     public int Shutdown(IntPtr contextHandle) =>
         Rcl.Shutdown(contextHandle);
@@ -105,6 +109,9 @@ public sealed class RclMacosWrapper : IRclWrapper
         Rcl.TakeSerializedMessage(subscriptionHandle, serializedMessage, out ptr, out length, out gid,
             out moreRemaining);
 
+    public int Take(IntPtr subscriptionHandle, IntPtr messageContextHandle, out Guid guid, out byte moreRemaining) =>
+        Rcl.Take(subscriptionHandle, messageContextHandle, out guid, out moreRemaining);
+
     public int DestroySerializedMessage(IntPtr messageHandle) =>
         Rcl.DestroySerializedMessage(messageHandle);
 
@@ -123,6 +130,9 @@ public sealed class RclMacosWrapper : IRclWrapper
 
     public int GetSubscriptionCount(IntPtr publisherHandle, out int count) =>
         Rcl.GetSubscriptionCount(publisherHandle, out count);
+
+    public int Publish(IntPtr publisherHandle, IntPtr messageContextHandle) =>
+        Rcl.Publish(publisherHandle, messageContextHandle);
 
     public int PublishSerializedMessage(IntPtr publisherHandle, IntPtr serializedMessageHandle) =>
         Rcl.PublishSerializedMessage(publisherHandle, serializedMessageHandle);
@@ -211,6 +221,12 @@ public sealed class RclMacosWrapper : IRclWrapper
 
         [DllImport(Library, EntryPoint = "native_rcl_set_dds_profile_path")]
         public static extern bool SetDdsProfilePath([MarshalAs(UnmanagedType.LPUTF8Str)] string path);
+        
+        [DllImport(Library, EntryPoint = "native_rcl_set_message_callbacks")]
+        public static extern void SetMessageCallbacks(
+            [MarshalAs(UnmanagedType.FunctionPtr)] CdrDeserializeCallback? cdrDeserializeCallback,
+            [MarshalAs(UnmanagedType.FunctionPtr)] CdrSerializeCallback? cdrSerializeCallback,
+            [MarshalAs(UnmanagedType.FunctionPtr)] CdrGetSerializedSizeCallback? cdrGetSerializedSizeCallback);
 
         [DllImport(Library, EntryPoint = "native_rcl_create_context")]
         public static extern IntPtr CreateContext();
@@ -219,7 +235,7 @@ public sealed class RclMacosWrapper : IRclWrapper
         public static extern void DestroyContext(IntPtr context);
 
         [DllImport(Library, EntryPoint = "native_rcl_init")]
-        public static extern int Init(IntPtr context);
+        public static extern int Init(IntPtr context, int domainId);
 
         [DllImport(Library, EntryPoint = "native_rcl_shutdown")]
         public static extern int Shutdown(IntPtr contextHandle);
@@ -304,7 +320,11 @@ public sealed class RclMacosWrapper : IRclWrapper
         [DllImport(Library, EntryPoint = "native_rcl_take_serialized_message")]
         public static extern int TakeSerializedMessage(IntPtr subscriptionHandle, IntPtr serializedMessage,
             out IntPtr ptr, out int length, out Guid gid, out byte moreRemaining);
-
+        
+        [DllImport(Library, EntryPoint = "native_rcl_take")]
+        public static extern int Take(IntPtr subscriptionHandle, IntPtr contextHandle, out Guid guid,
+            out byte moreRemaining);
+        
         [DllImport(Library, EntryPoint = "native_rcl_destroy_serialized_message")]
         public static extern int DestroySerializedMessage(IntPtr messageHandle);
 
@@ -325,6 +345,9 @@ public sealed class RclMacosWrapper : IRclWrapper
 
         [DllImport(Library, EntryPoint = "native_rcl_publisher_get_subscription_count")]
         public static extern int GetSubscriptionCount(IntPtr publisherHandle, out int count);
+
+        [DllImport(Library, EntryPoint = "native_rcl_publish")]
+        public static extern int Publish(IntPtr publisherHandle, IntPtr messageContextHandle);
 
         [DllImport(Library, EntryPoint = "native_rcl_publish_serialized_message")]
         public static extern int PublishSerializedMessage(IntPtr publisherHandle, IntPtr serializedMessageHandle);

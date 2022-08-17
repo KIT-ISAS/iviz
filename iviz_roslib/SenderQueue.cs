@@ -18,7 +18,7 @@ internal sealed class SenderQueue<T> where T : IMessage
     readonly ConcurrentQueue<Entry?> messageQueue = new();
     readonly List<Entry?> sendQueue = new();
     int messagesInQueue;
-        
+
     public long MaxQueueSizeInBytes { get; set; } = 50000;
 
     public int Count => messagesInQueue;
@@ -33,7 +33,7 @@ internal sealed class SenderQueue<T> where T : IMessage
             numDropped++;
             return;
         }
-            
+
         messageQueue.Enqueue(new Entry(message));
         Interlocked.Increment(ref messagesInQueue);
         signal.Release();
@@ -58,7 +58,7 @@ internal sealed class SenderQueue<T> where T : IMessage
         var tcs = TaskUtils.CreateCompletionSource();
         messageQueue.Enqueue(new Entry(message, tcs));
         signal.Release();
-            
+
         return token.CanBeCanceled
             ? WaitForSignal(tcs, token)
             : tcs.Task.AsValueTask();
@@ -200,7 +200,7 @@ internal sealed class SenderQueue<T> where T : IMessage
         {
             throw new ArgumentNullException(nameof(loopbackReceiver));
         }
-            
+
         try
         {
             foreach (var entry in queue)
@@ -232,11 +232,9 @@ internal sealed class SenderQueue<T> where T : IMessage
 
         public Entry(in T message, TaskCompletionSource? signal = null)
         {
-            (this.message, messageLength, this.signal) = (message, message.RosMessageLength, signal);
-            if (messageLength < 0)
-            {
-                throw new RosMessageSizeOverflowException();
-            }
+            this.message = message;
+            this.signal = signal;
+            messageLength = message.RosMessageLength;
         }
 
         public void Deconstruct(out T outMessage, out int outMessageLength, out TaskCompletionSource? outSignal) =>

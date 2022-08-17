@@ -121,8 +121,6 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
     /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>
     public void Publish(in TMessage message)
     {
-        if (message is null) BuiltIns.ThrowArgumentNull(nameof(message));
-
         AssertIsAlive();
         message.RosValidate();
         manager.Publish(message);
@@ -131,11 +129,6 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
     public ValueTask PublishAsync(in TMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
         CancellationToken token = default)
     {
-        if (message is null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(message));
-        }
-
         AssertIsAlive();
         message.RosValidate();
 

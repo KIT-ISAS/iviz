@@ -218,3 +218,14 @@ public class RosDynamicMessageException : RoslibException
     {
     }
 }
+
+public class RosParameterNotFoundException : RoslibException
+{
+    public RosParameterNotFoundException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
+
+    public RosParameterNotFoundException() : base("Parameter not found")
+    {
+    }
+}
