@@ -10,7 +10,6 @@ using Iviz.Roslib;
 using Iviz.Roslib2;
 using Iviz.Roslib2.RclInterop;
 using Iviz.Tools;
-using static Iviz.Ros.RoslibConnection;
 
 namespace Iviz.App
 {
@@ -255,7 +254,7 @@ namespace Iviz.App
 
         static void GenerateReportRos2(StringBuilder builder, Ros2Client client)
         {
-            if (!RosConnection.IsRos2VersionSupported)
+            if (!IRosProvider.IsRos2VersionSupported)
             {
                 builder.Append("<b>Error:</b> ROS version not supported!");
                 return;

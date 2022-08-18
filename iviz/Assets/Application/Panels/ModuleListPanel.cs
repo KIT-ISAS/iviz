@@ -120,7 +120,7 @@ namespace Iviz.App
         ModuleListButtons Buttons =>
             buttons ??= new ModuleListButtons(contentObject.AssertNotNull(nameof(contentObject)));
 
-        static RoslibConnection Connection => RosManager.Connection;
+        static IRosProvider Connection => RosManager.Connection;
 
         public AnchorCanvasPanel AnchorCanvasPanel => anchorCanvasPanel.AssertNotNull(nameof(anchorCanvasPanel));
         public Button UnlockButton => AnchorCanvasPanel.Unlock;
@@ -308,8 +308,8 @@ namespace Iviz.App
 
             BottomCanvas.CameraButtonClicked += CameraModuleData.ToggleShowPanel;
 
-            RosConnection.ConnectionStateChanged += OnConnectionStateChanged;
-            RosConnection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
+            IRosProvider.ConnectionStateChanged += OnConnectionStateChanged;
+            IRosProvider.ConnectionWarningStateChanged += OnConnectionWarningChanged;
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
             GameThread.EveryTenthOfASecond += UpdateCameraStats;

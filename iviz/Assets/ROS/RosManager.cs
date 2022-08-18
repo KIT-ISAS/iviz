@@ -19,9 +19,10 @@ namespace Iviz.Ros
         public static string? MyId => instance?.connection.MyId;
         public static bool IsConnected => instance?.connection.IsConnected ?? false;
         public static bool HasInstance => instance != null;
-        public static RoslibConnection Connection => instance?.connection ?? throw NewDisposeException();
+        public static IRosProvider Connection => RosConnection;
         public static RosOutLogger Logger => instance?.logger ?? throw NewDisposeException();
         public static RosServerManager Server => instance?.server ?? throw NewDisposeException();
+        internal static RoslibConnection RosConnection => instance?.connection ?? throw NewDisposeException();
 
         readonly RoslibConnection connection;
         readonly RosOutLogger logger;

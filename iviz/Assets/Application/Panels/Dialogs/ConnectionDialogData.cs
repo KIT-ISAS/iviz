@@ -279,7 +279,7 @@ namespace Iviz.App
             panel.DiscoveryServer.SetHints(LastDiscoveryServers.Select(
                 endpoint => endpoint?.Description() ?? noneStr));
 
-            if (!RosConnection.IsRos2VersionSupported)
+            if (!IRosProvider.IsRos2VersionSupported)
             {
                 RosVersion = RosVersion.ROS1;
                 panel.RosVersion1.Interactable = false;
@@ -399,7 +399,7 @@ namespace Iviz.App
 
             panel.RosVersion1.Clicked += () =>
             {
-                if (!RosConnection.IsRos2VersionSupported)
+                if (!IRosProvider.IsRos2VersionSupported)
                 {
                     RosLogger.Internal("<b>Error:</b> ROS2 is not supported on this platform.");
                     return;

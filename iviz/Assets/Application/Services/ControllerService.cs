@@ -30,7 +30,7 @@ namespace Iviz.Controllers
     {
         const int DefaultTimeoutInMs = 5000;
 
-        static RoslibConnection Connection => RosManager.Connection;
+        static IRosProvider Connection => RosManager.Connection;
         static IReadOnlyCollection<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
 
         static readonly Dictionary<ModuleType, string> ModuleNames =
@@ -262,7 +262,7 @@ namespace Iviz.Controllers
             }
 
             string? GetCachedPublishedType() =>
-                Connection.GetSystemPublishedTopicTypes(RosRequestType.CachedOnly)
+                Connection.GetSystemPublishedTopicTypes(false)
                     .TryGetFirst(topicInfo => topicInfo.Topic == topic, out var topicType)
                     ? topicType.Type
                     : null;

@@ -21,7 +21,7 @@ using Random = System.Random;
 
 namespace Iviz.Ros
 {
-    public sealed class RoslibConnection : RosConnection, Iviz.Displays.IServiceProvider
+    internal sealed class RoslibConnection : RosConnection, IRosProvider
     {
         static TopicNameType[] EmptyTopics => Array.Empty<TopicNameType>();
         static string[] EmptyParameters => Array.Empty<string>();
@@ -33,7 +33,7 @@ namespace Iviz.Ros
         readonly Dictionary<string, ISubscribedTopic> subscribersByTopic = new();
         readonly List<(string hostname, string address)> hostAliases = new();
 
-        string[] cachedParameters = EmptyParameters;
+        readonly Dictionary<string?, string[]> cachedParameters = new();
         TopicNameType[] cachedPublishedTopics = EmptyTopics;
         TopicNameType[] cachedTopics = EmptyTopics;
         SystemState? cachedSystemState;
@@ -256,7 +256,9 @@ namespace Iviz.Ros
                         await newRos1Client.CheckOwnUriAsync(token);
                         client = newRos1Client;
                         break;
-                    case RosVersion.ROS2 when IsRos2VersionSupported:
+
+                    case RosVersion.ROS2:
+                        if (!IsRos2VersionSupported) throw new InvalidOperationException("ROS2 not supported!");
 
                         SetEnvironmentVariable("FASTRTPS_DEFAULT_PROFILES_FILE", Settings.Ros2Folder + "/profiles.xml");
                         SetEnvironmentVariable("ROS_DISCOVERY_SERVER", DiscoveryServer?.Description());
@@ -270,7 +272,8 @@ namespace Iviz.Ros
                         client = newRos2Client;
                         break;
                     default:
-                        throw new InvalidOperationException("Error: ROS2 not supported!"); // should be unreachable
+                        BuiltIns.ThrowArgumentOutOfRange();
+                        break; // unreachable
                 }
 
                 var currentClient = client;
@@ -756,18 +759,6 @@ namespace Iviz.Ros
             advertiser.Id = newAdvertisedTopic.Id;
         }
 
-        public void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new()
-        {
-            ThrowHelper.ThrowIfNull(service, nameof(service));
-            ThrowHelper.ThrowIfNull(callback, nameof(callback));
-
-            AdvertiseService(service, (T t) =>
-            {
-                callback(t);
-                return default;
-            });
-        }
-
         public void AdvertiseService<T>(string service, Func<T, ValueTask> callback) where T : IService, new()
         {
             ThrowHelper.ThrowIfNull(service, nameof(service));
@@ -905,7 +896,7 @@ namespace Iviz.Ros
             {
                 try
                 {
-                    await SubscribeImpl<T>(listener, token);
+                    await SubscribeCore<T>(listener, token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -918,7 +909,7 @@ namespace Iviz.Ros
             });
         }
 
-        async ValueTask SubscribeImpl<T>(IListener listener, CancellationToken token)
+        async ValueTask SubscribeCore<T>(IListener listener, CancellationToken token)
             where T : IMessage, IDeserializable<T>, new()
         {
             if (subscribersByTopic.TryGetValue(listener.Topic, out var subscribedTopic))
@@ -1036,50 +1027,10 @@ namespace Iviz.Ros
                 ? subscribedTopic.UnsubscribeAsync(token)
                 : default;
         }
-
-        public void UnadvertiseService(string service)
+        
+        public TopicNameType[] GetSystemPublishedTopicTypes(bool withRefresh)
         {
-            ThrowHelper.ThrowIfNull(service, nameof(service));
-
-            var token = runningTs.Token;
-            Post(async () =>
-            {
-                try
-                {
-                    await UnadvertiseServiceCore(service, token);
-                }
-                catch (OperationCanceledException)
-                {
-                    // ignore
-                }
-                catch (Exception e)
-                {
-                    RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(UnadvertiseService)}", e);
-                }
-            });
-        }
-
-        async ValueTask UnadvertiseServiceCore(string serviceName, CancellationToken token)
-        {
-            if (!servicesByTopic.TryGetValue(serviceName, out var service))
-            {
-                return;
-            }
-
-            RosLogger.Info($"[{nameof(RosConnection)}]: Unadvertising service {serviceName}.");
-
-            if (Connected)
-            {
-                await service.UnadvertiseAsync(Client, token);
-            }
-
-            servicesByTopic.Remove(serviceName);
-        }
-
-        public TopicNameType[] GetSystemPublishedTopicTypes(
-            RosRequestType type = RosRequestType.CachedButRequestInBackground)
-        {
-            if (type == RosRequestType.CachedButRequestInBackground)
+            if (withRefresh)
             {
                 TaskUtils.Run(() => GetSystemPublishedTopicTypesAsync().AsTask(), runningTs.Token);
             }
@@ -1115,13 +1066,9 @@ namespace Iviz.Ros
             return cachedPublishedTopics;
         }
 
-        public TopicNameType[] GetSystemTopicTypes(RosRequestType type = RosRequestType.CachedButRequestInBackground)
+        public TopicNameType[] GetSystemTopicTypes()
         {
-            if (type == RosRequestType.CachedButRequestInBackground)
-            {
-                TaskUtils.Run(() => GetSystemTopicTypesAsync().AsTask(), runningTs.Token);
-            }
-
+            TaskUtils.Run(() => GetSystemTopicTypesAsync().AsTask(), runningTs.Token);
             return cachedTopics;
         }
 
@@ -1149,27 +1096,26 @@ namespace Iviz.Ros
             }
         }
 
-        public string[] GetSystemParameterList(CancellationToken token = default)
+        public string[] GetSystemParameterList(string? node)
         {
-            var internalToken = runningTs.Token;
+            var token = runningTs.Token;
 
             TaskUtils.Run(async () =>
             {
-                if (!Connected || token.IsCancellationRequested || internalToken.IsCancellationRequested)
+                if (!Connected || token.IsCancellationRequested)
                 {
-                    cachedParameters = EmptyParameters;
-                    return;
-                }
-
-                if (Client is not RosClient ros1Client)
-                {
+                    cachedParameters.Clear();
                     return;
                 }
 
                 try
                 {
-                    using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, internalToken);
-                    cachedParameters = await ros1Client.GetParameterNamesAsync(tokenSource.Token);
+                    cachedParameters[node] = Client switch
+                    {
+                        RosClient ros1Client => await ros1Client.GetParameterNamesAsync(token),
+                        Ros2Client ros2Client => await ros2Client.GetParameterNamesAsync(node, token),
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
                 }
                 catch (OperationCanceledException)
                 {
@@ -1179,13 +1125,15 @@ namespace Iviz.Ros
                 {
                     RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemParameterList)}", e);
                 }
-            }, internalToken);
+            }, token);
 
-            return cachedParameters;
+            return cachedParameters.TryGetValue(node, out string[] value)
+                ? value
+                : Array.Empty<string>();
         }
 
         public async ValueTask<(RosValue result, string? errorMsg)> GetParameterAsync(string parameter,
-            int timeoutInMs, string? nodeName = null, CancellationToken token = default)
+            int timeoutInMs, string? nodeName, CancellationToken token)
         {
             ThrowHelper.ThrowIfNull(parameter, nameof(parameter));
 
@@ -1199,16 +1147,18 @@ namespace Iviz.Ros
                 return (default, "Not connected");
             }
 
-            if (Client is not RosClient ros1Client)
-            {
-                return (default, "Only supported in ROS1");
-            }
-
             try
             {
                 using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
                 tokenSource.CancelAfter(timeoutInMs);
-                var param = await ros1Client.GetParameterAsync(parameter, tokenSource.Token);
+
+                var param = Client switch
+                {
+                    RosClient ros1Client => await ros1Client.GetParameterAsync(parameter, tokenSource.Token),
+                    Ros2Client ros2Client => await ros2Client.GetParameterAsync(parameter, nodeName, tokenSource.Token),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+
                 return (param, null);
             }
             catch (OperationCanceledException)
@@ -1216,6 +1166,10 @@ namespace Iviz.Ros
                 return token.IsCancellationRequested || runningTs.IsCancellationRequested
                     ? (default, "Operation cancelled")
                     : (default, "Operation timed out");
+            }
+            catch (RosParameterNotFoundException)
+            {
+                return (default, "Parameter not found");
             }
             catch (XmlRpcException)
             {
@@ -1228,9 +1182,9 @@ namespace Iviz.Ros
             }
         }
 
-        public SystemState? GetSystemState(RosRequestType type = RosRequestType.CachedButRequestInBackground)
+        public SystemState? GetSystemState(bool withRefresh)
         {
-            if (type == RosRequestType.CachedButRequestInBackground)
+            if (withRefresh)
             {
                 TaskUtils.Run(() => GetSystemStateAsync().AsTask(), runningTs.Token);
             }

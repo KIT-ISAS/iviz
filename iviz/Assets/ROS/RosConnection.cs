@@ -6,37 +6,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Tools;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Iviz.Ros
 {
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum RosVersion
-    {
-        ROS1,
-        ROS2
-    }
-
-    public enum RosRequestType
-    {
-        CachedOnly,
-        CachedButRequestInBackground,
-    }
-    
     /// <summary>
     /// Partial implementation of a ROS connection. The rest is in <see cref="RoslibConnection"/>.
     /// Here we only handle initializing connections and task queues.
     /// </summary>
-    public abstract class RosConnection
+    internal abstract class RosConnection
     {
         const int TaskWaitTimeInMs = 2000;
         const int ConnectionRetryTimeInMs = TaskWaitTimeInMs;
 
         bool disposed;
-
-        public static event Action<ConnectionState>? ConnectionStateChanged;
-        public static event Action<bool>? ConnectionWarningStateChanged;
 
         public const bool IsRos2VersionSupported = Settings.IsAndroid || Settings.IsIPhone || Settings.IsMacOS;
 
@@ -48,7 +30,7 @@ namespace Iviz.Ros
         ConnectionState connectionState = ConnectionState.Disconnected;
         DateTime lastConnectionTry = DateTime.MinValue;
         bool tryConnectOnce;
-        
+
         public bool IsConnected => connectionState == ConnectionState.Connected;
         public bool KeepReconnecting { get; set; }
 
@@ -64,8 +46,7 @@ namespace Iviz.Ros
             task.WaitNoThrow(this);
             disposed = true;
 
-            ConnectionStateChanged = null;
-            ConnectionWarningStateChanged = null;
+            IRosProvider.ClearEvents();
         }
 
         void SetConnectionState(ConnectionState newState)
@@ -76,12 +57,12 @@ namespace Iviz.Ros
             }
 
             connectionState = newState;
-            GameThread.Post(() => ConnectionStateChanged?.Invoke(newState));
+            GameThread.Post(() => IRosProvider.RaiseConnectionStateChanged(newState));
         }
 
         protected static void SetConnectionWarningState(bool value)
         {
-            GameThread.Post(() => ConnectionWarningStateChanged?.Invoke(value));
+            GameThread.Post(() => IRosProvider.RaiseConnectionWarningStateChanged(value));
         }
 
         /// <summary>
@@ -93,7 +74,7 @@ namespace Iviz.Ros
             {
                 return;
             }
-            
+
             toDos.Enqueue(a);
             Signal();
         }
@@ -172,7 +153,7 @@ namespace Iviz.Ros
             else
             {
                 SetConnectionState(ConnectionState.Disconnected);
-            }            
+            }
         }
 
         async ValueTask ExecuteTasks()
@@ -182,18 +163,18 @@ namespace Iviz.Ros
                 await action().AwaitNoThrow(this);
             }
         }
-        
+
         public void TryOnceToConnect()
         {
             if (connectionState != ConnectionState.Disconnected)
             {
                 return;
-            } 
-            
+            }
+
             tryConnectOnce = true;
             Signal();
         }
-        
+
         protected abstract ValueTask<bool> ConnectAsync();
 
         public virtual void Disconnect()
@@ -201,7 +182,7 @@ namespace Iviz.Ros
             SetConnectionState(ConnectionState.Disconnected);
             lastConnectionTry = DateTime.MinValue;
         }
-        
+
         public sealed override string ToString() => $"[{nameof(RosConnection)}]";
     }
 }

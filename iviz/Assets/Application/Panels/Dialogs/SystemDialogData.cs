@@ -257,7 +257,7 @@ namespace Iviz.App
         {
             using var description = BuilderPool.Rent();
 
-            var systemState = RosManager.Connection.GetSystemState(RosRequestType.CachedOnly);
+            var systemState = RosManager.Connection.GetSystemState(false);
             if (systemState == null)
             {
                 panel.TextBottom.text = EmptyBottomText;
@@ -301,7 +301,7 @@ namespace Iviz.App
         {
             using var description = BuilderPool.Rent();
 
-            var systemState = RosManager.Connection.GetSystemState(RosRequestType.CachedOnly);
+            var systemState = RosManager.Connection.GetSystemState(false);
             if (systemState == null)
             {
                 panel.TextBottom.text = EmptyBottomText;
@@ -427,7 +427,7 @@ namespace Iviz.App
 
         void UpdateNodesLink(string link)
         {
-            var systemState = RosManager.Connection.GetSystemState(RosRequestType.CachedOnly);
+            var systemState = RosManager.Connection.GetSystemState(false);
             if (systemState == null)
             {
                 panel.TextBottom.text = EmptyBottomText;

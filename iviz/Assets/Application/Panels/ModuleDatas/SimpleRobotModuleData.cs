@@ -41,7 +41,7 @@ namespace Iviz.App
             UpdateModuleButton();
 
             RobotController.RobotFinishedLoading += OnRobotFinishedLoading;
-            RosConnection.ConnectionStateChanged += OnConnectionStateChanged;
+            IRosProvider.ConnectionStateChanged += OnConnectionStateChanged;
         }
 
         void OnConnectionStateChanged(ConnectionState state)
@@ -67,7 +67,7 @@ namespace Iviz.App
             {
                 RobotController.RobotFinishedLoading -= OnRobotFinishedLoading;
                 RobotController.Dispose();
-                RosConnection.ConnectionStateChanged -= OnConnectionStateChanged;
+                IRosProvider.ConnectionStateChanged -= OnConnectionStateChanged;
             }
             catch (Exception e)
             {
@@ -83,7 +83,7 @@ namespace Iviz.App
 
             tokenSource?.Cancel();
             tokenSource = new CancellationTokenSource();
-            panel.SourceParameter.Hints = GetParameterHints(tokenSource.Token);
+            panel.SourceParameter.Hints = GetParameterHints();
 
             panel.SavedRobotName.Options = GetSavedRobots();
             if (string.IsNullOrWhiteSpace(RobotController.SavedRobotName) ||
@@ -184,7 +184,7 @@ namespace Iviz.App
         {
             tokenSource?.Cancel();
             tokenSource = new CancellationTokenSource();
-            panel.SourceParameter.Hints = GetParameterHints(tokenSource.Token);
+            panel.SourceParameter.Hints = GetParameterHints();
 
             panel.HelpText.Text = RobotController.HelpText;
             RobotController.UpdateStartTaskStatus();
@@ -192,18 +192,16 @@ namespace Iviz.App
             panel.Save.Interactable = !string.IsNullOrWhiteSpace(RobotController.Robot?.Name);
         }
 
-        static IEnumerable<string> GetParameterCandidates(CancellationToken token)
+        static IEnumerable<string> GetSavedRobots() => Resource.GetRobotNames().Prepend(NoneStr);
+
+        static IEnumerable<string> GetParameterHints() 
         {
-            var list = RosManager.Connection.GetSystemParameterList(token)
+            var list = RosManager.Connection.GetSystemParameterList()
                 .Where(x => x.Contains(ParamSubstring))
                 .ToList();
             list.Sort();
             return list;
-        }
-
-        static IEnumerable<string> GetSavedRobots() => Resource.GetRobotNames().Prepend(NoneStr);
-
-        static IEnumerable<string> GetParameterHints(CancellationToken token) => GetParameterCandidates(token);
+        }        
 
         bool IsRobotSaved => RobotController.Robot?.Name != null && Resource.IsRobotSaved(RobotController.Robot.Name);
 

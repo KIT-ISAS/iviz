@@ -18,7 +18,7 @@ namespace Iviz.Ros
     /// <typeparam name="T">The ROS message type</typeparam>
     public sealed class Listener<T> : IListener where T : IMessage, IDeserializable<T>, new()
     {
-        static RoslibConnection Connection => RosManager.Connection;
+        static RoslibConnection Connection => RosManager.RosConnection;
 
         readonly ConcurrentQueue<T> messageQueue = new();
         readonly Action<T>? handlerOnGameThread;
