@@ -7,33 +7,33 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class XRGazeState : IDeserializable<XRGazeState>, IMessage
     {
-        [DataMember (Name = "is_valid")] public bool IsValid;
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "transform")] public GeometryMsgs.Transform Transform;
+        [DataMember (Name = "is_valid")] public bool IsValid;
     
         public XRGazeState()
         {
         }
         
-        public XRGazeState(bool IsValid, in StdMsgs.Header Header, in GeometryMsgs.Transform Transform)
+        public XRGazeState(in StdMsgs.Header Header, in GeometryMsgs.Transform Transform, bool IsValid)
         {
-            this.IsValid = IsValid;
             this.Header = Header;
             this.Transform = Transform;
+            this.IsValid = IsValid;
         }
         
         public XRGazeState(ref ReadBuffer b)
         {
-            b.Deserialize(out IsValid);
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Transform);
+            b.Deserialize(out IsValid);
         }
         
         public XRGazeState(ref ReadBuffer2 b)
         {
-            b.Deserialize(out IsValid);
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Transform);
+            b.Deserialize(out IsValid);
         }
         
         public XRGazeState RosDeserialize(ref ReadBuffer b) => new XRGazeState(ref b);
@@ -42,16 +42,16 @@ namespace Iviz.Msgs.IvizMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(IsValid);
             Header.RosSerialize(ref b);
             b.Serialize(in Transform);
+            b.Serialize(IsValid);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
-            b.Serialize(IsValid);
             Header.RosSerialize(ref b);
             b.Serialize(in Transform);
+            b.Serialize(IsValid);
         }
         
         public void RosValidate()
@@ -65,10 +65,10 @@ namespace Iviz.Msgs.IvizMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
-            c += 1; // IsValid
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align8(c);
             c += 56; // Transform
+            c += 1; // IsValid
             return c;
         }
     
@@ -77,24 +77,24 @@ namespace Iviz.Msgs.IvizMsgs
         public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
-        public const string Md5Sum = "b062fdd884f10dff560e6f7d4400606b";
+        public const string Md5Sum = "95f43b2003d0b3928f0570ef6543b6ff";
     
         public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE71UwW4TMRC9+ytGyqEtSoNoEYdK3BDQA1KhFReEosl6smvhtbe2N+ny9Tx7k00LRXCA" +
-                "RpF21jvvzcybGa+8t2TicsPWaPVeWEugpjxULb6VFIZlG+v4/Cawi2sfWkp7Syn1+h//1IfrdxcUkx6D" +
-                "jgmpGV0ndpqDJmTEmhMTEqDG1I2EUysbsQBx24mm8jUNncQFgDeNiSiQanES2NqB+gin5Knybds7U3ES" +
-                "SqaVB3ggjSOmjkMyVW85wN8HbVx2XwduJbPjH+W2F1cJXb65gI+LUvXJIKEBDFUQjsbV+EiqNy6dn2UA" +
-                "zejLJx9ffFWzm60/xbnU0H3KglLDKWctd12QmBPmeIFgz8YqFwgClQThdKTjcrbEazwhREMu0vmqoWOU" +
-                "cDWkxjsQCm04GF5ZycQVpADrUQYdndxjdoXasfN7+pHxEONvaN3Em2s6bdA8m2WIfQ0l4dgFvzEarquh" +
-                "kFTWiEtkzSpwGFRGjSHV7G0WG05AldbgyTH6yqATmrYmNSqmkNlLW5aY4/80lr9ZiP2UBcnNQhmxlDSt" +
-                "Ca0kbUWg1tb/MkUxz9k6CMrtuMJQqc9SJR/OR7zlZLxTH3sAgoNJwafx7EmK3CXzSIlMm/Ltp/zzSlyW" +
-                "2fUOK9AKo63YtgkJoDYBUNSwAKsEgUgyJ5NIe+jhfAJHy99AKRikjOauAxnf1yQfA3Isi3oxp20DfYtX" +
-                "HoSyv2XjTUXB1EYfujGBmXbFzSmtzzBI1o45j8HQQpDs1T5Z0OWaBt/TNhcEI+wuGo/2TnmVPUjez/Mt" +
-                "s6N4KOiVx7ZDlhi5xsq4mHDFoetr6zm9ekl3kzVM1vcnafVhxh7rtiMf8oqO8j3oeX67PQxoFvmPBe2t" +
-                "rVI/AFE3cPiDBgAA";
+                "H4sIAAAAAAAAE71UwW4TMRC9+ytGyqEtSoMoiEMlbgjaA1KhFReEosl6smvhtbe2N+ny9Tx7k00LRXCA" +
+                "RpHW6533/ObNjC+EtQRqykPV4ltJYVi2sY7PbwK7uPahpbRfqZX3lkxcbtgarZR6849/6sP1+3OKSY8S" +
+                "LkZdM7pO7DQHTdDHmhMT5FBj6kbCqZWNWIC47URT+ZqGTuICwJvGRAimWpwEtnagPiIoeap82/bOVJyE" +
+                "kmnlAR5I44ip45BM1VsOiPdBG5fD14Fbyez4R7ntxVVCl2/PEeOiVH0yEDSAoQrC0bgaH0n1xqWXZxlA" +
+                "M/ryyccXX9XsZutPsS81qjCpoNRwyqrlrgsSs2CO5zjs2ZjlAofAJcFxOtJx2VviNZ4QToMW6XzV0DFS" +
+                "uBpS4x0IhTYcDK+sZOIKVoD1KIOOTu4xu0Lt2Pk9/ch4OONvaN3Em3M6bVA8m22IfQ0nEdgFvzEaoauh" +
+                "kFTWiEtkzSpwGFRGjUeq2btsNoKAKqXBk2P0lUElNG1NalRMIbOXsixzX/6ftvzNeOy7LEguFtKIJaVp" +
+                "aGglaSsCt7b+ly6Kuc/WQZBuxxWaSn2WKvnwcsRbTsY79bEHIDgsKfg07j1Jkjsxj6TItCnfftKfR+Ky" +
+                "9K53GIFWGGXFtE1IALUJgCKHBVglCEySOZlE2sMP5xM4Wv4GSkEjZTR3Hcj4vid5G5BjWdSLOW0b+Fui" +
+                "ciOU+S0TbyoKpjb6UI0JzLRLbk5pfYZGsnbUPB6GEoJk7/bJgi7XNPietjkhLMLuovEo76SrzEHyfp5v" +
+                "mR3FQ0OvPKYdtsTINUbGxYQrDlVfW8/p9Su6m1bDtPr+JKU+9Nhj1XbkQx7R0b4HNc9vt4cGzSb/MaH9" +
+                "aqvUD46fegyDBgAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

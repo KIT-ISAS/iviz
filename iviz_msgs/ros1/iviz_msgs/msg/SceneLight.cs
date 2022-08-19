@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Light : IDeserializable<Light>, IMessage
+    public sealed class SceneLight : IDeserializable<SceneLight>, IMessage
     {
         public const byte POINT = 0;
         public const byte DIRECTIONAL = 1;
@@ -20,12 +20,12 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "inner_angle")] public float InnerAngle;
         [DataMember (Name = "outer_angle")] public float OuterAngle;
     
-        public Light()
+        public SceneLight()
         {
             Name = "";
         }
         
-        public Light(ref ReadBuffer b)
+        public SceneLight(ref ReadBuffer b)
         {
             b.DeserializeString(out Name);
             b.Deserialize(out Type);
@@ -38,7 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out OuterAngle);
         }
         
-        public Light(ref ReadBuffer2 b)
+        public SceneLight(ref ReadBuffer2 b)
         {
             b.DeserializeString(out Name);
             b.Deserialize(out Type);
@@ -51,9 +51,9 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out OuterAngle);
         }
         
-        public Light RosDeserialize(ref ReadBuffer b) => new Light(ref b);
+        public SceneLight RosDeserialize(ref ReadBuffer b) => new SceneLight(ref b);
         
-        public Light RosDeserialize(ref ReadBuffer2 b) => new Light(ref b);
+        public SceneLight RosDeserialize(ref ReadBuffer2 b) => new SceneLight(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -106,7 +106,7 @@ namespace Iviz.Msgs.IvizMsgs
             return c;
         }
     
-        public const string MessageType = "iviz_msgs/Light";
+        public const string MessageType = "iviz_msgs/SceneLight";
     
         public string RosMessageType => MessageType;
     

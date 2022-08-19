@@ -5,31 +5,31 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Mesh : IDeserializable<Mesh>, IMessage
+    public sealed class ModelMesh : IDeserializable<ModelMesh>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "vertices")] public GeometryMsgs.Point32[] Vertices;
         [DataMember (Name = "normals")] public GeometryMsgs.Point32[] Normals;
         [DataMember (Name = "tangents")] public GeometryMsgs.Point32[] Tangents;
         [DataMember (Name = "bi_tangents")] public GeometryMsgs.Point32[] BiTangents;
-        [DataMember (Name = "tex_coords")] public TexCoords[] TexCoords;
-        [DataMember (Name = "color_channels")] public ColorChannel[] ColorChannels;
+        [DataMember (Name = "tex_coords")] public ModelTexCoords[] TexCoords;
+        [DataMember (Name = "color_channels")] public ModelColorChannel[] ColorChannels;
         [DataMember (Name = "faces")] public Triangle[] Faces;
         [DataMember (Name = "material_index")] public uint MaterialIndex;
     
-        public Mesh()
+        public ModelMesh()
         {
             Name = "";
             Vertices = System.Array.Empty<GeometryMsgs.Point32>();
             Normals = System.Array.Empty<GeometryMsgs.Point32>();
             Tangents = System.Array.Empty<GeometryMsgs.Point32>();
             BiTangents = System.Array.Empty<GeometryMsgs.Point32>();
-            TexCoords = System.Array.Empty<TexCoords>();
-            ColorChannels = System.Array.Empty<ColorChannel>();
+            TexCoords = System.Array.Empty<ModelTexCoords>();
+            ColorChannels = System.Array.Empty<ModelColorChannel>();
             Faces = System.Array.Empty<Triangle>();
         }
         
-        public Mesh(ref ReadBuffer b)
+        public ModelMesh(ref ReadBuffer b)
         {
             b.DeserializeString(out Name);
             b.DeserializeStructArray(out Vertices);
@@ -39,18 +39,18 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeArray(out TexCoords);
             for (int i = 0; i < TexCoords.Length; i++)
             {
-                TexCoords[i] = new TexCoords(ref b);
+                TexCoords[i] = new ModelTexCoords(ref b);
             }
             b.DeserializeArray(out ColorChannels);
             for (int i = 0; i < ColorChannels.Length; i++)
             {
-                ColorChannels[i] = new ColorChannel(ref b);
+                ColorChannels[i] = new ModelColorChannel(ref b);
             }
             b.DeserializeStructArray(out Faces);
             b.Deserialize(out MaterialIndex);
         }
         
-        public Mesh(ref ReadBuffer2 b)
+        public ModelMesh(ref ReadBuffer2 b)
         {
             b.DeserializeString(out Name);
             b.DeserializeStructArray(out Vertices);
@@ -60,20 +60,20 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeArray(out TexCoords);
             for (int i = 0; i < TexCoords.Length; i++)
             {
-                TexCoords[i] = new TexCoords(ref b);
+                TexCoords[i] = new ModelTexCoords(ref b);
             }
             b.DeserializeArray(out ColorChannels);
             for (int i = 0; i < ColorChannels.Length; i++)
             {
-                ColorChannels[i] = new ColorChannel(ref b);
+                ColorChannels[i] = new ModelColorChannel(ref b);
             }
             b.DeserializeStructArray(out Faces);
             b.Deserialize(out MaterialIndex);
         }
         
-        public Mesh RosDeserialize(ref ReadBuffer b) => new Mesh(ref b);
+        public ModelMesh RosDeserialize(ref ReadBuffer b) => new ModelMesh(ref b);
         
-        public Mesh RosDeserialize(ref ReadBuffer2 b) => new Mesh(ref b);
+        public ModelMesh RosDeserialize(ref ReadBuffer2 b) => new ModelMesh(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -188,7 +188,7 @@ namespace Iviz.Msgs.IvizMsgs
             return c;
         }
     
-        public const string MessageType = "iviz_msgs/Mesh";
+        public const string MessageType = "iviz_msgs/ModelMesh";
     
         public string RosMessageType => MessageType;
     
@@ -199,13 +199,14 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE71TO2scQQzu51cI0tgQHHAaE0h1RUgRCNidCYt2V7crPDNaRjr7zr8+mn0cKXJdLtuM" +
-                "tNInfXqpFc4DZEwUBpJEVk5N0kE//RTO9vn++Re8UjHuSC86ZCkJ42W7YR4o22WHlpuzzxMddyKl1wqk" +
-                "Y9PNSthJlLIbMWeKbumq2nSL7qDCjo/klj1Wqoc5NCQ0clNsOPd0DOHrP/7Cj8dvX+CvZYUP8DSyOtNs" +
-                "yFnBRoJJlI0lg+wBXXNP4Az7QgQ6OfObN7YRnHnLptVrKtSxOuT2ziN+d3cF/yUpUU89mMBBCeac8DZS" +
-                "IZ9WTaPcRvLYaoR9DbTSugPwOBu5NVLucWblfzzgVCSJVbA3TyYq2HJkO83QDZlIFQeqkJ6Uh7yQMXwh" +
-                "OEwQ3bxUVFllUM/hi+boKGthlY8CGkju6COg1k7UJnXoFc0Nmjnvohz6mjvso2Cd6vEsnc7S+5Vmy6/8" +
-                "vsz1vJgX13hd1asz+fMWlsNY07v0v9L7gtcbe4CyvsP6tuuL1yeyXf127bgJ7SZ0IfwGBH9cG+IEAAA=";
+                "H4sIAAAAAAAAE71TTWvcQAy9z68Q9NJASaG9hEBPeyg9BArdWylG9mht0ZmRGc0mu/n10djjpYXurYkv" +
+                "I1nS09OXlsxphISR3EgSqeRzF3XUj9+FU/n86ecveKRceCC96pAkRwzX7QXTSKlcd+i5u/g8iKewp9NO" +
+                "JHut0XTqhkVZbTsJkncTpkTBzENVu2HV1e0zG1Igsxywkj4uSSBiITOFjpOnk3Nf/vPnHn58vYd/Fuje" +
+                "wX5iNaapICeFMhHMolxYEsgB0DTzBE5wyESgszF//8RlAmPec9HqNWcaWC3k5tYQv5m7gv2SGMmThyJw" +
+                "VIIlJzxNlMnmVtMo94EMWwuhr0CN1i2A4WzkGlLyuLCyPwY4Z4lSarA1T2bK2HPgcl5Ct8hIqjhSDfGk" +
+                "PKaVTMHfBMcZgpnXiiqrBGo5bOUsOkgrrPJRwAKSBvoAqLUTtUkDWkVLgxbOuyBHX3O7QxCsUz1dpPNF" +
+                "en6l2fIjP69z/XtFr251W9q3ofPnVbhFaRxMegMOLeNybXeQ2zu2t28vvj6R7f63u8dN6DdhcO4F7pRb" +
+                "1vYEAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

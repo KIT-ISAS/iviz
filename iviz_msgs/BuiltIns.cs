@@ -265,35 +265,40 @@ public static class BuiltIns
         return result < 128;
     }
 
-    [DoesNotReturn, AssertionMethod]
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
     public static void ThrowArgument(string arg, string message) => throw new ArgumentNullException(arg, message);
 
-    [DoesNotReturn, AssertionMethod]
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
     public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);
 
-    [DoesNotReturn, AssertionMethod]
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    public static void ThrowArgumentNull(string arg, string message) => throw new ArgumentNullException(arg, message);
+
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
     public static void ThrowNullReference(string name) => throw new NullReferenceException(name);
 
-    [DoesNotReturn, AssertionMethod]
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
     public static void ThrowNullReference(string name, int i) =>
         throw new NullReferenceException($"{name}[{i}] cannot be null");
 
-    [DoesNotReturn, AssertionMethod]
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
     public static void ThrowNullReference() => throw new NullReferenceException("Message fields cannot be null.");
 
-    [DoesNotReturn, AssertionMethod]
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
     public static void ThrowBufferOverflow(int off, int remaining) =>
         throw new RosBufferException($"Requested {off} bytes, but only {remaining} remain!");
 
-    [DoesNotReturn, AssertionMethod]
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
     public static void ThrowImplausibleBufferSize() =>
         throw new RosBufferException("Implausible message requested more than 1TB elements.");
 
-    [DoesNotReturn, AssertionMethod]
-    public static void ThrowArgumentOutOfRange() =>
-        throw new ArgumentOutOfRangeException();
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    public static void ThrowArgumentOutOfRange() => throw new ArgumentOutOfRangeException();
 
-    [DoesNotReturn, AssertionMethod]
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    public static void ThrowArgumentOutOfRange(string arg) => throw new ArgumentOutOfRangeException(arg);
+
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
     public static void ThrowInvalidSizeForFixedArray(int size, int expected) =>
         throw new RosInvalidSizeForFixedArrayException(size, expected);
 }
