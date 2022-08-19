@@ -10,12 +10,14 @@ internal interface IRclDeserializeHandler
 internal sealed class RclDeserializeHandler<TMessage> : IRclDeserializeHandler where TMessage : IMessage
 {
     readonly IDeserializable<TMessage> generator;
+    readonly Ros2Subscriber subscriber;
     public TMessage? message;
     public int messageLength;
-    public bool paused;
+    public bool hasMessage;
 
-    public RclDeserializeHandler(IDeserializable<TMessage> generator)
+    public RclDeserializeHandler(Ros2Subscriber subscriber, IDeserializable<TMessage> generator)
     {
+        this.subscriber = subscriber;
         this.generator = generator;
         Reset();
     }
@@ -26,8 +28,9 @@ internal sealed class RclDeserializeHandler<TMessage> : IRclDeserializeHandler w
         int size = length - headerSize;
         messageLength = length;
 
-        if (paused) return;
-        
+        if (subscriber.IsPaused) return;
+
+        hasMessage = true;
         var b = new ReadBuffer2((byte*)ptr + headerSize, size);
         message = generator.RosDeserialize(ref b);
     }
@@ -35,7 +38,7 @@ internal sealed class RclDeserializeHandler<TMessage> : IRclDeserializeHandler w
     public void Reset()
     {
         message = default;
-        messageLength = -1;
-        paused = false;
+        messageLength = 0;
+        hasMessage = false;
     }
 }

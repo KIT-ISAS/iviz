@@ -12,6 +12,8 @@ typedef void (*CdrSerializeCallback)(const void *message_context, void *ptr, int
 
 typedef int32_t (*CdrGetSerializedSizeCallback)(const void *message_context);
 
+typedef void (*LoggerCallback) (int severity, const char *name, int64_t timestamp, const char *message);
+
 
 bool native_rcl_set_dds_profile_path(const char *path);
 
@@ -33,7 +35,7 @@ int32_t native_rcl_init_logging();
 
 void native_rcl_set_logging_level(int level);
 
-void native_rcl_set_logging_handler(void (*logger) (int severity, const char *name, int64_t timestamp, const char *message));
+void native_rcl_set_logging_handler(LoggerCallback logger);
 
 
 int32_t native_rcl_create_node_handle(void *context_handle, void **node_handle, const char *name, const char *name_space);
