@@ -10,9 +10,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Tools;
-using Include = Iviz.Msgs.IvizMsgs.Include;
 using Model = Iviz.Msgs.IvizMsgs.Model;
-using Texture = Iviz.Msgs.IvizMsgs.Texture;
 using Uri = System.Uri;
 
 namespace Iviz.ModelService;
@@ -390,14 +388,14 @@ public sealed class ModelServer : IDisposable
             PostProcessPreset.TargetRealTimeMaximumQuality | PostProcessPreset.ConvertToLeftHanded);
         var msg = new Model
         {
-            Meshes = new Msgs.IvizMsgs.Mesh[scene.Meshes.Count],
+            Meshes = new ModelMesh[scene.Meshes.Count],
             OrientationHint = orientationHint
         };
 
         var faces = new List<Triangle>();
         for (int i = 0; i < scene.MeshCount; i++)
         {
-            Assimp.Mesh srcMesh = scene.Meshes[i];
+            Mesh srcMesh = scene.Meshes[i];
 
             faces.Clear();
             for (int j = 0; j < srcMesh.FaceCount; j++)
@@ -430,7 +428,7 @@ public sealed class ModelServer : IDisposable
                 }
             }
 
-            var dstMesh = new Msgs.IvizMsgs.Mesh
+            var dstMesh = new ModelMesh
             {
                 Name = srcMesh.Name ?? "[mesh]",
                 Vertices = srcMesh.Vertices.Select(ToVector3).ToArray(),
@@ -446,12 +444,12 @@ public sealed class ModelServer : IDisposable
             msg.Meshes[i] = dstMesh;
         }
 
-        msg.Materials = new Msgs.IvizMsgs.Material[scene.MaterialCount];
+        msg.Materials = new ModelMaterial[scene.MaterialCount];
 
         for (int i = 0; i < scene.MaterialCount; i++)
         {
-            Assimp.Material srcMaterial = scene.Materials[i];
-            msg.Materials[i] = new Msgs.IvizMsgs.Material
+            Material srcMaterial = scene.Materials[i];
+            msg.Materials[i] = new ModelMaterial
             {
                 Name = srcMaterial.Name ?? "[material]",
                 Ambient = ToColor(srcMaterial.ColorAmbient),
@@ -467,15 +465,15 @@ public sealed class ModelServer : IDisposable
             };
         }
 
-        var nodes = new List<Msgs.IvizMsgs.Node>();
-        ProcessNode(scene.RootNode, nodes, new Dictionary<Assimp.Node, int>());
+        var nodes = new List<ModelNode>();
+        ProcessNode(scene.RootNode, nodes, new Dictionary<Node, int>());
 
         msg.Nodes = nodes.ToArray();
 
         return msg;
     }
 
-    static void ProcessNode(Assimp.Node node, List<Msgs.IvizMsgs.Node> nodes, Dictionary<Assimp.Node, int> ids)
+    static void ProcessNode(Node node, List<ModelNode> nodes, Dictionary<Node, int> ids)
     {
         if (node.Children.Count == 0 && node.MeshIndices.Count == 0)
         {
@@ -485,7 +483,7 @@ public sealed class ModelServer : IDisposable
         ids[node] = ids.Count;
         int parentId = node.Parent is null ? -1 : ids[node.Parent];
 
-        nodes.Add(new Msgs.IvizMsgs.Node(
+        nodes.Add(new ModelNode(
             node.Name,
             parentId,
             ToMatrix(node.Transform),
@@ -513,13 +511,13 @@ public sealed class ModelServer : IDisposable
         return new Color32((byte)r, (byte)g, (byte)b, (byte)a);
     }
 
-    static ColorChannel ToColorChannel(List<Color4D> colorChannel) => new(colorChannel.Select(ToColor).ToArray());
+    static ModelColorChannel ToColorChannel(List<Color4D> colorChannel) => new(colorChannel.Select(ToColor).ToArray());
 
-    static TexCoords ToTexCoords(List<Vector3D> texCoords) => new(texCoords.Select(ToVector3UV).ToArray());
+    static ModelTexCoords ToTexCoords(List<Vector3D> texCoords) => new(texCoords.Select(ToVector3UV).ToArray());
 
-    static Texture ToTexture(TextureSlot texture)
+    static ModelTexture ToTexture(TextureSlot texture)
     {
-        return new Texture
+        return new ModelTexture
         {
             Path = texture.FilePath,
             Index = texture.TextureIndex,
@@ -637,7 +635,7 @@ public sealed class ModelServer : IDisposable
             return;
         }
 
-        List<Include> includes = new List<Include>();
+        List<SceneInclude> includes = new List<SceneInclude>();
         ResolveIncludes(file, includes);
 
         msg.Response.Success = true;
@@ -652,9 +650,9 @@ public sealed class ModelServer : IDisposable
         LogUp(uri);
     }
 
-    static Msgs.IvizMsgs.Light ToLight(Sdf.Light light)
+    static SceneLight ToLight(Sdf.Light light)
     {
-        return new Msgs.IvizMsgs.Light
+        return new SceneLight
         {
             Name = light.Name ?? "",
             Type = (byte)light.Type,
@@ -668,7 +666,7 @@ public sealed class ModelServer : IDisposable
         };
     }
 
-    static void ResolveIncludes(Sdf.SdfFile file, ICollection<Include> includes)
+    static void ResolveIncludes(Sdf.SdfFile file, ICollection<SceneInclude> includes)
     {
         if (file.Worlds.Count != 0)
         {
@@ -682,7 +680,7 @@ public sealed class ModelServer : IDisposable
         }
     }
 
-    static void ResolveIncludes(Sdf.World world, ICollection<Include> includes)
+    static void ResolveIncludes(Sdf.World world, ICollection<SceneInclude> includes)
     {
         foreach (Sdf.Model model in world.Models)
         {
@@ -690,7 +688,7 @@ public sealed class ModelServer : IDisposable
         }
     }
 
-    static void ResolveIncludes(Sdf.Model model, ICollection<Include> includes, in Matrix4x4 inPose)
+    static void ResolveIncludes(Sdf.Model model, ICollection<SceneInclude> includes, in Matrix4x4 inPose)
     {
         if (model.IsInvalid)
         {
@@ -714,7 +712,7 @@ public sealed class ModelServer : IDisposable
         }
     }
 
-    static void ResolveIncludes(Sdf.Visual visual, ICollection<Include> includes, in Matrix4x4 inPose)
+    static void ResolveIncludes(Sdf.Visual visual, ICollection<SceneInclude> includes, in Matrix4x4 inPose)
     {
         if (visual.Geometry.Empty != null)
         {
@@ -723,10 +721,10 @@ public sealed class ModelServer : IDisposable
 
         Matrix4x4 pose = Multiply(inPose, ToPose(visual.Pose));
 
-        Msgs.IvizMsgs.Material includeMaterial;
+        ModelMaterial includeMaterial;
         if (visual.Material != null)
         {
-            includeMaterial = new Msgs.IvizMsgs.Material
+            includeMaterial = new ModelMaterial
             {
                 Name = visual.Name + "_material",
                 Diffuse = ToColor(visual.Material.Diffuse),
@@ -735,7 +733,7 @@ public sealed class ModelServer : IDisposable
         }
         else
         {
-            includeMaterial = new Msgs.IvizMsgs.Material();
+            includeMaterial = new ModelMaterial();
         }
 
         if (visual.Geometry.Box != null)
@@ -747,7 +745,7 @@ public sealed class ModelServer : IDisposable
             );
             pose = Multiply(pose, Matrix4x4.FromScaling(diag));
 
-            includes.Add(new Include
+            includes.Add(new SceneInclude
             {
                 Uri = "package://iviz_internal/cube",
                 Pose = ToMatrix(pose),
@@ -763,7 +761,7 @@ public sealed class ModelServer : IDisposable
             );
             pose = Multiply(pose, Matrix4x4.FromScaling(diag));
 
-            includes.Add(new Include
+            includes.Add(new SceneInclude
             {
                 Uri = "package://iviz_internal/cylinder",
                 Pose = ToMatrix(pose),
@@ -775,7 +773,7 @@ public sealed class ModelServer : IDisposable
             Vector3D diag = new((float)visual.Geometry.Sphere.Radius);
             pose = Multiply(pose, Matrix4x4.FromScaling(diag));
 
-            includes.Add(new Include
+            includes.Add(new SceneInclude
             {
                 Uri = "package://iviz_internal/cylinder",
                 Pose = ToMatrix(pose),
@@ -790,7 +788,7 @@ public sealed class ModelServer : IDisposable
             );
             pose = Multiply(pose, Matrix4x4.FromScaling(diag));
 
-            includes.Add(new Include
+            includes.Add(new SceneInclude
             {
                 Uri = visual.Geometry.Mesh.Uri.Value,
                 Pose = ToMatrix(pose),
