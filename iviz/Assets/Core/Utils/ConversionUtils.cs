@@ -6,7 +6,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Iviz.Urdf;
-using JetBrains.Annotations;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using Unity.Burst.Intrinsics;
@@ -127,20 +126,6 @@ namespace Iviz.Core
                     output[i] = input[i].low;
                 }
             }
-        }
-
-        [AssertionMethod]
-        static void AssertSize(in Span<uint> span, int size)
-        {
-            if (span.Length < size)
-                ThrowHelper.ThrowIndexOutOfRange("Span array is too short for the given operation");
-        }
-
-        [AssertionMethod]
-        static void AssertSize(in Span<byte> span, int size)
-        {
-            if (span.Length < size)
-                ThrowHelper.ThrowIndexOutOfRange("Span array is too short for the given operation");
         }
 
         [BurstCompile(CompileSynchronously = true)]

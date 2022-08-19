@@ -14,6 +14,7 @@ using UnityEngine;
 // ReSharper disable ConvertIfStatementToSwitchStatement
 namespace Iviz.Controllers
 {
+    /*
     internal sealed class GuiObject
     {
         readonly FrameNode node;
@@ -40,7 +41,7 @@ namespace Iviz.Controllers
                 {
                     widget.Interactable = value;
                 }
-                else if (display is IDialogIsInteractable dialog)
+                else if (display is IIsInteractable dialog)
                 {
                     dialog.Interactable = value;
                 }
@@ -260,4 +261,5 @@ namespace Iviz.Controllers
 
         public override string ToString() => $"[{nameof(GuiObject)} '{Id}']";
     }
+    */
 }

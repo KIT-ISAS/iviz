@@ -150,13 +150,20 @@ namespace Iviz.Displays
             baseLinkObject = new GameObject(Name);
         }
 
+        public RobotModel Clone()
+        {
+            return new RobotModel(Description);
+        }
+
         /// <summary>Constructs a robot asynchronously.</summary>
         /// <param name="provider">Object that can call CallService, usually a wrapped RosClient. Null if not available.</param>
         /// <param name="keepMeshMaterials">
         /// For external 3D models, whether to keep the materials instead
         /// of replacing them with the provided colors.
         /// </param>
-        public async ValueTask StartAsync(IServiceProvider? provider, bool keepMeshMaterials = false)
+        /// <param name="loadColliders">Whether collider models should be loaded.</param>
+        public async ValueTask StartAsync(IServiceProvider? provider = null, bool keepMeshMaterials = false,
+            bool loadColliders = true)
         {
             if (robot.Links.Count == 0 || robot.Joints.Count == 0)
             {
@@ -199,7 +206,8 @@ namespace Iviz.Displays
             ApplyAnyValidConfiguration();
 
             var modelLoadingTasks = robot.Links.SelectMany(
-                link => ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, runningTs.Token));
+                link => ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, loadColliders,
+                    runningTs.Token));
 
             try
             {
@@ -296,6 +304,7 @@ namespace Iviz.Displays
             Link link,
             IReadOnlyDictionary<string, Material> rootMaterials,
             IServiceProvider? provider,
+            bool loadColliders,
             CancellationToken token)
         {
             if (link.Visuals.Count == 0 && link.Collisions.Count == 0)
@@ -313,6 +322,11 @@ namespace Iviz.Displays
                 var task =
                     ProcessVisualAsync(keepMeshMaterials, visual, linkObject, rootMaterials, provider, token).AsTask();
                 tasks.Add(task);
+            }
+
+            if (!loadColliders)
+            {
+                return tasks;
             }
 
             foreach (var collision in link.Collisions)

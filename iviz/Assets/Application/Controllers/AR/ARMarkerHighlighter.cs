@@ -42,7 +42,7 @@ namespace Iviz.Controllers
             BottomLeft.localPosition = new Vector3(-0.5f, -0.5f, 0);
         }
 
-        public static void Highlight(ARMarker marker)
+        public static void Highlight(XRMarker marker)
         {
             if (marker.MarkerSizeInMm != 0)
             {

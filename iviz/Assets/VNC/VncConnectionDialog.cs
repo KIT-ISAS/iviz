@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public sealed class VncConnectionDialog : XRDialog, IDialogIsInteractable
+    public sealed class VncConnectionDialog : XRDialog, IIsInteractable
     {
         [SerializeField] TMP_Text? title;
         [SerializeField] TMP_InputField? hostname;

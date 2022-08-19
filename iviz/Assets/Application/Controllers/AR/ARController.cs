@@ -85,7 +85,7 @@ namespace Iviz.Controllers
 
         public static bool IsPulseActive => Instance != null && Instance.pulseManager.HasPulse;
 
-        public Sender<ARMarkerArray>? MarkerSender { get; private set; }
+        public Sender<XRMarkerArray>? MarkerSender { get; private set; }
         public Sender<Image> ColorSender { get; }
         public Sender<Image>? DepthSender { get; private set; }
         public Sender<Image>? DepthConfidenceSender { get; private set; }
@@ -257,7 +257,7 @@ namespace Iviz.Controllers
 
             if (MarkerDetector.IsEnabled)
             {
-                MarkerSender = new Sender<ARMarkerArray>("~xr/markers");
+                MarkerSender = new Sender<XRMarkerArray>("~xr/markers");
             }
         }
 
@@ -440,7 +440,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            ARMarker ToMarker(DetectedMarker marker) => new()
+            XRMarker ToMarker(DetectedMarker marker) => new()
             {
                 Type = (byte)marker.Type,
                 Header = new Header(markerSeq++, screenshot.Timestamp, TfModule.FixedFrameId),
@@ -461,10 +461,10 @@ namespace Iviz.Controllers
                 markerManager.Highlight(marker);
             }
 
-            MarkerSender?.Publish(new ARMarkerArray(array));
+            MarkerSender?.Publish(new XRMarkerArray(array));
         }
 
-        public static Pose GetAbsoluteMarkerPose(ARMarker marker)
+        public static Pose GetAbsoluteMarkerPose(XRMarker marker)
         {
             var rosPoseToFixed = (Transform)marker.CameraPose * marker.PoseRelativeToCamera;
             var unityPoseToFixed = rosPoseToFixed.Ros2Unity();

@@ -12,15 +12,15 @@ using Iviz.Core.Configurations;
 using Iviz.Displays.XR;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
 using UnityEngine;
+using Logger = UnityEngine.Logger;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
 namespace Iviz.Controllers
 {
-    public sealed class GuiWidgetListener : ListenerController, IMarkerDialogListener
+    public sealed class GuiWidgetListener : ListenerController, IMarkerDialogListener, IWidgetFeedback, IDialogFeedback
     {
         static GuiWidgetListener? defaultHandler;
         public static void DisposeDefaultHandler() => defaultHandler?.Dispose();
@@ -29,8 +29,11 @@ namespace Iviz.Controllers
             defaultHandler ??= new GuiWidgetListener(null, "~dialogs", Dialog.MessageType);
 
         readonly GuiWidgetConfiguration config = new();
-        readonly Dictionary<string, GuiObject> widgets = new();
-        readonly Dictionary<string, GuiObject> dialogs = new();
+
+        readonly VizHandler vizHandler;
+        
+        //readonly Dictionary<string, GuiObject> widgets = new();
+        //readonly Dictionary<string, GuiObject> dialogs = new();
         uint feedbackSeq;
 
         public override TfFrame Frame => TfModule.FixedFrame;
@@ -56,10 +59,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-                foreach (var widget in widgets.Values)
-                {
-                    widget.Visible = value;
-                }
+                vizHandler.Visible = value;
             }
         }
 
@@ -69,50 +69,15 @@ namespace Iviz.Controllers
             set
             {
                 config.Interactable = value;
-                foreach (var widget in widgets.Values)
-                {
-                    widget.Interactable = value;
-                }
-
-                foreach (var dialog in dialogs.Values)
-                {
-                    dialog.Interactable = value;
-                }
+                vizHandler.Interactable = value;
             }
         }
 
         public string Topic => Config.Topic;
 
-        public int NumEntriesForLog => widgets.Count;
+        public int NumEntriesForLog => vizHandler.Count;
 
-        public string BriefDescription
-        {
-            get
-            {
-                if (widgets.Count == 0 && dialogs.Count == 0)
-                {
-                    return $"<b>No widgets or dialogs</b>\nNo errors";
-                }
-
-                string widgetStr = widgets.Count switch
-                {
-                    0 => "<b>No widgets</b>",
-                    1 => "<b>1 widget</b>",
-                    _ => $"<b>{widgets.Count.ToString()} widgets</b>"
-                };
-
-                string dialogStr = dialogs.Count switch
-                {
-                    0 => "<b>No dialogs</b>",
-                    1 => "<b>1 dialog</b>",
-                    _ => $"<b>{dialogs.Count.ToString()} dialogs</b>"
-                };
-
-                const string errorStr = "No errors";
-
-                return $"{widgetStr}\n{dialogStr}\n{errorStr}";
-            }
-        }
+        public string BriefDescription => vizHandler.BriefDescription;
 
         public GuiWidgetListener(GuiWidgetConfiguration? configuration, string topic, string type)
         {
@@ -123,18 +88,35 @@ namespace Iviz.Controllers
                 Type = type,
             };
 
-            GameThread.EveryFrame += CheckDeadDialogs;
+            /*
+            widgetHandler = new WidgetHandler(this);
+            dialogHandler = new DialogHandler(this);
+            */
 
-            Listener = Config.Type switch
+            switch (config.Type)
             {
-                WidgetArray.MessageType => new Listener<WidgetArray>(Config.Topic, Handler) { MaxQueueSize = 50 },
-                Dialog.MessageType => new Listener<Dialog>(Config.Topic, Handler) { MaxQueueSize = 50 },
-                _ => throw new InvalidOperationException("Invalid message type")
-            };
-
+                case Widget.MessageType:
+                {
+                    var handler = new WidgetHandler(this);
+                    vizHandler = handler;
+                    Listener = new Listener<Widget>(Config.Topic, handler.Handler) { MaxQueueSize = 50 };
+                    break;
+                }
+                case Dialog.MessageType:
+                {
+                    var handler = new DialogHandler(this);
+                    vizHandler = handler;
+                    Listener = new Listener<Dialog>(Config.Topic, handler.Handler) { MaxQueueSize = 50 };
+                    break;
+                }
+                default:
+                    throw new InvalidOperationException("Invalid message type");
+            }
+            
             FeedbackSender = new Sender<Feedback>($"{config.Topic}/feedback");
         }
 
+        /*
         void Handler(WidgetArray msg)
         {
             foreach (var dialog in msg.Dialogs)
@@ -338,14 +320,18 @@ namespace Iviz.Controllers
             var guiObject = new GuiObject(this, msg, resourceKey, "Dialog." + (DialogType)msg.Type);
             dialogs[guiObject.Id] = guiObject;
         }
+        */
 
         public override void ResetController()
         {
             base.ResetController();
-            DestroyAll(dialogs);
-            DestroyAll(widgets);
+            vizHandler.RemoveAll();
+            
+            //DestroyAll(dialogs);
+            //DestroyAll(widgets);
         }
 
+        /*
         static void DestroyAll(Dictionary<string, GuiObject> dict)
         {
             foreach (var guiObject in dict.Values)
@@ -355,7 +341,9 @@ namespace Iviz.Controllers
 
             dict.Clear();
         }
+        */
 
+        /*
         void CheckDeadDialogs()
         {
             List<GuiObject>? deadObjects = null;
@@ -381,81 +369,99 @@ namespace Iviz.Controllers
                 dialogs.Remove(guiObject.Id);
             }
         }
+        */
 
-        internal void OnDialogButtonClicked(GuiObject dialog, int buttonId)
+        public IDialog? AddDialog(Dialog msg)
+        {
+            if (vizHandler is DialogHandler dialogHandler)
+            {
+                return dialogHandler.AddDialog(msg);
+            }
+
+            RosLogger.Error($"{this}: {nameof(AddDialog)} was called on a topic with a " +
+                            $"{vizHandler.GetType().Name}!");
+            return null;
+        }
+
+
+        
+        public void OnDialogButtonClicked(string id, string frameId, int buttonId)
         {
             FeedbackSender?.Publish(new Feedback
             {
+                Header = (feedbackSeq++, frameId),
                 VizId = RosManager.MyId ?? "",
-                Id = dialog.Id,
+                Id = id,
                 Type = (byte)FeedbackType.ButtonClick,
                 EntryId = buttonId,
             });
 
-            MarkAsExpired(dialog);
+            if (vizHandler is DialogHandler dialogHandler) // should be
+            {
+                dialogHandler.MarkAsExpired(id);
+            }
         }
 
-        internal void OnDialogMenuEntryClicked(GuiObject dialog, int buttonId)
+        public void OnDialogMenuEntryClicked(string id, string frameId, int buttonId)
         {
             FeedbackSender?.Publish(new Feedback
             {
+                Header = (feedbackSeq++, frameId),
                 VizId = RosManager.MyId ?? "",
-                Id = dialog.Id,
+                Id = id,
                 Type = (byte)FeedbackType.MenuEntryClick,
                 EntryId = buttonId,
             });
 
-            MarkAsExpired(dialog);
+            if (vizHandler is DialogHandler dialogHandler) // should be
+            {
+                dialogHandler.MarkAsExpired(id);
+            }
         }
 
-        static void MarkAsExpired(GuiObject dialog)
-        {
-            dialog.MarkAsExpired();
-        }
-
-        internal void OnDialogExpired(GuiObject dialog)
+        public void OnDialogExpired(string id, string frameId)
         {
             FeedbackSender?.Publish(new Feedback
             {
-                Header = (feedbackSeq++, dialog.ParentId),
+                Header = (feedbackSeq++, frameId),
                 VizId = RosManager.MyId ?? "",
-                Id = dialog.Id,
+                Id = id,
                 Type = (byte)FeedbackType.Expired,
             });
         }
 
-        internal void OnWidgetRotated(GuiObject widget, float angleInRad)
+        public void OnWidgetRotated(string id, string frameId, float angleInRad)
         {
             FeedbackSender?.Publish(new Feedback
             {
-                Header = (feedbackSeq++, widget.ParentId),
+                Header = (feedbackSeq++, frameId),
                 VizId = RosManager.MyId ?? "",
-                Id = widget.Id,
+                Id = id,
                 Type = (byte)FeedbackType.OrientationChanged,
                 Angle = angleInRad,
                 Orientation = Extensions.AngleAxisZ(angleInRad)
             });
         }
 
-        internal void OnWidgetMoved(GuiObject widget, in Vector3 direction)
+        public void OnWidgetMoved(string id, string frameId, in Vector3 direction)
         {
             FeedbackSender?.Publish(new Feedback
             {
-                Header = (feedbackSeq++, widget.ParentId),
+                Header = (feedbackSeq++, frameId),
                 VizId = RosManager.MyId ?? "",
-                Id = widget.Id,
+                Id = id,
                 Type = (byte)FeedbackType.PositionChanged,
                 Position = direction.Unity2RosPoint()
             });
         }
 
-        void OnTrajectoryDiscMoved(GuiObject widget, IReadOnlyList<Vector3> points, float periodInSec)
+        public void OnTrajectoryDiscMoved(string id, string frameId, IReadOnlyList<Vector3> points, float periodInSec)
         {
             FeedbackSender?.Publish(new Feedback
             {
-                Header = (feedbackSeq++, widget.ParentId),
+                Header = (feedbackSeq++, frameId),
                 VizId = RosManager.MyId ?? "",
-                Id = widget.Id,
+                Id = id,
                 Type = (byte)FeedbackType.TrajectoryChanged,
                 Trajectory = new Trajectory
                 {
@@ -469,41 +475,34 @@ namespace Iviz.Controllers
             });
         }
 
-        internal void OnWidgetResized(GuiObject widget, in Bounds bounds)
+        public void OnWidgetResized(string id, string frameId, in Bounds bounds)
         {
             FeedbackSender?.Publish(new Feedback
             {
-                Header = (feedbackSeq++, widget.ParentId),
+                Header = (feedbackSeq++, frameId),
                 VizId = RosManager.MyId ?? "",
-                Id = widget.Id,
+                Id = id,
                 Type = (byte)FeedbackType.ScaleChanged,
                 Scale = bounds.size.Unity2RosVector3().Abs(),
                 Position = bounds.center.Unity2RosPoint()
             });
         }
 
-        internal void OnWidgetClicked(GuiObject widget, int id)
+        public void OnWidgetClicked(string id, string frameId, int entryId)
         {
             FeedbackSender?.Publish(new Feedback
             {
+                Header = (feedbackSeq++, frameId),
                 VizId = RosManager.MyId ?? "",
-                Id = widget.Id,
+                Id = id,
                 Type = (byte)FeedbackType.ButtonClick,
-                EntryId = id,
+                EntryId = entryId,
             });
         }
 
         public void GenerateLog(StringBuilder description, int minIndex, int numEntries)
         {
-            ThrowHelper.ThrowIfNull(description, nameof(description));
-
-            foreach (var widget in widgets.Values.Skip(minIndex).Take(numEntries))
-            {
-                widget.GenerateLog(description);
-                description.AppendLine();
-            }
-
-            description.AppendLine().AppendLine();
+            vizHandler.GenerateLog(description, minIndex, numEntries);
         }
 
         public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
@@ -522,9 +521,7 @@ namespace Iviz.Controllers
         public override void Dispose()
         {
             base.Dispose();
-            GameThread.EveryFrame -= CheckDeadDialogs;
-            DestroyAll(dialogs);
-            DestroyAll(widgets);
+            vizHandler.Dispose();
         }
 
         public static void ClearResources()

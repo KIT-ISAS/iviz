@@ -7,9 +7,8 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public interface IWidget : IDisplay
+    public interface IWidget : IDisplay, IIsInteractable
     {
-        bool Interactable { set; }
     }
 
     public interface IWidgetWithColor : IWidget
