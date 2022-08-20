@@ -48,16 +48,19 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Material(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Name);
             b.Deserialize(out Ambient);
             b.Deserialize(out Diffuse);
             b.Deserialize(out Emissive);
+            b.Align4();
             b.Deserialize(out Opacity);
             b.Deserialize(out BumpScaling);
             b.Deserialize(out Shininess);
             b.Deserialize(out ShininessStrength);
             b.Deserialize(out Reflectivity);
             b.Deserialize(out BlendMode);
+            b.Align4();
             b.DeserializeArray(out Textures);
             for (int i = 0; i < Textures.Length; i++)
             {

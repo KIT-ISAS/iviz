@@ -75,6 +75,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public SetParametersAtomicallyRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeArray(out Parameters);
             for (int i = 0; i < Parameters.Length; i++)
             {

@@ -201,6 +201,7 @@ namespace Iviz.Msgs.HriMsgs
         public FacialActionUnits(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeStructArray(out FAU);
             b.DeserializeStructArray(out Intensity);
             b.DeserializeStructArray(out Confidence);

@@ -70,6 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetFramePoseRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStringArray(out Frames);
         }
         
@@ -138,7 +139,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetFramePoseResponse(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out IsValid);
+            b.Align4();
             b.DeserializeStructArray(out Poses);
         }
         

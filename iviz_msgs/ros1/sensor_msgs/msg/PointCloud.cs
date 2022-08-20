@@ -46,6 +46,7 @@ namespace Iviz.Msgs.SensorMsgs
         public PointCloud(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeStructArray(out Points);
             b.DeserializeArray(out Channels);
             for (int i = 0; i < Channels.Length; i++)

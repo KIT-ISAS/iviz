@@ -34,6 +34,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public PoseWithCovariance(ref ReadBuffer2 b)
         {
+            b.Align8();
             b.Deserialize(out Pose);
             b.DeserializeStructArray(36, out Covariance);
         }

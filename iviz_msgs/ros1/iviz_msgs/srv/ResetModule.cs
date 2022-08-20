@@ -70,6 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ResetModuleRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Id);
         }
         
@@ -134,6 +135,7 @@ namespace Iviz.Msgs.IvizMsgs
         public ResetModuleResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
+            b.Align4();
             b.DeserializeString(out Message);
         }
         

@@ -42,9 +42,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Include(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Uri);
             Pose = new Matrix4(ref b);
             Material = new Material(ref b);
+            b.Align4();
             b.DeserializeString(out Package);
         }
         

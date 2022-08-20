@@ -12,30 +12,27 @@ namespace Iviz.Msgs;
 /// </summary>
 public unsafe struct ReadBuffer
 {
-    readonly byte* ptr;
-    int offset;
-    int remaining;
+    byte* cursor;
+    readonly byte* end;
 
     ReadBuffer(byte* ptr, int length)
     {
-        this.ptr = ptr;
-        offset = 0;
-        remaining = length;
+        cursor = ptr;
+        end = ptr + length;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     void Advance(int value)
     {
-        offset += value;
-        remaining -= value;
+        cursor += value;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     readonly void ThrowIfOutOfRange(int off)
     {
-        if ((uint)off > (uint)remaining)
+        if ((nuint)cursor + (nuint)off > (nuint)end)
         {
-            BuiltIns.ThrowBufferOverflow(off, remaining);
+            BuiltIns.ThrowBufferOverflow(off);
         }
     }
 
@@ -45,8 +42,6 @@ public unsafe struct ReadBuffer
         Deserialize(out int i);
         return i;
     }
-
-    static string EmptyString => "";
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeString(out string val)
@@ -59,8 +54,7 @@ public unsafe struct ReadBuffer
         }
 
         ThrowIfOutOfRange(count);
-        byte* srcPtr = ptr + offset;
-        val = BuiltIns.GetString(srcPtr, count);
+        val = BuiltIns.GetString(cursor, count);
 
         Advance(count);
     }
@@ -79,7 +73,7 @@ public unsafe struct ReadBuffer
         int count = ReadInt();
         if (count == 0)
         {
-            val = Array.Empty<string>();
+            val = EmptyStringArray;
         }
         else
         {
@@ -107,7 +101,7 @@ public unsafe struct ReadBuffer
             Advance(innerCount);
         }
 
-        val = Array.Empty<string>();
+        val = EmptyStringArray;
     }
 
     #region scalars
@@ -116,7 +110,7 @@ public unsafe struct ReadBuffer
     public void Deserialize(out bool t)
     {
         ThrowIfOutOfRange(1);
-        t = ptr[offset] != 0;
+        t = *cursor != 0;
         Advance(1);
     }
 
@@ -124,7 +118,7 @@ public unsafe struct ReadBuffer
     public void Deserialize(out byte t)
     {
         ThrowIfOutOfRange(1);
-        t = ptr[offset];
+        t = *cursor;
         Advance(1);
     }
 
@@ -132,7 +126,7 @@ public unsafe struct ReadBuffer
     public void Deserialize(out sbyte t)
     {
         ThrowIfOutOfRange(1);
-        t = (sbyte)ptr[offset];
+        t = (sbyte)*cursor;
         Advance(1);
     }
 
@@ -141,7 +135,7 @@ public unsafe struct ReadBuffer
     {
         const int size = sizeof(short);
         ThrowIfOutOfRange(size);
-        t = *(short*)(ptr + offset);
+        t = *(short*)cursor;
         Advance(size);
     }
 
@@ -150,7 +144,7 @@ public unsafe struct ReadBuffer
     {
         const int size = sizeof(ushort);
         ThrowIfOutOfRange(size);
-        t = *(ushort*)(ptr + offset);
+        t = *(ushort*)cursor;
         Advance(size);
     }
 
@@ -159,7 +153,7 @@ public unsafe struct ReadBuffer
     {
         const int size = sizeof(int);
         ThrowIfOutOfRange(size);
-        t = *(int*)(ptr + offset);
+        t = *(int*)cursor;
         Advance(size);
     }
 
@@ -168,7 +162,7 @@ public unsafe struct ReadBuffer
     {
         const int size = sizeof(uint);
         ThrowIfOutOfRange(size);
-        t = *(uint*)(ptr + offset);
+        t = *(uint*)cursor;
         Advance(size);
     }
 
@@ -177,7 +171,7 @@ public unsafe struct ReadBuffer
     {
         const int size = 2 * sizeof(uint);
         ThrowIfOutOfRange(size);
-        t = *(time*)(ptr + offset);
+        t = *(time*)cursor;
         Advance(size);
     }
 
@@ -186,7 +180,7 @@ public unsafe struct ReadBuffer
     {
         const int size = 2 * sizeof(int);
         ThrowIfOutOfRange(size);
-        t = *(duration*)(ptr + offset);
+        t = *(duration*)cursor;
         Advance(size);
     }
 
@@ -195,7 +189,7 @@ public unsafe struct ReadBuffer
     {
         const int size = sizeof(float);
         ThrowIfOutOfRange(size);
-        t = *(float*)(ptr + offset);
+        t = *(float*)cursor;
         Advance(size);
     }
 
@@ -204,7 +198,7 @@ public unsafe struct ReadBuffer
     {
         const int size = sizeof(double);
         ThrowIfOutOfRange(size);
-        t = *(double*)(ptr + offset);
+        t = *(double*)cursor;
         Advance(size);
     }
 
@@ -213,7 +207,7 @@ public unsafe struct ReadBuffer
     {
         const int size = sizeof(long);
         ThrowIfOutOfRange(size);
-        t = *(long*)(ptr + offset);
+        t = *(long*)cursor;
         Advance(size);
     }
 
@@ -222,7 +216,7 @@ public unsafe struct ReadBuffer
     {
         const int size = sizeof(ulong);
         ThrowIfOutOfRange(size);
-        t = *(ulong*)(ptr + offset);
+        t = *(ulong*)cursor;
         Advance(size);
     }
 
@@ -231,7 +225,7 @@ public unsafe struct ReadBuffer
     {
         const int size = Vector3.RosFixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Vector3*)(ptr + offset);
+        t = *(Vector3*)cursor;
         Advance(size);
     }
 
@@ -240,7 +234,7 @@ public unsafe struct ReadBuffer
     {
         const int size = Point.RosFixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Point*)(ptr + offset);
+        t = *(Point*)cursor;
         Advance(size);
     }
 
@@ -249,7 +243,7 @@ public unsafe struct ReadBuffer
     {
         const int size = Quaternion.RosFixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Quaternion*)(ptr + offset);
+        t = *(Quaternion*)cursor;
         Advance(size);
     }
 
@@ -258,7 +252,7 @@ public unsafe struct ReadBuffer
     {
         const int size = Pose.RosFixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Pose*)(ptr + offset);
+        t = *(Pose*)cursor;
         Advance(size);
     }
 
@@ -267,7 +261,7 @@ public unsafe struct ReadBuffer
     {
         const int size = Transform.RosFixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Transform*)(ptr + offset);
+        t = *(Transform*)cursor;
         Advance(size);
     }
 
@@ -276,7 +270,7 @@ public unsafe struct ReadBuffer
     {
         const int size = Point32.RosFixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Point32*)(ptr + offset);
+        t = *(Point32*)cursor;
         Advance(size);
     }
 
@@ -285,7 +279,7 @@ public unsafe struct ReadBuffer
     {
         const int size = ColorRGBA.RosFixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(ColorRGBA*)(ptr + offset);
+        t = *(ColorRGBA*)cursor;
         Advance(size);
     }
 
@@ -294,7 +288,7 @@ public unsafe struct ReadBuffer
     {
         const int size = Color32.RosFixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Color32*)(ptr + offset);
+        t = *(Color32*)cursor;
         Advance(size);
     }
 
@@ -303,7 +297,7 @@ public unsafe struct ReadBuffer
     {
         const int size = Triangle.RosFixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Triangle*)(ptr + offset);
+        t = *(Triangle*)cursor;
         Advance(size);
     }
 
@@ -312,7 +306,7 @@ public unsafe struct ReadBuffer
     {
         int size = sizeof(T);
         ThrowIfOutOfRange(size);
-        t = *(T*)(ptr + offset);
+        t = *(T*)cursor;
         Advance(size);
     }
 
@@ -333,7 +327,7 @@ public unsafe struct ReadBuffer
         val = new byte[count];
         fixed (byte* valPtr = val)
         {
-            Unsafe.CopyBlock(valPtr, ptr + offset, (uint)count);
+            Unsafe.CopyBlock(valPtr, cursor, (uint)count);
         }
 
         Advance(count);
@@ -355,7 +349,7 @@ public unsafe struct ReadBuffer
         val = new Point32[count];
         fixed (Point32* valPtr = val)
         {
-            Unsafe.CopyBlock(valPtr, ptr + offset, (uint)size);
+            Unsafe.CopyBlock(valPtr, cursor, (uint)size);
         }
 
         Advance(size);
@@ -385,7 +379,7 @@ public unsafe struct ReadBuffer
         val = new T[count];
         fixed (T* valPtr = val)
         {
-            Unsafe.CopyBlock(valPtr, ptr + offset, (uint)size);
+            Unsafe.CopyBlock(valPtr, cursor, (uint)size);
         }
 
         Advance(size);
@@ -405,10 +399,9 @@ public unsafe struct ReadBuffer
 
         val = new SharedRent(count);
 
-        byte* srcPtr = ptr + offset;
         fixed (byte* valPtr = val.Array)
         {
-            Unsafe.CopyBlock(valPtr, srcPtr, (uint)count);
+            Unsafe.CopyBlock(valPtr, cursor, (uint)count);
         }
         
         Advance(count);
@@ -443,6 +436,13 @@ public unsafe struct ReadBuffer
         BuiltIns.ThrowImplausibleBufferSize();
         val = Array.Empty<T>(); // unreachable
     }
+    
+    #region Empties
+
+    static string EmptyString => "";
+    static string[] EmptyStringArray => Array.Empty<string>();
+
+    #endregion    
 
     /// <summary>
     /// Deserializes a message of the given type from the buffer array.  

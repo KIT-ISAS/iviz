@@ -27,6 +27,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Matrix4(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(16, out M);
         }
         

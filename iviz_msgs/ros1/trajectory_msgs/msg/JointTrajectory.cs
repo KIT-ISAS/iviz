@@ -38,7 +38,9 @@ namespace Iviz.Msgs.TrajectoryMsgs
         public JointTrajectory(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeStringArray(out JointNames);
+            b.Align4();
             b.DeserializeArray(out Points);
             for (int i = 0; i < Points.Length; i++)
             {

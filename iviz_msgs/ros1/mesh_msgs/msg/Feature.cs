@@ -33,6 +33,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public Feature(ref ReadBuffer2 b)
         {
+            b.Align8();
             b.Deserialize(out Location);
             b.DeserializeArray(out Descriptor);
             for (int i = 0; i < Descriptor.Length; i++)

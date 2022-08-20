@@ -36,8 +36,10 @@ namespace Iviz.Msgs.HriMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Age);
+            b.Align4();
             b.Deserialize(out AgeConfidence);
             b.Deserialize(out Gender);
+            b.Align4();
             b.Deserialize(out GenderConfidence);
         }
         

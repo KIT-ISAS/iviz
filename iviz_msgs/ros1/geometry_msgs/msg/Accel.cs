@@ -29,6 +29,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public Accel(ref ReadBuffer2 b)
         {
+            b.Align8();
             b.Deserialize(out Linear);
             b.Deserialize(out Angular);
         }

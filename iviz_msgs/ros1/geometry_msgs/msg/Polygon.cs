@@ -27,6 +27,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public Polygon(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out Points);
         }
         

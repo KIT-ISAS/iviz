@@ -45,12 +45,17 @@ namespace Iviz.Msgs.IvizMsgs
         
         public RobotConfiguration(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out SourceParameter);
+            b.Align4();
             b.DeserializeString(out SavedRobotName);
+            b.Align4();
             b.DeserializeString(out FramePrefix);
+            b.Align4();
             b.DeserializeString(out FrameSuffix);
             b.Deserialize(out AttachedToTf);
             b.Deserialize(out RenderAsOcclusionOnly);
+            b.Align4();
             b.Deserialize(out Tint);
             b.Deserialize(out Metallic);
             b.Deserialize(out Smoothness);

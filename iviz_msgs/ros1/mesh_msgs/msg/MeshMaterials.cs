@@ -51,16 +51,19 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshMaterials(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeArray(out Clusters);
             for (int i = 0; i < Clusters.Length; i++)
             {
                 Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out Materials);
             for (int i = 0; i < Materials.Length; i++)
             {
                 Materials[i] = new MeshMsgs.MeshMaterial(ref b);
             }
+            b.Align4();
             b.DeserializeStructArray(out ClusterMaterials);
             b.DeserializeArray(out VertexTexCoords);
             for (int i = 0; i < VertexTexCoords.Length; i++)

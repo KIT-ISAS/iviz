@@ -65,11 +65,13 @@ namespace Iviz.Msgs.MeshMsgs
         
         public TriangleMesh(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeArray(out Triangles);
             for (int i = 0; i < Triangles.Length; i++)
             {
                 Triangles[i] = new TriangleIndices(ref b);
             }
+            b.Align4();
             b.DeserializeStructArray(out Vertices);
             b.DeserializeStructArray(out VertexNormals);
             b.DeserializeStructArray(out VertexColors);
@@ -80,11 +82,13 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 FaceMaterials[i] = new MeshMsgs.MeshMaterial(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out Textures);
             for (int i = 0; i < Textures.Length; i++)
             {
                 Textures[i] = new SensorMsgs.Image(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out Clusters);
             for (int i = 0; i < Clusters.Length; i++)
             {

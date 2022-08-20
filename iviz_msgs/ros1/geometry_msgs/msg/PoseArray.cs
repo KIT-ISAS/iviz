@@ -31,6 +31,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public PoseArray(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeStructArray(out Poses);
         }
         

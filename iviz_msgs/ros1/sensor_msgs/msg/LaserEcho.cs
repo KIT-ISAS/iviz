@@ -30,6 +30,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public LaserEcho(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out Echoes);
         }
         

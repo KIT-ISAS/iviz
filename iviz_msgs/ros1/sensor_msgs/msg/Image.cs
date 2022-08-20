@@ -57,10 +57,12 @@ namespace Iviz.Msgs.SensorMsgs
         public Image(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out Height);
             b.Deserialize(out Width);
             b.DeserializeString(out Encoding);
             b.Deserialize(out IsBigendian);
+            b.Align4();
             b.Deserialize(out Step);
             b.DeserializeStructRent(out Data);
         }

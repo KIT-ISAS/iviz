@@ -35,7 +35,7 @@ public unsafe partial struct WriteBuffer2
     {
         if ((uint)off > (uint)remaining)
         {
-            BuiltIns.ThrowBufferOverflow(off, remaining);
+            BuiltIns.ThrowBufferOverflow(off);
         }
     }
 

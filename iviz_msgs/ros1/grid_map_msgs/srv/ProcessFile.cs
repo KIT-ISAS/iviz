@@ -74,7 +74,9 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public ProcessFileRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out FilePath);
+            b.Align4();
             b.DeserializeString(out TopicName);
         }
         

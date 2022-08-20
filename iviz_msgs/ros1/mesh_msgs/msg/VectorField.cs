@@ -30,6 +30,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public VectorField(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out Positions);
             b.DeserializeStructArray(out Vectors);
         }

@@ -157,9 +157,11 @@ namespace Iviz.Msgs.SensorMsgs
         public CameraInfo(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out Height);
             b.Deserialize(out Width);
             b.DeserializeString(out DistortionModel);
+            b.Align4();
             b.DeserializeStructArray(out D);
             b.DeserializeStructArray(9, out K);
             b.DeserializeStructArray(9, out R);

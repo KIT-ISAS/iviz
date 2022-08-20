@@ -35,7 +35,9 @@ namespace Iviz.Msgs.HriMsgs
         public Group(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeString(out GroupId);
+            b.Align4();
             b.DeserializeStringArray(out Members);
         }
         

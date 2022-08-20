@@ -40,6 +40,7 @@ namespace Iviz.Msgs.NavMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Info = new MapMetaData(ref b);
+            b.Align4();
             b.DeserializeStructArray(out Data);
         }
         

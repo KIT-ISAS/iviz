@@ -63,6 +63,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         {
             GoalId = new GoalID(ref b);
             b.Deserialize(out Status);
+            b.Align4();
             b.DeserializeString(out Text);
         }
         

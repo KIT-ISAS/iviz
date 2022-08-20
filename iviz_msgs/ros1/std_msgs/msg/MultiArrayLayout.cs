@@ -57,11 +57,13 @@ namespace Iviz.Msgs.StdMsgs
         
         public MultiArrayLayout(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeArray(out Dim);
             for (int i = 0; i < Dim.Length; i++)
             {
                 Dim[i] = new MultiArrayDimension(ref b);
             }
+            b.Align4();
             b.Deserialize(out DataOffset);
         }
         

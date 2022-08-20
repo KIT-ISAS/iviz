@@ -83,6 +83,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public AddDiagnosticsRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out LoadNamespace);
         }
         
@@ -150,6 +151,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public AddDiagnosticsResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
+            b.Align4();
             b.DeserializeString(out Message);
         }
         

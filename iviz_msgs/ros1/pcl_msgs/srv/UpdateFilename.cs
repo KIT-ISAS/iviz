@@ -68,6 +68,7 @@ namespace Iviz.Msgs.PclMsgs
         
         public UpdateFilenameRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Filename);
         }
         

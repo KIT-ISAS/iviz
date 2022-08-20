@@ -52,18 +52,22 @@ namespace Iviz.Msgs.RclInterfaces
         
         public ParameterEvent(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out Stamp);
             b.DeserializeString(out Node);
+            b.Align4();
             b.DeserializeArray(out NewParameters);
             for (int i = 0; i < NewParameters.Length; i++)
             {
                 NewParameters[i] = new Parameter(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out ChangedParameters);
             for (int i = 0; i < ChangedParameters.Length; i++)
             {
                 ChangedParameters[i] = new Parameter(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out DeletedParameters);
             for (int i = 0; i < DeletedParameters.Length; i++)
             {

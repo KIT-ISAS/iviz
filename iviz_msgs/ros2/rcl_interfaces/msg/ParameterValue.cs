@@ -63,11 +63,15 @@ namespace Iviz.Msgs.RclInterfaces
         {
             b.Deserialize(out Type);
             b.Deserialize(out BoolValue);
+            b.Align8();
             b.Deserialize(out IntegerValue);
             b.Deserialize(out DoubleValue);
             b.DeserializeString(out StringValue);
+            b.Align4();
             b.DeserializeStructArray(out ByteArrayValue);
+            b.Align4();
             b.DeserializeStructArray(out BoolArrayValue);
+            b.Align4();
             b.DeserializeStructArray(out IntegerArrayValue);
             b.DeserializeStructArray(out DoubleArrayValue);
             b.DeserializeStringArray(out StringArrayValue);

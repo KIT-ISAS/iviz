@@ -26,6 +26,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ColorChannel(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out Colors);
         }
         

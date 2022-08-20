@@ -77,7 +77,9 @@ namespace Iviz.Msgs.RclInterfaces
         
         public ListParametersRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStringArray(out Prefixes);
+            b.Align8();
             b.Deserialize(out Depth);
         }
         

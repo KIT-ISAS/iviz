@@ -35,6 +35,7 @@ namespace Iviz.Msgs.StdMsgs
         public UInt8MultiArray(ref ReadBuffer2 b)
         {
             Layout = new MultiArrayLayout(ref b);
+            b.Align4();
             b.DeserializeStructArray(out Data);
         }
         

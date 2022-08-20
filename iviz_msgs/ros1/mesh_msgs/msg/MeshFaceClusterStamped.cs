@@ -41,6 +41,7 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshFaceClusterStamped(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeString(out Uuid);
             Cluster = new MeshFaceCluster(ref b);
             b.Deserialize(out @override);

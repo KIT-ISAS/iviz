@@ -135,6 +135,7 @@ namespace Iviz.Msgs.StdSrvs
         public SetBoolResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
+            b.Align4();
             b.DeserializeString(out Message);
         }
         

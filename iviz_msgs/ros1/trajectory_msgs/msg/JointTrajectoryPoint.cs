@@ -35,6 +35,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public JointTrajectoryPoint(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out Positions);
             b.DeserializeStructArray(out Velocities);
             b.DeserializeStructArray(out Accelerations);

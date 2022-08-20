@@ -51,13 +51,17 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Scene(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Name);
+            b.Align4();
             b.DeserializeString(out Filename);
+            b.Align4();
             b.DeserializeArray(out Includes);
             for (int i = 0; i < Includes.Length; i++)
             {
                 Includes[i] = new Include(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out Lights);
             for (int i = 0; i < Lights.Length; i++)
             {

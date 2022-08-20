@@ -42,6 +42,7 @@ namespace Iviz.Msgs.PclMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Cloud = new SensorMsgs.PointCloud2(ref b);
+            b.Align4();
             b.DeserializeArray(out Polygons);
             for (int i = 0; i < Polygons.Length; i++)
             {

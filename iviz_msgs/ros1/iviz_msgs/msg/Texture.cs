@@ -66,10 +66,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Texture(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Path);
+            b.Align4();
             b.Deserialize(out Index);
             b.Deserialize(out Type);
             b.Deserialize(out Mapping);
+            b.Align4();
             b.Deserialize(out UvIndex);
             b.Deserialize(out BlendFactor);
             b.Deserialize(out Operation);

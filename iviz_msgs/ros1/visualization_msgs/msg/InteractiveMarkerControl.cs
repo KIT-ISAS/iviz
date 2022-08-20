@@ -94,17 +94,21 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public InteractiveMarkerControl(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Name);
+            b.Align8();
             b.Deserialize(out Orientation);
             b.Deserialize(out OrientationMode);
             b.Deserialize(out InteractionMode);
             b.Deserialize(out AlwaysVisible);
+            b.Align4();
             b.DeserializeArray(out Markers);
             for (int i = 0; i < Markers.Length; i++)
             {
                 Markers[i] = new Marker(ref b);
             }
             b.Deserialize(out IndependentMarkerOrientation);
+            b.Align4();
             b.DeserializeString(out Description);
         }
         

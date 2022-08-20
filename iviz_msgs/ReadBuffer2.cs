@@ -15,31 +15,42 @@ public unsafe partial struct ReadBuffer2
     /// <summary>
     /// Current position.
     /// </summary>
-    readonly byte* ptr;
-
-    int offset;
-    int remaining;
+    byte* cursor;
+    readonly byte* end;
 
     public ReadBuffer2(byte* ptr, int length)
     {
-        this.ptr = ptr;
-        offset = 0;
-        remaining = length;
+        cursor = ptr;
+        end = ptr + length;
     }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Align2() => cursor = (byte*)(((nint)cursor + 1) & ~1);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Align4() => cursor = (byte*)(((nint)cursor + 3) & ~3);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Align8() => cursor = (byte*)(((nint)cursor + 7) & ~7);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     void Advance(int value)
     {
-        offset += value;
-        remaining -= value;
+        cursor += value;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    void Advance(nint value)
+    {
+        cursor += value;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     readonly void ThrowIfOutOfRange(int off)
     {
-        if ((uint)off > (uint)remaining)
+        if ((nuint)cursor + (nuint)off > (nuint)end)
         {
-            BuiltIns.ThrowBufferOverflow(off, remaining);
+            BuiltIns.ThrowBufferOverflow(off);
         }
     }
 
@@ -49,8 +60,6 @@ public unsafe partial struct ReadBuffer2
         Deserialize(out int i);
         return i;
     }
-
-    static string EmptyString => "";
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeString(out string val)
@@ -71,7 +80,7 @@ public unsafe partial struct ReadBuffer2
         }
 
         int countWithoutZero = count - 1;
-        byte* srcPtr = ptr + offset;
+        byte* srcPtr = cursor;
         val = BuiltIns.GetString(srcPtr, countWithoutZero);
 
         Advance(count);
@@ -91,7 +100,7 @@ public unsafe partial struct ReadBuffer2
         int count = ReadInt();
         if (count == 0)
         {
-            val = Array.Empty<string>();
+            val = EmptyStringArray;
         }
         else
         {
@@ -99,13 +108,14 @@ public unsafe partial struct ReadBuffer2
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), SkipLocalsInit]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStringArray(int count, out string[] val)
     {
         ThrowIfOutOfRange(4 * count);
         val = new string[count];
         for (int i = 0; i < val.Length; i++)
         {
+            Align4();
             DeserializeString(out val[i]);
         }
     }
@@ -115,11 +125,12 @@ public unsafe partial struct ReadBuffer2
         int count = ReadInt();
         for (int i = 0; i < count; i++)
         {
+            Align4();
             int innerCount = ReadInt();
             Advance(innerCount);
         }
 
-        val = Array.Empty<string>();
+        val = EmptyStringArray;
     }
 
     #region scalars
@@ -128,7 +139,7 @@ public unsafe partial struct ReadBuffer2
     public void Deserialize(out bool t)
     {
         ThrowIfOutOfRange(1);
-        t = ptr[offset] != 0;
+        t = *cursor != 0;
         Advance(1);
     }
 
@@ -136,7 +147,7 @@ public unsafe partial struct ReadBuffer2
     public void Deserialize(out byte t)
     {
         ThrowIfOutOfRange(1);
-        t = ptr[offset];
+        t = *cursor;
         Advance(1);
     }
 
@@ -144,107 +155,97 @@ public unsafe partial struct ReadBuffer2
     public void Deserialize(out sbyte t)
     {
         ThrowIfOutOfRange(1);
-        t = (sbyte)ptr[offset];
+        t = (sbyte)*cursor;
         Advance(1);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out short t)
     {
-        Align2();
         const int size = sizeof(short);
         ThrowIfOutOfRange(size);
-        t = *(short*)(ptr + offset);
+        t = *(short*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out ushort t)
     {
-        Align2();
         const int size = sizeof(ushort);
         ThrowIfOutOfRange(size);
-        t = *(ushort*)(ptr + offset);
+        t = *(ushort*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out int t)
     {
-        Align4();
         const int size = sizeof(int);
         ThrowIfOutOfRange(size);
-        t = *(int*)(ptr + offset);
+        t = *(int*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out uint t)
     {
-        Align4();
         const int size = sizeof(uint);
         ThrowIfOutOfRange(size);
-        t = *(uint*)(ptr + offset);
+        t = *(uint*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out time t)
     {
-        Align4();
         const int size = 2 * sizeof(uint);
         ThrowIfOutOfRange(size);
-        t = *(time*)(ptr + offset);
+        t = *(time*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out duration t)
     {
-        Align4();
         const int size = 2 * sizeof(int);
         ThrowIfOutOfRange(size);
-        t = *(duration*)(ptr + offset);
+        t = *(duration*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out float t)
     {
-        Align4();
         const int size = sizeof(float);
         ThrowIfOutOfRange(size);
-        t = *(float*)(ptr + offset);
+        t = *(float*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out double t)
     {
-        Align8();
         const int size = sizeof(double);
         ThrowIfOutOfRange(size);
-        t = *(double*)(ptr + offset);
+        t = *(double*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out long t)
     {
-        Align8();
         const int size = sizeof(long);
         ThrowIfOutOfRange(size);
-        t = *(long*)(ptr + offset);
+        t = *(long*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out ulong t)
     {
-        Align8();
         const int size = sizeof(ulong);
         ThrowIfOutOfRange(size);
-        t = *(ulong*)(ptr + offset);
+        t = *(ulong*)cursor;
         Advance(size);
     }
 
@@ -257,7 +258,7 @@ public unsafe partial struct ReadBuffer2
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<bool>();
-        else DeserializeStructArray(count, out val);
+        else DeserializeStructArrayCore(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -271,22 +272,13 @@ public unsafe partial struct ReadBuffer2
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<byte>();
-        else DeserializeStructArray(count, out val);
+        else DeserializeStructArrayCore(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out byte[] val)
     {
-        int size = count * sizeof(byte);
-        ThrowIfOutOfRange(size);
-
-        val = new byte[count];
-        fixed (byte* valPtr = val)
-        {
-            Unsafe.CopyBlock(valPtr, ptr + offset, (uint)size);
-        }
-
-        Advance(size);
+        DeserializeStructArrayCore(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -308,13 +300,12 @@ public unsafe partial struct ReadBuffer2
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<short>();
-        else DeserializeStructArray(count, out val);
+        else DeserializeStructArrayCore(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out short[] val)
     {
-        Align2();
         DeserializeStructArrayCore(count, out val);
     }
 
@@ -323,7 +314,7 @@ public unsafe partial struct ReadBuffer2
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<ushort>();
-        else DeserializeStructArray(count, out val);
+        else DeserializeStructArrayCore(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -338,13 +329,12 @@ public unsafe partial struct ReadBuffer2
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<int>();
-        else DeserializeStructArray(count, out val);
+        else DeserializeStructArrayCore(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out int[] val)
     {
-        Align4();
         DeserializeStructArrayCore(count, out val);
     }
 
@@ -353,13 +343,12 @@ public unsafe partial struct ReadBuffer2
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<uint>();
-        else DeserializeStructArray(count, out val);
+        else DeserializeStructArrayCore(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out uint[] val)
     {
-        Align4();
         DeserializeStructArrayCore(count, out val);
     }
 
@@ -368,13 +357,12 @@ public unsafe partial struct ReadBuffer2
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<float>();
-        else DeserializeStructArray(count, out val);
+        else DeserializeStructArrayCore(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out float[] val)
     {
-        Align4();
         DeserializeStructArrayCore(count, out val);
     }
 
@@ -383,13 +371,16 @@ public unsafe partial struct ReadBuffer2
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<double>();
-        else DeserializeStructArray(count, out val);
+        else
+        {
+            Align8();
+            DeserializeStructArrayCore(count, out val);
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out double[] val)
     {
-        Align8();
         DeserializeStructArrayCore(count, out val);
     }
 
@@ -398,13 +389,16 @@ public unsafe partial struct ReadBuffer2
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<long>();
-        else DeserializeStructArray(count, out val);
+        else
+        {
+            Align8();
+            DeserializeStructArrayCore(count, out val);
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out long[] val)
     {
-        Align8();
         DeserializeStructArrayCore(count, out val);
     }
 
@@ -413,13 +407,16 @@ public unsafe partial struct ReadBuffer2
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<ulong>();
-        else DeserializeStructArray(count, out val);
+        else
+        {
+            Align8();
+            DeserializeStructArrayCore(count, out val);
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out ulong[] val)
     {
-        Align8();
         DeserializeStructArrayCore(count, out val);
     }
 
@@ -442,7 +439,7 @@ public unsafe partial struct ReadBuffer2
         val = new T[count];
         fixed (T* valPtr = val)
         {
-            Unsafe.CopyBlock(valPtr, ptr + offset, (uint)size);
+            Unsafe.CopyBlock(valPtr, cursor, (uint)size);
         }
 
         Advance(size);
@@ -465,7 +462,7 @@ public unsafe partial struct ReadBuffer2
         val = new SharedRent(count);
         fixed (byte* valPtr = val.Array)
         {
-            Unsafe.CopyBlock(valPtr, ptr + offset, (uint)count);
+            Unsafe.CopyBlock(valPtr, cursor, (uint)count);
         }
 
         Advance(count);
@@ -501,14 +498,12 @@ public unsafe partial struct ReadBuffer2
         val = Array.Empty<T>(); // unreachable
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    void Align2() => Advance((-offset) & 1);
+    #region Empties
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    void Align4() => Advance((-offset) & 3);
+    static string EmptyString => "";
+    static string[] EmptyStringArray => Array.Empty<string>();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    void Align8() => Advance((-offset) & 7);
+    #endregion    
 
     /// <summary>
     /// Deserializes a message of the given type from the buffer array.  
@@ -539,60 +534,54 @@ public unsafe partial struct ReadBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Vector3 t)
     {
-        Align8();
         const int size = Vector3.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Vector3*)(ptr + offset);
+        t = *(Vector3*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Point t)
     {
-        Align8();
         const int size = Point.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Point*)(ptr + offset);
+        t = *(Point*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Quaternion t)
     {
-        Align8();
         const int size = Quaternion.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Quaternion*)(ptr + offset);
+        t = *(Quaternion*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Pose t)
     {
-        Align8();
         const int size = Pose.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Pose*)(ptr + offset);
+        t = *(Pose*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Transform t)
     {
-        Align8();
         const int size = Transform.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Transform*)(ptr + offset);
+        t = *(Transform*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Point32 t)
     {
-        Align4();
         const int size = Point32.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Point32*)(ptr + offset);
+        t = *(Point32*)cursor;
         Advance(size);
     }
 
@@ -601,36 +590,34 @@ public unsafe partial struct ReadBuffer2
     {
         const int size = Color32.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Color32*)(ptr + offset);
+        t = *(Color32*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Triangle t)
     {
-        Align4();
         const int size = Triangle.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(Triangle*)(ptr + offset);
+        t = *(Triangle*)cursor;
         Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out ColorRGBA t)
     {
-        Align4();
         const int size = ColorRGBA.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
-        t = *(ColorRGBA*)(ptr + offset);
+        t = *(ColorRGBA*)cursor;
         Advance(size);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(out time[] val)
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<time>();
-        else DeserializeStructArray(count, out val);
+        else DeserializeStructArrayCore(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -639,13 +626,13 @@ public unsafe partial struct ReadBuffer2
         Align4();
         DeserializeStructArrayCore(count, out val);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(out Color32[] val)
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<Color32>();
-        else DeserializeStructArray(count, out val);
+        else DeserializeStructArrayCore(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -653,34 +640,36 @@ public unsafe partial struct ReadBuffer2
     {
         DeserializeStructArrayCore(count, out val);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(out Triangle[] val)
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<Triangle>();
-        else DeserializeStructArray(count, out val);
+        else DeserializeStructArrayCore(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out Triangle[] val)
     {
-        Align4();
         DeserializeStructArrayCore(count, out val);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(out Vector3[] val)
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<Vector3>();
-        else DeserializeStructArray(count, out val);
+        else
+        {
+            Align8();
+            DeserializeStructArrayCore(count, out val);
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out Vector3[] val)
     {
-        Align8();
         DeserializeStructArrayCore(count, out val);
     }
 
@@ -689,13 +678,16 @@ public unsafe partial struct ReadBuffer2
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<Point>();
-        else DeserializeStructArray(count, out val);
+        else
+        {
+            Align8();
+            DeserializeStructArrayCore(count, out val);
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out Point[] val)
     {
-        Align8();
         DeserializeStructArrayCore(count, out val);
     }
 
@@ -704,24 +696,13 @@ public unsafe partial struct ReadBuffer2
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<Point32>();
-        else DeserializeStructArray(count, out val);
+        else DeserializeStructArrayCore(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out Point32[] val)
     {
-        Align4();
-        
-        int size = count * Point32.Ros2FixedMessageLength;
-        ThrowIfOutOfRange(size);
-
-        val = new Point32[count];
-        fixed (Point32* valPtr = val)
-        {
-            Unsafe.CopyBlock(valPtr, ptr + offset, (uint)size);
-        }
-
-        Advance(size);        
+        DeserializeStructArrayCore(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -729,28 +710,30 @@ public unsafe partial struct ReadBuffer2
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<ColorRGBA>();
-        else DeserializeStructArray(count, out val);
+        else DeserializeStructArrayCore(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out ColorRGBA[] val)
     {
-        Align4();
         DeserializeStructArrayCore(count, out val);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(out Transform[] val)
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<Transform>();
-        else DeserializeStructArray(count, out val);
+        else
+        {
+            Align8();
+            DeserializeStructArrayCore(count, out val);
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out Transform[] val)
     {
-        Align8();
         DeserializeStructArrayCore(count, out val);
     }
 
@@ -759,13 +742,16 @@ public unsafe partial struct ReadBuffer2
     {
         int count = ReadInt();
         if (count == 0) val = Array.Empty<Pose>();
-        else DeserializeStructArray(count, out val);
+        else
+        {
+            Align8();
+            DeserializeStructArrayCore(count, out val);
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(int count, out Pose[] val)
     {
-        Align8();
         DeserializeStructArrayCore(count, out val);
     }
 }

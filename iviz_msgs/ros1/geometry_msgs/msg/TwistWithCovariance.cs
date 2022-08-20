@@ -36,6 +36,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public TwistWithCovariance(ref ReadBuffer2 b)
         {
             Twist = new Twist(ref b);
+            b.Align8();
             b.DeserializeStructArray(36, out Covariance);
         }
         

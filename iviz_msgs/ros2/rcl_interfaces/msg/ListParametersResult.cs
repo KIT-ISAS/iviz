@@ -33,7 +33,9 @@ namespace Iviz.Msgs.RclInterfaces
         
         public ListParametersResult(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStringArray(out Names);
+            b.Align4();
             b.DeserializeStringArray(out Prefixes);
         }
         

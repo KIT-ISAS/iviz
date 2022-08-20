@@ -114,6 +114,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public FrameGraphResponse(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out FrameYaml);
         }
         

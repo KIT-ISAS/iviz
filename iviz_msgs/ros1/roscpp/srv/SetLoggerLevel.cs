@@ -72,7 +72,9 @@ namespace Iviz.Msgs.Roscpp
         
         public SetLoggerLevelRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Logger);
+            b.Align4();
             b.DeserializeString(out Level);
         }
         

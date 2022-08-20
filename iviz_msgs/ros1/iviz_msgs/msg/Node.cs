@@ -37,9 +37,12 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Node(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Name);
+            b.Align4();
             b.Deserialize(out Parent);
             Transform = new Matrix4(ref b);
+            b.Align4();
             b.DeserializeStructArray(out Meshes);
         }
         

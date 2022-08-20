@@ -34,6 +34,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public NormalizedPointOfInterest2D(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out X);
             b.Deserialize(out Y);
             b.Deserialize(out C);

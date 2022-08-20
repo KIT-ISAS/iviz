@@ -52,6 +52,7 @@ namespace Iviz.Msgs.SensorMsgs
         public Imu(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align8();
             b.Deserialize(out Orientation);
             b.DeserializeStructArray(9, out OrientationCovariance);
             b.Deserialize(out AngularVelocity);

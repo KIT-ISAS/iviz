@@ -120,11 +120,13 @@ namespace Iviz.Msgs.HriMsgs
         public FacialLandmarks(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeArray(out Landmarks);
             for (int i = 0; i < Landmarks.Length; i++)
             {
                 Landmarks[i] = new NormalizedPointOfInterest2D(ref b);
             }
+            b.Align4();
             b.Deserialize(out Height);
             b.Deserialize(out Width);
         }

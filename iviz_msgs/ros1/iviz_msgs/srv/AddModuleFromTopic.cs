@@ -75,7 +75,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public AddModuleFromTopicRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Topic);
+            b.Align4();
             b.DeserializeString(out Id);
         }
         
@@ -149,7 +151,9 @@ namespace Iviz.Msgs.IvizMsgs
         public AddModuleFromTopicResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
+            b.Align4();
             b.DeserializeString(out Message);
+            b.Align4();
             b.DeserializeString(out Id);
         }
         

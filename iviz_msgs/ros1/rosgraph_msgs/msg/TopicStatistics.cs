@@ -60,9 +60,13 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public TopicStatistics(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Topic);
+            b.Align4();
             b.DeserializeString(out NodePub);
+            b.Align4();
             b.DeserializeString(out NodeSub);
+            b.Align4();
             b.Deserialize(out WindowStart);
             b.Deserialize(out WindowStop);
             b.Deserialize(out DeliveredMsgs);

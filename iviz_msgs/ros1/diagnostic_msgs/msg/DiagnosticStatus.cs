@@ -49,9 +49,13 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public DiagnosticStatus(ref ReadBuffer2 b)
         {
             b.Deserialize(out Level);
+            b.Align4();
             b.DeserializeString(out Name);
+            b.Align4();
             b.DeserializeString(out Message);
+            b.Align4();
             b.DeserializeString(out HardwareId);
+            b.Align4();
             b.DeserializeArray(out Values);
             for (int i = 0; i < Values.Length; i++)
             {

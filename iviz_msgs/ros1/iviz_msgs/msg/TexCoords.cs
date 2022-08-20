@@ -26,6 +26,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public TexCoords(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out Coords);
         }
         

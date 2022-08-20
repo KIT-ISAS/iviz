@@ -50,11 +50,14 @@ namespace Iviz.Msgs.IvizMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Type);
+            b.Align4();
             b.DeserializeString(out Code);
+            b.Align8();
             b.DeserializeStructArray(4, out Corners);
             b.DeserializeStructArray(9, out CameraIntrinsic);
             b.Deserialize(out CameraPose);
             b.Deserialize(out HasReliablePose);
+            b.Align8();
             b.Deserialize(out MarkerSizeInMm);
             b.Deserialize(out PoseRelativeToCamera);
         }

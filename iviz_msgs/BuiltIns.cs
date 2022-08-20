@@ -185,14 +185,6 @@ public static class BuiltIns
         return bytes;
     }
 
-    public static bool IsRos1<T>() => typeof(IMessageRos1).IsAssignableFrom(typeof(T));
-
-    public static bool IsRos2<T>() => typeof(IMessageRos2).IsAssignableFrom(typeof(T));
-
-    public static bool IsRos1<T>(this T msg) where T : ISerializable => msg is IMessageRos1;
-
-    public static bool IsRos2<T>(this T msg) where T : ISerializable => msg is IMessageRos2;
-
     // we use here the fact that 99% of the strings we get are ascii and with length <= 64 (i.e., frames in headers)
     // so we do a simple check and if it's ascii, we do a quick conversion that gets auto-vectorized in il2cpp
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -268,22 +260,22 @@ public static class BuiltIns
     [DoesNotReturn, AssertionMethod]
     public static void ThrowArgument(string arg, string message) => throw new ArgumentNullException(arg, message);
 
-    [DoesNotReturn, AssertionMethod]
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
     public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);
 
-    [DoesNotReturn, AssertionMethod]
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
     public static void ThrowNullReference(string name) => throw new NullReferenceException(name);
 
-    [DoesNotReturn, AssertionMethod]
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
     public static void ThrowNullReference(string name, int i) =>
         throw new NullReferenceException($"{name}[{i}] cannot be null");
 
-    [DoesNotReturn, AssertionMethod]
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
     public static void ThrowNullReference() => throw new NullReferenceException("Message fields cannot be null.");
 
-    [DoesNotReturn, AssertionMethod]
-    public static void ThrowBufferOverflow(int off, int remaining) =>
-        throw new RosBufferException($"Requested {off} bytes, but only {remaining} remain!");
+    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    public static void ThrowBufferOverflow(int off) =>
+        throw new RosBufferException($"Requested {off} bytes, but that takes us beyond the end!");
 
     [DoesNotReturn, AssertionMethod]
     public static void ThrowImplausibleBufferSize() =>

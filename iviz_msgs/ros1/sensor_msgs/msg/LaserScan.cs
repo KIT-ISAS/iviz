@@ -65,6 +65,7 @@ namespace Iviz.Msgs.SensorMsgs
         public LaserScan(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out AngleMin);
             b.Deserialize(out AngleMax);
             b.Deserialize(out AngleIncrement);

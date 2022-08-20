@@ -68,6 +68,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetGeometryRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Uuid);
         }
         

@@ -114,6 +114,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetUUIDResponse(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Uuid);
         }
         

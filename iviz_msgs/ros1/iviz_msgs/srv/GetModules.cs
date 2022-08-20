@@ -116,6 +116,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetModulesResponse(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStringArray(out Configs);
         }
         

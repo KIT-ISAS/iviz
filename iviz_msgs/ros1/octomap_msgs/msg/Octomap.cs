@@ -37,7 +37,9 @@ namespace Iviz.Msgs.OctomapMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Binary);
+            b.Align4();
             b.DeserializeString(out Id);
+            b.Align8();
             b.Deserialize(out Resolution);
             b.DeserializeStructArray(out Data);
         }

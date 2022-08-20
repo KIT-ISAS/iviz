@@ -34,7 +34,9 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshFeatures(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out MapUuid);
+            b.Align4();
             b.DeserializeArray(out Features);
             for (int i = 0; i < Features.Length; i++)
             {

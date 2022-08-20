@@ -36,6 +36,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         public GoalStatusArray(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeArray(out StatusList);
             for (int i = 0; i < StatusList.Length; i++)
             {

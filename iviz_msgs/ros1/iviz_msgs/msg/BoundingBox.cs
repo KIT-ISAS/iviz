@@ -28,6 +28,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public BoundingBox(ref ReadBuffer2 b)
         {
+            b.Align8();
             b.Deserialize(out Center);
             b.Deserialize(out Size);
         }

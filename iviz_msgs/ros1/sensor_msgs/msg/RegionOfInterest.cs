@@ -44,6 +44,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public RegionOfInterest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out XOffset);
             b.Deserialize(out YOffset);
             b.Deserialize(out Height);

@@ -28,6 +28,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public Clock(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out Clock_);
         }
         

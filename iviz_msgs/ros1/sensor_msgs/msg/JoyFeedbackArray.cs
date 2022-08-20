@@ -31,6 +31,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public JoyFeedbackArray(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeArray(out Array);
             for (int i = 0; i < Array.Length; i++)
             {

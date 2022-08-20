@@ -48,19 +48,25 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Model(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Name);
+            b.Align4();
             b.DeserializeString(out Filename);
+            b.Align4();
             b.DeserializeString(out OrientationHint);
+            b.Align4();
             b.DeserializeArray(out Meshes);
             for (int i = 0; i < Meshes.Length; i++)
             {
                 Meshes[i] = new Mesh(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out Materials);
             for (int i = 0; i < Materials.Length; i++)
             {
                 Materials[i] = new Material(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out Nodes);
             for (int i = 0; i < Nodes.Length; i++)
             {

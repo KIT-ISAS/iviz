@@ -80,7 +80,9 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public GetGridMapRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out FrameId);
+            b.Align8();
             b.Deserialize(out PositionX);
             b.Deserialize(out PositionY);
             b.Deserialize(out LengthX);

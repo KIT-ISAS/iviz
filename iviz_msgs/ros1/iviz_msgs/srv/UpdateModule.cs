@@ -80,8 +80,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public UpdateModuleRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Id);
+            b.Align4();
             b.DeserializeStringArray(out Fields);
+            b.Align4();
             b.DeserializeString(out Config);
         }
         
@@ -167,6 +170,7 @@ namespace Iviz.Msgs.IvizMsgs
         public UpdateModuleResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
+            b.Align4();
             b.DeserializeString(out Message);
         }
         

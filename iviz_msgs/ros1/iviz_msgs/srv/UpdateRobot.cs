@@ -79,9 +79,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public UpdateRobotRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out Operation);
             b.DeserializeString(out Id);
             Configuration = new IvizMsgs.RobotConfiguration(ref b);
+            b.Align4();
             b.DeserializeStringArray(out ValidFields);
         }
         
@@ -170,6 +172,7 @@ namespace Iviz.Msgs.IvizMsgs
         public UpdateRobotResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
+            b.Align4();
             b.DeserializeString(out Message);
         }
         

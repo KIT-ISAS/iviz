@@ -40,10 +40,12 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Light(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Name);
             b.Deserialize(out Type);
             b.Deserialize(out CastShadows);
             b.Deserialize(out Diffuse);
+            b.Align4();
             b.Deserialize(out Range);
             b.Deserialize(out Position);
             b.Deserialize(out Direction);

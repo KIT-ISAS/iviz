@@ -30,6 +30,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public Vector3Stamped(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align8();
             b.Deserialize(out Vector);
         }
         

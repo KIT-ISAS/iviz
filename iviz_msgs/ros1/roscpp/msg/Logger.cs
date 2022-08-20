@@ -30,7 +30,9 @@ namespace Iviz.Msgs.Roscpp
         
         public Logger(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Name);
+            b.Align4();
             b.DeserializeString(out Level);
         }
         

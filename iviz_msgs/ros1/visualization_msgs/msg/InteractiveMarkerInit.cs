@@ -46,7 +46,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public InteractiveMarkerInit(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out ServerId);
+            b.Align8();
             b.Deserialize(out SeqNum);
             b.DeserializeArray(out Markers);
             for (int i = 0; i < Markers.Length; i++)

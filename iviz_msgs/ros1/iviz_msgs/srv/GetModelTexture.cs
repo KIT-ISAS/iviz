@@ -68,6 +68,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetModelTextureRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Uri);
         }
         
@@ -135,6 +136,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Deserialize(out Success);
             Image = new SensorMsgs.CompressedImage(ref b);
+            b.Align4();
             b.DeserializeString(out Message);
         }
         

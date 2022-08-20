@@ -62,16 +62,21 @@ namespace Iviz.Msgs.RclInterfaces
         
         public ParameterDescriptor(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Name);
             b.Deserialize(out Type);
+            b.Align4();
             b.DeserializeString(out Description);
+            b.Align4();
             b.DeserializeString(out AdditionalConstraints);
             b.Deserialize(out ReadOnly);
+            b.Align4();
             b.DeserializeArray(out FloatingPointRange);
             for (int i = 0; i < FloatingPointRange.Length; i++)
             {
                 FloatingPointRange[i] = new FloatingPointRange(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out IntegerRange);
             for (int i = 0; i < IntegerRange.Length; i++)
             {

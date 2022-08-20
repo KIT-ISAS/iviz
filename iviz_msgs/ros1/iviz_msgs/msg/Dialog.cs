@@ -103,18 +103,26 @@ namespace Iviz.Msgs.IvizMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Action);
+            b.Align4();
             b.DeserializeString(out Id);
+            b.Align4();
             b.Deserialize(out Lifetime);
+            b.Align8();
             b.Deserialize(out Scale);
             b.Deserialize(out Type);
             b.Deserialize(out Buttons);
             b.Deserialize(out Icon);
+            b.Align4();
             b.Deserialize(out BackgroundColor);
             b.DeserializeString(out Title);
+            b.Align4();
             b.DeserializeString(out Caption);
+            b.Align2();
             b.Deserialize(out CaptionAlignment);
+            b.Align4();
             b.DeserializeStringArray(out MenuEntries);
             b.Deserialize(out BindingType);
+            b.Align8();
             b.Deserialize(out TfOffset);
             b.Deserialize(out DialogDisplacement);
             b.Deserialize(out TfDisplacement);

@@ -38,11 +38,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public WidgetArray(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeArray(out Dialogs);
             for (int i = 0; i < Dialogs.Length; i++)
             {
                 Dialogs[i] = new IvizMsgs.Dialog(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out Widgets);
             for (int i = 0; i < Widgets.Length; i++)
             {

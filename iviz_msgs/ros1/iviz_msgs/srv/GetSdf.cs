@@ -70,6 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetSdfRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Uri);
         }
         
@@ -140,6 +141,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Deserialize(out Success);
             Scene = new Scene(ref b);
+            b.Align4();
             b.DeserializeString(out Message);
         }
         

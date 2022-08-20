@@ -68,6 +68,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetLabeledClustersRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Uuid);
         }
         
@@ -130,6 +131,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetLabeledClustersResponse(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeArray(out Clusters);
             for (int i = 0; i < Clusters.Length; i++)
             {

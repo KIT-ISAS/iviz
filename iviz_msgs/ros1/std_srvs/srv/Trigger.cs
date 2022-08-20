@@ -120,6 +120,7 @@ namespace Iviz.Msgs.StdSrvs
         public TriggerResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
+            b.Align4();
             b.DeserializeString(out Message);
         }
         

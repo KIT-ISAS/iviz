@@ -25,6 +25,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public Duration(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out Data);
         }
         

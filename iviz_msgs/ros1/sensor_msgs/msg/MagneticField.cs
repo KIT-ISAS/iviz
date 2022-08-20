@@ -50,6 +50,7 @@ namespace Iviz.Msgs.SensorMsgs
         public MagneticField(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align8();
             b.Deserialize(out MagneticField_);
             b.DeserializeStructArray(9, out MagneticFieldCovariance);
         }

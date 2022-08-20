@@ -58,15 +58,19 @@ namespace Iviz.Msgs.VisualizationMsgs
         public InteractiveMarker(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align8();
             b.Deserialize(out Pose);
             b.DeserializeString(out Name);
+            b.Align4();
             b.DeserializeString(out Description);
+            b.Align4();
             b.Deserialize(out Scale);
             b.DeserializeArray(out MenuEntries);
             for (int i = 0; i < MenuEntries.Length; i++)
             {
                 MenuEntries[i] = new MenuEntry(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out Controls);
             for (int i = 0; i < Controls.Length; i++)
             {

@@ -58,6 +58,7 @@ namespace Iviz.Msgs.HriMsgs
         public Skeleton2D(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeArray(out Skeleton);
             for (int i = 0; i < Skeleton.Length; i++)
             {

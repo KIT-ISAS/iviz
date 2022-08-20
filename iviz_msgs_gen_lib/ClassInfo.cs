@@ -551,8 +551,8 @@ public sealed class ClassInfo
                     fields.Add($"    c += {fieldFixedSize}; // {variable.CsFieldName}");
                 }
 
-                currentAlignment = fieldFixedSize % fieldAlignment == 0 
-                    ? fieldAlignment 
+                currentAlignment = fieldFixedSize % fieldAlignment == 0
+                    ? fieldAlignment
                     : -1;
             }
 
@@ -886,6 +886,8 @@ public sealed class ClassInfo
                 lines.Add("{");
             }
 
+            int currentAlignment = -1;
+
             string prefix = forceStruct ? "h." : "";
             foreach (var variable in variables)
             {
@@ -907,20 +909,26 @@ public sealed class ClassInfo
                         case VariableElement.NotAnArray:
                             if (variable.CsClassType == "string")
                             {
+                                AddAlign(4);
                                 lines.Add(variable.IgnoreHint
                                     ? $"    b.SkipString(out {prefix}{variable.CsFieldName});"
                                     : $"    b.DeserializeString(out {prefix}{variable.CsFieldName});");
                             }
+                            else if (isRos2 && BuiltInAlignments.TryGetValue(variable.RosClassType, out int alignment))
+                            {
+                                AddAlign(alignment);
+                                lines.Add($"    b.Deserialize(out {prefix}{variable.CsFieldName});");
+                                break;
+                            }
                             else
                             {
                                 lines.Add($"    b.Deserialize(out {prefix}{variable.CsFieldName});");
-
-                                //lines.Add(
-                                //    $"    {prefix}{variable.CsFieldName} = b.Deserialize<{variable.CsClassName}>();");
                             }
 
+                            currentAlignment = -1;
                             break;
                         case VariableElement.DynamicSizeArray:
+                            AddAlign(4);
                             if (variable.CsClassType == "string")
                             {
                                 lines.Add(variable.IgnoreHint
@@ -929,26 +937,39 @@ public sealed class ClassInfo
                             }
                             else if (variable.RentHint)
                             {
-                                lines.Add(
-                                    $"    b.DeserializeStructRent(out {prefix}{variable.CsFieldName});");
+                                lines.Add($"    b.DeserializeStructRent(out {prefix}{variable.CsFieldName});");
                             }
                             else if (variable.IgnoreHint)
                             {
-                                lines.Add(
-                                    $"    b.SkipStructArray(out {prefix}{variable.CsFieldName});");
+                                lines.Add($"    b.SkipStructArray(out {prefix}{variable.CsFieldName});");
                             }
                             else
                             {
-                                lines.Add(
-                                    $"    b.DeserializeStructArray(out {prefix}{variable.CsFieldName});");
+                                lines.Add($"    b.DeserializeStructArray(out {prefix}{variable.CsFieldName});");
+
+                                if (isRos2 && BuiltInAlignments.TryGetValue(variable.RosClassType, out int alignment))
+                                {
+                                    currentAlignment = alignment;
+                                    break;
+                                }
                             }
 
+                            currentAlignment = -1;
                             break;
                         default:
+                            if (isRos2 && BuiltInAlignments.TryGetValue(variable.RosClassType, out int alignment3))
+                            {
+                                AddAlign(alignment3);
+                                lines.Add(
+                                    $"    b.DeserializeStructArray({variable.ArraySize}, out {prefix}{variable.CsFieldName});");
+                                break;
+                            }
+
                             lines.Add(
                                 variable.CsClassType == "string"
                                     ? $"    b.DeserializeStringArray({variable.ArraySize}, out {prefix}{variable.CsFieldName});"
                                     : $"    b.DeserializeStructArray({variable.ArraySize}, out {prefix}{variable.CsFieldName});");
+                            currentAlignment = -1;
                             break;
                     }
                 }
@@ -959,11 +980,17 @@ public sealed class ClassInfo
                         case VariableElement.NotAnArray:
                             if (variable.ClassInfo is { Ros1FixedSize: 0 })
                             {
-                                lines.Add(
-                                    $"    {prefix}{variable.CsFieldName} = {variable.CsClassType}.Singleton;");
+                                lines.Add($"    {prefix}{variable.CsFieldName} = {variable.CsClassType}.Singleton;");
                             }
                             else if (variable.ClassIsBlittable)
                             {
+                                if (isRos2 && variable.ClassInfo?.Ros2HeadAlignment is { } alignment)
+                                {
+                                    AddAlign(alignment);
+                                    lines.Add($"    b.Deserialize(out {prefix}{variable.CsFieldName});");
+                                    break;
+                                }
+
                                 lines.Add($"    b.Deserialize(out {prefix}{variable.CsFieldName});");
                             }
                             else if (variable.ClassIsStruct && !isAction)
@@ -977,14 +1004,22 @@ public sealed class ClassInfo
                                     $"    {prefix}{variable.CsFieldName} = new {variable.CsClassType}(ref b);");
                             }
 
+                            currentAlignment = -1;
                             break;
                         case VariableElement.DynamicSizeArray when variable.ClassIsBlittable:
-                            lines.Add(
-                                $"    b.DeserializeStructArray(out {prefix}{variable.CsFieldName});");
+                            AddAlign(4);
+                            lines.Add($"    b.DeserializeStructArray(out {prefix}{variable.CsFieldName});");
+                            if (isRos2 && variable.ClassInfo?.Ros2HeadAlignment is { } alignment2)
+                            {
+                                currentAlignment = alignment2;
+                                break;
+                            }
+
+                            currentAlignment = -1;
                             break;
                         case VariableElement.DynamicSizeArray:
-                            lines.Add(
-                                $"    b.DeserializeArray(out {prefix}{variable.CsFieldName});");
+                            AddAlign(4);
+                            lines.Add($"    b.DeserializeArray(out {prefix}{variable.CsFieldName});");
                             lines.Add($"    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
                             lines.Add("    {");
                             lines.Add(variable.ClassIsStruct && !isAction
@@ -992,11 +1027,20 @@ public sealed class ClassInfo
                                 : $"        {prefix}{variable.CsFieldName}[i] = new {variable.CsClassType}(ref b);");
 
                             lines.Add("    }");
+                            currentAlignment = -1;
                             break;
                         default:
                         {
                             if (variable.ClassIsBlittable)
                             {
+                                if (isRos2 && variable.ClassInfo?.Ros2HeadAlignment is { } alignment3)
+                                {
+                                    AddAlign(alignment3);
+                                    lines.Add(
+                                        $"    b.DeserializeStructArray({variable.ArraySize}, out {prefix}{variable.CsFieldName});");
+                                    break;
+                                }
+
                                 lines.Add(
                                     $"    b.DeserializeStructArray({variable.ArraySize}, out {prefix}{variable.CsFieldName});");
                             }
@@ -1012,9 +1056,27 @@ public sealed class ClassInfo
                                 lines.Add("    }");
                             }
 
+                            currentAlignment = -1;
                             break;
                         }
                     }
+                }
+
+                void AddAlign(int alignment)
+                {
+                    if (!isRos2) return;
+                    if (currentAlignment != -1 && currentAlignment >= alignment)
+                    {
+                        currentAlignment = alignment;
+                        return;
+                    }
+
+                    if (alignment != 1)
+                    {
+                        lines.Add($"    b.Align{alignment}();");
+                    }
+
+                    currentAlignment = alignment;
                 }
             }
         }
@@ -1169,7 +1231,7 @@ public sealed class ClassInfo
                                 lines.Add($"    {{");
                                 lines.Add($"        {variable.CsFieldName}[i].RosSerialize(ref b);");
                                 lines.Add($"    }}");
-                            }                            
+                            }
                         }
 
                         /*

@@ -47,13 +47,17 @@ namespace Iviz.Msgs.GridMapMsgs
         public GridMap(ref ReadBuffer2 b)
         {
             Info = new GridMapInfo(ref b);
+            b.Align4();
             b.DeserializeStringArray(out Layers);
+            b.Align4();
             b.DeserializeStringArray(out BasicLayers);
+            b.Align4();
             b.DeserializeArray(out Data);
             for (int i = 0; i < Data.Length; i++)
             {
                 Data[i] = new StdMsgs.Float32MultiArray(ref b);
             }
+            b.Align2();
             b.Deserialize(out OuterStartIndex);
             b.Deserialize(out InnerStartIndex);
         }

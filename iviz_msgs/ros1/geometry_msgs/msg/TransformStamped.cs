@@ -50,7 +50,9 @@ namespace Iviz.Msgs.GeometryMsgs
         public static void Deserialize(ref ReadBuffer2 b, out TransformStamped h)
         {
             StdMsgs.Header.Deserialize(ref b, out h.Header);
+            b.Align4();
             b.DeserializeString(out h.ChildFrameId);
+            b.Align8();
             b.Deserialize(out h.Transform);
         }
         

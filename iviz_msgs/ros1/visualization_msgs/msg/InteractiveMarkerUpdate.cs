@@ -60,19 +60,24 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public InteractiveMarkerUpdate(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out ServerId);
+            b.Align8();
             b.Deserialize(out SeqNum);
             b.Deserialize(out Type);
+            b.Align4();
             b.DeserializeArray(out Markers);
             for (int i = 0; i < Markers.Length; i++)
             {
                 Markers[i] = new InteractiveMarker(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out Poses);
             for (int i = 0; i < Poses.Length; i++)
             {
                 Poses[i] = new InteractiveMarkerPose(ref b);
             }
+            b.Align4();
             b.DeserializeStringArray(out Erases);
         }
         

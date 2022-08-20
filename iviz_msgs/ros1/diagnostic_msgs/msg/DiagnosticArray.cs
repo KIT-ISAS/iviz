@@ -37,6 +37,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public DiagnosticArray(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeArray(out Status);
             for (int i = 0; i < Status.Length; i++)
             {

@@ -30,6 +30,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public Wrench(ref ReadBuffer2 b)
         {
+            b.Align8();
             b.Deserialize(out Force);
             b.Deserialize(out Torque);
         }

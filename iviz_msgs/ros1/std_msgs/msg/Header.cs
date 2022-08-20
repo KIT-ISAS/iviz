@@ -54,6 +54,7 @@ namespace Iviz.Msgs.StdMsgs
         public static void Deserialize(ref ReadBuffer2 b, out Header h)
         {
             h.Seq = default;
+            b.Align4();
             b.Deserialize(out h.Stamp);
             b.DeserializeString(out h.FrameId);
         }

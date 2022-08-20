@@ -87,18 +87,23 @@ namespace Iviz.Msgs.VisualizationMsgs
         public Marker(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeString(out Ns);
+            b.Align4();
             b.Deserialize(out Id);
             b.Deserialize(out Type);
             b.Deserialize(out Action);
+            b.Align8();
             b.Deserialize(out Pose);
             b.Deserialize(out Scale);
             b.Deserialize(out Color);
             b.Deserialize(out Lifetime);
             b.Deserialize(out FrameLocked);
+            b.Align4();
             b.DeserializeStructArray(out Points);
             b.DeserializeStructArray(out Colors);
             b.DeserializeString(out Text);
+            b.Align4();
             b.DeserializeString(out MeshResource);
             b.Deserialize(out MeshUseEmbeddedMaterials);
         }

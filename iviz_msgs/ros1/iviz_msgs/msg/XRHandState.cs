@@ -41,6 +41,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Deserialize(out IsValid);
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align8();
             b.Deserialize(out Palm);
             b.DeserializeStructArray(out Thumb);
             b.DeserializeStructArray(out Index);

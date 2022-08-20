@@ -72,9 +72,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public MenuEntry(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out Id);
             b.Deserialize(out ParentId);
             b.DeserializeString(out Title);
+            b.Align4();
             b.DeserializeString(out Command);
             b.Deserialize(out CommandType);
         }

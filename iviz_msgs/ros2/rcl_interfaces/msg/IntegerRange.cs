@@ -49,6 +49,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public IntegerRange(ref ReadBuffer2 b)
         {
+            b.Align8();
             b.Deserialize(out FromValue);
             b.Deserialize(out ToValue);
             b.Deserialize(out Step);

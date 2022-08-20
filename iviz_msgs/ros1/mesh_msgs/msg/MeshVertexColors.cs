@@ -27,6 +27,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshVertexColors(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out VertexColors);
         }
         

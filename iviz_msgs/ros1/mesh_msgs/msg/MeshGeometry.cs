@@ -39,6 +39,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshGeometry(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out Vertices);
             b.DeserializeStructArray(out VertexNormals);
             b.DeserializeArray(out Faces);

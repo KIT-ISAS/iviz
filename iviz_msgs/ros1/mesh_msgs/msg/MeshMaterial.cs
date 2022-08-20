@@ -31,6 +31,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshMaterial(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out TextureIndex);
             b.Deserialize(out Color);
             b.Deserialize(out HasTexture);

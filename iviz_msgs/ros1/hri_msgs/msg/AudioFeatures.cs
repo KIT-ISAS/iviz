@@ -41,6 +41,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public AudioFeatures(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out ZCR);
             b.Deserialize(out RMS);
             b.Deserialize(out Pitch);

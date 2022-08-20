@@ -39,7 +39,9 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshVertexCostsStamped(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeString(out Uuid);
+            b.Align4();
             b.DeserializeString(out Type);
             MeshVertexCosts = new MeshMsgs.MeshVertexCosts(ref b);
         }

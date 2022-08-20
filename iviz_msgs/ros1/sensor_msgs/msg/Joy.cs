@@ -38,6 +38,7 @@ namespace Iviz.Msgs.SensorMsgs
         public Joy(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeStructArray(out Axes);
             b.DeserializeStructArray(out Buttons);
         }

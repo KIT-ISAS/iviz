@@ -60,6 +60,7 @@ namespace Iviz.Msgs.SensorMsgs
         public PointCloud2(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out Height);
             b.Deserialize(out Width);
             b.DeserializeArray(out Fields);
@@ -68,6 +69,7 @@ namespace Iviz.Msgs.SensorMsgs
                 Fields[i] = new PointField(ref b);
             }
             b.Deserialize(out IsBigendian);
+            b.Align4();
             b.Deserialize(out PointStep);
             b.Deserialize(out RowStep);
             b.DeserializeStructRent(out Data);

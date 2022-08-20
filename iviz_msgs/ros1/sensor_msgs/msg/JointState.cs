@@ -51,7 +51,9 @@ namespace Iviz.Msgs.SensorMsgs
         public JointState(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeStringArray(out Name);
+            b.Align4();
             b.DeserializeStructArray(out Position);
             b.DeserializeStructArray(out Velocity);
             b.DeserializeStructArray(out Effort);

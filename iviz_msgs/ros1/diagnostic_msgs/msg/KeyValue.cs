@@ -32,7 +32,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public KeyValue(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Key);
+            b.Align4();
             b.DeserializeString(out Value);
         }
         

@@ -70,6 +70,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public GetParameterTypesRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStringArray(out Names);
         }
         
@@ -136,6 +137,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public GetParameterTypesResponse(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out Types);
         }
         

@@ -34,6 +34,7 @@ namespace Iviz.Msgs.RclInterfaces
         public SetParametersResult(ref ReadBuffer2 b)
         {
             b.Deserialize(out Successful);
+            b.Align4();
             b.DeserializeString(out Reason);
         }
         

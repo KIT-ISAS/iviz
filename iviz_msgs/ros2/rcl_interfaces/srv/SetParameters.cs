@@ -73,6 +73,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public SetParametersRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeArray(out Parameters);
             for (int i = 0; i < Parameters.Length; i++)
             {
@@ -158,6 +159,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public SetParametersResponse(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeArray(out Results);
             for (int i = 0; i < Results.Length; i++)
             {

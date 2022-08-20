@@ -70,6 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetFileRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Uri);
         }
         
@@ -139,7 +140,9 @@ namespace Iviz.Msgs.IvizMsgs
         public GetFileResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
+            b.Align4();
             b.DeserializeStructArray(out Bytes);
+            b.Align4();
             b.DeserializeString(out Message);
         }
         

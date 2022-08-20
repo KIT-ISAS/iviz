@@ -49,16 +49,19 @@ namespace Iviz.Msgs.RclInterfaces
         
         public ParameterEventDescriptors(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeArray(out NewParameters);
             for (int i = 0; i < NewParameters.Length; i++)
             {
                 NewParameters[i] = new ParameterDescriptor(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out ChangedParameters);
             for (int i = 0; i < ChangedParameters.Length; i++)
             {
                 ChangedParameters[i] = new ParameterDescriptor(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out DeletedParameters);
             for (int i = 0; i < DeletedParameters.Length; i++)
             {

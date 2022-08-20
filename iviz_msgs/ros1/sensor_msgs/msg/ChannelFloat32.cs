@@ -49,7 +49,9 @@ namespace Iviz.Msgs.SensorMsgs
         
         public ChannelFloat32(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Name);
+            b.Align4();
             b.DeserializeStructArray(out Values);
         }
         

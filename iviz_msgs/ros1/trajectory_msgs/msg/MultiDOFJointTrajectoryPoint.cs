@@ -48,17 +48,20 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public MultiDOFJointTrajectoryPoint(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out Transforms);
             b.DeserializeArray(out Velocities);
             for (int i = 0; i < Velocities.Length; i++)
             {
                 Velocities[i] = new GeometryMsgs.Twist(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out Accelerations);
             for (int i = 0; i < Accelerations.Length; i++)
             {
                 Accelerations[i] = new GeometryMsgs.Twist(ref b);
             }
+            b.Align4();
             b.Deserialize(out TimeFromStart);
         }
         

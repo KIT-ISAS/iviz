@@ -66,14 +66,18 @@ namespace Iviz.Msgs.VisualizationMsgs
         public ImageMarker(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeString(out Ns);
+            b.Align4();
             b.Deserialize(out Id);
             b.Deserialize(out Type);
             b.Deserialize(out Action);
+            b.Align8();
             b.Deserialize(out Position);
             b.Deserialize(out Scale);
             b.Deserialize(out OutlineColor);
             b.Deserialize(out Filled);
+            b.Align4();
             b.Deserialize(out FillColor);
             b.Deserialize(out Lifetime);
             b.DeserializeStructArray(out Points);

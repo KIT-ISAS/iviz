@@ -35,10 +35,12 @@ namespace Iviz.Msgs.NavMsgs
         
         public MapMetaData(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out MapLoadTime);
             b.Deserialize(out Resolution);
             b.Deserialize(out Width);
             b.Deserialize(out Height);
+            b.Align8();
             b.Deserialize(out Origin);
         }
         

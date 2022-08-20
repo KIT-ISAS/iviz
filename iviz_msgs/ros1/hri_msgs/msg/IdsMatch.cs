@@ -75,10 +75,13 @@ namespace Iviz.Msgs.HriMsgs
         
         public IdsMatch(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Id1);
             b.Deserialize(out Id1Type);
+            b.Align4();
             b.DeserializeString(out Id2);
             b.Deserialize(out Id2Type);
+            b.Align4();
             b.Deserialize(out Confidence);
         }
         

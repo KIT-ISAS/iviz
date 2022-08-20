@@ -64,12 +64,17 @@ namespace Iviz.Msgs.VisualizationMsgs
         public InteractiveMarkerFeedback(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeString(out ClientId);
+            b.Align4();
             b.DeserializeString(out MarkerName);
+            b.Align4();
             b.DeserializeString(out ControlName);
             b.Deserialize(out EventType);
+            b.Align8();
             b.Deserialize(out Pose);
             b.Deserialize(out MenuEntryId);
+            b.Align8();
             b.Deserialize(out MousePoint);
             b.Deserialize(out MousePointValid);
         }

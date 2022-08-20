@@ -73,6 +73,7 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public BoundingBoxQueryRequest(ref ReadBuffer2 b)
         {
+            b.Align8();
             b.Deserialize(out Min);
             b.Deserialize(out Max);
         }

@@ -25,6 +25,7 @@ namespace Iviz.Msgs.Actionlib
         
         public TestGoal(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out Goal);
         }
         

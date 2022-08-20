@@ -60,13 +60,16 @@ namespace Iviz.Msgs.SensorMsgs
         public MultiDOFJointState(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeStringArray(out JointNames);
+            b.Align4();
             b.DeserializeStructArray(out Transforms);
             b.DeserializeArray(out Twist);
             for (int i = 0; i < Twist.Length; i++)
             {
                 Twist[i] = new GeometryMsgs.Twist(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out Wrench);
             for (int i = 0; i < Wrench.Length; i++)
             {

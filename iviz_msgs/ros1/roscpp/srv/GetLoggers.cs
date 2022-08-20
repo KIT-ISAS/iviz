@@ -118,6 +118,7 @@ namespace Iviz.Msgs.Roscpp
         
         public GetLoggersResponse(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeArray(out Loggers);
             for (int i = 0; i < Loggers.Length; i++)
             {

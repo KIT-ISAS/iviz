@@ -37,6 +37,7 @@ namespace Iviz.Msgs.Tf2Msgs
         public TF2Error(ref ReadBuffer2 b)
         {
             b.Deserialize(out Error);
+            b.Align4();
             b.DeserializeString(out ErrorString);
         }
         

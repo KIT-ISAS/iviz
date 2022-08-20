@@ -43,8 +43,11 @@ namespace Iviz.Msgs.HriMsgs
         public LiveSpeech(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeString(out Incremental);
+            b.Align4();
             b.DeserializeString(out Final);
+            b.Align8();
             b.Deserialize(out Confidence);
         }
         

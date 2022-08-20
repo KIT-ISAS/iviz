@@ -68,6 +68,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetVertexColorsRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Uuid);
         }
         

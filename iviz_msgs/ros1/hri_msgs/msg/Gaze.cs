@@ -39,7 +39,9 @@ namespace Iviz.Msgs.HriMsgs
         public Gaze(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeString(out Sender);
+            b.Align4();
             b.DeserializeString(out Receiver);
         }
         

@@ -71,7 +71,9 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetTextureRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Uuid);
+            b.Align4();
             b.Deserialize(out TextureIndex);
         }
         

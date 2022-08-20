@@ -82,6 +82,7 @@ namespace Iviz.Msgs.NavMsgs
         {
             Start = new GeometryMsgs.PoseStamped(ref b);
             Goal = new GeometryMsgs.PoseStamped(ref b);
+            b.Align4();
             b.Deserialize(out Tolerance);
         }
         

@@ -38,6 +38,7 @@ namespace Iviz.Msgs.SensorMsgs
         public TimeReference(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out TimeRef);
             b.DeserializeString(out Source);
         }

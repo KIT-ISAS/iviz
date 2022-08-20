@@ -125,8 +125,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public SelfTestResponse(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Id);
             b.Deserialize(out Passed);
+            b.Align4();
             b.DeserializeArray(out Status);
             for (int i = 0; i < Status.Length; i++)
             {

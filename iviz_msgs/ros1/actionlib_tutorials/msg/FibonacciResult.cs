@@ -27,6 +27,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public FibonacciResult(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out Sequence);
         }
         

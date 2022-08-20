@@ -35,6 +35,7 @@ namespace Iviz.Msgs.NavMsgs
         public Path(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeArray(out Poses);
             for (int i = 0; i < Poses.Length; i++)
             {

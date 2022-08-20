@@ -82,10 +82,15 @@ namespace Iviz.Msgs.RosgraphMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out h.Header);
             b.Deserialize(out h.Level);
+            b.Align4();
             b.DeserializeString(out h.Name);
+            b.Align4();
             b.DeserializeString(out h.Msg);
+            b.Align4();
             b.SkipString(out h.File);
+            b.Align4();
             b.SkipString(out h.Function);
+            b.Align4();
             b.Deserialize(out h.Line);
             b.SkipStringArray(out h.Topics);
         }

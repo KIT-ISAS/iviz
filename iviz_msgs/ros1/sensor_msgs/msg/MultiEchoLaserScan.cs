@@ -75,6 +75,7 @@ namespace Iviz.Msgs.SensorMsgs
         public MultiEchoLaserScan(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out AngleMin);
             b.Deserialize(out AngleMax);
             b.Deserialize(out AngleIncrement);
@@ -87,6 +88,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 Ranges[i] = new LaserEcho(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out Intensities);
             for (int i = 0; i < Intensities.Length; i++)
             {

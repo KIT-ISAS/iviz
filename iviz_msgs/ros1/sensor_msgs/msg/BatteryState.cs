@@ -100,6 +100,7 @@ namespace Iviz.Msgs.SensorMsgs
         public BatteryState(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out Voltage);
             b.Deserialize(out Temperature);
             b.Deserialize(out Current);
@@ -111,9 +112,11 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out PowerSupplyHealth);
             b.Deserialize(out PowerSupplyTechnology);
             b.Deserialize(out Present);
+            b.Align4();
             b.DeserializeStructArray(out CellVoltage);
             b.DeserializeStructArray(out CellTemperature);
             b.DeserializeString(out Location);
+            b.Align4();
             b.DeserializeString(out SerialNumber);
         }
         

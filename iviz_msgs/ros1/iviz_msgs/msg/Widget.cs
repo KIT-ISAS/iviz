@@ -65,15 +65,19 @@ namespace Iviz.Msgs.IvizMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Action);
+            b.Align4();
             b.DeserializeString(out Id);
             b.Deserialize(out Type);
+            b.Align8();
             b.Deserialize(out Pose);
             b.Deserialize(out Color);
             b.Deserialize(out SecondaryColor);
+            b.Align8();
             b.Deserialize(out Scale);
             b.Deserialize(out SecondaryScale);
             b.DeserializeString(out Caption);
             Boundary = new BoundingBox(ref b);
+            b.Align4();
             b.DeserializeArray(out SecondaryBoundaries);
             for (int i = 0; i < SecondaryBoundaries.Length; i++)
             {

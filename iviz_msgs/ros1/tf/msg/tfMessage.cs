@@ -30,6 +30,7 @@ namespace Iviz.Msgs.Tf
         
         public tfMessage(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeArray(out Transforms);
             for (int i = 0; i < Transforms.Length; i++)
             {

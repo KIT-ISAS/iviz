@@ -32,6 +32,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshFaceCluster(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out FaceIndices);
             b.DeserializeString(out Label);
         }

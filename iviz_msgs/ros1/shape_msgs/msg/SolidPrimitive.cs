@@ -58,6 +58,7 @@ namespace Iviz.Msgs.ShapeMsgs
         public SolidPrimitive(ref ReadBuffer2 b)
         {
             b.Deserialize(out Type);
+            b.Align4();
             b.DeserializeStructArray(out Dimensions);
         }
         

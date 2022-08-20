@@ -28,6 +28,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Vector2i(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out X);
             b.Deserialize(out Y);
         }

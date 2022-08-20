@@ -52,7 +52,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Mesh(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeString(out Name);
+            b.Align4();
             b.DeserializeStructArray(out Vertices);
             b.DeserializeStructArray(out Normals);
             b.DeserializeStructArray(out Tangents);
@@ -62,11 +64,13 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 TexCoords[i] = new TexCoords(ref b);
             }
+            b.Align4();
             b.DeserializeArray(out ColorChannels);
             for (int i = 0; i < ColorChannels.Length; i++)
             {
                 ColorChannels[i] = new ColorChannel(ref b);
             }
+            b.Align4();
             b.DeserializeStructArray(out Faces);
             b.Deserialize(out MaterialIndex);
         }

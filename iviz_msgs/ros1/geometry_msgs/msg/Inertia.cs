@@ -40,6 +40,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public Inertia(ref ReadBuffer2 b)
         {
+            b.Align8();
             b.Deserialize(out M);
             b.Deserialize(out Com);
             b.Deserialize(out Ixx);

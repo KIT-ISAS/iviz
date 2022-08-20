@@ -126,7 +126,9 @@ namespace Iviz.Msgs.IvizMsgs
         public GetCaptureResolutionsResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
+            b.Align4();
             b.DeserializeString(out Message);
+            b.Align4();
             b.DeserializeArray(out Resolutions);
             for (int i = 0; i < Resolutions.Length; i++)
             {

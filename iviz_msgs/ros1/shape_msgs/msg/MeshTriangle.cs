@@ -27,6 +27,7 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public MeshTriangle(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(3, out VertexIndices);
         }
         

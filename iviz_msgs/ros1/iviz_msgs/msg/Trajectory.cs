@@ -30,6 +30,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Trajectory(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out Poses);
             b.DeserializeStructArray(out Timestamps);
         }

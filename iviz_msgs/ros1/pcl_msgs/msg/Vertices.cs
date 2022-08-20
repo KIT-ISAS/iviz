@@ -27,6 +27,7 @@ namespace Iviz.Msgs.PclMsgs
         
         public Vertices(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeStructArray(out Vertices_);
         }
         

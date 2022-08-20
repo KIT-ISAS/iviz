@@ -142,11 +142,14 @@ namespace Iviz.Msgs.IvizMsgs
         public CaptureScreenshotResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
+            b.Align4();
             b.DeserializeString(out Message);
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out Width);
             b.Deserialize(out Height);
             b.Deserialize(out Bpp);
+            b.Align8();
             b.DeserializeStructArray(9, out Intrinsics);
             b.Deserialize(out Pose);
             b.DeserializeStructArray(out Data);

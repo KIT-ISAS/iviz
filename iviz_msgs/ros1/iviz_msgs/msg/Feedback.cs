@@ -49,10 +49,14 @@ namespace Iviz.Msgs.IvizMsgs
         public Feedback(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.DeserializeString(out VizId);
+            b.Align4();
             b.DeserializeString(out Id);
             b.Deserialize(out Type);
+            b.Align4();
             b.Deserialize(out EntryId);
+            b.Align8();
             b.Deserialize(out Angle);
             b.Deserialize(out Position);
             b.Deserialize(out Orientation);

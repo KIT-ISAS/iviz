@@ -30,6 +30,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ARMarkerArray(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.DeserializeArray(out Markers);
             for (int i = 0; i < Markers.Length; i++)
             {
