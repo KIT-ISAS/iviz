@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8140538696648896419}
   - component: {fileID: 2796826115721057332}
+  - component: {fileID: 5665589346352948054}
   m_Layer: 0
   m_Name: lever.dae
   m_TagString: Untagged
@@ -27,6 +28,7 @@ Transform:
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7284480435137045438}
   m_Father: {fileID: 0}
@@ -44,11 +46,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4ba586f8fee54a1ea9f4d8823b6cffc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  markerCollider: {fileID: 0}
   children:
   - {fileID: 269061027914533614}
-  occlusionOnly: 0
-  tint: {r: 1, g: 1, b: 1, a: 1}
+  boxCollider: {fileID: 5665589346352948054}
+  m_Transform: {fileID: 8140538696648896419}
+  updateBoundariesOnAwake: 1
+--- !u!65 &5665589346352948054
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1056327851893543970}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1067843108424119016
 GameObject:
   m_ObjectHideFlags: 0
@@ -75,6 +90,7 @@ Transform:
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4624258556587641984}
   m_Father: {fileID: 8140538696648896419}
@@ -110,6 +126,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4624258556587641984}
   m_RootOrder: 0
@@ -125,10 +142,12 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -153,6 +172,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &7159152473065891706
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -186,15 +206,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3455a5dc1e9e7814284a01e807ebf3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Transform: {fileID: 0}
   boxCollider: {fileID: 0}
-  texture: {fileID: 2800000, guid: 7481002d483c041489ffe8090321109c, type: 3}
+  diffuseTexture: {fileID: 0}
+  bumpTexture: {fileID: 0}
   emissiveColor: {r: 0, g: 0, b: 0, a: 1}
   color: {r: 1, g: 1, b: 1, a: 1}
-  tint: {r: 1, g: 1, b: 1, a: 1}
-  occlusionOnly: 0
-  localBounds:
-    m_Center: {x: 61.389675, y: 86.761154, z: -0.0025558472}
-    m_Extent: {x: 91.64413, y: 121.743546, z: 56.821144}
+  mainRenderer: {fileID: 0}
+  meshFilter: {fileID: 0}
 --- !u!1 &7394873349039554728
 GameObject:
   m_ObjectHideFlags: 0
@@ -221,6 +240,7 @@ Transform:
   m_LocalRotation: {x: 0.6620029, y: 0.2485053, z: -0.24850556, w: 0.66199875}
   m_LocalPosition: {x: 0, y: 0, z: -0}
   m_LocalScale: {x: 0.0010080319, y: 0.0010080319, z: 0.001008032}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1102806870923733988}
   m_Father: {fileID: 7284480435137045438}

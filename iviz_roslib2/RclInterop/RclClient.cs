@@ -24,12 +24,7 @@ internal sealed class RclClient : IDisposable
     {
         Rcl.SetRclWrapper(wrapper);
     }
-
-    public static bool SetDdsProfilePath(string path)
-    {
-        return Rcl.Impl.SetDdsProfilePath(path);
-    }
-
+    
     public RclClient(string name, string @namespace, int domainId)
     {
         contextHandle = Rcl.Impl.CreateContext();

@@ -63,7 +63,7 @@ namespace Iviz.Controllers
         }
 
 
-        public void Process(ARMarker rosMarker)
+        public void Process(XRMarker rosMarker)
         {
             var key = ((ARMarkerType)rosMarker.Type, rosMarker.Code);
             ProcessUnknownSize(rosMarker);
@@ -99,7 +99,7 @@ namespace Iviz.Controllers
             seenMarkers[(seenMarker.Type, seenMarker.Code)] = seenMarker;
         }
 
-        public void Highlight(ARMarker rosMarker)
+        public void Highlight(XRMarker rosMarker)
         {
             var key = ((ARMarkerType)rosMarker.Type, rosMarker.Code);
             if (activeMarkerHighlighters.TryGetValue(key, out float existingExpirationTime)
@@ -115,7 +115,7 @@ namespace Iviz.Controllers
             activeMarkerHighlighters[key] = expirationTime;
         }
 
-        void ProcessUnknownSize(ARMarker marker)
+        void ProcessUnknownSize(XRMarker marker)
         {
             if (!TryDetectMarkerSize(marker))
             {
@@ -133,7 +133,7 @@ namespace Iviz.Controllers
         }
 
 
-        static bool TryDetectMarkerSize(ARMarker marker)
+        static bool TryDetectMarkerSize(XRMarker marker)
         {
             const float distanceMultiplier = 0.15f;
 
@@ -198,7 +198,7 @@ namespace Iviz.Controllers
         }
 
 
-        static Msgs.GeometryMsgs.Pose SolvePnp(ARMarker marker)
+        static Msgs.GeometryMsgs.Pose SolvePnp(XRMarker marker)
         {
             float sizeInMm = (float)marker.MarkerSizeInMm;
             float sizeInM = sizeInMm / 1000f;

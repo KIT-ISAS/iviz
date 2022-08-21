@@ -9,7 +9,7 @@ namespace Iviz.Displays.XR
 {
     public sealed class XRPlainDialog : XRDialog,
         IDialogWithTitle, IDialogWithCaption, IDialogWithButtonSetup, IDialogCanBeClicked,
-        IDialogIsInteractable
+        IIsInteractable
     {
         [SerializeField] TMP_Text? title;
         [SerializeField] TMP_Text? caption;

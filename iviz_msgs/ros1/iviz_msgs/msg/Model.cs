@@ -10,18 +10,18 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "filename")] public string Filename;
         [DataMember (Name = "orientation_hint")] public string OrientationHint;
-        [DataMember (Name = "meshes")] public Mesh[] Meshes;
-        [DataMember (Name = "materials")] public Material[] Materials;
-        [DataMember (Name = "nodes")] public Node[] Nodes;
+        [DataMember (Name = "meshes")] public ModelMesh[] Meshes;
+        [DataMember (Name = "materials")] public ModelMaterial[] Materials;
+        [DataMember (Name = "nodes")] public ModelNode[] Nodes;
     
         public Model()
         {
             Name = "";
             Filename = "";
             OrientationHint = "";
-            Meshes = System.Array.Empty<Mesh>();
-            Materials = System.Array.Empty<Material>();
-            Nodes = System.Array.Empty<Node>();
+            Meshes = System.Array.Empty<ModelMesh>();
+            Materials = System.Array.Empty<ModelMaterial>();
+            Nodes = System.Array.Empty<ModelNode>();
         }
         
         public Model(ref ReadBuffer b)
@@ -32,17 +32,17 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeArray(out Meshes);
             for (int i = 0; i < Meshes.Length; i++)
             {
-                Meshes[i] = new Mesh(ref b);
+                Meshes[i] = new ModelMesh(ref b);
             }
             b.DeserializeArray(out Materials);
             for (int i = 0; i < Materials.Length; i++)
             {
-                Materials[i] = new Material(ref b);
+                Materials[i] = new ModelMaterial(ref b);
             }
             b.DeserializeArray(out Nodes);
             for (int i = 0; i < Nodes.Length; i++)
             {
-                Nodes[i] = new Node(ref b);
+                Nodes[i] = new ModelNode(ref b);
             }
         }
         
@@ -58,19 +58,19 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeArray(out Meshes);
             for (int i = 0; i < Meshes.Length; i++)
             {
-                Meshes[i] = new Mesh(ref b);
+                Meshes[i] = new ModelMesh(ref b);
             }
             b.Align4();
             b.DeserializeArray(out Materials);
             for (int i = 0; i < Materials.Length; i++)
             {
-                Materials[i] = new Material(ref b);
+                Materials[i] = new ModelMaterial(ref b);
             }
             b.Align4();
             b.DeserializeArray(out Nodes);
             for (int i = 0; i < Nodes.Length; i++)
             {
-                Nodes[i] = new Node(ref b);
+                Nodes[i] = new ModelNode(ref b);
             }
         }
         
@@ -201,23 +201,23 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE71W34+jNhB+56+wdC+tVF17e3s/pXtggWxQgaBA9ro6VcgBJ3ELNrKdbPb++s6AoY6u" +
-                "+9bdPAT7G3vmm/HM2NooLvZE0I55ehzveMvcuVScCUMNl6I6cGG8lOnDtz9JBx+mvZQapjhtEbFD7WWy" +
-                "YQAI+GjP+/I//7y0uP1M+Il/rzq9178ioYntwHzPZMeMehzFuQTWb6+Az4kpw2ug9NQCIVWH/J+SGyr2" +
-                "EIynF2x5Na8p2TmQUjUaN7JzVQ8TL5CtVMGBCsEwaDVOq3qcwyYIoNi3GL0dRarHQfUc24qLhp2fK6b/" +
-                "6Zb3ipQHroEppAEXmpgDI73UHFOCyB2hMIOVhAuyU4wR3QPznx64ORBgvuVG46pesZpr2PLza9AYw3JN" +
-                "AJJdxxrWECPJUTMy2CQPB6YYnBaa0XzbMtCtDaMNKrK0XhMCeiZyVpNohkRF3aCwV7KTBjdD8GTPFN3y" +
-                "lpvHYeu0E/JY0z3DLZCtfC9GMob+zcixJy2IR4+QlSAabECiwe5WWseQjybUEClq9guhGiOBQaopeDQE" +
-                "aOActPLYoG1v10qKp3qeR4/z6Puz18ucmE+msU3VZ2fi1sJYGNY8jF7KPCQ41thHoux3b79b+6XPT2Sq" +
-                "+qna6TTYToP6BdqobTHW7ZskysIqjBb+JinJF/LbBe6HYVzGdxEI3ngXzdcGldBuixfHPG/4bgcVPs9Z" +
-                "x6G2T2xOfAlFBsU5z7fHrq90TVsstwnUcAVxATX5I1IBCyb25jCLFNu1rDbgIqi1hwqXW1N1cDFhfzZH" +
-                "xcbujKMXyDhr05Ip7/OoylZZ5IR3wMJ4sdgUY3AduMijYJP4a8CvXNxPb+Iow0N668JRGhfFeEbXLr6M" +
-                "4tslrn53yWOd+kkB8PsLm8s4i7OoQMEHV7DK/SAu7wH+eEm9yBM/iNKR0CdXlqDd1M/Rrwt/19EiiYIy" +
-                "XmUouvB5k/2erb4O+JVnBaAij7PbarFepdXmzoneJCnyZbR24zcJgvskzsLIDeEkuln94URwQsGZzI3g" +
-                "hP/L691Ea5VXKdRKnCf3DiVAoVgcKgAUm5ty7QelwwLQML6Lw8jhgCvT1apcWg3XDh7fZlFo8ZnB17Wf" +
-                "V/jn2B+wIPHT3OEwgGm8Xq/cSAxoGAV+MpCYyrqnUFNjGxpfH+Nq89hPidzRvscqHRcdT/aVMlfyUHTw" +
-                "njFyarLDbYxXtZ0/KNoPZVkdf0BOz1+X+GC96GKjJz1V2MKgMyp+viZGUaF38Eb0povSPoJfojcjgymi" +
-                "3968B9vkFVHyAYL/l1TwqPgHVmxGr8wLAAA=";
+                "H4sIAAAAAAAAE71WS4/bNhC+61cQyCUFijw2myeQg1aS10L1giVvuggKgZZom61ECiTt9ebXZ0hRKo10" +
+                "b137YHG+GXK+Gc6QlEpQtkMM98ST43hLO+LKXFDCFFaUs3pPmfJS3pIuJXL//S/Uw4dIC2FFBMWdhu3Q" +
+                "ajL4A5TBR3re1//556Xl7RdEj/RH3cudfD3zmyIw0ewI74kSj6NNwSGSd1dA6kiEog3wesqAcdHrSJ7S" +
+                "K8x2kKCnDTa0nm0Mt4qcAs5FK/VscqobI4y6gHdcBHvMGNGJbLRYN6MsvQqSynadTuYWa9IH42TOd01Z" +
+                "S07PleL/DNB7gao9lcAUioQyidSeoIFLqgsG8S3CIIElogxtBSFIDsD85QNVewTMN1RJbTUI0lAJU357" +
+                "BSvGYC4RQLzvSUtapDg6SIKMT/SwJ4LAvmk3km46AmtLRXCrF7K0XiEE60zk7EqsNWWs14YFB8F7rvRk" +
+                "SB4fiMAb2lH1aKZOM6HAJd4RPQWKl+7YSEbhfwg6DKgD9RiRZsWQBB9QcjC74zYwzUcirBBnDfkdYakz" +
+                "oZPUYIjIJMhwDjp+aLVvb9txrHf1NI8e59GPy7TPXKJPVrUt2svQcbvCM4LlAKMLcLAeTbd9QsJ+d/a7" +
+                "sV/8/ESm/p/6Hk+DzTRoLnW+2hPHxn6TRFlYh9HCXycV+orenOF+GMZVfBeB4q13dirbzCLcb/QtM8st" +
+                "3W6h4WeZ9BRa/UjmPuDQc9Crs7w59EMtG9zp7ptACfcVZdCivyI1sCBsp/azSpBtRxoFccKydmfhJmzr" +
+                "HuKdD251EGQ8tvXoUvVvHVta1X0R1VmeRU6iDRbGi8W6HNPswGURBevEXwF+5eJ+ehNHmd6udy4cpXFZ" +
+                "jrt17eLLKL5dauv35zxWqZ+UAH8487mMsziLSq346Crywg/i6h7gT+fUyyLxgygdCX12dYn2m/qFjuss" +
+                "3lW0SKKgivNMq85iXmd/ZPk3g195VgFLFHF2Wy9WeVqv75zsTZqyWEYrN3+TIrhP4iyM3BROqpv8TyeD" +
+                "EwrBZG4GJ/xfXu8nWnlRp9A1cZHcO5QAhbZxqABQrm+qlR9UDgtAw/guDiOHg7ZM87xa2hWuHTy+zaLQ" +
+                "4jODbyu/qPWf499gQeKnhcPBgGm8WuVuJgwaRoGfGBJTgw8Yums8lcZnyWitHoepkHs8DLpfR6PD0T5f" +
+                "5p427QcPHcWnM9dc0/oOt/KDwINp0PrwC3K8UHPq1+3ZoTaGM2ChTzQ4KAU9XSMlMJNbeEt60w1q387P" +
+                "T3JkMKX1+9sP4Bu9QII/wA78zQU8OX4CDIKj+ggMAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

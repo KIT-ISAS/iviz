@@ -1099,6 +1099,7 @@ namespace Iviz.Ros
         public string[] GetSystemParameterList(string? node)
         {
             var token = runningTs.Token;
+            string nodeId = node ?? "";
 
             TaskUtils.Run(async () =>
             {
@@ -1110,7 +1111,7 @@ namespace Iviz.Ros
 
                 try
                 {
-                    cachedParameters[node] = Client switch
+                    cachedParameters[nodeId] = Client switch
                     {
                         RosClient ros1Client => await ros1Client.GetParameterNamesAsync(token),
                         Ros2Client ros2Client => await ros2Client.GetParameterNamesAsync(node, token),
@@ -1127,7 +1128,7 @@ namespace Iviz.Ros
                 }
             }, token);
 
-            return cachedParameters.TryGetValue(node, out string[] value)
+            return cachedParameters.TryGetValue(nodeId, out string[] value)
                 ? value
                 : Array.Empty<string>();
         }

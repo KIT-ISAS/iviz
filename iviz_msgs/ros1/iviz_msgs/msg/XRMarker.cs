@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ARMarker : IDeserializable<ARMarker>, IMessage
+    public sealed class XRMarker : IDeserializable<XRMarker>, IMessage
     {
         public const byte TYPE_ARUCO = 0;
         public const byte TYPE_QRCODE = 1;
@@ -26,14 +26,14 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Pose relative to the camera_pose field. Y points down, Z forward. </summary>
         [DataMember (Name = "pose_relative_to_camera")] public GeometryMsgs.Pose PoseRelativeToCamera;
     
-        public ARMarker()
+        public XRMarker()
         {
             Code = "";
             Corners = new GeometryMsgs.Vector3[4];
             CameraIntrinsic = new double[9];
         }
         
-        public ARMarker(ref ReadBuffer b)
+        public XRMarker(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Type);
@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out PoseRelativeToCamera);
         }
         
-        public ARMarker(ref ReadBuffer2 b)
+        public XRMarker(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Type);
@@ -62,9 +62,9 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out PoseRelativeToCamera);
         }
         
-        public ARMarker RosDeserialize(ref ReadBuffer b) => new ARMarker(ref b);
+        public XRMarker RosDeserialize(ref ReadBuffer b) => new XRMarker(ref b);
         
-        public ARMarker RosDeserialize(ref ReadBuffer2 b) => new ARMarker(ref b);
+        public XRMarker RosDeserialize(ref ReadBuffer2 b) => new XRMarker(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -131,7 +131,7 @@ namespace Iviz.Msgs.IvizMsgs
             return c;
         }
     
-        public const string MessageType = "iviz_msgs/ARMarker";
+        public const string MessageType = "iviz_msgs/XRMarker";
     
         public string RosMessageType => MessageType;
     

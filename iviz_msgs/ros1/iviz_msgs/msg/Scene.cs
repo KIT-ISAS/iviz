@@ -13,19 +13,19 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Original filename </summary>
         [DataMember (Name = "filename")] public string Filename;
         /// <summary> List of models to be included </summary>
-        [DataMember (Name = "includes")] public Include[] Includes;
+        [DataMember (Name = "includes")] public SceneInclude[] Includes;
         /// <summary> List of lights </summary>
-        [DataMember (Name = "lights")] public Light[] Lights;
+        [DataMember (Name = "lights")] public SceneLight[] Lights;
     
         public Scene()
         {
             Name = "";
             Filename = "";
-            Includes = System.Array.Empty<Include>();
-            Lights = System.Array.Empty<Light>();
+            Includes = System.Array.Empty<SceneInclude>();
+            Lights = System.Array.Empty<SceneLight>();
         }
         
-        public Scene(string Name, string Filename, Include[] Includes, Light[] Lights)
+        public Scene(string Name, string Filename, SceneInclude[] Includes, SceneLight[] Lights)
         {
             this.Name = Name;
             this.Filename = Filename;
@@ -40,12 +40,12 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeArray(out Includes);
             for (int i = 0; i < Includes.Length; i++)
             {
-                Includes[i] = new Include(ref b);
+                Includes[i] = new SceneInclude(ref b);
             }
             b.DeserializeArray(out Lights);
             for (int i = 0; i < Lights.Length; i++)
             {
-                Lights[i] = new Light(ref b);
+                Lights[i] = new SceneLight(ref b);
             }
         }
         
@@ -59,13 +59,13 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeArray(out Includes);
             for (int i = 0; i < Includes.Length; i++)
             {
-                Includes[i] = new Include(ref b);
+                Includes[i] = new SceneInclude(ref b);
             }
             b.Align4();
             b.DeserializeArray(out Lights);
             for (int i = 0; i < Lights.Length; i++)
             {
-                Lights[i] = new Light(ref b);
+                Lights[i] = new SceneLight(ref b);
             }
         }
         
@@ -168,24 +168,24 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE71WTW/cNhA9W7+CwF5aIEgb20nTAjnIK9kmqi9IWqdGEAhcibvLRiIFkvLa+fUdSpTM" +
-                "hXOss4el9GY4fPPEIWeFfFSLrm+ppkjVlFPkeUpLxveIk46ena1QAiMSO6QP1mV22LGWzk6pZHvGSbuA" +
-                "HuZ1OzT0y1fEpicFbhFT2sTqRENbhbRAWzrbGy9i+4OGCa0Z1ZnjPyGe9+l//nlxcfMXYg/se9WpvfrN" +
-                "kvZWKKc7KimvqSFJOKKPmkqTIFGK6kWkQTJkiG5gtBpNDjEBh8dL1As1CpTB+MKDSgYRO/swx+xJ/Y3s" +
-                "x1l4N65wIAqRSTT4BAfa0TcQiCmQrmE1TFdjXDvRMFaUyPrgodeXzCbq7VpB9MX5l3cfvqIOrZAUR8js" +
-                "XyF/DodJwYFx/RFdRWESVEF47W+iEn1Cv5/gfhDgEt+FYHh3stm9tWiFvDhHpNsyyvXy3rDdblDPdtox" +
-                "pdgDnXNGApRn+ml53w5dX6matBB6AdWBccapUi+RClhQvteHxSTprqW1hhQh7MR+C4XVVGYTeCXsxkGa" +
-                "2tLT008oDZu8JSPtuJ/J2ZG8PhGbvF2wvM/CKkmT0PnOIxbg6+tNMX1lBy6ycL2J/Bzwcxf34yscJma3" +
-                "XLhwGOOimDbLpYvfhvjm1ni/P+WRx35UAPzhZM1bnOAkLIzhD9eQZv4al/cAfzylXmSRvw7jidCfri0y" +
-                "68Z+ZvI6yTcPr6NwXeI0MaaTnDfJ30n6ecTPPWuAEBlObqrrPI2rzZ2j3mwpstswd/WbDev7CCdB6Eo4" +
-                "m67SfxwFZxSSSVwFZ/yZ1/uZVppVMRQtzqJ7hxKgULUOFQCKzVWZ++vSYQFogO9wEDocjGecpuWtjXDp" +
-                "4PgmCQOLLww+535WmT9n/RFbR36cORxGMMZ5nrpKjGgQrv1oJPF8pkNxgwOUNpzZ9NF666d+3sgd6Xtz" +
-                "XExOw0M1+S1Hylj9O1JrMdee6Kkkmglu34+S9OP5UA0vkIfXr8vx9p5VzFKcuEdvgPNpc466zBIWWTp9" +
-                "v5Nj2JFmK0SLaqJ0pQ6kEUf14kxeDkzC99TbU9FRLZ8mRpmYxIQ7mI06/djcMGmOWrDPwRjnVFYQsXXO" +
-                "+EEvmPdaav6QIHQjpbnsa8E1Ydze9TYn01MQeANPoI12kkKXBtcR/eXI9AGZncO0Ml49ZMkUTPn1LUTE" +
-                "4K7gmoHur6PQfJmmAfRE45roeIDm54FKs4xisPcgttKUNCaQpfUWIYgzk7OReDPuSBMbAvZSdEKbyaDd" +
-                "uF23rIUbbZw6z+zgAjRdCzxCk8j2fCKjyTeKhh61YJ4yMqw4dDbQ80CdrFArbGKGDzRI0ClCv/YG2iuj" +
-                "hBEJdg6dBBo5r1sxNGbt5aM+19fz5f3d+w9YIbyDFgsAAA==";
+                "H4sIAAAAAAAAE71WTW/cNhA9R7+CgC8tEKSN7Xy0QA7ySraJ6guS1qkRBAJX4u6ykUiBpHbt/PoOJUrm" +
+                "1jk23sNKejMcvnkcknOGfFSLrm+ppkjVlFPkeUpLxneIk46+enWGEngisUV6b11mhy1r6eyUSrZjnLQL" +
+                "6BXGFfO6HRr65Sti05sC34gpbQJ2oqGtQlqgDZ3tzTQuYru9hlGtebpjJsDzPv3PPy8ubv5E7MC+V53a" +
+                "qd9c9t4ZyumWSspratgSjuiDptKkS5SiepFskAwZNdbwtIpNDjEBh4dL1As1ypXB8z8eRgxwo5JB2M6+" +
+                "zIF7Un8ju3Eo3o7T7IlCZJIQVmVPO/oaojEFQjashuFqDG4HGtqKElnvPfTzxbPZettWEH1x/uXt+6+o" +
+                "Q2dIiiNk9o+QL8HB1dMbGNcf0VUUJkEVhNf+OirRJ/T7Ce4HAS7xXQiGtyebwFuJVsiLc0S6DaNcL98N" +
+                "224H9WSnHVOKHeicOBIgP9OPy/dm6PpK1aSF0Auo9owzTpV6jlTAgvKd3i8mSbctrTXkCWEn9hvYcE1l" +
+                "KmEqohKKc5Bmz+np7QW2i1XAMpL2uZsZ2id5oWW3CthZy/ssrJI0CZ0VH7EAX1+vi2m9HbjIwtU68nPA" +
+                "z13cj69wmJi6uXDhMMZFMZXNpYvfhvjm1ni/O+WRx35UAPz+ZM5bnOAkLIzhg2tIM3+Fy3uAP55SL7LI" +
+                "X4XxROgP1xaZeWM/M3md5JuH11G4KnGaGNNJzuvkryT9POLnnjVAiAwnN9V1nsbV+s5Rb7YU2W2Yu/rN" +
+                "htV9hJMgdCWcTVfp346CMwrJJK6CM/7E691MK82qGLYvzqJ7hxKgsH8dKgAU66sy91elwwLQAN/hIHQ4" +
+                "GM84TctbG+HSwfFNEgYWXxh8zv2sMn/O/CO2ivw4cziMYIzzPHWVGNEgXPnRSOLpiIdtDg6wyeEIpw/W" +
+                "Wz/2cyF3pO/NwTE5DYdq8lsOl/Ec2JJai3kDip5Kopng9vsoST+eFNXwDDm80KU6Xu2zlFmKE/ckDnA+" +
+                "VegozqxjkaXTIp6cyo4+GyFaVBOlK7UnjTiqZ0f0cn4SvqPejoqOavk40crEpChczmwU68fmhklz8oJ9" +
+                "DsY4p7KCiK1z5A96wbyfJekPCUKbUpoGoBZcE8bt/W9zMs0GgS/wBNpoKyk0c3A70V+OTO+RKR+mlfHq" +
+                "IUumYMivbyAiBncFtw40iR2F9sw0EqAnGudExz10RQcqzTSKQQFCbKUpaUwgS+sNQhBnJmcj8WYsSxMb" +
+                "AvZSdEKbwaDdWLMb1sIFNw6dR3ZwH5pOBl6hjWQ7PpHR5BtFQ49aME8ZGVYcuh3og2CznKFW2MQMH2ia" +
+                "oI+ERu419F1GCSMSVA6dBBo5r1oxNGbuZVGfNtnTXf7d+xdBzvP0PQsAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

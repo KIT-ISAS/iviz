@@ -30,6 +30,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2356096677438027657}
   m_RootOrder: 0
@@ -45,10 +46,12 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -73,6 +76,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &7535098406525158238
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -106,15 +110,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3455a5dc1e9e7814284a01e807ebf3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Transform: {fileID: 0}
   boxCollider: {fileID: 87769620096828178}
-  texture: {fileID: 0}
+  diffuseTexture: {fileID: 0}
+  bumpTexture: {fileID: 0}
   emissiveColor: {r: 0, g: 0, b: 0, a: 1}
   color: {r: 1, g: 1, b: 1, a: 1}
-  tint: {r: 1, g: 1, b: 1, a: 1}
-  occlusionOnly: 0
-  localBounds:
-    m_Center: {x: -0.009228228, y: 0.103168294, z: -0.14595805}
-    m_Extent: {x: 0.006232022, y: 0.004254803, z: 0.021145448}
+  mainRenderer: {fileID: 0}
+  meshFilter: {fileID: 0}
 --- !u!1 &1555327720941725864
 GameObject:
   m_ObjectHideFlags: 0
@@ -145,6 +148,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7629740299974085237}
   m_RootOrder: 0
@@ -160,10 +164,12 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -188,6 +194,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &5178315011213774185
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -221,15 +228,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3455a5dc1e9e7814284a01e807ebf3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Transform: {fileID: 0}
   boxCollider: {fileID: 171103296475749214}
-  texture: {fileID: 0}
+  diffuseTexture: {fileID: 0}
+  bumpTexture: {fileID: 0}
   emissiveColor: {r: 0, g: 0, b: 0, a: 1}
   color: {r: 0.24705882, g: 0.24705882, b: 0.24705882, a: 1}
-  tint: {r: 1, g: 1, b: 1, a: 1}
-  occlusionOnly: 0
-  localBounds:
-    m_Center: {x: 0.01874548, y: 0.1004828, z: -0.1434838}
-    m_Extent: {x: 0, y: 0, z: 0}
+  mainRenderer: {fileID: 0}
+  meshFilter: {fileID: 0}
 --- !u!1 &3229915810652051134
 GameObject:
   m_ObjectHideFlags: 0
@@ -260,6 +266,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7629740299974085237}
   m_RootOrder: 1
@@ -275,10 +282,12 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -303,6 +312,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1922898648874134338
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -336,15 +346,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3455a5dc1e9e7814284a01e807ebf3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Transform: {fileID: 0}
   boxCollider: {fileID: 4126017687451405134}
-  texture: {fileID: 0}
+  diffuseTexture: {fileID: 0}
+  bumpTexture: {fileID: 0}
   emissiveColor: {r: 0, g: 0, b: 0, a: 1}
   color: {r: 0.24705882, g: 0.24705882, b: 0.24705882, a: 1}
-  tint: {r: 1, g: 1, b: 1, a: 1}
-  occlusionOnly: 0
-  localBounds:
-    m_Center: {x: -0.016543206, y: 0.10898475, z: -0.18738165}
-    m_Extent: {x: 0.000043154694, y: 0.0010187514, z: 0.0056851506}
+  mainRenderer: {fileID: 0}
+  meshFilter: {fileID: 0}
 --- !u!1 &3376541033826430848
 GameObject:
   m_ObjectHideFlags: 0
@@ -371,6 +380,7 @@ Transform:
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5284170707280591900}
   - {fileID: 2356096677438027657}
@@ -404,6 +414,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0.259}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6123086497975279397}
   m_Father: {fileID: 4080394677775320240}
@@ -435,6 +446,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0.259}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2870563182051708716}
   - {fileID: 1554803774804260379}
@@ -472,6 +484,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5284170707280591900}
   m_RootOrder: 0
@@ -487,10 +500,12 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -515,6 +530,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &246632933100070823
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -548,15 +564,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3455a5dc1e9e7814284a01e807ebf3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Transform: {fileID: 0}
   boxCollider: {fileID: 6948227717564780567}
-  texture: {fileID: 0}
+  diffuseTexture: {fileID: 0}
+  bumpTexture: {fileID: 0}
   emissiveColor: {r: 0, g: 0, b: 0, a: 1}
   color: {r: 1, g: 1, b: 1, a: 1}
-  tint: {r: 1, g: 1, b: 1, a: 1}
-  occlusionOnly: 0
-  localBounds:
-    m_Center: {x: -0.000008944422, y: 0.037469838, z: -0.153448}
-    m_Extent: {x: 0.054998156, y: 0.09246507, z: 0.153448}
+  mainRenderer: {fileID: 0}
+  meshFilter: {fileID: 0}
 --- !u!1 &7166267931636444838
 GameObject:
   m_ObjectHideFlags: 0
@@ -583,6 +598,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0.259}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 780941794827656960}
   m_Father: {fileID: 4080394677775320240}
@@ -598,6 +614,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3559485116746784435}
   - component: {fileID: 1167094474460312512}
+  - component: {fileID: 3528801341998246036}
   m_Layer: 0
   m_Name: link5.dae
   m_TagString: Untagged
@@ -615,6 +632,7 @@ Transform:
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4080394677775320240}
   m_Father: {fileID: 0}
@@ -632,15 +650,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4ba586f8fee54a1ea9f4d8823b6cffc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  markerCollider: {fileID: 0}
   children:
   - {fileID: 6470800508802308294}
   - {fileID: 6591899777037502569}
   - {fileID: 700054792017022789}
   - {fileID: 278443961908191948}
   - {fileID: 5469744645626975656}
-  occlusionOnly: 0
-  tint: {r: 1, g: 1, b: 1, a: 1}
+  boxCollider: {fileID: 3528801341998246036}
+  m_Transform: {fileID: 3559485116746784435}
+  updateBoundariesOnAwake: 1
+--- !u!65 &3528801341998246036
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8108117996257959812}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8283673731610914613
 GameObject:
   m_ObjectHideFlags: 0
@@ -671,6 +702,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7629740299974085237}
   m_RootOrder: 2
@@ -686,10 +718,12 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -714,6 +748,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &5407838087270366917
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -747,12 +782,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3455a5dc1e9e7814284a01e807ebf3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Transform: {fileID: 0}
   boxCollider: {fileID: 1736719168688574313}
-  texture: {fileID: 0}
+  diffuseTexture: {fileID: 0}
+  bumpTexture: {fileID: 0}
   emissiveColor: {r: 0, g: 0, b: 0, a: 1}
   color: {r: 0.24705882, g: 0.24705882, b: 0.24705882, a: 1}
-  tint: {r: 1, g: 1, b: 1, a: 1}
-  occlusionOnly: 0
-  localBounds:
-    m_Center: {x: -0.000005574897, y: 0.09579594, z: -0.17882928}
-    m_Extent: {x: 0.050406307, y: 0.030000456, z: 0.13236943}
+  mainRenderer: {fileID: 0}
+  meshFilter: {fileID: 0}

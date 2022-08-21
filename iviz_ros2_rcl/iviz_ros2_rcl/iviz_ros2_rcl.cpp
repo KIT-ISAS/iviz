@@ -52,18 +52,17 @@
 
 static char log_buffer[2048];
 
-static void empty_handler(int severity, const char *name, rcutils_time_point_value_t timestamp, const char *message) { }
+/// Corresponds in C# to Iviz.Roslib2.RclInterop.Rcl.ConsoleLoggingHandler().
+static LoggerCallback rcl_external_logger;
 
-static void (*rcl_external_logger) (int severity, const char *name, rcutils_time_point_value_t timestamp, const char *message) = empty_handler;
-
-
-
+/// Corresponds in C# to Iviz.Roslib2.RclInterop.Rcl.CdrDeserializeCallback().
 static CdrDeserializeCallback cdr_deserialize_callback;
 
+/// Corresponds in C# to Iviz.Roslib2.RclInterop.Rcl.CdrSerializeCallback().
 static CdrSerializeCallback cdr_serialize_callback;
 
+/// Corresponds in C# to Iviz.Roslib2.RclInterop.Rcl.CdrGetSerializedSizeCallback()
 static CdrGetSerializedSizeCallback cdr_get_serialized_size_callback;
-
 
 
 static bool cdr_deserialize(eprosima::fastcdr::Cdr &cdr, void *message_context)
@@ -72,6 +71,7 @@ static bool cdr_deserialize(eprosima::fastcdr::Cdr &cdr, void *message_context)
     {
         size_t buffer_size = cdr.__getBuffer().getBufferSize();
         cdr_deserialize_callback(message_context, cdr.__getBuffer().getBuffer(), (int32_t) buffer_size);
+        // deserialization happens in C#, here we just consume the entire buffer
         cdr.reset();
         cdr.jump(buffer_size);
     }
@@ -85,6 +85,7 @@ static bool cdr_serialize(const void *message_context, eprosima::fastcdr::Cdr &c
     {
         size_t buffer_size = cdr.__getBuffer().getBufferSize();
         cdr_serialize_callback(message_context, cdr.__getBuffer().getBuffer(), (int32_t) buffer_size);
+        // serialization happens in C#, here we just consume the entire buffer
         cdr.reset();
         cdr.jump(buffer_size);
     }
@@ -96,6 +97,7 @@ static uint32_t cdr_get_serialized_size(const void *message_context)
 {
     if (cdr_get_serialized_size_callback != nullptr)
     {
+        // size calculation happens in C#
         return cdr_get_serialized_size_callback(message_context);
     }
     
@@ -104,11 +106,13 @@ static uint32_t cdr_get_serialized_size(const void *message_context)
 
 static size_t cdr_max_serialized_size(bool &full_bounded)
 {
+    // we don't use this
     full_bounded = false;
     return 1; // just some random value
 }
 
 
+/// Storage for pointers so that they don't get reclaimed when we return to C#
 struct interop_context
 {
     rcl_context_t context;
@@ -137,11 +141,12 @@ struct iviz_message_type_support
         this->message_namespace = message_namespace;
         this->message_name = message_name;
         
-        const rosidl_message_type_support_t *ts = ROSIDL_GET_MSG_TYPE_SUPPORT(rcl_interfaces, msg, Log);
+        const rosidl_message_type_support_t *template_typesupport =
+        ROSIDL_GET_MSG_TYPE_SUPPORT(rcl_interfaces, msg, Log);
         
-        message_support.typesupport_identifier = ts->typesupport_identifier;
+        message_support.typesupport_identifier = template_typesupport->typesupport_identifier;
         message_support.data = &message_callbacks;
-        message_support.func = ts->func;
+        message_support.func = template_typesupport->func;
 
         message_callbacks.message_namespace_ = this->message_namespace.data();
         message_callbacks.message_name_ = this->message_name.data();
@@ -175,19 +180,17 @@ struct iviz_service_type_support
         this->service_namespace = service_namespace;
         this->service_name = service_name;
         
-        const rosidl_service_type_support_t *service_ts = ROSIDL_GET_SRV_TYPE_SUPPORT(rcl_interfaces, srv, DescribeParameters);
+        const rosidl_service_type_support_t *template_service_typesupport =
+        ROSIDL_GET_SRV_TYPE_SUPPORT(rcl_interfaces, srv, DescribeParameters);
 
-        service_support.typesupport_identifier = service_ts->typesupport_identifier;
+        service_support.typesupport_identifier = template_service_typesupport->typesupport_identifier;
         service_support.data = &service_callbacks;
-        service_support.func = service_ts->func;
+        service_support.func = template_service_typesupport->func;
 
-        const service_type_support_callbacks_t *ts_callbacks = (service_type_support_callbacks_t*) service_ts->data;
+        const service_type_support_callbacks_t *ts_callbacks = (service_type_support_callbacks_t*) template_service_typesupport->data;
         const rosidl_message_type_support_t *ts_request = ts_callbacks->request_members_;
         const rosidl_message_type_support_t *ts_response = ts_callbacks->response_members_;
 
-        //const message_type_support_callbacks_t *callbacks_1 = (message_type_support_callbacks_t*)ts_request->data;
-        //const message_type_support_callbacks_t *callbacks_2 = (message_type_support_callbacks_t*)ts_response->data;
-        
         service_callbacks.service_namespace_ = this->service_namespace.data();
         service_callbacks.service_name_ = this->service_name.data();
         service_callbacks.request_members_ = &request_support;
@@ -222,78 +225,10 @@ struct iviz_service_type_support
 };
 
 
-/*
-#define MSGTYPE(a, b) (rosidl_message_type_support_t*) ROSIDL_GET_MSG_TYPE_SUPPORT(a, msg, b)
-#define ENTRY(a, b) {#a "/" #b, MSGTYPE(a, b)}
-
-static std::map<std::string, rosidl_message_type_support_t*> default_types_old
-{
-    ENTRY(std_msgs, String),
-    ENTRY(tf2_msgs, TFMessage),
-    ENTRY(rcl_interfaces, Log),
-    ENTRY(geometry_msgs, Transform),
-    ENTRY(geometry_msgs, TransformStamped),
-    ENTRY(geometry_msgs, Pose),
-    ENTRY(geometry_msgs, PoseStamped),
-    ENTRY(geometry_msgs, Point),
-    ENTRY(geometry_msgs, PointStamped),
-    ENTRY(geometry_msgs, Wrench),
-    ENTRY(geometry_msgs, WrenchStamped),
-    ENTRY(geometry_msgs, Twist),
-    ENTRY(geometry_msgs, TwistStamped),
-    ENTRY(nav_msgs, Odometry),
-    ENTRY(nav_msgs, OccupancyGrid),
-    ENTRY(sensor_msgs, PointCloud2),
-    ENTRY(sensor_msgs, Image),
-    ENTRY(sensor_msgs, CompressedImage),
-    ENTRY(sensor_msgs, LaserScan),
-    ENTRY(sensor_msgs, CameraInfo),
-    ENTRY(sensor_msgs, Joy),
-    ENTRY(visualization_msgs, Marker),
-    ENTRY(visualization_msgs, InteractiveMarker),
-    ENTRY(visualization_msgs, InteractiveMarkerFeedback),
-    ENTRY(visualization_msgs, InteractiveMarkerInit),
-    ENTRY(visualization_msgs, InteractiveMarkerUpdate),
-    ENTRY(grid_map_msgs, GridMap),
-    
-    ENTRY(iviz_msgs, XRGazeState),
-    ENTRY(iviz_msgs, XRHandState),
-    ENTRY(iviz_msgs, ARMarkerArray),
-    ENTRY(iviz_msgs, WidgetArray),
-};
- */
-
+/// Cache for message type supports already generated
 static std::map<std::string, iviz_message_type_support*> custom_message_types;
 
-/*
-#define SRVTYPE(a, b) (rosidl_service_type_support_t*) ROSIDL_GET_SRV_TYPE_SUPPORT(a, srv, b)
-#define SRVENTRY(a, b) {#a "/" #b, SRVTYPE(a, b)}
-
-static std::map<std::string, rosidl_service_type_support_t*> default_service_types
-{
-    SRVENTRY(rcl_interfaces, DescribeParameters),
-    SRVENTRY(rcl_interfaces, GetParameterTypes),
-    SRVENTRY(rcl_interfaces, GetParameters),
-    SRVENTRY(rcl_interfaces, ListParameters),
-    SRVENTRY(rcl_interfaces, SetParameters),
-    SRVENTRY(rcl_interfaces, SetParametersAtomically),
-    
-    SRVENTRY(iviz_msgs, GetModelResource),
-    SRVENTRY(iviz_msgs, GetModelTexture),
-    SRVENTRY(iviz_msgs, GetFile),
-    SRVENTRY(iviz_msgs, GetSdf),
-    SRVENTRY(iviz_msgs, AddModule),
-    SRVENTRY(iviz_msgs, AddModuleFromTopic),
-    SRVENTRY(iviz_msgs, GetModules),
-    SRVENTRY(iviz_msgs, UpdateModule),
-    SRVENTRY(iviz_msgs, ResetModule),
-    SRVENTRY(iviz_msgs, SetFixedFrame),
-    
-    SRVENTRY(iviz_msgs, UpdateRobot),
-    SRVENTRY(iviz_msgs, LaunchDialog),
-};
- */
-
+/// Cache for service type supports already generated
 static std::map<std::string, iviz_service_type_support*> custom_service_types;
 
 
@@ -364,7 +299,7 @@ static void rcl_logging_output_handler (const rcutils_log_location_t *location, 
                                         const char *name, rcutils_time_point_value_t timestamp,
                                         const char *format, va_list *args)
 {
-    if (rcl_external_logger == empty_handler)
+    if (rcl_external_logger == nullptr)
     {
         return;
     }
@@ -393,7 +328,7 @@ void native_rcl_set_logging_level(int level)
 
 void native_rcl_set_logging_handler(void (*logger) (int severity, const char *name, rcutils_time_point_value_t timestamp, const char *message))
 {
-    rcl_external_logger = logger == nullptr ? empty_handler : logger;
+    rcl_external_logger = logger;
 }
 
 int32_t native_rcl_create_node_handle(void *context_handle, void **node_handle, const char *name, const char *name_space)

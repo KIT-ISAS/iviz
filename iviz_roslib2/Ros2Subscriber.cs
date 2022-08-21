@@ -7,37 +7,19 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib2;
 
-public sealed class Ros2Subscriber<TMessage> : Ros2SubscriberHelper, IRos2Subscriber, IRosSubscriber<TMessage>
+public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, IRosSubscriber<TMessage>
     where TMessage : IMessage, new()
 {
     static RosCallback<TMessage>[] EmptyCallback => Array.Empty<RosCallback<TMessage>>();
 
     readonly Dictionary<string, RosCallback<TMessage>> callbacksById = new();
-    readonly CancellationTokenSource runningTs = new();
     readonly Ros2Client client;
 
     RosCallback<TMessage>[] cachedCallbacks = EmptyCallback; // cache to iterate through callbacks quickly
-    RclSubscriber? subscriber;
     Task? task;
-    PublisherStats[] publisherStats = new PublisherStats[32];
-    int numPublishers;
     int totalSubscribers;
     bool disposed;
 
-    bool IsAlive => !runningTs.IsCancellationRequested;
-
-    internal RclSubscriber Subscriber
-    {
-        private get => subscriber ?? throw new NullReferenceException("Subscriber has not been initialized!");
-        set => subscriber = value;
-    }
-
-    public CancellationToken CancellationToken => runningTs.Token;
-    public string Topic => Subscriber.Topic;
-    public string TopicType => Subscriber.TopicType;
-    public int NumPublishers => Subscriber.GetNumPublishers();
-    public bool IsPaused { get; set; }
-    public QosProfile Profile => Subscriber.Profile;
 
     internal Ros2Subscriber(Ros2Client client)
     {
@@ -55,36 +37,27 @@ public sealed class Ros2Subscriber<TMessage> : Ros2SubscriberHelper, IRos2Subscr
         var rclSubscriber = Subscriber;
         var generator = (IDeserializable<TMessage>)new TMessage();
         var receiverInfo = new Ros2Receiver(Topic, TopicType);
-        var messageHandler = new RclDeserializeHandler<TMessage>(generator);
+        var messageHandler = new RclDeserializeHandler<TMessage>(this, generator);
         using var gcHandle = new GCHandleWrapper(messageHandler);
 
         while (true)
         {
+            messageHandler.Reset();
+
             await signal.WaitAsync(token);
 
-            messageHandler.paused = IsPaused;
             if (!rclSubscriber.Take(gcHandle.ptr, out receiverInfo.guid))
             {
                 continue;
             }
 
-            UpdateReceiverInfo(receiverInfo.guid, messageHandler.messageLength, ref numPublishers, ref publisherStats);
-            if (messageHandler.paused)
+            UpdateReceiverInfo(receiverInfo.guid, messageHandler.messageLength);
+            if (!messageHandler.hasMessage)
             {
-                messageHandler.Reset();
                 continue;
             }
 
-            if (messageHandler.messageLength >= 0)
-            {
-                MessageCallback(messageHandler.message!, receiverInfo);
-            }
-            else
-            {
-                Logger.LogErrorFormat("{0}: Error in " + nameof(Run) + ". Handler message not set!", this);
-            }
-
-            messageHandler.Reset();
+            MessageCallback(messageHandler.message!, receiverInfo);
         }
     }
 
@@ -122,7 +95,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2SubscriberHelper, IRos2Subscr
 
     public async ValueTask<SubscriberState> GetStateAsync(CancellationToken token)
     {
-        var receiverStates = await GetStateAsync(client, Topic, publisherStats, numPublishers, token);
+        var receiverStates = await GetReceiverStates(client, token);
         return new Ros2SubscriberState(Topic, TopicType, callbacksById.Keys.ToArray(), receiverStates, Profile);
     }
 
@@ -225,19 +198,30 @@ public sealed class Ros2Subscriber<TMessage> : Ros2SubscriberHelper, IRos2Subscr
     }
 }
 
-public class Ros2SubscriberHelper : Signalizable
+public class Ros2Subscriber : Signalizable
 {
-    protected struct PublisherStats : IComparable<PublisherStats>
-    {
-        public Guid guid;
-        public long bytesReceived;
-        public int numReceived;
+    RclSubscriber? subscriber;
+    PublisherStats[] publisherStats = new PublisherStats[32];
+    int numPublishers;
 
-        public int CompareTo(PublisherStats other) => guid.CompareTo(other.guid);
+    protected readonly CancellationTokenSource runningTs = new();
+
+    protected bool IsAlive => !runningTs.IsCancellationRequested;
+
+    internal RclSubscriber Subscriber
+    {
+        get => subscriber ?? throw new NullReferenceException("Subscriber has not been initialized!");
+        set => subscriber = value;
     }
 
-    protected static void UpdateReceiverInfo(in Guid guid, int lengthInBytes,
-        ref int numPublishers, ref PublisherStats[] publisherStats)
+    public bool IsPaused { get; set; }
+    public CancellationToken CancellationToken => runningTs.Token;
+    public string Topic => Subscriber.Topic;
+    public string TopicType => Subscriber.TopicType;
+    public int NumPublishers => Subscriber.GetNumPublishers();
+    public QosProfile Profile => Subscriber.Profile;
+
+    protected void UpdateReceiverInfo(in Guid guid, int lengthInBytes)
     {
         bool success = numPublishers <= 3
             ? LinearSearch(publisherStats, numPublishers, guid, out int index)
@@ -251,10 +235,10 @@ public class Ros2SubscriberHelper : Signalizable
             return;
         }
 
-        AddNewEntry(in guid, lengthInBytes, ref numPublishers, ref publisherStats);
+        AddNewEntry(in guid, lengthInBytes);
     }
 
-    static void AddNewEntry(in Guid guid, int lengthInBytes, ref int numPublishers, ref PublisherStats[] publisherStats)
+    void AddNewEntry(in Guid guid, int lengthInBytes)
     {
         if (numPublishers == publisherStats.Length)
         {
@@ -271,7 +255,7 @@ public class Ros2SubscriberHelper : Signalizable
         Array.Sort(publisherStats, 0, numPublishers);
     }
 
-    protected static bool LinearSearch(PublisherStats[] arr, int length, in Guid key, out int index)
+    static bool LinearSearch(PublisherStats[] arr, int length, in Guid key, out int index)
     {
         for (int i = 0; i < length; i++)
         {
@@ -286,7 +270,7 @@ public class Ros2SubscriberHelper : Signalizable
         return false;
     }
 
-    protected static bool BinarySearch(PublisherStats[] arr, int length, in Guid key, out int index)
+    static bool BinarySearch(PublisherStats[] arr, int length, in Guid key, out int index)
     {
         int min = 0;
         int max = length - 1;
@@ -315,10 +299,9 @@ public class Ros2SubscriberHelper : Signalizable
         return false;
     }
 
-    protected static async ValueTask<List<Ros2ReceiverState>> GetStateAsync(
-        Ros2Client client, string topic, PublisherStats[] publisherStats, int numPublishers, CancellationToken token)
+    protected async ValueTask<List<Ros2ReceiverState>> GetReceiverStates(Ros2Client client, CancellationToken token)
     {
-        var publishers = await client.Rcl.GetPublisherInfoAsync(topic, token);
+        var publishers = await client.Rcl.GetPublisherInfoAsync(Topic, token);
 
         var knownPublishers = publishers.ToDictionary(static info => info.Guid);
 
@@ -364,4 +347,13 @@ public class Ros2SubscriberHelper : Signalizable
 
         return receiverStates;
     }
+    
+    struct PublisherStats : IComparable<PublisherStats>
+    {
+        public Guid guid;
+        public long bytesReceived;
+        public int numReceived;
+
+        public int CompareTo(PublisherStats other) => guid.CompareTo(other.guid);
+    }    
 }

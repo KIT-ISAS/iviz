@@ -875,14 +875,14 @@ public class IvizTests
     [Test]
     public void TestDialogs()
     {
-        using var writer = client.CreateWriter<WidgetArray>("/dialogs", latchingEnabled: true);
+        using var writer = client.CreateWriter<DialogArray>("/dialogs", latchingEnabled: true);
 
         var ivizController = new IvizController(client, IvizId);
         ivizController.AddModuleFromTopic("/dialogs");
 
         var header = new Header(0, time.Now(), "dialogs");
         
-        var widgetArray = new WidgetArray
+        var dialogArray = new DialogArray
         {
             Dialogs = new[]
             {
@@ -1037,7 +1037,7 @@ public class IvizTests
             }
         };
 
-        writer.Write(widgetArray);
+        writer.Write(dialogArray);
         
         Thread.Sleep(2000);
     }

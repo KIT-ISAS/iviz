@@ -16,6 +16,7 @@ namespace Iviz.Displays
         [SerializeField] protected MeshMarkerDisplay[] children = Array.Empty<MeshMarkerDisplay>();
         [SerializeField] BoxCollider? boxCollider;
         [SerializeField] Transform? m_Transform;
+        [SerializeField] bool updateBoundariesOnAwake;
         
         public BoxCollider Collider => boxCollider != null
             ? boxCollider
@@ -140,6 +141,14 @@ namespace Iviz.Displays
             set => Collider.enabled = value;
         }
 
+        void Awake()
+        {
+            if (updateBoundariesOnAwake)
+            {
+                UpdateBounds();
+            }
+        }
+        
         public void UpdateBounds()
         {
             var markerChildren = children.Select(resource =>

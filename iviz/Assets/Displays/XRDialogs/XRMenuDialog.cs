@@ -11,7 +11,7 @@ using TMPro;
 namespace Iviz.Displays.XR
 {
     public sealed class XRMenuDialog : XRDialog, IDialogWithCaption, IDialogWithTitle,
-        IDialogCanBeMenuClicked, IDialogCanBeClicked, IDialogWithEntries, IDialogIsInteractable
+        IDialogCanBeMenuClicked, IDialogCanBeClicked, IDialogWithEntries, IIsInteractable
     {
         [SerializeField] XRButton[] menuButtons = Array.Empty<XRButton>();
         [SerializeField] XRButton? upButton;

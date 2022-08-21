@@ -5,34 +5,34 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class TexCoords : IDeserializable<TexCoords>, IMessage
+    public sealed class ModelTexCoords : IDeserializable<ModelTexCoords>, IMessage
     {
         [DataMember (Name = "coords")] public GeometryMsgs.Point32[] Coords;
     
-        public TexCoords()
+        public ModelTexCoords()
         {
             Coords = System.Array.Empty<GeometryMsgs.Point32>();
         }
         
-        public TexCoords(GeometryMsgs.Point32[] Coords)
+        public ModelTexCoords(GeometryMsgs.Point32[] Coords)
         {
             this.Coords = Coords;
         }
         
-        public TexCoords(ref ReadBuffer b)
+        public ModelTexCoords(ref ReadBuffer b)
         {
             b.DeserializeStructArray(out Coords);
         }
         
-        public TexCoords(ref ReadBuffer2 b)
+        public ModelTexCoords(ref ReadBuffer2 b)
         {
             b.Align4();
             b.DeserializeStructArray(out Coords);
         }
         
-        public TexCoords RosDeserialize(ref ReadBuffer b) => new TexCoords(ref b);
+        public ModelTexCoords RosDeserialize(ref ReadBuffer b) => new ModelTexCoords(ref b);
         
-        public TexCoords RosDeserialize(ref ReadBuffer2 b) => new TexCoords(ref b);
+        public ModelTexCoords RosDeserialize(ref ReadBuffer2 b) => new ModelTexCoords(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -62,7 +62,7 @@ namespace Iviz.Msgs.IvizMsgs
             return c;
         }
     
-        public const string MessageType = "iviz_msgs/TexCoords";
+        public const string MessageType = "iviz_msgs/ModelTexCoords";
     
         public string RosMessageType => MessageType;
     

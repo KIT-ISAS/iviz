@@ -5,21 +5,21 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Node : IDeserializable<Node>, IMessage
+    public sealed class ModelNode : IDeserializable<ModelNode>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "parent")] public int Parent;
         [DataMember (Name = "transform")] public Matrix4 Transform;
         [DataMember (Name = "meshes")] public int[] Meshes;
     
-        public Node()
+        public ModelNode()
         {
             Name = "";
             Transform = new Matrix4();
             Meshes = System.Array.Empty<int>();
         }
         
-        public Node(string Name, int Parent, Matrix4 Transform, int[] Meshes)
+        public ModelNode(string Name, int Parent, Matrix4 Transform, int[] Meshes)
         {
             this.Name = Name;
             this.Parent = Parent;
@@ -27,7 +27,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.Meshes = Meshes;
         }
         
-        public Node(ref ReadBuffer b)
+        public ModelNode(ref ReadBuffer b)
         {
             b.DeserializeString(out Name);
             b.Deserialize(out Parent);
@@ -35,7 +35,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Meshes);
         }
         
-        public Node(ref ReadBuffer2 b)
+        public ModelNode(ref ReadBuffer2 b)
         {
             b.Align4();
             b.DeserializeString(out Name);
@@ -46,9 +46,9 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeStructArray(out Meshes);
         }
         
-        public Node RosDeserialize(ref ReadBuffer b) => new Node(ref b);
+        public ModelNode RosDeserialize(ref ReadBuffer b) => new ModelNode(ref b);
         
-        public Node RosDeserialize(ref ReadBuffer2 b) => new Node(ref b);
+        public ModelNode RosDeserialize(ref ReadBuffer2 b) => new ModelNode(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -90,7 +90,7 @@ namespace Iviz.Msgs.IvizMsgs
             return c;
         }
     
-        public const string MessageType = "iviz_msgs/Node";
+        public const string MessageType = "iviz_msgs/ModelNode";
     
         public string RosMessageType => MessageType;
     

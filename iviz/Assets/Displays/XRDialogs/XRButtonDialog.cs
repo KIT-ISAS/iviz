@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Iviz.Displays.XR
 {
     public sealed class XRButtonDialog : XRDialog, IDialogWithCaption, IDialogWithIcon, IDialogCanBeClicked,
-        IDialogIsInteractable
+        IIsInteractable
     {
         [SerializeField] XRButton? button;
 

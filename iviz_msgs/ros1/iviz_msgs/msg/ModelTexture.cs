@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Texture : IDeserializable<Texture>, IMessage
+    public sealed class ModelTexture : IDeserializable<ModelTexture>, IMessage
     {
         public const byte TYPE_NONE = 0;
         public const byte TYPE_DIFFUSE = 1;
@@ -46,12 +46,12 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "wrap_mode_u")] public byte WrapModeU;
         [DataMember (Name = "wrap_mode_v")] public byte WrapModeV;
     
-        public Texture()
+        public ModelTexture()
         {
             Path = "";
         }
         
-        public Texture(ref ReadBuffer b)
+        public ModelTexture(ref ReadBuffer b)
         {
             b.DeserializeString(out Path);
             b.Deserialize(out Index);
@@ -64,7 +64,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out WrapModeV);
         }
         
-        public Texture(ref ReadBuffer2 b)
+        public ModelTexture(ref ReadBuffer2 b)
         {
             b.Align4();
             b.DeserializeString(out Path);
@@ -80,9 +80,9 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out WrapModeV);
         }
         
-        public Texture RosDeserialize(ref ReadBuffer b) => new Texture(ref b);
+        public ModelTexture RosDeserialize(ref ReadBuffer b) => new ModelTexture(ref b);
         
-        public Texture RosDeserialize(ref ReadBuffer2 b) => new Texture(ref b);
+        public ModelTexture RosDeserialize(ref ReadBuffer2 b) => new ModelTexture(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -136,7 +136,7 @@ namespace Iviz.Msgs.IvizMsgs
             return c;
         }
     
-        public const string MessageType = "iviz_msgs/Texture";
+        public const string MessageType = "iviz_msgs/ModelTexture";
     
         public string RosMessageType => MessageType;
     

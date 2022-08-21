@@ -14,9 +14,8 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Tools;
-using Iviz.Urdf;
 using UnityEngine;
-using Color32 = UnityEngine.Color32;
+using Color32 = Iviz.Msgs.IvizMsgs.Color32;
 using Object = UnityEngine.Object;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
@@ -83,13 +82,13 @@ namespace Iviz.Displays
 
                 var meshColors = mesh.ColorChannels.Length != 0
                     ? mesh.ColorChannels[0].Colors
-                    : Array.Empty<Iviz.Msgs.IvizMsgs.Color32>();
+                    : Array.Empty<Color32>();
 
                 var material = msg.Materials[(int)mesh.MaterialIndex];
                 var diffuseTexture =
-                    material.Textures.FirstOrDefault(texture => texture.Type == Msgs.IvizMsgs.Texture.TYPE_DIFFUSE);
+                    material.Textures.FirstOrDefault(texture => texture.Type == ModelTexture.TYPE_DIFFUSE);
                 var bumpTexture =
-                    material.Textures.FirstOrDefault(texture => texture.Type == Msgs.IvizMsgs.Texture.TYPE_NORMALS);
+                    material.Textures.FirstOrDefault(texture => texture.Type == ModelTexture.TYPE_NORMALS);
 
                 var meshDiffuseTexCoords =
                     diffuseTexture != null && diffuseTexture.UvIndex < mesh.TexCoords.Length
@@ -132,7 +131,7 @@ namespace Iviz.Displays
                             MemoryMarshal.Cast<Point32, Vector3>(meshDiffuseTexCoords),
                             MemoryMarshal.Cast<Point32, Vector3>(meshBumpTexCoords),
                             MemoryMarshal.Cast<Triangle, int>(mesh.Faces),
-                            MemoryMarshal.Cast<Iviz.Msgs.IvizMsgs.Color32, Color32>(meshColors)
+                            MemoryMarshal.Cast<Color32, UnityEngine.Color32>(meshColors)
                         );
                     }
                     catch (Exception e)

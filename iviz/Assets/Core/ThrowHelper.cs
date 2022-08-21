@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Iviz.Msgs;
 using JetBrains.Annotations;
 
 namespace Iviz.Core
@@ -12,7 +13,7 @@ namespace Iviz.Core
         {
             if (t == null)
             {
-                ThrowArgumentNull(nameOfT);
+                BuiltIns.ThrowArgumentNull(nameOfT);
             }
         }
 
@@ -20,7 +21,7 @@ namespace Iviz.Core
         {
             if (t is null)
             {
-                ThrowArgumentNull(nameOfT);
+                BuiltIns.ThrowArgumentNull(nameOfT);
             }
         }
 
@@ -28,33 +29,20 @@ namespace Iviz.Core
         {
             if (string.IsNullOrWhiteSpace(t))
             {
-                ThrowArgumentNull(nameOfT, "Argument cannot be null or empty");
+                BuiltIns.ThrowArgumentNull(nameOfT, "Argument cannot be null or empty");
             }
         }
 
         [DoesNotReturn]
-        public static void ThrowIndexOutOfRange() => throw new IndexOutOfRangeException();
-
-        [DoesNotReturn]
-        public static void ThrowIndexOutOfRange(string message) => throw new IndexOutOfRangeException(message);
-
-        [DoesNotReturn]
-        public static void ThrowArgumentOutOfRange(string arg) => throw new ArgumentOutOfRangeException(arg);
-
-        [DoesNotReturn]
-        static void ThrowArgumentNull(string paramName) => throw new ArgumentNullException(paramName);
-
-        [DoesNotReturn, AssertionMethod]
-        public static void ThrowArgumentNull(string paramName, string message) =>
-            throw new ArgumentNullException(paramName, message);
+        public static void ThrowArgumentOutOfRange(string arg) => BuiltIns.ThrowArgumentOutOfRange(arg);
 
         [DoesNotReturn]
         public static void ThrowMissingAssetField(string message) => throw new MissingAssetFieldException(message);
 
         [DoesNotReturn, AssertionMethod]
         public static void ThrowArgument(string message, string paramName) =>
-            throw new ArgumentException(message, paramName);
-        
+            BuiltIns.ThrowArgument(message, paramName);
+
         [DoesNotReturn]
         public static void ThrowInvalidOperation(string message) => throw new InvalidOperationException(message);
     }

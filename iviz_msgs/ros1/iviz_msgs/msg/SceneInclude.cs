@@ -5,26 +5,26 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Include : IDeserializable<Include>, IMessage
+    public sealed class SceneInclude : IDeserializable<SceneInclude>, IMessage
     {
         // Reference to an external asset
         /// <summary> Uri of the asset </summary>
         [DataMember (Name = "uri")] public string Uri;
         /// <summary> Pose of the asset </summary>
         [DataMember (Name = "pose")] public Matrix4 Pose;
-        [DataMember (Name = "material")] public Material Material;
+        [DataMember (Name = "material")] public ModelMaterial Material;
         /// <summary> If uri has a model scheme, this indicates the package to search </summary>
         [DataMember (Name = "package")] public string Package;
     
-        public Include()
+        public SceneInclude()
         {
             Uri = "";
             Pose = new Matrix4();
-            Material = new Material();
+            Material = new ModelMaterial();
             Package = "";
         }
         
-        public Include(string Uri, Matrix4 Pose, Material Material, string Package)
+        public SceneInclude(string Uri, Matrix4 Pose, ModelMaterial Material, string Package)
         {
             this.Uri = Uri;
             this.Pose = Pose;
@@ -32,27 +32,27 @@ namespace Iviz.Msgs.IvizMsgs
             this.Package = Package;
         }
         
-        public Include(ref ReadBuffer b)
+        public SceneInclude(ref ReadBuffer b)
         {
             b.DeserializeString(out Uri);
             Pose = new Matrix4(ref b);
-            Material = new Material(ref b);
+            Material = new ModelMaterial(ref b);
             b.DeserializeString(out Package);
         }
         
-        public Include(ref ReadBuffer2 b)
+        public SceneInclude(ref ReadBuffer2 b)
         {
             b.Align4();
             b.DeserializeString(out Uri);
             Pose = new Matrix4(ref b);
-            Material = new Material(ref b);
+            Material = new ModelMaterial(ref b);
             b.Align4();
             b.DeserializeString(out Package);
         }
         
-        public Include RosDeserialize(ref ReadBuffer b) => new Include(ref b);
+        public SceneInclude RosDeserialize(ref ReadBuffer b) => new SceneInclude(ref b);
         
-        public Include RosDeserialize(ref ReadBuffer2 b) => new Include(ref b);
+        public SceneInclude RosDeserialize(ref ReadBuffer2 b) => new SceneInclude(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -104,7 +104,7 @@ namespace Iviz.Msgs.IvizMsgs
             return c;
         }
     
-        public const string MessageType = "iviz_msgs/Include";
+        public const string MessageType = "iviz_msgs/SceneInclude";
     
         public string RosMessageType => MessageType;
     
@@ -115,18 +115,18 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE72UyW7bMBCGz9FTEMi1QBtnaVogB1mibaLaoCWpEQQCI1M2W2uBSDlOn74jiVJo5NrU" +
-                "B1P8Zjj8Z8jhOQpZzhpWZgzJCtESsaNkTUn3iArBpGEI2fByi9qGo7Ozc5TAWOVI7phycCk4HK9QXQnW" +
-                "OQQwvvNgDYeIhfoYY9Y0+023/SqS9zvsqEAUFdWG7ZHIdqxgnyAQF4iXG57BctHHVQs7xYLRJtsZyDDu" +
-                "/vHPcKPld8QP/E9aiK34rBI18n1F5eXs8eLmCRXoHDXVC2T2q2r+j4ahgi0v5S2aO9izUxsvzMSJ0R36" +
-                "csJN2yYxucdguJjOsaQFM6xqXzWXM0SLZ85KOc03PM9b8WZnBReCH9iYM6qg8ly+TvPntqhTkdE9hJ6g" +
-                "2PGSl0yI9yQFFazcyt1kali+Z5mEFCHsoP55z8pN2l0CI4bb2Dbs8QnJ4Ut8fI1V8kpMo8btKE6N9OOF" +
-                "qOTVhvE6wKnne1g7557ZZLFIouGUNRwF2EocMwQ+07npzgn2uttyqWPskigaLsuVzleYLFed9/WpjtA1" +
-                "nQjwzcmeK+IRD0ed4atu8APTIvEa8O2p9ChwTAu7g6Bvus3p9nXNoMvrJN8QLxxsxcT3OtNJzon3w/Mf" +
-                "ej4zlAFCBMRbpovQd9PkXqveaImCFQ71+o0Ga+0Qz8Z6CUfT3P+pVXCkkIynV3Dkb7quR1l+kLrQtCRw" +
-                "1pokoNC1mhQAUTKPQ9OKNRVAbXJPbKxp6Dxd349XKsKVxsnSw7bik4KH0AzS7k/bv2eWY7qBpqGHLglD" +
-                "X69ET21smU4v4u1Nh+YGB2hteLPZUXnL13q8yAWt6+65GJzaQzr4TU9K3/05zWQ19l5Vs4ZKXpVq/tLQ" +
-                "un8f0vYdORjGX0PBjZnUBgAA";
+                "H4sIAAAAAAAAE72UyW7bMBCGz9FTEMi1QBtnaVIgB1mibaLaoCWpEQQCI1M2W2uBSDlJn74jiVLo5trG" +
+                "B1P8Zjj8Z0jOKQpZzhpWZgzJCtESsRfJmpLuERWCScMQsuHlFrUNRycnpyiBscqR3DHl4FJweLlAdSVY" +
+                "5xDA+JdHtWF7cGMNh7CF+hgD1zT7Rbf9UpL32+yoQBQV3Soksh0r2CeIxgXi5YZnsFz0wdXCTrZgtMl2" +
+                "BjKM23/8M9xo+Q3xA/+dFmIrPqtsjXxfUXk+ezi7ekQFOkVN9QyZ/ayaj9Cg19NoeSmv0dzBnp3aeGEm" +
+                "Toxu0Zcjbto2ickdBsPZdKIlLZhhVfuqOZ8hWjxxVsppvuF53oo3Oyu4EPzAxsRRBeXn8nWaP7VFnYqM" +
+                "7iH0BMWOl7xkQrwnKahg5VbuJlPD8j3LJOQJYQf1T3tWbtLuJgyXKIbL2Tbs4RHJ4Uv8/2qrCihFjRq3" +
+                "o0I10g86dlUBtWu8DnDq+R7WTrxnNlkskmg4bw1HAbYSxwyBz3RuunOCve7enOsYuySKhmtzofMVJstV" +
+                "5315rCN0TScCfHW054p4xMNRZ/iqG/zAtEi8Bnx9LD0KHNPC7iDoRrc53b6uGXR5HeUb4oWDrZj4Xmc6" +
+                "yjnxvnv+fc9nhjJAiIB4y3QR+m6a3GnVGy1RsMKhXr/RYK0d4tlYL+Fomvs/tAqOFJLx9AqO/E3X5SjL" +
+                "D1IXni8JnLUmCSi8X00KgCiZx6FpxZoKoDa5IzbWNHSeru/HKxXhQuNk6WFb8UnBfWgGafen7d8zyzHd" +
+                "QNPQQ5eEoa9Xoqc2tkynF/HW4uGZgwM8cmjh7EV5y9d6vMgFreuucQxO7SEd/Kbm0veBnGayGh9gVbOG" +
+                "Sl6Vav7c0LrvFGn7jhwM4w/igY0L6AYAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

@@ -3,7 +3,7 @@ geometry_msgs/Point32[] vertices
 geometry_msgs/Point32[] normals
 geometry_msgs/Point32[] tangents
 geometry_msgs/Point32[] bi_tangents
-TexCoords[] tex_coords
-ColorChannel[] color_channels
+ModelTexCoords[] tex_coords
+ModelColorChannel[] color_channels
 Triangle[] faces
 uint32 material_index

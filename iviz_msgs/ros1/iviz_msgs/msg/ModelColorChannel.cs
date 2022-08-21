@@ -5,34 +5,34 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ColorChannel : IDeserializable<ColorChannel>, IMessage
+    public sealed class ModelColorChannel : IDeserializable<ModelColorChannel>, IMessage
     {
         [DataMember (Name = "colors")] public Color32[] Colors;
     
-        public ColorChannel()
+        public ModelColorChannel()
         {
             Colors = System.Array.Empty<Color32>();
         }
         
-        public ColorChannel(Color32[] Colors)
+        public ModelColorChannel(Color32[] Colors)
         {
             this.Colors = Colors;
         }
         
-        public ColorChannel(ref ReadBuffer b)
+        public ModelColorChannel(ref ReadBuffer b)
         {
             b.DeserializeStructArray(out Colors);
         }
         
-        public ColorChannel(ref ReadBuffer2 b)
+        public ModelColorChannel(ref ReadBuffer2 b)
         {
             b.Align4();
             b.DeserializeStructArray(out Colors);
         }
         
-        public ColorChannel RosDeserialize(ref ReadBuffer b) => new ColorChannel(ref b);
+        public ModelColorChannel RosDeserialize(ref ReadBuffer b) => new ModelColorChannel(ref b);
         
-        public ColorChannel RosDeserialize(ref ReadBuffer2 b) => new ColorChannel(ref b);
+        public ModelColorChannel RosDeserialize(ref ReadBuffer2 b) => new ModelColorChannel(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -62,7 +62,7 @@ namespace Iviz.Msgs.IvizMsgs
             return c;
         }
     
-        public const string MessageType = "iviz_msgs/ColorChannel";
+        public const string MessageType = "iviz_msgs/ModelColorChannel";
     
         public string RosMessageType => MessageType;
     

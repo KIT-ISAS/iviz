@@ -20,7 +20,7 @@ namespace Iviz.Displays.XR
         void Initialize();
     }
 
-    public interface IDialogIsInteractable
+    public interface IIsInteractable
     {
         bool Interactable { set; }
     }

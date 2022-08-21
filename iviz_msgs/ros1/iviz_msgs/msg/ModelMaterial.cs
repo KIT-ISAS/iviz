@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Material : IDeserializable<Material>, IMessage
+    public sealed class ModelMaterial : IDeserializable<ModelMaterial>, IMessage
     {
         public const byte BLEND_DEFAULT = 0;
         public const byte BLEND_ADDITIVE = 1;
@@ -19,15 +19,15 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "shininess_strength")] public float ShininessStrength;
         [DataMember (Name = "reflectivity")] public float Reflectivity;
         [DataMember (Name = "blend_mode")] public byte BlendMode;
-        [DataMember (Name = "textures")] public Texture[] Textures;
+        [DataMember (Name = "textures")] public ModelTexture[] Textures;
     
-        public Material()
+        public ModelMaterial()
         {
             Name = "";
-            Textures = System.Array.Empty<Texture>();
+            Textures = System.Array.Empty<ModelTexture>();
         }
         
-        public Material(ref ReadBuffer b)
+        public ModelMaterial(ref ReadBuffer b)
         {
             b.DeserializeString(out Name);
             b.Deserialize(out Ambient);
@@ -42,11 +42,11 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeArray(out Textures);
             for (int i = 0; i < Textures.Length; i++)
             {
-                Textures[i] = new Texture(ref b);
+                Textures[i] = new ModelTexture(ref b);
             }
         }
         
-        public Material(ref ReadBuffer2 b)
+        public ModelMaterial(ref ReadBuffer2 b)
         {
             b.Align4();
             b.DeserializeString(out Name);
@@ -64,13 +64,13 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeArray(out Textures);
             for (int i = 0; i < Textures.Length; i++)
             {
-                Textures[i] = new Texture(ref b);
+                Textures[i] = new ModelTexture(ref b);
             }
         }
         
-        public Material RosDeserialize(ref ReadBuffer b) => new Material(ref b);
+        public ModelMaterial RosDeserialize(ref ReadBuffer b) => new ModelMaterial(ref b);
         
-        public Material RosDeserialize(ref ReadBuffer2 b) => new Material(ref b);
+        public ModelMaterial RosDeserialize(ref ReadBuffer2 b) => new ModelMaterial(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -148,7 +148,7 @@ namespace Iviz.Msgs.IvizMsgs
             return c;
         }
     
-        public const string MessageType = "iviz_msgs/Material";
+        public const string MessageType = "iviz_msgs/ModelMaterial";
     
         public string RosMessageType => MessageType;
     
@@ -159,16 +159,16 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE7WU247bIBCG73kKv0HbPbTbSntBbJKgArZ8yDaqKkQSkkWKDzI43e3TF9vYS7S3rS9s" +
-                "8/0j+Gdg6FRlHoIFQSziEVrCguTBY/ARdB6HUYRzvEFW+ASANq2qTkElSgnC+ly3tzeBKHdKVmYeH9Tx" +
-                "2Ok3XZZKa3WR4HiuhbGgbsRemdd5vOvKhuu9ONupZ6ifVaUqqfV7wq0LWZ3M8yy18niWe6Mu/bSj+91Z" +
-                "Vgde1gcJcvliulb+/BWY8U8D8PiPH0Cz1bfAGvjDS33SH1zyzkzrvqfJnPuK/2/EJe8WzLcJ4ixmyNvn" +
-                "gUV4uSyycZc9nCUoLAhMLb/xOaQLjFh/Wm59jCjOsvGw3Pl8jfBq3UffX/tIKSSZxZ+v1lxjhhnKeuGL" +
-                "L8QJDHG+tfjh2nqWEBgiOhr66mukX5fCpM/rKt8ULQkKcxyzXrrKuWDfWfw08BvgBDtFgtmKL9OY8mLj" +
-                "VW9SsmSNUr9+kxBuCWYR8ks4SYv4h1fBidpkmF/Bib/5up9sxQmntmlxQraeJUtt13pWLMiKRZ7CMPdc" +
-                "WBrhDY6Q56GPpHGcr90Mdx7HK4Yix2cHTylMeP/y1h9YSCBNPA8DpDhNY78SA41QCMlgYrpfGmGb2wbY" +
-                "1lbVQb64aPPaTAe5FE3TXxdjUHfhY9x8pQzdfxR7U0+9VzeyFUbVlRv/bkUz3A+8e0cuAPwFjGxOhxwF" +
-                "AAA=";
+                "H4sIAAAAAAAAE7WUXW/bIBSG7/kV/gfb0nbrJvWC2CRBMxj5I11UTYgkJEXylwzO2v364c8S9Xb1BTbP" +
+                "ewQvx5zTqtLce8sQ0YAHaAWzMPUevM+gdTgMApziLbLCFwC0aVR59kpRSOBXedXcLDxR7JUszTw/qtOp" +
+                "1W+6LJTW6iLBKa+EsaCqxUGZ13m+b4ua64PI7dIz1M+qVKXU+j3h1oUsz+Z5lhp5yuXBqEu37OB+n8vy" +
+                "yIvqKAGxQ57KF9M28um3Z4YvDcDDf34ASdY/POviLy/0WX8aMzA6asb3eXI4vsXHG3EzMO6a7hjiNKLI" +
+                "+eM9C/BqlSXD/3ZwwpCfhTC2fOFySJYY0e7e3LgYEZwkw7W5dfkG4fWmi7679hETGCYWf73ac4Mppijp" +
+                "hG+uEDHo43Rn8f219YSF0EdkMPTd1cJuXwJZd66r88ZoFSI/xRHtpKszZ/QnjR57vgCjYJdgmK75Ko4I" +
+                "z7ZO9iYlYRsUu/mbBH8XYhogN4WTtIx+ORmcqD0MdTM48Tdfd5OtiHFiyxezcOdYstTWr2PFgiRbpjH0" +
+                "U8eFpQHe4gA5HrpIEkXpZlzh1uF4TVEw8tnBYwwZ7wZn/575ISTM8dBDguM4cjPR0wD5MOxNTJ2mFrbM" +
+                "bYAtclUe5csYbV7r6SIXoq67xjEEtRc+xM3Npe8DJ3Ew1VSAVS0bYVRVjvM/jaj7TsHbd+QCwD/NTufl" +
+                "JgUAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Core;
+using Iviz.Msgs;
 using JetBrains.Annotations;
 using MarcusW.VncClient;
 using MarcusW.VncClient.Protocol.Implementation.Services.Communication;
@@ -312,7 +313,7 @@ namespace VNC
         static void AssertSize(in ReadOnlySpan<byte> span, int size)
         {
             if (span.Length < size) 
-                ThrowHelper.ThrowIndexOutOfRange("Span array is too short for the given operation");
+                BuiltIns.ThrowArgumentOutOfRange("Span array is too short for the given operation");
         }
     }
 }

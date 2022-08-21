@@ -63,15 +63,7 @@ public sealed class Ros2Client : IRosClient
     }
 
     public static void SetLoggingLevel(RclLogSeverity severity) => RclClient.SetLoggingLevel(severity);
-
-    static bool SetDdsProfilePath(string filename)
-    {
-        if (string.IsNullOrEmpty(filename)) BuiltIns.ThrowArgumentNull(nameof(filename));
-        if (!File.Exists(filename)) throw new FileNotFoundException("DDS profile path not found", filename);
-
-        return RclClient.SetDdsProfilePath(filename);
-    }
-
+    
     public void InitializeParameterServer()
     {
         TaskUtils.RunSync(ParameterServer.RegisterServicesAsync);

@@ -11,4 +11,4 @@ float32 shininess
 float32 shininess_strength
 float32 reflectivity
 uint8 blend_mode
-Texture[] textures
+ModelTexture[] textures
