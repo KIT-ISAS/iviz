@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -41,7 +42,6 @@ namespace Iviz.Msgs.SensorMsgs
         {
             b.Deserialize(out Type);
             b.Deserialize(out Id);
-            b.Align4();
             b.Deserialize(out Intensity);
         }
         

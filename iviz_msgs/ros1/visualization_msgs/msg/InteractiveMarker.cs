@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
@@ -73,8 +74,8 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.DeserializeString(out Name);
             b.Align4();
             b.DeserializeString(out Description);
-            b.Align4();
             b.Deserialize(out Scale);
+            b.Align4();
             {
                 int n = b.DeserializeArrayLength();
                 MenuEntries = n == 0

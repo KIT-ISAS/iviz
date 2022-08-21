@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -58,7 +59,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Ambient);
             b.Deserialize(out Diffuse);
             b.Deserialize(out Emissive);
-            b.Align4();
             b.Deserialize(out Opacity);
             b.Deserialize(out BumpScaling);
             b.Deserialize(out Shininess);

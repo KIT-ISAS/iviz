@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -42,7 +43,17 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Action);
             b.DeserializeString(out Id);
             b.DeserializeStringArray(out JointNames);
-            b.DeserializeStructArray(out JointValues);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                JointValues = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref JointValues[0]), n * 4);
+                }
+            }
             b.DeserializeString(out RobotDescription);
             b.DeserializeString(out SourceNode);
             b.DeserializeString(out SourceParameter);
@@ -63,7 +74,17 @@ namespace Iviz.Msgs.IvizMsgs
             b.Align4();
             b.DeserializeStringArray(out JointNames);
             b.Align4();
-            b.DeserializeStructArray(out JointValues);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                JointValues = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref JointValues[0]), n * 4);
+                }
+            }
             b.DeserializeString(out RobotDescription);
             b.Align4();
             b.DeserializeString(out SourceNode);

@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GridMapMsgs
@@ -82,11 +83,11 @@ namespace Iviz.Msgs.GridMapMsgs
         {
             b.Align4();
             b.DeserializeString(out FrameId);
-            b.Align8();
             b.Deserialize(out PositionX);
             b.Deserialize(out PositionY);
             b.Deserialize(out LengthX);
             b.Deserialize(out LengthY);
+            b.Align4();
             b.DeserializeStringArray(out Layers);
         }
         

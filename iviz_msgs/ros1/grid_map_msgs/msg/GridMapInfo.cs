@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GridMapMsgs
@@ -34,10 +35,10 @@ namespace Iviz.Msgs.GridMapMsgs
         public GridMapInfo(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align8();
             b.Deserialize(out Resolution);
             b.Deserialize(out LengthX);
             b.Deserialize(out LengthY);
+            b.Align8();
             b.Deserialize(out Pose);
         }
         

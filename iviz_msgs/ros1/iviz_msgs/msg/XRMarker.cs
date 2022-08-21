@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -38,8 +39,16 @@ namespace Iviz.Msgs.IvizMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Type);
             b.DeserializeString(out Code);
-            b.DeserializeStructArray(4, out Corners);
-            b.DeserializeStructArray(9, out CameraIntrinsic);
+            unsafe
+            {
+                Corners = new GeometryMsgs.Vector3[4];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref Corners[0]), 4 * 24);
+            }
+            unsafe
+            {
+                CameraIntrinsic = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref CameraIntrinsic[0]), 9 * 8);
+            }
             b.Deserialize(out CameraPose);
             b.Deserialize(out HasReliablePose);
             b.Deserialize(out MarkerSizeInMm);
@@ -53,11 +62,18 @@ namespace Iviz.Msgs.IvizMsgs
             b.Align4();
             b.DeserializeString(out Code);
             b.Align8();
-            b.DeserializeStructArray(4, out Corners);
-            b.DeserializeStructArray(9, out CameraIntrinsic);
+            unsafe
+            {
+                Corners = new GeometryMsgs.Vector3[4];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref Corners[0]), 4 * 24);
+            }
+            unsafe
+            {
+                CameraIntrinsic = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref CameraIntrinsic[0]), 9 * 8);
+            }
             b.Deserialize(out CameraPose);
             b.Deserialize(out HasReliablePose);
-            b.Align8();
             b.Deserialize(out MarkerSizeInMm);
             b.Deserialize(out PoseRelativeToCamera);
         }

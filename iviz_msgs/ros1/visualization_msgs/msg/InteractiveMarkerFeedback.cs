@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
@@ -74,7 +75,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Align8();
             b.Deserialize(out Pose);
             b.Deserialize(out MenuEntryId);
-            b.Align8();
             b.Deserialize(out MousePoint);
             b.Deserialize(out MousePointValid);
         }

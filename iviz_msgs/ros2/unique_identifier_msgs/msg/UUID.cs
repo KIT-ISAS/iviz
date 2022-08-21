@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.UniqueIdentifierMsgs
@@ -25,12 +26,20 @@ namespace Iviz.Msgs.UniqueIdentifierMsgs
         
         public UUID(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(16, out Uuid);
+            unsafe
+            {
+                Uuid = new byte[16];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref Uuid[0]), 16 * 1);
+            }
         }
         
         public UUID(ref ReadBuffer2 b)
         {
-            b.DeserializeStructArray(16, out Uuid);
+            unsafe
+            {
+                Uuid = new byte[16];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref Uuid[0]), 16 * 1);
+            }
         }
         
         public UUID RosDeserialize(ref ReadBuffer b) => new UUID(ref b);

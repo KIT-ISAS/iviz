@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -21,13 +22,33 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ModelColorChannel(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(out Colors);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Colors = n == 0
+                    ? System.Array.Empty<Color32>()
+                    : new Color32[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Colors[0]), n * 4);
+                }
+            }
         }
         
         public ModelColorChannel(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(out Colors);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Colors = n == 0
+                    ? System.Array.Empty<Color32>()
+                    : new Color32[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Colors[0]), n * 4);
+                }
+            }
         }
         
         public ModelColorChannel RosDeserialize(ref ReadBuffer b) => new ModelColorChannel(ref b);

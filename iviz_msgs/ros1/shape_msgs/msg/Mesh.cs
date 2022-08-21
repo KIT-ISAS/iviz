@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ShapeMsgs
@@ -37,7 +38,17 @@ namespace Iviz.Msgs.ShapeMsgs
                     Triangles[i] = new MeshTriangle(ref b);
                 }
             }
-            b.DeserializeStructArray(out Vertices);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Vertices = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    : new GeometryMsgs.Point[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices[0]), n * 24);
+                }
+            }
         }
         
         public Mesh(ref ReadBuffer2 b)
@@ -54,7 +65,17 @@ namespace Iviz.Msgs.ShapeMsgs
                 }
             }
             b.Align4();
-            b.DeserializeStructArray(out Vertices);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Vertices = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    : new GeometryMsgs.Point[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices[0]), n * 24);
+                }
+            }
         }
         
         public Mesh RosDeserialize(ref ReadBuffer b) => new Mesh(ref b);

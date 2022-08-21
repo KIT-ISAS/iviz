@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.NavMsgs
@@ -33,7 +34,17 @@ namespace Iviz.Msgs.NavMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Info = new MapMetaData(ref b);
-            b.DeserializeStructArray(out Data);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Data = n == 0
+                    ? System.Array.Empty<sbyte>()
+                    : new sbyte[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 1);
+                }
+            }
         }
         
         public OccupancyGrid(ref ReadBuffer2 b)
@@ -41,7 +52,17 @@ namespace Iviz.Msgs.NavMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             Info = new MapMetaData(ref b);
             b.Align4();
-            b.DeserializeStructArray(out Data);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Data = n == 0
+                    ? System.Array.Empty<sbyte>()
+                    : new sbyte[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 1);
+                }
+            }
         }
         
         public OccupancyGrid RosDeserialize(ref ReadBuffer b) => new OccupancyGrid(ref b);

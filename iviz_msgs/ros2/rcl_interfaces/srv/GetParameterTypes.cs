@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RclInterfaces
@@ -133,13 +134,33 @@ namespace Iviz.Msgs.RclInterfaces
         
         public GetParameterTypesResponse(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(out Types);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Types = n == 0
+                    ? System.Array.Empty<byte>()
+                    : new byte[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Types[0]), n * 1);
+                }
+            }
         }
         
         public GetParameterTypesResponse(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(out Types);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Types = n == 0
+                    ? System.Array.Empty<byte>()
+                    : new byte[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Types[0]), n * 1);
+                }
+            }
         }
         
         public GetParameterTypesResponse RosDeserialize(ref ReadBuffer b) => new GetParameterTypesResponse(ref b);

@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -35,7 +36,17 @@ namespace Iviz.Msgs.SensorMsgs
         public PointCloud(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeStructArray(out Points);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Points = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    : new GeometryMsgs.Point32[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Points[0]), n * 12);
+                }
+            }
             {
                 int n = b.DeserializeArrayLength();
                 Channels = n == 0
@@ -52,7 +63,17 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
-            b.DeserializeStructArray(out Points);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Points = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    : new GeometryMsgs.Point32[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Points[0]), n * 12);
+                }
+            }
             {
                 int n = b.DeserializeArrayLength();
                 Channels = n == 0

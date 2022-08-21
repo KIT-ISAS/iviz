@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -44,7 +45,17 @@ namespace Iviz.Msgs.SensorMsgs
         public ChannelFloat32(ref ReadBuffer b)
         {
             b.DeserializeString(out Name);
-            b.DeserializeStructArray(out Values);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Values = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Values[0]), n * 4);
+                }
+            }
         }
         
         public ChannelFloat32(ref ReadBuffer2 b)
@@ -52,7 +63,17 @@ namespace Iviz.Msgs.SensorMsgs
             b.Align4();
             b.DeserializeString(out Name);
             b.Align4();
-            b.DeserializeStructArray(out Values);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Values = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Values[0]), n * 4);
+                }
+            }
         }
         
         public ChannelFloat32 RosDeserialize(ref ReadBuffer b) => new ChannelFloat32(ref b);

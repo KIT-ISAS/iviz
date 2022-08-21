@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.HriMsgs
@@ -136,7 +137,6 @@ namespace Iviz.Msgs.HriMsgs
                     Landmarks[i] = new NormalizedPointOfInterest2D(ref b);
                 }
             }
-            b.Align4();
             b.Deserialize(out Height);
             b.Deserialize(out Width);
         }

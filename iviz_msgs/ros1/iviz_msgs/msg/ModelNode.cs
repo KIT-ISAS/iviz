@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -32,18 +33,37 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Name);
             b.Deserialize(out Parent);
             Transform = new Matrix4(ref b);
-            b.DeserializeStructArray(out Meshes);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Meshes = n == 0
+                    ? System.Array.Empty<int>()
+                    : new int[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Meshes[0]), n * 4);
+                }
+            }
         }
         
         public ModelNode(ref ReadBuffer2 b)
         {
             b.Align4();
             b.DeserializeString(out Name);
-            b.Align4();
             b.Deserialize(out Parent);
             Transform = new Matrix4(ref b);
             b.Align4();
-            b.DeserializeStructArray(out Meshes);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Meshes = n == 0
+                    ? System.Array.Empty<int>()
+                    : new int[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Meshes[0]), n * 4);
+                }
+            }
         }
         
         public ModelNode RosDeserialize(ref ReadBuffer b) => new ModelNode(ref b);

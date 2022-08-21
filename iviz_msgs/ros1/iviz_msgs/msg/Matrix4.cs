@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -22,13 +23,21 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Matrix4(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(16, out M);
+            unsafe
+            {
+                M = new float[16];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref M[0]), 16 * 4);
+            }
         }
         
         public Matrix4(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(16, out M);
+            unsafe
+            {
+                M = new float[16];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref M[0]), 16 * 4);
+            }
         }
         
         public Matrix4 RosDeserialize(ref ReadBuffer b) => new Matrix4(ref b);

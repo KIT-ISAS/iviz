@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -48,7 +49,6 @@ namespace Iviz.Msgs.SensorMsgs
         public Illuminance(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align8();
             b.Deserialize(out Illuminance_);
             b.Deserialize(out Variance);
         }

@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibTutorials
@@ -22,13 +23,33 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public FibonacciFeedback(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(out Sequence);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Sequence = n == 0
+                    ? System.Array.Empty<int>()
+                    : new int[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Sequence[0]), n * 4);
+                }
+            }
         }
         
         public FibonacciFeedback(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(out Sequence);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Sequence = n == 0
+                    ? System.Array.Empty<int>()
+                    : new int[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Sequence[0]), n * 4);
+                }
+            }
         }
         
         public FibonacciFeedback RosDeserialize(ref ReadBuffer b) => new FibonacciFeedback(ref b);

@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -48,7 +49,6 @@ namespace Iviz.Msgs.SensorMsgs
         public NavSatStatus(ref ReadBuffer2 b)
         {
             b.Deserialize(out Status);
-            b.Align2();
             b.Deserialize(out Service);
         }
         

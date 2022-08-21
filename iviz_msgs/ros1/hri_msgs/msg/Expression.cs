@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.HriMsgs
@@ -69,7 +70,6 @@ namespace Iviz.Msgs.HriMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
             b.DeserializeString(out Expression_);
-            b.Align4();
             b.Deserialize(out Valence);
             b.Deserialize(out Arousal);
             b.Deserialize(out Confidence);

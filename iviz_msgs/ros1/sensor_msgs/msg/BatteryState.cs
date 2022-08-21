@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -91,8 +92,28 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out PowerSupplyHealth);
             b.Deserialize(out PowerSupplyTechnology);
             b.Deserialize(out Present);
-            b.DeserializeStructArray(out CellVoltage);
-            b.DeserializeStructArray(out CellTemperature);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                CellVoltage = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref CellVoltage[0]), n * 4);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                CellTemperature = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref CellTemperature[0]), n * 4);
+                }
+            }
             b.DeserializeString(out Location);
             b.DeserializeString(out SerialNumber);
         }
@@ -100,7 +121,6 @@ namespace Iviz.Msgs.SensorMsgs
         public BatteryState(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align4();
             b.Deserialize(out Voltage);
             b.Deserialize(out Temperature);
             b.Deserialize(out Current);
@@ -113,8 +133,28 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out PowerSupplyTechnology);
             b.Deserialize(out Present);
             b.Align4();
-            b.DeserializeStructArray(out CellVoltage);
-            b.DeserializeStructArray(out CellTemperature);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                CellVoltage = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref CellVoltage[0]), n * 4);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                CellTemperature = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref CellTemperature[0]), n * 4);
+                }
+            }
             b.DeserializeString(out Location);
             b.Align4();
             b.DeserializeString(out SerialNumber);

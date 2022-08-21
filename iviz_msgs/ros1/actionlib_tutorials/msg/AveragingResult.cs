@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibTutorials
@@ -29,7 +30,6 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public AveragingResult(ref ReadBuffer2 b)
         {
-            b.Align4();
             b.Deserialize(out InteriorAngle);
             b.Deserialize(out Apothem);
         }

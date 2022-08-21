@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Actionlib
@@ -28,7 +29,6 @@ namespace Iviz.Msgs.Actionlib
         
         public TwoIntsGoal(ref ReadBuffer2 b)
         {
-            b.Align8();
             b.Deserialize(out A);
             b.Deserialize(out B);
         }

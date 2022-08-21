@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
@@ -36,7 +37,6 @@ namespace Iviz.Msgs.MeshMsgs
         {
             b.Align4();
             b.DeserializeString(out Uuid);
-            b.Align4();
             b.Deserialize(out TextureIndex);
             Image = new SensorMsgs.Image(ref b);
         }

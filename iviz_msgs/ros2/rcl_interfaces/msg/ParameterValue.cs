@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RclInterfaces
@@ -52,10 +53,50 @@ namespace Iviz.Msgs.RclInterfaces
             b.Deserialize(out IntegerValue);
             b.Deserialize(out DoubleValue);
             b.DeserializeString(out StringValue);
-            b.DeserializeStructArray(out ByteArrayValue);
-            b.DeserializeStructArray(out BoolArrayValue);
-            b.DeserializeStructArray(out IntegerArrayValue);
-            b.DeserializeStructArray(out DoubleArrayValue);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                ByteArrayValue = n == 0
+                    ? System.Array.Empty<byte>()
+                    : new byte[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref ByteArrayValue[0]), n * 1);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                BoolArrayValue = n == 0
+                    ? System.Array.Empty<bool>()
+                    : new bool[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref BoolArrayValue[0]), n * 1);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                IntegerArrayValue = n == 0
+                    ? System.Array.Empty<long>()
+                    : new long[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref IntegerArrayValue[0]), n * 8);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                DoubleArrayValue = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref DoubleArrayValue[0]), n * 8);
+                }
+            }
             b.DeserializeStringArray(out StringArrayValue);
         }
         
@@ -63,17 +104,57 @@ namespace Iviz.Msgs.RclInterfaces
         {
             b.Deserialize(out Type);
             b.Deserialize(out BoolValue);
-            b.Align8();
             b.Deserialize(out IntegerValue);
             b.Deserialize(out DoubleValue);
+            b.Align4();
             b.DeserializeString(out StringValue);
             b.Align4();
-            b.DeserializeStructArray(out ByteArrayValue);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                ByteArrayValue = n == 0
+                    ? System.Array.Empty<byte>()
+                    : new byte[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref ByteArrayValue[0]), n * 1);
+                }
+            }
             b.Align4();
-            b.DeserializeStructArray(out BoolArrayValue);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                BoolArrayValue = n == 0
+                    ? System.Array.Empty<bool>()
+                    : new bool[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref BoolArrayValue[0]), n * 1);
+                }
+            }
             b.Align4();
-            b.DeserializeStructArray(out IntegerArrayValue);
-            b.DeserializeStructArray(out DoubleArrayValue);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                IntegerArrayValue = n == 0
+                    ? System.Array.Empty<long>()
+                    : new long[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref IntegerArrayValue[0]), n * 8);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                DoubleArrayValue = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref DoubleArrayValue[0]), n * 8);
+                }
+            }
             b.DeserializeStringArray(out StringArrayValue);
         }
         

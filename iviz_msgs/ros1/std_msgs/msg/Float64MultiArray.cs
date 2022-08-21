@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
@@ -29,14 +30,34 @@ namespace Iviz.Msgs.StdMsgs
         public Float64MultiArray(ref ReadBuffer b)
         {
             Layout = new MultiArrayLayout(ref b);
-            b.DeserializeStructArray(out Data);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Data = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 8);
+                }
+            }
         }
         
         public Float64MultiArray(ref ReadBuffer2 b)
         {
             Layout = new MultiArrayLayout(ref b);
             b.Align4();
-            b.DeserializeStructArray(out Data);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Data = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 8);
+                }
+            }
         }
         
         public Float64MultiArray RosDeserialize(ref ReadBuffer b) => new Float64MultiArray(ref b);

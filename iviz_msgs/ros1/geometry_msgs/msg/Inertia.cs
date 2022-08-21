@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
@@ -40,8 +41,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public Inertia(ref ReadBuffer2 b)
         {
-            b.Align8();
             b.Deserialize(out M);
+            b.Align8();
             b.Deserialize(out Com);
             b.Deserialize(out Ixx);
             b.Deserialize(out Ixy);

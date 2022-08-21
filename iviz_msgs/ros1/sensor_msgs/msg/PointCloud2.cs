@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -65,9 +66,9 @@ namespace Iviz.Msgs.SensorMsgs
         public PointCloud2(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align4();
             b.Deserialize(out Height);
             b.Deserialize(out Width);
+            b.Align4();
             {
                 int n = b.DeserializeArrayLength();
                 Fields = n == 0
@@ -79,9 +80,9 @@ namespace Iviz.Msgs.SensorMsgs
                 }
             }
             b.Deserialize(out IsBigendian);
-            b.Align4();
             b.Deserialize(out PointStep);
             b.Deserialize(out RowStep);
+            b.Align4();
             b.DeserializeStructRent(out Data);
             b.Deserialize(out IsDense);
         }

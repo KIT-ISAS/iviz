@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -77,7 +78,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Pose);
             b.Deserialize(out Color);
             b.Deserialize(out SecondaryColor);
-            b.Align8();
             b.Deserialize(out Scale);
             b.Deserialize(out SecondaryScale);
             b.DeserializeString(out Caption);

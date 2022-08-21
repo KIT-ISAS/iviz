@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
@@ -28,8 +29,28 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshGeometry(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(out Vertices);
-            b.DeserializeStructArray(out VertexNormals);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Vertices = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    : new GeometryMsgs.Point[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices[0]), n * 24);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                VertexNormals = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    : new GeometryMsgs.Point[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref VertexNormals[0]), n * 24);
+                }
+            }
             {
                 int n = b.DeserializeArrayLength();
                 Faces = n == 0
@@ -45,8 +66,28 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshGeometry(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(out Vertices);
-            b.DeserializeStructArray(out VertexNormals);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Vertices = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    : new GeometryMsgs.Point[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices[0]), n * 24);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                VertexNormals = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    : new GeometryMsgs.Point[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref VertexNormals[0]), n * 24);
+                }
+            }
             {
                 int n = b.DeserializeArrayLength();
                 Faces = n == 0

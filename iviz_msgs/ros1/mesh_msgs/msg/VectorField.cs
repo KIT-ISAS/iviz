@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
@@ -24,15 +25,55 @@ namespace Iviz.Msgs.MeshMsgs
         
         public VectorField(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(out Positions);
-            b.DeserializeStructArray(out Vectors);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Positions = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    : new GeometryMsgs.Point[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Positions[0]), n * 24);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Vectors = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Vector3>()
+                    : new GeometryMsgs.Vector3[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vectors[0]), n * 24);
+                }
+            }
         }
         
         public VectorField(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(out Positions);
-            b.DeserializeStructArray(out Vectors);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Positions = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    : new GeometryMsgs.Point[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Positions[0]), n * 24);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Vectors = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Vector3>()
+                    : new GeometryMsgs.Vector3[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vectors[0]), n * 24);
+                }
+            }
         }
         
         public VectorField RosDeserialize(ref ReadBuffer b) => new VectorField(ref b);

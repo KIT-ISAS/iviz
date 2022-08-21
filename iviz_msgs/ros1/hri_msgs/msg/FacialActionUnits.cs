@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.HriMsgs
@@ -193,18 +194,78 @@ namespace Iviz.Msgs.HriMsgs
         public FacialActionUnits(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeStructArray(out FAU);
-            b.DeserializeStructArray(out Intensity);
-            b.DeserializeStructArray(out Confidence);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                FAU = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref FAU[0]), n * 4);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Intensity = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Intensity[0]), n * 4);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Confidence = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Confidence[0]), n * 4);
+                }
+            }
         }
         
         public FacialActionUnits(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
-            b.DeserializeStructArray(out FAU);
-            b.DeserializeStructArray(out Intensity);
-            b.DeserializeStructArray(out Confidence);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                FAU = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref FAU[0]), n * 4);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Intensity = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Intensity[0]), n * 4);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Confidence = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Confidence[0]), n * 4);
+                }
+            }
         }
         
         public FacialActionUnits RosDeserialize(ref ReadBuffer b) => new FacialActionUnits(ref b);

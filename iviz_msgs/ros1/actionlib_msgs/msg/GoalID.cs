@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibMsgs
@@ -35,8 +36,8 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         public GoalID(ref ReadBuffer2 b)
         {
-            b.Align4();
             b.Deserialize(out Stamp);
+            b.Align4();
             b.DeserializeString(out Id);
         }
         

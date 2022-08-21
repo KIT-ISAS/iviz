@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.PclMsgs
@@ -22,13 +23,33 @@ namespace Iviz.Msgs.PclMsgs
         
         public Vertices(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(out Vertices_);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Vertices_ = n == 0
+                    ? System.Array.Empty<uint>()
+                    : new uint[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices_[0]), n * 4);
+                }
+            }
         }
         
         public Vertices(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(out Vertices_);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Vertices_ = n == 0
+                    ? System.Array.Empty<uint>()
+                    : new uint[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices_[0]), n * 4);
+                }
+            }
         }
         
         public Vertices RosDeserialize(ref ReadBuffer b) => new Vertices(ref b);

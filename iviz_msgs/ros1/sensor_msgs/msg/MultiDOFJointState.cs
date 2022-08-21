@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -44,7 +45,17 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.DeserializeStringArray(out JointNames);
-            b.DeserializeStructArray(out Transforms);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Transforms = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    : new GeometryMsgs.Transform[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Transforms[0]), n * 56);
+                }
+            }
             {
                 int n = b.DeserializeArrayLength();
                 Twist = n == 0
@@ -73,7 +84,17 @@ namespace Iviz.Msgs.SensorMsgs
             b.Align4();
             b.DeserializeStringArray(out JointNames);
             b.Align4();
-            b.DeserializeStructArray(out Transforms);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Transforms = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    : new GeometryMsgs.Transform[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Transforms[0]), n * 56);
+                }
+            }
             {
                 int n = b.DeserializeArrayLength();
                 Twist = n == 0

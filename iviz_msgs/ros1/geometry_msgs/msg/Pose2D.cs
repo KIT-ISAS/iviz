@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
@@ -36,7 +37,6 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public Pose2D(ref ReadBuffer2 b)
         {
-            b.Align8();
             b.Deserialize(out X);
             b.Deserialize(out Y);
             b.Deserialize(out Theta);

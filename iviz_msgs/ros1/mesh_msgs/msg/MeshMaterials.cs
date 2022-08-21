@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
@@ -51,7 +52,17 @@ namespace Iviz.Msgs.MeshMsgs
                     Materials[i] = new MeshMsgs.MeshMaterial(ref b);
                 }
             }
-            b.DeserializeStructArray(out ClusterMaterials);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                ClusterMaterials = n == 0
+                    ? System.Array.Empty<uint>()
+                    : new uint[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref ClusterMaterials[0]), n * 4);
+                }
+            }
             {
                 int n = b.DeserializeArrayLength();
                 VertexTexCoords = n == 0
@@ -89,7 +100,17 @@ namespace Iviz.Msgs.MeshMsgs
                 }
             }
             b.Align4();
-            b.DeserializeStructArray(out ClusterMaterials);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                ClusterMaterials = n == 0
+                    ? System.Array.Empty<uint>()
+                    : new uint[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref ClusterMaterials[0]), n * 4);
+                }
+            }
             {
                 int n = b.DeserializeArrayLength();
                 VertexTexCoords = n == 0

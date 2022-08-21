@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RclInterfaces
@@ -67,8 +68,8 @@ namespace Iviz.Msgs.RclInterfaces
         
         public ParameterEvent(ref ReadBuffer2 b)
         {
-            b.Align4();
             b.Deserialize(out Stamp);
+            b.Align4();
             b.DeserializeString(out Node);
             b.Align4();
             {

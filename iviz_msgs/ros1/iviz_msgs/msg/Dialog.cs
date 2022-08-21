@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -105,9 +106,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Action);
             b.Align4();
             b.DeserializeString(out Id);
-            b.Align4();
             b.Deserialize(out Lifetime);
-            b.Align8();
             b.Deserialize(out Scale);
             b.Deserialize(out Type);
             b.Deserialize(out Buttons);
@@ -117,7 +116,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Title);
             b.Align4();
             b.DeserializeString(out Caption);
-            b.Align2();
             b.Deserialize(out CaptionAlignment);
             b.Align4();
             b.DeserializeStringArray(out MenuEntries);

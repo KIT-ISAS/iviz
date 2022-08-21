@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -58,14 +59,33 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out ScanTime);
             b.Deserialize(out RangeMin);
             b.Deserialize(out RangeMax);
-            b.DeserializeStructArray(out Ranges);
-            b.DeserializeStructArray(out Intensities);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Ranges = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Ranges[0]), n * 4);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Intensities = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Intensities[0]), n * 4);
+                }
+            }
         }
         
         public LaserScan(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align4();
             b.Deserialize(out AngleMin);
             b.Deserialize(out AngleMax);
             b.Deserialize(out AngleIncrement);
@@ -73,8 +93,29 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out ScanTime);
             b.Deserialize(out RangeMin);
             b.Deserialize(out RangeMax);
-            b.DeserializeStructArray(out Ranges);
-            b.DeserializeStructArray(out Intensities);
+            b.Align4();
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Ranges = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Ranges[0]), n * 4);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Intensities = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Intensities[0]), n * 4);
+                }
+            }
         }
         
         public LaserScan RosDeserialize(ref ReadBuffer b) => new LaserScan(ref b);

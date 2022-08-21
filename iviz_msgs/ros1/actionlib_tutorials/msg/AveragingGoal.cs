@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibTutorials
@@ -29,7 +30,6 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public AveragingGoal(ref ReadBuffer2 b)
         {
-            b.Align4();
             b.Deserialize(out Edges);
             b.Deserialize(out Radius);
         }

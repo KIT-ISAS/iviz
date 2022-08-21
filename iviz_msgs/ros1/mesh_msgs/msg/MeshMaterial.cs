@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
@@ -31,8 +32,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshMaterial(ref ReadBuffer2 b)
         {
-            b.Align4();
             b.Deserialize(out TextureIndex);
+            b.Align4();
             b.Deserialize(out Color);
             b.Deserialize(out HasTexture);
         }

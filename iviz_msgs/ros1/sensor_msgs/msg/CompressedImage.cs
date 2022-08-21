@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -39,7 +40,17 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.DeserializeString(out Format);
-            b.DeserializeStructArray(out Data);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Data = n == 0
+                    ? System.Array.Empty<byte>()
+                    : new byte[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 1);
+                }
+            }
         }
         
         public CompressedImage(ref ReadBuffer2 b)
@@ -48,7 +59,17 @@ namespace Iviz.Msgs.SensorMsgs
             b.Align4();
             b.DeserializeString(out Format);
             b.Align4();
-            b.DeserializeStructArray(out Data);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Data = n == 0
+                    ? System.Array.Empty<byte>()
+                    : new byte[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 1);
+                }
+            }
         }
         
         public CompressedImage RosDeserialize(ref ReadBuffer b) => new CompressedImage(ref b);

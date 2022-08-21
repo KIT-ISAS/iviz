@@ -54,6 +54,8 @@ public unsafe partial struct ReadBuffer2
         Deserialize(out int i);
         return i;
     }
+    
+    #region strings
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeString(out string val)
@@ -126,6 +128,8 @@ public unsafe partial struct ReadBuffer2
 
         val = EmptyStringArray;
     }
+    
+    #endregion
 
     #region scalars
 
@@ -248,198 +252,12 @@ public unsafe partial struct ReadBuffer2
     #region arrays
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out bool[] val)
+    public void DeserializeStructArray(void* value, int count)
     {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<bool>();
-        else DeserializeStructArrayCore(count, out val);
+        ThrowIfOutOfRange(count);
+        Unsafe.CopyBlock(value, cursor, (uint)count);
+        Advance(count);
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out bool[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out byte[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<byte>();
-        else DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out byte[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out sbyte[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<sbyte>();
-        else DeserializeStructArray(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out sbyte[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out short[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<short>();
-        else DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out short[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out ushort[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<ushort>();
-        else DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out ushort[] val)
-    {
-        Align2();
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out int[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<int>();
-        else DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out int[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out uint[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<uint>();
-        else DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out uint[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out float[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<float>();
-        else DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out float[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out double[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<double>();
-        else
-        {
-            Align8();
-            DeserializeStructArrayCore(count, out val);
-        }
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out double[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out long[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<long>();
-        else
-        {
-            Align8();
-            DeserializeStructArrayCore(count, out val);
-        }
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out long[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out ulong[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<ulong>();
-        else
-        {
-            Align8();
-            DeserializeStructArrayCore(count, out val);
-        }
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out ulong[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    /*
-    public void DeserializeStructArray<T>(out T[] val) where T : unmanaged
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<T>();
-        else DeserializeStructArrayCore(count, out val);
-    }
-    */
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    void DeserializeStructArrayCore<T>(int count, out T[] val) where T : unmanaged
-    {
-        int size = count * sizeof(T);
-        ThrowIfOutOfRange(size);
-
-        val = new T[count];
-        fixed (T* valPtr = val)
-        {
-            Unsafe.CopyBlock(valPtr, cursor, (uint)size);
-        }
-
-        Advance(size);
-    }
-
-    #endregion
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructRent(out SharedRent val)
@@ -483,11 +301,13 @@ public unsafe partial struct ReadBuffer2
 
         return count;
     }
+    
+    #endregion
 
     #region Empties
 
     static string EmptyString => "";
-    static string[] EmptyStringArray => Array.Empty<string>();
+    static string[] EmptyStringArray => EmptyArray<string>.Value;
 
     #endregion    
 
@@ -513,10 +333,8 @@ public unsafe partial struct ReadBuffer2
             return generator.RosDeserialize(ref b);
         }
     }
-}
 
-public unsafe partial struct ReadBuffer2
-{
+    #region extras
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Vector3 t)
     {
@@ -597,147 +415,10 @@ public unsafe partial struct ReadBuffer2
         t = *(ColorRGBA*)cursor;
         Advance(size);
     }
+    #endregion
+}
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out time[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<time>();
-        else DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out time[] val)
-    {
-        Align4();
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out Color32[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<Color32>();
-        else DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out Color32[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out Triangle[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<Triangle>();
-        else DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out Triangle[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out Vector3[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<Vector3>();
-        else
-        {
-            Align8();
-            DeserializeStructArrayCore(count, out val);
-        }
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out Vector3[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out Point[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<Point>();
-        else
-        {
-            Align8();
-            DeserializeStructArrayCore(count, out val);
-        }
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out Point[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out Point32[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<Point32>();
-        else DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out Point32[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out ColorRGBA[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<ColorRGBA>();
-        else DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out ColorRGBA[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out Transform[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<Transform>();
-        else
-        {
-            Align8();
-            DeserializeStructArrayCore(count, out val);
-        }
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out Transform[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out Pose[] val)
-    {
-        int count = ReadInt();
-        if (count == 0) val = Array.Empty<Pose>();
-        else
-        {
-            Align8();
-            DeserializeStructArrayCore(count, out val);
-        }
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(int count, out Pose[] val)
-    {
-        DeserializeStructArrayCore(count, out val);
-    }
+public static class EmptyArray<T>
+{
+    internal static readonly T[] Value = new T[0];
 }

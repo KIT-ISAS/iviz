@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Actionlib
@@ -28,7 +29,6 @@ namespace Iviz.Msgs.Actionlib
         
         public TestRequestResult(ref ReadBuffer2 b)
         {
-            b.Align4();
             b.Deserialize(out TheResult);
             b.Deserialize(out IsSimpleServer);
         }

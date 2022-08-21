@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
@@ -53,8 +54,8 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             b.Align4();
             b.DeserializeString(out ServerId);
-            b.Align8();
             b.Deserialize(out SeqNum);
+            b.Align4();
             {
                 int n = b.DeserializeArrayLength();
                 Markers = n == 0

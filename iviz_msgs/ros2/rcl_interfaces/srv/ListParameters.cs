@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RclInterfaces
@@ -79,7 +80,6 @@ namespace Iviz.Msgs.RclInterfaces
         {
             b.Align4();
             b.DeserializeStringArray(out Prefixes);
-            b.Align8();
             b.Deserialize(out Depth);
         }
         

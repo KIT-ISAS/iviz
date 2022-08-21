@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.OctomapMsgs
@@ -30,7 +31,17 @@ namespace Iviz.Msgs.OctomapMsgs
             b.Deserialize(out Binary);
             b.DeserializeString(out Id);
             b.Deserialize(out Resolution);
-            b.DeserializeStructArray(out Data);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Data = n == 0
+                    ? System.Array.Empty<sbyte>()
+                    : new sbyte[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 1);
+                }
+            }
         }
         
         public Octomap(ref ReadBuffer2 b)
@@ -39,9 +50,19 @@ namespace Iviz.Msgs.OctomapMsgs
             b.Deserialize(out Binary);
             b.Align4();
             b.DeserializeString(out Id);
-            b.Align8();
             b.Deserialize(out Resolution);
-            b.DeserializeStructArray(out Data);
+            b.Align4();
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Data = n == 0
+                    ? System.Array.Empty<sbyte>()
+                    : new sbyte[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 1);
+                }
+            }
         }
         
         public Octomap RosDeserialize(ref ReadBuffer b) => new Octomap(ref b);

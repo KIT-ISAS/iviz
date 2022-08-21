@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosgraphMsgs
@@ -66,7 +67,6 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.DeserializeString(out NodePub);
             b.Align4();
             b.DeserializeString(out NodeSub);
-            b.Align4();
             b.Deserialize(out WindowStart);
             b.Deserialize(out WindowStop);
             b.Deserialize(out DeliveredMsgs);

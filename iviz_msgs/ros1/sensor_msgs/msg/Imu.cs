@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -42,11 +43,23 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Orientation);
-            b.DeserializeStructArray(9, out OrientationCovariance);
+            unsafe
+            {
+                OrientationCovariance = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref OrientationCovariance[0]), 9 * 8);
+            }
             b.Deserialize(out AngularVelocity);
-            b.DeserializeStructArray(9, out AngularVelocityCovariance);
+            unsafe
+            {
+                AngularVelocityCovariance = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref AngularVelocityCovariance[0]), 9 * 8);
+            }
             b.Deserialize(out LinearAcceleration);
-            b.DeserializeStructArray(9, out LinearAccelerationCovariance);
+            unsafe
+            {
+                LinearAccelerationCovariance = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref LinearAccelerationCovariance[0]), 9 * 8);
+            }
         }
         
         public Imu(ref ReadBuffer2 b)
@@ -54,11 +67,23 @@ namespace Iviz.Msgs.SensorMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align8();
             b.Deserialize(out Orientation);
-            b.DeserializeStructArray(9, out OrientationCovariance);
+            unsafe
+            {
+                OrientationCovariance = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref OrientationCovariance[0]), 9 * 8);
+            }
             b.Deserialize(out AngularVelocity);
-            b.DeserializeStructArray(9, out AngularVelocityCovariance);
+            unsafe
+            {
+                AngularVelocityCovariance = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref AngularVelocityCovariance[0]), 9 * 8);
+            }
             b.Deserialize(out LinearAcceleration);
-            b.DeserializeStructArray(9, out LinearAccelerationCovariance);
+            unsafe
+            {
+                LinearAccelerationCovariance = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref LinearAccelerationCovariance[0]), 9 * 8);
+            }
         }
         
         public Imu RosDeserialize(ref ReadBuffer b) => new Imu(ref b);

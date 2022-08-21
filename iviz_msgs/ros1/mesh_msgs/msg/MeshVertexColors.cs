@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
@@ -22,13 +23,33 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshVertexColors(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(out VertexColors);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                VertexColors = n == 0
+                    ? System.Array.Empty<StdMsgs.ColorRGBA>()
+                    : new StdMsgs.ColorRGBA[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref VertexColors[0]), n * 16);
+                }
+            }
         }
         
         public MeshVertexColors(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(out VertexColors);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                VertexColors = n == 0
+                    ? System.Array.Empty<StdMsgs.ColorRGBA>()
+                    : new StdMsgs.ColorRGBA[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref VertexColors[0]), n * 16);
+                }
+            }
         }
         
         public MeshVertexColors RosDeserialize(ref ReadBuffer b) => new MeshVertexColors(ref b);

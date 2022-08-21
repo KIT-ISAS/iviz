@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RclInterfaces
@@ -49,7 +50,6 @@ namespace Iviz.Msgs.RclInterfaces
         
         public IntegerRange(ref ReadBuffer2 b)
         {
-            b.Align8();
             b.Deserialize(out FromValue);
             b.Deserialize(out ToValue);
             b.Deserialize(out Step);

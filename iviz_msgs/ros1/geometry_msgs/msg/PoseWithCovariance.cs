@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
@@ -29,14 +30,22 @@ namespace Iviz.Msgs.GeometryMsgs
         public PoseWithCovariance(ref ReadBuffer b)
         {
             b.Deserialize(out Pose);
-            b.DeserializeStructArray(36, out Covariance);
+            unsafe
+            {
+                Covariance = new double[36];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref Covariance[0]), 36 * 8);
+            }
         }
         
         public PoseWithCovariance(ref ReadBuffer2 b)
         {
             b.Align8();
             b.Deserialize(out Pose);
-            b.DeserializeStructArray(36, out Covariance);
+            unsafe
+            {
+                Covariance = new double[36];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref Covariance[0]), 36 * 8);
+            }
         }
         
         public PoseWithCovariance RosDeserialize(ref ReadBuffer b) => new PoseWithCovariance(ref b);

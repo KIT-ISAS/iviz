@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -134,7 +135,17 @@ namespace Iviz.Msgs.IvizMsgs
         public GetFileResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            b.DeserializeStructArray(out Bytes);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Bytes = n == 0
+                    ? System.Array.Empty<byte>()
+                    : new byte[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Bytes[0]), n * 1);
+                }
+            }
             b.DeserializeString(out Message);
         }
         
@@ -142,7 +153,17 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Deserialize(out Success);
             b.Align4();
-            b.DeserializeStructArray(out Bytes);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Bytes = n == 0
+                    ? System.Array.Empty<byte>()
+                    : new byte[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Bytes[0]), n * 1);
+                }
+            }
             b.Align4();
             b.DeserializeString(out Message);
         }

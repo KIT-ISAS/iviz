@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -43,9 +44,39 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.DeserializeStringArray(out Name);
-            b.DeserializeStructArray(out Position);
-            b.DeserializeStructArray(out Velocity);
-            b.DeserializeStructArray(out Effort);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Position = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Position[0]), n * 8);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Velocity = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Velocity[0]), n * 8);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Effort = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Effort[0]), n * 8);
+                }
+            }
         }
         
         public JointState(ref ReadBuffer2 b)
@@ -54,9 +85,39 @@ namespace Iviz.Msgs.SensorMsgs
             b.Align4();
             b.DeserializeStringArray(out Name);
             b.Align4();
-            b.DeserializeStructArray(out Position);
-            b.DeserializeStructArray(out Velocity);
-            b.DeserializeStructArray(out Effort);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Position = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Position[0]), n * 8);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Velocity = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Velocity[0]), n * 8);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Effort = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Effort[0]), n * 8);
+                }
+            }
         }
         
         public JointState RosDeserialize(ref ReadBuffer b) => new JointState(ref b);

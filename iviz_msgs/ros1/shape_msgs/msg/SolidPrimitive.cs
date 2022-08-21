@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ShapeMsgs
@@ -52,14 +53,34 @@ namespace Iviz.Msgs.ShapeMsgs
         public SolidPrimitive(ref ReadBuffer b)
         {
             b.Deserialize(out Type);
-            b.DeserializeStructArray(out Dimensions);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Dimensions = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Dimensions[0]), n * 8);
+                }
+            }
         }
         
         public SolidPrimitive(ref ReadBuffer2 b)
         {
             b.Deserialize(out Type);
             b.Align4();
-            b.DeserializeStructArray(out Dimensions);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Dimensions = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Dimensions[0]), n * 8);
+                }
+            }
         }
         
         public SolidPrimitive RosDeserialize(ref ReadBuffer b) => new SolidPrimitive(ref b);

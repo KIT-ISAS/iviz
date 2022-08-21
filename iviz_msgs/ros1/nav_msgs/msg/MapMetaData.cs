@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.NavMsgs
@@ -35,7 +36,6 @@ namespace Iviz.Msgs.NavMsgs
         
         public MapMetaData(ref ReadBuffer2 b)
         {
-            b.Align4();
             b.Deserialize(out MapLoadTime);
             b.Deserialize(out Resolution);
             b.Deserialize(out Width);

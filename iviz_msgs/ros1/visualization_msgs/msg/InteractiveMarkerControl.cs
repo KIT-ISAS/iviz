@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
@@ -106,7 +107,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out OrientationMode);
             b.Deserialize(out InteractionMode);
             b.Deserialize(out AlwaysVisible);
-            b.Align4();
             {
                 int n = b.DeserializeArrayLength();
                 Markers = n == 0

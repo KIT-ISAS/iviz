@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GridMapMsgs
@@ -67,7 +68,6 @@ namespace Iviz.Msgs.GridMapMsgs
                     Data[i] = new StdMsgs.Float32MultiArray(ref b);
                 }
             }
-            b.Align2();
             b.Deserialize(out OuterStartIndex);
             b.Deserialize(out InnerStartIndex);
         }

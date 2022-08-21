@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -134,16 +135,56 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetFramePoseResponse(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(out IsValid);
-            b.DeserializeStructArray(out Poses);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                IsValid = n == 0
+                    ? System.Array.Empty<bool>()
+                    : new bool[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref IsValid[0]), n * 1);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Poses = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Pose>()
+                    : new GeometryMsgs.Pose[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Poses[0]), n * 56);
+                }
+            }
         }
         
         public GetFramePoseResponse(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(out IsValid);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                IsValid = n == 0
+                    ? System.Array.Empty<bool>()
+                    : new bool[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref IsValid[0]), n * 1);
+                }
+            }
             b.Align4();
-            b.DeserializeStructArray(out Poses);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Poses = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Pose>()
+                    : new GeometryMsgs.Pose[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Poses[0]), n * 56);
+                }
+            }
         }
         
         public GetFramePoseResponse RosDeserialize(ref ReadBuffer b) => new GetFramePoseResponse(ref b);

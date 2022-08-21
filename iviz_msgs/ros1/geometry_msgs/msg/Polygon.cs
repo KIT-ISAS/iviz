@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
@@ -22,13 +23,33 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public Polygon(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(out Points);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Points = n == 0
+                    ? System.Array.Empty<Point32>()
+                    : new Point32[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Points[0]), n * 12);
+                }
+            }
         }
         
         public Polygon(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(out Points);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Points = n == 0
+                    ? System.Array.Empty<Point32>()
+                    : new Point32[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Points[0]), n * 12);
+                }
+            }
         }
         
         public Polygon RosDeserialize(ref ReadBuffer b) => new Polygon(ref b);

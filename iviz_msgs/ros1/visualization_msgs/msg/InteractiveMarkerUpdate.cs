@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
@@ -72,7 +73,6 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             b.Align4();
             b.DeserializeString(out ServerId);
-            b.Align8();
             b.Deserialize(out SeqNum);
             b.Deserialize(out Type);
             b.Align4();

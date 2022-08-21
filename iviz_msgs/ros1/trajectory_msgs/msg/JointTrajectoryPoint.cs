@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.TrajectoryMsgs
@@ -26,20 +27,100 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public JointTrajectoryPoint(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(out Positions);
-            b.DeserializeStructArray(out Velocities);
-            b.DeserializeStructArray(out Accelerations);
-            b.DeserializeStructArray(out Effort);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Positions = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Positions[0]), n * 8);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Velocities = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Velocities[0]), n * 8);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Accelerations = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Accelerations[0]), n * 8);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Effort = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Effort[0]), n * 8);
+                }
+            }
             b.Deserialize(out TimeFromStart);
         }
         
         public JointTrajectoryPoint(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(out Positions);
-            b.DeserializeStructArray(out Velocities);
-            b.DeserializeStructArray(out Accelerations);
-            b.DeserializeStructArray(out Effort);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Positions = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Positions[0]), n * 8);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Velocities = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Velocities[0]), n * 8);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Accelerations = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Accelerations[0]), n * 8);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Effort = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Effort[0]), n * 8);
+                }
+            }
             b.Deserialize(out TimeFromStart);
         }
         

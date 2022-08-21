@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.HriMsgs
@@ -47,7 +48,6 @@ namespace Iviz.Msgs.HriMsgs
             b.DeserializeString(out Incremental);
             b.Align4();
             b.DeserializeString(out Final);
-            b.Align8();
             b.Deserialize(out Confidence);
         }
         

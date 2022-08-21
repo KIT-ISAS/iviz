@@ -90,8 +90,8 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.SkipString(out h.File);
             b.Align4();
             b.SkipString(out h.Function);
-            b.Align4();
             b.Deserialize(out h.Line);
+            b.Align4();
             b.SkipStringArray(out h.Topics);
         }
         

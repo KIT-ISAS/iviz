@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.PclMsgs
@@ -24,14 +25,34 @@ namespace Iviz.Msgs.PclMsgs
         public ModelCoefficients(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeStructArray(out Values);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Values = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Values[0]), n * 4);
+                }
+            }
         }
         
         public ModelCoefficients(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
-            b.DeserializeStructArray(out Values);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Values = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Values[0]), n * 4);
+                }
+            }
         }
         
         public ModelCoefficients RosDeserialize(ref ReadBuffer b) => new ModelCoefficients(ref b);

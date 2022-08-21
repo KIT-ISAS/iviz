@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -44,7 +45,11 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out MagneticField_);
-            b.DeserializeStructArray(9, out MagneticFieldCovariance);
+            unsafe
+            {
+                MagneticFieldCovariance = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref MagneticFieldCovariance[0]), 9 * 8);
+            }
         }
         
         public MagneticField(ref ReadBuffer2 b)
@@ -52,7 +57,11 @@ namespace Iviz.Msgs.SensorMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align8();
             b.Deserialize(out MagneticField_);
-            b.DeserializeStructArray(9, out MagneticFieldCovariance);
+            unsafe
+            {
+                MagneticFieldCovariance = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref MagneticFieldCovariance[0]), 9 * 8);
+            }
         }
         
         public MagneticField RosDeserialize(ref ReadBuffer b) => new MagneticField(ref b);

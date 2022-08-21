@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ShapeMsgs
@@ -26,13 +27,21 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public Plane(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(4, out Coef);
+            unsafe
+            {
+                Coef = new double[4];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref Coef[0]), 4 * 8);
+            }
         }
         
         public Plane(ref ReadBuffer2 b)
         {
             b.Align8();
-            b.DeserializeStructArray(4, out Coef);
+            unsafe
+            {
+                Coef = new double[4];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref Coef[0]), 4 * 8);
+            }
         }
         
         public Plane RosDeserialize(ref ReadBuffer b) => new Plane(ref b);

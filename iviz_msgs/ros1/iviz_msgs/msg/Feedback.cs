@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -54,10 +55,9 @@ namespace Iviz.Msgs.IvizMsgs
             b.Align4();
             b.DeserializeString(out Id);
             b.Deserialize(out Type);
-            b.Align4();
             b.Deserialize(out EntryId);
-            b.Align8();
             b.Deserialize(out Angle);
+            b.Align8();
             b.Deserialize(out Position);
             b.Deserialize(out Orientation);
             b.Deserialize(out Scale);

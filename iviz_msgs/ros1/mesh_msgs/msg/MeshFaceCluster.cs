@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
@@ -26,14 +27,34 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshFaceCluster(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(out FaceIndices);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                FaceIndices = n == 0
+                    ? System.Array.Empty<uint>()
+                    : new uint[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref FaceIndices[0]), n * 4);
+                }
+            }
             b.DeserializeString(out Label);
         }
         
         public MeshFaceCluster(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(out FaceIndices);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                FaceIndices = n == 0
+                    ? System.Array.Empty<uint>()
+                    : new uint[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref FaceIndices[0]), n * 4);
+                }
+            }
             b.DeserializeString(out Label);
         }
         

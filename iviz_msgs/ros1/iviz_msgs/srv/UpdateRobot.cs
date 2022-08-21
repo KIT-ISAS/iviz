@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -79,8 +80,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public UpdateRobotRequest(ref ReadBuffer2 b)
         {
-            b.Align4();
             b.Deserialize(out Operation);
+            b.Align4();
             b.DeserializeString(out Id);
             Configuration = new IvizMsgs.RobotConfiguration(ref b);
             b.Align4();

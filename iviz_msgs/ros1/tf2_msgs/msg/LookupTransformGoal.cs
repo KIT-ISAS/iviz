@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Tf2Msgs
@@ -42,10 +43,10 @@ namespace Iviz.Msgs.Tf2Msgs
             b.DeserializeString(out TargetFrame);
             b.Align4();
             b.DeserializeString(out SourceFrame);
-            b.Align4();
             b.Deserialize(out SourceTime);
             b.Deserialize(out Timeout);
             b.Deserialize(out TargetTime);
+            b.Align4();
             b.DeserializeString(out FixedFrame);
             b.Deserialize(out Advanced);
         }

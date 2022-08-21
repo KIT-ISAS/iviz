@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.NavMsgs
@@ -31,16 +32,36 @@ namespace Iviz.Msgs.NavMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out CellWidth);
             b.Deserialize(out CellHeight);
-            b.DeserializeStructArray(out Cells);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Cells = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    : new GeometryMsgs.Point[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Cells[0]), n * 24);
+                }
+            }
         }
         
         public GridCells(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align4();
             b.Deserialize(out CellWidth);
             b.Deserialize(out CellHeight);
-            b.DeserializeStructArray(out Cells);
+            b.Align4();
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Cells = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    : new GeometryMsgs.Point[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Cells[0]), n * 24);
+                }
+            }
         }
         
         public GridCells RosDeserialize(ref ReadBuffer b) => new GridCells(ref b);

@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -21,13 +22,33 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ModelTexCoords(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(out Coords);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Coords = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    : new GeometryMsgs.Point32[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Coords[0]), n * 12);
+                }
+            }
         }
         
         public ModelTexCoords(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(out Coords);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Coords = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    : new GeometryMsgs.Point32[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Coords[0]), n * 12);
+                }
+            }
         }
         
         public ModelTexCoords RosDeserialize(ref ReadBuffer b) => new ModelTexCoords(ref b);

@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
@@ -77,8 +78,28 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out Color);
             b.Deserialize(out Lifetime);
             b.Deserialize(out FrameLocked);
-            b.DeserializeStructArray(out Points);
-            b.DeserializeStructArray(out Colors);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Points = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    : new GeometryMsgs.Point[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Points[0]), n * 24);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Colors = n == 0
+                    ? System.Array.Empty<StdMsgs.ColorRGBA>()
+                    : new StdMsgs.ColorRGBA[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Colors[0]), n * 16);
+                }
+            }
             b.DeserializeString(out Text);
             b.DeserializeString(out MeshResource);
             b.Deserialize(out MeshUseEmbeddedMaterials);
@@ -89,7 +110,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
             b.DeserializeString(out Ns);
-            b.Align4();
             b.Deserialize(out Id);
             b.Deserialize(out Type);
             b.Deserialize(out Action);
@@ -99,9 +119,28 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out Color);
             b.Deserialize(out Lifetime);
             b.Deserialize(out FrameLocked);
-            b.Align4();
-            b.DeserializeStructArray(out Points);
-            b.DeserializeStructArray(out Colors);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Points = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    : new GeometryMsgs.Point[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Points[0]), n * 24);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Colors = n == 0
+                    ? System.Array.Empty<StdMsgs.ColorRGBA>()
+                    : new StdMsgs.ColorRGBA[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Colors[0]), n * 16);
+                }
+            }
             b.DeserializeString(out Text);
             b.Align4();
             b.DeserializeString(out MeshResource);

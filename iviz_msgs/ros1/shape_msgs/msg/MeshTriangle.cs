@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ShapeMsgs
@@ -22,13 +23,21 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public MeshTriangle(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(3, out VertexIndices);
+            unsafe
+            {
+                VertexIndices = new uint[3];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref VertexIndices[0]), 3 * 4);
+            }
         }
         
         public MeshTriangle(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(3, out VertexIndices);
+            unsafe
+            {
+                VertexIndices = new uint[3];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref VertexIndices[0]), 3 * 4);
+            }
         }
         
         public MeshTriangle RosDeserialize(ref ReadBuffer b) => new MeshTriangle(ref b);

@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.HriMsgs
@@ -36,17 +37,37 @@ namespace Iviz.Msgs.HriMsgs
             b.Deserialize(out RMS);
             b.Deserialize(out Pitch);
             b.Deserialize(out HNR);
-            b.DeserializeStructArray(out MFCC);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                MFCC = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref MFCC[0]), n * 4);
+                }
+            }
         }
         
         public AudioFeatures(ref ReadBuffer2 b)
         {
-            b.Align4();
             b.Deserialize(out ZCR);
             b.Deserialize(out RMS);
             b.Deserialize(out Pitch);
             b.Deserialize(out HNR);
-            b.DeserializeStructArray(out MFCC);
+            b.Align4();
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                MFCC = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref MFCC[0]), n * 4);
+                }
+            }
         }
         
         public AudioFeatures RosDeserialize(ref ReadBuffer b) => new AudioFeatures(ref b);

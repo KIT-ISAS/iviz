@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -29,11 +30,61 @@ namespace Iviz.Msgs.IvizMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Palm);
-            b.DeserializeStructArray(out Thumb);
-            b.DeserializeStructArray(out Index);
-            b.DeserializeStructArray(out Middle);
-            b.DeserializeStructArray(out Ring);
-            b.DeserializeStructArray(out Little);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Thumb = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    : new GeometryMsgs.Transform[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Thumb[0]), n * 56);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Index = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    : new GeometryMsgs.Transform[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Index[0]), n * 56);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Middle = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    : new GeometryMsgs.Transform[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Middle[0]), n * 56);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Ring = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    : new GeometryMsgs.Transform[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Ring[0]), n * 56);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Little = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    : new GeometryMsgs.Transform[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Little[0]), n * 56);
+                }
+            }
             b.Deserialize(out IsValid);
         }
         
@@ -42,11 +93,61 @@ namespace Iviz.Msgs.IvizMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align8();
             b.Deserialize(out Palm);
-            b.DeserializeStructArray(out Thumb);
-            b.DeserializeStructArray(out Index);
-            b.DeserializeStructArray(out Middle);
-            b.DeserializeStructArray(out Ring);
-            b.DeserializeStructArray(out Little);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Thumb = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    : new GeometryMsgs.Transform[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Thumb[0]), n * 56);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Index = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    : new GeometryMsgs.Transform[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Index[0]), n * 56);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Middle = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    : new GeometryMsgs.Transform[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Middle[0]), n * 56);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Ring = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    : new GeometryMsgs.Transform[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Ring[0]), n * 56);
+                }
+            }
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Little = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    : new GeometryMsgs.Transform[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Little[0]), n * 56);
+                }
+            }
             b.Deserialize(out IsValid);
         }
         

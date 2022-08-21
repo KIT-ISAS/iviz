@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
@@ -25,14 +26,34 @@ namespace Iviz.Msgs.GeometryMsgs
         public PoseArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeStructArray(out Poses);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Poses = n == 0
+                    ? System.Array.Empty<Pose>()
+                    : new Pose[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Poses[0]), n * 56);
+                }
+            }
         }
         
         public PoseArray(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
-            b.DeserializeStructArray(out Poses);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Poses = n == 0
+                    ? System.Array.Empty<Pose>()
+                    : new Pose[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Poses[0]), n * 56);
+                }
+            }
         }
         
         public PoseArray RosDeserialize(ref ReadBuffer b) => new PoseArray(ref b);

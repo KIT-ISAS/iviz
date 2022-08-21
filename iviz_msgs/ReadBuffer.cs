@@ -43,6 +43,8 @@ public unsafe struct ReadBuffer
         return i;
     }
 
+    #region strings
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeString(out string val)
     {
@@ -104,6 +106,7 @@ public unsafe struct ReadBuffer
 
         val = EmptyStringArray;
     }
+    #endregion
 
     #region scalars
 
@@ -222,87 +225,6 @@ public unsafe struct ReadBuffer
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize(out Vector3 t)
-    {
-        const int size = Vector3.RosFixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Vector3*)cursor;
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize(out Point t)
-    {
-        const int size = Point.RosFixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Point*)cursor;
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize(out Quaternion t)
-    {
-        const int size = Quaternion.RosFixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Quaternion*)cursor;
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize(out Pose t)
-    {
-        const int size = Pose.RosFixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Pose*)cursor;
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize(out Transform t)
-    {
-        const int size = Transform.RosFixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Transform*)cursor;
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize(out Point32 t)
-    {
-        const int size = Point32.RosFixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Point32*)cursor;
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize(out ColorRGBA t)
-    {
-        const int size = ColorRGBA.RosFixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(ColorRGBA*)cursor;
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize(out Color32 t)
-    {
-        const int size = Color32.RosFixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Color32*)cursor;
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize(out Triangle t)
-    {
-        const int size = Triangle.RosFixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Triangle*)cursor;
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize<T>(out T t) where T : unmanaged
     {
         int size = sizeof(T);
@@ -312,56 +234,15 @@ public unsafe struct ReadBuffer
     }
 
     #endregion
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out byte[] val)
-    {
-        int count = ReadInt();
-        if (count == 0)
-        {
-            val = Array.Empty<byte>();
-            return;
-        }
-
-        ThrowIfOutOfRange(count);
-
-        val = new byte[count];
-        fixed (byte* valPtr = val)
-        {
-            Unsafe.CopyBlock(valPtr, cursor, (uint)count);
-        }
-
-        Advance(count);
-    }
-
+    
+    #region arrays
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(void* value, int count)
     {
         ThrowIfOutOfRange(count);
         Unsafe.CopyBlock(value, cursor, (uint)count);
         Advance(count);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(out Point32[] val)
-    {
-        int count = ReadInt();
-        if (count == 0)
-        {
-            val = Array.Empty<Point32>();
-            return;
-        }
-
-        int size = count * Point32.RosFixedMessageLength;
-        ThrowIfOutOfRange(size);
-
-        val = new Point32[count];
-        fixed (Point32* valPtr = val)
-        {
-            Unsafe.CopyBlock(valPtr, cursor, (uint)size);
-        }
-
-        Advance(size);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -458,10 +339,12 @@ public unsafe struct ReadBuffer
         val = Array.Empty<T>(); // unreachable
     }
 
+    #endregion
+    
     #region Empties
 
     static string EmptyString => "";
-    static string[] EmptyStringArray => Array.Empty<string>();
+    static string[] EmptyStringArray => EmptyArray<string>.Value;
 
     #endregion
 
@@ -497,4 +380,88 @@ public unsafe struct ReadBuffer
             return generator.RosDeserialize(ref b);
         }
     }
+    
+    #region extras
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize(out Vector3 t)
+    {
+        const int size = Vector3.RosFixedMessageLength;
+        ThrowIfOutOfRange(size);
+        t = *(Vector3*)cursor;
+        Advance(size);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize(out Point t)
+    {
+        const int size = Point.RosFixedMessageLength;
+        ThrowIfOutOfRange(size);
+        t = *(Point*)cursor;
+        Advance(size);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize(out Quaternion t)
+    {
+        const int size = Quaternion.RosFixedMessageLength;
+        ThrowIfOutOfRange(size);
+        t = *(Quaternion*)cursor;
+        Advance(size);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize(out Pose t)
+    {
+        const int size = Pose.RosFixedMessageLength;
+        ThrowIfOutOfRange(size);
+        t = *(Pose*)cursor;
+        Advance(size);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize(out Transform t)
+    {
+        const int size = Transform.RosFixedMessageLength;
+        ThrowIfOutOfRange(size);
+        t = *(Transform*)cursor;
+        Advance(size);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize(out Point32 t)
+    {
+        const int size = Point32.RosFixedMessageLength;
+        ThrowIfOutOfRange(size);
+        t = *(Point32*)cursor;
+        Advance(size);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize(out ColorRGBA t)
+    {
+        const int size = ColorRGBA.RosFixedMessageLength;
+        ThrowIfOutOfRange(size);
+        t = *(ColorRGBA*)cursor;
+        Advance(size);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize(out Color32 t)
+    {
+        const int size = Color32.RosFixedMessageLength;
+        ThrowIfOutOfRange(size);
+        t = *(Color32*)cursor;
+        Advance(size);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize(out Triangle t)
+    {
+        const int size = Triangle.RosFixedMessageLength;
+        ThrowIfOutOfRange(size);
+        t = *(Triangle*)cursor;
+        Advance(size);
+    }
+    #endregion
 }

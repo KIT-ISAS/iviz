@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -145,10 +146,32 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Height);
             b.Deserialize(out Width);
             b.DeserializeString(out DistortionModel);
-            b.DeserializeStructArray(out D);
-            b.DeserializeStructArray(9, out K);
-            b.DeserializeStructArray(9, out R);
-            b.DeserializeStructArray(12, out P);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                D = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref D[0]), n * 8);
+                }
+            }
+            unsafe
+            {
+                K = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref K[0]), 9 * 8);
+            }
+            unsafe
+            {
+                R = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref R[0]), 9 * 8);
+            }
+            unsafe
+            {
+                P = new double[12];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref P[0]), 12 * 8);
+            }
             b.Deserialize(out BinningX);
             b.Deserialize(out BinningY);
             Roi = new RegionOfInterest(ref b);
@@ -157,15 +180,37 @@ namespace Iviz.Msgs.SensorMsgs
         public CameraInfo(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align4();
             b.Deserialize(out Height);
             b.Deserialize(out Width);
+            b.Align4();
             b.DeserializeString(out DistortionModel);
             b.Align4();
-            b.DeserializeStructArray(out D);
-            b.DeserializeStructArray(9, out K);
-            b.DeserializeStructArray(9, out R);
-            b.DeserializeStructArray(12, out P);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                D = n == 0
+                    ? System.Array.Empty<double>()
+                    : new double[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref D[0]), n * 8);
+                }
+            }
+            unsafe
+            {
+                K = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref K[0]), 9 * 8);
+            }
+            unsafe
+            {
+                R = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref R[0]), 9 * 8);
+            }
+            unsafe
+            {
+                P = new double[12];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref P[0]), 12 * 8);
+            }
             b.Deserialize(out BinningX);
             b.Deserialize(out BinningY);
             Roi = new RegionOfInterest(ref b);

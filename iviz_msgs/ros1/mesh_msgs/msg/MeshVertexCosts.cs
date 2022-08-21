@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
@@ -22,13 +23,33 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshVertexCosts(ref ReadBuffer b)
         {
-            b.DeserializeStructArray(out Costs);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Costs = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Costs[0]), n * 4);
+                }
+            }
         }
         
         public MeshVertexCosts(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStructArray(out Costs);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Costs = n == 0
+                    ? System.Array.Empty<float>()
+                    : new float[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Costs[0]), n * 4);
+                }
+            }
         }
         
         public MeshVertexCosts RosDeserialize(ref ReadBuffer b) => new MeshVertexCosts(ref b);

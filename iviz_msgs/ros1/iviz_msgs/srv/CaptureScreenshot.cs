@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -134,9 +135,23 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Width);
             b.Deserialize(out Height);
             b.Deserialize(out Bpp);
-            b.DeserializeStructArray(9, out Intrinsics);
+            unsafe
+            {
+                Intrinsics = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref Intrinsics[0]), 9 * 8);
+            }
             b.Deserialize(out Pose);
-            b.DeserializeStructArray(out Data);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Data = n == 0
+                    ? System.Array.Empty<byte>()
+                    : new byte[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 1);
+                }
+            }
         }
         
         public CaptureScreenshotResponse(ref ReadBuffer2 b)
@@ -145,14 +160,27 @@ namespace Iviz.Msgs.IvizMsgs
             b.Align4();
             b.DeserializeString(out Message);
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align4();
             b.Deserialize(out Width);
             b.Deserialize(out Height);
             b.Deserialize(out Bpp);
             b.Align8();
-            b.DeserializeStructArray(9, out Intrinsics);
+            unsafe
+            {
+                Intrinsics = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref Intrinsics[0]), 9 * 8);
+            }
             b.Deserialize(out Pose);
-            b.DeserializeStructArray(out Data);
+            unsafe
+            {
+                int n = b.DeserializeArrayLength();
+                Data = n == 0
+                    ? System.Array.Empty<byte>()
+                    : new byte[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 1);
+                }
+            }
         }
         
         public CaptureScreenshotResponse RosDeserialize(ref ReadBuffer b) => new CaptureScreenshotResponse(ref b);

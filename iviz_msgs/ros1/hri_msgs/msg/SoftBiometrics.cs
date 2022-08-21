@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.HriMsgs
@@ -36,10 +37,8 @@ namespace Iviz.Msgs.HriMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Age);
-            b.Align4();
             b.Deserialize(out AgeConfidence);
             b.Deserialize(out Gender);
-            b.Align4();
             b.Deserialize(out GenderConfidence);
         }
         

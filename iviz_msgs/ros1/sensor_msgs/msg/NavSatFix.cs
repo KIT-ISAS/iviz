@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
@@ -57,7 +58,11 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Latitude);
             b.Deserialize(out Longitude);
             b.Deserialize(out Altitude);
-            b.DeserializeStructArray(9, out PositionCovariance);
+            unsafe
+            {
+                PositionCovariance = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref PositionCovariance[0]), 9 * 8);
+            }
             b.Deserialize(out PositionCovarianceType);
         }
         
@@ -65,11 +70,15 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Status = new NavSatStatus(ref b);
-            b.Align8();
             b.Deserialize(out Latitude);
             b.Deserialize(out Longitude);
             b.Deserialize(out Altitude);
-            b.DeserializeStructArray(9, out PositionCovariance);
+            b.Align8();
+            unsafe
+            {
+                PositionCovariance = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref PositionCovariance[0]), 9 * 8);
+            }
             b.Deserialize(out PositionCovarianceType);
         }
         

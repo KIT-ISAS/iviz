@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
@@ -25,7 +26,6 @@ namespace Iviz.Msgs.StdMsgs
         
         public Time(ref ReadBuffer2 b)
         {
-            b.Align4();
             b.Deserialize(out Data);
         }
         

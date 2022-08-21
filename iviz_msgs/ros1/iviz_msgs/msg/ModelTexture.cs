@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -68,11 +69,9 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Align4();
             b.DeserializeString(out Path);
-            b.Align4();
             b.Deserialize(out Index);
             b.Deserialize(out Type);
             b.Deserialize(out Mapping);
-            b.Align4();
             b.Deserialize(out UvIndex);
             b.Deserialize(out BlendFactor);
             b.Deserialize(out Operation);
