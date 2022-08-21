@@ -109,6 +109,7 @@ namespace Iviz.Msgs.RclInterfaces
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Names);
             return c;
         }
@@ -136,20 +137,30 @@ namespace Iviz.Msgs.RclInterfaces
         
         public GetParametersResponse(ref ReadBuffer b)
         {
-            b.DeserializeArray(out Values);
-            for (int i = 0; i < Values.Length; i++)
             {
-                Values[i] = new ParameterValue(ref b);
+                int n = b.DeserializeArrayLength();
+                Values = n == 0
+                    ? System.Array.Empty<ParameterValue>()
+                    : new ParameterValue[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Values[i] = new ParameterValue(ref b);
+                }
             }
         }
         
         public GetParametersResponse(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeArray(out Values);
-            for (int i = 0; i < Values.Length; i++)
             {
-                Values[i] = new ParameterValue(ref b);
+                int n = b.DeserializeArrayLength();
+                Values = n == 0
+                    ? System.Array.Empty<ParameterValue>()
+                    : new ParameterValue[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Values[i] = new ParameterValue(ref b);
+                }
             }
         }
         

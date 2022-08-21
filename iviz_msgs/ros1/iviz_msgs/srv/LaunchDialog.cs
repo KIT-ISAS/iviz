@@ -173,6 +173,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             int c = d;
             c += 1; // Success
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Message);
             c = Feedback.AddRos2MessageLength(c);
             return c;

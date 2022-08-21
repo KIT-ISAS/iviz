@@ -64,20 +64,30 @@ namespace Iviz.Msgs.RclInterfaces
         
         public SetParametersRequest(ref ReadBuffer b)
         {
-            b.DeserializeArray(out Parameters);
-            for (int i = 0; i < Parameters.Length; i++)
             {
-                Parameters[i] = new Parameter(ref b);
+                int n = b.DeserializeArrayLength();
+                Parameters = n == 0
+                    ? System.Array.Empty<Parameter>()
+                    : new Parameter[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Parameters[i] = new Parameter(ref b);
+                }
             }
         }
         
         public SetParametersRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeArray(out Parameters);
-            for (int i = 0; i < Parameters.Length; i++)
             {
-                Parameters[i] = new Parameter(ref b);
+                int n = b.DeserializeArrayLength();
+                Parameters = n == 0
+                    ? System.Array.Empty<Parameter>()
+                    : new Parameter[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Parameters[i] = new Parameter(ref b);
+                }
             }
         }
         
@@ -150,20 +160,30 @@ namespace Iviz.Msgs.RclInterfaces
         
         public SetParametersResponse(ref ReadBuffer b)
         {
-            b.DeserializeArray(out Results);
-            for (int i = 0; i < Results.Length; i++)
             {
-                Results[i] = new SetParametersResult(ref b);
+                int n = b.DeserializeArrayLength();
+                Results = n == 0
+                    ? System.Array.Empty<SetParametersResult>()
+                    : new SetParametersResult[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Results[i] = new SetParametersResult(ref b);
+                }
             }
         }
         
         public SetParametersResponse(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeArray(out Results);
-            for (int i = 0; i < Results.Length; i++)
             {
-                Results[i] = new SetParametersResult(ref b);
+                int n = b.DeserializeArrayLength();
+                Results = n == 0
+                    ? System.Array.Empty<SetParametersResult>()
+                    : new SetParametersResult[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Results[i] = new SetParametersResult(ref b);
+                }
             }
         }
         

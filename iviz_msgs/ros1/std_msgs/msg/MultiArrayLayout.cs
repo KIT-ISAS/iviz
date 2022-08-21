@@ -47,10 +47,15 @@ namespace Iviz.Msgs.StdMsgs
         
         public MultiArrayLayout(ref ReadBuffer b)
         {
-            b.DeserializeArray(out Dim);
-            for (int i = 0; i < Dim.Length; i++)
             {
-                Dim[i] = new MultiArrayDimension(ref b);
+                int n = b.DeserializeArrayLength();
+                Dim = n == 0
+                    ? System.Array.Empty<MultiArrayDimension>()
+                    : new MultiArrayDimension[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Dim[i] = new MultiArrayDimension(ref b);
+                }
             }
             b.Deserialize(out DataOffset);
         }
@@ -58,10 +63,15 @@ namespace Iviz.Msgs.StdMsgs
         public MultiArrayLayout(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeArray(out Dim);
-            for (int i = 0; i < Dim.Length; i++)
             {
-                Dim[i] = new MultiArrayDimension(ref b);
+                int n = b.DeserializeArrayLength();
+                Dim = n == 0
+                    ? System.Array.Empty<MultiArrayDimension>()
+                    : new MultiArrayDimension[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Dim[i] = new MultiArrayDimension(ref b);
+                }
             }
             b.Align4();
             b.Deserialize(out DataOffset);

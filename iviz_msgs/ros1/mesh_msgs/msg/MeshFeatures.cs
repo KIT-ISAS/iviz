@@ -25,10 +25,15 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshFeatures(ref ReadBuffer b)
         {
             b.DeserializeString(out MapUuid);
-            b.DeserializeArray(out Features);
-            for (int i = 0; i < Features.Length; i++)
             {
-                Features[i] = new MeshMsgs.Feature(ref b);
+                int n = b.DeserializeArrayLength();
+                Features = n == 0
+                    ? System.Array.Empty<MeshMsgs.Feature>()
+                    : new MeshMsgs.Feature[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Features[i] = new MeshMsgs.Feature(ref b);
+                }
             }
         }
         
@@ -37,10 +42,15 @@ namespace Iviz.Msgs.MeshMsgs
             b.Align4();
             b.DeserializeString(out MapUuid);
             b.Align4();
-            b.DeserializeArray(out Features);
-            for (int i = 0; i < Features.Length; i++)
             {
-                Features[i] = new MeshMsgs.Feature(ref b);
+                int n = b.DeserializeArrayLength();
+                Features = n == 0
+                    ? System.Array.Empty<MeshMsgs.Feature>()
+                    : new MeshMsgs.Feature[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Features[i] = new MeshMsgs.Feature(ref b);
+                }
             }
         }
         
@@ -86,6 +96,7 @@ namespace Iviz.Msgs.MeshMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, MapUuid);
             c = WriteBuffer2.Align4(c);
             c += 4; // Features.Length

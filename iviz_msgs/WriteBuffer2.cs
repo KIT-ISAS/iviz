@@ -35,7 +35,7 @@ public unsafe partial struct WriteBuffer2
     {
         if ((uint)off > (uint)remaining)
         {
-            BuiltIns.ThrowBufferOverflow(off);
+            BuiltIns.ThrowBufferOverflow(off, remaining);
         }
     }
 
@@ -77,35 +77,35 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int AddLength(int c, ISerializable[] array) // used by tests
     {
-        c = Align4(c) + sizeof(int);
+        int d = Align4(c) + sizeof(int);
         foreach (var message in array)
         {
-            c = message.AddRos2MessageLength(c);
+            d = message.AddRos2MessageLength(d);
         }
 
-        return c;
+        return d;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int AddLength(int c, string? s)
     {
-        int d = Align4(c) + sizeof(int) + 1; // trailing '\0'
+        int d = c + (sizeof(int) + 1); // * trailing '\0'
         return s is not { Length: not 0 }
             ? d
             : d + BuiltIns.GetByteCount(s);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int AddLength(int d, string[] bs)
+    public static int AddLength(int c, string[] bs)
     {
-        int c = d;
-        c = Align4(c) + sizeof(int);
+        int d = c + sizeof(int);
         foreach (string b in bs)
         {
-            c = AddLength(c, b);
+            d = Align4(d);
+            d = AddLength(d, b);
         }
 
-        return c;
+        return d;
     }
 
     #endregion
@@ -305,8 +305,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(bool[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         SerializeStructArrayCore(val);
     }
 
@@ -320,8 +321,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(byte[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         SerializeStructArrayCore(val);
     }
 
@@ -335,8 +337,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(sbyte[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         SerializeStructArrayCore(val);
     }
 
@@ -350,8 +353,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(short[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         SerializeStructArrayCore(val);
     }
 
@@ -366,8 +370,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(ushort[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         SerializeStructArrayCore(val);
     }
 
@@ -382,8 +387,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(int[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         SerializeStructArrayCore(val);
     }
 
@@ -398,8 +404,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(uint[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         SerializeStructArrayCore(val);
     }
 
@@ -414,8 +421,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(float[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         SerializeStructArrayCore(val);
     }
 
@@ -430,8 +438,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(double[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         Align8();
         SerializeStructArrayCore(val);
     }
@@ -447,8 +456,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(long[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         Align8();
         SerializeStructArrayCore(val);
     }
@@ -464,8 +474,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(ulong[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         Align8();
         SerializeStructArrayCore(val);
     }
@@ -481,8 +492,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(Vector3[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         Align8();
         SerializeStructArrayCore(val);
     }
@@ -498,8 +510,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(Point[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         Align8();
         SerializeStructArrayCore(val);
     }
@@ -507,16 +520,18 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(time[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         SerializeStructArrayCore(val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(Transform[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         Align8();
         SerializeStructArrayCore(val);
     }
@@ -524,8 +539,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(Pose[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         Align8();
         SerializeStructArrayCore(val);
     }
@@ -533,8 +549,9 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(Quaternion[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         Align8();
         SerializeStructArrayCore(val);
     }
@@ -542,32 +559,36 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(Point32[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         SerializeStructArrayCore(val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(Color32[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         SerializeStructArrayCore(val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(Triangle[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         SerializeStructArrayCore(val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(ColorRGBA[] val)
     {
-        WriteInt(val.Length);
-        if (val.Length == 0) return;
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
         SerializeStructArrayCore(val);
     }
 

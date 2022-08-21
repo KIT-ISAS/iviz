@@ -168,6 +168,7 @@ namespace Iviz.Msgs.StdSrvs
         {
             int c = d;
             c += 1; // Success
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Message);
             return c;
         }

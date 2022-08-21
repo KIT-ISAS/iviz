@@ -40,17 +40,11 @@ public unsafe partial struct ReadBuffer2
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    void Advance(nint value)
-    {
-        cursor += value;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     readonly void ThrowIfOutOfRange(int off)
     {
-        if ((nuint)cursor + (nuint)off > (nuint)end)
+        if ((nuint)off > (nuint)end - (nuint)cursor)
         {
-            BuiltIns.ThrowBufferOverflow(off);
+            BuiltIns.ThrowBufferOverflow();
         }
     }
 
@@ -80,8 +74,7 @@ public unsafe partial struct ReadBuffer2
         }
 
         int countWithoutZero = count - 1;
-        byte* srcPtr = cursor;
-        val = BuiltIns.GetString(srcPtr, countWithoutZero);
+        val = BuiltIns.GetString(cursor, countWithoutZero);
 
         Advance(count);
     }
@@ -113,7 +106,7 @@ public unsafe partial struct ReadBuffer2
     {
         ThrowIfOutOfRange(4 * count);
         val = new string[count];
-        for (int i = 0; i < val.Length; i++)
+        for (int i = 0; i < count; i++)
         {
             Align4();
             DeserializeString(out val[i]);
@@ -127,6 +120,7 @@ public unsafe partial struct ReadBuffer2
         {
             Align4();
             int innerCount = ReadInt();
+            ThrowIfOutOfRange(innerCount);
             Advance(innerCount);
         }
 
@@ -479,23 +473,15 @@ public unsafe partial struct ReadBuffer2
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeArray<T>(out T[] val) where T : IMessageRos2, new()
+    public int DeserializeArrayLength()
     {
         int count = ReadInt();
-        if (count == 0)
+        if ((uint)count > 1024 * 1024 * 1024)
         {
-            val = Array.Empty<T>();
-            return;
+            BuiltIns.ThrowImplausibleBufferSize();
         }
 
-        if (count <= 1024 * 1024 * 1024)
-        {
-            val = new T[count];
-            return; // entry deserializations happen outside
-        }
-
-        BuiltIns.ThrowImplausibleBufferSize();
-        val = Array.Empty<T>(); // unreachable
+        return count;
     }
 
     #region Empties

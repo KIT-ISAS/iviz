@@ -120,6 +120,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             c += 4; // Id
             c += 4; // ParentId
             c = WriteBuffer2.AddLength(c, Title);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Command);
             c += 1; // CommandType
             return c;

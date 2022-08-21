@@ -58,13 +58,20 @@ namespace Iviz.Msgs.IvizMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Action);
+            b.Align4();
             b.DeserializeString(out Id);
+            b.Align4();
             b.DeserializeStringArray(out JointNames);
+            b.Align4();
             b.DeserializeStructArray(out JointValues);
             b.DeserializeString(out RobotDescription);
+            b.Align4();
             b.DeserializeString(out SourceNode);
+            b.Align4();
             b.DeserializeString(out SourceParameter);
+            b.Align4();
             b.DeserializeString(out SavedRobotName);
+            b.Align4();
             b.Deserialize(out Tint);
             b.Deserialize(out Metallic);
             b.Deserialize(out Smoothness);
@@ -150,14 +157,19 @@ namespace Iviz.Msgs.IvizMsgs
             int c = d;
             c = Header.AddRos2MessageLength(c);
             c += 1; // Action
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Id);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, JointNames);
             c = WriteBuffer2.Align4(c);
             c += 4; // JointValues length
             c += 4 * JointValues.Length;
             c = WriteBuffer2.AddLength(c, RobotDescription);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, SourceNode);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, SourceParameter);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, SavedRobotName);
             c = WriteBuffer2.Align4(c);
             c += 16; // Tint

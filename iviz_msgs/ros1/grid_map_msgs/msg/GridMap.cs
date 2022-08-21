@@ -35,10 +35,15 @@ namespace Iviz.Msgs.GridMapMsgs
             Info = new GridMapInfo(ref b);
             b.DeserializeStringArray(out Layers);
             b.DeserializeStringArray(out BasicLayers);
-            b.DeserializeArray(out Data);
-            for (int i = 0; i < Data.Length; i++)
             {
-                Data[i] = new StdMsgs.Float32MultiArray(ref b);
+                int n = b.DeserializeArrayLength();
+                Data = n == 0
+                    ? System.Array.Empty<StdMsgs.Float32MultiArray>()
+                    : new StdMsgs.Float32MultiArray[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Data[i] = new StdMsgs.Float32MultiArray(ref b);
+                }
             }
             b.Deserialize(out OuterStartIndex);
             b.Deserialize(out InnerStartIndex);
@@ -52,10 +57,15 @@ namespace Iviz.Msgs.GridMapMsgs
             b.Align4();
             b.DeserializeStringArray(out BasicLayers);
             b.Align4();
-            b.DeserializeArray(out Data);
-            for (int i = 0; i < Data.Length; i++)
             {
-                Data[i] = new StdMsgs.Float32MultiArray(ref b);
+                int n = b.DeserializeArrayLength();
+                Data = n == 0
+                    ? System.Array.Empty<StdMsgs.Float32MultiArray>()
+                    : new StdMsgs.Float32MultiArray[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Data[i] = new StdMsgs.Float32MultiArray(ref b);
+                }
             }
             b.Align2();
             b.Deserialize(out OuterStartIndex);
@@ -134,7 +144,9 @@ namespace Iviz.Msgs.GridMapMsgs
         {
             int c = d;
             c = Info.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Layers);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, BasicLayers);
             c = WriteBuffer2.Align4(c);
             c += 4; // Data.Length

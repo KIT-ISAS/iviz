@@ -124,9 +124,13 @@ namespace Iviz.Msgs.IvizMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, SourceParameter);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, SavedRobotName);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, FramePrefix);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, FrameSuffix);
             c += 1; // AttachedToTf
             c += 1; // RenderAsOcclusionOnly

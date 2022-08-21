@@ -21,20 +21,30 @@ namespace Iviz.Msgs.IvizMsgs
         
         public WidgetArray(ref ReadBuffer b)
         {
-            b.DeserializeArray(out Widgets);
-            for (int i = 0; i < Widgets.Length; i++)
             {
-                Widgets[i] = new IvizMsgs.Widget(ref b);
+                int n = b.DeserializeArrayLength();
+                Widgets = n == 0
+                    ? System.Array.Empty<IvizMsgs.Widget>()
+                    : new IvizMsgs.Widget[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Widgets[i] = new IvizMsgs.Widget(ref b);
+                }
             }
         }
         
         public WidgetArray(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeArray(out Widgets);
-            for (int i = 0; i < Widgets.Length; i++)
             {
-                Widgets[i] = new IvizMsgs.Widget(ref b);
+                int n = b.DeserializeArrayLength();
+                Widgets = n == 0
+                    ? System.Array.Empty<IvizMsgs.Widget>()
+                    : new IvizMsgs.Widget[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Widgets[i] = new IvizMsgs.Widget(ref b);
+                }
             }
         }
         

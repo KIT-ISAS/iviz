@@ -48,10 +48,15 @@ namespace Iviz.Msgs.HriMsgs
         public Skeleton2D(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeArray(out Skeleton);
-            for (int i = 0; i < Skeleton.Length; i++)
             {
-                Skeleton[i] = new NormalizedPointOfInterest2D(ref b);
+                int n = b.DeserializeArrayLength();
+                Skeleton = n == 0
+                    ? System.Array.Empty<NormalizedPointOfInterest2D>()
+                    : new NormalizedPointOfInterest2D[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Skeleton[i] = new NormalizedPointOfInterest2D(ref b);
+                }
             }
         }
         
@@ -59,10 +64,15 @@ namespace Iviz.Msgs.HriMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
-            b.DeserializeArray(out Skeleton);
-            for (int i = 0; i < Skeleton.Length; i++)
             {
-                Skeleton[i] = new NormalizedPointOfInterest2D(ref b);
+                int n = b.DeserializeArrayLength();
+                Skeleton = n == 0
+                    ? System.Array.Empty<NormalizedPointOfInterest2D>()
+                    : new NormalizedPointOfInterest2D[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Skeleton[i] = new NormalizedPointOfInterest2D(ref b);
+                }
             }
         }
         

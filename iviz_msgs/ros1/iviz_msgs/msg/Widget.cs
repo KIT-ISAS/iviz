@@ -54,10 +54,15 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out SecondaryScale);
             b.DeserializeString(out Caption);
             Boundary = new BoundingBox(ref b);
-            b.DeserializeArray(out SecondaryBoundaries);
-            for (int i = 0; i < SecondaryBoundaries.Length; i++)
             {
-                SecondaryBoundaries[i] = new BoundingBoxStamped(ref b);
+                int n = b.DeserializeArrayLength();
+                SecondaryBoundaries = n == 0
+                    ? System.Array.Empty<BoundingBoxStamped>()
+                    : new BoundingBoxStamped[n];
+                for (int i = 0; i < n; i++)
+                {
+                    SecondaryBoundaries[i] = new BoundingBoxStamped(ref b);
+                }
             }
         }
         
@@ -78,10 +83,15 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Caption);
             Boundary = new BoundingBox(ref b);
             b.Align4();
-            b.DeserializeArray(out SecondaryBoundaries);
-            for (int i = 0; i < SecondaryBoundaries.Length; i++)
             {
-                SecondaryBoundaries[i] = new BoundingBoxStamped(ref b);
+                int n = b.DeserializeArrayLength();
+                SecondaryBoundaries = n == 0
+                    ? System.Array.Empty<BoundingBoxStamped>()
+                    : new BoundingBoxStamped[n];
+                for (int i = 0; i < n; i++)
+                {
+                    SecondaryBoundaries[i] = new BoundingBoxStamped(ref b);
+                }
             }
         }
         
@@ -162,6 +172,7 @@ namespace Iviz.Msgs.IvizMsgs
             int c = d;
             c = Header.AddRos2MessageLength(c);
             c += 1; // Action
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Id);
             c += 1; // Type
             c = WriteBuffer2.Align8(c);

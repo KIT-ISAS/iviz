@@ -48,15 +48,25 @@ namespace Iviz.Msgs.RclInterfaces
             b.DeserializeString(out Description);
             b.DeserializeString(out AdditionalConstraints);
             b.Deserialize(out ReadOnly);
-            b.DeserializeArray(out FloatingPointRange);
-            for (int i = 0; i < FloatingPointRange.Length; i++)
             {
-                FloatingPointRange[i] = new FloatingPointRange(ref b);
+                int n = b.DeserializeArrayLength();
+                FloatingPointRange = n == 0
+                    ? System.Array.Empty<FloatingPointRange>()
+                    : new FloatingPointRange[n];
+                for (int i = 0; i < n; i++)
+                {
+                    FloatingPointRange[i] = new FloatingPointRange(ref b);
+                }
             }
-            b.DeserializeArray(out IntegerRange);
-            for (int i = 0; i < IntegerRange.Length; i++)
             {
-                IntegerRange[i] = new IntegerRange(ref b);
+                int n = b.DeserializeArrayLength();
+                IntegerRange = n == 0
+                    ? System.Array.Empty<IntegerRange>()
+                    : new IntegerRange[n];
+                for (int i = 0; i < n; i++)
+                {
+                    IntegerRange[i] = new IntegerRange(ref b);
+                }
             }
         }
         
@@ -71,16 +81,26 @@ namespace Iviz.Msgs.RclInterfaces
             b.DeserializeString(out AdditionalConstraints);
             b.Deserialize(out ReadOnly);
             b.Align4();
-            b.DeserializeArray(out FloatingPointRange);
-            for (int i = 0; i < FloatingPointRange.Length; i++)
             {
-                FloatingPointRange[i] = new FloatingPointRange(ref b);
+                int n = b.DeserializeArrayLength();
+                FloatingPointRange = n == 0
+                    ? System.Array.Empty<FloatingPointRange>()
+                    : new FloatingPointRange[n];
+                for (int i = 0; i < n; i++)
+                {
+                    FloatingPointRange[i] = new FloatingPointRange(ref b);
+                }
             }
             b.Align4();
-            b.DeserializeArray(out IntegerRange);
-            for (int i = 0; i < IntegerRange.Length; i++)
             {
-                IntegerRange[i] = new IntegerRange(ref b);
+                int n = b.DeserializeArrayLength();
+                IntegerRange = n == 0
+                    ? System.Array.Empty<IntegerRange>()
+                    : new IntegerRange[n];
+                for (int i = 0; i < n; i++)
+                {
+                    IntegerRange[i] = new IntegerRange(ref b);
+                }
             }
         }
         
@@ -163,9 +183,12 @@ namespace Iviz.Msgs.RclInterfaces
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Name);
             c += 1; // Type
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Description);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, AdditionalConstraints);
             c += 1; // ReadOnly
             c = WriteBuffer2.Align4(c);

@@ -39,10 +39,15 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.DeserializeString(out Name);
             b.DeserializeString(out Message);
             b.DeserializeString(out HardwareId);
-            b.DeserializeArray(out Values);
-            for (int i = 0; i < Values.Length; i++)
             {
-                Values[i] = new KeyValue(ref b);
+                int n = b.DeserializeArrayLength();
+                Values = n == 0
+                    ? System.Array.Empty<KeyValue>()
+                    : new KeyValue[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Values[i] = new KeyValue(ref b);
+                }
             }
         }
         
@@ -56,10 +61,15 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.Align4();
             b.DeserializeString(out HardwareId);
             b.Align4();
-            b.DeserializeArray(out Values);
-            for (int i = 0; i < Values.Length; i++)
             {
-                Values[i] = new KeyValue(ref b);
+                int n = b.DeserializeArrayLength();
+                Values = n == 0
+                    ? System.Array.Empty<KeyValue>()
+                    : new KeyValue[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Values[i] = new KeyValue(ref b);
+                }
             }
         }
         
@@ -124,8 +134,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
             int c = d;
             c += 1; // Level
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Message);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, HardwareId);
             c = WriteBuffer2.Align4(c);
             c += 4; // Values.Length

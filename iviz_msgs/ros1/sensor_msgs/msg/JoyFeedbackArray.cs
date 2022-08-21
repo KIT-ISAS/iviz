@@ -22,20 +22,30 @@ namespace Iviz.Msgs.SensorMsgs
         
         public JoyFeedbackArray(ref ReadBuffer b)
         {
-            b.DeserializeArray(out Array);
-            for (int i = 0; i < Array.Length; i++)
             {
-                Array[i] = new JoyFeedback(ref b);
+                int n = b.DeserializeArrayLength();
+                Array = n == 0
+                    ? System.Array.Empty<JoyFeedback>()
+                    : new JoyFeedback[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Array[i] = new JoyFeedback(ref b);
+                }
             }
         }
         
         public JoyFeedbackArray(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeArray(out Array);
-            for (int i = 0; i < Array.Length; i++)
             {
-                Array[i] = new JoyFeedback(ref b);
+                int n = b.DeserializeArrayLength();
+                Array = n == 0
+                    ? System.Array.Empty<JoyFeedback>()
+                    : new JoyFeedback[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Array[i] = new JoyFeedback(ref b);
+                }
             }
         }
         

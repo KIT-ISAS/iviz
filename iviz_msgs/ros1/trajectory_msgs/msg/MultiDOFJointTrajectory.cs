@@ -33,10 +33,15 @@ namespace Iviz.Msgs.TrajectoryMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.DeserializeStringArray(out JointNames);
-            b.DeserializeArray(out Points);
-            for (int i = 0; i < Points.Length; i++)
             {
-                Points[i] = new MultiDOFJointTrajectoryPoint(ref b);
+                int n = b.DeserializeArrayLength();
+                Points = n == 0
+                    ? System.Array.Empty<MultiDOFJointTrajectoryPoint>()
+                    : new MultiDOFJointTrajectoryPoint[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Points[i] = new MultiDOFJointTrajectoryPoint(ref b);
+                }
             }
         }
         
@@ -46,10 +51,15 @@ namespace Iviz.Msgs.TrajectoryMsgs
             b.Align4();
             b.DeserializeStringArray(out JointNames);
             b.Align4();
-            b.DeserializeArray(out Points);
-            for (int i = 0; i < Points.Length; i++)
             {
-                Points[i] = new MultiDOFJointTrajectoryPoint(ref b);
+                int n = b.DeserializeArrayLength();
+                Points = n == 0
+                    ? System.Array.Empty<MultiDOFJointTrajectoryPoint>()
+                    : new MultiDOFJointTrajectoryPoint[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Points[i] = new MultiDOFJointTrajectoryPoint(ref b);
+                }
             }
         }
         
@@ -111,6 +121,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         {
             int c = d;
             c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, JointNames);
             c = WriteBuffer2.Align4(c);
             c += 4; // Points.Length

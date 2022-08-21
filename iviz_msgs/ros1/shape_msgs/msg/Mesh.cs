@@ -27,10 +27,15 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public Mesh(ref ReadBuffer b)
         {
-            b.DeserializeArray(out Triangles);
-            for (int i = 0; i < Triangles.Length; i++)
             {
-                Triangles[i] = new MeshTriangle(ref b);
+                int n = b.DeserializeArrayLength();
+                Triangles = n == 0
+                    ? System.Array.Empty<MeshTriangle>()
+                    : new MeshTriangle[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Triangles[i] = new MeshTriangle(ref b);
+                }
             }
             b.DeserializeStructArray(out Vertices);
         }
@@ -38,10 +43,15 @@ namespace Iviz.Msgs.ShapeMsgs
         public Mesh(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeArray(out Triangles);
-            for (int i = 0; i < Triangles.Length; i++)
             {
-                Triangles[i] = new MeshTriangle(ref b);
+                int n = b.DeserializeArrayLength();
+                Triangles = n == 0
+                    ? System.Array.Empty<MeshTriangle>()
+                    : new MeshTriangle[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Triangles[i] = new MeshTriangle(ref b);
+                }
             }
             b.Align4();
             b.DeserializeStructArray(out Vertices);

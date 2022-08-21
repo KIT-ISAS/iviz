@@ -209,6 +209,7 @@ namespace Iviz.Msgs.SensorMsgs
             c += 4; // CellTemperature length
             c += 4 * CellTemperature.Length;
             c = WriteBuffer2.AddLength(c, Location);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, SerialNumber);
             return c;
         }

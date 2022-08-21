@@ -116,10 +116,15 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Deserialize(out Success);
             b.DeserializeString(out Message);
-            b.DeserializeArray(out Resolutions);
-            for (int i = 0; i < Resolutions.Length; i++)
             {
-                Resolutions[i] = new Vector2i(ref b);
+                int n = b.DeserializeArrayLength();
+                Resolutions = n == 0
+                    ? System.Array.Empty<Vector2i>()
+                    : new Vector2i[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Resolutions[i] = new Vector2i(ref b);
+                }
             }
         }
         
@@ -129,10 +134,15 @@ namespace Iviz.Msgs.IvizMsgs
             b.Align4();
             b.DeserializeString(out Message);
             b.Align4();
-            b.DeserializeArray(out Resolutions);
-            for (int i = 0; i < Resolutions.Length; i++)
             {
-                Resolutions[i] = new Vector2i(ref b);
+                int n = b.DeserializeArrayLength();
+                Resolutions = n == 0
+                    ? System.Array.Empty<Vector2i>()
+                    : new Vector2i[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Resolutions[i] = new Vector2i(ref b);
+                }
             }
         }
         
@@ -181,6 +191,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             int c = d;
             c += 1; // Success
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Message);
             c = WriteBuffer2.Align4(c);
             c += 4; // Resolutions length

@@ -21,19 +21,30 @@ namespace Iviz.Msgs.IvizMsgs
         
         public XRMarkerArray(ref ReadBuffer b)
         {
-            b.DeserializeArray(out Markers);
-            for (int i = 0; i < Markers.Length; i++)
             {
-                Markers[i] = new XRMarker(ref b);
+                int n = b.DeserializeArrayLength();
+                Markers = n == 0
+                    ? System.Array.Empty<XRMarker>()
+                    : new XRMarker[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Markers[i] = new XRMarker(ref b);
+                }
             }
         }
         
         public XRMarkerArray(ref ReadBuffer2 b)
         {
-            b.DeserializeArray(out Markers);
-            for (int i = 0; i < Markers.Length; i++)
+            b.Align4();
             {
-                Markers[i] = new XRMarker(ref b);
+                int n = b.DeserializeArrayLength();
+                Markers = n == 0
+                    ? System.Array.Empty<XRMarker>()
+                    : new XRMarker[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Markers[i] = new XRMarker(ref b);
+                }
             }
         }
         

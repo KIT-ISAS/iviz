@@ -257,44 +257,44 @@ public static class BuiltIns
         return result < 128;
     }
 
-    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn, AssertionMethod]
     public static void ThrowArgument(string arg, string message) => throw new ArgumentNullException(arg, message);
 
-    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn, AssertionMethod]
     public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);
 
-    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn, AssertionMethod]
     public static void ThrowArgumentNull(string arg, string message) => throw new ArgumentNullException(arg, message);
 
-    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn, AssertionMethod]
     public static void ThrowNullReference(string name) => throw new NullReferenceException(name);
 
-    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn, AssertionMethod]
     public static void ThrowNullReference(string name, int i) =>
-        throw new NullReferenceException($"{name}[{i}] cannot be null");
+        throw new NullReferenceException($"{name}[{i.ToString()}] cannot be null");
 
-    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn, AssertionMethod]
     public static void ThrowNullReference() => throw new NullReferenceException("Message fields cannot be null.");
 
-    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn, AssertionMethod]
     public static void ThrowBufferOverflow(int off, int remaining) =>
-        throw new RosBufferException($"Requested {off} bytes, but only {remaining} remain!");
+        throw new RosBufferException($"Requested {off.ToString()} bytes, but only {remaining.ToString()} remain!");
     
-    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
-    public static void ThrowBufferOverflow(int off) =>
-        throw new RosBufferException($"Requested {off} bytes, but that takes us beyond the end!");
+    [DoesNotReturn, AssertionMethod]
+    public static void ThrowBufferOverflow() =>
+        throw new RosBufferException($"Requested bytes beyond the buffer end!");
 
-    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn, AssertionMethod]
     public static void ThrowImplausibleBufferSize() =>
-        throw new RosBufferException("Implausible message requested more than 1TB elements.");
+        throw new RosBufferException("Message requested a negative amount or an implausible more than 1TB elements.");
 
-    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn, AssertionMethod]
     public static void ThrowArgumentOutOfRange() => throw new ArgumentOutOfRangeException();
 
-    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn, AssertionMethod]
     public static void ThrowArgumentOutOfRange(string arg) => throw new ArgumentOutOfRangeException(arg);
 
-    [DoesNotReturn, AssertionMethod, MethodImpl(MethodImplOptions.NoInlining)]
+    [DoesNotReturn, AssertionMethod]
     public static void ThrowInvalidSizeForFixedArray(int size, int expected) =>
         throw new RosInvalidSizeForFixedArrayException(size, expected);
 }

@@ -105,6 +105,7 @@ namespace Iviz.Msgs.MeshMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Uuid);
             c = WriteBuffer2.Align4(c);
             c += 4; // TextureIndex

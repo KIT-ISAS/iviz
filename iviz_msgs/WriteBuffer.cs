@@ -35,7 +35,7 @@ public unsafe ref struct WriteBuffer
     {
         if ((uint)off > (uint)remaining)
         {
-            BuiltIns.ThrowBufferOverflow(off);
+            BuiltIns.ThrowBufferOverflow(off, remaining);
         }
     }
 

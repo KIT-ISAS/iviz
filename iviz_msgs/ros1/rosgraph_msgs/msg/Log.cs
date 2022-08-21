@@ -155,9 +155,13 @@ namespace Iviz.Msgs.RosgraphMsgs
             int c = d;
             c = Header.AddRos2MessageLength(c);
             c += 1; // Level
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Msg);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, File);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Function);
             c = WriteBuffer2.Align4(c);
             c += 4; // Line

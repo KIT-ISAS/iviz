@@ -31,10 +31,15 @@ namespace Iviz.Msgs.PclMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Cloud = new SensorMsgs.PointCloud2(ref b);
-            b.DeserializeArray(out Polygons);
-            for (int i = 0; i < Polygons.Length; i++)
             {
-                Polygons[i] = new Vertices(ref b);
+                int n = b.DeserializeArrayLength();
+                Polygons = n == 0
+                    ? System.Array.Empty<Vertices>()
+                    : new Vertices[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Polygons[i] = new Vertices(ref b);
+                }
             }
         }
         
@@ -43,10 +48,15 @@ namespace Iviz.Msgs.PclMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             Cloud = new SensorMsgs.PointCloud2(ref b);
             b.Align4();
-            b.DeserializeArray(out Polygons);
-            for (int i = 0; i < Polygons.Length; i++)
             {
-                Polygons[i] = new Vertices(ref b);
+                int n = b.DeserializeArrayLength();
+                Polygons = n == 0
+                    ? System.Array.Empty<Vertices>()
+                    : new Vertices[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Polygons[i] = new Vertices(ref b);
+                }
             }
         }
         

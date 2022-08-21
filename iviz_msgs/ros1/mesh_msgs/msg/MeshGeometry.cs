@@ -30,10 +30,15 @@ namespace Iviz.Msgs.MeshMsgs
         {
             b.DeserializeStructArray(out Vertices);
             b.DeserializeStructArray(out VertexNormals);
-            b.DeserializeArray(out Faces);
-            for (int i = 0; i < Faces.Length; i++)
             {
-                Faces[i] = new MeshMsgs.TriangleIndices(ref b);
+                int n = b.DeserializeArrayLength();
+                Faces = n == 0
+                    ? System.Array.Empty<MeshMsgs.TriangleIndices>()
+                    : new MeshMsgs.TriangleIndices[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Faces[i] = new MeshMsgs.TriangleIndices(ref b);
+                }
             }
         }
         
@@ -42,10 +47,15 @@ namespace Iviz.Msgs.MeshMsgs
             b.Align4();
             b.DeserializeStructArray(out Vertices);
             b.DeserializeStructArray(out VertexNormals);
-            b.DeserializeArray(out Faces);
-            for (int i = 0; i < Faces.Length; i++)
             {
-                Faces[i] = new MeshMsgs.TriangleIndices(ref b);
+                int n = b.DeserializeArrayLength();
+                Faces = n == 0
+                    ? System.Array.Empty<MeshMsgs.TriangleIndices>()
+                    : new MeshMsgs.TriangleIndices[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Faces[i] = new MeshMsgs.TriangleIndices(ref b);
+                }
             }
         }
         

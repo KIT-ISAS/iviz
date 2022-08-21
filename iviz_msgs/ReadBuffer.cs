@@ -30,9 +30,9 @@ public unsafe struct ReadBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     readonly void ThrowIfOutOfRange(int off)
     {
-        if ((nuint)cursor + (nuint)off > (nuint)end)
+        if ((nuint)off > (nuint)end - (nuint)cursor)
         {
-            BuiltIns.ThrowBufferOverflow(off);
+            BuiltIns.ThrowBufferOverflow();
         }
     }
 
@@ -86,7 +86,7 @@ public unsafe struct ReadBuffer
     {
         ThrowIfOutOfRange(4 * count);
         val = new string[count];
-        for (int i = 0; i < val.Length; i++)
+        for (int i = 0; i < count; i++)
         {
             DeserializeString(out val[i]);
         }
@@ -98,6 +98,7 @@ public unsafe struct ReadBuffer
         for (int i = 0; i < count; i++)
         {
             int innerCount = ReadInt();
+            ThrowIfOutOfRange(innerCount);
             Advance(innerCount);
         }
 
@@ -332,7 +333,15 @@ public unsafe struct ReadBuffer
 
         Advance(count);
     }
-    
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(void* value, int count)
+    {
+        ThrowIfOutOfRange(count);
+        Unsafe.CopyBlock(value, cursor, (uint)count);
+        Advance(count);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(out Point32[] val)
     {
@@ -354,7 +363,7 @@ public unsafe struct ReadBuffer
 
         Advance(size);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray<T>(out T[] val) where T : unmanaged
     {
@@ -385,7 +394,19 @@ public unsafe struct ReadBuffer
         Advance(size);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int DeserializeArrayLength()
+    {
+        int count = ReadInt();
+        if ((uint)count > 1024 * 1024 * 1024)
+        {
+            BuiltIns.ThrowImplausibleBufferSize();
+        }
+
+        return count;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructRent(out SharedRent val)
     {
         int count = ReadInt();
@@ -403,7 +424,7 @@ public unsafe struct ReadBuffer
         {
             Unsafe.CopyBlock(valPtr, cursor, (uint)count);
         }
-        
+
         Advance(count);
     }
 
@@ -436,13 +457,13 @@ public unsafe struct ReadBuffer
         BuiltIns.ThrowImplausibleBufferSize();
         val = Array.Empty<T>(); // unreachable
     }
-    
+
     #region Empties
 
     static string EmptyString => "";
     static string[] EmptyStringArray => Array.Empty<string>();
 
-    #endregion    
+    #endregion
 
     /// <summary>
     /// Deserializes a message of the given type from the buffer array.  

@@ -70,6 +70,7 @@ namespace Iviz.Msgs.Tf2Msgs
         {
             int c = d;
             c += 1; // Error
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, ErrorString);
             return c;
         }

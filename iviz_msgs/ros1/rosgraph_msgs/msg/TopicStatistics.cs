@@ -143,8 +143,11 @@ namespace Iviz.Msgs.RosgraphMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Topic);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, NodePub);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, NodeSub);
             c = WriteBuffer2.Align4(c);
             c += 8; // WindowStart

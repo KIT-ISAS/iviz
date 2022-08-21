@@ -86,7 +86,9 @@ namespace Iviz.Msgs.HriMsgs
         {
             int c = d;
             c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Sender);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Receiver);
             return c;
         }

@@ -98,6 +98,7 @@ namespace Iviz.Msgs.IvizMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Uri);
             return c;
         }
@@ -174,6 +175,7 @@ namespace Iviz.Msgs.IvizMsgs
             int c = d;
             c += 1; // Success
             c = Image.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Message);
             return c;
         }

@@ -37,15 +37,25 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.DeserializeString(out Name);
             b.DeserializeString(out Filename);
-            b.DeserializeArray(out Includes);
-            for (int i = 0; i < Includes.Length; i++)
             {
-                Includes[i] = new SceneInclude(ref b);
+                int n = b.DeserializeArrayLength();
+                Includes = n == 0
+                    ? System.Array.Empty<SceneInclude>()
+                    : new SceneInclude[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Includes[i] = new SceneInclude(ref b);
+                }
             }
-            b.DeserializeArray(out Lights);
-            for (int i = 0; i < Lights.Length; i++)
             {
-                Lights[i] = new SceneLight(ref b);
+                int n = b.DeserializeArrayLength();
+                Lights = n == 0
+                    ? System.Array.Empty<SceneLight>()
+                    : new SceneLight[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Lights[i] = new SceneLight(ref b);
+                }
             }
         }
         
@@ -56,16 +66,26 @@ namespace Iviz.Msgs.IvizMsgs
             b.Align4();
             b.DeserializeString(out Filename);
             b.Align4();
-            b.DeserializeArray(out Includes);
-            for (int i = 0; i < Includes.Length; i++)
             {
-                Includes[i] = new SceneInclude(ref b);
+                int n = b.DeserializeArrayLength();
+                Includes = n == 0
+                    ? System.Array.Empty<SceneInclude>()
+                    : new SceneInclude[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Includes[i] = new SceneInclude(ref b);
+                }
             }
             b.Align4();
-            b.DeserializeArray(out Lights);
-            for (int i = 0; i < Lights.Length; i++)
             {
-                Lights[i] = new SceneLight(ref b);
+                int n = b.DeserializeArrayLength();
+                Lights = n == 0
+                    ? System.Array.Empty<SceneLight>()
+                    : new SceneLight[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Lights[i] = new SceneLight(ref b);
+                }
             }
         }
         
@@ -140,7 +160,9 @@ namespace Iviz.Msgs.IvizMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Filename);
             c = WriteBuffer2.Align4(c);
             c += 4; // Includes.Length

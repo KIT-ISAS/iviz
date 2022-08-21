@@ -122,7 +122,9 @@ namespace Iviz.Msgs.IvizMsgs
         {
             int c = d;
             c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, VizId);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Id);
             c += 1; // Type
             c = WriteBuffer2.Align4(c);

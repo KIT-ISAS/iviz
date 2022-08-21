@@ -90,6 +90,7 @@ namespace Iviz.Msgs.OctomapMsgs
             int c = d;
             c = Header.AddRos2MessageLength(c);
             c += 1; // Binary
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Id);
             c = WriteBuffer2.Align8(c);
             c += 8; // Resolution

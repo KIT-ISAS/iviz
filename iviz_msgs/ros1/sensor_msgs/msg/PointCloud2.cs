@@ -45,10 +45,15 @@ namespace Iviz.Msgs.SensorMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Height);
             b.Deserialize(out Width);
-            b.DeserializeArray(out Fields);
-            for (int i = 0; i < Fields.Length; i++)
             {
-                Fields[i] = new PointField(ref b);
+                int n = b.DeserializeArrayLength();
+                Fields = n == 0
+                    ? System.Array.Empty<PointField>()
+                    : new PointField[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Fields[i] = new PointField(ref b);
+                }
             }
             b.Deserialize(out IsBigendian);
             b.Deserialize(out PointStep);
@@ -63,10 +68,15 @@ namespace Iviz.Msgs.SensorMsgs
             b.Align4();
             b.Deserialize(out Height);
             b.Deserialize(out Width);
-            b.DeserializeArray(out Fields);
-            for (int i = 0; i < Fields.Length; i++)
             {
-                Fields[i] = new PointField(ref b);
+                int n = b.DeserializeArrayLength();
+                Fields = n == 0
+                    ? System.Array.Empty<PointField>()
+                    : new PointField[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Fields[i] = new PointField(ref b);
+                }
             }
             b.Deserialize(out IsBigendian);
             b.Align4();

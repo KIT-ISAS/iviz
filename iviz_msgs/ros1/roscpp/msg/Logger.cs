@@ -65,7 +65,9 @@ namespace Iviz.Msgs.Roscpp
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Level);
             return c;
         }

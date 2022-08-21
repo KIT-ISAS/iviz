@@ -66,20 +66,30 @@ namespace Iviz.Msgs.RclInterfaces
         
         public SetParametersAtomicallyRequest(ref ReadBuffer b)
         {
-            b.DeserializeArray(out Parameters);
-            for (int i = 0; i < Parameters.Length; i++)
             {
-                Parameters[i] = new Parameter(ref b);
+                int n = b.DeserializeArrayLength();
+                Parameters = n == 0
+                    ? System.Array.Empty<Parameter>()
+                    : new Parameter[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Parameters[i] = new Parameter(ref b);
+                }
             }
         }
         
         public SetParametersAtomicallyRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeArray(out Parameters);
-            for (int i = 0; i < Parameters.Length; i++)
             {
-                Parameters[i] = new Parameter(ref b);
+                int n = b.DeserializeArrayLength();
+                Parameters = n == 0
+                    ? System.Array.Empty<Parameter>()
+                    : new Parameter[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Parameters[i] = new Parameter(ref b);
+                }
             }
         }
         

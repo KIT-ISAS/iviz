@@ -21,19 +21,30 @@ namespace Iviz.Msgs.IvizMsgs
         
         public DialogArray(ref ReadBuffer b)
         {
-            b.DeserializeArray(out Dialogs);
-            for (int i = 0; i < Dialogs.Length; i++)
             {
-                Dialogs[i] = new IvizMsgs.Dialog(ref b);
+                int n = b.DeserializeArrayLength();
+                Dialogs = n == 0
+                    ? System.Array.Empty<IvizMsgs.Dialog>()
+                    : new IvizMsgs.Dialog[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Dialogs[i] = new IvizMsgs.Dialog(ref b);
+                }
             }
         }
         
         public DialogArray(ref ReadBuffer2 b)
         {
-            b.DeserializeArray(out Dialogs);
-            for (int i = 0; i < Dialogs.Length; i++)
+            b.Align4();
             {
-                Dialogs[i] = new IvizMsgs.Dialog(ref b);
+                int n = b.DeserializeArrayLength();
+                Dialogs = n == 0
+                    ? System.Array.Empty<IvizMsgs.Dialog>()
+                    : new IvizMsgs.Dialog[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Dialogs[i] = new IvizMsgs.Dialog(ref b);
+                }
             }
         }
         

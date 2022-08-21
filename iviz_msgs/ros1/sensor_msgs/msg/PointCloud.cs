@@ -36,10 +36,15 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.DeserializeStructArray(out Points);
-            b.DeserializeArray(out Channels);
-            for (int i = 0; i < Channels.Length; i++)
             {
-                Channels[i] = new ChannelFloat32(ref b);
+                int n = b.DeserializeArrayLength();
+                Channels = n == 0
+                    ? System.Array.Empty<ChannelFloat32>()
+                    : new ChannelFloat32[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Channels[i] = new ChannelFloat32(ref b);
+                }
             }
         }
         
@@ -48,10 +53,15 @@ namespace Iviz.Msgs.SensorMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
             b.DeserializeStructArray(out Points);
-            b.DeserializeArray(out Channels);
-            for (int i = 0; i < Channels.Length; i++)
             {
-                Channels[i] = new ChannelFloat32(ref b);
+                int n = b.DeserializeArrayLength();
+                Channels = n == 0
+                    ? System.Array.Empty<ChannelFloat32>()
+                    : new ChannelFloat32[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Channels[i] = new ChannelFloat32(ref b);
+                }
             }
         }
         

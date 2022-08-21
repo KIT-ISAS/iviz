@@ -144,6 +144,7 @@ namespace Iviz.Msgs.Tf2Msgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, FrameYaml);
             return c;
         }

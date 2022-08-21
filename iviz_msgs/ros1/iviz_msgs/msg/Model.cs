@@ -29,20 +29,35 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Name);
             b.DeserializeString(out Filename);
             b.DeserializeString(out OrientationHint);
-            b.DeserializeArray(out Meshes);
-            for (int i = 0; i < Meshes.Length; i++)
             {
-                Meshes[i] = new ModelMesh(ref b);
+                int n = b.DeserializeArrayLength();
+                Meshes = n == 0
+                    ? System.Array.Empty<ModelMesh>()
+                    : new ModelMesh[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Meshes[i] = new ModelMesh(ref b);
+                }
             }
-            b.DeserializeArray(out Materials);
-            for (int i = 0; i < Materials.Length; i++)
             {
-                Materials[i] = new ModelMaterial(ref b);
+                int n = b.DeserializeArrayLength();
+                Materials = n == 0
+                    ? System.Array.Empty<ModelMaterial>()
+                    : new ModelMaterial[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Materials[i] = new ModelMaterial(ref b);
+                }
             }
-            b.DeserializeArray(out Nodes);
-            for (int i = 0; i < Nodes.Length; i++)
             {
-                Nodes[i] = new ModelNode(ref b);
+                int n = b.DeserializeArrayLength();
+                Nodes = n == 0
+                    ? System.Array.Empty<ModelNode>()
+                    : new ModelNode[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Nodes[i] = new ModelNode(ref b);
+                }
             }
         }
         
@@ -55,22 +70,37 @@ namespace Iviz.Msgs.IvizMsgs
             b.Align4();
             b.DeserializeString(out OrientationHint);
             b.Align4();
-            b.DeserializeArray(out Meshes);
-            for (int i = 0; i < Meshes.Length; i++)
             {
-                Meshes[i] = new ModelMesh(ref b);
+                int n = b.DeserializeArrayLength();
+                Meshes = n == 0
+                    ? System.Array.Empty<ModelMesh>()
+                    : new ModelMesh[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Meshes[i] = new ModelMesh(ref b);
+                }
             }
             b.Align4();
-            b.DeserializeArray(out Materials);
-            for (int i = 0; i < Materials.Length; i++)
             {
-                Materials[i] = new ModelMaterial(ref b);
+                int n = b.DeserializeArrayLength();
+                Materials = n == 0
+                    ? System.Array.Empty<ModelMaterial>()
+                    : new ModelMaterial[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Materials[i] = new ModelMaterial(ref b);
+                }
             }
             b.Align4();
-            b.DeserializeArray(out Nodes);
-            for (int i = 0; i < Nodes.Length; i++)
             {
-                Nodes[i] = new ModelNode(ref b);
+                int n = b.DeserializeArrayLength();
+                Nodes = n == 0
+                    ? System.Array.Empty<ModelNode>()
+                    : new ModelNode[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Nodes[i] = new ModelNode(ref b);
+                }
             }
         }
         
@@ -166,8 +196,11 @@ namespace Iviz.Msgs.IvizMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Filename);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, OrientationHint);
             c = WriteBuffer2.Align4(c);
             c += 4; // Meshes.Length

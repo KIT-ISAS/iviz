@@ -31,44 +31,74 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshMaterials(ref ReadBuffer b)
         {
-            b.DeserializeArray(out Clusters);
-            for (int i = 0; i < Clusters.Length; i++)
             {
-                Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
+                int n = b.DeserializeArrayLength();
+                Clusters = n == 0
+                    ? System.Array.Empty<MeshMsgs.MeshFaceCluster>()
+                    : new MeshMsgs.MeshFaceCluster[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
+                }
             }
-            b.DeserializeArray(out Materials);
-            for (int i = 0; i < Materials.Length; i++)
             {
-                Materials[i] = new MeshMsgs.MeshMaterial(ref b);
+                int n = b.DeserializeArrayLength();
+                Materials = n == 0
+                    ? System.Array.Empty<MeshMsgs.MeshMaterial>()
+                    : new MeshMsgs.MeshMaterial[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Materials[i] = new MeshMsgs.MeshMaterial(ref b);
+                }
             }
             b.DeserializeStructArray(out ClusterMaterials);
-            b.DeserializeArray(out VertexTexCoords);
-            for (int i = 0; i < VertexTexCoords.Length; i++)
             {
-                VertexTexCoords[i] = new MeshMsgs.MeshVertexTexCoords(ref b);
+                int n = b.DeserializeArrayLength();
+                VertexTexCoords = n == 0
+                    ? System.Array.Empty<MeshMsgs.MeshVertexTexCoords>()
+                    : new MeshMsgs.MeshVertexTexCoords[n];
+                for (int i = 0; i < n; i++)
+                {
+                    VertexTexCoords[i] = new MeshMsgs.MeshVertexTexCoords(ref b);
+                }
             }
         }
         
         public MeshMaterials(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeArray(out Clusters);
-            for (int i = 0; i < Clusters.Length; i++)
             {
-                Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
+                int n = b.DeserializeArrayLength();
+                Clusters = n == 0
+                    ? System.Array.Empty<MeshMsgs.MeshFaceCluster>()
+                    : new MeshMsgs.MeshFaceCluster[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
+                }
             }
             b.Align4();
-            b.DeserializeArray(out Materials);
-            for (int i = 0; i < Materials.Length; i++)
             {
-                Materials[i] = new MeshMsgs.MeshMaterial(ref b);
+                int n = b.DeserializeArrayLength();
+                Materials = n == 0
+                    ? System.Array.Empty<MeshMsgs.MeshMaterial>()
+                    : new MeshMsgs.MeshMaterial[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Materials[i] = new MeshMsgs.MeshMaterial(ref b);
+                }
             }
             b.Align4();
             b.DeserializeStructArray(out ClusterMaterials);
-            b.DeserializeArray(out VertexTexCoords);
-            for (int i = 0; i < VertexTexCoords.Length; i++)
             {
-                VertexTexCoords[i] = new MeshMsgs.MeshVertexTexCoords(ref b);
+                int n = b.DeserializeArrayLength();
+                VertexTexCoords = n == 0
+                    ? System.Array.Empty<MeshMsgs.MeshVertexTexCoords>()
+                    : new MeshMsgs.MeshVertexTexCoords[n];
+                for (int i = 0; i < n; i++)
+                {
+                    VertexTexCoords[i] = new MeshMsgs.MeshVertexTexCoords(ref b);
+                }
             }
         }
         

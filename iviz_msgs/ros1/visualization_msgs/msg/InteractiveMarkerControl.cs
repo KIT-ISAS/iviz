@@ -83,10 +83,15 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out OrientationMode);
             b.Deserialize(out InteractionMode);
             b.Deserialize(out AlwaysVisible);
-            b.DeserializeArray(out Markers);
-            for (int i = 0; i < Markers.Length; i++)
             {
-                Markers[i] = new Marker(ref b);
+                int n = b.DeserializeArrayLength();
+                Markers = n == 0
+                    ? System.Array.Empty<Marker>()
+                    : new Marker[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Markers[i] = new Marker(ref b);
+                }
             }
             b.Deserialize(out IndependentMarkerOrientation);
             b.DeserializeString(out Description);
@@ -102,10 +107,15 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out InteractionMode);
             b.Deserialize(out AlwaysVisible);
             b.Align4();
-            b.DeserializeArray(out Markers);
-            for (int i = 0; i < Markers.Length; i++)
             {
-                Markers[i] = new Marker(ref b);
+                int n = b.DeserializeArrayLength();
+                Markers = n == 0
+                    ? System.Array.Empty<Marker>()
+                    : new Marker[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Markers[i] = new Marker(ref b);
+                }
             }
             b.Deserialize(out IndependentMarkerOrientation);
             b.Align4();
@@ -176,6 +186,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.Align8(c);
             c += 32; // Orientation
@@ -189,6 +200,7 @@ namespace Iviz.Msgs.VisualizationMsgs
                 c = t.AddRos2MessageLength(c);
             }
             c += 1; // IndependentMarkerOrientation
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Description);
             return c;
         }

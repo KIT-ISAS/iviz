@@ -21,20 +21,30 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public TFMessage(ref ReadBuffer b)
         {
-            b.DeserializeArray(out Transforms);
-            for (int i = 0; i < Transforms.Length; i++)
             {
-                GeometryMsgs.TransformStamped.Deserialize(ref b, out Transforms[i]);
+                int n = b.DeserializeArrayLength();
+                Transforms = n == 0
+                    ? System.Array.Empty<GeometryMsgs.TransformStamped>()
+                    : new GeometryMsgs.TransformStamped[n];
+                for (int i = 0; i < n; i++)
+                {
+                    GeometryMsgs.TransformStamped.Deserialize(ref b, out Transforms[i]);
+                }
             }
         }
         
         public TFMessage(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeArray(out Transforms);
-            for (int i = 0; i < Transforms.Length; i++)
             {
-                GeometryMsgs.TransformStamped.Deserialize(ref b, out Transforms[i]);
+                int n = b.DeserializeArrayLength();
+                Transforms = n == 0
+                    ? System.Array.Empty<GeometryMsgs.TransformStamped>()
+                    : new GeometryMsgs.TransformStamped[n];
+                for (int i = 0; i < n; i++)
+                {
+                    GeometryMsgs.TransformStamped.Deserialize(ref b, out Transforms[i]);
+                }
             }
         }
         

@@ -67,6 +67,7 @@ namespace Iviz.Msgs.RclInterfaces
         {
             int c = d;
             c += 1; // Successful
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Reason);
             return c;
         }

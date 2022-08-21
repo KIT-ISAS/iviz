@@ -98,6 +98,7 @@ namespace Iviz.Msgs.MeshMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Uuid);
             return c;
         }
@@ -122,20 +123,30 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetLabeledClustersResponse(ref ReadBuffer b)
         {
-            b.DeserializeArray(out Clusters);
-            for (int i = 0; i < Clusters.Length; i++)
             {
-                Clusters[i] = new MeshFaceCluster(ref b);
+                int n = b.DeserializeArrayLength();
+                Clusters = n == 0
+                    ? System.Array.Empty<MeshFaceCluster>()
+                    : new MeshFaceCluster[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Clusters[i] = new MeshFaceCluster(ref b);
+                }
             }
         }
         
         public GetLabeledClustersResponse(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeArray(out Clusters);
-            for (int i = 0; i < Clusters.Length; i++)
             {
-                Clusters[i] = new MeshFaceCluster(ref b);
+                int n = b.DeserializeArrayLength();
+                Clusters = n == 0
+                    ? System.Array.Empty<MeshFaceCluster>()
+                    : new MeshFaceCluster[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Clusters[i] = new MeshFaceCluster(ref b);
+                }
             }
         }
         

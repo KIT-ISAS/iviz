@@ -86,6 +86,7 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             int c = d;
             c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, ChildFrameId);
             c = WriteBuffer2.Align8(c);
             c += 56; // Transform

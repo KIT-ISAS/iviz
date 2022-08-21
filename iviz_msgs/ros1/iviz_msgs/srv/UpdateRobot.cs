@@ -139,6 +139,7 @@ namespace Iviz.Msgs.IvizMsgs
             c += 4; // Operation
             c = WriteBuffer2.AddLength(c, Id);
             c = Configuration.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, ValidFields);
             return c;
         }
@@ -205,6 +206,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             int c = d;
             c += 1; // Success
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Message);
             return c;
         }

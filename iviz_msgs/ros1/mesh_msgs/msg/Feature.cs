@@ -24,10 +24,15 @@ namespace Iviz.Msgs.MeshMsgs
         public Feature(ref ReadBuffer b)
         {
             b.Deserialize(out Location);
-            b.DeserializeArray(out Descriptor);
-            for (int i = 0; i < Descriptor.Length; i++)
             {
-                Descriptor[i] = new StdMsgs.Float32(ref b);
+                int n = b.DeserializeArrayLength();
+                Descriptor = n == 0
+                    ? System.Array.Empty<StdMsgs.Float32>()
+                    : new StdMsgs.Float32[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Descriptor[i] = new StdMsgs.Float32(ref b);
+                }
             }
         }
         
@@ -35,10 +40,15 @@ namespace Iviz.Msgs.MeshMsgs
         {
             b.Align8();
             b.Deserialize(out Location);
-            b.DeserializeArray(out Descriptor);
-            for (int i = 0; i < Descriptor.Length; i++)
             {
-                Descriptor[i] = new StdMsgs.Float32(ref b);
+                int n = b.DeserializeArrayLength();
+                Descriptor = n == 0
+                    ? System.Array.Empty<StdMsgs.Float32>()
+                    : new StdMsgs.Float32[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Descriptor[i] = new StdMsgs.Float32(ref b);
+                }
             }
         }
         

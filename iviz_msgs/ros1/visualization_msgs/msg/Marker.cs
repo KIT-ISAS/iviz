@@ -179,6 +179,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             int c = d;
             c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Ns);
             c = WriteBuffer2.Align4(c);
             c += 4; // Id
@@ -197,6 +198,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             c += 4; // Colors length
             c += 16 * Colors.Length;
             c = WriteBuffer2.AddLength(c, Text);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, MeshResource);
             c += 1; // MeshUseEmbeddedMaterials
             return c;

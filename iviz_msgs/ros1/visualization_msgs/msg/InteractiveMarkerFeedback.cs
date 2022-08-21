@@ -134,8 +134,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             int c = d;
             c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, ClientId);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, MarkerName);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, ControlName);
             c += 1; // EventType
             c = WriteBuffer2.Align8(c);

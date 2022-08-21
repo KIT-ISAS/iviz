@@ -45,15 +45,25 @@ namespace Iviz.Msgs.SensorMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.DeserializeStringArray(out JointNames);
             b.DeserializeStructArray(out Transforms);
-            b.DeserializeArray(out Twist);
-            for (int i = 0; i < Twist.Length; i++)
             {
-                Twist[i] = new GeometryMsgs.Twist(ref b);
+                int n = b.DeserializeArrayLength();
+                Twist = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Twist>()
+                    : new GeometryMsgs.Twist[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Twist[i] = new GeometryMsgs.Twist(ref b);
+                }
             }
-            b.DeserializeArray(out Wrench);
-            for (int i = 0; i < Wrench.Length; i++)
             {
-                Wrench[i] = new GeometryMsgs.Wrench(ref b);
+                int n = b.DeserializeArrayLength();
+                Wrench = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Wrench>()
+                    : new GeometryMsgs.Wrench[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Wrench[i] = new GeometryMsgs.Wrench(ref b);
+                }
             }
         }
         
@@ -64,16 +74,26 @@ namespace Iviz.Msgs.SensorMsgs
             b.DeserializeStringArray(out JointNames);
             b.Align4();
             b.DeserializeStructArray(out Transforms);
-            b.DeserializeArray(out Twist);
-            for (int i = 0; i < Twist.Length; i++)
             {
-                Twist[i] = new GeometryMsgs.Twist(ref b);
+                int n = b.DeserializeArrayLength();
+                Twist = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Twist>()
+                    : new GeometryMsgs.Twist[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Twist[i] = new GeometryMsgs.Twist(ref b);
+                }
             }
             b.Align4();
-            b.DeserializeArray(out Wrench);
-            for (int i = 0; i < Wrench.Length; i++)
             {
-                Wrench[i] = new GeometryMsgs.Wrench(ref b);
+                int n = b.DeserializeArrayLength();
+                Wrench = n == 0
+                    ? System.Array.Empty<GeometryMsgs.Wrench>()
+                    : new GeometryMsgs.Wrench[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Wrench[i] = new GeometryMsgs.Wrench(ref b);
+                }
             }
         }
         
@@ -156,6 +176,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
             int c = d;
             c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, JointNames);
             c = WriteBuffer2.Align4(c);
             c += 4; // Transforms length

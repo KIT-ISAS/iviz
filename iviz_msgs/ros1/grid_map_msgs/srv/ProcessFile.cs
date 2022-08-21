@@ -109,7 +109,9 @@ namespace Iviz.Msgs.GridMapMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, FilePath);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, TopicName);
             return c;
         }

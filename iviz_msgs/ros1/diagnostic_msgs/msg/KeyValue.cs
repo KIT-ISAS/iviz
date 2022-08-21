@@ -67,7 +67,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Key);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Value);
             return c;
         }

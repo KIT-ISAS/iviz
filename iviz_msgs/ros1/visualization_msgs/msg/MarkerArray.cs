@@ -21,20 +21,30 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public MarkerArray(ref ReadBuffer b)
         {
-            b.DeserializeArray(out Markers);
-            for (int i = 0; i < Markers.Length; i++)
             {
-                Markers[i] = new Marker(ref b);
+                int n = b.DeserializeArrayLength();
+                Markers = n == 0
+                    ? System.Array.Empty<Marker>()
+                    : new Marker[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Markers[i] = new Marker(ref b);
+                }
             }
         }
         
         public MarkerArray(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeArray(out Markers);
-            for (int i = 0; i < Markers.Length; i++)
             {
-                Markers[i] = new Marker(ref b);
+                int n = b.DeserializeArrayLength();
+                Markers = n == 0
+                    ? System.Array.Empty<Marker>()
+                    : new Marker[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Markers[i] = new Marker(ref b);
+                }
             }
         }
         

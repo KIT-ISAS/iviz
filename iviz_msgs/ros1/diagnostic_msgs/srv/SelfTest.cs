@@ -116,10 +116,15 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
             b.DeserializeString(out Id);
             b.Deserialize(out Passed);
-            b.DeserializeArray(out Status);
-            for (int i = 0; i < Status.Length; i++)
             {
-                Status[i] = new DiagnosticStatus(ref b);
+                int n = b.DeserializeArrayLength();
+                Status = n == 0
+                    ? System.Array.Empty<DiagnosticStatus>()
+                    : new DiagnosticStatus[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Status[i] = new DiagnosticStatus(ref b);
+                }
             }
         }
         
@@ -129,10 +134,15 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.DeserializeString(out Id);
             b.Deserialize(out Passed);
             b.Align4();
-            b.DeserializeArray(out Status);
-            for (int i = 0; i < Status.Length; i++)
             {
-                Status[i] = new DiagnosticStatus(ref b);
+                int n = b.DeserializeArrayLength();
+                Status = n == 0
+                    ? System.Array.Empty<DiagnosticStatus>()
+                    : new DiagnosticStatus[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Status[i] = new DiagnosticStatus(ref b);
+                }
             }
         }
         
@@ -180,6 +190,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Id);
             c += 1; // Passed
             c = WriteBuffer2.Align4(c);

@@ -96,10 +96,12 @@ namespace Iviz.Msgs.IvizMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Uri);
             c = WriteBuffer2.Align4(c);
             c += 64; // Pose
             c = Material.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Package);
             return c;
         }

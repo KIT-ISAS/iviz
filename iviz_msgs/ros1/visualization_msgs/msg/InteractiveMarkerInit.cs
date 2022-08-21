@@ -37,10 +37,15 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             b.DeserializeString(out ServerId);
             b.Deserialize(out SeqNum);
-            b.DeserializeArray(out Markers);
-            for (int i = 0; i < Markers.Length; i++)
             {
-                Markers[i] = new InteractiveMarker(ref b);
+                int n = b.DeserializeArrayLength();
+                Markers = n == 0
+                    ? System.Array.Empty<InteractiveMarker>()
+                    : new InteractiveMarker[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Markers[i] = new InteractiveMarker(ref b);
+                }
             }
         }
         
@@ -50,10 +55,15 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.DeserializeString(out ServerId);
             b.Align8();
             b.Deserialize(out SeqNum);
-            b.DeserializeArray(out Markers);
-            for (int i = 0; i < Markers.Length; i++)
             {
-                Markers[i] = new InteractiveMarker(ref b);
+                int n = b.DeserializeArrayLength();
+                Markers = n == 0
+                    ? System.Array.Empty<InteractiveMarker>()
+                    : new InteractiveMarker[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Markers[i] = new InteractiveMarker(ref b);
+                }
             }
         }
         
@@ -101,6 +111,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, ServerId);
             c = WriteBuffer2.Align8(c);
             c += 8; // SeqNum

@@ -26,10 +26,15 @@ namespace Iviz.Msgs.ActionlibMsgs
         public GoalStatusArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeArray(out StatusList);
-            for (int i = 0; i < StatusList.Length; i++)
             {
-                StatusList[i] = new GoalStatus(ref b);
+                int n = b.DeserializeArrayLength();
+                StatusList = n == 0
+                    ? System.Array.Empty<GoalStatus>()
+                    : new GoalStatus[n];
+                for (int i = 0; i < n; i++)
+                {
+                    StatusList[i] = new GoalStatus(ref b);
+                }
             }
         }
         
@@ -37,10 +42,15 @@ namespace Iviz.Msgs.ActionlibMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
-            b.DeserializeArray(out StatusList);
-            for (int i = 0; i < StatusList.Length; i++)
             {
-                StatusList[i] = new GoalStatus(ref b);
+                int n = b.DeserializeArrayLength();
+                StatusList = n == 0
+                    ? System.Array.Empty<GoalStatus>()
+                    : new GoalStatus[n];
+                for (int i = 0; i < n; i++)
+                {
+                    StatusList[i] = new GoalStatus(ref b);
+                }
             }
         }
         

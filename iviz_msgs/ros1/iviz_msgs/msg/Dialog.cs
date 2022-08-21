@@ -206,6 +206,7 @@ namespace Iviz.Msgs.IvizMsgs
             int c = d;
             c = Header.AddRos2MessageLength(c);
             c += 1; // Action
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Id);
             c = WriteBuffer2.Align4(c);
             c += 8; // Lifetime
@@ -217,9 +218,11 @@ namespace Iviz.Msgs.IvizMsgs
             c = WriteBuffer2.Align4(c);
             c += 16; // BackgroundColor
             c = WriteBuffer2.AddLength(c, Title);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Caption);
             c = WriteBuffer2.Align2(c);
             c += 2; // CaptionAlignment
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, MenuEntries);
             c += 1; // BindingType
             c = WriteBuffer2.Align8(c);

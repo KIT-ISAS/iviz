@@ -39,10 +39,15 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out ShininessStrength);
             b.Deserialize(out Reflectivity);
             b.Deserialize(out BlendMode);
-            b.DeserializeArray(out Textures);
-            for (int i = 0; i < Textures.Length; i++)
             {
-                Textures[i] = new ModelTexture(ref b);
+                int n = b.DeserializeArrayLength();
+                Textures = n == 0
+                    ? System.Array.Empty<ModelTexture>()
+                    : new ModelTexture[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Textures[i] = new ModelTexture(ref b);
+                }
             }
         }
         
@@ -61,10 +66,15 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Reflectivity);
             b.Deserialize(out BlendMode);
             b.Align4();
-            b.DeserializeArray(out Textures);
-            for (int i = 0; i < Textures.Length; i++)
             {
-                Textures[i] = new ModelTexture(ref b);
+                int n = b.DeserializeArrayLength();
+                Textures = n == 0
+                    ? System.Array.Empty<ModelTexture>()
+                    : new ModelTexture[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Textures[i] = new ModelTexture(ref b);
+                }
             }
         }
         
@@ -128,6 +138,7 @@ namespace Iviz.Msgs.IvizMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Name);
             c += 4; // Ambient
             c += 4; // Diffuse

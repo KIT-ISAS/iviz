@@ -71,6 +71,7 @@ namespace Iviz.Msgs.HriMsgs
         {
             int c = d;
             c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Ids);
             return c;
         }

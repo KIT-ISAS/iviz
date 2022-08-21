@@ -112,6 +112,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
             int c = d;
             c = Header.AddRos2MessageLength(c);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Name);
             c = WriteBuffer2.Align4(c);
             c += 4; // Position length

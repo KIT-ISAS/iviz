@@ -45,15 +45,25 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.DeserializeString(out ServerId);
             b.Deserialize(out SeqNum);
             b.Deserialize(out Type);
-            b.DeserializeArray(out Markers);
-            for (int i = 0; i < Markers.Length; i++)
             {
-                Markers[i] = new InteractiveMarker(ref b);
+                int n = b.DeserializeArrayLength();
+                Markers = n == 0
+                    ? System.Array.Empty<InteractiveMarker>()
+                    : new InteractiveMarker[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Markers[i] = new InteractiveMarker(ref b);
+                }
             }
-            b.DeserializeArray(out Poses);
-            for (int i = 0; i < Poses.Length; i++)
             {
-                Poses[i] = new InteractiveMarkerPose(ref b);
+                int n = b.DeserializeArrayLength();
+                Poses = n == 0
+                    ? System.Array.Empty<InteractiveMarkerPose>()
+                    : new InteractiveMarkerPose[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Poses[i] = new InteractiveMarkerPose(ref b);
+                }
             }
             b.DeserializeStringArray(out Erases);
         }
@@ -66,16 +76,26 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out SeqNum);
             b.Deserialize(out Type);
             b.Align4();
-            b.DeserializeArray(out Markers);
-            for (int i = 0; i < Markers.Length; i++)
             {
-                Markers[i] = new InteractiveMarker(ref b);
+                int n = b.DeserializeArrayLength();
+                Markers = n == 0
+                    ? System.Array.Empty<InteractiveMarker>()
+                    : new InteractiveMarker[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Markers[i] = new InteractiveMarker(ref b);
+                }
             }
             b.Align4();
-            b.DeserializeArray(out Poses);
-            for (int i = 0; i < Poses.Length; i++)
             {
-                Poses[i] = new InteractiveMarkerPose(ref b);
+                int n = b.DeserializeArrayLength();
+                Poses = n == 0
+                    ? System.Array.Empty<InteractiveMarkerPose>()
+                    : new InteractiveMarkerPose[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Poses[i] = new InteractiveMarkerPose(ref b);
+                }
             }
             b.Align4();
             b.DeserializeStringArray(out Erases);
@@ -160,6 +180,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, ServerId);
             c = WriteBuffer2.Align8(c);
             c += 8; // SeqNum
@@ -176,6 +197,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 c = t.AddRos2MessageLength(c);
             }
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Erases);
             return c;
         }

@@ -131,6 +131,7 @@ namespace Iviz.Msgs.GridMapMsgs
         public int AddRos2MessageLength(int d)
         {
             int c = d;
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, FrameId);
             c = WriteBuffer2.Align8(c);
             c += 8; // PositionX

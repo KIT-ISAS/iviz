@@ -43,15 +43,25 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.DeserializeString(out Name);
             b.DeserializeString(out Description);
             b.Deserialize(out Scale);
-            b.DeserializeArray(out MenuEntries);
-            for (int i = 0; i < MenuEntries.Length; i++)
             {
-                MenuEntries[i] = new MenuEntry(ref b);
+                int n = b.DeserializeArrayLength();
+                MenuEntries = n == 0
+                    ? System.Array.Empty<MenuEntry>()
+                    : new MenuEntry[n];
+                for (int i = 0; i < n; i++)
+                {
+                    MenuEntries[i] = new MenuEntry(ref b);
+                }
             }
-            b.DeserializeArray(out Controls);
-            for (int i = 0; i < Controls.Length; i++)
             {
-                Controls[i] = new InteractiveMarkerControl(ref b);
+                int n = b.DeserializeArrayLength();
+                Controls = n == 0
+                    ? System.Array.Empty<InteractiveMarkerControl>()
+                    : new InteractiveMarkerControl[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Controls[i] = new InteractiveMarkerControl(ref b);
+                }
             }
         }
         
@@ -65,16 +75,26 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.DeserializeString(out Description);
             b.Align4();
             b.Deserialize(out Scale);
-            b.DeserializeArray(out MenuEntries);
-            for (int i = 0; i < MenuEntries.Length; i++)
             {
-                MenuEntries[i] = new MenuEntry(ref b);
+                int n = b.DeserializeArrayLength();
+                MenuEntries = n == 0
+                    ? System.Array.Empty<MenuEntry>()
+                    : new MenuEntry[n];
+                for (int i = 0; i < n; i++)
+                {
+                    MenuEntries[i] = new MenuEntry(ref b);
+                }
             }
             b.Align4();
-            b.DeserializeArray(out Controls);
-            for (int i = 0; i < Controls.Length; i++)
             {
-                Controls[i] = new InteractiveMarkerControl(ref b);
+                int n = b.DeserializeArrayLength();
+                Controls = n == 0
+                    ? System.Array.Empty<InteractiveMarkerControl>()
+                    : new InteractiveMarkerControl[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Controls[i] = new InteractiveMarkerControl(ref b);
+                }
             }
         }
         
@@ -160,6 +180,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             c = WriteBuffer2.Align8(c);
             c += 56; // Pose
             c = WriteBuffer2.AddLength(c, Name);
+            c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Description);
             c = WriteBuffer2.Align4(c);
             c += 4; // Scale
