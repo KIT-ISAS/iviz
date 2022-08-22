@@ -667,7 +667,7 @@ namespace Iviz.Core
         /// <summary>
         /// Retrieves the given component from each entry in the enumerable, if it exists.
         /// </summary>
-        public static IEnumerable<T> WithComponent<T>(this IEnumerable<Component> transforms)
+        public static IEnumerable<T> WithComponent<T>(this IEnumerable<Component> transforms) where T : Component
         {
             foreach (var transform in transforms)
             {

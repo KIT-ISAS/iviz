@@ -21,6 +21,7 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
+using UnityEngine.Scripting;
 using Logger = Iviz.Msgs.Roscpp.Logger;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 

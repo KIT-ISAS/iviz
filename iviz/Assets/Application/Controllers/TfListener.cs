@@ -217,18 +217,19 @@ namespace Iviz.Controllers
 
         void PublishFrame(TfFrame frame)
         {
-            string childFrameId = frame.Id;
+            var parent = frame.Parent;
             string parentFrameId;
+            string childFrameId = frame.Id;
             Pose localPose;
 
-            if (frame.Parent == null || frame.Parent == TfModule.OriginFrame)
+            if (parent == null || parent == TfModule.OriginFrame)
             {
                 parentFrameId = "";
                 localPose = TfModule.RelativeToFixedFrame(frame.Transform);
             }
             else
             {
-                parentFrameId = frame.Parent.Id;
+                parentFrameId = parent.Id;
                 localPose = frame.Transform.AsLocalPose();
             }
 

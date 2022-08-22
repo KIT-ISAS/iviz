@@ -11,6 +11,7 @@ using Iviz.Roslib;
 using Iviz.Tools;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Scripting;
 
 namespace Iviz.Ros
 {

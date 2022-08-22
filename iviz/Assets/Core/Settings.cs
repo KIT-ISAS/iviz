@@ -2,11 +2,10 @@
 
 using System;
 using Iviz.Common;
-using Iviz.Core.XR;
-using Iviz.Msgs;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Utilities;
 using UnityEngine;
+using UnityEngine.Scripting;
 
 namespace Iviz.Core
 {

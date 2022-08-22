@@ -144,7 +144,6 @@ namespace Iviz.Ros
                 tryConnectOnce = false;
             }
 
-            SetConnectionState(connectionResult ? ConnectionState.Connected : ConnectionState.Disconnected);
             if (connectionResult)
             {
                 KeepReconnecting = true;
