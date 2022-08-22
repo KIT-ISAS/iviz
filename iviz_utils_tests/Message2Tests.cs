@@ -1,11 +1,10 @@
-using System;
-using System.Runtime.InteropServices;
-using System.Threading;
+
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.MeshMsgs;
 using Iviz.Msgs.StdMsgs;
+using Iviz.Tools;
 using NUnit.Framework;
 using UInt16 = Iviz.Msgs.StdMsgs.UInt16;
 
@@ -17,10 +16,42 @@ public class Message2Tests
     [Test]
     public void TestMessageConsistency()
     {
-        WriteBuffer2.AddLength(0, "a");
-        Assert.IsTrue(WriteBuffer2.AddLength(0, "") == sizeof(int) + 1);
-        Assert.IsTrue(WriteBuffer2.AddLength(0, "abcd") == sizeof(int) + "abcd".Length + 1);
-        Assert.IsTrue(WriteBuffer2.AddLength(1, "abcd") == 4 + sizeof(int) + "abcd".Length + 1);
+        var header = new Header(1, new time(10, 20), "abcd");
+        var log = new Msgs.RosgraphMsgs.Log(header, 1, "name", "message", "file", "function", 2000, new[] { "topic1, topic2" });
+
+        byte[] logArray = log.SerializeToArrayRos2();
+        //Assert.AreEqual(BaseUtils.GetMd5Hash(logArray), "2da79d032c7392f78627aff94eda903a");
+
+        var otherLog = log.DeserializeRos2(logArray);
+        Assert.AreEqual(log.Name, otherLog.Name);
+        Assert.AreEqual(log.Msg, otherLog.Msg);
+        Assert.AreEqual("", otherLog.Function); // marked as ignore!
+        Assert.AreEqual(log.Level, otherLog.Level);
+
+        double[] eye = new double[36];
+        foreach (int i in 1..6)
+        {
+            eye[i * 7] = 1;
+        }
+
+        var cov = new TwistWithCovarianceStamped(header,
+            new TwistWithCovariance(new Twist(Vector3.UnitX, Vector3.UnitZ), eye));
+
+        byte[] covArray = cov.SerializeToArrayRos2();
+        //Assert.AreEqual(BaseUtils.GetMd5Hash(covArray), "35ca07d018d5627c247bc4f9cbaccefc");
+
+        var otherCov = cov.DeserializeRos2(covArray);
+        Assert.AreEqual(cov.Twist.Twist.Angular, otherCov.Twist.Twist.Angular);
+        Assert.AreEqual(cov.Twist.Twist.Linear, otherCov.Twist.Twist.Linear);
+        CollectionAssert.AreEqual(cov.Twist.Covariance, otherCov.Twist.Covariance);        
+    }
+    
+    [Test]
+    public void TestMessageLengths()
+    {
+        Assert.IsTrue(new String("").Ros2MessageLength == sizeof(int) + 1);
+        Assert.IsTrue(new String("abcd").Ros2MessageLength == sizeof(int) + "abcd".Length + 1);
+        Assert.IsTrue(new String("abcd").AddRos2MessageLength(1) == 4 + sizeof(int) + "abcd".Length + 1);
         
         
         var h = new Header();

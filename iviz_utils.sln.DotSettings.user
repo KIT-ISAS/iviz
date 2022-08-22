@@ -1,10 +1,11 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=_002FUsers_002Fakzeac_002FDocuments_002Fiviz_002Fassimpnet_002FAssimpNet_002Fbin_002FRelease_002Fnetstandard1_002E3_002FAssimpNet_002Edll/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003ASocket_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2021_002E2_003Fresharper_002Dhost_003FSourcesCache_003Fd3525442f0c2430f8599c032103e0deb8f000_003F1E_003FSocket_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
+	
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/PredefinedNamingRules/=PrivateConstants/@EntryIndexedValue">&lt;Policy Inspect="True" Prefix="" Suffix="" Style="AaBb_AaBb" /&gt;</s:String>
 	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/CustomBuildToolPath/@EntryValue">/usr/local/share/dotnet/sdk/6.0.202/MSBuild.dll</s:String>
 	<s:Int64 x:Key="/Default/Environment/Hierarchy/Build/BuildTool/MsbuildVersion/@EntryValue">1114112</s:Int64>
-	<s:String x:Key="/Default/Environment/Hierarchy/Build/SolutionBuilderNext/OutputVerbosityLevel/@EntryValue">Diagnostic</s:String>
+	
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=289aa647_002D5e74_002D4287_002D96d2_002D3cbb7b0f8886/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestTf" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
     &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMagnitude&lt;/TestId&gt;
@@ -30,6 +31,12 @@
     &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.NetworkTests.TestChannelAsync&lt;/TestId&gt;
     &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestImage&lt;/TestId&gt;
     &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestWorld&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestDialogs&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.MessageTests.TestMessageConsistency&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.MessageTests&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.RosMasterTests&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.Message2Tests.TestMessageConsistency&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.Message2Tests.TestMessageConsistencyN&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e3adf1f9_002D6f13_002D431e_002Da944_002Db6b703a80cb5/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestChannelsAsync" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
@@ -50,6 +57,7 @@
       &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests&lt;/TestId&gt;
       &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.BagTests.TestTopics&lt;/TestId&gt;
       &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.BagTests.TestMessages&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.Message2Tests&lt;/TestId&gt;
     &lt;/TestAncestor&gt;
     &lt;ProjectFile&gt;D426E606-432C-4314-B451-285C6AEA44F2/f:MessageTests.cs&lt;/ProjectFile&gt;
   &lt;/Or&gt;

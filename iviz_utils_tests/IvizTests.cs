@@ -484,7 +484,7 @@ public class IvizTests
 
         writer.WaitForAnySubscriber();
         Thread.Sleep(100);
-        uint s = 0;
+        //uint s = 0;
         const int w = 100;
         const int h = 100;
 
