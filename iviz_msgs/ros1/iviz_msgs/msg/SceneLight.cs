@@ -46,8 +46,8 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Type);
             b.Deserialize(out CastShadows);
             b.Deserialize(out Diffuse);
-            b.Deserialize(out Range);
             b.Align4();
+            b.Deserialize(out Range);
             b.Deserialize(out Position);
             b.Deserialize(out Direction);
             b.Deserialize(out InnerAngle);

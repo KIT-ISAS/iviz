@@ -12,7 +12,7 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         public MarkerArray()
         {
-            Markers = System.Array.Empty<Marker>();
+            Markers = EmptyArray<Marker>.Value;
         }
         
         public MarkerArray(Marker[] Markers)
@@ -25,7 +25,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Markers = n == 0
-                    ? System.Array.Empty<Marker>()
+                    ? EmptyArray<Marker>.Value
                     : new Marker[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -36,11 +36,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public MarkerArray(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Markers = n == 0
-                    ? System.Array.Empty<Marker>()
+                    ? EmptyArray<Marker>.Value
                     : new Marker[n];
                 for (int i = 0; i < n; i++)
                 {

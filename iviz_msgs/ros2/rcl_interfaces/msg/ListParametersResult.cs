@@ -16,8 +16,8 @@ namespace Iviz.Msgs.RclInterfaces
     
         public ListParametersResult()
         {
-            Names = System.Array.Empty<string>();
-            Prefixes = System.Array.Empty<string>();
+            Names = EmptyArray<string>.Value;
+            Prefixes = EmptyArray<string>.Value;
         }
         
         public ListParametersResult(string[] Names, string[] Prefixes)

@@ -38,6 +38,7 @@ namespace Iviz.Msgs.StdMsgs
         {
             b.Align4();
             b.DeserializeString(out Label);
+            b.Align4();
             b.Deserialize(out Size);
             b.Deserialize(out Stride);
         }

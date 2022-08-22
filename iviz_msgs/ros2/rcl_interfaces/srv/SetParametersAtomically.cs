@@ -57,7 +57,7 @@ namespace Iviz.Msgs.RclInterfaces
     
         public SetParametersAtomicallyRequest()
         {
-            Parameters = System.Array.Empty<Parameter>();
+            Parameters = EmptyArray<Parameter>.Value;
         }
         
         public SetParametersAtomicallyRequest(Parameter[] Parameters)
@@ -70,7 +70,7 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 int n = b.DeserializeArrayLength();
                 Parameters = n == 0
-                    ? System.Array.Empty<Parameter>()
+                    ? EmptyArray<Parameter>.Value
                     : new Parameter[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -81,11 +81,11 @@ namespace Iviz.Msgs.RclInterfaces
         
         public SetParametersAtomicallyRequest(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Parameters = n == 0
-                    ? System.Array.Empty<Parameter>()
+                    ? EmptyArray<Parameter>.Value
                     : new Parameter[n];
                 for (int i = 0; i < n; i++)
                 {

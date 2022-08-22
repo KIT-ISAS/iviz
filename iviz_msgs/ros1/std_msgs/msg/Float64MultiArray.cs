@@ -18,7 +18,7 @@ namespace Iviz.Msgs.StdMsgs
         public Float64MultiArray()
         {
             Layout = new MultiArrayLayout();
-            Data = System.Array.Empty<double>();
+            Data = EmptyArray<double>.Value;
         }
         
         public Float64MultiArray(MultiArrayLayout Layout, double[] Data)
@@ -34,7 +34,7 @@ namespace Iviz.Msgs.StdMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Data = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
@@ -46,15 +46,16 @@ namespace Iviz.Msgs.StdMsgs
         public Float64MultiArray(ref ReadBuffer2 b)
         {
             Layout = new MultiArrayLayout(ref b);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Data = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 8);
                 }
             }

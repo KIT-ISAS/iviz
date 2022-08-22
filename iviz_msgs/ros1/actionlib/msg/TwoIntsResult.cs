@@ -26,6 +26,7 @@ namespace Iviz.Msgs.Actionlib
         
         public TwoIntsResult(ref ReadBuffer2 b)
         {
+            b.Align8();
             b.Deserialize(out Sum);
         }
         

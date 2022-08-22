@@ -26,7 +26,7 @@ namespace Iviz.Msgs.SensorMsgs
         public CompressedImage()
         {
             Format = "";
-            Data = System.Array.Empty<byte>();
+            Data = EmptyArray<byte>.Value;
         }
         
         public CompressedImage(in StdMsgs.Header Header, string Format, byte[] Data)
@@ -44,7 +44,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Data = n == 0
-                    ? System.Array.Empty<byte>()
+                    ? EmptyArray<byte>.Value
                     : new byte[n];
                 if (n != 0)
                 {
@@ -58,12 +58,12 @@ namespace Iviz.Msgs.SensorMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
             b.DeserializeString(out Format);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Data = n == 0
-                    ? System.Array.Empty<byte>()
+                    ? EmptyArray<byte>.Value
                     : new byte[n];
                 if (n != 0)
                 {

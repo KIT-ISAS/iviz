@@ -13,8 +13,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         public Trajectory()
         {
-            Poses = System.Array.Empty<GeometryMsgs.Pose>();
-            Timestamps = System.Array.Empty<time>();
+            Poses = EmptyArray<GeometryMsgs.Pose>.Value;
+            Timestamps = EmptyArray<time>.Value;
         }
         
         public Trajectory(GeometryMsgs.Pose[] Poses, time[] Timestamps)
@@ -29,7 +29,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Poses = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Pose>()
+                    ? EmptyArray<GeometryMsgs.Pose>.Value
                     : new GeometryMsgs.Pose[n];
                 if (n != 0)
                 {
@@ -40,7 +40,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Timestamps = n == 0
-                    ? System.Array.Empty<time>()
+                    ? EmptyArray<time>.Value
                     : new time[n];
                 if (n != 0)
                 {
@@ -51,15 +51,16 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Trajectory(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Poses = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Pose>()
+                    ? EmptyArray<GeometryMsgs.Pose>.Value
                     : new GeometryMsgs.Pose[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Poses[0]), n * 56);
                 }
             }
@@ -67,7 +68,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Timestamps = n == 0
-                    ? System.Array.Empty<time>()
+                    ? EmptyArray<time>.Value
                     : new time[n];
                 if (n != 0)
                 {

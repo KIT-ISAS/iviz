@@ -13,7 +13,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         public Feature()
         {
-            Descriptor = System.Array.Empty<StdMsgs.Float32>();
+            Descriptor = EmptyArray<StdMsgs.Float32>.Value;
         }
         
         public Feature(in GeometryMsgs.Point Location, StdMsgs.Float32[] Descriptor)
@@ -28,7 +28,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Descriptor = n == 0
-                    ? System.Array.Empty<StdMsgs.Float32>()
+                    ? EmptyArray<StdMsgs.Float32>.Value
                     : new StdMsgs.Float32[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -44,7 +44,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Descriptor = n == 0
-                    ? System.Array.Empty<StdMsgs.Float32>()
+                    ? EmptyArray<StdMsgs.Float32>.Value
                     : new StdMsgs.Float32[n];
                 for (int i = 0; i < n; i++)
                 {

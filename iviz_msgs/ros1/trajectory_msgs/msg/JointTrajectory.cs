@@ -14,8 +14,8 @@ namespace Iviz.Msgs.TrajectoryMsgs
     
         public JointTrajectory()
         {
-            JointNames = System.Array.Empty<string>();
-            Points = System.Array.Empty<JointTrajectoryPoint>();
+            JointNames = EmptyArray<string>.Value;
+            Points = EmptyArray<JointTrajectoryPoint>.Value;
         }
         
         public JointTrajectory(in StdMsgs.Header Header, string[] JointNames, JointTrajectoryPoint[] Points)
@@ -32,7 +32,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Points = n == 0
-                    ? System.Array.Empty<JointTrajectoryPoint>()
+                    ? EmptyArray<JointTrajectoryPoint>.Value
                     : new JointTrajectoryPoint[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -46,11 +46,11 @@ namespace Iviz.Msgs.TrajectoryMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
             b.DeserializeStringArray(out JointNames);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Points = n == 0
-                    ? System.Array.Empty<JointTrajectoryPoint>()
+                    ? EmptyArray<JointTrajectoryPoint>.Value
                     : new JointTrajectoryPoint[n];
                 for (int i = 0; i < n; i++)
                 {

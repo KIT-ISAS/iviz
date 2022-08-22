@@ -61,7 +61,7 @@ namespace Iviz.Msgs.IvizMsgs
         public UpdateModuleRequest()
         {
             Id = "";
-            Fields = System.Array.Empty<string>();
+            Fields = EmptyArray<string>.Value;
             Config = "";
         }
         

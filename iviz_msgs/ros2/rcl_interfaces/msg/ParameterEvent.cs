@@ -25,9 +25,9 @@ namespace Iviz.Msgs.RclInterfaces
         public ParameterEvent()
         {
             Node = "";
-            NewParameters = System.Array.Empty<Parameter>();
-            ChangedParameters = System.Array.Empty<Parameter>();
-            DeletedParameters = System.Array.Empty<Parameter>();
+            NewParameters = EmptyArray<Parameter>.Value;
+            ChangedParameters = EmptyArray<Parameter>.Value;
+            DeletedParameters = EmptyArray<Parameter>.Value;
         }
         
         public ParameterEvent(ref ReadBuffer b)
@@ -37,7 +37,7 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 int n = b.DeserializeArrayLength();
                 NewParameters = n == 0
-                    ? System.Array.Empty<Parameter>()
+                    ? EmptyArray<Parameter>.Value
                     : new Parameter[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -47,7 +47,7 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 int n = b.DeserializeArrayLength();
                 ChangedParameters = n == 0
-                    ? System.Array.Empty<Parameter>()
+                    ? EmptyArray<Parameter>.Value
                     : new Parameter[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 int n = b.DeserializeArrayLength();
                 DeletedParameters = n == 0
-                    ? System.Array.Empty<Parameter>()
+                    ? EmptyArray<Parameter>.Value
                     : new Parameter[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -68,36 +68,36 @@ namespace Iviz.Msgs.RclInterfaces
         
         public ParameterEvent(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out Stamp);
-            b.Align4();
             b.DeserializeString(out Node);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 NewParameters = n == 0
-                    ? System.Array.Empty<Parameter>()
+                    ? EmptyArray<Parameter>.Value
                     : new Parameter[n];
                 for (int i = 0; i < n; i++)
                 {
                     NewParameters[i] = new Parameter(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 ChangedParameters = n == 0
-                    ? System.Array.Empty<Parameter>()
+                    ? EmptyArray<Parameter>.Value
                     : new Parameter[n];
                 for (int i = 0; i < n; i++)
                 {
                     ChangedParameters[i] = new Parameter(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 DeletedParameters = n == 0
-                    ? System.Array.Empty<Parameter>()
+                    ? EmptyArray<Parameter>.Value
                     : new Parameter[n];
                 for (int i = 0; i < n; i++)
                 {

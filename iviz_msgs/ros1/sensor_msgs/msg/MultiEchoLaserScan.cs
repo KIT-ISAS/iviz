@@ -47,8 +47,8 @@ namespace Iviz.Msgs.SensorMsgs
     
         public MultiEchoLaserScan()
         {
-            Ranges = System.Array.Empty<LaserEcho>();
-            Intensities = System.Array.Empty<LaserEcho>();
+            Ranges = EmptyArray<LaserEcho>.Value;
+            Intensities = EmptyArray<LaserEcho>.Value;
         }
         
         public MultiEchoLaserScan(ref ReadBuffer b)
@@ -64,7 +64,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Ranges = n == 0
-                    ? System.Array.Empty<LaserEcho>()
+                    ? EmptyArray<LaserEcho>.Value
                     : new LaserEcho[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -74,7 +74,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Intensities = n == 0
-                    ? System.Array.Empty<LaserEcho>()
+                    ? EmptyArray<LaserEcho>.Value
                     : new LaserEcho[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -86,6 +86,7 @@ namespace Iviz.Msgs.SensorMsgs
         public MultiEchoLaserScan(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out AngleMin);
             b.Deserialize(out AngleMax);
             b.Deserialize(out AngleIncrement);
@@ -93,22 +94,21 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out ScanTime);
             b.Deserialize(out RangeMin);
             b.Deserialize(out RangeMax);
-            b.Align4();
             {
                 int n = b.DeserializeArrayLength();
                 Ranges = n == 0
-                    ? System.Array.Empty<LaserEcho>()
+                    ? EmptyArray<LaserEcho>.Value
                     : new LaserEcho[n];
                 for (int i = 0; i < n; i++)
                 {
                     Ranges[i] = new LaserEcho(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Intensities = n == 0
-                    ? System.Array.Empty<LaserEcho>()
+                    ? EmptyArray<LaserEcho>.Value
                     : new LaserEcho[n];
                 for (int i = 0; i < n; i++)
                 {

@@ -124,7 +124,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             Message = "";
             Intrinsics = new double[9];
-            Data = System.Array.Empty<byte>();
+            Data = EmptyArray<byte>.Value;
         }
         
         public CaptureScreenshotResponse(ref ReadBuffer b)
@@ -145,7 +145,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Data = n == 0
-                    ? System.Array.Empty<byte>()
+                    ? EmptyArray<byte>.Value
                     : new byte[n];
                 if (n != 0)
                 {
@@ -160,12 +160,13 @@ namespace Iviz.Msgs.IvizMsgs
             b.Align4();
             b.DeserializeString(out Message);
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out Width);
             b.Deserialize(out Height);
             b.Deserialize(out Bpp);
-            b.Align8();
             unsafe
             {
+                b.Align8();
                 Intrinsics = new double[9];
                 b.DeserializeStructArray(Unsafe.AsPointer(ref Intrinsics[0]), 9 * 8);
             }
@@ -174,7 +175,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Data = n == 0
-                    ? System.Array.Empty<byte>()
+                    ? EmptyArray<byte>.Value
                     : new byte[n];
                 if (n != 0)
                 {

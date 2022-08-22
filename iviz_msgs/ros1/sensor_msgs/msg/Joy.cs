@@ -18,8 +18,8 @@ namespace Iviz.Msgs.SensorMsgs
     
         public Joy()
         {
-            Axes = System.Array.Empty<float>();
-            Buttons = System.Array.Empty<int>();
+            Axes = EmptyArray<float>.Value;
+            Buttons = EmptyArray<int>.Value;
         }
         
         public Joy(in StdMsgs.Header Header, float[] Axes, int[] Buttons)
@@ -36,7 +36,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Axes = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -47,7 +47,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Buttons = n == 0
-                    ? System.Array.Empty<int>()
+                    ? EmptyArray<int>.Value
                     : new int[n];
                 if (n != 0)
                 {
@@ -59,12 +59,12 @@ namespace Iviz.Msgs.SensorMsgs
         public Joy(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Axes = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -75,7 +75,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Buttons = n == 0
-                    ? System.Array.Empty<int>()
+                    ? EmptyArray<int>.Value
                     : new int[n];
                 if (n != 0)
                 {

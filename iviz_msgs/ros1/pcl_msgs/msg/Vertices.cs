@@ -13,7 +13,7 @@ namespace Iviz.Msgs.PclMsgs
     
         public Vertices()
         {
-            Vertices_ = System.Array.Empty<uint>();
+            Vertices_ = EmptyArray<uint>.Value;
         }
         
         public Vertices(uint[] Vertices_)
@@ -27,7 +27,7 @@ namespace Iviz.Msgs.PclMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Vertices_ = n == 0
-                    ? System.Array.Empty<uint>()
+                    ? EmptyArray<uint>.Value
                     : new uint[n];
                 if (n != 0)
                 {
@@ -38,12 +38,12 @@ namespace Iviz.Msgs.PclMsgs
         
         public Vertices(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Vertices_ = n == 0
-                    ? System.Array.Empty<uint>()
+                    ? EmptyArray<uint>.Value
                     : new uint[n];
                 if (n != 0)
                 {

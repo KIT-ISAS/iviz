@@ -13,7 +13,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         public MeshVertexColors()
         {
-            VertexColors = System.Array.Empty<StdMsgs.ColorRGBA>();
+            VertexColors = EmptyArray<StdMsgs.ColorRGBA>.Value;
         }
         
         public MeshVertexColors(StdMsgs.ColorRGBA[] VertexColors)
@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 VertexColors = n == 0
-                    ? System.Array.Empty<StdMsgs.ColorRGBA>()
+                    ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
@@ -38,12 +38,12 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshVertexColors(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 VertexColors = n == 0
-                    ? System.Array.Empty<StdMsgs.ColorRGBA>()
+                    ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {

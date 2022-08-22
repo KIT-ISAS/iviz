@@ -13,7 +13,7 @@ namespace Iviz.Msgs.SensorMsgs
     
         public JoyFeedbackArray()
         {
-            Array = System.Array.Empty<JoyFeedback>();
+            Array = EmptyArray<JoyFeedback>.Value;
         }
         
         public JoyFeedbackArray(JoyFeedback[] Array)
@@ -26,7 +26,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Array = n == 0
-                    ? System.Array.Empty<JoyFeedback>()
+                    ? EmptyArray<JoyFeedback>.Value
                     : new JoyFeedback[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -37,11 +37,11 @@ namespace Iviz.Msgs.SensorMsgs
         
         public JoyFeedbackArray(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Array = n == 0
-                    ? System.Array.Empty<JoyFeedback>()
+                    ? EmptyArray<JoyFeedback>.Value
                     : new JoyFeedback[n];
                 for (int i = 0; i < n; i++)
                 {

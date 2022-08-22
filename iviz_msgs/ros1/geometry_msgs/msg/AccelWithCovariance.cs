@@ -41,9 +41,9 @@ namespace Iviz.Msgs.GeometryMsgs
         public AccelWithCovariance(ref ReadBuffer2 b)
         {
             Accel = new Accel(ref b);
-            b.Align8();
             unsafe
             {
+                b.Align8();
                 Covariance = new double[36];
                 b.DeserializeStructArray(Unsafe.AsPointer(ref Covariance[0]), 36 * 8);
             }

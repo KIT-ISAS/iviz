@@ -13,8 +13,8 @@ namespace Iviz.Msgs.MeshMsgs
     
         public VectorField()
         {
-            Positions = System.Array.Empty<GeometryMsgs.Point>();
-            Vectors = System.Array.Empty<GeometryMsgs.Vector3>();
+            Positions = EmptyArray<GeometryMsgs.Point>.Value;
+            Vectors = EmptyArray<GeometryMsgs.Vector3>.Value;
         }
         
         public VectorField(GeometryMsgs.Point[] Positions, GeometryMsgs.Vector3[] Vectors)
@@ -29,7 +29,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Positions = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
@@ -40,7 +40,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Vectors = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Vector3>()
+                    ? EmptyArray<GeometryMsgs.Vector3>.Value
                     : new GeometryMsgs.Vector3[n];
                 if (n != 0)
                 {
@@ -51,15 +51,16 @@ namespace Iviz.Msgs.MeshMsgs
         
         public VectorField(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Positions = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Positions[0]), n * 24);
                 }
             }
@@ -67,10 +68,11 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Vectors = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Vector3>()
+                    ? EmptyArray<GeometryMsgs.Vector3>.Value
                     : new GeometryMsgs.Vector3[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Vectors[0]), n * 24);
                 }
             }

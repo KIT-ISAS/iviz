@@ -18,7 +18,7 @@ namespace Iviz.Msgs.StdMsgs
         public Int32MultiArray()
         {
             Layout = new MultiArrayLayout();
-            Data = System.Array.Empty<int>();
+            Data = EmptyArray<int>.Value;
         }
         
         public Int32MultiArray(MultiArrayLayout Layout, int[] Data)
@@ -34,7 +34,7 @@ namespace Iviz.Msgs.StdMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Data = n == 0
-                    ? System.Array.Empty<int>()
+                    ? EmptyArray<int>.Value
                     : new int[n];
                 if (n != 0)
                 {
@@ -46,12 +46,12 @@ namespace Iviz.Msgs.StdMsgs
         public Int32MultiArray(ref ReadBuffer2 b)
         {
             Layout = new MultiArrayLayout(ref b);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Data = n == 0
-                    ? System.Array.Empty<int>()
+                    ? EmptyArray<int>.Value
                     : new int[n];
                 if (n != 0)
                 {

@@ -10,7 +10,7 @@ namespace Iviz.Msgs;
 /// <summary>
 /// Contains utilities to deserialize ROS 2 messages from a byte array.
 /// </summary>
-public unsafe partial struct ReadBuffer2
+public unsafe struct ReadBuffer2
 {
     /// <summary>
     /// Current position.
@@ -416,9 +416,4 @@ public unsafe partial struct ReadBuffer2
         Advance(size);
     }
     #endregion
-}
-
-public static class EmptyArray<T>
-{
-    internal static readonly T[] Value = new T[0];
 }

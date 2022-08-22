@@ -12,7 +12,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         public ModelTexCoords()
         {
-            Coords = System.Array.Empty<GeometryMsgs.Point32>();
+            Coords = EmptyArray<GeometryMsgs.Point32>.Value;
         }
         
         public ModelTexCoords(GeometryMsgs.Point32[] Coords)
@@ -26,7 +26,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Coords = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
@@ -37,12 +37,12 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ModelTexCoords(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Coords = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {

@@ -103,7 +103,7 @@ namespace Iviz.Msgs.IvizMsgs
         public GetCaptureResolutionsResponse()
         {
             Message = "";
-            Resolutions = System.Array.Empty<Vector2i>();
+            Resolutions = EmptyArray<Vector2i>.Value;
         }
         
         public GetCaptureResolutionsResponse(bool Success, string Message, Vector2i[] Resolutions)
@@ -120,7 +120,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Resolutions = n == 0
-                    ? System.Array.Empty<Vector2i>()
+                    ? EmptyArray<Vector2i>.Value
                     : new Vector2i[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -134,11 +134,11 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Success);
             b.Align4();
             b.DeserializeString(out Message);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Resolutions = n == 0
-                    ? System.Array.Empty<Vector2i>()
+                    ? EmptyArray<Vector2i>.Value
                     : new Vector2i[n];
                 for (int i = 0; i < n; i++)
                 {

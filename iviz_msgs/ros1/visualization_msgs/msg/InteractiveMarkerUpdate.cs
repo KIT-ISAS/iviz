@@ -36,9 +36,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         public InteractiveMarkerUpdate()
         {
             ServerId = "";
-            Markers = System.Array.Empty<InteractiveMarker>();
-            Poses = System.Array.Empty<InteractiveMarkerPose>();
-            Erases = System.Array.Empty<string>();
+            Markers = EmptyArray<InteractiveMarker>.Value;
+            Poses = EmptyArray<InteractiveMarkerPose>.Value;
+            Erases = EmptyArray<string>.Value;
         }
         
         public InteractiveMarkerUpdate(ref ReadBuffer b)
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Markers = n == 0
-                    ? System.Array.Empty<InteractiveMarker>()
+                    ? EmptyArray<InteractiveMarker>.Value
                     : new InteractiveMarker[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Poses = n == 0
-                    ? System.Array.Empty<InteractiveMarkerPose>()
+                    ? EmptyArray<InteractiveMarkerPose>.Value
                     : new InteractiveMarkerPose[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -73,24 +73,25 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             b.Align4();
             b.DeserializeString(out ServerId);
+            b.Align8();
             b.Deserialize(out SeqNum);
             b.Deserialize(out Type);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Markers = n == 0
-                    ? System.Array.Empty<InteractiveMarker>()
+                    ? EmptyArray<InteractiveMarker>.Value
                     : new InteractiveMarker[n];
                 for (int i = 0; i < n; i++)
                 {
                     Markers[i] = new InteractiveMarker(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Poses = n == 0
-                    ? System.Array.Empty<InteractiveMarkerPose>()
+                    ? EmptyArray<InteractiveMarkerPose>.Value
                     : new InteractiveMarkerPose[n];
                 for (int i = 0; i < n; i++)
                 {

@@ -268,6 +268,7 @@ namespace Iviz.MsgsGen
         {
             var str = new StringBuilder(200);
 
+            str.AppendNewLine("using System.Runtime.CompilerServices;");
             str.AppendNewLine("using System.Runtime.Serialization;");
 
             str.AppendNewLine("");

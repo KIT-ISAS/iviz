@@ -56,7 +56,7 @@ namespace Iviz.Msgs.RclInterfaces
     
         public GetParameterTypesRequest()
         {
-            Names = System.Array.Empty<string>();
+            Names = EmptyArray<string>.Value;
         }
         
         public GetParameterTypesRequest(string[] Names)
@@ -124,7 +124,7 @@ namespace Iviz.Msgs.RclInterfaces
     
         public GetParameterTypesResponse()
         {
-            Types = System.Array.Empty<byte>();
+            Types = EmptyArray<byte>.Value;
         }
         
         public GetParameterTypesResponse(byte[] Types)
@@ -138,7 +138,7 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 int n = b.DeserializeArrayLength();
                 Types = n == 0
-                    ? System.Array.Empty<byte>()
+                    ? EmptyArray<byte>.Value
                     : new byte[n];
                 if (n != 0)
                 {
@@ -149,12 +149,12 @@ namespace Iviz.Msgs.RclInterfaces
         
         public GetParameterTypesResponse(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Types = n == 0
-                    ? System.Array.Empty<byte>()
+                    ? EmptyArray<byte>.Value
                     : new byte[n];
                 if (n != 0)
                 {

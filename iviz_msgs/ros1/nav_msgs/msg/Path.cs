@@ -14,7 +14,7 @@ namespace Iviz.Msgs.NavMsgs
     
         public Path()
         {
-            Poses = System.Array.Empty<GeometryMsgs.PoseStamped>();
+            Poses = EmptyArray<GeometryMsgs.PoseStamped>.Value;
         }
         
         public Path(in StdMsgs.Header Header, GeometryMsgs.PoseStamped[] Poses)
@@ -29,7 +29,7 @@ namespace Iviz.Msgs.NavMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Poses = n == 0
-                    ? System.Array.Empty<GeometryMsgs.PoseStamped>()
+                    ? EmptyArray<GeometryMsgs.PoseStamped>.Value
                     : new GeometryMsgs.PoseStamped[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -41,11 +41,11 @@ namespace Iviz.Msgs.NavMsgs
         public Path(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Poses = n == 0
-                    ? System.Array.Empty<GeometryMsgs.PoseStamped>()
+                    ? EmptyArray<GeometryMsgs.PoseStamped>.Value
                     : new GeometryMsgs.PoseStamped[n];
                 for (int i = 0; i < n; i++)
                 {

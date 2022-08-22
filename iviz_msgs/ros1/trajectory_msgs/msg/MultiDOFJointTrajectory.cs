@@ -19,8 +19,8 @@ namespace Iviz.Msgs.TrajectoryMsgs
     
         public MultiDOFJointTrajectory()
         {
-            JointNames = System.Array.Empty<string>();
-            Points = System.Array.Empty<MultiDOFJointTrajectoryPoint>();
+            JointNames = EmptyArray<string>.Value;
+            Points = EmptyArray<MultiDOFJointTrajectoryPoint>.Value;
         }
         
         public MultiDOFJointTrajectory(in StdMsgs.Header Header, string[] JointNames, MultiDOFJointTrajectoryPoint[] Points)
@@ -37,7 +37,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Points = n == 0
-                    ? System.Array.Empty<MultiDOFJointTrajectoryPoint>()
+                    ? EmptyArray<MultiDOFJointTrajectoryPoint>.Value
                     : new MultiDOFJointTrajectoryPoint[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -51,11 +51,11 @@ namespace Iviz.Msgs.TrajectoryMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
             b.DeserializeStringArray(out JointNames);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Points = n == 0
-                    ? System.Array.Empty<MultiDOFJointTrajectoryPoint>()
+                    ? EmptyArray<MultiDOFJointTrajectoryPoint>.Value
                     : new MultiDOFJointTrajectoryPoint[n];
                 for (int i = 0; i < n; i++)
                 {

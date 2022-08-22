@@ -26,9 +26,9 @@ namespace Iviz.Msgs.GridMapMsgs
         public GridMap()
         {
             Info = new GridMapInfo();
-            Layers = System.Array.Empty<string>();
-            BasicLayers = System.Array.Empty<string>();
-            Data = System.Array.Empty<StdMsgs.Float32MultiArray>();
+            Layers = EmptyArray<string>.Value;
+            BasicLayers = EmptyArray<string>.Value;
+            Data = EmptyArray<StdMsgs.Float32MultiArray>.Value;
         }
         
         public GridMap(ref ReadBuffer b)
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.GridMapMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Data = n == 0
-                    ? System.Array.Empty<StdMsgs.Float32MultiArray>()
+                    ? EmptyArray<StdMsgs.Float32MultiArray>.Value
                     : new StdMsgs.Float32MultiArray[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -57,17 +57,18 @@ namespace Iviz.Msgs.GridMapMsgs
             b.DeserializeStringArray(out Layers);
             b.Align4();
             b.DeserializeStringArray(out BasicLayers);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Data = n == 0
-                    ? System.Array.Empty<StdMsgs.Float32MultiArray>()
+                    ? EmptyArray<StdMsgs.Float32MultiArray>.Value
                     : new StdMsgs.Float32MultiArray[n];
                 for (int i = 0; i < n; i++)
                 {
                     Data[i] = new StdMsgs.Float32MultiArray(ref b);
                 }
             }
+            b.Align2();
             b.Deserialize(out OuterStartIndex);
             b.Deserialize(out InnerStartIndex);
         }

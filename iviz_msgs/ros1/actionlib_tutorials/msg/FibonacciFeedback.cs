@@ -13,7 +13,7 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         public FibonacciFeedback()
         {
-            Sequence = System.Array.Empty<int>();
+            Sequence = EmptyArray<int>.Value;
         }
         
         public FibonacciFeedback(int[] Sequence)
@@ -27,7 +27,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             {
                 int n = b.DeserializeArrayLength();
                 Sequence = n == 0
-                    ? System.Array.Empty<int>()
+                    ? EmptyArray<int>.Value
                     : new int[n];
                 if (n != 0)
                 {
@@ -38,12 +38,12 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public FibonacciFeedback(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Sequence = n == 0
-                    ? System.Array.Empty<int>()
+                    ? EmptyArray<int>.Value
                     : new int[n];
                 if (n != 0)
                 {

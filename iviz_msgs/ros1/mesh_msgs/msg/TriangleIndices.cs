@@ -32,9 +32,9 @@ namespace Iviz.Msgs.MeshMsgs
         
         public TriangleIndices(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 VertexIndices = new uint[3];
                 b.DeserializeStructArray(Unsafe.AsPointer(ref VertexIndices[0]), 3 * 4);
             }

@@ -28,7 +28,7 @@ namespace Iviz.Msgs.HriMsgs
     
         public AudioFeatures()
         {
-            MFCC = System.Array.Empty<float>();
+            MFCC = EmptyArray<float>.Value;
         }
         
         public AudioFeatures(ref ReadBuffer b)
@@ -41,7 +41,7 @@ namespace Iviz.Msgs.HriMsgs
             {
                 int n = b.DeserializeArrayLength();
                 MFCC = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -52,16 +52,16 @@ namespace Iviz.Msgs.HriMsgs
         
         public AudioFeatures(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out ZCR);
             b.Deserialize(out RMS);
             b.Deserialize(out Pitch);
             b.Deserialize(out HNR);
-            b.Align4();
             unsafe
             {
                 int n = b.DeserializeArrayLength();
                 MFCC = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {

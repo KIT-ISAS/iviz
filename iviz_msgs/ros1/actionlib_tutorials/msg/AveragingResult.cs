@@ -30,6 +30,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public AveragingResult(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out InteriorAngle);
             b.Deserialize(out Apothem);
         }

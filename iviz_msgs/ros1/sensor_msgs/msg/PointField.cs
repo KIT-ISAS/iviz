@@ -52,8 +52,10 @@ namespace Iviz.Msgs.SensorMsgs
         {
             b.Align4();
             b.DeserializeString(out Name);
+            b.Align4();
             b.Deserialize(out Offset);
             b.Deserialize(out Datatype);
+            b.Align4();
             b.Deserialize(out Count);
         }
         

@@ -16,10 +16,10 @@ namespace Iviz.Msgs.MeshMsgs
     
         public MeshMaterials()
         {
-            Clusters = System.Array.Empty<MeshMsgs.MeshFaceCluster>();
-            Materials = System.Array.Empty<MeshMsgs.MeshMaterial>();
-            ClusterMaterials = System.Array.Empty<uint>();
-            VertexTexCoords = System.Array.Empty<MeshMsgs.MeshVertexTexCoords>();
+            Clusters = EmptyArray<MeshMsgs.MeshFaceCluster>.Value;
+            Materials = EmptyArray<MeshMsgs.MeshMaterial>.Value;
+            ClusterMaterials = EmptyArray<uint>.Value;
+            VertexTexCoords = EmptyArray<MeshMsgs.MeshVertexTexCoords>.Value;
         }
         
         public MeshMaterials(MeshMsgs.MeshFaceCluster[] Clusters, MeshMsgs.MeshMaterial[] Materials, uint[] ClusterMaterials, MeshMsgs.MeshVertexTexCoords[] VertexTexCoords)
@@ -35,7 +35,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Clusters = n == 0
-                    ? System.Array.Empty<MeshMsgs.MeshFaceCluster>()
+                    ? EmptyArray<MeshMsgs.MeshFaceCluster>.Value
                     : new MeshMsgs.MeshFaceCluster[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -45,7 +45,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Materials = n == 0
-                    ? System.Array.Empty<MeshMsgs.MeshMaterial>()
+                    ? EmptyArray<MeshMsgs.MeshMaterial>.Value
                     : new MeshMsgs.MeshMaterial[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -56,7 +56,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 ClusterMaterials = n == 0
-                    ? System.Array.Empty<uint>()
+                    ? EmptyArray<uint>.Value
                     : new uint[n];
                 if (n != 0)
                 {
@@ -66,7 +66,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 VertexTexCoords = n == 0
-                    ? System.Array.Empty<MeshMsgs.MeshVertexTexCoords>()
+                    ? EmptyArray<MeshMsgs.MeshVertexTexCoords>.Value
                     : new MeshMsgs.MeshVertexTexCoords[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -77,34 +77,34 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshMaterials(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Clusters = n == 0
-                    ? System.Array.Empty<MeshMsgs.MeshFaceCluster>()
+                    ? EmptyArray<MeshMsgs.MeshFaceCluster>.Value
                     : new MeshMsgs.MeshFaceCluster[n];
                 for (int i = 0; i < n; i++)
                 {
                     Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Materials = n == 0
-                    ? System.Array.Empty<MeshMsgs.MeshMaterial>()
+                    ? EmptyArray<MeshMsgs.MeshMaterial>.Value
                     : new MeshMsgs.MeshMaterial[n];
                 for (int i = 0; i < n; i++)
                 {
                     Materials[i] = new MeshMsgs.MeshMaterial(ref b);
                 }
             }
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 ClusterMaterials = n == 0
-                    ? System.Array.Empty<uint>()
+                    ? EmptyArray<uint>.Value
                     : new uint[n];
                 if (n != 0)
                 {
@@ -114,7 +114,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 VertexTexCoords = n == 0
-                    ? System.Array.Empty<MeshMsgs.MeshVertexTexCoords>()
+                    ? EmptyArray<MeshMsgs.MeshVertexTexCoords>.Value
                     : new MeshMsgs.MeshVertexTexCoords[n];
                 for (int i = 0; i < n; i++)
                 {

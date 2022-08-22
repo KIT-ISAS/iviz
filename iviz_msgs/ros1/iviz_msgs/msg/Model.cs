@@ -20,9 +20,9 @@ namespace Iviz.Msgs.IvizMsgs
             Name = "";
             Filename = "";
             OrientationHint = "";
-            Meshes = System.Array.Empty<ModelMesh>();
-            Materials = System.Array.Empty<ModelMaterial>();
-            Nodes = System.Array.Empty<ModelNode>();
+            Meshes = EmptyArray<ModelMesh>.Value;
+            Materials = EmptyArray<ModelMaterial>.Value;
+            Nodes = EmptyArray<ModelNode>.Value;
         }
         
         public Model(ref ReadBuffer b)
@@ -33,7 +33,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Meshes = n == 0
-                    ? System.Array.Empty<ModelMesh>()
+                    ? EmptyArray<ModelMesh>.Value
                     : new ModelMesh[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -43,7 +43,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Materials = n == 0
-                    ? System.Array.Empty<ModelMaterial>()
+                    ? EmptyArray<ModelMaterial>.Value
                     : new ModelMaterial[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Nodes = n == 0
-                    ? System.Array.Empty<ModelNode>()
+                    ? EmptyArray<ModelNode>.Value
                     : new ModelNode[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -70,33 +70,33 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Filename);
             b.Align4();
             b.DeserializeString(out OrientationHint);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Meshes = n == 0
-                    ? System.Array.Empty<ModelMesh>()
+                    ? EmptyArray<ModelMesh>.Value
                     : new ModelMesh[n];
                 for (int i = 0; i < n; i++)
                 {
                     Meshes[i] = new ModelMesh(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Materials = n == 0
-                    ? System.Array.Empty<ModelMaterial>()
+                    ? EmptyArray<ModelMaterial>.Value
                     : new ModelMaterial[n];
                 for (int i = 0; i < n; i++)
                 {
                     Materials[i] = new ModelMaterial(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Nodes = n == 0
-                    ? System.Array.Empty<ModelNode>()
+                    ? EmptyArray<ModelNode>.Value
                     : new ModelNode[n];
                 for (int i = 0; i < n; i++)
                 {

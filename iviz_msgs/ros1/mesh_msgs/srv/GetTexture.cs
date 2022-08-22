@@ -74,6 +74,7 @@ namespace Iviz.Msgs.MeshMsgs
         {
             b.Align4();
             b.DeserializeString(out Uuid);
+            b.Align4();
             b.Deserialize(out TextureIndex);
         }
         

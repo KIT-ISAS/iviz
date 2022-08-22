@@ -57,9 +57,11 @@ namespace Iviz.Msgs.StereoMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Image = new SensorMsgs.Image(ref b);
+            b.Align4();
             b.Deserialize(out F);
             b.Deserialize(out T);
             ValidWindow = new SensorMsgs.RegionOfInterest(ref b);
+            b.Align4();
             b.Deserialize(out MinDisparity);
             b.Deserialize(out MaxDisparity);
             b.Deserialize(out DeltaD);

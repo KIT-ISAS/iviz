@@ -41,7 +41,7 @@ namespace Iviz.Msgs.ShapeMsgs
     
         public SolidPrimitive()
         {
-            Dimensions = System.Array.Empty<double>();
+            Dimensions = EmptyArray<double>.Value;
         }
         
         public SolidPrimitive(byte Type, double[] Dimensions)
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.ShapeMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Dimensions = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
@@ -69,15 +69,16 @@ namespace Iviz.Msgs.ShapeMsgs
         public SolidPrimitive(ref ReadBuffer2 b)
         {
             b.Deserialize(out Type);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Dimensions = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Dimensions[0]), n * 8);
                 }
             }

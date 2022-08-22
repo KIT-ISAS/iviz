@@ -33,8 +33,8 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             Name = "";
             Description = "";
-            MenuEntries = System.Array.Empty<MenuEntry>();
-            Controls = System.Array.Empty<InteractiveMarkerControl>();
+            MenuEntries = EmptyArray<MenuEntry>.Value;
+            Controls = EmptyArray<InteractiveMarkerControl>.Value;
         }
         
         public InteractiveMarker(ref ReadBuffer b)
@@ -47,7 +47,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 int n = b.DeserializeArrayLength();
                 MenuEntries = n == 0
-                    ? System.Array.Empty<MenuEntry>()
+                    ? EmptyArray<MenuEntry>.Value
                     : new MenuEntry[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Controls = n == 0
-                    ? System.Array.Empty<InteractiveMarkerControl>()
+                    ? EmptyArray<InteractiveMarkerControl>.Value
                     : new InteractiveMarkerControl[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -74,23 +74,23 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.DeserializeString(out Name);
             b.Align4();
             b.DeserializeString(out Description);
-            b.Deserialize(out Scale);
             b.Align4();
+            b.Deserialize(out Scale);
             {
                 int n = b.DeserializeArrayLength();
                 MenuEntries = n == 0
-                    ? System.Array.Empty<MenuEntry>()
+                    ? EmptyArray<MenuEntry>.Value
                     : new MenuEntry[n];
                 for (int i = 0; i < n; i++)
                 {
                     MenuEntries[i] = new MenuEntry(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Controls = n == 0
-                    ? System.Array.Empty<InteractiveMarkerControl>()
+                    ? EmptyArray<InteractiveMarkerControl>.Value
                     : new InteractiveMarkerControl[n];
                 for (int i = 0; i < n; i++)
                 {

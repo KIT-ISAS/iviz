@@ -133,7 +133,7 @@ namespace Iviz.Msgs.SensorMsgs
         public CameraInfo()
         {
             DistortionModel = "";
-            D = System.Array.Empty<double>();
+            D = EmptyArray<double>.Value;
             K = new double[9];
             R = new double[9];
             P = new double[12];
@@ -150,7 +150,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 D = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
@@ -180,19 +180,20 @@ namespace Iviz.Msgs.SensorMsgs
         public CameraInfo(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out Height);
             b.Deserialize(out Width);
-            b.Align4();
             b.DeserializeString(out DistortionModel);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 D = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref D[0]), n * 8);
                 }
             }

@@ -43,8 +43,8 @@ namespace Iviz.Msgs.VisualizationMsgs
         public ImageMarker()
         {
             Ns = "";
-            Points = System.Array.Empty<GeometryMsgs.Point>();
-            OutlineColors = System.Array.Empty<StdMsgs.ColorRGBA>();
+            Points = EmptyArray<GeometryMsgs.Point>.Value;
+            OutlineColors = EmptyArray<StdMsgs.ColorRGBA>.Value;
         }
         
         public ImageMarker(ref ReadBuffer b)
@@ -64,7 +64,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Points = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
@@ -75,7 +75,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 int n = b.DeserializeArrayLength();
                 OutlineColors = n == 0
-                    ? System.Array.Empty<StdMsgs.ColorRGBA>()
+                    ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
@@ -89,6 +89,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
             b.DeserializeString(out Ns);
+            b.Align4();
             b.Deserialize(out Id);
             b.Deserialize(out Type);
             b.Deserialize(out Action);
@@ -97,16 +98,18 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out Scale);
             b.Deserialize(out OutlineColor);
             b.Deserialize(out Filled);
+            b.Align4();
             b.Deserialize(out FillColor);
             b.Deserialize(out Lifetime);
             unsafe
             {
                 int n = b.DeserializeArrayLength();
                 Points = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Points[0]), n * 24);
                 }
             }
@@ -114,7 +117,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 int n = b.DeserializeArrayLength();
                 OutlineColors = n == 0
-                    ? System.Array.Empty<StdMsgs.ColorRGBA>()
+                    ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {

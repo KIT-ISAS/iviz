@@ -74,6 +74,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public StartCaptureRequest(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out ResolutionX);
             b.Deserialize(out ResolutionY);
             b.Deserialize(out WithHolograms);

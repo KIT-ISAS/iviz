@@ -41,9 +41,9 @@ namespace Iviz.Msgs.GeometryMsgs
         public TwistWithCovariance(ref ReadBuffer2 b)
         {
             Twist = new Twist(ref b);
-            b.Align8();
             unsafe
             {
+                b.Align8();
                 Covariance = new double[36];
                 b.DeserializeStructArray(Unsafe.AsPointer(ref Covariance[0]), 36 * 8);
             }

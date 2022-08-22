@@ -16,7 +16,7 @@ namespace Iviz.Msgs.NavMsgs
     
         public GridCells()
         {
-            Cells = System.Array.Empty<GeometryMsgs.Point>();
+            Cells = EmptyArray<GeometryMsgs.Point>.Value;
         }
         
         public GridCells(in StdMsgs.Header Header, float CellWidth, float CellHeight, GeometryMsgs.Point[] Cells)
@@ -36,7 +36,7 @@ namespace Iviz.Msgs.NavMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Cells = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
@@ -48,17 +48,18 @@ namespace Iviz.Msgs.NavMsgs
         public GridCells(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out CellWidth);
             b.Deserialize(out CellHeight);
-            b.Align4();
             unsafe
             {
                 int n = b.DeserializeArrayLength();
                 Cells = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Cells[0]), n * 24);
                 }
             }

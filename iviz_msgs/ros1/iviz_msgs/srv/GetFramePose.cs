@@ -56,7 +56,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         public GetFramePoseRequest()
         {
-            Frames = System.Array.Empty<string>();
+            Frames = EmptyArray<string>.Value;
         }
         
         public GetFramePoseRequest(string[] Frames)
@@ -123,8 +123,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         public GetFramePoseResponse()
         {
-            IsValid = System.Array.Empty<bool>();
-            Poses = System.Array.Empty<GeometryMsgs.Pose>();
+            IsValid = EmptyArray<bool>.Value;
+            Poses = EmptyArray<GeometryMsgs.Pose>.Value;
         }
         
         public GetFramePoseResponse(bool[] IsValid, GeometryMsgs.Pose[] Poses)
@@ -139,7 +139,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 IsValid = n == 0
-                    ? System.Array.Empty<bool>()
+                    ? EmptyArray<bool>.Value
                     : new bool[n];
                 if (n != 0)
                 {
@@ -150,7 +150,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Poses = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Pose>()
+                    ? EmptyArray<GeometryMsgs.Pose>.Value
                     : new GeometryMsgs.Pose[n];
                 if (n != 0)
                 {
@@ -161,27 +161,28 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetFramePoseResponse(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 IsValid = n == 0
-                    ? System.Array.Empty<bool>()
+                    ? EmptyArray<bool>.Value
                     : new bool[n];
                 if (n != 0)
                 {
                     b.DeserializeStructArray(Unsafe.AsPointer(ref IsValid[0]), n * 1);
                 }
             }
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Poses = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Pose>()
+                    ? EmptyArray<GeometryMsgs.Pose>.Value
                     : new GeometryMsgs.Pose[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Poses[0]), n * 56);
                 }
             }

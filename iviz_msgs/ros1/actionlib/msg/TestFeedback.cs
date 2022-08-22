@@ -26,6 +26,7 @@ namespace Iviz.Msgs.Actionlib
         
         public TestFeedback(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out Feedback);
         }
         

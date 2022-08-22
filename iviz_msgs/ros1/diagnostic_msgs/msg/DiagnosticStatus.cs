@@ -31,7 +31,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             Name = "";
             Message = "";
             HardwareId = "";
-            Values = System.Array.Empty<KeyValue>();
+            Values = EmptyArray<KeyValue>.Value;
         }
         
         public DiagnosticStatus(ref ReadBuffer b)
@@ -43,7 +43,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Values = n == 0
-                    ? System.Array.Empty<KeyValue>()
+                    ? EmptyArray<KeyValue>.Value
                     : new KeyValue[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -61,11 +61,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.DeserializeString(out Message);
             b.Align4();
             b.DeserializeString(out HardwareId);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Values = n == 0
-                    ? System.Array.Empty<KeyValue>()
+                    ? EmptyArray<KeyValue>.Value
                     : new KeyValue[n];
                 for (int i = 0; i < n; i++)
                 {

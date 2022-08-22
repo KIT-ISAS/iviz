@@ -12,7 +12,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         public ModelColorChannel()
         {
-            Colors = System.Array.Empty<Color32>();
+            Colors = EmptyArray<Color32>.Value;
         }
         
         public ModelColorChannel(Color32[] Colors)
@@ -26,7 +26,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Colors = n == 0
-                    ? System.Array.Empty<Color32>()
+                    ? EmptyArray<Color32>.Value
                     : new Color32[n];
                 if (n != 0)
                 {
@@ -37,12 +37,12 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ModelColorChannel(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Colors = n == 0
-                    ? System.Array.Empty<Color32>()
+                    ? EmptyArray<Color32>.Value
                     : new Color32[n];
                 if (n != 0)
                 {

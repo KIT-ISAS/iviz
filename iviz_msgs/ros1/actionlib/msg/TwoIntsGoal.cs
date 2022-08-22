@@ -29,6 +29,7 @@ namespace Iviz.Msgs.Actionlib
         
         public TwoIntsGoal(ref ReadBuffer2 b)
         {
+            b.Align8();
             b.Deserialize(out A);
             b.Deserialize(out B);
         }

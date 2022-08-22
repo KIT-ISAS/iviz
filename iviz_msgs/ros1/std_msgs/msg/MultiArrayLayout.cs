@@ -37,7 +37,7 @@ namespace Iviz.Msgs.StdMsgs
     
         public MultiArrayLayout()
         {
-            Dim = System.Array.Empty<MultiArrayDimension>();
+            Dim = EmptyArray<MultiArrayDimension>.Value;
         }
         
         public MultiArrayLayout(MultiArrayDimension[] Dim, uint DataOffset)
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.StdMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Dim = n == 0
-                    ? System.Array.Empty<MultiArrayDimension>()
+                    ? EmptyArray<MultiArrayDimension>.Value
                     : new MultiArrayDimension[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -63,17 +63,18 @@ namespace Iviz.Msgs.StdMsgs
         
         public MultiArrayLayout(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Dim = n == 0
-                    ? System.Array.Empty<MultiArrayDimension>()
+                    ? EmptyArray<MultiArrayDimension>.Value
                     : new MultiArrayDimension[n];
                 for (int i = 0; i < n; i++)
                 {
                     Dim[i] = new MultiArrayDimension(ref b);
                 }
             }
+            b.Align4();
             b.Deserialize(out DataOffset);
         }
         

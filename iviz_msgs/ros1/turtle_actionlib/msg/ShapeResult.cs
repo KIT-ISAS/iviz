@@ -30,6 +30,7 @@ namespace Iviz.Msgs.TurtleActionlib
         
         public ShapeResult(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out InteriorAngle);
             b.Deserialize(out Apothem);
         }

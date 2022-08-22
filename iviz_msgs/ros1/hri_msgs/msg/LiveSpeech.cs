@@ -48,6 +48,7 @@ namespace Iviz.Msgs.HriMsgs
             b.DeserializeString(out Incremental);
             b.Align4();
             b.DeserializeString(out Final);
+            b.Align8();
             b.Deserialize(out Confidence);
         }
         

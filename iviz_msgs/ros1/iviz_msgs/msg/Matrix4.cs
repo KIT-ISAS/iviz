@@ -32,9 +32,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Matrix4(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 M = new float[16];
                 b.DeserializeStructArray(Unsafe.AsPointer(ref M[0]), 16 * 4);
             }

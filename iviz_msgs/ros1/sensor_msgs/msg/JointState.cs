@@ -34,10 +34,10 @@ namespace Iviz.Msgs.SensorMsgs
     
         public JointState()
         {
-            Name = System.Array.Empty<string>();
-            Position = System.Array.Empty<double>();
-            Velocity = System.Array.Empty<double>();
-            Effort = System.Array.Empty<double>();
+            Name = EmptyArray<string>.Value;
+            Position = EmptyArray<double>.Value;
+            Velocity = EmptyArray<double>.Value;
+            Effort = EmptyArray<double>.Value;
         }
         
         public JointState(ref ReadBuffer b)
@@ -48,7 +48,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Position = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Velocity = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
@@ -70,7 +70,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Effort = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
@@ -84,15 +84,16 @@ namespace Iviz.Msgs.SensorMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
             b.DeserializeStringArray(out Name);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Position = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Position[0]), n * 8);
                 }
             }
@@ -100,10 +101,11 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Velocity = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Velocity[0]), n * 8);
                 }
             }
@@ -111,10 +113,11 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Effort = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Effort[0]), n * 8);
                 }
             }

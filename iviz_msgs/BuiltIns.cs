@@ -184,6 +184,16 @@ public static class BuiltIns
 
         return bytes;
     }
+    
+    public static T DeserializeRos1<T>(this IDeserializable<T> generator, Span<byte> src) where T : IMessage
+    {
+        return ReadBuffer.Deserialize(generator, src);
+    }
+
+    public static T DeserializeRos2<T>(this IDeserializable<T> generator, Span<byte> src) where T : IMessage
+    {
+        return ReadBuffer2.Deserialize(generator, src);
+    }
 
     // we use here the fact that 99% of the strings we get are ascii and with length <= 64 (i.e., frames in headers)
     // so we do a simple check and if it's ascii, we do a quick conversion that gets auto-vectorized in il2cpp

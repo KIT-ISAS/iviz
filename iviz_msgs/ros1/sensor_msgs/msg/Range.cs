@@ -66,6 +66,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out RadiationType);
+            b.Align4();
             b.Deserialize(out FieldOfView);
             b.Deserialize(out MinRange);
             b.Deserialize(out MaxRange);

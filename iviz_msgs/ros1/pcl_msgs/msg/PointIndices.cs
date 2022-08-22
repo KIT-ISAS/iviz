@@ -13,7 +13,7 @@ namespace Iviz.Msgs.PclMsgs
     
         public PointIndices()
         {
-            Indices = System.Array.Empty<int>();
+            Indices = EmptyArray<int>.Value;
         }
         
         public PointIndices(in StdMsgs.Header Header, int[] Indices)
@@ -29,7 +29,7 @@ namespace Iviz.Msgs.PclMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Indices = n == 0
-                    ? System.Array.Empty<int>()
+                    ? EmptyArray<int>.Value
                     : new int[n];
                 if (n != 0)
                 {
@@ -41,12 +41,12 @@ namespace Iviz.Msgs.PclMsgs
         public PointIndices(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Indices = n == 0
-                    ? System.Array.Empty<int>()
+                    ? EmptyArray<int>.Value
                     : new int[n];
                 if (n != 0)
                 {

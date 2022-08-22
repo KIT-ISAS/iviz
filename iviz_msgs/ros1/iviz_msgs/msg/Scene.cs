@@ -22,8 +22,8 @@ namespace Iviz.Msgs.IvizMsgs
         {
             Name = "";
             Filename = "";
-            Includes = System.Array.Empty<SceneInclude>();
-            Lights = System.Array.Empty<SceneLight>();
+            Includes = EmptyArray<SceneInclude>.Value;
+            Lights = EmptyArray<SceneLight>.Value;
         }
         
         public Scene(string Name, string Filename, SceneInclude[] Includes, SceneLight[] Lights)
@@ -41,7 +41,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Includes = n == 0
-                    ? System.Array.Empty<SceneInclude>()
+                    ? EmptyArray<SceneInclude>.Value
                     : new SceneInclude[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Lights = n == 0
-                    ? System.Array.Empty<SceneLight>()
+                    ? EmptyArray<SceneLight>.Value
                     : new SceneLight[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -66,22 +66,22 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Name);
             b.Align4();
             b.DeserializeString(out Filename);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Includes = n == 0
-                    ? System.Array.Empty<SceneInclude>()
+                    ? EmptyArray<SceneInclude>.Value
                     : new SceneInclude[n];
                 for (int i = 0; i < n; i++)
                 {
                     Includes[i] = new SceneInclude(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Lights = n == 0
-                    ? System.Array.Empty<SceneLight>()
+                    ? EmptyArray<SceneLight>.Value
                     : new SceneLight[n];
                 for (int i = 0; i < n; i++)
                 {

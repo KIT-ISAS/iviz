@@ -18,9 +18,9 @@ namespace Iviz.Msgs.TrajectoryMsgs
     
         public MultiDOFJointTrajectoryPoint()
         {
-            Transforms = System.Array.Empty<GeometryMsgs.Transform>();
-            Velocities = System.Array.Empty<GeometryMsgs.Twist>();
-            Accelerations = System.Array.Empty<GeometryMsgs.Twist>();
+            Transforms = EmptyArray<GeometryMsgs.Transform>.Value;
+            Velocities = EmptyArray<GeometryMsgs.Twist>.Value;
+            Accelerations = EmptyArray<GeometryMsgs.Twist>.Value;
         }
         
         public MultiDOFJointTrajectoryPoint(GeometryMsgs.Transform[] Transforms, GeometryMsgs.Twist[] Velocities, GeometryMsgs.Twist[] Accelerations, duration TimeFromStart)
@@ -37,7 +37,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Transforms = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
@@ -47,7 +47,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Velocities = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Twist>()
+                    ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Accelerations = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Twist>()
+                    ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -69,39 +69,41 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public MultiDOFJointTrajectoryPoint(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Transforms = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Transforms[0]), n * 56);
                 }
             }
             {
                 int n = b.DeserializeArrayLength();
                 Velocities = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Twist>()
+                    ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
                 for (int i = 0; i < n; i++)
                 {
                     Velocities[i] = new GeometryMsgs.Twist(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Accelerations = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Twist>()
+                    ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
                 for (int i = 0; i < n; i++)
                 {
                     Accelerations[i] = new GeometryMsgs.Twist(ref b);
                 }
             }
+            b.Align4();
             b.Deserialize(out TimeFromStart);
         }
         

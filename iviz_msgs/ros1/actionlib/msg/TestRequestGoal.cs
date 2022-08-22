@@ -47,12 +47,15 @@ namespace Iviz.Msgs.Actionlib
         
         public TestRequestGoal(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out TerminateStatus);
             b.Deserialize(out IgnoreCancel);
             b.Align4();
             b.DeserializeString(out ResultText);
+            b.Align4();
             b.Deserialize(out TheResult);
             b.Deserialize(out IsSimpleClient);
+            b.Align4();
             b.Deserialize(out DelayAccept);
             b.Deserialize(out DelayTerminate);
             b.Deserialize(out PauseStatus);

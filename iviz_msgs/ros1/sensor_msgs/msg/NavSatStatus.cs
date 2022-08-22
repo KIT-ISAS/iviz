@@ -49,6 +49,7 @@ namespace Iviz.Msgs.SensorMsgs
         public NavSatStatus(ref ReadBuffer2 b)
         {
             b.Deserialize(out Status);
+            b.Align2();
             b.Deserialize(out Service);
         }
         

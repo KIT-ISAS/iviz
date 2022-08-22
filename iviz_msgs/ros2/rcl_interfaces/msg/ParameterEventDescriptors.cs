@@ -17,9 +17,9 @@ namespace Iviz.Msgs.RclInterfaces
     
         public ParameterEventDescriptors()
         {
-            NewParameters = System.Array.Empty<ParameterDescriptor>();
-            ChangedParameters = System.Array.Empty<ParameterDescriptor>();
-            DeletedParameters = System.Array.Empty<ParameterDescriptor>();
+            NewParameters = EmptyArray<ParameterDescriptor>.Value;
+            ChangedParameters = EmptyArray<ParameterDescriptor>.Value;
+            DeletedParameters = EmptyArray<ParameterDescriptor>.Value;
         }
         
         public ParameterEventDescriptors(ParameterDescriptor[] NewParameters, ParameterDescriptor[] ChangedParameters, ParameterDescriptor[] DeletedParameters)
@@ -34,7 +34,7 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 int n = b.DeserializeArrayLength();
                 NewParameters = n == 0
-                    ? System.Array.Empty<ParameterDescriptor>()
+                    ? EmptyArray<ParameterDescriptor>.Value
                     : new ParameterDescriptor[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -44,7 +44,7 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 int n = b.DeserializeArrayLength();
                 ChangedParameters = n == 0
-                    ? System.Array.Empty<ParameterDescriptor>()
+                    ? EmptyArray<ParameterDescriptor>.Value
                     : new ParameterDescriptor[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 int n = b.DeserializeArrayLength();
                 DeletedParameters = n == 0
-                    ? System.Array.Empty<ParameterDescriptor>()
+                    ? EmptyArray<ParameterDescriptor>.Value
                     : new ParameterDescriptor[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -65,33 +65,33 @@ namespace Iviz.Msgs.RclInterfaces
         
         public ParameterEventDescriptors(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 NewParameters = n == 0
-                    ? System.Array.Empty<ParameterDescriptor>()
+                    ? EmptyArray<ParameterDescriptor>.Value
                     : new ParameterDescriptor[n];
                 for (int i = 0; i < n; i++)
                 {
                     NewParameters[i] = new ParameterDescriptor(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 ChangedParameters = n == 0
-                    ? System.Array.Empty<ParameterDescriptor>()
+                    ? EmptyArray<ParameterDescriptor>.Value
                     : new ParameterDescriptor[n];
                 for (int i = 0; i < n; i++)
                 {
                     ChangedParameters[i] = new ParameterDescriptor(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 DeletedParameters = n == 0
-                    ? System.Array.Empty<ParameterDescriptor>()
+                    ? EmptyArray<ParameterDescriptor>.Value
                     : new ParameterDescriptor[n];
                 for (int i = 0; i < n; i++)
                 {

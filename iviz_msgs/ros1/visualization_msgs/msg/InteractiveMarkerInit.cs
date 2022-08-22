@@ -24,7 +24,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         public InteractiveMarkerInit()
         {
             ServerId = "";
-            Markers = System.Array.Empty<InteractiveMarker>();
+            Markers = EmptyArray<InteractiveMarker>.Value;
         }
         
         public InteractiveMarkerInit(string ServerId, ulong SeqNum, InteractiveMarker[] Markers)
@@ -41,7 +41,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Markers = n == 0
-                    ? System.Array.Empty<InteractiveMarker>()
+                    ? EmptyArray<InteractiveMarker>.Value
                     : new InteractiveMarker[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -54,12 +54,12 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             b.Align4();
             b.DeserializeString(out ServerId);
+            b.Align8();
             b.Deserialize(out SeqNum);
-            b.Align4();
             {
                 int n = b.DeserializeArrayLength();
                 Markers = n == 0
-                    ? System.Array.Empty<InteractiveMarker>()
+                    ? EmptyArray<InteractiveMarker>.Value
                     : new InteractiveMarker[n];
                 for (int i = 0; i < n; i++)
                 {

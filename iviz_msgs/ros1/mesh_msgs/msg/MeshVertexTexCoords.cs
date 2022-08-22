@@ -30,6 +30,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshVertexTexCoords(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out U);
             b.Deserialize(out V);
         }

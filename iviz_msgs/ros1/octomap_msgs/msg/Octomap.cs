@@ -22,7 +22,7 @@ namespace Iviz.Msgs.OctomapMsgs
         public Octomap()
         {
             Id = "";
-            Data = System.Array.Empty<sbyte>();
+            Data = EmptyArray<sbyte>.Value;
         }
         
         public Octomap(ref ReadBuffer b)
@@ -35,7 +35,7 @@ namespace Iviz.Msgs.OctomapMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Data = n == 0
-                    ? System.Array.Empty<sbyte>()
+                    ? EmptyArray<sbyte>.Value
                     : new sbyte[n];
                 if (n != 0)
                 {
@@ -50,13 +50,13 @@ namespace Iviz.Msgs.OctomapMsgs
             b.Deserialize(out Binary);
             b.Align4();
             b.DeserializeString(out Id);
+            b.Align8();
             b.Deserialize(out Resolution);
-            b.Align4();
             unsafe
             {
                 int n = b.DeserializeArrayLength();
                 Data = n == 0
-                    ? System.Array.Empty<sbyte>()
+                    ? EmptyArray<sbyte>.Value
                     : new sbyte[n];
                 if (n != 0)
                 {

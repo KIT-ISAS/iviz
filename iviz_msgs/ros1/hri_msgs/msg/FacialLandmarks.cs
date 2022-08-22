@@ -95,7 +95,7 @@ namespace Iviz.Msgs.HriMsgs
     
         public FacialLandmarks()
         {
-            Landmarks = System.Array.Empty<NormalizedPointOfInterest2D>();
+            Landmarks = EmptyArray<NormalizedPointOfInterest2D>.Value;
         }
         
         public FacialLandmarks(in StdMsgs.Header Header, NormalizedPointOfInterest2D[] Landmarks, uint Height, uint Width)
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.HriMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Landmarks = n == 0
-                    ? System.Array.Empty<NormalizedPointOfInterest2D>()
+                    ? EmptyArray<NormalizedPointOfInterest2D>.Value
                     : new NormalizedPointOfInterest2D[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -126,17 +126,18 @@ namespace Iviz.Msgs.HriMsgs
         public FacialLandmarks(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Landmarks = n == 0
-                    ? System.Array.Empty<NormalizedPointOfInterest2D>()
+                    ? EmptyArray<NormalizedPointOfInterest2D>.Value
                     : new NormalizedPointOfInterest2D[n];
                 for (int i = 0; i < n; i++)
                 {
                     Landmarks[i] = new NormalizedPointOfInterest2D(ref b);
                 }
             }
+            b.Align4();
             b.Deserialize(out Height);
             b.Deserialize(out Width);
         }

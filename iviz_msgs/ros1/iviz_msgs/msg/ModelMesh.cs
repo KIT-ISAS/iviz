@@ -21,13 +21,13 @@ namespace Iviz.Msgs.IvizMsgs
         public ModelMesh()
         {
             Name = "";
-            Vertices = System.Array.Empty<GeometryMsgs.Point32>();
-            Normals = System.Array.Empty<GeometryMsgs.Point32>();
-            Tangents = System.Array.Empty<GeometryMsgs.Point32>();
-            BiTangents = System.Array.Empty<GeometryMsgs.Point32>();
-            TexCoords = System.Array.Empty<ModelTexCoords>();
-            ColorChannels = System.Array.Empty<ModelColorChannel>();
-            Faces = System.Array.Empty<Triangle>();
+            Vertices = EmptyArray<GeometryMsgs.Point32>.Value;
+            Normals = EmptyArray<GeometryMsgs.Point32>.Value;
+            Tangents = EmptyArray<GeometryMsgs.Point32>.Value;
+            BiTangents = EmptyArray<GeometryMsgs.Point32>.Value;
+            TexCoords = EmptyArray<ModelTexCoords>.Value;
+            ColorChannels = EmptyArray<ModelColorChannel>.Value;
+            Faces = EmptyArray<Triangle>.Value;
         }
         
         public ModelMesh(ref ReadBuffer b)
@@ -37,7 +37,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Vertices = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
@@ -48,7 +48,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Normals = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Tangents = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 BiTangents = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
@@ -80,7 +80,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 TexCoords = n == 0
-                    ? System.Array.Empty<ModelTexCoords>()
+                    ? EmptyArray<ModelTexCoords>.Value
                     : new ModelTexCoords[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -90,7 +90,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 ColorChannels = n == 0
-                    ? System.Array.Empty<ModelColorChannel>()
+                    ? EmptyArray<ModelColorChannel>.Value
                     : new ModelColorChannel[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -101,7 +101,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Faces = n == 0
-                    ? System.Array.Empty<Triangle>()
+                    ? EmptyArray<Triangle>.Value
                     : new Triangle[n];
                 if (n != 0)
                 {
@@ -115,12 +115,12 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Align4();
             b.DeserializeString(out Name);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Vertices = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
@@ -131,7 +131,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Normals = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
@@ -142,7 +142,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Tangents = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
@@ -153,7 +153,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 BiTangents = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
@@ -163,30 +163,30 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 TexCoords = n == 0
-                    ? System.Array.Empty<ModelTexCoords>()
+                    ? EmptyArray<ModelTexCoords>.Value
                     : new ModelTexCoords[n];
                 for (int i = 0; i < n; i++)
                 {
                     TexCoords[i] = new ModelTexCoords(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 ColorChannels = n == 0
-                    ? System.Array.Empty<ModelColorChannel>()
+                    ? EmptyArray<ModelColorChannel>.Value
                     : new ModelColorChannel[n];
                 for (int i = 0; i < n; i++)
                 {
                     ColorChannels[i] = new ModelColorChannel(ref b);
                 }
             }
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Faces = n == 0
-                    ? System.Array.Empty<Triangle>()
+                    ? EmptyArray<Triangle>.Value
                     : new Triangle[n];
                 if (n != 0)
                 {

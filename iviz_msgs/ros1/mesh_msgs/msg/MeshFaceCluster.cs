@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         public MeshFaceCluster()
         {
-            FaceIndices = System.Array.Empty<uint>();
+            FaceIndices = EmptyArray<uint>.Value;
             Label = "";
         }
         
@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 FaceIndices = n == 0
-                    ? System.Array.Empty<uint>()
+                    ? EmptyArray<uint>.Value
                     : new uint[n];
                 if (n != 0)
                 {
@@ -43,12 +43,12 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshFaceCluster(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 FaceIndices = n == 0
-                    ? System.Array.Empty<uint>()
+                    ? EmptyArray<uint>.Value
                     : new uint[n];
                 if (n != 0)
                 {

@@ -103,7 +103,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public SelfTestResponse()
         {
             Id = "";
-            Status = System.Array.Empty<DiagnosticStatus>();
+            Status = EmptyArray<DiagnosticStatus>.Value;
         }
         
         public SelfTestResponse(string Id, byte Passed, DiagnosticStatus[] Status)
@@ -120,7 +120,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Status = n == 0
-                    ? System.Array.Empty<DiagnosticStatus>()
+                    ? EmptyArray<DiagnosticStatus>.Value
                     : new DiagnosticStatus[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -134,11 +134,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.Align4();
             b.DeserializeString(out Id);
             b.Deserialize(out Passed);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Status = n == 0
-                    ? System.Array.Empty<DiagnosticStatus>()
+                    ? EmptyArray<DiagnosticStatus>.Value
                     : new DiagnosticStatus[n];
                 for (int i = 0; i < n; i++)
                 {

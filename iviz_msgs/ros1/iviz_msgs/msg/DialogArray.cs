@@ -12,7 +12,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         public DialogArray()
         {
-            Dialogs = System.Array.Empty<IvizMsgs.Dialog>();
+            Dialogs = EmptyArray<IvizMsgs.Dialog>.Value;
         }
         
         public DialogArray(IvizMsgs.Dialog[] Dialogs)
@@ -25,7 +25,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Dialogs = n == 0
-                    ? System.Array.Empty<IvizMsgs.Dialog>()
+                    ? EmptyArray<IvizMsgs.Dialog>.Value
                     : new IvizMsgs.Dialog[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -36,11 +36,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public DialogArray(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Dialogs = n == 0
-                    ? System.Array.Empty<IvizMsgs.Dialog>()
+                    ? EmptyArray<IvizMsgs.Dialog>.Value
                     : new IvizMsgs.Dialog[n];
                 for (int i = 0; i < n; i++)
                 {

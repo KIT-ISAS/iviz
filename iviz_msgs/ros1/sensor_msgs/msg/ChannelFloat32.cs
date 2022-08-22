@@ -33,7 +33,7 @@ namespace Iviz.Msgs.SensorMsgs
         public ChannelFloat32()
         {
             Name = "";
-            Values = System.Array.Empty<float>();
+            Values = EmptyArray<float>.Value;
         }
         
         public ChannelFloat32(string Name, float[] Values)
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Values = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -62,12 +62,12 @@ namespace Iviz.Msgs.SensorMsgs
         {
             b.Align4();
             b.DeserializeString(out Name);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Values = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {

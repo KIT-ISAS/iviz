@@ -70,10 +70,10 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Status = new NavSatStatus(ref b);
+            b.Align8();
             b.Deserialize(out Latitude);
             b.Deserialize(out Longitude);
             b.Deserialize(out Altitude);
-            b.Align8();
             unsafe
             {
                 PositionCovariance = new double[9];

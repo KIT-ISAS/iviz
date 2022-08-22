@@ -18,7 +18,7 @@ namespace Iviz.Msgs.PclMsgs
         public PolygonMesh()
         {
             Cloud = new SensorMsgs.PointCloud2();
-            Polygons = System.Array.Empty<Vertices>();
+            Polygons = EmptyArray<Vertices>.Value;
         }
         
         public PolygonMesh(in StdMsgs.Header Header, SensorMsgs.PointCloud2 Cloud, Vertices[] Polygons)
@@ -35,7 +35,7 @@ namespace Iviz.Msgs.PclMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Polygons = n == 0
-                    ? System.Array.Empty<Vertices>()
+                    ? EmptyArray<Vertices>.Value
                     : new Vertices[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -48,11 +48,11 @@ namespace Iviz.Msgs.PclMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Cloud = new SensorMsgs.PointCloud2(ref b);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Polygons = n == 0
-                    ? System.Array.Empty<Vertices>()
+                    ? EmptyArray<Vertices>.Value
                     : new Vertices[n];
                 for (int i = 0; i < n; i++)
                 {

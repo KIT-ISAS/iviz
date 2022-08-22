@@ -61,9 +61,9 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Type);
             b.Align4();
             b.DeserializeString(out Code);
-            b.Align8();
             unsafe
             {
+                b.Align8();
                 Corners = new GeometryMsgs.Vector3[4];
                 b.DeserializeStructArray(Unsafe.AsPointer(ref Corners[0]), 4 * 24);
             }
@@ -74,6 +74,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
             b.Deserialize(out CameraPose);
             b.Deserialize(out HasReliablePose);
+            b.Align8();
             b.Deserialize(out MarkerSizeInMm);
             b.Deserialize(out PoseRelativeToCamera);
         }

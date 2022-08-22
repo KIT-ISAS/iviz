@@ -73,7 +73,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         public InteractiveMarkerControl()
         {
             Name = "";
-            Markers = System.Array.Empty<Marker>();
+            Markers = EmptyArray<Marker>.Value;
             Description = "";
         }
         
@@ -87,7 +87,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Markers = n == 0
-                    ? System.Array.Empty<Marker>()
+                    ? EmptyArray<Marker>.Value
                     : new Marker[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -108,9 +108,10 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out InteractionMode);
             b.Deserialize(out AlwaysVisible);
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Markers = n == 0
-                    ? System.Array.Empty<Marker>()
+                    ? EmptyArray<Marker>.Value
                     : new Marker[n];
                 for (int i = 0; i < n; i++)
                 {

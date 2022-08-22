@@ -88,6 +88,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public static void Deserialize(ref ReadBuffer2 b, out Log h)
         {
+            b.Align4();
             b.Deserialize(out h.Stamp);
             b.Deserialize(out h.Level);
             b.Align4();
@@ -98,6 +99,7 @@ namespace Iviz.Msgs.RclInterfaces
             b.DeserializeString(out h.File);
             b.Align4();
             b.DeserializeString(out h.Function);
+            b.Align4();
             b.Deserialize(out h.Line);
         }
         

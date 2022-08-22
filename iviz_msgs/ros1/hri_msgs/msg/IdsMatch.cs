@@ -82,6 +82,7 @@ namespace Iviz.Msgs.HriMsgs
             b.Align4();
             b.DeserializeString(out Id2);
             b.Deserialize(out Id2Type);
+            b.Align4();
             b.Deserialize(out Confidence);
         }
         

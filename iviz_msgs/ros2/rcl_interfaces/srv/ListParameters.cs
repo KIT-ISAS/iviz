@@ -61,7 +61,7 @@ namespace Iviz.Msgs.RclInterfaces
     
         public ListParametersRequest()
         {
-            Prefixes = System.Array.Empty<string>();
+            Prefixes = EmptyArray<string>.Value;
         }
         
         public ListParametersRequest(string[] Prefixes, ulong Depth)
@@ -80,6 +80,7 @@ namespace Iviz.Msgs.RclInterfaces
         {
             b.Align4();
             b.DeserializeStringArray(out Prefixes);
+            b.Align8();
             b.Deserialize(out Depth);
         }
         

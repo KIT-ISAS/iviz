@@ -178,9 +178,9 @@ namespace Iviz.Msgs.HriMsgs
     
         public FacialActionUnits()
         {
-            FAU = System.Array.Empty<float>();
-            Intensity = System.Array.Empty<float>();
-            Confidence = System.Array.Empty<float>();
+            FAU = EmptyArray<float>.Value;
+            Intensity = EmptyArray<float>.Value;
+            Confidence = EmptyArray<float>.Value;
         }
         
         public FacialActionUnits(in StdMsgs.Header Header, float[] FAU, float[] Intensity, float[] Confidence)
@@ -198,7 +198,7 @@ namespace Iviz.Msgs.HriMsgs
             {
                 int n = b.DeserializeArrayLength();
                 FAU = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -209,7 +209,7 @@ namespace Iviz.Msgs.HriMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Intensity = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -220,7 +220,7 @@ namespace Iviz.Msgs.HriMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Confidence = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -232,12 +232,12 @@ namespace Iviz.Msgs.HriMsgs
         public FacialActionUnits(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 FAU = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -248,7 +248,7 @@ namespace Iviz.Msgs.HriMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Intensity = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -259,7 +259,7 @@ namespace Iviz.Msgs.HriMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Confidence = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {

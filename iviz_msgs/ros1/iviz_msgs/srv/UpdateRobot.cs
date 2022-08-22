@@ -59,7 +59,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             Id = "";
             Configuration = new IvizMsgs.RobotConfiguration();
-            ValidFields = System.Array.Empty<string>();
+            ValidFields = EmptyArray<string>.Value;
         }
         
         public UpdateRobotRequest(int Operation, string Id, IvizMsgs.RobotConfiguration Configuration, string[] ValidFields)
@@ -80,8 +80,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public UpdateRobotRequest(ref ReadBuffer2 b)
         {
-            b.Deserialize(out Operation);
             b.Align4();
+            b.Deserialize(out Operation);
             b.DeserializeString(out Id);
             Configuration = new IvizMsgs.RobotConfiguration(ref b);
             b.Align4();

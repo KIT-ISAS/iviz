@@ -39,7 +39,7 @@ namespace Iviz.Msgs.IvizMsgs
             Id = "";
             Caption = "";
             Boundary = new BoundingBox();
-            SecondaryBoundaries = System.Array.Empty<BoundingBoxStamped>();
+            SecondaryBoundaries = EmptyArray<BoundingBoxStamped>.Value;
         }
         
         public Widget(ref ReadBuffer b)
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 SecondaryBoundaries = n == 0
-                    ? System.Array.Empty<BoundingBoxStamped>()
+                    ? EmptyArray<BoundingBoxStamped>.Value
                     : new BoundingBoxStamped[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -78,15 +78,16 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Pose);
             b.Deserialize(out Color);
             b.Deserialize(out SecondaryColor);
+            b.Align8();
             b.Deserialize(out Scale);
             b.Deserialize(out SecondaryScale);
             b.DeserializeString(out Caption);
             Boundary = new BoundingBox(ref b);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 SecondaryBoundaries = n == 0
-                    ? System.Array.Empty<BoundingBoxStamped>()
+                    ? EmptyArray<BoundingBoxStamped>.Value
                     : new BoundingBoxStamped[n];
                 for (int i = 0; i < n; i++)
                 {

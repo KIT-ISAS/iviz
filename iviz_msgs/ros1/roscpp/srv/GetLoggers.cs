@@ -100,7 +100,7 @@ namespace Iviz.Msgs.Roscpp
     
         public GetLoggersResponse()
         {
-            Loggers = System.Array.Empty<Logger>();
+            Loggers = EmptyArray<Logger>.Value;
         }
         
         public GetLoggersResponse(Logger[] Loggers)
@@ -113,7 +113,7 @@ namespace Iviz.Msgs.Roscpp
             {
                 int n = b.DeserializeArrayLength();
                 Loggers = n == 0
-                    ? System.Array.Empty<Logger>()
+                    ? EmptyArray<Logger>.Value
                     : new Logger[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -124,11 +124,11 @@ namespace Iviz.Msgs.Roscpp
         
         public GetLoggersResponse(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Loggers = n == 0
-                    ? System.Array.Empty<Logger>()
+                    ? EmptyArray<Logger>.Value
                     : new Logger[n];
                 for (int i = 0; i < n; i++)
                 {

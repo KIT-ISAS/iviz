@@ -25,7 +25,7 @@ namespace Iviz.Msgs.IvizMsgs
         public ModelMaterial()
         {
             Name = "";
-            Textures = System.Array.Empty<ModelTexture>();
+            Textures = EmptyArray<ModelTexture>.Value;
         }
         
         public ModelMaterial(ref ReadBuffer b)
@@ -43,7 +43,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Textures = n == 0
-                    ? System.Array.Empty<ModelTexture>()
+                    ? EmptyArray<ModelTexture>.Value
                     : new ModelTexture[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -59,17 +59,18 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Ambient);
             b.Deserialize(out Diffuse);
             b.Deserialize(out Emissive);
+            b.Align4();
             b.Deserialize(out Opacity);
             b.Deserialize(out BumpScaling);
             b.Deserialize(out Shininess);
             b.Deserialize(out ShininessStrength);
             b.Deserialize(out Reflectivity);
             b.Deserialize(out BlendMode);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Textures = n == 0
-                    ? System.Array.Empty<ModelTexture>()
+                    ? EmptyArray<ModelTexture>.Value
                     : new ModelTexture[n];
                 for (int i = 0; i < n; i++)
                 {

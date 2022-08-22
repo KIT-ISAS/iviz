@@ -121,7 +121,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         public GetFileResponse()
         {
-            Bytes = System.Array.Empty<byte>();
+            Bytes = EmptyArray<byte>.Value;
             Message = "";
         }
         
@@ -139,7 +139,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Bytes = n == 0
-                    ? System.Array.Empty<byte>()
+                    ? EmptyArray<byte>.Value
                     : new byte[n];
                 if (n != 0)
                 {
@@ -152,12 +152,12 @@ namespace Iviz.Msgs.IvizMsgs
         public GetFileResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Bytes = n == 0
-                    ? System.Array.Empty<byte>()
+                    ? EmptyArray<byte>.Value
                     : new byte[n];
                 if (n != 0)
                 {

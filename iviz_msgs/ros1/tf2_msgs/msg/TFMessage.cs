@@ -12,7 +12,7 @@ namespace Iviz.Msgs.Tf2Msgs
     
         public TFMessage()
         {
-            Transforms = System.Array.Empty<GeometryMsgs.TransformStamped>();
+            Transforms = EmptyArray<GeometryMsgs.TransformStamped>.Value;
         }
         
         public TFMessage(GeometryMsgs.TransformStamped[] Transforms)
@@ -25,7 +25,7 @@ namespace Iviz.Msgs.Tf2Msgs
             {
                 int n = b.DeserializeArrayLength();
                 Transforms = n == 0
-                    ? System.Array.Empty<GeometryMsgs.TransformStamped>()
+                    ? EmptyArray<GeometryMsgs.TransformStamped>.Value
                     : new GeometryMsgs.TransformStamped[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -36,11 +36,11 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public TFMessage(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Transforms = n == 0
-                    ? System.Array.Empty<GeometryMsgs.TransformStamped>()
+                    ? EmptyArray<GeometryMsgs.TransformStamped>.Value
                     : new GeometryMsgs.TransformStamped[n];
                 for (int i = 0; i < n; i++)
                 {

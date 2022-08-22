@@ -13,7 +13,7 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public Polygon()
         {
-            Points = System.Array.Empty<Point32>();
+            Points = EmptyArray<Point32>.Value;
         }
         
         public Polygon(Point32[] Points)
@@ -27,7 +27,7 @@ namespace Iviz.Msgs.GeometryMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Points = n == 0
-                    ? System.Array.Empty<Point32>()
+                    ? EmptyArray<Point32>.Value
                     : new Point32[n];
                 if (n != 0)
                 {
@@ -38,12 +38,12 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public Polygon(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Points = n == 0
-                    ? System.Array.Empty<Point32>()
+                    ? EmptyArray<Point32>.Value
                     : new Point32[n];
                 if (n != 0)
                 {

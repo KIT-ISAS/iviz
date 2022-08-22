@@ -16,8 +16,8 @@ namespace Iviz.Msgs.ShapeMsgs
     
         public Mesh()
         {
-            Triangles = System.Array.Empty<MeshTriangle>();
-            Vertices = System.Array.Empty<GeometryMsgs.Point>();
+            Triangles = EmptyArray<MeshTriangle>.Value;
+            Vertices = EmptyArray<GeometryMsgs.Point>.Value;
         }
         
         public Mesh(MeshTriangle[] Triangles, GeometryMsgs.Point[] Vertices)
@@ -31,7 +31,7 @@ namespace Iviz.Msgs.ShapeMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Triangles = n == 0
-                    ? System.Array.Empty<MeshTriangle>()
+                    ? EmptyArray<MeshTriangle>.Value
                     : new MeshTriangle[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.ShapeMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Vertices = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
@@ -53,26 +53,27 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public Mesh(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Triangles = n == 0
-                    ? System.Array.Empty<MeshTriangle>()
+                    ? EmptyArray<MeshTriangle>.Value
                     : new MeshTriangle[n];
                 for (int i = 0; i < n; i++)
                 {
                     Triangles[i] = new MeshTriangle(ref b);
                 }
             }
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Vertices = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices[0]), n * 24);
                 }
             }

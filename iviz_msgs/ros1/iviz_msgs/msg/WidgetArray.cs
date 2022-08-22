@@ -12,7 +12,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         public WidgetArray()
         {
-            Widgets = System.Array.Empty<IvizMsgs.Widget>();
+            Widgets = EmptyArray<IvizMsgs.Widget>.Value;
         }
         
         public WidgetArray(IvizMsgs.Widget[] Widgets)
@@ -25,7 +25,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Widgets = n == 0
-                    ? System.Array.Empty<IvizMsgs.Widget>()
+                    ? EmptyArray<IvizMsgs.Widget>.Value
                     : new IvizMsgs.Widget[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -36,11 +36,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public WidgetArray(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Widgets = n == 0
-                    ? System.Array.Empty<IvizMsgs.Widget>()
+                    ? EmptyArray<IvizMsgs.Widget>.Value
                     : new IvizMsgs.Widget[n];
                 for (int i = 0; i < n; i++)
                 {

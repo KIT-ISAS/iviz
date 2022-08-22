@@ -22,8 +22,8 @@ namespace Iviz.Msgs.SensorMsgs
     
         public PointCloud()
         {
-            Points = System.Array.Empty<GeometryMsgs.Point32>();
-            Channels = System.Array.Empty<ChannelFloat32>();
+            Points = EmptyArray<GeometryMsgs.Point32>.Value;
+            Channels = EmptyArray<ChannelFloat32>.Value;
         }
         
         public PointCloud(in StdMsgs.Header Header, GeometryMsgs.Point32[] Points, ChannelFloat32[] Channels)
@@ -40,7 +40,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Points = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
@@ -50,7 +50,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Channels = n == 0
-                    ? System.Array.Empty<ChannelFloat32>()
+                    ? EmptyArray<ChannelFloat32>.Value
                     : new ChannelFloat32[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -62,12 +62,12 @@ namespace Iviz.Msgs.SensorMsgs
         public PointCloud(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Points = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point32>()
+                    ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
@@ -77,7 +77,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Channels = n == 0
-                    ? System.Array.Empty<ChannelFloat32>()
+                    ? EmptyArray<ChannelFloat32>.Value
                     : new ChannelFloat32[n];
                 for (int i = 0; i < n; i++)
                 {

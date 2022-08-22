@@ -19,11 +19,11 @@ namespace Iviz.Msgs.IvizMsgs
     
         public XRHandState()
         {
-            Thumb = System.Array.Empty<GeometryMsgs.Transform>();
-            Index = System.Array.Empty<GeometryMsgs.Transform>();
-            Middle = System.Array.Empty<GeometryMsgs.Transform>();
-            Ring = System.Array.Empty<GeometryMsgs.Transform>();
-            Little = System.Array.Empty<GeometryMsgs.Transform>();
+            Thumb = EmptyArray<GeometryMsgs.Transform>.Value;
+            Index = EmptyArray<GeometryMsgs.Transform>.Value;
+            Middle = EmptyArray<GeometryMsgs.Transform>.Value;
+            Ring = EmptyArray<GeometryMsgs.Transform>.Value;
+            Little = EmptyArray<GeometryMsgs.Transform>.Value;
         }
         
         public XRHandState(ref ReadBuffer b)
@@ -34,7 +34,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Thumb = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
@@ -45,7 +45,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Index = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
@@ -56,7 +56,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Middle = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
@@ -67,7 +67,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Ring = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
@@ -78,7 +78,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Little = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
@@ -97,10 +97,11 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Thumb = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Thumb[0]), n * 56);
                 }
             }
@@ -108,10 +109,11 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Index = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Index[0]), n * 56);
                 }
             }
@@ -119,10 +121,11 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Middle = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Middle[0]), n * 56);
                 }
             }
@@ -130,10 +133,11 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Ring = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Ring[0]), n * 56);
                 }
             }
@@ -141,10 +145,11 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Little = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Little[0]), n * 56);
                 }
             }

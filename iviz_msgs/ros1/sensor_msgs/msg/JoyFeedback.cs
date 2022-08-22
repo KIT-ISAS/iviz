@@ -42,6 +42,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
             b.Deserialize(out Type);
             b.Deserialize(out Id);
+            b.Align4();
             b.Deserialize(out Intensity);
         }
         

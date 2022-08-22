@@ -30,6 +30,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public AveragingGoal(ref ReadBuffer2 b)
         {
+            b.Align4();
             b.Deserialize(out Edges);
             b.Deserialize(out Radius);
         }

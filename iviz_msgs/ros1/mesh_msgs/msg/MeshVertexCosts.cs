@@ -13,7 +13,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         public MeshVertexCosts()
         {
-            Costs = System.Array.Empty<float>();
+            Costs = EmptyArray<float>.Value;
         }
         
         public MeshVertexCosts(float[] Costs)
@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Costs = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -38,12 +38,12 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshVertexCosts(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Costs = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {

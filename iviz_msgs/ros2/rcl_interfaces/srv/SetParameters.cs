@@ -55,7 +55,7 @@ namespace Iviz.Msgs.RclInterfaces
     
         public SetParametersRequest()
         {
-            Parameters = System.Array.Empty<Parameter>();
+            Parameters = EmptyArray<Parameter>.Value;
         }
         
         public SetParametersRequest(Parameter[] Parameters)
@@ -68,7 +68,7 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 int n = b.DeserializeArrayLength();
                 Parameters = n == 0
-                    ? System.Array.Empty<Parameter>()
+                    ? EmptyArray<Parameter>.Value
                     : new Parameter[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -79,11 +79,11 @@ namespace Iviz.Msgs.RclInterfaces
         
         public SetParametersRequest(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Parameters = n == 0
-                    ? System.Array.Empty<Parameter>()
+                    ? EmptyArray<Parameter>.Value
                     : new Parameter[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -151,7 +151,7 @@ namespace Iviz.Msgs.RclInterfaces
     
         public SetParametersResponse()
         {
-            Results = System.Array.Empty<SetParametersResult>();
+            Results = EmptyArray<SetParametersResult>.Value;
         }
         
         public SetParametersResponse(SetParametersResult[] Results)
@@ -164,7 +164,7 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 int n = b.DeserializeArrayLength();
                 Results = n == 0
-                    ? System.Array.Empty<SetParametersResult>()
+                    ? EmptyArray<SetParametersResult>.Value
                     : new SetParametersResult[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -175,11 +175,11 @@ namespace Iviz.Msgs.RclInterfaces
         
         public SetParametersResponse(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Results = n == 0
-                    ? System.Array.Empty<SetParametersResult>()
+                    ? EmptyArray<SetParametersResult>.Value
                     : new SetParametersResult[n];
                 for (int i = 0; i < n; i++)
                 {

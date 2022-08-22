@@ -37,7 +37,7 @@ namespace Iviz.Msgs.SensorMsgs
     
         public PointCloud2()
         {
-            Fields = System.Array.Empty<PointField>();
+            Fields = EmptyArray<PointField>.Value;
             Data = Tools.SharedRent.Empty;
         }
         
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Fields = n == 0
-                    ? System.Array.Empty<PointField>()
+                    ? EmptyArray<PointField>.Value
                     : new PointField[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -66,13 +66,13 @@ namespace Iviz.Msgs.SensorMsgs
         public PointCloud2(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out Height);
             b.Deserialize(out Width);
-            b.Align4();
             {
                 int n = b.DeserializeArrayLength();
                 Fields = n == 0
-                    ? System.Array.Empty<PointField>()
+                    ? EmptyArray<PointField>.Value
                     : new PointField[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -80,9 +80,9 @@ namespace Iviz.Msgs.SensorMsgs
                 }
             }
             b.Deserialize(out IsBigendian);
+            b.Align4();
             b.Deserialize(out PointStep);
             b.Deserialize(out RowStep);
-            b.Align4();
             b.DeserializeStructRent(out Data);
             b.Deserialize(out IsDense);
         }

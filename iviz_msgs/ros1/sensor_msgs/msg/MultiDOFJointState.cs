@@ -35,10 +35,10 @@ namespace Iviz.Msgs.SensorMsgs
     
         public MultiDOFJointState()
         {
-            JointNames = System.Array.Empty<string>();
-            Transforms = System.Array.Empty<GeometryMsgs.Transform>();
-            Twist = System.Array.Empty<GeometryMsgs.Twist>();
-            Wrench = System.Array.Empty<GeometryMsgs.Wrench>();
+            JointNames = EmptyArray<string>.Value;
+            Transforms = EmptyArray<GeometryMsgs.Transform>.Value;
+            Twist = EmptyArray<GeometryMsgs.Twist>.Value;
+            Wrench = EmptyArray<GeometryMsgs.Wrench>.Value;
         }
         
         public MultiDOFJointState(ref ReadBuffer b)
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Transforms = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Twist = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Twist>()
+                    ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -69,7 +69,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Wrench = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Wrench>()
+                    ? EmptyArray<GeometryMsgs.Wrench>.Value
                     : new GeometryMsgs.Wrench[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -83,33 +83,34 @@ namespace Iviz.Msgs.SensorMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
             b.DeserializeStringArray(out JointNames);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Transforms = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Transform>()
+                    ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Transforms[0]), n * 56);
                 }
             }
             {
                 int n = b.DeserializeArrayLength();
                 Twist = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Twist>()
+                    ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
                 for (int i = 0; i < n; i++)
                 {
                     Twist[i] = new GeometryMsgs.Twist(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Wrench = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Wrench>()
+                    ? EmptyArray<GeometryMsgs.Wrench>.Value
                     : new GeometryMsgs.Wrench[n];
                 for (int i = 0; i < n; i++)
                 {

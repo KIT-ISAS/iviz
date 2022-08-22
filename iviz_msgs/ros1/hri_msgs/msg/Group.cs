@@ -16,7 +16,7 @@ namespace Iviz.Msgs.HriMsgs
         public Group()
         {
             GroupId = "";
-            Members = System.Array.Empty<string>();
+            Members = EmptyArray<string>.Value;
         }
         
         public Group(in StdMsgs.Header Header, string GroupId, string[] Members)

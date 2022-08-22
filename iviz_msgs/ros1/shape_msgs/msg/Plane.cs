@@ -36,9 +36,9 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public Plane(ref ReadBuffer2 b)
         {
-            b.Align8();
             unsafe
             {
+                b.Align8();
                 Coef = new double[4];
                 b.DeserializeStructArray(Unsafe.AsPointer(ref Coef[0]), 4 * 8);
             }

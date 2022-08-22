@@ -29,8 +29,8 @@ namespace Iviz.Msgs.IvizMsgs
         public RobotPreview()
         {
             Id = "";
-            JointNames = System.Array.Empty<string>();
-            JointValues = System.Array.Empty<float>();
+            JointNames = EmptyArray<string>.Value;
+            JointValues = EmptyArray<float>.Value;
             RobotDescription = "";
             SourceNode = "";
             SourceParameter = "";
@@ -47,7 +47,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 JointValues = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -73,12 +73,12 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Id);
             b.Align4();
             b.DeserializeStringArray(out JointNames);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 JointValues = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {

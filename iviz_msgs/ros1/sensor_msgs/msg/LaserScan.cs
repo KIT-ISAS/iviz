@@ -45,8 +45,8 @@ namespace Iviz.Msgs.SensorMsgs
     
         public LaserScan()
         {
-            Ranges = System.Array.Empty<float>();
-            Intensities = System.Array.Empty<float>();
+            Ranges = EmptyArray<float>.Value;
+            Intensities = EmptyArray<float>.Value;
         }
         
         public LaserScan(ref ReadBuffer b)
@@ -63,7 +63,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Ranges = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -74,7 +74,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Intensities = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -86,6 +86,7 @@ namespace Iviz.Msgs.SensorMsgs
         public LaserScan(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out AngleMin);
             b.Deserialize(out AngleMax);
             b.Deserialize(out AngleIncrement);
@@ -93,12 +94,11 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out ScanTime);
             b.Deserialize(out RangeMin);
             b.Deserialize(out RangeMax);
-            b.Align4();
             unsafe
             {
                 int n = b.DeserializeArrayLength();
                 Ranges = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Intensities = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {

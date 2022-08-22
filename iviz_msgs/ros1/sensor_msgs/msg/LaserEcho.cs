@@ -16,7 +16,7 @@ namespace Iviz.Msgs.SensorMsgs
     
         public LaserEcho()
         {
-            Echoes = System.Array.Empty<float>();
+            Echoes = EmptyArray<float>.Value;
         }
         
         public LaserEcho(float[] Echoes)
@@ -30,7 +30,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Echoes = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -41,12 +41,12 @@ namespace Iviz.Msgs.SensorMsgs
         
         public LaserEcho(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Echoes = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {

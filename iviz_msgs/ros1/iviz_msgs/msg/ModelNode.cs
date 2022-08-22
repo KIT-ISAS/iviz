@@ -17,7 +17,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             Name = "";
             Transform = new Matrix4();
-            Meshes = System.Array.Empty<int>();
+            Meshes = EmptyArray<int>.Value;
         }
         
         public ModelNode(string Name, int Parent, Matrix4 Transform, int[] Meshes)
@@ -37,7 +37,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Meshes = n == 0
-                    ? System.Array.Empty<int>()
+                    ? EmptyArray<int>.Value
                     : new int[n];
                 if (n != 0)
                 {
@@ -50,14 +50,15 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Align4();
             b.DeserializeString(out Name);
+            b.Align4();
             b.Deserialize(out Parent);
             Transform = new Matrix4(ref b);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Meshes = n == 0
-                    ? System.Array.Empty<int>()
+                    ? EmptyArray<int>.Value
                     : new int[n];
                 if (n != 0)
                 {

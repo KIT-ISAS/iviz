@@ -114,7 +114,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         public GetLabeledClustersResponse()
         {
-            Clusters = System.Array.Empty<MeshFaceCluster>();
+            Clusters = EmptyArray<MeshFaceCluster>.Value;
         }
         
         public GetLabeledClustersResponse(MeshFaceCluster[] Clusters)
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Clusters = n == 0
-                    ? System.Array.Empty<MeshFaceCluster>()
+                    ? EmptyArray<MeshFaceCluster>.Value
                     : new MeshFaceCluster[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -138,11 +138,11 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetLabeledClustersResponse(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Clusters = n == 0
-                    ? System.Array.Empty<MeshFaceCluster>()
+                    ? EmptyArray<MeshFaceCluster>.Value
                     : new MeshFaceCluster[n];
                 for (int i = 0; i < n; i++)
                 {

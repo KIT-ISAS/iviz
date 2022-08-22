@@ -55,7 +55,7 @@ namespace Iviz.Msgs.RclInterfaces
     
         public DescribeParametersRequest()
         {
-            Names = System.Array.Empty<string>();
+            Names = EmptyArray<string>.Value;
         }
         
         public DescribeParametersRequest(string[] Names)
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.RclInterfaces
     
         public DescribeParametersResponse()
         {
-            Descriptors = System.Array.Empty<ParameterDescriptor>();
+            Descriptors = EmptyArray<ParameterDescriptor>.Value;
         }
         
         public DescribeParametersResponse(ParameterDescriptor[] Descriptors)
@@ -135,7 +135,7 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 int n = b.DeserializeArrayLength();
                 Descriptors = n == 0
-                    ? System.Array.Empty<ParameterDescriptor>()
+                    ? EmptyArray<ParameterDescriptor>.Value
                     : new ParameterDescriptor[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -146,11 +146,11 @@ namespace Iviz.Msgs.RclInterfaces
         
         public DescribeParametersResponse(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Descriptors = n == 0
-                    ? System.Array.Empty<ParameterDescriptor>()
+                    ? EmptyArray<ParameterDescriptor>.Value
                     : new ParameterDescriptor[n];
                 for (int i = 0; i < n; i++)
                 {

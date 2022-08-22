@@ -19,10 +19,10 @@ namespace Iviz.Msgs.TrajectoryMsgs
     
         public JointTrajectoryPoint()
         {
-            Positions = System.Array.Empty<double>();
-            Velocities = System.Array.Empty<double>();
-            Accelerations = System.Array.Empty<double>();
-            Effort = System.Array.Empty<double>();
+            Positions = EmptyArray<double>.Value;
+            Velocities = EmptyArray<double>.Value;
+            Accelerations = EmptyArray<double>.Value;
+            Effort = EmptyArray<double>.Value;
         }
         
         public JointTrajectoryPoint(ref ReadBuffer b)
@@ -31,7 +31,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Positions = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Velocities = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Accelerations = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
@@ -64,7 +64,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Effort = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
@@ -76,15 +76,16 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public JointTrajectoryPoint(ref ReadBuffer2 b)
         {
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Positions = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Positions[0]), n * 8);
                 }
             }
@@ -92,10 +93,11 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Velocities = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Velocities[0]), n * 8);
                 }
             }
@@ -103,10 +105,11 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Accelerations = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Accelerations[0]), n * 8);
                 }
             }
@@ -114,10 +117,11 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Effort = n == 0
-                    ? System.Array.Empty<double>()
+                    ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Effort[0]), n * 8);
                 }
             }

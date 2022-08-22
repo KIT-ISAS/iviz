@@ -24,15 +24,15 @@ namespace Iviz.Msgs.MeshMsgs
     
         public TriangleMesh()
         {
-            Triangles = System.Array.Empty<TriangleIndices>();
-            Vertices = System.Array.Empty<GeometryMsgs.Point>();
-            VertexNormals = System.Array.Empty<GeometryMsgs.Point>();
-            VertexColors = System.Array.Empty<StdMsgs.ColorRGBA>();
-            TriangleColors = System.Array.Empty<StdMsgs.ColorRGBA>();
-            VertexTextureCoords = System.Array.Empty<GeometryMsgs.Point>();
-            FaceMaterials = System.Array.Empty<MeshMsgs.MeshMaterial>();
-            Textures = System.Array.Empty<SensorMsgs.Image>();
-            Clusters = System.Array.Empty<MeshMsgs.MeshFaceCluster>();
+            Triangles = EmptyArray<TriangleIndices>.Value;
+            Vertices = EmptyArray<GeometryMsgs.Point>.Value;
+            VertexNormals = EmptyArray<GeometryMsgs.Point>.Value;
+            VertexColors = EmptyArray<StdMsgs.ColorRGBA>.Value;
+            TriangleColors = EmptyArray<StdMsgs.ColorRGBA>.Value;
+            VertexTextureCoords = EmptyArray<GeometryMsgs.Point>.Value;
+            FaceMaterials = EmptyArray<MeshMsgs.MeshMaterial>.Value;
+            Textures = EmptyArray<SensorMsgs.Image>.Value;
+            Clusters = EmptyArray<MeshMsgs.MeshFaceCluster>.Value;
         }
         
         public TriangleMesh(ref ReadBuffer b)
@@ -40,7 +40,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Triangles = n == 0
-                    ? System.Array.Empty<TriangleIndices>()
+                    ? EmptyArray<TriangleIndices>.Value
                     : new TriangleIndices[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Vertices = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
@@ -62,7 +62,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 VertexNormals = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
@@ -73,7 +73,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 VertexColors = n == 0
-                    ? System.Array.Empty<StdMsgs.ColorRGBA>()
+                    ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
@@ -84,7 +84,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 TriangleColors = n == 0
-                    ? System.Array.Empty<StdMsgs.ColorRGBA>()
+                    ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
@@ -95,7 +95,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 VertexTextureCoords = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
@@ -105,7 +105,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 FaceMaterials = n == 0
-                    ? System.Array.Empty<MeshMsgs.MeshMaterial>()
+                    ? EmptyArray<MeshMsgs.MeshMaterial>.Value
                     : new MeshMsgs.MeshMaterial[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -115,7 +115,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Textures = n == 0
-                    ? System.Array.Empty<SensorMsgs.Image>()
+                    ? EmptyArray<SensorMsgs.Image>.Value
                     : new SensorMsgs.Image[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -125,7 +125,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Clusters = n == 0
-                    ? System.Array.Empty<MeshMsgs.MeshFaceCluster>()
+                    ? EmptyArray<MeshMsgs.MeshFaceCluster>.Value
                     : new MeshMsgs.MeshFaceCluster[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -136,26 +136,27 @@ namespace Iviz.Msgs.MeshMsgs
         
         public TriangleMesh(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Triangles = n == 0
-                    ? System.Array.Empty<TriangleIndices>()
+                    ? EmptyArray<TriangleIndices>.Value
                     : new TriangleIndices[n];
                 for (int i = 0; i < n; i++)
                 {
                     Triangles[i] = new TriangleIndices(ref b);
                 }
             }
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Vertices = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices[0]), n * 24);
                 }
             }
@@ -163,10 +164,11 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 VertexNormals = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref VertexNormals[0]), n * 24);
                 }
             }
@@ -174,7 +176,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 VertexColors = n == 0
-                    ? System.Array.Empty<StdMsgs.ColorRGBA>()
+                    ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
@@ -185,7 +187,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 TriangleColors = n == 0
-                    ? System.Array.Empty<StdMsgs.ColorRGBA>()
+                    ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
@@ -196,39 +198,40 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 VertexTextureCoords = n == 0
-                    ? System.Array.Empty<GeometryMsgs.Point>()
+                    ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
+                    b.Align8();
                     b.DeserializeStructArray(Unsafe.AsPointer(ref VertexTextureCoords[0]), n * 24);
                 }
             }
             {
                 int n = b.DeserializeArrayLength();
                 FaceMaterials = n == 0
-                    ? System.Array.Empty<MeshMsgs.MeshMaterial>()
+                    ? EmptyArray<MeshMsgs.MeshMaterial>.Value
                     : new MeshMsgs.MeshMaterial[n];
                 for (int i = 0; i < n; i++)
                 {
                     FaceMaterials[i] = new MeshMsgs.MeshMaterial(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Textures = n == 0
-                    ? System.Array.Empty<SensorMsgs.Image>()
+                    ? EmptyArray<SensorMsgs.Image>.Value
                     : new SensorMsgs.Image[n];
                 for (int i = 0; i < n; i++)
                 {
                     Textures[i] = new SensorMsgs.Image(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Clusters = n == 0
-                    ? System.Array.Empty<MeshMsgs.MeshFaceCluster>()
+                    ? EmptyArray<MeshMsgs.MeshFaceCluster>.Value
                     : new MeshMsgs.MeshFaceCluster[n];
                 for (int i = 0; i < n; i++)
                 {

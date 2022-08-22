@@ -102,7 +102,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         public GetModulesResponse()
         {
-            Configs = System.Array.Empty<string>();
+            Configs = EmptyArray<string>.Value;
         }
         
         public GetModulesResponse(string[] Configs)

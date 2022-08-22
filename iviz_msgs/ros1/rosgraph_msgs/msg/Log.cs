@@ -90,8 +90,8 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.SkipString(out h.File);
             b.Align4();
             b.SkipString(out h.Function);
-            b.Deserialize(out h.Line);
             b.Align4();
+            b.Deserialize(out h.Line);
             b.SkipStringArray(out h.Topics);
         }
         
@@ -108,7 +108,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.Serialize(File ?? "");
             b.Serialize(Function ?? "");
             b.Serialize(Line);
-            b.SerializeArray(Topics ?? System.Array.Empty<string>());
+            b.SerializeArray(Topics ?? EmptyArray<string>.Value);
         }
         
         public readonly void RosSerialize(ref WriteBuffer2 b)
@@ -120,7 +120,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.Serialize(File ?? "");
             b.Serialize(Function ?? "");
             b.Serialize(Line);
-            b.SerializeArray(Topics ?? System.Array.Empty<string>());
+            b.SerializeArray(Topics ?? EmptyArray<string>.Value);
         }
         
         public readonly void RosValidate()

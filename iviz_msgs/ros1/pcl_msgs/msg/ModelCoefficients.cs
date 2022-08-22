@@ -13,7 +13,7 @@ namespace Iviz.Msgs.PclMsgs
     
         public ModelCoefficients()
         {
-            Values = System.Array.Empty<float>();
+            Values = EmptyArray<float>.Value;
         }
         
         public ModelCoefficients(in StdMsgs.Header Header, float[] Values)
@@ -29,7 +29,7 @@ namespace Iviz.Msgs.PclMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Values = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -41,12 +41,12 @@ namespace Iviz.Msgs.PclMsgs
         public ModelCoefficients(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Values = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {

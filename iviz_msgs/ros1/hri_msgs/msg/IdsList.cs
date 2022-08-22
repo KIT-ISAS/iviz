@@ -17,7 +17,7 @@ namespace Iviz.Msgs.HriMsgs
     
         public IdsList()
         {
-            Ids = System.Array.Empty<string>();
+            Ids = EmptyArray<string>.Value;
         }
         
         public IdsList(in StdMsgs.Header Header, string[] Ids)

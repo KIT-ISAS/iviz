@@ -16,7 +16,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
     
         public DiagnosticArray()
         {
-            Status = System.Array.Empty<DiagnosticStatus>();
+            Status = EmptyArray<DiagnosticStatus>.Value;
         }
         
         public DiagnosticArray(in StdMsgs.Header Header, DiagnosticStatus[] Status)
@@ -31,7 +31,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Status = n == 0
-                    ? System.Array.Empty<DiagnosticStatus>()
+                    ? EmptyArray<DiagnosticStatus>.Value
                     : new DiagnosticStatus[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -43,11 +43,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public DiagnosticArray(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Status = n == 0
-                    ? System.Array.Empty<DiagnosticStatus>()
+                    ? EmptyArray<DiagnosticStatus>.Value
                     : new DiagnosticStatus[n];
                 for (int i = 0; i < n; i++)
                 {

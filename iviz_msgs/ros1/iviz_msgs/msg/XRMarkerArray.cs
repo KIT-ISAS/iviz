@@ -12,7 +12,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         public XRMarkerArray()
         {
-            Markers = System.Array.Empty<XRMarker>();
+            Markers = EmptyArray<XRMarker>.Value;
         }
         
         public XRMarkerArray(XRMarker[] Markers)
@@ -25,7 +25,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Markers = n == 0
-                    ? System.Array.Empty<XRMarker>()
+                    ? EmptyArray<XRMarker>.Value
                     : new XRMarker[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -36,11 +36,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public XRMarkerArray(ref ReadBuffer2 b)
         {
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Markers = n == 0
-                    ? System.Array.Empty<XRMarker>()
+                    ? EmptyArray<XRMarker>.Value
                     : new XRMarker[n];
                 for (int i = 0; i < n; i++)
                 {

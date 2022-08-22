@@ -20,7 +20,7 @@ namespace Iviz.Msgs.NavMsgs
         public OccupancyGrid()
         {
             Info = new MapMetaData();
-            Data = System.Array.Empty<sbyte>();
+            Data = EmptyArray<sbyte>.Value;
         }
         
         public OccupancyGrid(in StdMsgs.Header Header, MapMetaData Info, sbyte[] Data)
@@ -38,7 +38,7 @@ namespace Iviz.Msgs.NavMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Data = n == 0
-                    ? System.Array.Empty<sbyte>()
+                    ? EmptyArray<sbyte>.Value
                     : new sbyte[n];
                 if (n != 0)
                 {
@@ -51,12 +51,12 @@ namespace Iviz.Msgs.NavMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Info = new MapMetaData(ref b);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Data = n == 0
-                    ? System.Array.Empty<sbyte>()
+                    ? EmptyArray<sbyte>.Value
                     : new sbyte[n];
                 if (n != 0)
                 {

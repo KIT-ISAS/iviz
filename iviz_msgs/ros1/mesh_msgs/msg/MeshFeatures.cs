@@ -14,7 +14,7 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshFeatures()
         {
             MapUuid = "";
-            Features = System.Array.Empty<MeshMsgs.Feature>();
+            Features = EmptyArray<MeshMsgs.Feature>.Value;
         }
         
         public MeshFeatures(string MapUuid, MeshMsgs.Feature[] Features)
@@ -29,7 +29,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 int n = b.DeserializeArrayLength();
                 Features = n == 0
-                    ? System.Array.Empty<MeshMsgs.Feature>()
+                    ? EmptyArray<MeshMsgs.Feature>.Value
                     : new MeshMsgs.Feature[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -42,11 +42,11 @@ namespace Iviz.Msgs.MeshMsgs
         {
             b.Align4();
             b.DeserializeString(out MapUuid);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 Features = n == 0
-                    ? System.Array.Empty<MeshMsgs.Feature>()
+                    ? EmptyArray<MeshMsgs.Feature>.Value
                     : new MeshMsgs.Feature[n];
                 for (int i = 0; i < n; i++)
                 {

@@ -72,8 +72,8 @@ namespace Iviz.Msgs.SensorMsgs
     
         public BatteryState()
         {
-            CellVoltage = System.Array.Empty<float>();
-            CellTemperature = System.Array.Empty<float>();
+            CellVoltage = EmptyArray<float>.Value;
+            CellTemperature = EmptyArray<float>.Value;
             Location = "";
             SerialNumber = "";
         }
@@ -96,7 +96,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 CellVoltage = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -107,7 +107,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 CellTemperature = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -121,6 +121,7 @@ namespace Iviz.Msgs.SensorMsgs
         public BatteryState(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Align4();
             b.Deserialize(out Voltage);
             b.Deserialize(out Temperature);
             b.Deserialize(out Current);
@@ -132,12 +133,12 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out PowerSupplyHealth);
             b.Deserialize(out PowerSupplyTechnology);
             b.Deserialize(out Present);
-            b.Align4();
             unsafe
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 CellVoltage = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
@@ -148,7 +149,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 int n = b.DeserializeArrayLength();
                 CellTemperature = n == 0
-                    ? System.Array.Empty<float>()
+                    ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {

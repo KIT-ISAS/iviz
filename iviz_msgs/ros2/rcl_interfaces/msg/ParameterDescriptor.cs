@@ -38,8 +38,8 @@ namespace Iviz.Msgs.RclInterfaces
             Name = "";
             Description = "";
             AdditionalConstraints = "";
-            FloatingPointRange = System.Array.Empty<FloatingPointRange>();
-            IntegerRange = System.Array.Empty<IntegerRange>();
+            FloatingPointRange = EmptyArray<FloatingPointRange>.Value;
+            IntegerRange = EmptyArray<IntegerRange>.Value;
         }
         
         public ParameterDescriptor(ref ReadBuffer b)
@@ -52,7 +52,7 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 int n = b.DeserializeArrayLength();
                 FloatingPointRange = n == 0
-                    ? System.Array.Empty<FloatingPointRange>()
+                    ? EmptyArray<FloatingPointRange>.Value
                     : new FloatingPointRange[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -62,7 +62,7 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 int n = b.DeserializeArrayLength();
                 IntegerRange = n == 0
-                    ? System.Array.Empty<IntegerRange>()
+                    ? EmptyArray<IntegerRange>.Value
                     : new IntegerRange[n];
                 for (int i = 0; i < n; i++)
                 {
@@ -81,22 +81,22 @@ namespace Iviz.Msgs.RclInterfaces
             b.Align4();
             b.DeserializeString(out AdditionalConstraints);
             b.Deserialize(out ReadOnly);
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 FloatingPointRange = n == 0
-                    ? System.Array.Empty<FloatingPointRange>()
+                    ? EmptyArray<FloatingPointRange>.Value
                     : new FloatingPointRange[n];
                 for (int i = 0; i < n; i++)
                 {
                     FloatingPointRange[i] = new FloatingPointRange(ref b);
                 }
             }
-            b.Align4();
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 IntegerRange = n == 0
-                    ? System.Array.Empty<IntegerRange>()
+                    ? EmptyArray<IntegerRange>.Value
                     : new IntegerRange[n];
                 for (int i = 0; i < n; i++)
                 {

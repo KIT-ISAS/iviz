@@ -26,6 +26,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public UInt16(ref ReadBuffer2 b)
         {
+            b.Align2();
             b.Deserialize(out Data);
         }
         
