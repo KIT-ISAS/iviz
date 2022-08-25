@@ -37,12 +37,20 @@ namespace Iviz.Controllers
                 return $"{vizObjectsStr}\n{errorStr}";
             }
         }
-        
+
         public WidgetHandler(IWidgetFeedback feedback)
         {
             this.feedback = feedback;
         }
-        
+
+        public void Handler(WidgetArray msg)
+        {
+            foreach (var widget in msg.Widgets)
+            {
+                Handler(widget);
+            }
+        }
+
         public void Handler(Widget msg)
         {
             switch ((ActionType)msg.Action)
@@ -54,16 +62,16 @@ namespace Iviz.Controllers
                     RemoveAll();
                     break;
                 case ActionType.Add:
-                    HandleAddWidget(msg);
+                    HandleAdd(msg);
                     break;
                 default:
-                    RosLogger.Error($"{this}: Widget '{msg.Id}' requested unknown " +
+                    RosLogger.Error($"{this}: Object '{msg.Id}' requested unknown " +
                                     $"action {((int)msg.Action).ToString()}");
                     break;
             }
         }
 
-        void HandleAddWidget(Widget msg)
+        void HandleAdd(Widget msg)
         {
             if (string.IsNullOrWhiteSpace(msg.Id))
             {
@@ -95,7 +103,7 @@ namespace Iviz.Controllers
                 var widgetObject = (WidgetObject)existingObject;
                 if (widgetObject.Type == widgetType)
                 {
-                    widgetObject.UpdateWidget(msg);
+                    widgetObject.Update(msg);
                     return;
                 }
 
@@ -140,7 +148,7 @@ namespace Iviz.Controllers
 
             public WidgetObject(IWidgetFeedback feedback, Widget msg, ResourceKey<GameObject> resourceKey,
                 string typeDescription)
-                : base(msg.Id, resourceKey, typeDescription)
+                : base(msg.Id, typeDescription, resourceKey)
             {
                 Type = (WidgetType)msg.Type;
 
@@ -175,10 +183,10 @@ namespace Iviz.Controllers
                     canBeClicked.Clicked += entry => feedback.OnWidgetClicked(id, FrameId, entry);
                 }
 
-                UpdateWidget(msg);
+                Update(msg);
             }
 
-            public void UpdateWidget(Widget msg)
+            public void Update(Widget msg)
             {
                 node.AttachTo(msg.Header.FrameId);
 

@@ -8,6 +8,7 @@ using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.Configurations;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
@@ -287,11 +288,8 @@ namespace Iviz.Controllers
 
         public bool TryWriteJoint(string joint, float value)
         {
-            if (Robot == null)
-            {
-                throw new InvalidOperationException("There is no robot to set joints to!");
-            }
-
+            if (Robot == null) ThrowHelper.ThrowInvalidOperation("There is no robot to set joints to!");
+            
             return Robot.TryWriteJoint(joint, value);
         }
 
@@ -334,7 +332,7 @@ namespace Iviz.Controllers
             {
                 HelpText = "- Requesting parameter -";
                 (parameterValue, errorMsg) =
-                    await RosManager.Connection.GetParameterAsync(value, ParameterTimeoutInMs);
+                    await RosManager.Connection.GetParameterAsync(value, timeoutInMs: ParameterTimeoutInMs);
             }
             catch (OperationCanceledException)
             {

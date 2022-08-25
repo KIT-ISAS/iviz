@@ -36,12 +36,20 @@ namespace Iviz.Controllers
                 return $"{vizObjectsStr}\n{errorStr}";
             }
         }
-        
+
         public DialogHandler(IDialogFeedback feedback)
         {
             this.feedback = feedback;
-            
+
             GameThread.EveryFrame += CheckDeadDialogs;
+        }
+
+        public void Handler(DialogArray msg)
+        {
+            foreach (var dialog in msg.Dialogs)
+            {
+                Handler(dialog);
+            }
         }
 
         public void Handler(Dialog msg)
@@ -55,16 +63,16 @@ namespace Iviz.Controllers
                     RemoveAll();
                     break;
                 case ActionType.Add:
-                    HandleAddDialog(msg);
+                    HandleAdd(msg);
                     break;
                 default:
-                    RosLogger.Error($"{this}: Widget '{msg.Id}' requested unknown " +
+                    RosLogger.Error($"{this}: Object '{msg.Id}' requested unknown " +
                                     $"action {((int)msg.Action).ToString()}");
                     break;
             }
         }
 
-        void HandleAddDialog(Dialog msg)
+        void HandleAdd(Dialog msg)
         {
             if (string.IsNullOrWhiteSpace(msg.Id))
             {
@@ -115,7 +123,7 @@ namespace Iviz.Controllers
 
             if (vizObjects.TryGetValue(msg.Id, out var existingObject))
             {
-                var dialogObject = (DialogObject)existingObject;  
+                var dialogObject = (DialogObject)existingObject;
                 if (msg.Lifetime.ToTimeSpan() < TimeSpan.Zero)
                 {
                     dialogObject.MarkAsExpired();
@@ -186,7 +194,7 @@ namespace Iviz.Controllers
             float expirationTime;
 
             public DialogObject(IDialogFeedback feedback, Dialog msg, ResourceKey<GameObject> resourceKey,
-                string typeDescription) : base(msg.Id, resourceKey, typeDescription)
+                string typeDescription) : base(msg.Id, typeDescription, resourceKey)
             {
                 if (display is not IDialog dialog)
                 {
@@ -277,7 +285,7 @@ namespace Iviz.Controllers
 
             public IDialog AsDialog()
             {
-                return (IDialog)display;
+                return (IDialog?)display ?? throw new MissingAssetFieldException("Display is missing!");
             }
 
             public bool Expired => expirationTime < GameThread.GameTime;

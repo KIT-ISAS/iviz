@@ -416,7 +416,7 @@ namespace Iviz.App
             try
             {
                 (paramValue, _) =
-                    await RosManager.Connection.GetParameterAsync(param, 5000, token: token)
+                    await RosManager.Connection.GetParameterAsync(param, timeoutInMs: 5000, token: token)
                         .ConfigureAwait(false);
                 GameThread.Post(() => UpdateParametersLink(param));
             }

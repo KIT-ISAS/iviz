@@ -66,7 +66,7 @@ namespace Iviz.App
                 ModuleType.Path => o.AddComponent<PathModulePanel>(),
                 ModuleType.GridMap => o.AddComponent<GridMapModulePanel>(),
                 ModuleType.Octomap => o.AddComponent<OctomapModulePanel>(),
-                ModuleType.GuiWidget => o.AddComponent<GuiWidgetModulePanel>(),
+                ModuleType.VizWidget => o.AddComponent<VizWidgetModulePanel>(),
                 ModuleType.XR => o.AddComponent<XRModulePanel>(),
                 ModuleType.Camera => o.AddComponent<CameraPanel>(),
                 ModuleType.TFPublisher => o.AddComponent<PublishedFramePanel>(),

@@ -227,6 +227,9 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool EqualsApprox(this float a, float b) => Mathf.Approximately(a, b);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool EqualsApprox(in Vector3 lhs, in Vector3 rhs)
         {
             // from unity

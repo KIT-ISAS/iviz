@@ -253,7 +253,7 @@ namespace Iviz.App
             tfPublisher.Dispose();
             cameraPanelData?.Dispose();
 
-            GuiWidgetListener.DisposeDefaultHandler();
+            VizWidgetListener.DisposeDefaultHandler();
             connectionManager?.Dispose();
 
             tfModule?.Dispose();
@@ -324,7 +324,7 @@ namespace Iviz.App
             }
             else
             {
-                throw new NullReferenceException("The menu dialog is not set!");
+                ThrowHelper.ThrowMissingAssetField("The menu dialog is not set!");
             }
         }
 
@@ -422,7 +422,7 @@ namespace Iviz.App
 
         void StartRosbag()
         {
-            string filename = $"iviz-{GameThread.Now:yyyy-MM-dd-HH-mm-ss}.bag";
+            string filename = $"iviz-" + GameThread.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".bag";
             Directory.CreateDirectory(Settings.BagsFolder);
             Connection.BagListener = new BagListener($"{Settings.BagsFolder}/{filename}");
             UpperCanvas.RecordBagImage.color = Color.red;

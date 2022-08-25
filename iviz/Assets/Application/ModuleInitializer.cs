@@ -27,7 +27,7 @@ namespace Iviz.App
             // this is only really needed in the editor
             Settings.ClearResources();
             Resource.ClearResources();
-            GuiWidgetListener.ClearResources();
+            VizWidgetListener.ClearResources();
             ARController.ClearResources();
             ResourcePool.ClearResources();
             GameThread.ClearResources();

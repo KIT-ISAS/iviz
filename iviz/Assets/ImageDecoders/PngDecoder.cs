@@ -162,15 +162,20 @@ namespace Iviz.ImageDecoders
             var self = (PngDecoder)handle.Target;
 
             int countToRead = (int)byteCountToRead;
+            if (countToRead == 0)
+            {
+                return;
+            }
+            
             var targetBuffer = new Span<byte>(outBytes.ToPointer(), countToRead);
             if (self.position + countToRead > self.readBuffer.Length)
             {
                 RosLogger.Error(nameof(PngDecoder) + ": Buffer underflow!");
-                targetBuffer.Fill(0);
+                targetBuffer.InitBlock(0);
                 return;
             }
 
-            self.readBuffer.AsSpan(self.position, countToRead).CopyTo(targetBuffer);
+            self.readBuffer.AsSpan(self.position, countToRead).BlockCopyTo(targetBuffer);
             self.position += countToRead;
         }
 

@@ -111,8 +111,11 @@ namespace Iviz.Resources
                 { OccupancyGrid.MessageType, ModuleType.OccupancyGrid },
                 { GridMap.MessageType, ModuleType.GridMap },
 
-                { WidgetArray.MessageType, ModuleType.GuiWidget },
-                { Dialog.MessageType, ModuleType.GuiWidget },
+                { Widget.MessageType, ModuleType.VizWidget },
+                { WidgetArray.MessageType, ModuleType.VizWidget },
+                { Dialog.MessageType, ModuleType.VizWidget },
+                { DialogArray.MessageType, ModuleType.VizWidget },
+                { RobotPreview.MessageType, ModuleType.VizWidget },
 
                 // these are already implemented, but need refinement
                 //{ JointState.MessageType, ModuleType.JointState },

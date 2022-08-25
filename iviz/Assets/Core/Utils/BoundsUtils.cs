@@ -173,7 +173,7 @@ namespace Iviz.Core
 
         public static Rect Combine(this Span<Rect> bounds, float padding = 0)
         {
-            if (bounds.Length == 0) BuiltIns.ThrowArgumentOutOfRange();
+            if (bounds.Length == 0) ThrowHelper.ThrowArgumentOutOfRange(nameof(bounds));
             
             float minX = float.MaxValue, minY = float.MaxValue;
             float maxX = float.MinValue, maxY = float.MinValue;

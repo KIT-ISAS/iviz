@@ -53,7 +53,8 @@ namespace Iviz.Controllers
                 // shouldn't happen
                 if (cameraManager.currentConfiguration is not { } configuration)
                 {
-                    throw new InvalidOperationException("AR subsystem is not set!");
+                    ThrowHelper.ThrowInvalidOperation("AR subsystem is not set!");
+                    return default; // unreachable
                 }
 
                 const float defaultFovInRad = 60;

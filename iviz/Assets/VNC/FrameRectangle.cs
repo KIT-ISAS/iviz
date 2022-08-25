@@ -230,14 +230,14 @@ namespace VNC
             if (rowLength == dstPitch)
             {
                 int sizeToFill = rectangle.Size.Height * rowLength;
-                dst[..sizeToFill].Fill(c);
+                dst[..sizeToFill].InitBlock(c);
             }
             else
             {
                 int offset = 0;
                 for (int y = rectangle.Size.Height; y > 0; y--)
                 {
-                    dst.Slice(offset, rowLength).Fill(c);
+                    dst.Slice(offset, rowLength).InitBlock(c);
                     offset += dstPitch;
                 }
             }
@@ -313,7 +313,7 @@ namespace VNC
         static void AssertSize(in ReadOnlySpan<byte> span, int size)
         {
             if (span.Length < size) 
-                BuiltIns.ThrowArgumentOutOfRange("Span array is too short for the given operation");
+                ThrowHelper.ThrowArgumentOutOfRange("Span array is too short for the given operation");
         }
     }
 }

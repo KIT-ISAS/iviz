@@ -57,13 +57,14 @@ namespace Iviz.Displays
         public IReadOnlyDictionary<string, string> LinkParents => linkParents;
 
         public GameObject BaseLinkObject =>
-            !disposed ? baseLinkObject : throw new ObjectDisposedException("this");
+            !disposed ? baseLinkObject : throw new ObjectDisposedException(nameof(RobotModel));
 
         public IReadOnlyDictionary<string, GameObject> LinkObjects =>
-            !disposed ? linkObjects : throw new ObjectDisposedException("this");
+            !disposed ? linkObjects : throw new ObjectDisposedException(nameof(RobotModel));
 
         public bool OcclusionOnly
         {
+            get => occlusionOnly;
             set
             {
                 occlusionOnly = value;
@@ -76,6 +77,7 @@ namespace Iviz.Displays
 
         public Color Tint
         {
+            get => tint;
             set
             {
                 tint = value;
@@ -88,6 +90,7 @@ namespace Iviz.Displays
 
         public bool Visible
         {
+            get => visible;
             set
             {
                 visible = value;
@@ -100,6 +103,7 @@ namespace Iviz.Displays
 
         public float Smoothness
         {
+            get => smoothness;
             set
             {
                 smoothness = value;
@@ -112,6 +116,7 @@ namespace Iviz.Displays
 
         public float Metallic
         {
+            get => metallic;
             set
             {
                 metallic = value;
@@ -124,6 +129,7 @@ namespace Iviz.Displays
 
         public bool EnableShadows
         {
+            get => enableShadows;
             set
             {
                 enableShadows = value;
@@ -150,9 +156,17 @@ namespace Iviz.Displays
             baseLinkObject = new GameObject(Name);
         }
 
+        RobotModel(Robot robot, string robotDescription)
+        {
+            this.robot = robot;
+            Name = robot.Name;
+            Description = robotDescription;
+            baseLinkObject = new GameObject(Name);
+        }
+
         public RobotModel Clone()
         {
-            return new RobotModel(Description);
+            return new RobotModel(robot, Description);
         }
 
         /// <summary>Constructs a robot asynchronously.</summary>
@@ -162,7 +176,8 @@ namespace Iviz.Displays
         /// of replacing them with the provided colors.
         /// </param>
         /// <param name="loadColliders">Whether collider models should be loaded.</param>
-        public async ValueTask StartAsync(IServiceProvider? provider = null, bool keepMeshMaterials = false,
+        public async ValueTask StartAsync(IServiceProvider? provider = null, 
+            bool keepMeshMaterials = false,
             bool loadColliders = true)
         {
             if (robot.Links.Count == 0 || robot.Joints.Count == 0)

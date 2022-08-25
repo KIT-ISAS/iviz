@@ -1,5 +1,6 @@
 #nullable enable
 
+using System.Runtime.InteropServices;
 using Iviz.Core;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
@@ -88,7 +89,7 @@ namespace Iviz.Displays
                     {
                         dirX = ab / Mathf.Sqrt(abMagnitudeSq);
                         var (x, y, z) = dirX;
-                        if (Hint.Unlikely((Mathf.Abs(z) - 1).ApproximatelyZero()))
+                        if (Hint.Unlikely(Mathf.Approximately(z, 1)))
                         {
                             float den = Mathf.Sqrt(x * x + z * z);
                             dirY.x = -z / den;
@@ -129,6 +130,7 @@ namespace Iviz.Displays
                 }
             }
             
+            [StructLayout(LayoutKind.Sequential)]
             struct Batch
             {
                 public float3 a, b, c, d, e;
@@ -169,6 +171,7 @@ namespace Iviz.Displays
                 }
             }
             
+            [StructLayout(LayoutKind.Sequential)]
             struct Batch
             {
                 public float a, b, c, d, e;
@@ -214,6 +217,7 @@ namespace Iviz.Displays
                 }
             }
 
+            [StructLayout(LayoutKind.Sequential)]
             struct Batch
             {
                 public float2 a, b, c, d, e;
