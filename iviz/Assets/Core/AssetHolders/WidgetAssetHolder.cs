@@ -50,6 +50,9 @@ namespace Iviz.Displays
         public GameObject ARMarkerPanel = null;
         public GameObject ARMarkers = null;
 
+        public GameObject RobotPanel = null;
+        public GameObject RobotWidget = null;
+
         public GameObject TfPublisherWidget = null;
         public GameObject MagnitudeWidget = null;
 

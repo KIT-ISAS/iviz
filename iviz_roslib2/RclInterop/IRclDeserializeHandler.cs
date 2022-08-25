@@ -19,7 +19,7 @@ internal sealed class RclDeserializeHandler<TMessage> : IRclDeserializeHandler w
     {
         this.subscriber = subscriber;
         this.generator = generator;
-        Reset();
+        Clear();
     }
 
     public unsafe void DeserializeFrom(IntPtr ptr, int length)
@@ -30,12 +30,12 @@ internal sealed class RclDeserializeHandler<TMessage> : IRclDeserializeHandler w
 
         if (subscriber.IsPaused) return;
 
-        hasMessage = true;
         var b = new ReadBuffer2((byte*)ptr + headerSize, size);
         message = generator.RosDeserialize(ref b);
+        hasMessage = true;
     }
 
-    public void Reset()
+    public void Clear()
     {
         message = default;
         messageLength = 0;

@@ -8,7 +8,6 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
     readonly IntPtr contextHandle;
     readonly IntPtr nodeHandle;
     readonly IntPtr subscriptionHandle;
-    //readonly SerializedMessage messageBuffer;
     bool disposed;
 
     public IntPtr Handle => disposed
@@ -44,45 +43,10 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
             default:
                 throw new RosRclException($"Subscription for topic '{topic}' [{topicType}] failed!", ret);
         }
-
-
-        /*
-        messageBuffer = (RclRet)ret switch
-        {
-            RclRet.Ok => new SerializedMessage(),
-            RclRet.InvalidMsgType => throw new RosUnsupportedMessageException(topicType),
-            _ => throw new RosRclException($"Subscription for topic '{topic}' [{topicType}] failed!", ret)
-        };
-        */
     }
 
     void Check(int result) => Rcl.Check(contextHandle, result);
-
-    /*
-    public bool TryTakeMessage(out Span<byte> span, out Guid guid, out bool moreRemaining)
-    {
-        int ret = Rcl.Impl.TakeSerializedMessage(Handle, messageBuffer.Handle, out IntPtr ptr, out int length, out guid,
-            out byte moreRemainingByte);
-
-        moreRemaining = moreRemainingByte != 0;
-
-        switch ((RclRet)ret)
-        {
-            case RclRet.Ok:
-                const int headerSize = 4;
-                span = Rcl.CreateByteSpan(ptr + headerSize, length - headerSize);
-                return true;
-            case RclRet.SubscriptionTakeFailed:
-                span = default;
-                return false;
-            default:
-                Logger.LogErrorFormat("{0}: {1} failed!", this, nameof(Rcl.Impl.TakeSerializedMessage));
-                span = default;
-                return false;
-        }
-    }
-    */
-
+    
     public bool Take(IntPtr callbackContextHandle, out Guid guid)
     {
         int ret = Rcl.Impl.Take(subscriptionHandle, callbackContextHandle, out guid, out _);

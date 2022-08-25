@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace Iviz.Core
 {
+    [Il2CppEagerStaticClassConstruction]
     public static class Quaternions
     {
         public static readonly Quaternion Rotate90AroundX = new(0.707106769f, 0, 0, 0.707106769f);

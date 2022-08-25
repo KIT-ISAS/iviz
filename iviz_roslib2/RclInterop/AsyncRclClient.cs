@@ -62,14 +62,14 @@ internal sealed class AsyncRclClient : TaskExecutor
             return; // timeout, nothing triggered
         }
 
-        if (IsNotZero(triggeredGuards[1]))
+        if ((nint)triggeredGuards[1] != 0)
         {
             GraphChangedTicks = DateTime.Now.Ticks;
         }
 
         for (int i = 0; i < subscriberHandles.Length; i++)
         {
-            if (IsNotZero(triggeredSubscriptions[i]))
+            if ((nint)triggeredSubscriptions[i] != 0)
             {
                 subscribers[i].signalizable.Signal();
             }
@@ -77,7 +77,7 @@ internal sealed class AsyncRclClient : TaskExecutor
 
         for (int i = 0; i < serviceClientHandles.Length; i++)
         {
-            if (IsNotZero(triggeredClients[i]))
+            if ((nint)triggeredClients[i] != 0)
             {
                 serviceClients[i].signalizable.Signal();
             }
@@ -85,15 +85,12 @@ internal sealed class AsyncRclClient : TaskExecutor
 
         for (int i = 0; i < serviceServerHandles.Length; i++)
         {
-            if (IsNotZero(triggeredServers[i]))
+            if ((nint)triggeredServers[i] != 0)
             {
                 serviceServers[i].signalizable.Signal();
             }
         }
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static bool IsNotZero(IntPtr ptr) => Unsafe.As<IntPtr, nint>(ref ptr) != 0;
 
     void RebuildSubscribers()
     {

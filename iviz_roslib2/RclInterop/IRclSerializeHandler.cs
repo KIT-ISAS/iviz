@@ -21,7 +21,7 @@ internal sealed class RclSerializeHandler<TMessage> : IRclSerializeHandler where
         const int header = 0x00000100; // CDR_LE { 0x00, 0x01}, serialization options { 0x00, 0x00 } 
         const int headerSize = 4;
 
-        if (length < headerSize) BuiltIns.ThrowBufferOverflow(headerSize, length); 
+        if (length < headerSize) BuiltIns.ThrowBufferOverflow(); 
         Unsafe.WriteUnaligned(ref Rcl.GetReference(ptr), header);
 
         int size = length - headerSize;

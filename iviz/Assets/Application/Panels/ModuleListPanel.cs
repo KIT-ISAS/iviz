@@ -1015,6 +1015,12 @@ namespace Iviz.App
             ThrowHelper.ThrowIfNull(caller, nameof(caller));
             Dialogs.MarkerData.Show(caller);
         }
+        
+        public void ShowMarkerDialog(SimpleRobotModuleData caller)
+        {
+            ThrowHelper.ThrowIfNull(caller, nameof(caller));
+            Dialogs.RobotData.Show(caller);
+        }
 
         public void ShowARMarkerDialog()
         {

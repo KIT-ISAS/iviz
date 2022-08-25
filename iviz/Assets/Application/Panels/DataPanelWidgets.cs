@@ -144,6 +144,11 @@ namespace Iviz.App
             return Resource.Widgets.MarkerWidget.Instantiate<MarkerWidget>(NonStatics.transform);
         }
 
+        public RobotWidget AddRobot()
+        {
+            return Resource.Widgets.RobotWidget.Instantiate<RobotWidget>(NonStatics.transform);
+        }
+
         public FrameWidget AddFrame()
         {
             return Resource.Widgets.Frame.Instantiate<FrameWidget>(NonStatics.transform);

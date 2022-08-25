@@ -42,7 +42,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
 
         while (true)
         {
-            messageHandler.Reset();
+            messageHandler.Clear();
 
             await signal.WaitAsync(token);
 
@@ -52,7 +52,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
             }
 
             UpdateReceiverInfo(receiverInfo.guid, messageHandler.messageLength);
-            if (!messageHandler.hasMessage)
+            if (!messageHandler.hasMessage) // false if paused or exception
             {
                 continue;
             }
