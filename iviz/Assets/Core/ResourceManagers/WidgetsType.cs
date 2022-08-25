@@ -21,6 +21,7 @@ namespace Iviz.Resources
         public ResourceKey<GameObject> SettingsPanel { get; }
         public ResourceKey<GameObject> EchoPanel { get; }
         public ResourceKey<GameObject> SystemPanel { get; }
+        public ResourceKey<GameObject> RobotPanel { get; }
 
         public ResourceKey<GameObject> HeadTitle { get; }
         public ResourceKey<GameObject> Toggle { get; }
@@ -44,6 +45,7 @@ namespace Iviz.Resources
         public ResourceKey<GameObject> Vector3Multi { get; }
         public ResourceKey<GameObject> InputWithHints { get; }
         public ResourceKey<GameObject> MarkerWidget { get; }
+        public ResourceKey<GameObject> RobotWidget { get; }
         public ResourceKey<GameObject> CollapsibleWidget { get; }
 
         public ResourceKey<GameObject> DataPanel { get; }
@@ -75,6 +77,7 @@ namespace Iviz.Resources
             SettingsPanel = Create(assetHolder.SettingsPanel, nameof(assetHolder.SettingsPanel));
             EchoPanel = Create(assetHolder.EchoPanel, nameof(assetHolder.EchoPanel));
             SystemPanel = Create(assetHolder.SystemInfo, nameof(assetHolder.SystemInfo));
+            RobotPanel = Create(assetHolder.RobotPanel, nameof(assetHolder.RobotPanel));
 
             HeadTitle = Create(assetHolder.HeadTitle, nameof(assetHolder.HeadTitle));
             Toggle = Create(assetHolder.Toggle, nameof(assetHolder.Toggle));
@@ -98,6 +101,7 @@ namespace Iviz.Resources
             Vector3Multi = Create(assetHolder.Vector3Multi, nameof(assetHolder.Vector3Multi));
             InputWithHints = Create(assetHolder.InputFieldWithHints, nameof(assetHolder.InputFieldWithHints));
             MarkerWidget = Create(assetHolder.Markers, nameof(assetHolder.Markers));
+            RobotWidget = Create(assetHolder.RobotWidget, nameof(assetHolder.RobotWidget));
 
             DataPanel = Create(assetHolder.DataPanel, nameof(assetHolder.DataPanel));
             ARMarkerPanel = Create(assetHolder.ARMarkerPanel, nameof(assetHolder.ARMarkerPanel));

@@ -4,9 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
@@ -54,6 +56,7 @@ namespace Iviz.Displays
         public string Name { get; }
         public string? BaseLink { get; private set; }
         public string Description { get; }
+
         public IReadOnlyDictionary<string, string> LinkParents => linkParents;
 
         public GameObject BaseLinkObject =>
@@ -678,6 +681,98 @@ namespace Iviz.Displays
             var jointObject = jointObjects[jointName];
             jointObject.transform.SetLocalPose(validatedPose);
             return true;
+        }
+
+        public void GenerateLog(StringBuilder builder)
+        {
+            if (BaseLink == null)
+            {
+                return;
+            }
+
+            if (!robot.Links.TryGetFirst(link => link.Name == BaseLink, out var baseLink))
+            {
+                return;
+            }
+            
+            WriteLink(builder, baseLink, 0);
+
+            var children = robot.Links.ToDictionary(
+                link => link.Name,
+                link => robot.Joints.Where(joint => joint.Parent.Link == link.Name).ToList()
+            );
+
+            var links = robot.Links.ToDictionary(
+                link => link.Name,
+                link => link
+            );
+            
+            var stack = new Stack<(Joint joint, int level)>();
+
+            foreach (var child in children[baseLink.Name])
+            {
+                stack.Push((child, 1));
+            }
+            
+            while (stack.TryPop(out var entry))
+            {
+                int level = entry.level;
+                var joint = entry.joint;
+                var link = links[joint.Child.Link];
+
+                WriteJoint(builder, joint, level);
+                WriteLink(builder, link, level);
+
+                if (!children.TryGetValue(link.Name, out var linkChildren))
+                {
+                    continue;
+                }
+                
+                foreach (var childJoint in linkChildren)
+                {
+                    stack.Push((childJoint, level + 1));
+                }
+            }
+        }
+
+        static void WriteJoint(StringBuilder builder, Joint joint, int level)
+        {
+            builder.Append(' ', level)
+                .Append("<b>Joint '").Append(joint.Name).Append("'</b>").AppendLine();
+            builder.Append(' ', level)
+                .Append("Type: ").Append(joint.Type).AppendLine();
+            builder.Append(' ', level)
+                .Append("Axis: ").Append(BuiltIns.ToJsonString(joint.Axis, false)).AppendLine();
+            builder.Append(' ', level)
+                .Append("Origin: ").Append(BuiltIns.ToJsonString(joint.Origin, false)).AppendLine();
+        }
+
+        static void WriteLink(StringBuilder builder, Link link, int level)
+        {
+            builder.Append(' ', level)
+                .Append("<b>Link '").Append(link.Name).Append("'</b>").AppendLine();
+            foreach (var visual in link.Visuals)
+            {
+                builder.Append(' ', level)
+                    .Append("<b>Visual '").Append(visual.Name).Append("'</b>").AppendLine();
+                builder.Append(' ', level)
+                    .Append("Origin: ").Append(BuiltIns.ToJsonString(visual.Origin, false)).AppendLine();
+                builder.Append(' ', level)
+                    .Append("Origin: ").Append(BuiltIns.ToJsonString(visual.Geometry, false)).AppendLine();
+            }
+
+            foreach (var collision in link.Collisions)
+            {
+                builder.Append(' ', level)
+                    .Append("<b>Visual '").Append(collision.Name).Append("'</b>").AppendLine();
+                builder.Append(' ', level)
+                    .Append("Origin: ").Append(BuiltIns.ToJsonString(collision.Origin, false)).AppendLine();
+                if (collision.Geometry is { } geometry)
+                {
+                    builder.Append(' ', level)
+                        .Append("Origin: ").Append(BuiltIns.ToJsonString(geometry, false)).AppendLine();
+                }
+            }
         }
 
         public override string ToString() => $"[{nameof(RobotModel)} '{Name}']";

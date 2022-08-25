@@ -14,6 +14,5 @@ namespace Iviz.Common
         string BriefDescription { get; }
         void ResetController();
         bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds);
-        //IEnumerable<IHasBounds> GetAllBounds();
     }
 }

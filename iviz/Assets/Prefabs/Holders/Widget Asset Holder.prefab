@@ -122,6 +122,10 @@ MonoBehaviour:
     type: 3}
   ARMarkers: {fileID: 6469948729944380942, guid: 929fe40406d244701b9d2a3803336720,
     type: 3}
+  RobotPanel: {fileID: 8682521506046349266, guid: 347ab8708013d490ab6749cb6057b119,
+    type: 3}
+  RobotWidget: {fileID: 6469948729944380942, guid: a0178acc08c9b4b57aa5bf06e03e9901,
+    type: 3}
   TfPublisherWidget: {fileID: 6469948729944380942, guid: 3138219d9480a469d93f47f9bf5ab282,
     type: 3}
   MagnitudeWidget: {fileID: 6469948729944380942, guid: 41e568838dc6f43bebd62a83fbaf0230,
