@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -10,14 +8,12 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Roslib.Utils;
 using Iviz.Roslib.XmlRpc;
-using Iviz.XmlRpc;
 using Iviz.Tools;
 using Nito.AsyncEx;
 
@@ -149,263 +145,15 @@ public sealed class RosClient : IRosClient
     /// </summary>
     public Uri CallerUri { get; private set; }
 
-    RosClient(Uri? masterUri, string? ownId, Uri? ownUri, string? namespaceOverride)
-    {
-        masterUri ??= EnvironmentMasterUri;
-
-        if (masterUri is null)
-        {
-            throw new ArgumentException("No valid master uri provided, and ROS_MASTER_URI is not set",
-                nameof(masterUri));
-        }
-
-        if (masterUri.Scheme != "http")
-        {
-            throw new ArgumentException("URI scheme must be http", nameof(masterUri));
-        }
-
-        ownUri ??= TryGetCallerUriFor(masterUri) ?? TryGetCallerUri();
-
-        if (ownUri.Scheme != "http")
-        {
-            throw new ArgumentException("URI scheme must be http", nameof(ownUri));
-        }
-
-        if (string.IsNullOrWhiteSpace(ownId))
-        {
-            ownId = CreateCallerId();
-        }
-
-        string? ns = namespaceOverride ?? EnvironmentRosNamespace;
-        namespacePrefix = ns == null ? "/" : $"/{ns}/";
-
-        if (ownId[0] != '/')
-        {
-            ownId = $"{namespacePrefix}{ownId}";
-        }
-
-        if (ownId[0] == '~')
-        {
-            throw new RosInvalidResourceNameException("ROS node names may not start with a '~'");
-        }
-
-        RosNameUtils.ValidateResourceName(ownId);
-
-        CallerId = ownId;
-        CallerUri = ownUri;
-
-        RosMasterClient = new RosMasterClient(masterUri, CallerId, CallerUri, 3);
-        Parameters = new RosParameterClient(RosMasterClient);
-    }
+    /// <summary>
+    /// Gets the topics published by this node.
+    /// </summary>
+    public TopicNameType[] SubscribedTopics => GetSubscriptionsRpc();
 
     /// <summary>
-    /// Constructs and connects a ROS client in a sync way.
-    /// You should use <see cref="CreateAsync"/> in async contexts.
+    /// Gets the topics published by this node.
     /// </summary>
-    /// <param name="masterUri">
-    /// URI to the master node. Example: new Uri("http://localhost:11311").
-    /// </param>
-    /// <param name="ownId">
-    /// The ROS name of this node.
-    /// This is your identity in the network, and must be unique. Example: /my_new_node
-    /// Leave empty to generate one automatically.
-    /// </param>
-    /// <param name="ownUri">
-    /// URI of this node.
-    /// Other clients will use this address to connect to this node.
-    /// Leave empty to generate one automatically. </param>
-    /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
-    /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
-    public RosClient(Uri? masterUri = null, string? ownId = null, Uri? ownUri = null,
-        bool ensureCleanSlate = true, string? namespaceOverride = null) :
-        this(masterUri, ownId, ownUri, namespaceOverride)
-    {
-        try
-        {
-            // Do a simple ping to the master. This will tell us whether the master is reachable.
-            // (there is nothing special about GetUri, it's just a cheap call)
-            RosMasterClient.GetUri();
-        }
-        catch (Exception e) when (e is not OperationCanceledException)
-        {
-            throw new RosConnectionException($"Failed to contact the master URI at '{masterUri}'", e);
-        }
-
-        try
-        {
-            // Create an XmlRpc server. This will tell us quickly whether the port is taken.
-            listener = new RosNodeServer(this);
-        }
-        catch (SocketException e)
-        {
-            throw new RosUriBindingException($"Failed to bind to local URI '{ownUri}'", e);
-        }
-
-        // Start the XmlRpc server.
-        listener.Start();
-
-        if (CallerUri.Port == AnyPort || CallerUri.IsDefaultPort)
-        {
-            string absolutePath = Uri.UnescapeDataString(CallerUri.AbsolutePath);
-            CallerUri = new Uri($"http://{CallerUri.Host}:{listener.ListenerPort.ToString()}{absolutePath}");
-
-            // caller uri has changed;
-            RosMasterClient = new RosMasterClient(MasterUri, CallerId, CallerUri, 3);
-            Parameters = new RosParameterClient(RosMasterClient);
-        }
-
-
-        Logger.LogDebugFormat("{0}: Initialized.", this);
-
-        if (!ensureCleanSlate)
-        {
-            return;
-        }
-
-        try
-        {
-            EnsureCleanSlate();
-        }
-        catch
-        {
-            Logger.LogDebugFormat("{0}: EnsureCleanState failed.", this);
-            listener.Dispose();
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Constructs and connects a ROS client in async.
-    /// </summary>
-    /// <param name="masterUri">
-    /// URI to the master node. Example: new Uri("http://localhost:11311").
-    /// </param>
-    /// <param name="ownId">
-    /// The ROS name of this node.
-    /// This is your identity in the network, and must be unique. Example: /my_new_node
-    /// Leave empty to generate one automatically.
-    /// </param>
-    /// <param name="ownUri">
-    /// URI of this node. 
-    /// Other clients will use this address to connect to this node.
-    /// Leave empty to generate one automatically.
-    /// </param>
-    /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
-    /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
-    /// <param name="token">An optional cancellation token.</param>        
-    public static async ValueTask<RosClient> CreateAsync(Uri? masterUri = null, string? ownId = null,
-        Uri? ownUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null,
-        CancellationToken token = default)
-    {
-        RosClient client = new(masterUri, ownId, ownUri, namespaceOverride);
-
-        try
-        {
-            // Do a simple ping to the master. This will tell us whether the master is reachable.
-            // (there is nothing special about GetUri, it's just a cheap call)
-            await client.RosMasterClient.GetUriAsync(token);
-        }
-        catch (Exception e)
-        {
-            throw new RosConnectionException($"Failed to contact the master URI '{masterUri}'", e);
-        }
-
-        try
-        {
-            // Create an XmlRpc server. This will tell us quickly whether the port is taken.
-            client.listener = new RosNodeServer(client);
-        }
-        catch (SocketException e)
-        {
-            throw new RosUriBindingException($"Failed to bind to local URI '{ownUri}'", e);
-        }
-
-        client.listener.Start();
-
-        if (client.CallerUri.Port == AnyPort || client.CallerUri.IsDefaultPort)
-        {
-            string absolutePath = Uri.UnescapeDataString(client.CallerUri.AbsolutePath);
-            client.CallerUri =
-                new Uri($"http://{client.CallerUri.Host}:{client.listener.ListenerPort.ToString()}{absolutePath}");
-
-            // own uri has changed;
-            client.RosMasterClient = new RosMasterClient(client.MasterUri, client.CallerId, client.CallerUri);
-            client.Parameters = new RosParameterClient(client.RosMasterClient);
-        }
-
-        Logger.LogDebugFormat("{0}: Initialized.", client);
-
-        if (!ensureCleanSlate)
-        {
-            return client;
-        }
-
-        try
-        {
-            await client.EnsureCleanSlateAsync(token);
-        }
-        catch
-        {
-            Logger.LogDebugFormat("{0}: " + nameof(EnsureCleanSlateAsync) + " failed.", client);
-            await client.listener.DisposeAsync();
-            throw;
-        }
-
-        return client;
-    }
-
-    /// <summary>
-    /// Constructs and connects a ROS client. Same as calling new() directly.
-    /// This constructor exists only to have a sync equivalent to <see cref="CreateAsync"/> (which you should use in async contexts).
-    /// </summary>
-    /// <param name="masterUri">
-    /// URI to the master node. Example: new Uri("http://localhost:11311").
-    /// </param>
-    /// <param name="ownId">
-    /// The ROS name of this node.
-    /// This is your identity in the network, and must be unique. Example: /my_new_node
-    /// Leave empty to generate one automatically.
-    /// </param>
-    /// <param name="callerUri">
-    /// URI of this node.
-    /// Other clients will use this address to connect to this node.
-    /// Leave empty to generate one automatically. </param>
-    /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
-    /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
-    public static RosClient Create(Uri? masterUri = null, string? ownId = null,
-        Uri? callerUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null) =>
-        new RosClient(masterUri, ownId, callerUri, ensureCleanSlate, namespaceOverride);
-
-    /// <summary>
-    /// Constructs and connects a ROS client.
-    /// </summary>
-    /// <param name="masterUri">
-    /// URI to the master node. Example: http://localhost:11311.
-    /// </param>
-    /// <param name="ownId">
-    /// The ROS name of this node.
-    /// This is your identity in the network, and must be unique. Example: /my_new_node
-    /// Leave empty to generate one automatically.
-    /// </param>
-    /// <param name="ownUri">
-    /// URI of this node.
-    /// Other clients will use this address to connect to this node.
-    /// Leave empty to generate one automatically. </param>
-    /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
-    /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
-    public RosClient(string? masterUri,
-        string? ownId = null,
-        string? ownUri = null,
-        bool ensureCleanSlate = true,
-        string? namespaceOverride = null) :
-        this(TryToCreateUri(masterUri, true), ownId, TryToCreateUri(ownUri, false), ensureCleanSlate,
-            namespaceOverride)
-    {
-    }
-
-    public static RosClient Create(string? masterUri, string? ownId = null,
-        string? ownUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null) =>
-        new RosClient(masterUri, ownId, ownUri, ensureCleanSlate, namespaceOverride);
+    public TopicNameType[] PublishedTopics => GetPublicationsRpc();
 
     static Uri? TryToCreateUri(string? uri, bool isMaster)
     {
@@ -572,13 +320,285 @@ public sealed class RosClient : IRosClient
         return EnvironmentMasterUri ?? new Uri("http://localhost:11311/");
     }
 
-    /// <summary>
-    /// Asks the master which topics we advertise and are subscribed to, and removes them.
-    /// </summary>
-    public void EnsureCleanSlate(CancellationToken token = default)
+    string ResolveResourceName(string name)
     {
-        TaskUtils.RunSync(EnsureCleanSlateAsync, token);
+        RosNameUtils.ValidateResourceName(name);
+
+        return name[0] switch
+        {
+            '/' => name,
+            '~' => $"{CallerId}/{name[1..]}",
+            _ => $"{namespacePrefix}{name}"
+        };
     }
+
+    internal RosNodeClient CreateNodeClient(Uri otherUri) =>
+        new(CallerId, CallerUri, otherUri, (int)RpcNodeTimeout.TotalMilliseconds);
+
+    #region constructors
+
+    RosClient(Uri? masterUri, string? ownId, Uri? ownUri, string? namespaceOverride)
+    {
+        masterUri ??= EnvironmentMasterUri;
+
+        if (masterUri is null)
+        {
+            throw new ArgumentException("No valid master uri provided, and ROS_MASTER_URI is not set",
+                nameof(masterUri));
+        }
+
+        if (masterUri.Scheme != "http")
+        {
+            throw new ArgumentException("URI scheme must be http", nameof(masterUri));
+        }
+
+        ownUri ??= TryGetCallerUriFor(masterUri) ?? TryGetCallerUri();
+
+        if (ownUri.Scheme != "http")
+        {
+            throw new ArgumentException("URI scheme must be http", nameof(ownUri));
+        }
+
+        if (string.IsNullOrWhiteSpace(ownId))
+        {
+            ownId = CreateCallerId();
+        }
+
+        string? ns = namespaceOverride ?? EnvironmentRosNamespace;
+        namespacePrefix = ns == null ? "/" : $"/{ns}/";
+
+        if (ownId[0] != '/')
+        {
+            ownId = $"{namespacePrefix}{ownId}";
+        }
+
+        if (ownId[0] == '~')
+        {
+            throw new RosInvalidResourceNameException("ROS node names may not start with a '~'");
+        }
+
+        RosNameUtils.ValidateResourceName(ownId);
+
+        CallerId = ownId;
+        CallerUri = ownUri;
+
+        RosMasterClient = new RosMasterClient(masterUri, CallerId, CallerUri, 3);
+        Parameters = new RosParameterClient(RosMasterClient);
+    }
+
+    /// <summary>
+    /// Constructs and connects a ROS client in a sync way.
+    /// You should use <see cref="CreateAsync"/> in async contexts.
+    /// </summary>
+    /// <param name="masterUri">
+    /// URI to the master node. Example: new Uri("http://localhost:11311").
+    /// </param>
+    /// <param name="ownId">
+    /// The ROS name of this node.
+    /// This is your identity in the network, and must be unique. Example: /my_new_node
+    /// Leave empty to generate one automatically.
+    /// </param>
+    /// <param name="ownUri">
+    /// URI of this node.
+    /// Other clients will use this address to connect to this node.
+    /// Leave empty to generate one automatically. </param>
+    /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
+    /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
+    public RosClient(Uri? masterUri = null, string? ownId = null, Uri? ownUri = null,
+        bool ensureCleanSlate = true, string? namespaceOverride = null) :
+        this(masterUri, ownId, ownUri, namespaceOverride)
+    {
+        try
+        {
+            // Do a simple ping to the master. This will tell us whether the master is reachable.
+            // (there is nothing special about GetUri, it's just a cheap call)
+            TaskUtils.RunSync(RosMasterClient.GetUriAsync);
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            throw new RosConnectionException($"Failed to contact the master URI at '{masterUri}'", e);
+        }
+
+        try
+        {
+            // Create an XmlRpc server. This will tell us quickly whether the port is taken.
+            listener = new RosNodeServer(this);
+        }
+        catch (SocketException e)
+        {
+            throw new RosUriBindingException($"Failed to bind to local URI '{ownUri}'", e);
+        }
+
+        // Start the XmlRpc server.
+        listener.Start();
+
+        if (CallerUri.Port == AnyPort || CallerUri.IsDefaultPort)
+        {
+            string absolutePath = Uri.UnescapeDataString(CallerUri.AbsolutePath);
+            CallerUri = new Uri($"http://{CallerUri.Host}:{listener.ListenerPort.ToString()}{absolutePath}");
+
+            // caller uri has changed;
+            RosMasterClient = new RosMasterClient(MasterUri, CallerId, CallerUri, 3);
+            Parameters = new RosParameterClient(RosMasterClient);
+        }
+
+
+        Logger.LogDebugFormat("{0}: Initialized.", this);
+
+        if (!ensureCleanSlate)
+        {
+            return;
+        }
+
+        TaskUtils.RunSync(TryEnsureCleanSlate);
+
+        async ValueTask TryEnsureCleanSlate()
+        {
+            try
+            {
+                await EnsureCleanSlateAsync();
+            }
+            catch
+            {
+                Logger.LogDebugFormat("{0}: EnsureCleanState failed.", this);
+                await listener.DisposeAsync();
+                throw;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Constructs and connects a ROS client in async.
+    /// </summary>
+    /// <param name="masterUri">
+    /// URI to the master node. Example: new Uri("http://localhost:11311").
+    /// </param>
+    /// <param name="ownId">
+    /// The ROS name of this node.
+    /// This is your identity in the network, and must be unique. Example: /my_new_node
+    /// Leave empty to generate one automatically.
+    /// </param>
+    /// <param name="ownUri">
+    /// URI of this node. 
+    /// Other clients will use this address to connect to this node.
+    /// Leave empty to generate one automatically.
+    /// </param>
+    /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
+    /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
+    /// <param name="token">An optional cancellation token.</param>        
+    public static async ValueTask<RosClient> CreateAsync(Uri? masterUri = null, string? ownId = null,
+        Uri? ownUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null,
+        CancellationToken token = default)
+    {
+        RosClient client = new(masterUri, ownId, ownUri, namespaceOverride);
+
+        try
+        {
+            // Do a simple ping to the master. This will tell us whether the master is reachable.
+            // (there is nothing special about GetUri, it's just a cheap call)
+            await client.RosMasterClient.GetUriAsync(token);
+        }
+        catch (Exception e)
+        {
+            throw new RosConnectionException($"Failed to contact the master URI '{masterUri}'", e);
+        }
+
+        try
+        {
+            // Create an XmlRpc server. This will tell us quickly whether the port is taken.
+            client.listener = new RosNodeServer(client);
+        }
+        catch (SocketException e)
+        {
+            throw new RosUriBindingException($"Failed to bind to local URI '{ownUri}'", e);
+        }
+
+        client.listener.Start();
+
+        if (client.CallerUri.Port == AnyPort || client.CallerUri.IsDefaultPort)
+        {
+            string absolutePath = Uri.UnescapeDataString(client.CallerUri.AbsolutePath);
+            client.CallerUri =
+                new Uri($"http://{client.CallerUri.Host}:{client.listener.ListenerPort.ToString()}{absolutePath}");
+
+            // own uri has changed;
+            client.RosMasterClient = new RosMasterClient(client.MasterUri, client.CallerId, client.CallerUri);
+            client.Parameters = new RosParameterClient(client.RosMasterClient);
+        }
+
+        Logger.LogDebugFormat("{0}: Initialized.", client);
+
+        if (!ensureCleanSlate)
+        {
+            return client;
+        }
+
+        try
+        {
+            await client.EnsureCleanSlateAsync(token);
+        }
+        catch
+        {
+            Logger.LogDebugFormat("{0}: " + nameof(EnsureCleanSlateAsync) + " failed.", client);
+            await client.listener.DisposeAsync();
+            throw;
+        }
+
+        return client;
+    }
+
+    /// <summary>
+    /// Constructs and connects a ROS client. Same as calling new() directly.
+    /// This constructor exists only to have a sync equivalent to <see cref="CreateAsync"/> (which you should use in async contexts).
+    /// </summary>
+    /// <param name="masterUri">
+    /// URI to the master node. Example: new Uri("http://localhost:11311").
+    /// </param>
+    /// <param name="ownId">
+    /// The ROS name of this node.
+    /// This is your identity in the network, and must be unique. Example: /my_new_node
+    /// Leave empty to generate one automatically.
+    /// </param>
+    /// <param name="callerUri">
+    /// URI of this node.
+    /// Other clients will use this address to connect to this node.
+    /// Leave empty to generate one automatically. </param>
+    /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
+    /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
+    public static RosClient Create(Uri? masterUri = null, string? ownId = null,
+        Uri? callerUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null) =>
+        new RosClient(masterUri, ownId, callerUri, ensureCleanSlate, namespaceOverride);
+
+    /// <summary>
+    /// Constructs and connects a ROS client.
+    /// </summary>
+    /// <param name="masterUri">
+    /// URI to the master node. Example: http://localhost:11311.
+    /// </param>
+    /// <param name="ownId">
+    /// The ROS name of this node.
+    /// This is your identity in the network, and must be unique. Example: /my_new_node
+    /// Leave empty to generate one automatically.
+    /// </param>
+    /// <param name="ownUri">
+    /// URI of this node.
+    /// Other clients will use this address to connect to this node.
+    /// Leave empty to generate one automatically. </param>
+    /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
+    /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
+    public RosClient(string? masterUri,
+        string? ownId = null,
+        string? ownUri = null,
+        bool ensureCleanSlate = true,
+        string? namespaceOverride = null) :
+        this(TryToCreateUri(masterUri, true), ownId, TryToCreateUri(ownUri, false), ensureCleanSlate,
+            namespaceOverride)
+    {
+    }
+
+    public static RosClient Create(string? masterUri, string? ownId = null,
+        string? ownUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null) =>
+        new RosClient(masterUri, ownId, ownUri, ensureCleanSlate, namespaceOverride);
 
     /// <summary>
     /// Asks the master which topics we advertise and are subscribed to, and removes them.
@@ -655,36 +675,31 @@ public sealed class RosClient : IRosClient
         }
     }
 
-    internal RosNodeClient CreateNodeClient(Uri otherUri) =>
-        new(CallerId, CallerUri, otherUri, (int)RpcNodeTimeout.TotalMilliseconds);
+    #endregion
 
-    (string id, RosSubscriber<T> subscriber)
-        CreateSubscriber<T>(string topic, bool requestNoDelay, Action<T> firstCallback, in T generator,
-            RosTransportHint transportHint)
+    #region subscriber
+
+    internal bool TryGetLoopbackReceiver<T>(string topic, in Endpoint endpoint, out ILoopbackReceiver<T>? receiver)
         where T : IMessage
     {
-        var topicInfo = new TopicInfo(CallerId, topic, generator);
-        int timeoutInMs = (int)TcpRosTimeout.TotalMilliseconds;
-
-        var subscription = new RosSubscriber<T>(this, topicInfo, requestNoDelay, timeoutInMs, transportHint);
-        string id = subscription.Subscribe(firstCallback);
-
-        subscribersByTopic[topic] = subscription;
-
-        var masterResponse = RosMasterClient.RegisterSubscriber(topic, topicInfo.Type);
-        if (!masterResponse.IsValid)
+        if (subscribersByTopic.TryGetValue(topic, out var existingSubscriber) &&
+            existingSubscriber is RosSubscriber<T> subscriber)
         {
-            subscribersByTopic.TryRemove(topic, out _);
-            throw new RosRpcException(
-                $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
+            return subscriber.TryGetLoopbackReceiver(endpoint, out receiver);
         }
 
-        subscription.PublisherUpdateRcp(masterResponse.Publishers, default);
-        return (id, subscription);
+        receiver = null;
+        return false;
+    }
+
+    internal async ValueTask RemoveSubscriberAsync(IRosSubscriber subscriber, CancellationToken token)
+    {
+        subscribersByTopic.TryRemove(subscriber.Topic, out _);
+        await RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, token);
     }
 
     async ValueTask<(string id, RosSubscriber<T> subscriber)>
-        CreateSubscriberAsync<T>(string topic, bool requestNoDelay, RosCallback<T> firstCallback, T generator,
+        CreateSubscriberAsync<T>(string topic, RosCallback<T> firstCallback, bool requestNoDelay, T generator,
             RosTransportHint transportHint, CancellationToken token)
         where T : IMessage
     {
@@ -736,21 +751,12 @@ public sealed class RosClient : IRosClient
         bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.PreferTcp)
         where T : IMessage, new()
     {
-        if (topic is null) BuiltIns.ThrowArgumentNull(nameof(topic));
-        if (callback is null) BuiltIns.ThrowArgumentNull(nameof(callback));
-
-        string resolvedTopic = ResolveResourceName(topic);
-        if (!TryGetSubscriberImpl(resolvedTopic, out var existingSubscriber))
-        {
-            (string id, subscriber) = CreateSubscriber(resolvedTopic, requestNoDelay, callback, new T(), transportHint);
-            return id;
-        }
-
-        subscriber = existingSubscriber as RosSubscriber<T> ?? throw new RosInvalidMessageTypeException(topic,
-            existingSubscriber.TopicType, BuiltIns.GetMessageType<T>());
-        return subscriber.Subscribe(callback);
+        (string id, subscriber) =
+            TaskUtils.RunSync(() => SubscribeAsync(topic, callback, requestNoDelay, transportHint));
+        return id;
     }
 
+    /// <inheritdoc cref="IRosClient.Subscribe{T}"/>
     string IRosClient.Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
         RosTransportHint transportHint)
     {
@@ -772,23 +778,9 @@ public sealed class RosClient : IRosClient
     public string Subscribe(string topic, Action<IMessage> callback, out RosSubscriber<IMessage> subscriber,
         bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.PreferTcp)
     {
-        if (callback is null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(callback));
-        }
-
-        string resolvedTopic = ResolveResourceName(topic);
-        if (!TryGetSubscriberImpl(resolvedTopic, out var existingSubscriber))
-        {
-            (string id, subscriber) =
-                CreateSubscriber(resolvedTopic, requestNoDelay, callback, new DynamicMessage(), transportHint);
-            return id;
-        }
-
-        subscriber = existingSubscriber as RosSubscriber<IMessage> ?? throw new RosInvalidMessageTypeException(
-            topic,
-            existingSubscriber.TopicType, "IMessage [generic]");
-        return subscriber.Subscribe(callback);
+        (string id, subscriber) =
+            TaskUtils.RunSync(() => SubscribeAsync(topic, callback, requestNoDelay, transportHint));
+        return id;
     }
 
     /*
@@ -829,6 +821,7 @@ public sealed class RosClient : IRosClient
         return SubscribeAsyncCore(topic, (RosCallback<T>)Callback, requestNoDelay, transportHint, token);
     }
 
+    /// <inheritdoc cref="IRosClient.SubscribeAsync{T}(string,System.Action{T},Iviz.Roslib.RosTransportHint,System.Threading.CancellationToken)"/>
     async ValueTask<(string id, IRosSubscriber<T> subscriber)> IRosClient.SubscribeAsync<T>(
         string topic, Action<T> callback, RosTransportHint transportHint, CancellationToken token)
     {
@@ -855,7 +848,7 @@ public sealed class RosClient : IRosClient
         if (!TryGetSubscriberImpl(resolvedTopic, out var existingSubscriber))
         {
             void Callback(in IMessage t, IRosConnection _) => callback(t);
-            return CreateSubscriberAsync(resolvedTopic, requestNoDelay, (RosCallback<IMessage>)Callback,
+            return CreateSubscriberAsync(resolvedTopic, (RosCallback<IMessage>)Callback, requestNoDelay,
                 new DynamicMessage(), transportHint, token);
         }
 
@@ -908,7 +901,7 @@ public sealed class RosClient : IRosClient
         string resolvedTopic = ResolveResourceName(topic);
         if (!TryGetSubscriberImpl(resolvedTopic, out var existingSubscriber))
         {
-            return CreateSubscriberAsync(resolvedTopic, requestNoDelay, callback, new T(), transportHint, token);
+            return CreateSubscriberAsync(resolvedTopic, callback, requestNoDelay, new T(), transportHint, token);
         }
 
         if (existingSubscriber is not RosSubscriber<T> validatedSubscriber)
@@ -919,6 +912,7 @@ public sealed class RosClient : IRosClient
         return (validatedSubscriber.Subscribe(callback), validatedSubscriber).AsTaskResult();
     }
 
+    /// <inheritdoc cref="IRosClient.SubscribeAsync{T}(string,Iviz.Roslib.RosCallback{T},Iviz.Roslib.RosTransportHint,System.Threading.CancellationToken)"/>
     async ValueTask<(string id, IRosSubscriber<T> subscriber)> IRosClient.SubscribeAsync<T>(
         string topic, RosCallback<T> callback, RosTransportHint transportHint, CancellationToken token)
     {
@@ -932,13 +926,7 @@ public sealed class RosClient : IRosClient
     /// <returns>Whether the unsubscription succeeded.</returns>
     public bool Unsubscribe(string topicId)
     {
-        if (topicId is null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(topicId));
-        }
-
-        var subscriber = subscribersByTopic.Values.FirstOrDefault(s => s.ContainsId(topicId));
-        return subscriber != null && subscriber.Unsubscribe(topicId);
+        return TaskUtils.RunSync(() => UnsubscribeAsync(topicId));
     }
 
     /// <summary>
@@ -948,25 +936,10 @@ public sealed class RosClient : IRosClient
     /// <returns>Whether the unsubscription succeeded.</returns>
     public async ValueTask<bool> UnsubscribeAsync(string topicId)
     {
-        if (topicId is null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(topicId));
-        }
+        if (topicId is null) BuiltIns.ThrowArgumentNull(nameof(topicId));
 
         var subscriber = subscribersByTopic.Values.FirstOrDefault(s => s.ContainsId(topicId));
         return subscriber != null && await subscriber.UnsubscribeAsync(topicId);
-    }
-
-    internal void RemoveSubscriber(IRosSubscriber subscriber)
-    {
-        subscribersByTopic.TryRemove(subscriber.Topic, out _);
-        RosMasterClient.UnregisterSubscriber(subscriber.Topic);
-    }
-
-    internal async ValueTask RemoveSubscriberAsync(IRosSubscriber subscriber, CancellationToken token)
-    {
-        subscribersByTopic.TryRemove(subscriber.Topic, out _);
-        await RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, token);
     }
 
     /// <summary>
@@ -986,46 +959,9 @@ public sealed class RosClient : IRosClient
         return subscribersByTopic.TryGetValue(resolvedTopic, out subscriber);
     }
 
-    string ResolveResourceName(string name)
-    {
-        RosNameUtils.ValidateResourceName(name);
+    #endregion
 
-        return name[0] switch
-        {
-            '/' => name,
-            '~' => $"{CallerId}/{name[1..]}",
-            _ => $"{namespacePrefix}{name}"
-        };
-    }
-
-    RosPublisher<T> CreatePublisher<T>(string topic, T generator) where T : IMessage
-    {
-        var topicInfo = new TopicInfo(CallerId, topic, generator);
-
-        var publisher = new RosPublisher<T>(this, topicInfo)
-            { TimeoutInMs = (int)TcpRosTimeout.TotalMilliseconds };
-
-        publishersByTopic[topic] = publisher;
-
-        RegisterPublisherResponse? response;
-        try
-        {
-            response = RosMasterClient.RegisterPublisher(topic, topicInfo.Type);
-        }
-        catch (Exception e)
-        {
-            publishersByTopic.TryRemove(topic, out _);
-            throw new RosRpcException("Error registering publisher", e);
-        }
-
-        if (response.IsValid)
-        {
-            return publisher;
-        }
-
-        publishersByTopic.TryRemove(topic, out _);
-        throw new RosRpcException($"Error registering publisher: {response.StatusMessage}");
-    }
+    #region publisher
 
     async ValueTask<IRosPublisher> CreatePublisherAsync<T>(string topic, CancellationToken token, T generator)
         where T : IMessage
@@ -1074,31 +1010,14 @@ public sealed class RosClient : IRosClient
     /// <returns>An identifier that can be used to unadvertise from this publisher.</returns>
     public string Advertise<T>(string topic, out RosPublisher<T> publisher) where T : IMessage, new()
     {
-        return AdvertiseCore(topic, out publisher);
+        (string id, publisher) = TaskUtils.RunSync(() => AdvertiseAsync<T>(topic));
+        return id;
     }
 
-    string AdvertiseCore<T>(string topic, out RosPublisher<T> publisher) where T : IMessage, new()
-    {
-        string resolvedTopic = ResolveResourceName(topic);
-
-        if (!TryGetPublisher(resolvedTopic, out var existingPublisher))
-        {
-            publisher = CreatePublisher(resolvedTopic, new T());
-            return publisher.Advertise();
-        }
-
-        if (existingPublisher is not RosPublisher<T> validatedPublisher)
-        {
-            throw new RosInvalidMessageTypeException(topic, existingPublisher.TopicType, BuiltIns.GetMessageType<T>());
-        }
-
-        publisher = validatedPublisher;
-        return publisher.Advertise();
-    }
-
+    /// <inheritdoc cref="IRosClient.Advertise{T}"/>
     string IRosClient.Advertise<T>(string topic, out IRosPublisher<T> publisher, bool latchingEnabled)
     {
-        string id = AdvertiseCore<T>(topic, out var newPublisher);
+        var (id, newPublisher) = TaskUtils.RunSync(() => AdvertiseAsync<T>(topic));
         newPublisher.LatchingEnabled = latchingEnabled;
         publisher = newPublisher;
         return id;
@@ -1117,33 +1036,8 @@ public sealed class RosClient : IRosClient
     /// <returns>An identifier that can be used to unadvertise from this publisher.</returns>
     public string Advertise(string topic, DynamicMessage generator, out RosPublisher<DynamicMessage> publisher)
     {
-        if (generator == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(generator));
-        }
-
-        if (!generator.IsInitialized)
-        {
-            throw new InvalidOperationException("Generator has not been initialized");
-        }
-
-        string resolvedTopic = ResolveResourceName(topic);
-
-        if (!TryGetPublisher(resolvedTopic, out var existingPublisher))
-        {
-            publisher = CreatePublisher<DynamicMessage>(resolvedTopic, generator);
-            return publisher.Advertise();
-        }
-
-        if (existingPublisher is not RosPublisher<DynamicMessage> validatedPublisher)
-        {
-            throw new RosInvalidMessageTypeException(
-                $"There is already an advertiser for '{topic}' with a different type [{existingPublisher.TopicType}] - " +
-                $"requested type was [{generator.RosMessageType}](dynamic)");
-        }
-
-        publisher = validatedPublisher;
-        return publisher.Advertise();
+        (string id, publisher) = TaskUtils.RunSync(() => AdvertiseAsync(topic, generator));
+        return id;
     }
 
     /*
@@ -1189,6 +1083,7 @@ public sealed class RosClient : IRosClient
         return (publisher.Advertise(), publisher);
     }
 
+    /// <inheritdoc cref="IRosClient.AdvertiseAsync{T}"/>
     async ValueTask<(string id, IRosPublisher<T> publisher)> IRosClient.AdvertiseAsync<T>(string topic,
         bool latchingEnabled, CancellationToken token)
     {
@@ -1251,14 +1146,7 @@ public sealed class RosClient : IRosClient
     /// <returns>Whether the unadvertisement succeeded.</returns>
     public bool Unadvertise(string topicId)
     {
-        if (topicId is null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(topicId));
-        }
-
-        IRosPublisher? publisher = publishersByTopic.Values.FirstOrDefault(p => p.ContainsId(topicId));
-
-        return publisher != null && publisher.Unadvertise(topicId);
+        return TaskUtils.RunSync(() => UnadvertiseAsync(topicId));
     }
 
     /// <summary>
@@ -1293,6 +1181,10 @@ public sealed class RosClient : IRosClient
         return publishersByTopic.TryGetValue(resolvedTopic, out publisher);
     }
 
+    #endregion
+
+    #region graph
+
     /// <summary>
     /// Asks the master for all the published topics in the system with at least one publisher.
     /// Corresponds to the function 'getPublishedTopics' in the ROS Master API.
@@ -1300,15 +1192,7 @@ public sealed class RosClient : IRosClient
     /// <returns>List of topic names and message types.</returns>
     public TopicNameType[] GetSystemPublishedTopics()
     {
-        var response = RosMasterClient.GetPublishedTopics();
-        if (!response.IsValid)
-        {
-            throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
-        }
-
-        return response.Topics
-            .Select(tuple => new TopicNameType(tuple.name, tuple.type))
-            .ToArray();
+        return TaskUtils.RunSync(GetSystemPublishedTopicsAsync);
     }
 
     /// <summary>
@@ -1337,15 +1221,7 @@ public sealed class RosClient : IRosClient
     /// <returns>List of topic names and message types.</returns>
     public TopicNameType[] GetSystemTopics()
     {
-        var response = RosMasterClient.GetTopicTypes();
-        if (response.IsValid)
-        {
-            return response.Topics
-                .Select(tuple => new TopicNameType(tuple.name, tuple.type))
-                .ToArray();
-        }
-
-        throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
+        return TaskUtils.RunSync(GetSystemTopicsAsync);
     }
 
     /// <summary>
@@ -1366,12 +1242,6 @@ public sealed class RosClient : IRosClient
             .ToArray();
     }
 
-
-    /// <summary>
-    /// Gets the topics published by this node.
-    /// </summary>
-    public TopicNameType[] SubscribedTopics => GetSubscriptionsRpc();
-
     /// <summary>
     /// Asks the master for the nodes and topics in the system.
     /// Corresponds to the function 'getSystemState' in the ROS Master API.
@@ -1379,13 +1249,7 @@ public sealed class RosClient : IRosClient
     /// <returns>List of advertised topics, subscribed topics, and offered services, together with the involved nodes.</returns>
     public SystemState GetSystemState()
     {
-        var response = RosMasterClient.GetSystemState();
-        if (!response.IsValid)
-        {
-            throw new RosRpcException($"Failed to retrieve system state: {response.StatusMessage}");
-        }
-
-        return new SystemState(response.Publishers, response.Subscribers, response.Services);
+        return TaskUtils.RunSync(GetSystemStateAsync);
     }
 
     /// <summary>
@@ -1403,11 +1267,6 @@ public sealed class RosClient : IRosClient
 
         return new SystemState(response.Publishers, response.Subscribers, response.Services);
     }
-
-    /// <summary>
-    /// Gets the topics published by this node.
-    /// </summary>
-    public TopicNameType[] PublishedTopics => GetPublicationsRpc();
 
     internal TopicNameType[] GetSubscriptionsRpc()
     {
@@ -1493,7 +1352,7 @@ public sealed class RosClient : IRosClient
                 LookupNodeResponse response;
                 try
                 {
-                    response = RosMasterClient.LookupNode(sender.RemoteId);
+                    response = TaskUtils.RunSync(() => RosMasterClient.LookupNodeAsync(sender.RemoteId));
                 }
                 catch (Exception e)
                 {
@@ -1513,16 +1372,11 @@ public sealed class RosClient : IRosClient
         return busInfos;
     }
 
-    /// <summary>
-    /// Calls the given ROS service.
-    /// </summary>
-    /// <param name="serviceName">Name of the ROS service</param>
-    /// <param name="service">Service message. The response will be written in the response field.</param>
-    /// <param name="persistent">Whether a persistent connection with the provider should be maintained.</param>
-    /// <param name="timeoutInMs">Maximal time to wait.</param>
-    /// <typeparam name="T">Service type.</typeparam>
-    /// <returns>Whether the call succeeded.</returns>
-    /// <exception cref="TaskCanceledException">The operation timed out.</exception>
+    #endregion
+
+    #region service
+
+    /// <inheritdoc cref="IRosClient.CallService{T}"/>
     public void CallService<T>(string serviceName, T service, bool persistent, int timeoutInMs)
         where T : IService, new()
     {
@@ -1591,18 +1445,7 @@ public sealed class RosClient : IRosClient
     }
 
 
-    /// <summary>
-    /// Calls the given ROS service.
-    /// </summary>
-    /// <param name="serviceName">Name of the ROS service</param>
-    /// <param name="service">Service message. The response will be written in the response field.</param>
-    /// <param name="persistent">
-    /// Whether a persistent connection with the provider should be maintained.
-    /// The connection will be stopped if any exception is thrown or the token is canceled.
-    /// </param>
-    /// <param name="token">A cancellation token</param>
-    /// <typeparam name="T">Service type.</typeparam>
-    /// <returns>Whether the call succeeded.</returns>
+    /// <inheritdoc cref="IRosClient.CallServiceAsync{T}"/>
     public async ValueTask CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
         CancellationToken token = default)
         where T : IService, new()
@@ -1746,13 +1589,7 @@ public sealed class RosClient : IRosClient
         return AdvertiseServiceAsync<T>(serviceName, Wrapper, token);
     }
 
-    /// <summary>
-    /// Advertises the given service. The callback function may be async.
-    /// </summary>
-    /// <param name="serviceName">Name of the ROS service.</param>
-    /// <param name="callback">Async function to be called when a service request arrives. The response should be written in the response field.</param>
-    /// <param name="token">An optional cancellation token.</param>
-    /// <typeparam name="T">Service type.</typeparam>
+    /// <inheritdoc cref="IRosClient.AdvertiseServiceAsync{T}"/>
     public async ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, ValueTask> callback,
         CancellationToken token = default)
         where T : IService, new()
@@ -1785,23 +1622,13 @@ public sealed class RosClient : IRosClient
         return true;
     }
 
-    /// <summary>
-    /// Unadvertises the service.
-    /// </summary>
-    /// <param name="name">Name of the service</param>
-    /// <param name="token">An optional cancellation token</param>
-    /// <exception cref="ArgumentException">Thrown if name is null</exception>
+    /// <inheritdoc cref="IRosClient.UnadvertiseService"/>
     public void UnadvertiseService(string name, CancellationToken token = default)
     {
         TaskUtils.RunSync(() => UnadvertiseServiceAsync(name, token), token);
     }
 
-    /// <summary>
-    /// Unadvertises the service.
-    /// </summary>
-    /// <param name="name">Name of the service</param>
-    /// <param name="token">An optional cancellation token</param>
-    /// <exception cref="ArgumentException">Thrown if name is null</exception>        
+    /// <inheritdoc cref="IRosClient.UnadvertiseServiceAsync"/>        
     public async ValueTask UnadvertiseServiceAsync(string name, CancellationToken token = default)
     {
         string resolvedServiceName = ResolveResourceName(name);
@@ -1819,8 +1646,7 @@ public sealed class RosClient : IRosClient
 
     public bool IsServiceAvailable(string service)
     {
-        string resolvedServiceName = ResolveResourceName(service);
-        return RosMasterClient.LookupService(resolvedServiceName).IsValid;
+        return TaskUtils.RunSync(() => IsServiceAvailableAsync(service));
     }
 
     public async ValueTask<bool> IsServiceAvailableAsync(string service, CancellationToken token = default)
@@ -1829,28 +1655,22 @@ public sealed class RosClient : IRosClient
         return (await RosMasterClient.LookupServiceAsync(resolvedServiceName, token)).IsValid;
     }
 
-    public string[] GetParameterNames() => Parameters.GetParameterNames();
+    #endregion
+
+    #region parameters
+
+    public string[] GetParameterNames() => TaskUtils.RunSync(Parameters.GetParameterNamesAsync);
 
     public ValueTask<string[]> GetParameterNamesAsync(CancellationToken token = default) =>
         Parameters.GetParameterNamesAsync(token);
 
-    public RosValue GetParameter(string key) => Parameters.GetParameter(key);
+    public RosValue GetParameter(string key) => TaskUtils.RunSync(() => Parameters.GetParameterAsync(key));
 
     public ValueTask<RosValue> GetParameterAsync(string key, CancellationToken token = default) =>
         Parameters.GetParameterAsync(key, token);
 
-    internal bool TryGetLoopbackReceiver<T>(string topic, in Endpoint endpoint, out ILoopbackReceiver<T>? receiver)
-        where T : IMessage
-    {
-        if (subscribersByTopic.TryGetValue(topic, out var existingSubscriber) &&
-            existingSubscriber is RosSubscriber<T> subscriber)
-        {
-            return subscriber.TryGetLoopbackReceiver(endpoint, out receiver);
-        }
+    #endregion
 
-        receiver = null;
-        return false;
-    }
 
     /// <summary>
     /// Close this connection. Unsubscribes and unadvertises all topics.
@@ -1861,7 +1681,7 @@ public sealed class RosClient : IRosClient
     }
 
     /// <summary>
-    /// Close this connection. Unsubscribes and unadvertises all topics.
+    /// Close this connection. Unsubscribes and unadvertises all topics  and services.
     /// </summary>
     public async ValueTask CloseAsync(CancellationToken token = default)
     {

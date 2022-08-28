@@ -8,7 +8,7 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
-internal sealed class SenderQueue<T> where T : IMessage
+internal sealed class SenderQueue<TMessage> where TMessage : IMessage
 {
     const int NumPacketsWithoutConstraint = 2;
     const int MaxPacketsInQueue = 2048;
@@ -25,18 +25,17 @@ internal sealed class SenderQueue<T> where T : IMessage
 
     public SenderQueue(IRosSender sender) => this.sender = sender;
 
-    public void Enqueue(in T message, ref int numDropped, ref long bytesDropped)
+    public bool TryEnqueue(in TMessage message)
     {
         if (messagesInQueue > MaxPacketsInQueue)
         {
-            bytesDropped += message.RosMessageLength;
-            numDropped++;
-            return;
+             return false;
         }
 
         messageQueue.Enqueue(new Entry(message));
         Interlocked.Increment(ref messagesInQueue);
         signal.Release();
+        return true;
     }
 
     public void EnqueueEmpty()
@@ -46,7 +45,7 @@ internal sealed class SenderQueue<T> where T : IMessage
         signal.Release();
     }
 
-    public ValueTask EnqueueAsync(in T message, CancellationToken token, ref int numDropped, ref long bytesDropped)
+    public ValueTask EnqueueAsync(in TMessage message, CancellationToken token, ref int numDropped, ref long bytesDropped)
     {
         if (messagesInQueue > MaxPacketsInQueue)
         {
@@ -193,7 +192,7 @@ internal sealed class SenderQueue<T> where T : IMessage
         }
     }
 
-    public void DirectSendToLoopback(in RangeEnumerable<Entry?> queue, ILoopbackReceiver<T> loopbackReceiver,
+    public void DirectSendToLoopback(in RangeEnumerable<Entry?> queue, ILoopbackReceiver<TMessage> loopbackReceiver,
         ref long numSent, ref long bytesSent)
     {
         if (loopbackReceiver == null)
@@ -226,18 +225,18 @@ internal sealed class SenderQueue<T> where T : IMessage
 
     internal readonly struct Entry
     {
-        readonly T message;
+        readonly TMessage message;
         public readonly int messageLength;
         public readonly TaskCompletionSource? signal;
 
-        public Entry(in T message, TaskCompletionSource? signal = null)
+        public Entry(in TMessage message, TaskCompletionSource? signal = null)
         {
             this.message = message;
             this.signal = signal;
             messageLength = message.RosMessageLength;
         }
 
-        public void Deconstruct(out T outMessage, out int outMessageLength, out TaskCompletionSource? outSignal) =>
+        public void Deconstruct(out TMessage outMessage, out int outMessageLength, out TaskCompletionSource? outSignal) =>
             (outMessage, outMessageLength, outSignal) = (message, messageLength, signal);
     }
 }

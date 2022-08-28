@@ -265,10 +265,8 @@ internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage
         await StreamUtils.EnqueueConnectionAsync(Endpoint.Port, this, token);
 
         listener.Stop();
-        if (!await task.AwaitFor(2000, token))
-        {
-            Logger.LogDebugFormat("{0}: Sender stuck. Abandoning.", this);
-        }
+        
+        await task.AwaitNoThrow(2000, this, token);
 
         await senders.Select(sender => sender.DisposeAsync(token).AsTask()).WhenAll().AwaitNoThrow(this);
         senders.Clear();
@@ -290,18 +288,18 @@ internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage
     }
 }
 
-internal readonly struct NullableMessage<T>
+internal readonly struct NullableMessage<TMessage>
 {
-    public readonly T? value;
+    public readonly TMessage? value;
     public readonly bool hasValue;
 
-    NullableMessage(in T element)
+    NullableMessage(in TMessage element)
     {
         value = element;
         hasValue = true;
     }
 
-    public static implicit operator NullableMessage<T>(in T message) => new(message);
+    public static implicit operator NullableMessage<TMessage>(in TMessage message) => new(message);
 }
 
 internal interface ILatchedMessageProvider<TMessage>

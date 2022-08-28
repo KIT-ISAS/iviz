@@ -88,8 +88,7 @@ internal sealed class RosServiceListener
         var toRemove = requests.Where(request => !request.IsAlive).ToList();
         var tasks = toRemove.Select(async request =>
         {
-            Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x",
-                this, request.Hostname);
+            Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x", this, request.Hostname);
             await request.StopAsync(token);
             requests.Remove(request);
         }).ToArray();
@@ -111,11 +110,9 @@ internal sealed class RosServiceListener
         await StreamUtils.EnqueueConnectionAsync(Uri.Port, this, token);
 
         listener.Stop();
-        if (!await task.AwaitFor(2000, token))
-        {
-            Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
-        }
-
+        
+        await task.AwaitNoThrow(2000, this, token);
+        
         await requests.Select(request => request.StopAsync(token).AsTask()).WhenAll().AwaitNoThrow(this);
         requests.Clear();
     }

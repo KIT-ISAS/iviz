@@ -25,6 +25,9 @@ internal sealed class RosNodeServer
     Task? task;
     bool disposed;
 
+    Uri Uri => client.CallerUri;
+    public int ListenerPort => listener.LocalPort;
+
     public RosNodeServer(RosClient client)
     {
         this.client = client;
@@ -52,20 +55,7 @@ internal sealed class RosNodeServer
         };
     }
 
-    public int ListenerPort => listener.LocalPort;
-    Uri Uri => client.CallerUri;
-
-    public void Dispose()
-    {
-        DisposeAsync(true).WaitNoThrow(this);
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        return DisposeAsync(false);
-    }
-
-    async ValueTask DisposeAsync(bool sync)
+    public async ValueTask DisposeAsync()
     {
         if (disposed)
         {
@@ -75,16 +65,8 @@ internal sealed class RosNodeServer
         disposed = true;
 
         runningTs.Cancel();
-        if (sync)
-        {
-            listener.Dispose();
-            task?.WaitNoThrow(2000, this);
-        }
-        else
-        {
-            await listener.DisposeAsync().AwaitNoThrow(this);
-            await task.AwaitNoThrow(2000, this);
-        }
+        await listener.DisposeAsync().AwaitNoThrow(this);
+        await task.AwaitNoThrow(2000, this);
     }
 
     public void Start()

@@ -5,12 +5,12 @@ using Iviz.MsgsGen.Dynamic;
 namespace Iviz.Roslib;
 
 /// <summary>
-///     Full info about a ROS topic and its message type, including dependencies.
+/// Full info about a ROS topic and its message type, including dependencies.
 /// </summary>
 internal sealed class TopicInfo
 {
     /// <summary>
-    ///     Concatenated dependencies file.
+    /// Concatenated dependencies file.
     /// </summary>
     public string MessageDependencies =>
         Generator.RosDependenciesBase64 == DynamicMessage.RosAny
@@ -18,27 +18,27 @@ internal sealed class TopicInfo
             : BuiltIns.DecompressDependencies(Generator.RosDependenciesBase64);
 
     /// <summary>
-    ///     ROS name of this node.
+    /// ROS name of this node.
     /// </summary>
     public string CallerId { get; }
 
     /// <summary>
-    ///     Name of this topic.
+    /// Name of this topic.
     /// </summary>
     public string Topic { get; }
 
     /// <summary>
-    ///     MD5 hash of the compact representation of the message.
+    /// MD5 hash of the compact representation of the message.
     /// </summary>
     public string Md5Sum => Generator.RosMd5Sum;
 
     /// <summary>
-    ///     Full ROS message type.
+    /// Full ROS message type.
     /// </summary>
     public string Type => Generator.RosMessageType;
 
     /// <summary>
-    ///     Instance of the message used to generate others of the same type.
+    /// Instance of the message used to generate others of the same type.
     /// </summary>
     public IMessage Generator { get; }
 
