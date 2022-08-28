@@ -2,18 +2,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs;
-using Iviz.Msgs.RosgraphMsgs;
-using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Urdf;
-using Iviz.Tools;
 using Nito.AsyncEx;
 using UnityEngine;
 using Color = UnityEngine.Color;
@@ -44,6 +40,10 @@ namespace Iviz.Displays
         readonly Robot robot;
         readonly CancellationTokenSource runningTs = new();
 
+        readonly Stack<(Joint joint, int level)> stack = new();
+
+        readonly uint descriptionHash;
+
         Color tint = Color.white;
         float smoothness = 0.5f;
         float metallic = 0.5f;
@@ -60,13 +60,14 @@ namespace Iviz.Displays
         public IReadOnlyDictionary<string, string> LinkParents => linkParents;
 
         public GameObject BaseLinkObject =>
-            !disposed ? baseLinkObject : throw new ObjectDisposedException("this");
+            !disposed ? baseLinkObject : throw new ObjectDisposedException(nameof(RobotModel));
 
         public IReadOnlyDictionary<string, GameObject> LinkObjects =>
-            !disposed ? linkObjects : throw new ObjectDisposedException("this");
+            !disposed ? linkObjects : throw new ObjectDisposedException(nameof(RobotModel));
 
         public bool OcclusionOnly
         {
+            get => occlusionOnly;
             set
             {
                 occlusionOnly = value;
@@ -79,6 +80,7 @@ namespace Iviz.Displays
 
         public Color Tint
         {
+            get => tint;
             set
             {
                 tint = value;
@@ -91,6 +93,7 @@ namespace Iviz.Displays
 
         public bool Visible
         {
+            get => visible;
             set
             {
                 visible = value;
@@ -103,6 +106,7 @@ namespace Iviz.Displays
 
         public float Smoothness
         {
+            get => smoothness;
             set
             {
                 smoothness = value;
@@ -115,6 +119,7 @@ namespace Iviz.Displays
 
         public float Metallic
         {
+            get => metallic;
             set
             {
                 metallic = value;
@@ -127,6 +132,7 @@ namespace Iviz.Displays
 
         public bool EnableShadows
         {
+            get => enableShadows;
             set
             {
                 enableShadows = value;
@@ -151,11 +157,21 @@ namespace Iviz.Displays
             Name = robot.Name;
             Description = robotDescription;
             baseLinkObject = new GameObject(Name);
+            descriptionHash = HashCalculator.Compute(Description);
+        }
+
+        RobotModel(RobotModel other)
+        {
+            robot = other.robot;
+            descriptionHash = other.descriptionHash;
+            Name = other.Name;
+            Description = other.Description;
+            baseLinkObject = new GameObject(Name);
         }
 
         public RobotModel Clone()
         {
-            return new RobotModel(Description);
+            return new RobotModel(this);
         }
 
         /// <summary>Constructs a robot asynchronously.</summary>
@@ -165,7 +181,8 @@ namespace Iviz.Displays
         /// of replacing them with the provided colors.
         /// </param>
         /// <param name="loadColliders">Whether collider models should be loaded.</param>
-        public async ValueTask StartAsync(IServiceProvider? provider = null, bool keepMeshMaterials = false,
+        public async ValueTask StartAsync(IServiceProvider? provider = null,
+            bool keepMeshMaterials = false,
             bool loadColliders = true)
         {
             if (robot.Links.Count == 0 || robot.Joints.Count == 0)
@@ -685,16 +702,13 @@ namespace Iviz.Displays
 
         public void GenerateLog(StringBuilder builder)
         {
-            if (BaseLink == null)
+            if (BaseLink == null ||
+                !robot.Links.TryGetFirst(link => link.Name == BaseLink, out var baseLink))
             {
+                builder.Append("<b>Error:</b> No base link found!");
                 return;
             }
 
-            if (!robot.Links.TryGetFirst(link => link.Name == BaseLink, out var baseLink))
-            {
-                return;
-            }
-            
             WriteLink(builder, baseLink, 0);
 
             var children = robot.Links.ToDictionary(
@@ -706,14 +720,14 @@ namespace Iviz.Displays
                 link => link.Name,
                 link => link
             );
-            
-            var stack = new Stack<(Joint joint, int level)>();
 
+            stack.Clear();
+            
             foreach (var child in children[baseLink.Name])
             {
-                stack.Push((child, 1));
+                stack.Push((child, 4));
             }
-            
+
             while (stack.TryPop(out var entry))
             {
                 int level = entry.level;
@@ -721,60 +735,176 @@ namespace Iviz.Displays
                 var link = links[joint.Child.Link];
 
                 WriteJoint(builder, joint, level);
-                WriteLink(builder, link, level);
+                WriteLink(builder, link, level + 4);
 
                 if (!children.TryGetValue(link.Name, out var linkChildren))
                 {
                     continue;
                 }
-                
+
                 foreach (var childJoint in linkChildren)
                 {
-                    stack.Push((childJoint, level + 1));
+                    stack.Push((childJoint, level + 8));
                 }
             }
+
+            builder.AppendLine().AppendLine();
         }
 
         static void WriteJoint(StringBuilder builder, Joint joint, int level)
         {
             builder.Append(' ', level)
-                .Append("<b>Joint '").Append(joint.Name).Append("'</b>").AppendLine();
+                .Append("<color=#000080ff>")
+                .Append("<b>(o) Joint ").Append(joint.Name).Append("</b>")
+                .Append("</color>")
+                .AppendLine();
             builder.Append(' ', level)
-                .Append("Type: ").Append(joint.Type).AppendLine();
-            builder.Append(' ', level)
-                .Append("Axis: ").Append(BuiltIns.ToJsonString(joint.Axis, false)).AppendLine();
-            builder.Append(' ', level)
-                .Append("Origin: ").Append(BuiltIns.ToJsonString(joint.Origin, false)).AppendLine();
+                .Append(joint.Type);
+
+            if (joint.Limit != Limit.Empty && joint.Type is not (Joint.JointType.Continuous or Joint.JointType.Fixed))
+            {
+                var (low, up, _) = joint.Limit;
+                builder.Append(" [")
+                    .Append(low).Append(" .. ").Append(up)
+                    .Append("]");
+            }
+
+            builder.AppendLine();
+
+            builder.Append(' ', level).Append("Axis ");
+
+            switch (joint.Axis.Xyz)
+            {
+                case (1, 0, 0):
+                    builder.Append("+X");
+                    break;
+                case (0, 1, 0):
+                    builder.Append("+Y");
+                    break;
+                case (0, 0, 1):
+                    builder.Append("+Z");
+                    break;
+                default:
+                    var (x, y, z) = joint.Axis.Xyz;
+                    builder.Append("[")
+                        .Append(x).Append(", ")
+                        .Append(y).Append(", ")
+                        .Append(z).Append("]");
+                    break;
+            }
+
+            builder.AppendLine();
+
+            WriteOrigin(builder, joint.Origin, level);
         }
 
         static void WriteLink(StringBuilder builder, Link link, int level)
         {
             builder.Append(' ', level)
-                .Append("<b>Link '").Append(link.Name).Append("'</b>").AppendLine();
+                .Append("<color=#800000ff>")
+                .Append("<b>>> Link ").Append(link.Name).Append("</b>")
+                .Append("</color>")
+                .AppendLine();
             foreach (var visual in link.Visuals)
             {
                 builder.Append(' ', level)
-                    .Append("<b>Visual '").Append(visual.Name).Append("'</b>").AppendLine();
-                builder.Append(' ', level)
-                    .Append("Origin: ").Append(BuiltIns.ToJsonString(visual.Origin, false)).AppendLine();
-                builder.Append(' ', level)
-                    .Append("Origin: ").Append(BuiltIns.ToJsonString(visual.Geometry, false)).AppendLine();
+                    .Append("<b>Visual ").Append(visual.Name).Append("</b>").AppendLine();
+                WriteVisual(builder, visual.Geometry, visual.Origin, level);
             }
 
             foreach (var collision in link.Collisions)
             {
                 builder.Append(' ', level)
-                    .Append("<b>Visual '").Append(collision.Name).Append("'</b>").AppendLine();
-                builder.Append(' ', level)
-                    .Append("Origin: ").Append(BuiltIns.ToJsonString(collision.Origin, false)).AppendLine();
-                if (collision.Geometry is { } geometry)
-                {
-                    builder.Append(' ', level)
-                        .Append("Origin: ").Append(BuiltIns.ToJsonString(geometry, false)).AppendLine();
-                }
+                    .Append("<color=#402020ff>")
+                    .Append("<b>Collider ").Append(collision.Name).Append("</b>")
+                    .Append("</color>")
+                    .AppendLine();
+                WriteVisual(builder, collision.Geometry, collision.Origin, level);
             }
         }
 
+        static void WriteVisual(StringBuilder builder, Geometry? geometry, Origin origin, int level)
+        {
+            if (geometry == null)
+            {
+                builder.Append(' ', level).Append("No geometry").AppendLine();
+            }
+            else if (geometry.Box?.Size is var (sizeX, sizeY, sizeZ))
+            {
+                builder.Append(' ', level)
+                    .Append("Box scale: [")
+                    .Append(sizeX).Append(", ")
+                    .Append(sizeY).Append(", ")
+                    .Append(sizeZ).Append("]")
+                    .AppendLine();
+            }
+            else if (geometry.Cylinder is var (cylinderRadius, cylinderLength))
+            {
+                builder.Append(' ', level)
+                    .Append("Cylinder radius: ")
+                    .Append(cylinderRadius)
+                    .Append(" length: ")
+                    .Append(cylinderLength)
+                    .AppendLine();
+            }
+            else if (geometry.Sphere?.Radius is { } radius)
+            {
+                builder.Append(' ', level)
+                    .Append("Sphere radius: ")
+                    .Append(radius)
+                    .AppendLine();
+            }
+            else if (geometry.Mesh is var (filename, (scaleX, scaleY, scaleZ)))
+            {
+                builder.Append(' ', level)
+                    .Append("Mesh '")
+                    .Append(filename);
+
+                if ((scaleX, scaleY, scaleZ) != (1, 1, 1))
+                {
+                    builder.Append(" scale: [")
+                        .Append(scaleX).Append(", ")
+                        .Append(scaleY).Append(", ")
+                        .Append(scaleZ).Append("]");
+                }
+
+                builder.AppendLine();
+            }
+            else
+            {
+                builder.Append(' ', level).Append("Unknown shape").AppendLine();
+            }
+
+            if (origin != Origin.Identity)
+            {
+                WriteOrigin(builder, origin, level);
+            }
+        }
+
+        static void WriteOrigin(StringBuilder builder, Origin origin, int level)
+        {
+            (float x, float y, float z) = origin.Xyz;
+            builder.Append(' ', level)
+                .Append("Origin xyz: [")
+                .Append(x).Append(", ")
+                .Append(y).Append(", ")
+                .Append(z).Append("] ");
+
+            (float r, float p, float Y) = origin.Rpy;
+            builder.Append("rpy: [")
+                .Append(r).Append(", ")
+                .Append(p).Append(", ")
+                .Append(Y).Append("]")
+                .AppendLine();
+        }
+
+
         public override string ToString() => $"[{nameof(RobotModel)} '{Name}']";
+
+        public override int GetHashCode() => (int)descriptionHash;
+
+        public bool Equals(RobotModel other) => descriptionHash == other.descriptionHash;
+
+        public override bool Equals(object obj) => obj is RobotModel other && Equals(other);
     }
 }

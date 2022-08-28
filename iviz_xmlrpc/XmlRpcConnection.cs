@@ -52,20 +52,9 @@ public sealed class XmlRpcConnection : IDisposable, IComparable<XmlRpcConnection
     public async ValueTask<RosValue> MethodCallAsync(Uri callerUri, string method, XmlRpcArg[] args,
         CancellationToken token = default)
     {
-        if (disposed)
-        {
-            throw new ObjectDisposedException("this");
-        }
-
-        if (callerUri is null)
-        {
-            BaseUtils.ThrowArgumentNull(nameof(callerUri));
-        }
-
-        if (args is null)
-        {
-            BaseUtils.ThrowArgumentNull(nameof(args));
-        }
+        if (disposed) throw new ObjectDisposedException("this");
+        if (callerUri is null) BaseUtils.ThrowArgumentNull(nameof(callerUri));
+        if (args is null) BaseUtils.ThrowArgumentNull(nameof(args));
 
         token.ThrowIfCancellationRequested();
 

@@ -48,13 +48,14 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Width);
             {
                 int n = b.DeserializeArrayLength();
-                Fields = n == 0
+                var array = n == 0
                     ? EmptyArray<PointField>.Value
                     : new PointField[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Fields[i] = new PointField(ref b);
+                    array[i] = new PointField(ref b);
                 }
+                Fields = array;
             }
             b.Deserialize(out IsBigendian);
             b.Deserialize(out PointStep);
@@ -71,13 +72,14 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Width);
             {
                 int n = b.DeserializeArrayLength();
-                Fields = n == 0
+                var array = n == 0
                     ? EmptyArray<PointField>.Value
                     : new PointField[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Fields[i] = new PointField(ref b);
+                    array[i] = new PointField(ref b);
                 }
+                Fields = array;
             }
             b.Deserialize(out IsBigendian);
             b.Align4();

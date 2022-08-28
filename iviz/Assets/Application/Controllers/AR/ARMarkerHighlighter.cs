@@ -64,7 +64,7 @@ namespace Iviz.Controllers
 
             if (corners.Length == 0)
             {
-                throw new ArgumentException("Cannot highlight marker with no corners.");
+                ThrowHelper.ThrowArgument("Cannot highlight marker with no corners.", nameof(corners));
             }
 
             var intrinsic = new Intrinsic(intrinsicArray);

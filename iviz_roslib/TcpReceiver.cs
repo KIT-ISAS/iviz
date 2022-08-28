@@ -12,7 +12,11 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
-internal sealed class TcpReceiver<TMessage> : TcpReceiverStaticHelper, IProtocolReceiver, ILoopbackReceiver<TMessage>, ITcpReceiver
+/// <summary>
+/// Handles a ROS TCP connection.
+/// </summary>
+/// <typeparam name="TMessage"></typeparam>
+internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, ILoopbackReceiver<TMessage>, ITcpReceiver
     where TMessage : IMessage
 {
     const int DisposeTimeoutInMs = 2000;
@@ -313,7 +317,7 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiverStaticHelper, IProtocol
     }
 }
 
-internal class TcpReceiverStaticHelper
+internal class TcpReceiver
 {
     protected static async ValueTask<int> ReceivePacket(TcpClient client, ResizableRent readBuffer, CancellationToken token)
     {

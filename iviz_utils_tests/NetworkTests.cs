@@ -47,24 +47,6 @@ public class NetworkTests
     }
 
     [Test]
-    public void TestXmlRpcGetUri()
-    {
-        var args = new XmlRpcArg[] { CallerId };
-
-        using var source = new CancellationTokenSource();
-        source.CancelAfter(3000);
-
-        var response = XmlRpcService.MethodCall(MasterUri, CallerUri, "getUri", args, source.Token);
-
-        Assert.IsTrue(response.TryGetArray(out var responseArray));
-        Assert.IsTrue(responseArray.Length == 3);
-        Assert.IsTrue(responseArray[0].TryGet(out int successCode) && successCode == 1);
-        Assert.IsTrue(responseArray[1].TryGet(out string _));
-        Assert.IsTrue(responseArray[2].TryGet(out string retMasterUri) &&
-                      Uri.TryCreate(retMasterUri, UriKind.Absolute, out _));
-    }
-
-    [Test]
     public async Task TestXmlRpcGetUriAsync()
     {
         var args = new XmlRpcArg[] { CallerId };
@@ -90,9 +72,6 @@ public class NetworkTests
         using var source = new CancellationTokenSource();
         source.Cancel();
 
-        Assert.Catch<OperationCanceledException>(() =>
-            XmlRpcService.MethodCall(MasterUri, CallerUri, "getUri", args, source.Token));
-
         Assert.CatchAsync<OperationCanceledException>(async () =>
             await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, "getUri", args, source.Token));
     }
@@ -101,7 +80,8 @@ public class NetworkTests
     public void TestRosClientConnection()
     {
         using var _ = new RosClient(MasterUri, CallerId, CallerUri);
-        Uri testMasterUri = new RosNodeClient(CallerId, OtherCallerUri, CallerUri).GetMasterUri().Uri;
+        var rosNodeClient = new RosNodeClient(CallerId, OtherCallerUri, CallerUri);
+        Uri testMasterUri = TaskUtils.RunSync(rosNodeClient.GetMasterUriAsync).Uri;
         Assert.True(testMasterUri == MasterUri);
         Assert.Catch<RosUriBindingException>(() => new RosClient(MasterUri, CallerId, CallerUri));
     }
@@ -126,7 +106,8 @@ public class NetworkTests
                 tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
         }
 
-        var newSystemState = new RosMasterClient(MasterUri, CallerId, CallerUri).GetSystemState();
+        var rosMasterClient = new RosMasterClient(MasterUri, CallerId, CallerUri);
+        var newSystemState = TaskUtils.RunSync(rosMasterClient.GetSystemStateAsync);
         Assert.False(newSystemState.Publishers.Any(tuple =>
             tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
     }

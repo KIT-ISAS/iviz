@@ -191,14 +191,14 @@ namespace Iviz.Controllers
                 {
                     0 => "No errors",
                     1 => "1 error",
-                    _ => $"{totalErrors} errors"
+                    _ => $"{totalErrors.ToString()} errors"
                 };
 
                 string warnStr = totalWarnings switch
                 {
                     0 => "No warnings",
                     1 => "1 warning",
-                    _ => $"{totalWarnings} warnings"
+                    _ => $"{totalWarnings.ToString()} warnings"
                 };
 
                 return $"{markerStr}\n{errorStr}, {warnStr}";
@@ -255,7 +255,7 @@ namespace Iviz.Controllers
             {
                 Marker.MessageType => new Listener<Marker>(Config.Topic, Handle, rosTransportHint),
                 MarkerArray.MessageType => new Listener<MarkerArray>(Config.Topic, Handle, rosTransportHint),
-                _ => throw new InvalidOperationException("Invalid message type")
+                _ => Ros.Listener.ThrowUnsupportedMessageType(Config.Type)
             };
 
             GameThread.EverySecond += CheckDeadMarkers;

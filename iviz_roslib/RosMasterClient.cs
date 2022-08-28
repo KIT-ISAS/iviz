@@ -71,28 +71,10 @@ public sealed class RosMasterClient : IDisposable
         return $"[RosMasterClient masterUri={MasterUri} callerUri={CallerUri} callerId={CallerId}]";
     }
 
-    public GetUriResponse GetUri()
-    {
-        var response = MethodCall("getUri", cachedCallerIdArg);
-        return new GetUriResponse(response);
-    }
-
     public async ValueTask<GetUriResponse> GetUriAsync(CancellationToken token = default)
     {
         var response = await MethodCallAsync("getUri", cachedCallerIdArg, token);
         return new GetUriResponse(response);
-    }
-
-    public LookupNodeResponse LookupNode(string nodeId)
-    {
-        if (nodeId == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(nodeId));
-        }
-
-        XmlRpcArg[] args = { CallerId, nodeId };
-        var response = MethodCall("lookupNode", args);
-        return new LookupNodeResponse(response);
     }
 
     public async ValueTask<LookupNodeResponse> LookupNodeAsync(string nodeId, CancellationToken token = default)
@@ -107,13 +89,6 @@ public sealed class RosMasterClient : IDisposable
         return new LookupNodeResponse(response);
     }
 
-    public GetPublishedTopicsResponse GetPublishedTopics(string subgraph = "")
-    {
-        XmlRpcArg[] args = { CallerId, subgraph };
-        var response = MethodCall("getPublishedTopics", args);
-        return new GetPublishedTopicsResponse(response);
-    }
-
     public async ValueTask<GetPublishedTopicsResponse> GetPublishedTopicsAsync(string subgraph = "",
         CancellationToken token = default)
     {
@@ -122,33 +97,10 @@ public sealed class RosMasterClient : IDisposable
         return new GetPublishedTopicsResponse(response);
     }
 
-    public GetPublishedTopicsResponse GetTopicTypes()
-    {
-        var response = MethodCall("getTopicTypes", cachedCallerIdArg);
-        return new GetPublishedTopicsResponse(response);
-    }
-
     public async ValueTask<GetPublishedTopicsResponse> GetTopicTypesAsync(CancellationToken token = default)
     {
         var response = await MethodCallAsync("getTopicTypes", cachedCallerIdArg, token);
         return new GetPublishedTopicsResponse(response);
-    }
-
-    public RegisterSubscriberResponse RegisterSubscriber(string topic, string topicType)
-    {
-        if (topic == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(topic));
-        }
-
-        if (topicType == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(topicType));
-        }
-
-        XmlRpcArg[] args = { CallerId, topic, topicType, CallerUri };
-        var response = MethodCall("registerSubscriber", args);
-        return new RegisterSubscriberResponse(response);
     }
 
     public async ValueTask<RegisterSubscriberResponse> RegisterSubscriberAsync(string topic, string topicType,
@@ -169,18 +121,6 @@ public sealed class RosMasterClient : IDisposable
         return new RegisterSubscriberResponse(response);
     }
 
-    public UnregisterSubscriberResponse UnregisterSubscriber(string topic)
-    {
-        if (topic == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(topic));
-        }
-
-        XmlRpcArg[] args = { CallerId, topic, CallerUri };
-        var response = MethodCall("unregisterSubscriber", args);
-        return new UnregisterSubscriberResponse(response);
-    }
-
     public async ValueTask<UnregisterSubscriberResponse> UnregisterSubscriberAsync(string topic,
         CancellationToken token = default)
     {
@@ -192,23 +132,6 @@ public sealed class RosMasterClient : IDisposable
         XmlRpcArg[] args = { CallerId, topic, CallerUri };
         var response = await MethodCallAsync("unregisterSubscriber", args, token);
         return new UnregisterSubscriberResponse(response);
-    }
-
-    public RegisterPublisherResponse RegisterPublisher(string topic, string topicType)
-    {
-        if (topic == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(topic));
-        }
-
-        if (topicType == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(topicType));
-        }
-
-        XmlRpcArg[] args = { CallerId, topic, topicType, CallerUri };
-        var response = MethodCall("registerPublisher", args);
-        return new RegisterPublisherResponse(response);
     }
 
     public async ValueTask<RegisterPublisherResponse> RegisterPublisherAsync(string topic, string topicType,
@@ -229,18 +152,6 @@ public sealed class RosMasterClient : IDisposable
         return new RegisterPublisherResponse(response);
     }
 
-    public UnregisterPublisherResponse UnregisterPublisher(string topic)
-    {
-        if (topic == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(topic));
-        }
-
-        XmlRpcArg[] args = { CallerId, topic, CallerUri };
-        var response = MethodCall("unregisterPublisher", args);
-        return new UnregisterPublisherResponse(response);
-    }
-
     public async ValueTask<UnregisterPublisherResponse> UnregisterPublisherAsync(string topic,
         CancellationToken token = default)
     {
@@ -254,28 +165,10 @@ public sealed class RosMasterClient : IDisposable
         return new UnregisterPublisherResponse(response);
     }
 
-    public GetSystemStateResponse GetSystemState()
-    {
-        var response = MethodCall("getSystemState", cachedCallerIdArg);
-        return new GetSystemStateResponse(response);
-    }
-
     public async ValueTask<GetSystemStateResponse> GetSystemStateAsync(CancellationToken token = default)
     {
         var response = await MethodCallAsync("getSystemState", cachedCallerIdArg, token);
         return new GetSystemStateResponse(response);
-    }
-
-    public LookupServiceResponse LookupService(string service)
-    {
-        if (service == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(service));
-        }
-
-        XmlRpcArg[] args = { CallerId, service };
-        var response = MethodCall("lookupService", args);
-        return new LookupServiceResponse(response);
     }
 
     public async ValueTask<LookupServiceResponse> LookupServiceAsync(string service,
@@ -289,23 +182,6 @@ public sealed class RosMasterClient : IDisposable
         XmlRpcArg[] args = { CallerId, service };
         var response = await MethodCallAsync("lookupService", args, token);
         return new LookupServiceResponse(response);
-    }
-
-    public DefaultResponse RegisterService(string service, Uri rosRpcUri)
-    {
-        if (service == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(service));
-        }
-
-        if (rosRpcUri == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(rosRpcUri));
-        }
-
-        XmlRpcArg[] args = { CallerId, service, rosRpcUri, CallerUri };
-        var response = MethodCall("registerService", args);
-        return DefaultResponse.Create(response);
     }
 
     public async ValueTask<DefaultResponse> RegisterServiceAsync(string service, Uri rosRpcUri,
@@ -326,23 +202,6 @@ public sealed class RosMasterClient : IDisposable
         return DefaultResponse.Create(response);
     }
 
-    public UnregisterServiceResponse UnregisterService(string service, Uri rosRpcUri)
-    {
-        if (service == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(service));
-        }
-
-        if (rosRpcUri == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(rosRpcUri));
-        }
-
-        XmlRpcArg[] args = { CallerId, service, rosRpcUri };
-        var response = MethodCall("unregisterService", args);
-        return new UnregisterServiceResponse(response);
-    }
-
     public async ValueTask<UnregisterServiceResponse> UnregisterServiceAsync(string service, Uri rosRpcUri,
         CancellationToken token = default)
     {
@@ -359,28 +218,6 @@ public sealed class RosMasterClient : IDisposable
         XmlRpcArg[] args = { CallerId, service, rosRpcUri };
         var response = await MethodCallAsync("unregisterService", args, token);
         return new UnregisterServiceResponse(response);
-    }
-
-    internal RosValue[] MethodCall(string function, XmlRpcArg[] args)
-    {
-        using var ts = new CancellationTokenSource(TimeoutInMs);
-
-        RosValue tmp;
-        try
-        {
-            tmp = XmlRpcService.MethodCall(MasterUri, CallerUri, function, args, ts.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            throw new TimeoutException($"Call to '{function}' timed out");
-        }
-
-        if (!tmp.TryGetArray(out RosValue[] result))
-        {
-            throw new ParseException($"Expected type object[], got {tmp}");
-        }
-
-        return result;
     }
 
     internal async ValueTask<RosValue[]> MethodCallAsync(string function, XmlRpcArg[] args,

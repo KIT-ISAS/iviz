@@ -27,7 +27,7 @@ namespace Iviz.Common
         GridMap,
         Robot,
         Octomap,
-        GuiWidget,
+        VizWidget,
         XR,
         Camera,
         TFPublisher,

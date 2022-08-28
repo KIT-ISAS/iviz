@@ -4,7 +4,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="ARModuleData"/> 
     /// </summary>
-    public sealed class GuiWidgetModulePanel : ListenerModulePanel
+    public sealed class VizWidgetModulePanel : ListenerModulePanel
     {
         public SimpleButtonWidget CloseButton { get; private set; }
         public SimpleButtonWidget ResetButton { get; private set; }
@@ -14,7 +14,7 @@ namespace Iviz.App
         void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
-            p.AddHeadTitleWidget("GUI Widgets");
+            p.AddHeadTitleWidget("Viz Widgets");
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             Listener = p.AddListener();

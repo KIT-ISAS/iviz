@@ -63,7 +63,7 @@ public sealed class Ros2Client : IRosClient
     }
 
     public static void SetLoggingLevel(RclLogSeverity severity) => RclClient.SetLoggingLevel(severity);
-    
+
     public void InitializeParameterServer()
     {
         TaskUtils.RunSync(ParameterServer.RegisterServicesAsync);
@@ -571,4 +571,19 @@ public sealed class Ros2Client : IRosClient
     [DoesNotReturn]
     static void ThrowUnsupportedMessageTypeException(string messageType) =>
         throw new RosUnsupportedMessageException(messageType);
+
+
+    #region parameters
+
+    string[] IRosClient.GetParameterNames() => GetParameterNames();
+
+    ValueTask<string[]> IRosClient.GetParameterNamesAsync(CancellationToken token) =>
+        GetParameterNamesAsync(token: token);
+
+    RosValue IRosClient.GetParameter(string key) => GetParameter(key);
+
+    ValueTask<RosValue> IRosClient.GetParameterAsync(string key, CancellationToken token) =>
+        GetParameterAsync(key, token: token);
+
+    #endregion
 }

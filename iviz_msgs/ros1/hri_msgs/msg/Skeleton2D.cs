@@ -51,13 +51,14 @@ namespace Iviz.Msgs.HriMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             {
                 int n = b.DeserializeArrayLength();
-                Skeleton = n == 0
+                var array = n == 0
                     ? EmptyArray<NormalizedPointOfInterest2D>.Value
                     : new NormalizedPointOfInterest2D[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Skeleton[i] = new NormalizedPointOfInterest2D(ref b);
+                    array[i] = new NormalizedPointOfInterest2D(ref b);
                 }
+                Skeleton = array;
             }
         }
         
@@ -67,13 +68,14 @@ namespace Iviz.Msgs.HriMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Skeleton = n == 0
+                var array = n == 0
                     ? EmptyArray<NormalizedPointOfInterest2D>.Value
                     : new NormalizedPointOfInterest2D[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Skeleton[i] = new NormalizedPointOfInterest2D(ref b);
+                    array[i] = new NormalizedPointOfInterest2D(ref b);
                 }
+                Skeleton = array;
             }
         }
         

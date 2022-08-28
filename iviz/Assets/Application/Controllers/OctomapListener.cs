@@ -122,7 +122,7 @@ namespace Iviz.Controllers
 
         void SetterFunction(NativeList<float4> buffer)
         {
-            if (helper == null || !Mathf.Approximately(helper.Resolution, (float) lastMsg.Resolution))
+            if (helper == null || !helper.Resolution.EqualsApprox((float) lastMsg.Resolution))
             {
                 helper = new OctreeHelper((float) lastMsg.Resolution);
             }

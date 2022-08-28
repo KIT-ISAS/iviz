@@ -258,7 +258,7 @@ namespace Iviz.Ros
                         break;
 
                     case RosVersion.ROS2:
-                        if (!IsRos2VersionSupported) throw new InvalidOperationException("ROS2 not supported!");
+                        if (!IsRos2VersionSupported) ThrowHelper.ThrowInvalidOperation("ROS2 not supported!");
 
                         SetEnvironmentVariable("FASTRTPS_DEFAULT_PROFILES_FILE", Settings.Ros2Folder + "/profiles.xml");
                         SetEnvironmentVariable("ROS_DISCOVERY_SERVER", DiscoveryServer?.Description());
@@ -272,7 +272,7 @@ namespace Iviz.Ros
                         client = newRos2Client;
                         break;
                     default:
-                        BuiltIns.ThrowArgumentOutOfRange();
+                        ThrowHelper.ThrowArgumentOutOfRange(nameof(currentVersion));
                         break; // unreachable
                 }
 
@@ -519,7 +519,7 @@ namespace Iviz.Ros
                         if (!warningSet)
                         {
                             RosLogger.Internal("<b>Warning:</b> The master is not responding. It was last seen at" +
-                                               $" [{lastMasterAccess:HH:mm:ss}].");
+                                               $" [{lastMasterAccess.ToString("HH:mm:ss")}].");
                             SetConnectionWarningState(true);
                             warningSet = true;
                         }
@@ -602,8 +602,8 @@ namespace Iviz.Ros
             {
                 time.GlobalTimeOffset = offset;
                 string offsetStr = Mathf.Abs((float)offset.TotalSeconds) >= 1
-                    ? $"{offset.TotalSeconds:#,0.###} sec"
-                    : $"{offset.TotalMilliseconds:#,0.###} ms";
+                    ? offset.TotalSeconds.ToString("#,0.###") + " sec"
+                    : offset.TotalMilliseconds.ToString("#,0.###") + " ms";
                 RosLogger.Info($"[NtpChecker]: Master clock appears to have a time offset of {offsetStr}. " +
                                "Local published messages will use this offset.");
             }
@@ -759,7 +759,7 @@ namespace Iviz.Ros
             advertiser.Id = newAdvertisedTopic.Id;
         }
 
-        public void AdvertiseService<T>(string service, Func<T, ValueTask> callback) where T : IService, new()
+        public void AdvertiseService<T>(string service, Func<T, ValueTask> callback) where T : class, IService, new()
         {
             ThrowHelper.ThrowIfNull(service, nameof(service));
             ThrowHelper.ThrowIfNull(callback, nameof(callback));
@@ -804,7 +804,7 @@ namespace Iviz.Ros
         }
 
         public async ValueTask<bool> CallModelServiceAsync<T>(string service, T srv, int timeoutInMs,
-            CancellationToken token) where T : IService, new()
+            CancellationToken token) where T : class, IService, new()
         {
             using var myLock = await modelServiceLock.LockAsync();
 
@@ -826,8 +826,8 @@ namespace Iviz.Ros
             }
         }
 
-        async ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs,
-            CancellationToken token) where T : IService, new()
+        async ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs, CancellationToken token)
+            where T : class, IService, new()
         {
             ThrowHelper.ThrowIfNull(service, nameof(service));
             ThrowHelper.ThrowIfNull(srv, nameof(srv));
@@ -868,8 +868,9 @@ namespace Iviz.Ros
 
             if (basePublisher is not IRosPublisher<T> publisher)
             {
-                RosLogger.Error($"[{nameof(RosConnection)}]: Publisher type does not match! Message is "
-                                + typeof(T).Name + ", publisher is " + basePublisher.GetType().Name);
+                RosLogger.Error(
+                    $"[{nameof(RosConnection)}]: Publisher type does not match! Message is {msg.RosMessageType}, " +
+                    $"publisher is {basePublisher.TopicType}");
                 return;
             }
 
@@ -1027,7 +1028,7 @@ namespace Iviz.Ros
                 ? subscribedTopic.UnsubscribeAsync(token)
                 : default;
         }
-        
+
         public TopicNameType[] GetSystemPublishedTopicTypes(bool withRefresh)
         {
             if (withRefresh)

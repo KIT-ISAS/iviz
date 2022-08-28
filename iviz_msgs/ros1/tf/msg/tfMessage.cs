@@ -24,13 +24,14 @@ namespace Iviz.Msgs.Tf
         {
             {
                 int n = b.DeserializeArrayLength();
-                Transforms = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.TransformStamped>.Value
                     : new GeometryMsgs.TransformStamped[n];
                 for (int i = 0; i < n; i++)
                 {
-                    GeometryMsgs.TransformStamped.Deserialize(ref b, out Transforms[i]);
+                    GeometryMsgs.TransformStamped.Deserialize(ref b, out array[i]);
                 }
+                Transforms = array;
             }
         }
         
@@ -39,13 +40,14 @@ namespace Iviz.Msgs.Tf
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Transforms = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.TransformStamped>.Value
                     : new GeometryMsgs.TransformStamped[n];
                 for (int i = 0; i < n; i++)
                 {
-                    GeometryMsgs.TransformStamped.Deserialize(ref b, out Transforms[i]);
+                    GeometryMsgs.TransformStamped.Deserialize(ref b, out array[i]);
                 }
+                Transforms = array;
             }
         }
         

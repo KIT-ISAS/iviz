@@ -29,62 +29,22 @@ public sealed class HttpListener
     bool KeepRunning => !runningTs.IsCancellationRequested;
 
     /// <summary>
+    /// The port on which the listener is listening
+    /// </summary>
+    public int LocalPort { get; }
+
+    /// <summary>
     /// Creates a new HTTP listener that listens on the given port.
     /// </summary>
     /// <param name="requestedPort">The port to listen on. Ports 0 and 80 are assumed to be 'any'.</param>
     public HttpListener(int requestedPort = AnyPort)
     {
-        listener = new TcpListener(IPAddress.IPv6Any, requestedPort == DefaultHttpPort ? AnyPort : requestedPort)
-            {Server = {DualMode = true}};
+        int port = requestedPort == DefaultHttpPort ? AnyPort : requestedPort;
+        listener = new TcpListener(IPAddress.IPv6Any, port) { Server = { DualMode = true } };
         listener.Start();
 
-        IPEndPoint endpoint = (IPEndPoint) listener.LocalEndpoint;
+        IPEndPoint endpoint = (IPEndPoint)listener.LocalEndpoint;
         LocalPort = endpoint.Port;
-    }
-
-    /// <summary>
-    /// The port on which the listener is listening
-    /// </summary>
-    public int LocalPort { get; }
-
-    public void Dispose()
-    {
-        DisposeAsync(true).WaitNoThrow(this); // shouldn't block
-    }
-        
-    public ValueTask DisposeAsync()
-    {
-        return DisposeAsync(false);
-    }
-
-    async ValueTask DisposeAsync(bool sync)
-    {
-        if (disposed)
-        {
-            return;
-        }
-
-        disposed = true;
-        runningTs.Cancel();
-
-        if (!started)
-        {
-            listener.Stop();
-            return;
-        }
-
-        Logger.LogDebugFormat("{0}: Disposing listener...", this);
-        if (sync)
-        {
-            StreamUtils.EnqueueConnection(LocalPort, this);
-        }
-        else
-        {
-            await StreamUtils.EnqueueConnectionAsync(LocalPort, this, timeoutInMs: 2000);
-        }
-
-        listener.Stop();
-        Logger.LogDebugFormat("{0}: Listener dispose out", this);
     }
 
     /// <summary>
@@ -99,7 +59,9 @@ public sealed class HttpListener
     /// </param>
     /// <returns>An awaitable task.</returns>
     /// <exception cref="ArgumentNullException">Thrown if handler is null</exception>
-    public async ValueTask StartAsync(Func<HttpListenerContext, CancellationToken, ValueTask> handler, bool runInBackground)
+    public async ValueTask StartAsync(Func<HttpListenerContext, 
+            CancellationToken, ValueTask> handler,
+        bool runInBackground)
     {
         if (handler is null)
         {
@@ -107,7 +69,7 @@ public sealed class HttpListener
         }
 
         var token = runningTs.Token;
-            
+
         started = true;
         while (KeepRunning)
             try
@@ -163,29 +125,47 @@ public sealed class HttpListener
     /// </summary>
     /// <param name="timeoutInMs">Maximal time to wait</param>
     /// <returns>An awaitable task</returns>
-    public async ValueTask AwaitRunningTasks(int timeoutInMs = DefaultTimeoutInMs)
+    public Task AwaitRunningTasks(int timeoutInMs = DefaultTimeoutInMs)
     {
         backgroundTasks.RemoveAll(tuple => tuple.task.IsCompleted);
         if (backgroundTasks.Count == 0)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         var now = DateTime.Now;
         int count = backgroundTasks.Count(tuple => (tuple.start - now).TotalMilliseconds > BackgroundTimeoutInMs);
         if (count > 0)
         {
-            Logger.LogFormat("{0}: There appear to be {1} tasks deadlocked!", this, count);
+            Logger.LogFormat("{0}: There appear to be {1} task(s) deadlocked!", this, count);
         }
 
-        try
+        return backgroundTasks.Select(tuple => tuple.task).WhenAll().AwaitNoThrow(timeoutInMs, this);
+    }
+
+
+    public async ValueTask DisposeAsync()
+    {
+        if (disposed)
         {
-            await backgroundTasks.Select(tuple => tuple.task).WhenAll().AwaitFor(timeoutInMs);
+            return;
         }
-        catch (Exception e)
+
+        disposed = true;
+        runningTs.Cancel();
+
+        if (!started)
         {
-            Logger.LogFormat("{0}: Got an exception while waiting: {1}", this, e);
+            listener.Stop();
+            return;
         }
+
+        Logger.LogDebugFormat("{0}: Disposing listener...", this);
+
+        await StreamUtils.EnqueueConnectionAsync(LocalPort, this, timeoutInMs: 2000);
+
+        listener.Stop();
+        Logger.LogDebugFormat("{0}: Listener dispose out", this);
     }
 
     public override string ToString()

@@ -593,7 +593,7 @@ namespace Iviz.Controllers
                     fixed (float4* srcPtr = &src[0])
                     fixed (float4* dstPtr = &dst[0])
                     {
-                        dstOff += Utils.ParseFloat4(srcPtr, dstPtr, width);
+                        dstOff += BurstUtils.ParseFloat4(srcPtr, dstPtr, width);
                     }
                 }
             }
@@ -608,7 +608,7 @@ namespace Iviz.Controllers
                     fixed (float4* srcPtr = &src[0])
                     fixed (float4* dstPtr = &dst[0])
                     {
-                        dstOff += Utils.ParseFloat4Z(srcPtr, dstPtr, width);
+                        dstOff += BurstUtils.ParseFloat4Z(srcPtr, dstPtr, width);
                     }
                 }
             }
@@ -623,7 +623,7 @@ namespace Iviz.Controllers
                     fixed (float3* srcPtr = &src[0])
                     fixed (float4* dstPtr = &dst[0])
                     {
-                        dstOff += Utils.ParseFloat3(srcPtr, dstPtr, width);
+                        dstOff += BurstUtils.ParseFloat3(srcPtr, dstPtr, width);
                     }
                 }
             }
@@ -822,7 +822,7 @@ namespace Iviz.Controllers
         static bool IsInvalid(float f) => f.IsInvalid() || Mathf.Abs(f) > MaxPositionMagnitude;
 
         [BurstCompile]
-        static unsafe class Utils
+        static unsafe class BurstUtils
         {
             [BurstCompile(CompileSynchronously = true)]
             public static int ParseFloat3([NoAlias] float3* input, [NoAlias] float4* output, int inputLength)

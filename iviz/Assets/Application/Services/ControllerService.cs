@@ -941,7 +941,7 @@ namespace Iviz.Controllers
 
                     bool overrideExpired = false;
                     string dialogId = srv.Request.Dialog.Id;
-                    var dialog = GuiWidgetListener.DefaultHandler.AddDialog(srv.Request.Dialog);
+                    var dialog = VizWidgetListener.DefaultHandler.AddDialog(srv.Request.Dialog);
                     var ts = TaskUtils.CreateCompletionSource();
 
                     // ReSharper disable once ConvertIfStatementToSwitchStatement

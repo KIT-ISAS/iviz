@@ -40,23 +40,25 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Filename);
             {
                 int n = b.DeserializeArrayLength();
-                Includes = n == 0
+                var array = n == 0
                     ? EmptyArray<SceneInclude>.Value
                     : new SceneInclude[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Includes[i] = new SceneInclude(ref b);
+                    array[i] = new SceneInclude(ref b);
                 }
+                Includes = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Lights = n == 0
+                var array = n == 0
                     ? EmptyArray<SceneLight>.Value
                     : new SceneLight[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Lights[i] = new SceneLight(ref b);
+                    array[i] = new SceneLight(ref b);
                 }
+                Lights = array;
             }
         }
         
@@ -69,24 +71,26 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Includes = n == 0
+                var array = n == 0
                     ? EmptyArray<SceneInclude>.Value
                     : new SceneInclude[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Includes[i] = new SceneInclude(ref b);
+                    array[i] = new SceneInclude(ref b);
                 }
+                Includes = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Lights = n == 0
+                var array = n == 0
                     ? EmptyArray<SceneLight>.Value
                     : new SceneLight[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Lights[i] = new SceneLight(ref b);
+                    array[i] = new SceneLight(ref b);
                 }
+                Lights = array;
             }
         }
         

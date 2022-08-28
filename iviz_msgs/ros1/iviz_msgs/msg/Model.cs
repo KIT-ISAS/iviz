@@ -32,33 +32,36 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out OrientationHint);
             {
                 int n = b.DeserializeArrayLength();
-                Meshes = n == 0
+                var array = n == 0
                     ? EmptyArray<ModelMesh>.Value
                     : new ModelMesh[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Meshes[i] = new ModelMesh(ref b);
+                    array[i] = new ModelMesh(ref b);
                 }
+                Meshes = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Materials = n == 0
+                var array = n == 0
                     ? EmptyArray<ModelMaterial>.Value
                     : new ModelMaterial[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Materials[i] = new ModelMaterial(ref b);
+                    array[i] = new ModelMaterial(ref b);
                 }
+                Materials = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Nodes = n == 0
+                var array = n == 0
                     ? EmptyArray<ModelNode>.Value
                     : new ModelNode[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Nodes[i] = new ModelNode(ref b);
+                    array[i] = new ModelNode(ref b);
                 }
+                Nodes = array;
             }
         }
         
@@ -73,35 +76,38 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Meshes = n == 0
+                var array = n == 0
                     ? EmptyArray<ModelMesh>.Value
                     : new ModelMesh[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Meshes[i] = new ModelMesh(ref b);
+                    array[i] = new ModelMesh(ref b);
                 }
+                Meshes = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Materials = n == 0
+                var array = n == 0
                     ? EmptyArray<ModelMaterial>.Value
                     : new ModelMaterial[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Materials[i] = new ModelMaterial(ref b);
+                    array[i] = new ModelMaterial(ref b);
                 }
+                Materials = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Nodes = n == 0
+                var array = n == 0
                     ? EmptyArray<ModelNode>.Value
                     : new ModelNode[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Nodes[i] = new ModelNode(ref b);
+                    array[i] = new ModelNode(ref b);
                 }
+                Nodes = array;
             }
         }
         

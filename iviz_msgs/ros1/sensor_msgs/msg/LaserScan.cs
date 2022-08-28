@@ -62,24 +62,26 @@ namespace Iviz.Msgs.SensorMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Ranges = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Ranges[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Ranges = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Intensities = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Intensities[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Intensities = array;
             }
         }
         
@@ -97,24 +99,26 @@ namespace Iviz.Msgs.SensorMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Ranges = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Ranges[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Ranges = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Intensities = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Intensities[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Intensities = array;
             }
         }
         

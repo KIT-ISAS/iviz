@@ -35,24 +35,26 @@ namespace Iviz.Msgs.SensorMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Axes = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Axes[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Axes = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Buttons = n == 0
+                var array = n == 0
                     ? EmptyArray<int>.Value
                     : new int[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Buttons[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Buttons = array;
             }
         }
         
@@ -63,24 +65,26 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Axes = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Axes[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Axes = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Buttons = n == 0
+                var array = n == 0
                     ? EmptyArray<int>.Value
                     : new int[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Buttons[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Buttons = array;
             }
         }
         

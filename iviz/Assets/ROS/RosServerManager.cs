@@ -66,7 +66,7 @@ namespace Iviz.Ros
             catch
             {
                 await DisposeAsync();
-                return false; 
+                return false;
             }
 
             await Task.Delay(100);

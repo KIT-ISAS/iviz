@@ -9,21 +9,21 @@ using Newtonsoft.Json;
 
 namespace Iviz.App
 {
-    public sealed class GuiWidgetModuleData : ListenerModuleData, IInteractableModuleData
+    public sealed class VizWidgetModuleData : ListenerModuleData, IInteractableModuleData
     {
-        readonly GuiWidgetListener listener;
-        readonly GuiWidgetModulePanel panel;
+        readonly VizWidgetListener listener;
+        readonly VizWidgetModulePanel panel;
 
         protected override ListenerController Listener => listener;
-        public override ModuleType ModuleType => ModuleType.GuiWidget;
+        public override ModuleType ModuleType => ModuleType.VizWidget;
         public override ModulePanel Panel => panel;
         public override IConfiguration Configuration => listener.Config;
 
-        public GuiWidgetModuleData(ModuleDataConstructor constructor) :
+        public VizWidgetModuleData(ModuleDataConstructor constructor) :
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic)
         {
-            panel = ModulePanelManager.GetPanelByResourceType<GuiWidgetModulePanel>(ModuleType.GuiWidget);
-            listener = new GuiWidgetListener((GuiWidgetConfiguration?)constructor.Configuration, Topic, constructor.Type);
+            panel = ModulePanelManager.GetPanelByResourceType<VizWidgetModulePanel>(ModuleType.VizWidget);
+            listener = new VizWidgetListener((VizWidgetConfiguration?)constructor.Configuration, Topic, constructor.Type);
             Interactable = ModuleListPanel.SceneInteractable;
             UpdateModuleButton();
         }
@@ -61,7 +61,7 @@ namespace Iviz.App
             {
                 switch (field)
                 {
-                    case nameof(GuiWidgetConfiguration.Visible):
+                    case nameof(VizWidgetConfiguration.Visible):
                         break;
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");

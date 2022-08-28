@@ -26,13 +26,14 @@ namespace Iviz.Msgs.ActionlibTutorials
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Sequence = n == 0
+                var array = n == 0
                     ? EmptyArray<int>.Value
                     : new int[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Sequence[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Sequence = array;
             }
         }
         
@@ -42,13 +43,14 @@ namespace Iviz.Msgs.ActionlibTutorials
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Sequence = n == 0
+                var array = n == 0
                     ? EmptyArray<int>.Value
                     : new int[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Sequence[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Sequence = array;
             }
         }
         

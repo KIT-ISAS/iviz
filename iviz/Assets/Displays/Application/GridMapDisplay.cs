@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Runtime.CompilerServices;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
@@ -311,7 +312,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            texture.AsSpan().Fill(0);
+            texture.AsSpan().InitBlock(0);
             texture.Apply();
 
             Collider.center = new Vector3(0.5f, 0.5f, 0).Ros2Unity();

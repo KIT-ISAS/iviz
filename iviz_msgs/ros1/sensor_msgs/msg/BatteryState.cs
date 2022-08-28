@@ -95,24 +95,26 @@ namespace Iviz.Msgs.SensorMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                CellVoltage = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref CellVoltage[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                CellVoltage = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                CellTemperature = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref CellTemperature[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                CellTemperature = array;
             }
             b.DeserializeString(out Location);
             b.DeserializeString(out SerialNumber);
@@ -137,24 +139,26 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                CellVoltage = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref CellVoltage[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                CellVoltage = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                CellTemperature = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref CellTemperature[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                CellTemperature = array;
             }
             b.DeserializeString(out Location);
             b.Align4();

@@ -81,24 +81,26 @@ namespace Iviz.Msgs.VisualizationMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Points = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Points[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                Points = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Colors = n == 0
+                var array = n == 0
                     ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Colors[0]), n * 16);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 16);
                 }
+                Colors = array;
             }
             b.DeserializeString(out Text);
             b.DeserializeString(out MeshResource);
@@ -124,25 +126,27 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Points = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Points[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                Points = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Colors = n == 0
+                var array = n == 0
                     ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Colors[0]), n * 16);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 16);
                 }
+                Colors = array;
             }
             b.DeserializeString(out Text);
             b.Align4();

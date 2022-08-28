@@ -31,13 +31,14 @@ namespace Iviz.Msgs.TrajectoryMsgs
             b.DeserializeStringArray(out JointNames);
             {
                 int n = b.DeserializeArrayLength();
-                Points = n == 0
+                var array = n == 0
                     ? EmptyArray<JointTrajectoryPoint>.Value
                     : new JointTrajectoryPoint[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Points[i] = new JointTrajectoryPoint(ref b);
+                    array[i] = new JointTrajectoryPoint(ref b);
                 }
+                Points = array;
             }
         }
         
@@ -49,13 +50,14 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Points = n == 0
+                var array = n == 0
                     ? EmptyArray<JointTrajectoryPoint>.Value
                     : new JointTrajectoryPoint[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Points[i] = new JointTrajectoryPoint(ref b);
+                    array[i] = new JointTrajectoryPoint(ref b);
                 }
+                Points = array;
             }
         }
         

@@ -126,13 +126,14 @@ namespace Iviz.Msgs.MeshMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                Clusters = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshFaceCluster>.Value
                     : new MeshFaceCluster[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Clusters[i] = new MeshFaceCluster(ref b);
+                    array[i] = new MeshFaceCluster(ref b);
                 }
+                Clusters = array;
             }
         }
         
@@ -141,13 +142,14 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Clusters = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshFaceCluster>.Value
                     : new MeshFaceCluster[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Clusters[i] = new MeshFaceCluster(ref b);
+                    array[i] = new MeshFaceCluster(ref b);
                 }
+                Clusters = array;
             }
         }
         

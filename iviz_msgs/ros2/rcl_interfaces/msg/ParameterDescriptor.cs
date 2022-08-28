@@ -51,23 +51,25 @@ namespace Iviz.Msgs.RclInterfaces
             b.Deserialize(out ReadOnly);
             {
                 int n = b.DeserializeArrayLength();
-                FloatingPointRange = n == 0
+                var array = n == 0
                     ? EmptyArray<FloatingPointRange>.Value
                     : new FloatingPointRange[n];
                 for (int i = 0; i < n; i++)
                 {
-                    FloatingPointRange[i] = new FloatingPointRange(ref b);
+                    array[i] = new FloatingPointRange(ref b);
                 }
+                FloatingPointRange = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                IntegerRange = n == 0
+                var array = n == 0
                     ? EmptyArray<IntegerRange>.Value
                     : new IntegerRange[n];
                 for (int i = 0; i < n; i++)
                 {
-                    IntegerRange[i] = new IntegerRange(ref b);
+                    array[i] = new IntegerRange(ref b);
                 }
+                IntegerRange = array;
             }
         }
         
@@ -84,24 +86,26 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                FloatingPointRange = n == 0
+                var array = n == 0
                     ? EmptyArray<FloatingPointRange>.Value
                     : new FloatingPointRange[n];
                 for (int i = 0; i < n; i++)
                 {
-                    FloatingPointRange[i] = new FloatingPointRange(ref b);
+                    array[i] = new FloatingPointRange(ref b);
                 }
+                FloatingPointRange = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                IntegerRange = n == 0
+                var array = n == 0
                     ? EmptyArray<IntegerRange>.Value
                     : new IntegerRange[n];
                 for (int i = 0; i < n; i++)
                 {
-                    IntegerRange[i] = new IntegerRange(ref b);
+                    array[i] = new IntegerRange(ref b);
                 }
+                IntegerRange = array;
             }
         }
         

@@ -232,7 +232,7 @@ namespace Iviz.Controllers
             {
                 Image.MessageType => new Listener<Image>(Config.Topic, Handler),
                 CompressedImage.MessageType => new Listener<CompressedImage>(Config.Topic, HandlerCompressed),
-                _ => throw new InvalidOperationException("Invalid message type")
+                _ => Ros.Listener.ThrowUnsupportedMessageType(Config.Type)
             };
 
             billboard.Title = Listener.Topic;

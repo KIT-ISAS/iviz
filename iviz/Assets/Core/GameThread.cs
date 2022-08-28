@@ -35,7 +35,7 @@ namespace Iviz.Core
         {
             get => networkFrameSkip;
             set => networkFrameSkip =
-                (value >= 1) ? value : throw new ArgumentException($"Invalid argument {value}");
+                (value >= 1) ? value : throw new ArgumentException($"Invalid argument {value.ToString()}");
         }
 
         /// <summary>

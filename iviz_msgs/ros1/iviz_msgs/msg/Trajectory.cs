@@ -28,24 +28,26 @@ namespace Iviz.Msgs.IvizMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Poses = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Pose>.Value
                     : new GeometryMsgs.Pose[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Poses[0]), n * 56);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 56);
                 }
+                Poses = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Timestamps = n == 0
+                var array = n == 0
                     ? EmptyArray<time>.Value
                     : new time[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Timestamps[0]), n * 8);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
                 }
+                Timestamps = array;
             }
         }
         
@@ -55,25 +57,27 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Poses = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Pose>.Value
                     : new GeometryMsgs.Pose[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Poses[0]), n * 56);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 56);
                 }
+                Poses = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Timestamps = n == 0
+                var array = n == 0
                     ? EmptyArray<time>.Value
                     : new time[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Timestamps[0]), n * 8);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
                 }
+                Timestamps = array;
             }
         }
         

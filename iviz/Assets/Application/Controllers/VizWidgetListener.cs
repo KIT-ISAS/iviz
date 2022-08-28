@@ -20,15 +20,15 @@ using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
 namespace Iviz.Controllers
 {
-    public sealed class GuiWidgetListener : ListenerController, IMarkerDialogListener, IWidgetFeedback, IDialogFeedback
+    public sealed class VizWidgetListener : ListenerController, IMarkerDialogListener, IWidgetFeedback, IDialogFeedback
     {
-        static GuiWidgetListener? defaultHandler;
+        static VizWidgetListener? defaultHandler;
         public static void DisposeDefaultHandler() => defaultHandler?.Dispose();
 
-        public static GuiWidgetListener DefaultHandler =>
-            defaultHandler ??= new GuiWidgetListener(null, "~dialogs", Dialog.MessageType);
+        public static VizWidgetListener DefaultHandler =>
+            defaultHandler ??= new VizWidgetListener(null, "~dialogs", Dialog.MessageType);
 
-        readonly GuiWidgetConfiguration config = new();
+        readonly VizWidgetConfiguration config = new();
 
         readonly VizHandler vizHandler;
         
@@ -40,7 +40,7 @@ namespace Iviz.Controllers
         public Sender<Feedback>? FeedbackSender { get; }
         public override IListener Listener { get; }
 
-        public GuiWidgetConfiguration Config
+        public VizWidgetConfiguration Config
         {
             get => config;
             private set
@@ -79,20 +79,15 @@ namespace Iviz.Controllers
 
         public string BriefDescription => vizHandler.BriefDescription;
 
-        public GuiWidgetListener(GuiWidgetConfiguration? configuration, string topic, string type)
+        public VizWidgetListener(VizWidgetConfiguration? configuration, string topic, string type)
         {
-            Config = configuration ?? new GuiWidgetConfiguration
+            Config = configuration ?? new VizWidgetConfiguration
             {
                 Topic = topic,
                 Id = topic,
                 Type = type,
             };
-
-            /*
-            widgetHandler = new WidgetHandler(this);
-            dialogHandler = new DialogHandler(this);
-            */
-
+            
             switch (config.Type)
             {
                 case Widget.MessageType:
@@ -102,6 +97,13 @@ namespace Iviz.Controllers
                     Listener = new Listener<Widget>(Config.Topic, handler.Handler) { MaxQueueSize = 50 };
                     break;
                 }
+                case WidgetArray.MessageType:
+                {
+                    var handler = new WidgetHandler(this);
+                    vizHandler = handler;
+                    Listener = new Listener<WidgetArray>(Config.Topic, handler.Handler) { MaxQueueSize = 50 };
+                    break;
+                }
                 case Dialog.MessageType:
                 {
                     var handler = new DialogHandler(this);
@@ -109,8 +111,16 @@ namespace Iviz.Controllers
                     Listener = new Listener<Dialog>(Config.Topic, handler.Handler) { MaxQueueSize = 50 };
                     break;
                 }
+                case DialogArray.MessageType:
+                {
+                    var handler = new DialogHandler(this);
+                    vizHandler = handler;
+                    Listener = new Listener<DialogArray>(Config.Topic, handler.Handler) { MaxQueueSize = 50 };
+                    break;
+                }
                 default:
-                    throw new InvalidOperationException("Invalid message type");
+                    Ros.Listener.ThrowUnsupportedMessageType(Config.Type);
+                    break; // unreachable
             }
             
             FeedbackSender = new Sender<Feedback>($"{config.Topic}/feedback");

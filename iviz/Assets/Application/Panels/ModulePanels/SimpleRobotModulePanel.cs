@@ -21,7 +21,9 @@
         public SliderWidget Smoothness { get; private set; }
         public ToggleWidget OcclusionOnlyMode { get; private set; }
         public ToggleWidget Save { get; private set; }
-        
+
+        public RobotWidget Robot { get; private set; }
+
         CollapsibleWidget Decorations { get; set; }
         public InputFieldWidget Prefix { get; private set; }
         public InputFieldWidget Suffix { get; private set; }
@@ -44,6 +46,8 @@
             Smoothness = p.AddSlider("Smoothness").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
             OcclusionOnlyMode = p.AddToggle("AR Occlusion Only Mode");
             Save = p.AddToggle("Save this Robot Locally");
+
+            Robot = p.AddRobot();
 
             Material = p.AddCollapsibleWidget("Visuals")
                 .Attach(OcclusionOnlyMode)

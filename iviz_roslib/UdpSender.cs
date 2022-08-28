@@ -10,14 +10,13 @@ using Iviz.MsgsGen.Dynamic;
 using Iviz.Roslib.Utils;
 using Iviz.Roslib.XmlRpc;
 using Iviz.Tools;
-using Buffer = System.Buffer;
 
 namespace Iviz.Roslib;
 
-internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IMessage
+internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSender where TMessage : IMessage
 {
     readonly CancellationTokenSource runningTs = new();
-    readonly SenderQueue<T> senderQueue;
+    readonly SenderQueue<TMessage> senderQueue;
     readonly TopicInfo topicInfo;
     readonly Task task;
 
@@ -40,7 +39,9 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
 
     bool KeepRunning => !runningTs.IsCancellationRequested;
 
-    public bool IsAlive => !task.IsCompleted;
+    bool IsRunning => !task.IsCompleted;
+
+    public bool IsAlive => IsRunning;
 
     public long MaxQueueSizeInBytes
     {
@@ -50,13 +51,14 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
 
     public UdpClient UdpClient { get; }
     public int MaxPacketSize { get; }
-    public ILoopbackReceiver<T>? LoopbackReceiver { private get; set; }
+    public ILoopbackReceiver<TMessage>? LoopbackReceiver { private get; set; }
 
-    public UdpSender(RpcUdpTopicRequest request, TopicInfo topicInfo, ILatchedMessageProvider<T> provider,
+    public UdpSender(RpcUdpTopicRequest request, TopicInfo topicInfo, 
+        ILatchedMessageProvider<TMessage> provider,
         out byte[] responseHeader)
     {
         this.topicInfo = topicInfo;
-        senderQueue = new SenderQueue<T>(this);
+        senderQueue = new SenderQueue<TMessage>(this);
 
         RemoteEndpoint = new Endpoint(request.Hostname, request.Port);
 
@@ -132,7 +134,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
         task = TaskUtils.Run(() => StartSession(provider).AwaitNoThrow(this));
     }
 
-    async ValueTask StartSession(ILatchedMessageProvider<T> provider)
+    async ValueTask StartSession(ILatchedMessageProvider<TMessage> provider)
     {
         Logger.LogDebugFormat("{0}: Started!", this);
 
@@ -166,7 +168,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
         senderQueue.FlushRemaining();
     }
 
-    async ValueTask ProcessLoop(ILatchedMessageProvider<T> provider)
+    async ValueTask ProcessLoop(ILatchedMessageProvider<TMessage> provider)
     {
         using var writeBuffer = new Rent<byte>(MaxPacketSize);
         writeBuffer[..UdpRosParams.HeaderLength].Fill(0);
@@ -196,7 +198,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
         }
     }
 
-    async ValueTask SendWithSocketAsync(RangeEnumerable<SenderQueue<T>.Entry?> queue, Rent<byte> writeBuffer)
+    async ValueTask SendWithSocketAsync(RangeEnumerable<SenderQueue<TMessage>.Entry?> queue, Rent<byte> writeBuffer)
     {
         const int udpPlusSizeHeaders = UdpRosParams.HeaderLength + 4;
         //byte[] array = writeBuffer.Array;
@@ -373,21 +375,28 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
             BytesDropped = bytesDropped
         };
 
-    public void Publish(in T message)
+    public void Publish(in TMessage message)
     {
-        if (IsAlive)
+        if (!IsRunning)
         {
-            senderQueue.Enqueue(message, ref numDropped, ref bytesDropped);
+            return;
         }
+        
+        if (!senderQueue.TryEnqueue(message))
+        {
+            numDropped++;
+            bytesDropped += message.RosMessageLength;
+        }
+        
     }
 
-    public ValueTask PublishAndWaitAsync(in T message, CancellationToken token)
+    public ValueTask PublishAndWaitAsync(in TMessage message, CancellationToken token)
     {
-        return !IsAlive
+        return !IsRunning
             ? Task.FromException(new ObjectDisposedException("this")).AsValueTask()
             : senderQueue.EnqueueAsync(message, token, ref numDropped, ref bytesDropped);
     }
 
     public override string ToString() =>
-        $"[UdpSender '{topicInfo.Topic}' :{Endpoint.Port.ToString()} >>'{RemoteCallerId}']";
+        $"[{nameof(UdpSender<TMessage>)} '{topicInfo.Topic}' :{Endpoint.Port.ToString()} >>'{RemoteCallerId}']";
 }

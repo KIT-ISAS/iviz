@@ -38,13 +38,14 @@ namespace Iviz.Msgs.GridMapMsgs
             b.DeserializeStringArray(out BasicLayers);
             {
                 int n = b.DeserializeArrayLength();
-                Data = n == 0
+                var array = n == 0
                     ? EmptyArray<StdMsgs.Float32MultiArray>.Value
                     : new StdMsgs.Float32MultiArray[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Data[i] = new StdMsgs.Float32MultiArray(ref b);
+                    array[i] = new StdMsgs.Float32MultiArray(ref b);
                 }
+                Data = array;
             }
             b.Deserialize(out OuterStartIndex);
             b.Deserialize(out InnerStartIndex);
@@ -60,13 +61,14 @@ namespace Iviz.Msgs.GridMapMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Data = n == 0
+                var array = n == 0
                     ? EmptyArray<StdMsgs.Float32MultiArray>.Value
                     : new StdMsgs.Float32MultiArray[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Data[i] = new StdMsgs.Float32MultiArray(ref b);
+                    array[i] = new StdMsgs.Float32MultiArray(ref b);
                 }
+                Data = array;
             }
             b.Align2();
             b.Deserialize(out OuterStartIndex);

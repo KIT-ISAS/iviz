@@ -87,11 +87,13 @@ public unsafe struct ReadBuffer
     public void DeserializeStringArray(int count, out string[] val)
     {
         ThrowIfOutOfRange(4 * count);
-        val = new string[count];
+        var array = new string[count];
         for (int i = 0; i < count; i++)
         {
-            DeserializeString(out val[i]);
+            DeserializeString(out array[i]);
         }
+
+        val = array;
     }
 
     public void SkipStringArray(out string[] val)
@@ -266,12 +268,13 @@ public unsafe struct ReadBuffer
         int size = count * sizeOfT;
         ThrowIfOutOfRange(size);
 
-        val = new T[count];
-        fixed (T* valPtr = val)
+        var array = new T[count];
+        fixed (T* valPtr = array)
         {
             Unsafe.CopyBlock(valPtr, cursor, (uint)size);
         }
 
+        val = array;
         Advance(size);
     }
 
@@ -299,13 +302,14 @@ public unsafe struct ReadBuffer
 
         ThrowIfOutOfRange(count);
 
-        val = new SharedRent(count);
+        var array = new SharedRent(count);
 
-        fixed (byte* valPtr = val.Array)
+        fixed (byte* valPtr = array.Array)
         {
             Unsafe.CopyBlock(valPtr, cursor, (uint)count);
         }
 
+        val = array;
         Advance(count);
     }
 

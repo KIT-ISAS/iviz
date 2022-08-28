@@ -247,7 +247,7 @@ namespace Iviz.Controllers
                 TwistStamped.MessageType => CreateListener<TwistStamped>(Handler),
                 Twist.MessageType => CreateListener<Twist>(Handler),
                 Odometry.MessageType => CreateListener<Odometry>(Handler),
-                _ => throw new InvalidOperationException("Invalid message type")
+                _ => Ros.Listener.ThrowUnsupportedMessageType(Config.Type)
             };
 
             Listener<T> CreateListener<T>(Action<T> a) where T : IMessage, IDeserializable<T>, new() =>

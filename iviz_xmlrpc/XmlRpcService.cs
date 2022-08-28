@@ -248,23 +248,6 @@ public static class XmlRpcService
     }
 
     /// <summary>
-    /// Calls an XML-RPC method. The connection to the server is closed after the call.
-    /// For async contexts use <see cref="MethodCallAsync"/>.
-    /// </summary>
-    /// <param name="remoteUri">Uri of the callee.</param>
-    /// <param name="callerUri">Uri of the caller.</param>
-    /// <param name="method">Name of the XML-RPC method.</param>
-    /// <param name="args">List of arguments.</param>
-    /// <param name="token">Optional cancellation token</param>
-    /// <returns>The result of the remote call.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>        
-    public static RosValue MethodCall(Uri remoteUri, Uri callerUri, string method, XmlRpcArg[] args,
-        CancellationToken token = default)
-    {
-        return TaskUtils.RunSync(() => MethodCallAsync(remoteUri, callerUri, method, args, token));
-    }
-
-    /// <summary>
     /// Responds to an XML-RPC function call sent through an HTTP request.
     /// First deserializes the function arguments from the request, then it calls one
     /// of the methods in the list, and finally it responds with the serialized arguments. 

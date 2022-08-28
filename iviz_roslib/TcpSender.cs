@@ -12,9 +12,9 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
-internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IMessage
+internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSender where TMessage : IMessage
 {
-    readonly SenderQueue<T> senderQueue;
+    readonly SenderQueue<TMessage> senderQueue;
     readonly CancellationTokenSource runningTs = new();
     readonly TopicInfo topicInfo;
     readonly Task task;
@@ -33,7 +33,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
     public Endpoint RemoteEndpoint { get; }
     public TransportType TransportType => TransportType.Tcp;
     public TcpClient TcpClient { get; }
-    public ILoopbackReceiver<T>? LoopbackReceiver { private get; set; }
+    public ILoopbackReceiver<TMessage>? LoopbackReceiver { private get; set; }
 
     bool KeepRunning => !runningTs.IsCancellationRequested;
 
@@ -69,10 +69,10 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
             BytesDropped = bytesDropped
         };
 
-    public TcpSender(TcpClient client, TopicInfo topicInfo, ILatchedMessageProvider<T> provider)
+    public TcpSender(TcpClient client, TopicInfo topicInfo, ILatchedMessageProvider<TMessage> provider)
     {
         this.topicInfo = topicInfo;
-        senderQueue = new SenderQueue<T>(this);
+        senderQueue = new SenderQueue<TMessage>(this);
         TcpClient = client;
         Endpoint = new Endpoint((IPEndPoint)TcpClient.Client.LocalEndPoint!);
         RemoteEndpoint = new Endpoint((IPEndPoint)TcpClient.Client.RemoteEndPoint!);
@@ -228,7 +228,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         }
     }
 
-    async ValueTask StartSession(ILatchedMessageProvider<T> provider)
+    async ValueTask StartSession(ILatchedMessageProvider<TMessage> provider)
     {
         Logger.LogDebugFormat("{0}: Started!", this);
 
@@ -262,7 +262,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         senderQueue.FlushRemaining();
     }
 
-    async ValueTask ProcessLoop(ILatchedMessageProvider<T> provider)
+    async ValueTask ProcessLoop(ILatchedMessageProvider<TMessage> provider)
     {
         using var writeBuffer = new ResizableRent();
 
@@ -291,7 +291,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         }
     }
 
-    async ValueTask SendWithSocketAsync(RangeEnumerable<SenderQueue<T>.Entry?> queue, ResizableRent writeBuffer)
+    async ValueTask SendWithSocketAsync(RangeEnumerable<SenderQueue<TMessage>.Entry?> queue, ResizableRent writeBuffer)
     {
         try
         {
@@ -322,20 +322,27 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         }
     }
 
-    public void Publish(in T message)
+    public void Publish(in TMessage message)
     {
-        if (IsRunning)
+        if (!IsRunning)
         {
-            senderQueue.Enqueue(message, ref numDropped, ref bytesDropped);
+            return;
+        }
+
+        if (!senderQueue.TryEnqueue(message))
+        {
+            numDropped++;
+            bytesDropped += message.RosMessageLength;
         }
     }
 
-    public ValueTask PublishAndWaitAsync(in T message, CancellationToken token)
+    public ValueTask PublishAndWaitAsync(in TMessage message, CancellationToken token)
     {
         return !IsRunning
             ? Task.FromException(new ObjectDisposedException("this")).AsValueTask()
             : senderQueue.EnqueueAsync(message, token, ref numDropped, ref bytesDropped);
     }
 
-    public override string ToString() => $"[TcpSender '{Topic}' :{Endpoint.Port.ToString()} >>'{RemoteCallerId}']";
+    public override string ToString() =>
+        $"[{nameof(TcpSender<TMessage>)} '{Topic}' :{Endpoint.Port.ToString()} >>'{RemoteCallerId}']";
 }

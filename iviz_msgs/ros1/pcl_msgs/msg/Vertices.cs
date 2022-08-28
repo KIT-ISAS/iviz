@@ -26,13 +26,14 @@ namespace Iviz.Msgs.PclMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Vertices_ = n == 0
+                var array = n == 0
                     ? EmptyArray<uint>.Value
                     : new uint[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices_[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Vertices_ = array;
             }
         }
         
@@ -42,13 +43,14 @@ namespace Iviz.Msgs.PclMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Vertices_ = n == 0
+                var array = n == 0
                     ? EmptyArray<uint>.Value
                     : new uint[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices_[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Vertices_ = array;
             }
         }
         

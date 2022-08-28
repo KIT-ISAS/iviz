@@ -28,7 +28,7 @@ namespace Iviz.App
         [DataMember] public List<PathConfiguration> Paths { get; set; } = new();
         [DataMember] public List<GridMapConfiguration> GridMaps { get; set; } = new();
         [DataMember] public List<OctomapConfiguration> Octomaps { get; set; } = new();
-        [DataMember] public List<GuiWidgetConfiguration> Dialogs { get; set; } = new();
+        [DataMember] public List<VizWidgetConfiguration> Dialogs { get; set; } = new();
         [DataMember] public TfPublisherConfiguration TfPublisher { get; set; } = new();
         [DataMember] public CameraConfiguration Camera { get; set; } = new();
         [DataMember] public ARConfiguration? AR { get; set; }

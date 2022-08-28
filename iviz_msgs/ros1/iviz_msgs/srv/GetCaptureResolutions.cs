@@ -119,13 +119,14 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Message);
             {
                 int n = b.DeserializeArrayLength();
-                Resolutions = n == 0
+                var array = n == 0
                     ? EmptyArray<Vector2i>.Value
                     : new Vector2i[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Resolutions[i] = new Vector2i(ref b);
+                    array[i] = new Vector2i(ref b);
                 }
+                Resolutions = array;
             }
         }
         
@@ -137,13 +138,14 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Resolutions = n == 0
+                var array = n == 0
                     ? EmptyArray<Vector2i>.Value
                     : new Vector2i[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Resolutions[i] = new Vector2i(ref b);
+                    array[i] = new Vector2i(ref b);
                 }
+                Resolutions = array;
             }
         }
         

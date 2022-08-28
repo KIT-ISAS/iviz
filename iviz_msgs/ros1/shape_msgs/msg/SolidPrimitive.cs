@@ -56,13 +56,14 @@ namespace Iviz.Msgs.ShapeMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Dimensions = n == 0
+                var array = n == 0
                     ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Dimensions[0]), n * 8);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
                 }
+                Dimensions = array;
             }
         }
         
@@ -73,14 +74,15 @@ namespace Iviz.Msgs.ShapeMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Dimensions = n == 0
+                var array = n == 0
                     ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Dimensions[0]), n * 8);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
                 }
+                Dimensions = array;
             }
         }
         

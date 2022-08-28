@@ -27,7 +27,8 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// Whether latching is enabled. When active, new subscribers will automatically receive a copy of the last message sent.
     /// </param>
     /// <returns>An identifier that can be used to unadvertise from this publisher.</returns>        
-    string Advertise<T>(string topic, out IRosPublisher<T> publisher, bool latchingEnabled = false) where T : IMessage, new();
+    string Advertise<T>(string topic, out IRosPublisher<T> publisher, bool latchingEnabled = false)
+        where T : IMessage, new();
 
     /// <summary>
     /// Advertises the given topic.
@@ -172,20 +173,21 @@ public interface IRosClient : IDisposable, IAsyncDisposable
 
     public ValueTask<TopicNameType[]> GetSystemTopicsAsync(CancellationToken token = default);
 
-    ValueTask DisposeAsync(CancellationToken token = default);
-
     SystemState GetSystemState();
 
     ValueTask<SystemState> GetSystemStateAsync(CancellationToken token = default);
 
-    /*
     string[] GetParameterNames();
 
     ValueTask<string[]> GetParameterNamesAsync(CancellationToken token = default);
 
-    bool GetParameter(string key, out RosParameterValue value);
+    RosValue GetParameter(string key);
 
-    ValueTask<(bool success, RosParameterValue value)>
-        GetParameterAsync(string key, CancellationToken token = default);
-    */
+    ValueTask<RosValue> GetParameterAsync(string key, CancellationToken token = default);
+
+
+    /// <summary>
+    /// Close this connection. Unsubscribes and unadvertises all topics and services.
+    /// </summary>
+    ValueTask DisposeAsync(CancellationToken token = default);
 }

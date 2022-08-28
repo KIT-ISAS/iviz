@@ -29,13 +29,14 @@ namespace Iviz.Msgs.ActionlibMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             {
                 int n = b.DeserializeArrayLength();
-                StatusList = n == 0
+                var array = n == 0
                     ? EmptyArray<GoalStatus>.Value
                     : new GoalStatus[n];
                 for (int i = 0; i < n; i++)
                 {
-                    StatusList[i] = new GoalStatus(ref b);
+                    array[i] = new GoalStatus(ref b);
                 }
+                StatusList = array;
             }
         }
         
@@ -45,13 +46,14 @@ namespace Iviz.Msgs.ActionlibMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                StatusList = n == 0
+                var array = n == 0
                     ? EmptyArray<GoalStatus>.Value
                     : new GoalStatus[n];
                 for (int i = 0; i < n; i++)
                 {
-                    StatusList[i] = new GoalStatus(ref b);
+                    array[i] = new GoalStatus(ref b);
                 }
+                StatusList = array;
             }
         }
         

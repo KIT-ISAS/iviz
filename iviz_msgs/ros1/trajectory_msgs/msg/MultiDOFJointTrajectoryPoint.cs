@@ -36,33 +36,36 @@ namespace Iviz.Msgs.TrajectoryMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Transforms = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Transforms[0]), n * 56);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 56);
                 }
+                Transforms = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Velocities = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Velocities[i] = new GeometryMsgs.Twist(ref b);
+                    array[i] = new GeometryMsgs.Twist(ref b);
                 }
+                Velocities = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Accelerations = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Accelerations[i] = new GeometryMsgs.Twist(ref b);
+                    array[i] = new GeometryMsgs.Twist(ref b);
                 }
+                Accelerations = array;
             }
             b.Deserialize(out TimeFromStart);
         }
@@ -73,35 +76,38 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Transforms = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Transforms[0]), n * 56);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 56);
                 }
+                Transforms = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Velocities = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Velocities[i] = new GeometryMsgs.Twist(ref b);
+                    array[i] = new GeometryMsgs.Twist(ref b);
                 }
+                Velocities = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Accelerations = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Accelerations[i] = new GeometryMsgs.Twist(ref b);
+                    array[i] = new GeometryMsgs.Twist(ref b);
                 }
+                Accelerations = array;
             }
             b.Align4();
             b.Deserialize(out TimeFromStart);

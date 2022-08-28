@@ -34,6 +34,9 @@ namespace Iviz.Core
         }
 
         [DoesNotReturn]
+        public static void ThrowArgumentOutOfRange() => BuiltIns.ThrowArgumentOutOfRange();
+
+        [DoesNotReturn]
         public static void ThrowArgumentOutOfRange(string arg) => BuiltIns.ThrowArgumentOutOfRange(arg);
 
         [DoesNotReturn]
@@ -45,5 +48,8 @@ namespace Iviz.Core
 
         [DoesNotReturn]
         public static void ThrowInvalidOperation(string message) => throw new InvalidOperationException(message);
+
+        [DoesNotReturn, AssertionMethod]
+        public static void ThrowArgumentNull(string arg, string message) => BuiltIns.ThrowArgumentNull(arg, message);
     }
 }

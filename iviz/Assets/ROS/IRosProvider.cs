@@ -52,9 +52,9 @@ namespace Iviz.Ros
             CancellationToken token = default);
 
         ValueTask<(RosValue result, string? errorMsg)> GetParameterAsync(string parameter,
-            int timeoutInMs, string? nodeName = null, CancellationToken token = default);
+            int timeoutInMs = 2000, string? nodeName = null, CancellationToken token = default);
 
-        void AdvertiseService<T>(string service, Func<T, ValueTask> callback) where T : IService, new();
+        void AdvertiseService<T>(string service, Func<T, ValueTask> callback) where T : class, IService, new();
 
         void Disconnect();
 

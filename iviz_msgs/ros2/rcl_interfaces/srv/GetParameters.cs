@@ -140,13 +140,14 @@ namespace Iviz.Msgs.RclInterfaces
         {
             {
                 int n = b.DeserializeArrayLength();
-                Values = n == 0
+                var array = n == 0
                     ? EmptyArray<ParameterValue>.Value
                     : new ParameterValue[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Values[i] = new ParameterValue(ref b);
+                    array[i] = new ParameterValue(ref b);
                 }
+                Values = array;
             }
         }
         
@@ -155,13 +156,14 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Values = n == 0
+                var array = n == 0
                     ? EmptyArray<ParameterValue>.Value
                     : new ParameterValue[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Values[i] = new ParameterValue(ref b);
+                    array[i] = new ParameterValue(ref b);
                 }
+                Values = array;
             }
         }
         

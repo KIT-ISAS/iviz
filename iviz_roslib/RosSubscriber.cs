@@ -220,34 +220,12 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
 
     public bool Unsubscribe(string id)
     {
-        if (id == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(id));
-        }
-
-        if (!IsAlive)
-        {
-            return true;
-        }
-
-        bool removed = callbacksById.Remove(id);
-        cachedCallbacks = callbacksById.Values.ToArray();
-
-        if (callbacksById.Count == 0)
-        {
-            Dispose();
-            client.RemoveSubscriber(this);
-        }
-
-        return removed;
+        return TaskUtils.RunSync(() => UnsubscribeAsync(id, default));
     }
 
     public async ValueTask<bool> UnsubscribeAsync(string id, CancellationToken token = default)
     {
-        if (id is null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(id));
-        }
+        if (id is null) BuiltIns.ThrowArgumentNull(nameof(id));
 
         if (!IsAlive)
         {

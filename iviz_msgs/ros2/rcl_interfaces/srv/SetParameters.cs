@@ -67,13 +67,14 @@ namespace Iviz.Msgs.RclInterfaces
         {
             {
                 int n = b.DeserializeArrayLength();
-                Parameters = n == 0
+                var array = n == 0
                     ? EmptyArray<Parameter>.Value
                     : new Parameter[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Parameters[i] = new Parameter(ref b);
+                    array[i] = new Parameter(ref b);
                 }
+                Parameters = array;
             }
         }
         
@@ -82,13 +83,14 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Parameters = n == 0
+                var array = n == 0
                     ? EmptyArray<Parameter>.Value
                     : new Parameter[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Parameters[i] = new Parameter(ref b);
+                    array[i] = new Parameter(ref b);
                 }
+                Parameters = array;
             }
         }
         
@@ -163,13 +165,14 @@ namespace Iviz.Msgs.RclInterfaces
         {
             {
                 int n = b.DeserializeArrayLength();
-                Results = n == 0
+                var array = n == 0
                     ? EmptyArray<SetParametersResult>.Value
                     : new SetParametersResult[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Results[i] = new SetParametersResult(ref b);
+                    array[i] = new SetParametersResult(ref b);
                 }
+                Results = array;
             }
         }
         
@@ -178,13 +181,14 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Results = n == 0
+                var array = n == 0
                     ? EmptyArray<SetParametersResult>.Value
                     : new SetParametersResult[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Results[i] = new SetParametersResult(ref b);
+                    array[i] = new SetParametersResult(ref b);
                 }
+                Results = array;
             }
         }
         

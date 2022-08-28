@@ -106,6 +106,8 @@ namespace Iviz.App
             panel.Metallic.Value = RobotController.Metallic;
             panel.Smoothness.Value = RobotController.Smoothness;
 
+            panel.Robot.RobotListener = this;
+            
             panel.Prefix.Value = RobotController.FramePrefix;
             panel.Suffix.Value = RobotController.FrameSuffix;
 

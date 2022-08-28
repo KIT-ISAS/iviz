@@ -23,14 +23,6 @@ public sealed class RosNodeClient
     public RosNodeClient(string callerId, Uri callerUri, Uri partnerUri, int timeoutInMs = 2000) =>
         (CallerId, CallerUri, Uri, TimeoutInMs) = (callerId, callerUri, partnerUri, timeoutInMs);
 
-    internal RequestTopicResponse RequestTopic(string topic, RosTransportHint transportHint,
-        RpcUdpTopicRequest? udpTopicRequest)
-    {
-        var args = CreateRequestTopicArgs(CallerId, topic, transportHint, udpTopicRequest);
-        var response = MethodCall("requestTopic", args);
-        return new RequestTopicResponse(response);
-    }
-
     internal async ValueTask<RequestTopicResponse> RequestTopicAsync(string topic,
         RosTransportHint transportHint, RpcUdpTopicRequest? udpTopicRequest,
         CancellationToken token)
@@ -72,46 +64,20 @@ public sealed class RosNodeClient
         return new XmlRpcArg[] { callerId, topic, supportedProtocols };
     }
 
-    public GetMasterUriResponse GetMasterUri()
-    {
-        XmlRpcArg[] args = { CallerId };
-        var response = MethodCall("getMasterUri", args);
-        return new GetMasterUriResponse(response);
-    }
-
     public async ValueTask<GetMasterUriResponse> GetMasterUriAsync(CancellationToken token = default)
     {
         XmlRpcArg[] args = { CallerId };
         var response = await MethodCallAsync("getMasterUri", args, token);
         return new GetMasterUriResponse(response);
     }
-
-    public GetPidResponse GetPid()
-    {
-        XmlRpcArg[] args = { CallerId };
-        var response = MethodCall("getPid", args);
-        return new GetPidResponse(response);
-    }
-
+    
     public async ValueTask<GetPidResponse> GetPidAsync(CancellationToken token = default)
     {
         XmlRpcArg[] args = { CallerId };
         var response = await MethodCallAsync("getPid", args, token);
         return new GetPidResponse(response);
     }
-
-    RosValue[] MethodCall(string function, XmlRpcArg[] args)
-    {
-        var wrapper = XmlRpcService.MethodCall(Uri, CallerUri, function, args);
-        if (wrapper.TryGetArray(out RosValue[] response))
-        {
-            return response;
-        }
-
-        throw new RosRpcException($"Error while calling '{function}' on '{Uri}': " +
-                                  $"Expected type object[], got {wrapper}");
-    }
-
+    
     async ValueTask<RosValue[]> MethodCallAsync(string function, XmlRpcArg[] args, CancellationToken token)
     {
         using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);

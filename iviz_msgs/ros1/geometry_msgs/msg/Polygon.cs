@@ -26,13 +26,14 @@ namespace Iviz.Msgs.GeometryMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Points = n == 0
+                var array = n == 0
                     ? EmptyArray<Point32>.Value
                     : new Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Points[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                Points = array;
             }
         }
         
@@ -42,13 +43,14 @@ namespace Iviz.Msgs.GeometryMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Points = n == 0
+                var array = n == 0
                     ? EmptyArray<Point32>.Value
                     : new Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Points[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                Points = array;
             }
         }
         

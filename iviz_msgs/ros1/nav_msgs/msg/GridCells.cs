@@ -35,13 +35,14 @@ namespace Iviz.Msgs.NavMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Cells = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Cells[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                Cells = array;
             }
         }
         
@@ -54,14 +55,15 @@ namespace Iviz.Msgs.NavMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Cells = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Cells[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                Cells = array;
             }
         }
         

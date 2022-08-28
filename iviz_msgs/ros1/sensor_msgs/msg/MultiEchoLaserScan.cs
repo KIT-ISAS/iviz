@@ -63,23 +63,25 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out RangeMax);
             {
                 int n = b.DeserializeArrayLength();
-                Ranges = n == 0
+                var array = n == 0
                     ? EmptyArray<LaserEcho>.Value
                     : new LaserEcho[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Ranges[i] = new LaserEcho(ref b);
+                    array[i] = new LaserEcho(ref b);
                 }
+                Ranges = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Intensities = n == 0
+                var array = n == 0
                     ? EmptyArray<LaserEcho>.Value
                     : new LaserEcho[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Intensities[i] = new LaserEcho(ref b);
+                    array[i] = new LaserEcho(ref b);
                 }
+                Intensities = array;
             }
         }
         
@@ -96,24 +98,26 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out RangeMax);
             {
                 int n = b.DeserializeArrayLength();
-                Ranges = n == 0
+                var array = n == 0
                     ? EmptyArray<LaserEcho>.Value
                     : new LaserEcho[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Ranges[i] = new LaserEcho(ref b);
+                    array[i] = new LaserEcho(ref b);
                 }
+                Ranges = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Intensities = n == 0
+                var array = n == 0
                     ? EmptyArray<LaserEcho>.Value
                     : new LaserEcho[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Intensities[i] = new LaserEcho(ref b);
+                    array[i] = new LaserEcho(ref b);
                 }
+                Intensities = array;
             }
         }
         

@@ -19,17 +19,6 @@ public sealed class HttpListenerContext : IDisposable
         this.client = client;
     }
 
-    public void Dispose()
-    {
-        if (disposed)
-        {
-            return;
-        }
-
-        client.Close();
-        disposed = true;
-    }
-
     /// <summary>
     /// Retrieves the HTTP request.
     /// </summary>
@@ -97,5 +86,17 @@ public sealed class HttpListenerContext : IDisposable
 
         using var rent = errorMsg.AsRent();
         return client.WriteChunkAsync(rent, token, timeoutInMs);
+    }
+    
+    
+    public void Dispose()
+    {
+        if (disposed)
+        {
+            return;
+        }
+
+        client.Close();
+        disposed = true;
     }
 }

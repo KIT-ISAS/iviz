@@ -16,35 +16,19 @@ namespace Iviz.App
     {
         readonly RobotDialogPanel panel;
         SimpleRobotModuleData? robotModuleData;
+        uint? textHash;
 
         public override IDialogPanel Panel => panel;
 
         public RobotDialogData()
         {
-            panel = DialogPanelManager.GetPanelByType<RobotDialogPanel>(DialogPanelType.Marker);
+            panel = DialogPanelManager.GetPanelByType<RobotDialogPanel>(DialogPanelType.Robot);
         }
 
         public override void SetupPanel()
         {
-            var robotModel = robotModuleData?.RobotController.Robot;
-            if (robotModel == null)
-            {
-                return;
-            }
-
             ResetPanelPosition();
-
-            const int maxLabelWidth = 300;
-            using (var description = BuilderPool.Rent())
-            {
-                Resource.Font.Split(description, robotModel.Name, maxLabelWidth);
-                panel.Label.SetText(description);
-            }
-
             panel.Close.Clicked += Close;
-            panel.ResetAll += robotModel.ApplyAnyValidConfiguration;
-            //panel.LinkClicked += markerId => HighlightMarker(listener, markerId);
-
             UpdatePanel();
         }
 
@@ -53,11 +37,29 @@ namespace Iviz.App
             var robotModel = robotModuleData?.RobotController.Robot;
             if (robotModel == null)
             {
+                panel.Label.Text = "No Robot Loaded";
+                panel.Text.text = "Nothing to show.";
+                textHash = null;
                 return;
             }
 
+            const int maxLabelWidth = 300;
+
             using var description = BuilderPool.Rent();
+            Resource.Font.Split(description, robotModel.Name, maxLabelWidth);
+            panel.Label.SetText(description);
+
+            description.Length = 0;
+
             robotModel.GenerateLog(description);
+            
+            uint newHash = HashCalculator.Compute(description);
+            if (newHash == textHash)
+            {
+                return;
+            }
+
+            textHash = newHash;
             panel.Text.SetTextRent(description);
         }
 

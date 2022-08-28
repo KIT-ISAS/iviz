@@ -78,7 +78,13 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BlockCopyTo(this Span<byte> src, Span<byte> dst)
         {
-            BlockCopyTo((ReadOnlySpan<byte>)src, dst);
+            Unsafe.CopyBlock(ref dst[0], ref src[0], (uint)src.Length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void InitBlock(this Span<byte> src, byte c)
+        {
+            Unsafe.InitBlock(ref src[0], c, (uint)src.Length);
         }
 
         public static ReadOnlySpan<T> Cast<T>(this ReadOnlySpan<byte> src) where T : unmanaged
@@ -110,14 +116,14 @@ namespace Iviz.Core
         {
             return (T[]?)new ListConverter { list = list }.ExtractArray() ?? Array.Empty<T>();
         }
-        
+
         /// <summary>
         /// Creates a span from the given pointer and size. 
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<byte> AsSpan(this IntPtr ptr, int size) => new(ptr.ToPointer(), size);
 
-        
+
         /*
         [StructLayout(LayoutKind.Explicit)]
         ref struct GetLengthHelper

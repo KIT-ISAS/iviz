@@ -43,13 +43,14 @@ namespace Iviz.Msgs.SensorMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Data = n == 0
+                var array = n == 0
                     ? EmptyArray<byte>.Value
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 1);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
                 }
+                Data = array;
             }
         }
         
@@ -62,13 +63,14 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Data = n == 0
+                var array = n == 0
                     ? EmptyArray<byte>.Value
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 1);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
                 }
+                Data = array;
             }
         }
         

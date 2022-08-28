@@ -20,9 +20,9 @@ namespace Iviz.Controllers
         bool visible;
 
         public int Count => vizObjects.Count;
-        
+
         public abstract string BriefDescription { get; }
-        
+
         public bool Visible
         {
             get => visible;
@@ -92,10 +92,10 @@ namespace Iviz.Controllers
 
         protected class VizObject
         {
-            readonly ResourceKey<GameObject> resourceKey;
+            readonly ResourceKey<GameObject>? resourceKey;
             readonly string typeDescription;
             protected readonly FrameNode node;
-            protected readonly IDisplay display;
+            protected readonly IDisplay? display;
             protected float scale = 1;
             public readonly string id;
 
@@ -117,13 +117,15 @@ namespace Iviz.Controllers
                 }
             }
 
-            protected VizObject(string id, ResourceKey<GameObject> resourceKey, string typeDescription)
+            protected VizObject(string id, string typeDescription, ResourceKey<GameObject>? resourceKey = null)
             {
                 node = new FrameNode(id);
-                this.resourceKey = resourceKey;
-                this.typeDescription = typeDescription;
                 this.id = id;
+                this.typeDescription = typeDescription;
 
+                if (resourceKey == null) return;
+                
+                this.resourceKey = resourceKey;
                 if (!ResourcePool.Rent(resourceKey, node.Transform).TryGetComponent(out display))
                 {
                     ThrowHelper.ThrowMissingAssetField("Viz object does not have a display!");
@@ -133,7 +135,11 @@ namespace Iviz.Controllers
             public void Dispose()
             {
                 Interactable = true;
-                display.ReturnToPool(resourceKey);
+                if (resourceKey != null)
+                {
+                    display.ReturnToPool(resourceKey);
+                }
+
                 node.Dispose();
             }
 

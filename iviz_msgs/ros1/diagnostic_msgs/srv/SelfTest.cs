@@ -119,13 +119,14 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.Deserialize(out Passed);
             {
                 int n = b.DeserializeArrayLength();
-                Status = n == 0
+                var array = n == 0
                     ? EmptyArray<DiagnosticStatus>.Value
                     : new DiagnosticStatus[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Status[i] = new DiagnosticStatus(ref b);
+                    array[i] = new DiagnosticStatus(ref b);
                 }
+                Status = array;
             }
         }
         
@@ -137,13 +138,14 @@ namespace Iviz.Msgs.DiagnosticMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Status = n == 0
+                var array = n == 0
                     ? EmptyArray<DiagnosticStatus>.Value
                     : new DiagnosticStatus[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Status[i] = new DiagnosticStatus(ref b);
+                    array[i] = new DiagnosticStatus(ref b);
                 }
+                Status = array;
             }
         }
         

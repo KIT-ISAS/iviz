@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading;
 using Iviz.Core;
@@ -344,5 +345,9 @@ namespace Iviz.Ros
             return (IListener)Activator.CreateInstance(listenerType,
                 topicName, handler, RosTransportHint.PreferTcp);
         }
+        
+        [DoesNotReturn]
+        public static IListener ThrowUnsupportedMessageType(string message) =>
+            throw new InvalidOperationException($"Type {message} is not supported!");
     }
 }

@@ -31,7 +31,7 @@ public static class TaskUtils
     {
         return Task.Run(task, token);
     }
-    
+
     public static T RunSync<T>(Func<CancellationToken, ValueTask<T>> func, CancellationToken token = default) =>
         Run(() => func(token).AsTask(), token).WaitAndRethrow();
 
@@ -44,98 +44,11 @@ public static class TaskUtils
     public static void RunSync(Func<CancellationToken, Task> func, CancellationToken token = default) =>
         Run(() => func(token), token).WaitAndRethrow();
 
-    public static void RunSync(Func<ValueTask> func, CancellationToken token = default) => 
+    public static void RunSync(Func<ValueTask> func, CancellationToken token = default) =>
         Run(() => func().AsTask(), token).WaitAndRethrow();
 
-    public static void RunSync(Func<Task> func, CancellationToken token = default) => 
-        Run(func, token).WaitAndRethrow();    
-
-    /// <summary>
-    /// Waits for the task to complete.
-    /// Only use this if the async function that generated the task does not support a cancellation token.
-    /// </summary>
-    /// <param name="task">The task to be awaited</param>
-    /// <param name="timeoutInMs">The maximal amount to wait</param>
-    /// <param name="token">An optional token to cancel the waiting</param>
-    /// <returns>An awaitable task, with true if the task in the argument finished before the given time</returns>
-    /// <exception cref="TaskCanceledException">If the token expires</exception>
-    public static async Task<bool> AwaitFor(this Task task, int timeoutInMs, CancellationToken token = default)
-    {
-        if (timeoutInMs == -1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(timeoutInMs));
-        }
-
-        token.ThrowIfCancellationRequested();
-        if (task.IsCompleted)
-        {
-            return true;
-        }
-
-        using var tokenSource = !token.CanBeCanceled
-            ? new CancellationTokenSource()
-            : CancellationTokenSource.CreateLinkedTokenSource(token);
-        tokenSource.CancelAfter(timeoutInMs);
-
-        var timeout = CreateCompletionSource();
-
-        // ReSharper disable once UseAwaitUsing
-        using (tokenSource.Token.Register(CallbackHelpers.SetResult, timeout))
-        {
-            Task result = await (task, timeout.Task).WhenAny();
-            return result == task;
-        }
-    }
-
-    /// <summary>
-    /// Waits a given time for the task to complete, and suppresses all exceptions.
-    /// Only use this if the async function that generated the task does not support a cancellation token.
-    /// </summary>
-    /// <param name="task">The task to be awaited</param>
-    /// <param name="caller">The name of the caller, used in the error message</param>
-    /// <param name="timeoutInMs">The maximal amount to wait</param>
-    /// <param name="token">An optional cancellation token</param>
-    public static async Task AwaitNoThrow(this Task? task, int timeoutInMs, object caller,
-        CancellationToken token = default)
-    {
-        if (task == null || task.IsCompleted)
-        {
-            return;
-        }
-
-        using var tokenSource = !token.CanBeCanceled
-            ? new CancellationTokenSource()
-            : CancellationTokenSource.CreateLinkedTokenSource(token);
-        tokenSource.CancelAfter(timeoutInMs);
-
-        var timeout = CreateCompletionSource();
-        var timeoutTask = timeout.Task;
-
-        // ReSharper disable once UseAwaitUsing
-        using (tokenSource.Token.Register(CallbackHelpers.SetResult, timeout))
-        {
-            Task result = await (task, timeoutTask).WhenAny();
-            if (result != task)
-            {
-                if (!token.IsCancellationRequested)
-                {
-                    Logger.LogErrorFormat(GenericExceptionFormat, caller, new TimeoutException());
-                }
-
-                return;
-            }
-
-            await task.AwaitNoThrow(caller);
-        }
-    }
-
-
-    /// <summary>
-    /// Returns whether the task ran to completion (i.e., completed but not cancelled or faulted)
-    /// </summary>
-    /// <param name="task">The task to be checked</param>
-    /// <returns>Whether the task ran to completion</returns>
-    static bool RanToCompletion(this Task task) => task.Status == TaskStatus.RanToCompletion;
+    public static void RunSync(Func<Task> func, CancellationToken token = default) =>
+        Run(func, token).WaitAndRethrow();
 
     /// <summary>
     /// Waits for the task and suppresses all exceptions, prints an error message instead.
@@ -144,7 +57,7 @@ public static class TaskUtils
     /// <param name="caller">The name of the caller to use in the error message</param>
     public static void WaitNoThrow(this Task? t, object caller)
     {
-        if (t == null)
+        if (t == null || t.IsCompletedSuccessfully || t.IsCanceled)
         {
             return;
         }
@@ -169,6 +82,11 @@ public static class TaskUtils
     /// <param name="caller">The name of the caller to use in the error message</param>
     public static void WaitNoThrow(this ValueTask t, object caller)
     {
+        if (t.IsCompletedSuccessfully || t.IsCanceled)
+        {
+            return;
+        }
+
         try
         {
             t.GetAwaiter().GetResult();
@@ -190,7 +108,7 @@ public static class TaskUtils
     /// <param name="caller">The name of the caller to use in the error message</param>
     public static void WaitNoThrow(this Task? t, int timeoutInMs, object caller)
     {
-        if (t == null || t.IsCompleted)
+        if (t == null || t.IsCompletedSuccessfully || t.IsCanceled)
         {
             return;
         }
@@ -220,7 +138,7 @@ public static class TaskUtils
     /// <param name="t">The task to await.</param>
     public static void WaitAndRethrow(this Task? t)
     {
-        if (t == null || t.RanToCompletion())
+        if (t == null || t.IsCompletedSuccessfully)
         {
             return;
         }
@@ -263,13 +181,28 @@ public static class TaskUtils
     /// </summary>
     /// <param name="t">The task to await</param>
     /// <param name="caller">The name of the caller to use in the error message</param>
-    public static async Task AwaitNoThrow(this Task? t, object caller)
+    public static Task AwaitNoThrow(this Task? t, object caller)
     {
-        if (t == null || t.RanToCompletion())
+        if (t == null || t.IsCompletedSuccessfully || t.IsCanceled)
         {
-            return;
+            return Task.CompletedTask;
         }
 
+        if (t.IsFaulted)
+        {
+            if (t.Exception?.InnerException is { } e and not TimeoutException)
+            {
+                Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        return AwaitNoThrowCore(t, caller);
+    }
+
+    static async Task AwaitNoThrowCore(Task t, object caller)
+    {
         try
         {
             await t;
@@ -288,29 +221,14 @@ public static class TaskUtils
     /// </summary>
     /// <param name="t">The task to await</param>
     /// <param name="caller">The name of the caller to use in the error message</param>
-    public static async Task<T?> AwaitNoThrow<T>(this ValueTask<T> t, object caller)
+    public static Task AwaitNoThrow<T>(this ValueTask<T> t, object caller)
     {
-        try
-        {
-            return await t;
-        }
-        catch (Exception e)
-        {
-            if (e is not (OperationCanceledException or TimeoutException))
-            {
-                Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
-            }
-        }
-
-        return default;
+        return t.IsCompletedSuccessfully || t.IsCanceled
+            ? Task.CompletedTask
+            : AwaitNoThrowCore(t, caller);
     }
 
-    /// <summary>
-    /// Waits for the task and suppresses all exceptions, prints an error message instead.
-    /// </summary>
-    /// <param name="t">The task to await</param>
-    /// <param name="caller">The name of the caller to use in the error message</param>
-    public static async Task AwaitNoThrow(this ValueTask t, object caller)
+    static async Task AwaitNoThrowCore<T>(ValueTask<T> t, object caller)
     {
         try
         {
@@ -322,6 +240,89 @@ public static class TaskUtils
             {
                 Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
             }
+        }
+    }
+
+    /// <summary>
+    /// Waits for the task and suppresses all exceptions, prints an error message instead.
+    /// </summary>
+    /// <param name="t">The task to await</param>
+    /// <param name="caller">The name of the caller to use in the error message</param>
+    public static Task AwaitNoThrow(this ValueTask t, object caller)
+    {
+        return t.IsCompletedSuccessfully || t.IsCanceled
+            ? Task.CompletedTask
+            : AwaitNoThrowCore(t, caller);
+    }
+
+    static async Task AwaitNoThrowCore(ValueTask t, object caller)
+    {
+        try
+        {
+            await t;
+        }
+        catch (Exception e)
+        {
+            if (e is not (OperationCanceledException or TimeoutException))
+            {
+                Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Waits a given time for the task to complete, and suppresses all exceptions.
+    /// Only use this if the async function that generated the task does not support a cancellation token.
+    /// </summary>
+    /// <param name="t">The task to be awaited</param>
+    /// <param name="caller">The name of the caller, used in the error message</param>
+    /// <param name="timeoutInMs">The maximal amount to wait</param>
+    /// <param name="token">An optional cancellation token</param>
+    public static Task AwaitNoThrow(this Task? t, int timeoutInMs, object caller, CancellationToken token = default)
+    {
+        if (t == null || t.IsCompletedSuccessfully || t.IsCanceled)
+        {
+            return Task.CompletedTask;
+        }
+
+        if (t.IsFaulted)
+        {
+            if (t.Exception?.InnerException is { } e and not TimeoutException)
+            {
+                Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        return AwaitNoThrowCore(t, timeoutInMs, caller, token);
+    }
+
+    static async Task AwaitNoThrowCore(Task task, int timeoutInMs, object caller, CancellationToken token)
+    {
+        using var tokenSource = !token.CanBeCanceled
+            ? new CancellationTokenSource()
+            : CancellationTokenSource.CreateLinkedTokenSource(token);
+        tokenSource.CancelAfter(timeoutInMs);
+
+        var timeout = CreateCompletionSource();
+        var timeoutTask = timeout.Task;
+
+        // ReSharper disable once UseAwaitUsing
+        using (tokenSource.Token.Register(CallbackHelpers.SetResult, timeout))
+        {
+            Task result = await (task, timeoutTask).WhenAny();
+            if (result != task)
+            {
+                if (!token.IsCancellationRequested)
+                {
+                    Logger.LogErrorFormat(GenericExceptionFormat, caller, new TimeoutException());
+                }
+
+                return;
+            }
+
+            await task.AwaitNoThrow(caller);
         }
     }
 
@@ -339,7 +340,7 @@ public static class TaskUtils
     public static Task WhenAll(this (Task, Task) ts)
     {
         var (task1, task2) = ts;
-        return task1.RanToCompletion() && task2.RanToCompletion()
+        return task1.IsCompletedSuccessfully && task2.IsCompletedSuccessfully
             ? Task.CompletedTask
             : Task.WhenAll(task1, task2);
     }
@@ -378,7 +379,6 @@ public static class TaskUtils
     /// </summary>
     public static TaskCompletionSource<T> CreateCompletionSource<T>() =>
         new(TaskCreationOptions.RunContinuationsAsynchronously);
-    
 }
 
 public static class ValueTaskUtils
@@ -387,12 +387,6 @@ public static class ValueTaskUtils
     /// Creates a completed <see cref="ValueTask{T}"/> that returns the given value.
     /// </summary>
     public static ValueTask<T> AsTaskResult<T>(this T t) => new(t);
-
-    /// <summary>
-    /// Creates a completed <see cref="ValueTask{T}"/> that returns the given value as a T?.
-    /// Same as <see cref="AsTaskResult{T}"/> but keeps the compiler from complaining. 
-    /// </summary>
-    public static ValueTask<T?> AsTaskResultMaybeNull<T>(this T t) => new(t);
 
     /// <summary>
     /// Creates a <see cref="ValueTask{T}"/> that wraps the given task.

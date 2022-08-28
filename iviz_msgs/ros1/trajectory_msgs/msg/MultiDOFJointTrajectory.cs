@@ -36,13 +36,14 @@ namespace Iviz.Msgs.TrajectoryMsgs
             b.DeserializeStringArray(out JointNames);
             {
                 int n = b.DeserializeArrayLength();
-                Points = n == 0
+                var array = n == 0
                     ? EmptyArray<MultiDOFJointTrajectoryPoint>.Value
                     : new MultiDOFJointTrajectoryPoint[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Points[i] = new MultiDOFJointTrajectoryPoint(ref b);
+                    array[i] = new MultiDOFJointTrajectoryPoint(ref b);
                 }
+                Points = array;
             }
         }
         
@@ -54,13 +55,14 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Points = n == 0
+                var array = n == 0
                     ? EmptyArray<MultiDOFJointTrajectoryPoint>.Value
                     : new MultiDOFJointTrajectoryPoint[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Points[i] = new MultiDOFJointTrajectoryPoint(ref b);
+                    array[i] = new MultiDOFJointTrajectoryPoint(ref b);
                 }
+                Points = array;
             }
         }
         

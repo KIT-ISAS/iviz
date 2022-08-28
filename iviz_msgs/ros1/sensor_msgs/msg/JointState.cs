@@ -47,35 +47,38 @@ namespace Iviz.Msgs.SensorMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Position = n == 0
+                var array = n == 0
                     ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Position[0]), n * 8);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
                 }
+                Position = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Velocity = n == 0
+                var array = n == 0
                     ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Velocity[0]), n * 8);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
                 }
+                Velocity = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Effort = n == 0
+                var array = n == 0
                     ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Effort[0]), n * 8);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
                 }
+                Effort = array;
             }
         }
         
@@ -88,38 +91,41 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Position = n == 0
+                var array = n == 0
                     ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Position[0]), n * 8);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
                 }
+                Position = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Velocity = n == 0
+                var array = n == 0
                     ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Velocity[0]), n * 8);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
                 }
+                Velocity = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Effort = n == 0
+                var array = n == 0
                     ? EmptyArray<double>.Value
                     : new double[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Effort[0]), n * 8);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
                 }
+                Effort = array;
             }
         }
         

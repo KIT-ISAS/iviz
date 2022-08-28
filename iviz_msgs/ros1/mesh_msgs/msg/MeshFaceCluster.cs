@@ -30,13 +30,14 @@ namespace Iviz.Msgs.MeshMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                FaceIndices = n == 0
+                var array = n == 0
                     ? EmptyArray<uint>.Value
                     : new uint[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref FaceIndices[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                FaceIndices = array;
             }
             b.DeserializeString(out Label);
         }
@@ -47,13 +48,14 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                FaceIndices = n == 0
+                var array = n == 0
                     ? EmptyArray<uint>.Value
                     : new uint[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref FaceIndices[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                FaceIndices = array;
             }
             b.DeserializeString(out Label);
         }

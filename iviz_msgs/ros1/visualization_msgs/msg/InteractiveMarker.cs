@@ -46,23 +46,25 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out Scale);
             {
                 int n = b.DeserializeArrayLength();
-                MenuEntries = n == 0
+                var array = n == 0
                     ? EmptyArray<MenuEntry>.Value
                     : new MenuEntry[n];
                 for (int i = 0; i < n; i++)
                 {
-                    MenuEntries[i] = new MenuEntry(ref b);
+                    array[i] = new MenuEntry(ref b);
                 }
+                MenuEntries = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Controls = n == 0
+                var array = n == 0
                     ? EmptyArray<InteractiveMarkerControl>.Value
                     : new InteractiveMarkerControl[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Controls[i] = new InteractiveMarkerControl(ref b);
+                    array[i] = new InteractiveMarkerControl(ref b);
                 }
+                Controls = array;
             }
         }
         
@@ -78,24 +80,26 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out Scale);
             {
                 int n = b.DeserializeArrayLength();
-                MenuEntries = n == 0
+                var array = n == 0
                     ? EmptyArray<MenuEntry>.Value
                     : new MenuEntry[n];
                 for (int i = 0; i < n; i++)
                 {
-                    MenuEntries[i] = new MenuEntry(ref b);
+                    array[i] = new MenuEntry(ref b);
                 }
+                MenuEntries = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Controls = n == 0
+                var array = n == 0
                     ? EmptyArray<InteractiveMarkerControl>.Value
                     : new InteractiveMarkerControl[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Controls[i] = new InteractiveMarkerControl(ref b);
+                    array[i] = new InteractiveMarkerControl(ref b);
                 }
+                Controls = array;
             }
         }
         
