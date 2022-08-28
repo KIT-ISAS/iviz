@@ -343,8 +343,8 @@ public unsafe struct ReadBuffer
     
     #region Empties
 
-    static string EmptyString => "";
-    static string[] EmptyStringArray => EmptyArray<string>.Value;
+    static string EmptyString => EmptyArray.String;
+    static string[] EmptyStringArray => EmptyArray.StringArray;
 
     #endregion
 
