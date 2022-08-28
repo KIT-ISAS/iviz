@@ -14,25 +14,26 @@ namespace Iviz.App
         [SerializeField] TMP_Text? text;
         [SerializeField] Button? button;
         SimpleRobotModuleData? listener;
-        
+
         TMP_Text Text => text.AssertNotNull(nameof(text));
         Button Button => button.AssertNotNull(nameof(button));
-        
+
         public SimpleRobotModuleData? RobotListener
         {
             private get => listener;
             set
             {
-                if (listener == null && value != null)
+                if (listener != null)
                 {
-                    GameThread.EverySecond += UpdateStats;
-                }
-                else if (listener != null && value == null)
-                {
-                    GameThread.EverySecond -= UpdateStats;
+                    listener.RobotController.RobotFinishedLoading -= UpdateStats;
                 }
 
                 listener = value;
+                if (listener != null)
+                {
+                    listener.RobotController.RobotFinishedLoading += UpdateStats;
+                }
+
                 if (value != null)
                 {
                     UpdateStats();
@@ -55,7 +56,21 @@ namespace Iviz.App
 
         void UpdateStats()
         {
-            Text.text = listener?.RobotController.Name ?? "(No robot listener)";
+            if (listener == null)
+            {
+                Text.text = "(no robot listener)";
+                return;
+            }
+
+            if (listener.RobotController.Robot is not { } robot)
+            {
+                Text.text = "No Robot Loaded";
+                return;
+            }
+
+            int count = robot.LinkObjects.Count;
+            Text.text = "<b>" + robot.Name + "</b>\n" +
+                        (count == 1 ? "1 link" : $"{count.ToString()} links");
         }
 
         public void ClearSubscribers()

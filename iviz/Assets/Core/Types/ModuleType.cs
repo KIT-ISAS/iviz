@@ -28,7 +28,6 @@ namespace Iviz.Common
         Robot,
         Octomap,
         VizWidget,
-        GuiWidget = VizWidget,
         XR,
         Camera,
         TFPublisher,

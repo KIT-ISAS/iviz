@@ -868,8 +868,9 @@ namespace Iviz.Ros
 
             if (basePublisher is not IRosPublisher<T> publisher)
             {
-                RosLogger.Error($"[{nameof(RosConnection)}]: Publisher type does not match! Message is "
-                                + typeof(T).Name + ", publisher is " + basePublisher.GetType().Name);
+                RosLogger.Error(
+                    $"[{nameof(RosConnection)}]: Publisher type does not match! Message is {msg.RosMessageType}, " +
+                    $"publisher is {basePublisher.TopicType}");
                 return;
             }
 
