@@ -30,24 +30,26 @@ namespace Iviz.Msgs.ShapeMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                Triangles = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshTriangle>.Value
                     : new MeshTriangle[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Triangles[i] = new MeshTriangle(ref b);
+                    array[i] = new MeshTriangle(ref b);
                 }
+                Triangles = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Vertices = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                Vertices = array;
             }
         }
         
@@ -56,26 +58,28 @@ namespace Iviz.Msgs.ShapeMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Triangles = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshTriangle>.Value
                     : new MeshTriangle[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Triangles[i] = new MeshTriangle(ref b);
+                    array[i] = new MeshTriangle(ref b);
                 }
+                Triangles = array;
             }
             unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Vertices = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                Vertices = array;
             }
         }
         

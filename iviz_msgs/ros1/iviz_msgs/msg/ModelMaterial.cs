@@ -42,13 +42,14 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out BlendMode);
             {
                 int n = b.DeserializeArrayLength();
-                Textures = n == 0
+                var array = n == 0
                     ? EmptyArray<ModelTexture>.Value
                     : new ModelTexture[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Textures[i] = new ModelTexture(ref b);
+                    array[i] = new ModelTexture(ref b);
                 }
+                Textures = array;
             }
         }
         
@@ -69,13 +70,14 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Textures = n == 0
+                var array = n == 0
                     ? EmptyArray<ModelTexture>.Value
                     : new ModelTexture[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Textures[i] = new ModelTexture(ref b);
+                    array[i] = new ModelTexture(ref b);
                 }
+                Textures = array;
             }
         }
         

@@ -32,34 +32,37 @@ namespace Iviz.Msgs.MeshMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Vertices = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                Vertices = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                VertexNormals = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref VertexNormals[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                VertexNormals = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Faces = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshMsgs.TriangleIndices>.Value
                     : new MeshMsgs.TriangleIndices[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Faces[i] = new MeshMsgs.TriangleIndices(ref b);
+                    array[i] = new MeshMsgs.TriangleIndices(ref b);
                 }
+                Faces = array;
             }
         }
         
@@ -69,36 +72,39 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Vertices = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                Vertices = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                VertexNormals = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref VertexNormals[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                VertexNormals = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Faces = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshMsgs.TriangleIndices>.Value
                     : new MeshMsgs.TriangleIndices[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Faces[i] = new MeshMsgs.TriangleIndices(ref b);
+                    array[i] = new MeshMsgs.TriangleIndices(ref b);
                 }
+                Faces = array;
             }
         }
         

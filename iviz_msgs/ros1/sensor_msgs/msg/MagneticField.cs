@@ -47,8 +47,9 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out MagneticField_);
             unsafe
             {
-                MagneticFieldCovariance = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref MagneticFieldCovariance[0]), 9 * 8);
+                var array = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                MagneticFieldCovariance = array;
             }
         }
         
@@ -59,8 +60,9 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out MagneticField_);
             unsafe
             {
-                MagneticFieldCovariance = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref MagneticFieldCovariance[0]), 9 * 8);
+                var array = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                MagneticFieldCovariance = array;
             }
         }
         

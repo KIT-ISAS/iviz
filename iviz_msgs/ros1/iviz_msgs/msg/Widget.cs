@@ -57,13 +57,14 @@ namespace Iviz.Msgs.IvizMsgs
             Boundary = new BoundingBox(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                SecondaryBoundaries = n == 0
+                var array = n == 0
                     ? EmptyArray<BoundingBoxStamped>.Value
                     : new BoundingBoxStamped[n];
                 for (int i = 0; i < n; i++)
                 {
-                    SecondaryBoundaries[i] = new BoundingBoxStamped(ref b);
+                    array[i] = new BoundingBoxStamped(ref b);
                 }
+                SecondaryBoundaries = array;
             }
         }
         
@@ -86,13 +87,14 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                SecondaryBoundaries = n == 0
+                var array = n == 0
                     ? EmptyArray<BoundingBoxStamped>.Value
                     : new BoundingBoxStamped[n];
                 for (int i = 0; i < n; i++)
                 {
-                    SecondaryBoundaries[i] = new BoundingBoxStamped(ref b);
+                    array[i] = new BoundingBoxStamped(ref b);
                 }
+                SecondaryBoundaries = array;
             }
         }
         

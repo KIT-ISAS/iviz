@@ -26,13 +26,14 @@ namespace Iviz.Msgs.MeshMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Costs = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Costs[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Costs = array;
             }
         }
         
@@ -42,13 +43,14 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Costs = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Costs[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Costs = array;
             }
         }
         

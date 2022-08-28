@@ -137,13 +137,14 @@ namespace Iviz.Msgs.RclInterfaces
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Types = n == 0
+                var array = n == 0
                     ? EmptyArray<byte>.Value
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Types[0]), n * 1);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
                 }
+                Types = array;
             }
         }
         
@@ -153,13 +154,14 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Types = n == 0
+                var array = n == 0
                     ? EmptyArray<byte>.Value
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Types[0]), n * 1);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
                 }
+                Types = array;
             }
         }
         

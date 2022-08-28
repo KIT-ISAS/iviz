@@ -25,8 +25,9 @@ namespace Iviz.Msgs.IvizMsgs
         {
             unsafe
             {
-                M = new float[16];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref M[0]), 16 * 4);
+                var array = new float[16];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 16 * 4);
+                M = array;
             }
         }
         
@@ -35,8 +36,9 @@ namespace Iviz.Msgs.IvizMsgs
             unsafe
             {
                 b.Align4();
-                M = new float[16];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref M[0]), 16 * 4);
+                var array = new float[16];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 16 * 4);
+                M = array;
             }
         }
         

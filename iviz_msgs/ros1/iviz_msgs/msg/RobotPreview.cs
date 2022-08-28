@@ -46,13 +46,14 @@ namespace Iviz.Msgs.IvizMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                JointValues = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref JointValues[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                JointValues = array;
             }
             b.DeserializeString(out RobotDescription);
             b.DeserializeString(out SourceNode);
@@ -77,13 +78,14 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                JointValues = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref JointValues[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                JointValues = array;
             }
             b.DeserializeString(out RobotDescription);
             b.Align4();

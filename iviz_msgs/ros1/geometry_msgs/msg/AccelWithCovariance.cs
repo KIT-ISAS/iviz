@@ -33,8 +33,9 @@ namespace Iviz.Msgs.GeometryMsgs
             Accel = new Accel(ref b);
             unsafe
             {
-                Covariance = new double[36];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref Covariance[0]), 36 * 8);
+                var array = new double[36];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 36 * 8);
+                Covariance = array;
             }
         }
         
@@ -44,8 +45,9 @@ namespace Iviz.Msgs.GeometryMsgs
             unsafe
             {
                 b.Align8();
-                Covariance = new double[36];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref Covariance[0]), 36 * 8);
+                var array = new double[36];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 36 * 8);
+                Covariance = array;
             }
         }
         

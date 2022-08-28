@@ -112,13 +112,14 @@ namespace Iviz.Msgs.Roscpp
         {
             {
                 int n = b.DeserializeArrayLength();
-                Loggers = n == 0
+                var array = n == 0
                     ? EmptyArray<Logger>.Value
                     : new Logger[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Loggers[i] = new Logger(ref b);
+                    array[i] = new Logger(ref b);
                 }
+                Loggers = array;
             }
         }
         
@@ -127,13 +128,14 @@ namespace Iviz.Msgs.Roscpp
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Loggers = n == 0
+                var array = n == 0
                     ? EmptyArray<Logger>.Value
                     : new Logger[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Loggers[i] = new Logger(ref b);
+                    array[i] = new Logger(ref b);
                 }
+                Loggers = array;
             }
         }
         

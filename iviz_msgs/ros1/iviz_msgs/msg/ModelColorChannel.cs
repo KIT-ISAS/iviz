@@ -25,13 +25,14 @@ namespace Iviz.Msgs.IvizMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Colors = n == 0
+                var array = n == 0
                     ? EmptyArray<Color32>.Value
                     : new Color32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Colors[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Colors = array;
             }
         }
         
@@ -41,13 +42,14 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Colors = n == 0
+                var array = n == 0
                     ? EmptyArray<Color32>.Value
                     : new Color32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Colors[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                Colors = array;
             }
         }
         

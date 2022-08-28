@@ -34,13 +34,14 @@ namespace Iviz.Msgs.OctomapMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Data = n == 0
+                var array = n == 0
                     ? EmptyArray<sbyte>.Value
                     : new sbyte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 1);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
                 }
+                Data = array;
             }
         }
         
@@ -55,13 +56,14 @@ namespace Iviz.Msgs.OctomapMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Data = n == 0
+                var array = n == 0
                     ? EmptyArray<sbyte>.Value
                     : new sbyte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Data[0]), n * 1);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
                 }
+                Data = array;
             }
         }
         

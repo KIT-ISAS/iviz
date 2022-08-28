@@ -40,13 +40,14 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out SeqNum);
             {
                 int n = b.DeserializeArrayLength();
-                Markers = n == 0
+                var array = n == 0
                     ? EmptyArray<InteractiveMarker>.Value
                     : new InteractiveMarker[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Markers[i] = new InteractiveMarker(ref b);
+                    array[i] = new InteractiveMarker(ref b);
                 }
+                Markers = array;
             }
         }
         
@@ -58,13 +59,14 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out SeqNum);
             {
                 int n = b.DeserializeArrayLength();
-                Markers = n == 0
+                var array = n == 0
                     ? EmptyArray<InteractiveMarker>.Value
                     : new InteractiveMarker[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Markers[i] = new InteractiveMarker(ref b);
+                    array[i] = new InteractiveMarker(ref b);
                 }
+                Markers = array;
             }
         }
         

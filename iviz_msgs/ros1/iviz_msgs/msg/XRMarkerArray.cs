@@ -24,13 +24,14 @@ namespace Iviz.Msgs.IvizMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                Markers = n == 0
+                var array = n == 0
                     ? EmptyArray<XRMarker>.Value
                     : new XRMarker[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Markers[i] = new XRMarker(ref b);
+                    array[i] = new XRMarker(ref b);
                 }
+                Markers = array;
             }
         }
         
@@ -39,13 +40,14 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Markers = n == 0
+                var array = n == 0
                     ? EmptyArray<XRMarker>.Value
                     : new XRMarker[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Markers[i] = new XRMarker(ref b);
+                    array[i] = new XRMarker(ref b);
                 }
+                Markers = array;
             }
         }
         

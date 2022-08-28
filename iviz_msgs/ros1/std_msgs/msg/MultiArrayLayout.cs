@@ -50,13 +50,14 @@ namespace Iviz.Msgs.StdMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                Dim = n == 0
+                var array = n == 0
                     ? EmptyArray<MultiArrayDimension>.Value
                     : new MultiArrayDimension[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Dim[i] = new MultiArrayDimension(ref b);
+                    array[i] = new MultiArrayDimension(ref b);
                 }
+                Dim = array;
             }
             b.Deserialize(out DataOffset);
         }
@@ -66,13 +67,14 @@ namespace Iviz.Msgs.StdMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Dim = n == 0
+                var array = n == 0
                     ? EmptyArray<MultiArrayDimension>.Value
                     : new MultiArrayDimension[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Dim[i] = new MultiArrayDimension(ref b);
+                    array[i] = new MultiArrayDimension(ref b);
                 }
+                Dim = array;
             }
             b.Align4();
             b.Deserialize(out DataOffset);

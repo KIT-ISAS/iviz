@@ -28,8 +28,9 @@ namespace Iviz.Msgs.UniqueIdentifierMsgs
         {
             unsafe
             {
-                Uuid = new byte[16];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref Uuid[0]), 16 * 1);
+                var array = new byte[16];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 16 * 1);
+                Uuid = array;
             }
         }
         
@@ -37,8 +38,9 @@ namespace Iviz.Msgs.UniqueIdentifierMsgs
         {
             unsafe
             {
-                Uuid = new byte[16];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref Uuid[0]), 16 * 1);
+                var array = new byte[16];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 16 * 1);
+                Uuid = array;
             }
         }
         

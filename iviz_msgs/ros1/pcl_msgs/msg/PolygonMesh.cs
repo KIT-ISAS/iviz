@@ -34,13 +34,14 @@ namespace Iviz.Msgs.PclMsgs
             Cloud = new SensorMsgs.PointCloud2(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                Polygons = n == 0
+                var array = n == 0
                     ? EmptyArray<Vertices>.Value
                     : new Vertices[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Polygons[i] = new Vertices(ref b);
+                    array[i] = new Vertices(ref b);
                 }
+                Polygons = array;
             }
         }
         
@@ -51,13 +52,14 @@ namespace Iviz.Msgs.PclMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Polygons = n == 0
+                var array = n == 0
                     ? EmptyArray<Vertices>.Value
                     : new Vertices[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Polygons[i] = new Vertices(ref b);
+                    array[i] = new Vertices(ref b);
                 }
+                Polygons = array;
             }
         }
         

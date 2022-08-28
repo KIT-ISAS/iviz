@@ -45,20 +45,23 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Orientation);
             unsafe
             {
-                OrientationCovariance = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref OrientationCovariance[0]), 9 * 8);
+                var array = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                OrientationCovariance = array;
             }
             b.Deserialize(out AngularVelocity);
             unsafe
             {
-                AngularVelocityCovariance = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref AngularVelocityCovariance[0]), 9 * 8);
+                var array = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                AngularVelocityCovariance = array;
             }
             b.Deserialize(out LinearAcceleration);
             unsafe
             {
-                LinearAccelerationCovariance = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref LinearAccelerationCovariance[0]), 9 * 8);
+                var array = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                LinearAccelerationCovariance = array;
             }
         }
         
@@ -69,20 +72,23 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Orientation);
             unsafe
             {
-                OrientationCovariance = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref OrientationCovariance[0]), 9 * 8);
+                var array = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                OrientationCovariance = array;
             }
             b.Deserialize(out AngularVelocity);
             unsafe
             {
-                AngularVelocityCovariance = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref AngularVelocityCovariance[0]), 9 * 8);
+                var array = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                AngularVelocityCovariance = array;
             }
             b.Deserialize(out LinearAcceleration);
             unsafe
             {
-                LinearAccelerationCovariance = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref LinearAccelerationCovariance[0]), 9 * 8);
+                var array = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                LinearAccelerationCovariance = array;
             }
         }
         

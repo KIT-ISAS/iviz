@@ -42,13 +42,14 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.DeserializeString(out HardwareId);
             {
                 int n = b.DeserializeArrayLength();
-                Values = n == 0
+                var array = n == 0
                     ? EmptyArray<KeyValue>.Value
                     : new KeyValue[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Values[i] = new KeyValue(ref b);
+                    array[i] = new KeyValue(ref b);
                 }
+                Values = array;
             }
         }
         
@@ -64,13 +65,14 @@ namespace Iviz.Msgs.DiagnosticMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Values = n == 0
+                var array = n == 0
                     ? EmptyArray<KeyValue>.Value
                     : new KeyValue[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Values[i] = new KeyValue(ref b);
+                    array[i] = new KeyValue(ref b);
                 }
+                Values = array;
             }
         }
         

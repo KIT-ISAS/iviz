@@ -39,23 +39,25 @@ namespace Iviz.Msgs.SensorMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Points = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Points[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                Points = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Channels = n == 0
+                var array = n == 0
                     ? EmptyArray<ChannelFloat32>.Value
                     : new ChannelFloat32[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Channels[i] = new ChannelFloat32(ref b);
+                    array[i] = new ChannelFloat32(ref b);
                 }
+                Channels = array;
             }
         }
         
@@ -66,23 +68,25 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Points = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Points[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                Points = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Channels = n == 0
+                var array = n == 0
                     ? EmptyArray<ChannelFloat32>.Value
                     : new ChannelFloat32[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Channels[i] = new ChannelFloat32(ref b);
+                    array[i] = new ChannelFloat32(ref b);
                 }
+                Channels = array;
             }
         }
         

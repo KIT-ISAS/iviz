@@ -25,8 +25,9 @@ namespace Iviz.Msgs.ShapeMsgs
         {
             unsafe
             {
-                VertexIndices = new uint[3];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref VertexIndices[0]), 3 * 4);
+                var array = new uint[3];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 3 * 4);
+                VertexIndices = array;
             }
         }
         
@@ -35,8 +36,9 @@ namespace Iviz.Msgs.ShapeMsgs
             unsafe
             {
                 b.Align4();
-                VertexIndices = new uint[3];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref VertexIndices[0]), 3 * 4);
+                var array = new uint[3];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 3 * 4);
+                VertexIndices = array;
             }
         }
         

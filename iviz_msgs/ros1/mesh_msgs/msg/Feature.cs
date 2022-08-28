@@ -27,13 +27,14 @@ namespace Iviz.Msgs.MeshMsgs
             b.Deserialize(out Location);
             {
                 int n = b.DeserializeArrayLength();
-                Descriptor = n == 0
+                var array = n == 0
                     ? EmptyArray<StdMsgs.Float32>.Value
                     : new StdMsgs.Float32[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Descriptor[i] = new StdMsgs.Float32(ref b);
+                    array[i] = new StdMsgs.Float32(ref b);
                 }
+                Descriptor = array;
             }
         }
         
@@ -43,13 +44,14 @@ namespace Iviz.Msgs.MeshMsgs
             b.Deserialize(out Location);
             {
                 int n = b.DeserializeArrayLength();
-                Descriptor = n == 0
+                var array = n == 0
                     ? EmptyArray<StdMsgs.Float32>.Value
                     : new StdMsgs.Float32[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Descriptor[i] = new StdMsgs.Float32(ref b);
+                    array[i] = new StdMsgs.Float32(ref b);
                 }
+                Descriptor = array;
             }
         }
         

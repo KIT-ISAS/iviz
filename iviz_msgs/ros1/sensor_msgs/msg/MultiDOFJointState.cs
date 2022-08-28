@@ -48,33 +48,36 @@ namespace Iviz.Msgs.SensorMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Transforms = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Transforms[0]), n * 56);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 56);
                 }
+                Transforms = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Twist = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Twist[i] = new GeometryMsgs.Twist(ref b);
+                    array[i] = new GeometryMsgs.Twist(ref b);
                 }
+                Twist = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Wrench = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Wrench>.Value
                     : new GeometryMsgs.Wrench[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Wrench[i] = new GeometryMsgs.Wrench(ref b);
+                    array[i] = new GeometryMsgs.Wrench(ref b);
                 }
+                Wrench = array;
             }
         }
         
@@ -87,35 +90,38 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Transforms = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Transform>.Value
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Transforms[0]), n * 56);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 56);
                 }
+                Transforms = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Twist = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Twist[i] = new GeometryMsgs.Twist(ref b);
+                    array[i] = new GeometryMsgs.Twist(ref b);
                 }
+                Twist = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Wrench = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Wrench>.Value
                     : new GeometryMsgs.Wrench[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Wrench[i] = new GeometryMsgs.Wrench(ref b);
+                    array[i] = new GeometryMsgs.Wrench(ref b);
                 }
+                Wrench = array;
             }
         }
         

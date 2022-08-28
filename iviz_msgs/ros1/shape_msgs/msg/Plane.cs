@@ -29,8 +29,9 @@ namespace Iviz.Msgs.ShapeMsgs
         {
             unsafe
             {
-                Coef = new double[4];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref Coef[0]), 4 * 8);
+                var array = new double[4];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 4 * 8);
+                Coef = array;
             }
         }
         
@@ -39,8 +40,9 @@ namespace Iviz.Msgs.ShapeMsgs
             unsafe
             {
                 b.Align8();
-                Coef = new double[4];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref Coef[0]), 4 * 8);
+                var array = new double[4];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 4 * 8);
+                Coef = array;
             }
         }
         

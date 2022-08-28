@@ -36,77 +36,84 @@ namespace Iviz.Msgs.IvizMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Vertices = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                Vertices = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Normals = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Normals[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                Normals = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Tangents = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Tangents[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                Tangents = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                BiTangents = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref BiTangents[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                BiTangents = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                TexCoords = n == 0
+                var array = n == 0
                     ? EmptyArray<ModelTexCoords>.Value
                     : new ModelTexCoords[n];
                 for (int i = 0; i < n; i++)
                 {
-                    TexCoords[i] = new ModelTexCoords(ref b);
+                    array[i] = new ModelTexCoords(ref b);
                 }
+                TexCoords = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                ColorChannels = n == 0
+                var array = n == 0
                     ? EmptyArray<ModelColorChannel>.Value
                     : new ModelColorChannel[n];
                 for (int i = 0; i < n; i++)
                 {
-                    ColorChannels[i] = new ModelColorChannel(ref b);
+                    array[i] = new ModelColorChannel(ref b);
                 }
+                ColorChannels = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Faces = n == 0
+                var array = n == 0
                     ? EmptyArray<Triangle>.Value
                     : new Triangle[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Faces[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                Faces = array;
             }
             b.Deserialize(out MaterialIndex);
         }
@@ -119,79 +126,86 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Vertices = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                Vertices = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Normals = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Normals[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                Normals = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Tangents = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Tangents[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                Tangents = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                BiTangents = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref BiTangents[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                BiTangents = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                TexCoords = n == 0
+                var array = n == 0
                     ? EmptyArray<ModelTexCoords>.Value
                     : new ModelTexCoords[n];
                 for (int i = 0; i < n; i++)
                 {
-                    TexCoords[i] = new ModelTexCoords(ref b);
+                    array[i] = new ModelTexCoords(ref b);
                 }
+                TexCoords = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                ColorChannels = n == 0
+                var array = n == 0
                     ? EmptyArray<ModelColorChannel>.Value
                     : new ModelColorChannel[n];
                 for (int i = 0; i < n; i++)
                 {
-                    ColorChannels[i] = new ModelColorChannel(ref b);
+                    array[i] = new ModelColorChannel(ref b);
                 }
+                ColorChannels = array;
             }
             unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Faces = n == 0
+                var array = n == 0
                     ? EmptyArray<Triangle>.Value
                     : new Triangle[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Faces[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                Faces = array;
             }
             b.Deserialize(out MaterialIndex);
         }

@@ -24,13 +24,14 @@ namespace Iviz.Msgs.IvizMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                Widgets = n == 0
+                var array = n == 0
                     ? EmptyArray<IvizMsgs.Widget>.Value
                     : new IvizMsgs.Widget[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Widgets[i] = new IvizMsgs.Widget(ref b);
+                    array[i] = new IvizMsgs.Widget(ref b);
                 }
+                Widgets = array;
             }
         }
         
@@ -39,13 +40,14 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Widgets = n == 0
+                var array = n == 0
                     ? EmptyArray<IvizMsgs.Widget>.Value
                     : new IvizMsgs.Widget[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Widgets[i] = new IvizMsgs.Widget(ref b);
+                    array[i] = new IvizMsgs.Widget(ref b);
                 }
+                Widgets = array;
             }
         }
         

@@ -28,13 +28,14 @@ namespace Iviz.Msgs.NavMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             {
                 int n = b.DeserializeArrayLength();
-                Poses = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.PoseStamped>.Value
                     : new GeometryMsgs.PoseStamped[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Poses[i] = new GeometryMsgs.PoseStamped(ref b);
+                    array[i] = new GeometryMsgs.PoseStamped(ref b);
                 }
+                Poses = array;
             }
         }
         
@@ -44,13 +45,14 @@ namespace Iviz.Msgs.NavMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Poses = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.PoseStamped>.Value
                     : new GeometryMsgs.PoseStamped[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Poses[i] = new GeometryMsgs.PoseStamped(ref b);
+                    array[i] = new GeometryMsgs.PoseStamped(ref b);
                 }
+                Poses = array;
             }
         }
         

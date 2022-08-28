@@ -26,13 +26,14 @@ namespace Iviz.Msgs.MeshMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                VertexColors = n == 0
+                var array = n == 0
                     ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref VertexColors[0]), n * 16);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 16);
                 }
+                VertexColors = array;
             }
         }
         
@@ -42,13 +43,14 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                VertexColors = n == 0
+                var array = n == 0
                     ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref VertexColors[0]), n * 16);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 16);
                 }
+                VertexColors = array;
             }
         }
         

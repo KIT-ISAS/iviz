@@ -34,44 +34,48 @@ namespace Iviz.Msgs.MeshMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                Clusters = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshMsgs.MeshFaceCluster>.Value
                     : new MeshMsgs.MeshFaceCluster[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
+                    array[i] = new MeshMsgs.MeshFaceCluster(ref b);
                 }
+                Clusters = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Materials = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshMsgs.MeshMaterial>.Value
                     : new MeshMsgs.MeshMaterial[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Materials[i] = new MeshMsgs.MeshMaterial(ref b);
+                    array[i] = new MeshMsgs.MeshMaterial(ref b);
                 }
+                Materials = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                ClusterMaterials = n == 0
+                var array = n == 0
                     ? EmptyArray<uint>.Value
                     : new uint[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref ClusterMaterials[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                ClusterMaterials = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                VertexTexCoords = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshMsgs.MeshVertexTexCoords>.Value
                     : new MeshMsgs.MeshVertexTexCoords[n];
                 for (int i = 0; i < n; i++)
                 {
-                    VertexTexCoords[i] = new MeshMsgs.MeshVertexTexCoords(ref b);
+                    array[i] = new MeshMsgs.MeshVertexTexCoords(ref b);
                 }
+                VertexTexCoords = array;
             }
         }
         
@@ -80,46 +84,50 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Clusters = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshMsgs.MeshFaceCluster>.Value
                     : new MeshMsgs.MeshFaceCluster[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
+                    array[i] = new MeshMsgs.MeshFaceCluster(ref b);
                 }
+                Clusters = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Materials = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshMsgs.MeshMaterial>.Value
                     : new MeshMsgs.MeshMaterial[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Materials[i] = new MeshMsgs.MeshMaterial(ref b);
+                    array[i] = new MeshMsgs.MeshMaterial(ref b);
                 }
+                Materials = array;
             }
             unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                ClusterMaterials = n == 0
+                var array = n == 0
                     ? EmptyArray<uint>.Value
                     : new uint[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref ClusterMaterials[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                ClusterMaterials = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                VertexTexCoords = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshMsgs.MeshVertexTexCoords>.Value
                     : new MeshMsgs.MeshVertexTexCoords[n];
                 for (int i = 0; i < n; i++)
                 {
-                    VertexTexCoords[i] = new MeshMsgs.MeshVertexTexCoords(ref b);
+                    array[i] = new MeshMsgs.MeshVertexTexCoords(ref b);
                 }
+                VertexTexCoords = array;
             }
         }
         

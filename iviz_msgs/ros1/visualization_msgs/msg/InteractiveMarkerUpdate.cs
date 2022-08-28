@@ -48,23 +48,25 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out Type);
             {
                 int n = b.DeserializeArrayLength();
-                Markers = n == 0
+                var array = n == 0
                     ? EmptyArray<InteractiveMarker>.Value
                     : new InteractiveMarker[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Markers[i] = new InteractiveMarker(ref b);
+                    array[i] = new InteractiveMarker(ref b);
                 }
+                Markers = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Poses = n == 0
+                var array = n == 0
                     ? EmptyArray<InteractiveMarkerPose>.Value
                     : new InteractiveMarkerPose[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Poses[i] = new InteractiveMarkerPose(ref b);
+                    array[i] = new InteractiveMarkerPose(ref b);
                 }
+                Poses = array;
             }
             b.DeserializeStringArray(out Erases);
         }
@@ -79,24 +81,26 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Markers = n == 0
+                var array = n == 0
                     ? EmptyArray<InteractiveMarker>.Value
                     : new InteractiveMarker[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Markers[i] = new InteractiveMarker(ref b);
+                    array[i] = new InteractiveMarker(ref b);
                 }
+                Markers = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Poses = n == 0
+                var array = n == 0
                     ? EmptyArray<InteractiveMarkerPose>.Value
                     : new InteractiveMarkerPose[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Poses[i] = new InteractiveMarkerPose(ref b);
+                    array[i] = new InteractiveMarkerPose(ref b);
                 }
+                Poses = array;
             }
             b.Align4();
             b.DeserializeStringArray(out Erases);

@@ -28,13 +28,14 @@ namespace Iviz.Msgs.MeshMsgs
             b.DeserializeString(out MapUuid);
             {
                 int n = b.DeserializeArrayLength();
-                Features = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshMsgs.Feature>.Value
                     : new MeshMsgs.Feature[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Features[i] = new MeshMsgs.Feature(ref b);
+                    array[i] = new MeshMsgs.Feature(ref b);
                 }
+                Features = array;
             }
         }
         
@@ -45,13 +46,14 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Features = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshMsgs.Feature>.Value
                     : new MeshMsgs.Feature[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Features[i] = new MeshMsgs.Feature(ref b);
+                    array[i] = new MeshMsgs.Feature(ref b);
                 }
+                Features = array;
             }
         }
         

@@ -41,13 +41,15 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Code);
             unsafe
             {
-                Corners = new GeometryMsgs.Vector3[4];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref Corners[0]), 4 * 24);
+                var array = new GeometryMsgs.Vector3[4];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 4 * 24);
+                Corners = array;
             }
             unsafe
             {
-                CameraIntrinsic = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref CameraIntrinsic[0]), 9 * 8);
+                var array = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                CameraIntrinsic = array;
             }
             b.Deserialize(out CameraPose);
             b.Deserialize(out HasReliablePose);
@@ -64,13 +66,15 @@ namespace Iviz.Msgs.IvizMsgs
             unsafe
             {
                 b.Align8();
-                Corners = new GeometryMsgs.Vector3[4];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref Corners[0]), 4 * 24);
+                var array = new GeometryMsgs.Vector3[4];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 4 * 24);
+                Corners = array;
             }
             unsafe
             {
-                CameraIntrinsic = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref CameraIntrinsic[0]), 9 * 8);
+                var array = new double[9];
+                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                CameraIntrinsic = array;
             }
             b.Deserialize(out CameraPose);
             b.Deserialize(out HasReliablePose);

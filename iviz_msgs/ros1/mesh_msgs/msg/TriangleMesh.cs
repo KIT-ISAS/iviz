@@ -39,98 +39,107 @@ namespace Iviz.Msgs.MeshMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                Triangles = n == 0
+                var array = n == 0
                     ? EmptyArray<TriangleIndices>.Value
                     : new TriangleIndices[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Triangles[i] = new TriangleIndices(ref b);
+                    array[i] = new TriangleIndices(ref b);
                 }
+                Triangles = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Vertices = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                Vertices = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                VertexNormals = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref VertexNormals[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                VertexNormals = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                VertexColors = n == 0
+                var array = n == 0
                     ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref VertexColors[0]), n * 16);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 16);
                 }
+                VertexColors = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                TriangleColors = n == 0
+                var array = n == 0
                     ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref TriangleColors[0]), n * 16);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 16);
                 }
+                TriangleColors = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                VertexTextureCoords = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref VertexTextureCoords[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                VertexTextureCoords = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                FaceMaterials = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshMsgs.MeshMaterial>.Value
                     : new MeshMsgs.MeshMaterial[n];
                 for (int i = 0; i < n; i++)
                 {
-                    FaceMaterials[i] = new MeshMsgs.MeshMaterial(ref b);
+                    array[i] = new MeshMsgs.MeshMaterial(ref b);
                 }
+                FaceMaterials = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Textures = n == 0
+                var array = n == 0
                     ? EmptyArray<SensorMsgs.Image>.Value
                     : new SensorMsgs.Image[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Textures[i] = new SensorMsgs.Image(ref b);
+                    array[i] = new SensorMsgs.Image(ref b);
                 }
+                Textures = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                Clusters = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshMsgs.MeshFaceCluster>.Value
                     : new MeshMsgs.MeshFaceCluster[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
+                    array[i] = new MeshMsgs.MeshFaceCluster(ref b);
                 }
+                Clusters = array;
             }
         }
         
@@ -139,104 +148,113 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Triangles = n == 0
+                var array = n == 0
                     ? EmptyArray<TriangleIndices>.Value
                     : new TriangleIndices[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Triangles[i] = new TriangleIndices(ref b);
+                    array[i] = new TriangleIndices(ref b);
                 }
+                Triangles = array;
             }
             unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Vertices = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Vertices[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                Vertices = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                VertexNormals = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref VertexNormals[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                VertexNormals = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                VertexColors = n == 0
+                var array = n == 0
                     ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref VertexColors[0]), n * 16);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 16);
                 }
+                VertexColors = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                TriangleColors = n == 0
+                var array = n == 0
                     ? EmptyArray<StdMsgs.ColorRGBA>.Value
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref TriangleColors[0]), n * 16);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 16);
                 }
+                TriangleColors = array;
             }
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                VertexTextureCoords = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point>.Value
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref VertexTextureCoords[0]), n * 24);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
                 }
+                VertexTextureCoords = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                FaceMaterials = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshMsgs.MeshMaterial>.Value
                     : new MeshMsgs.MeshMaterial[n];
                 for (int i = 0; i < n; i++)
                 {
-                    FaceMaterials[i] = new MeshMsgs.MeshMaterial(ref b);
+                    array[i] = new MeshMsgs.MeshMaterial(ref b);
                 }
+                FaceMaterials = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Textures = n == 0
+                var array = n == 0
                     ? EmptyArray<SensorMsgs.Image>.Value
                     : new SensorMsgs.Image[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Textures[i] = new SensorMsgs.Image(ref b);
+                    array[i] = new SensorMsgs.Image(ref b);
                 }
+                Textures = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Clusters = n == 0
+                var array = n == 0
                     ? EmptyArray<MeshMsgs.MeshFaceCluster>.Value
                     : new MeshMsgs.MeshFaceCluster[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
+                    array[i] = new MeshMsgs.MeshFaceCluster(ref b);
                 }
+                Clusters = array;
             }
         }
         

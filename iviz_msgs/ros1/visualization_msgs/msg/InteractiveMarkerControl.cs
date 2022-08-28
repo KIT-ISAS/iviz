@@ -86,13 +86,14 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out AlwaysVisible);
             {
                 int n = b.DeserializeArrayLength();
-                Markers = n == 0
+                var array = n == 0
                     ? EmptyArray<Marker>.Value
                     : new Marker[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Markers[i] = new Marker(ref b);
+                    array[i] = new Marker(ref b);
                 }
+                Markers = array;
             }
             b.Deserialize(out IndependentMarkerOrientation);
             b.DeserializeString(out Description);
@@ -110,13 +111,14 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Markers = n == 0
+                var array = n == 0
                     ? EmptyArray<Marker>.Value
                     : new Marker[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Markers[i] = new Marker(ref b);
+                    array[i] = new Marker(ref b);
                 }
+                Markers = array;
             }
             b.Deserialize(out IndependentMarkerOrientation);
             b.Align4();

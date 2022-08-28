@@ -40,13 +40,14 @@ namespace Iviz.Msgs.HriMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                MFCC = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref MFCC[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                MFCC = array;
             }
         }
         
@@ -60,13 +61,14 @@ namespace Iviz.Msgs.HriMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                MFCC = n == 0
+                var array = n == 0
                     ? EmptyArray<float>.Value
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref MFCC[0]), n * 4);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
                 }
+                MFCC = array;
             }
         }
         

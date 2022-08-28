@@ -25,13 +25,14 @@ namespace Iviz.Msgs.SensorMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                Array = n == 0
+                var array = n == 0
                     ? EmptyArray<JoyFeedback>.Value
                     : new JoyFeedback[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Array[i] = new JoyFeedback(ref b);
+                    array[i] = new JoyFeedback(ref b);
                 }
+                Array = array;
             }
         }
         
@@ -40,13 +41,14 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Array = n == 0
+                var array = n == 0
                     ? EmptyArray<JoyFeedback>.Value
                     : new JoyFeedback[n];
                 for (int i = 0; i < n; i++)
                 {
-                    Array[i] = new JoyFeedback(ref b);
+                    array[i] = new JoyFeedback(ref b);
                 }
+                Array = array;
             }
         }
         

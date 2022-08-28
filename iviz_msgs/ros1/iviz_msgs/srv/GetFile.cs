@@ -138,13 +138,14 @@ namespace Iviz.Msgs.IvizMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Bytes = n == 0
+                var array = n == 0
                     ? EmptyArray<byte>.Value
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Bytes[0]), n * 1);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
                 }
+                Bytes = array;
             }
             b.DeserializeString(out Message);
         }
@@ -156,13 +157,14 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Bytes = n == 0
+                var array = n == 0
                     ? EmptyArray<byte>.Value
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Bytes[0]), n * 1);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
                 }
+                Bytes = array;
             }
             b.Align4();
             b.DeserializeString(out Message);

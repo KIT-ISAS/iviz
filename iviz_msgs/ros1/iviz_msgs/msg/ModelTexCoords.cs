@@ -25,13 +25,14 @@ namespace Iviz.Msgs.IvizMsgs
             unsafe
             {
                 int n = b.DeserializeArrayLength();
-                Coords = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Coords[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                Coords = array;
             }
         }
         
@@ -41,13 +42,14 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                Coords = n == 0
+                var array = n == 0
                     ? EmptyArray<GeometryMsgs.Point32>.Value
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref Coords[0]), n * 12);
+                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
                 }
+                Coords = array;
             }
         }
         
