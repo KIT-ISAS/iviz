@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -90,7 +91,7 @@ namespace Iviz.Controllers
 
         // ----------------------------------------------
 
-        protected class VizObject
+        protected class VizObject : IDisposable
         {
             readonly ResourceKey<GameObject>? resourceKey;
             readonly string typeDescription;
@@ -132,7 +133,7 @@ namespace Iviz.Controllers
                 }
             }
 
-            public void Dispose()
+            public virtual void Dispose()
             {
                 Interactable = true;
                 if (resourceKey != null)

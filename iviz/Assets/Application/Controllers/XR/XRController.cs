@@ -179,12 +179,12 @@ namespace Iviz.Controllers.XR
                             var newPose = adjustment.Multiply(TfModule.RootFrame.Transform.AsPose());
                             TfModule.RootFrame.Transform.SetPose(newPose);
                             hololensInitManipulableFrame.transform.SetPose(newPose);
-                            ModuleListPanel.Instance.SaveXRConfiguration(newPose);
+                            ModuleListPanel.Instance.SaveXRConfigurationAsync(newPose);
                         },
                         _ => { }
                     );
 
-                    ModuleListPanel.Instance.SaveXRConfiguration(newOriginAbsolute);
+                    ModuleListPanel.Instance.SaveXRConfigurationAsync(newOriginAbsolute);
                     break;
                 case downButton:
                     var clickInfo =

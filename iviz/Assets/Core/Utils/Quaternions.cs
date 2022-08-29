@@ -1,3 +1,4 @@
+using Unity.IL2CPP.CompilerServices;
 using UnityEngine;
 
 namespace Iviz.Core

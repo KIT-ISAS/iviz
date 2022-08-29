@@ -935,7 +935,7 @@ namespace Iviz.App
                         hits[0].highlightable.Highlight(hits[0].hitPoint);
                         return;
                     case > 1:
-                        HighlightAll(hits);
+                        _ = HighlightAllAsync(hits);
                         return;
                 }
             }
@@ -967,7 +967,7 @@ namespace Iviz.App
             FAnimator.Start(new ClickedPoseHighlighter(poseToHighlight));
         }
 
-        static async void HighlightAll(IEnumerable<(IHighlightable highlightable, Vector3)> hits)
+        static async ValueTask HighlightAllAsync(IEnumerable<(IHighlightable highlightable, Vector3)> hits)
         {
             var aliveHits = hits.Where(toHighlight => toHighlight.highlightable.IsAlive);
             foreach (var (highlightable, hitPoint) in aliveHits)

@@ -441,7 +441,7 @@ namespace Iviz.Controllers
                         ? existingMarker
                         : CreateMarkerObject(id, msg.Type);
 
-                    markerToUpdate.SetAsync(msg);
+                    _ = markerToUpdate.SetAsync(msg);
                     break;
                 case Marker.DELETE:
                     if (markers.TryGetValue(id, out var markerToDelete))

@@ -126,7 +126,7 @@ namespace Iviz.Core
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Error during {nameof(EveryFrame)}", e);
+                RosLogger.Error($"{ToString()}: Error during {nameof(EveryFrame)}", e);
             }
 
             if (GameTime - lastSecondRunTime > 1)
@@ -137,7 +137,7 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Error during {nameof(EverySecond)}", e);
+                    RosLogger.Error($"{ToString()}: Error during {nameof(EverySecond)}", e);
                 }
 
                 try
@@ -146,7 +146,7 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Error during {nameof(LateEverySecond)}", e);
+                    RosLogger.Error($"{ToString()}: Error during {nameof(LateEverySecond)}", e);
                 }
 
                 RosLogger.ResetCounter();
@@ -161,7 +161,7 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Error during {nameof(EveryTenthOfASecond)}", e);
+                    RosLogger.Error($"{ToString()}: Error during {nameof(EveryTenthOfASecond)}", e);
                 }
 
                 lastTickRunTime = GameTime;
@@ -181,7 +181,7 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Error during {nameof(Post)} call", e);
+                    RosLogger.Error($"{ToString()}: Error during {nameof(Post)} call", e);
                 }
             }
 
@@ -197,7 +197,7 @@ namespace Iviz.Core
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Error during {nameof(ListenersEveryFrame)}", e);
+                RosLogger.Error($"{ToString()}: Error during {nameof(ListenersEveryFrame)}", e);
             }
 
             foreach (int _ in ..listenerQueue.Count)
@@ -213,7 +213,7 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Error during {nameof(PostInListenerQueue)} call", e);
+                    RosLogger.Error($"{ToString()}: Error during {nameof(PostInListenerQueue)} call", e);
                 }
             }
 
@@ -230,7 +230,7 @@ namespace Iviz.Core
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Error during {nameof(LateEveryFrame)}", e);
+                RosLogger.Error($"{ToString()}: Error during {nameof(LateEveryFrame)}", e);
             }
         }
 

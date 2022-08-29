@@ -186,7 +186,7 @@ namespace Iviz.Controllers
             UniqueNodeName = (++globalIdCounter).ToString();
         }
 
-        public async void SetAsync(Marker msg)
+        public async ValueTask SetAsync(Marker msg)
         {
             ThrowHelper.ThrowIfNull(msg, nameof(msg));
             lastMessage = msg;
@@ -216,7 +216,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Failed to update resource", e);
+                RosLogger.Error($"{ToString()}: Failed to update resource", e);
                 numErrors++;
                 return;
             }
@@ -273,11 +273,7 @@ namespace Iviz.Controllers
         T ValidateResource<T>() where T : MarkerDisplay
         {
             T? t = resource as T;
-            if (t is null)
-            {
-                ThrowHelper.ThrowMissingAssetField("Resource does not have a marker component!");
-            }
-
+            if (t is null) ThrowHelper.ThrowMissingAssetField("Resource does not have a marker component!");
             return t;
         }
 
@@ -575,7 +571,7 @@ namespace Iviz.Controllers
             {
                 if (msg.Type() != MarkerType.MeshResource)
                 {
-                    RosLogger.Warn($"{this}: Marker type '{msg.Type.ToString()}' has no resource assigned!");
+                    RosLogger.Warn($"{ToString()}: Marker type '{msg.Type.ToString()}' has no resource assigned!");
                 }
 
                 BoundsChanged?.Invoke();
@@ -602,7 +598,7 @@ namespace Iviz.Controllers
                 if (msg.Type() != MarkerType.MeshResource)
                 {
                     // shouldn't happen!
-                    RosLogger.Warn($"{this}: Mesh resource '{resourceKey}' has no {nameof(IDisplay)}!");
+                    RosLogger.Warn($"{ToString()}: Mesh resource '{resourceKey.ToString()}' has no {nameof(IDisplay)}!");
                 }
 
                 // add generic wrapper
@@ -665,14 +661,14 @@ namespace Iviz.Controllers
                 MarkerType.Points => AsTask(Resource.Displays.PointList),
                 MarkerType.TriangleList => AsTask(Resource.Displays.MeshTriangles),
                 MarkerType.MeshResource when Resource.TryGetResource(msg.MeshResource, out var info) => AsTask(info),
-                MarkerType.MeshResource => RequestMeshResource(msg.MeshResource),
-                _ => AsTask(null)
+                MarkerType.MeshResource => RequestMeshResourceAsync(msg.MeshResource),
+                _ => default
             };
 
             static ValueTask<ResourceKey<GameObject>?> AsTask(ResourceKey<GameObject>? val) => new(val);
         }
 
-        async ValueTask<ResourceKey<GameObject>?> RequestMeshResource(string meshResource)
+        async ValueTask<ResourceKey<GameObject>?> RequestMeshResourceAsync(string meshResource)
         {
             StopLoadResourceTask();
             runningTs = new CancellationTokenSource();
@@ -684,7 +680,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
-                RosLogger.Error($"{this}: {nameof(Resource.GetGameObjectResourceAsync)} failed for '{meshResource}'",
+                RosLogger.Error($"{ToString()}: {nameof(Resource.GetGameObjectResourceAsync)} failed for '{meshResource}'",
                     e);
                 return null;
             }
@@ -809,7 +805,8 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                description.Append(ErrorStr).Append("Failed to load mesh resource. Check out the Log messages from [Me].").AppendLine();
+                description.Append(ErrorStr)
+                    .Append("Failed to load mesh resource. Check out the Log messages from [Me].").AppendLine();
                 return;
             }
 

@@ -37,7 +37,7 @@ namespace Iviz.MarkerDetection
                 enableQr = value;
                 if (Settings.IsHololens)
                 {
-                    SetHololensEnabled(enableQr || enableAruco);
+                    _ = SetHololensEnabled(enableQr || enableAruco);
                 }
             }
         }
@@ -50,7 +50,7 @@ namespace Iviz.MarkerDetection
                 enableAruco = value;
                 if (Settings.IsHololens)
                 {
-                    SetHololensEnabled(enableQr || enableAruco);
+                    _ = SetHololensEnabled(enableQr || enableAruco);
                 }
             }
         }
@@ -168,14 +168,14 @@ namespace Iviz.MarkerDetection
                     RaiseOnMarkerDetected(screenshot, newQrMarkers);
                     return ARMarkerType.QrCode;
                 case (true, true):
-                    RaiseOnMarkerDetected(screenshot, newArucoMarkers.Concat<DetectedMarker>(newQrMarkers).ToList());
+                    RaiseOnMarkerDetected(screenshot, newArucoMarkers.Concat(newQrMarkers).ToList());
                     return ARMarkerType.Aruco;
                 case (false, false):
                     return null;
             }
         }
 
-        async void SetHololensEnabled(bool value)
+        async ValueTask SetHololensEnabled(bool value)
         {
             if (Settings.ScreenCaptureManager == null)
             {

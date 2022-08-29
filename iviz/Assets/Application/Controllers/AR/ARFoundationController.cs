@@ -160,7 +160,7 @@ namespace Iviz.Controllers
                     pose.position = sourcePosition;
                     pose.rotation = Quaternion.Euler(0, sourceRotation.eulerAngles.y - 90, 0);
                     SetWorldPose(pose, RootMover.Setup);
-                    
+
                     markerDetector.DelayBetweenCapturesInMs = 3000;
                 }
             }
@@ -254,7 +254,7 @@ namespace Iviz.Controllers
                 arContents.CameraManager, arContents.Camera.transform, arContents.OcclusionManager);
 
             RaiseARStateChanged();
-            
+
             PostInitialize();
         }
 
@@ -268,7 +268,7 @@ namespace Iviz.Controllers
             SetupModeEnabled = true;
         }
 
-        public async void ResetSession()
+        public async ValueTask ResetSessionAsync()
         {
             bool meshingEnabled = EnableMeshing;
             var occlusionQuality = OcclusionQuality;
@@ -405,7 +405,7 @@ namespace Iviz.Controllers
 
             try
             {
-                CaptureScreenForPublish(tokenSource.Token);
+                _ = CaptureScreenForPublish(tokenSource.Token);
             }
             catch (Exception e)
             {
@@ -535,43 +535,51 @@ namespace Iviz.Controllers
             }
         }
 
-        async void CaptureScreenForPublish(CancellationToken token)
+        async ValueTask CaptureScreenForPublish(CancellationToken token)
         {
-            if (ColorSender == null
-                || DepthSender == null
+            if (DepthSender == null
                 || DepthConfidenceSender == null
-                || colorInfoSender == null
                 || depthInfoSender == null)
             {
                 return;
             }
 
             var captureManager = (ARScreenCaptureManager?)Settings.ScreenCaptureManager;
-
-            bool shouldPublishColor = ColorSender.NumSubscribers != 0;
-            bool shouldPublishDepth = DepthSender.NumSubscribers != 0;
-            bool shouldPublishConfidence = DepthConfidenceSender.NumSubscribers != 0;
-            if (captureManager == null || token.IsCancellationRequested ||
-                (!shouldPublishColor && !shouldPublishDepth && !shouldPublishConfidence))
+            if (captureManager == null || token.IsCancellationRequested)
             {
                 return;
             }
 
-            var colorTask = shouldPublishColor
-                ? captureManager.CaptureColorAsync(token: token).AwaitNoThrow(this)
-                : null;
+            bool shouldPublishColor = ColorSender.NumSubscribers != 0;
+            bool shouldPublishDepth = DepthSender.NumSubscribers != 0;
+            bool shouldPublishConfidence = DepthConfidenceSender.NumSubscribers != 0;
+            if (!shouldPublishColor && !shouldPublishDepth && !shouldPublishConfidence)
+            {
+                return;
+            }
 
-            var depthTask = shouldPublishDepth
-                ? captureManager.CaptureDepthAsync(token: token).AwaitNoThrow(this)
-                : null;
-
+            var colorTask = shouldPublishColor ? captureManager.CaptureColorAsync(token: token) : default;
+            var depthTask = shouldPublishDepth ? captureManager.CaptureDepthAsync(token: token) : default;
             var confidenceTask = shouldPublishConfidence
-                ? captureManager.CaptureDepthConfidenceAsync(token: token).AwaitNoThrow(this)
-                : null;
+                ? captureManager.CaptureDepthConfidenceAsync(token: token)
+                : default;
 
-            var color = colorTask != null ? await colorTask : null;
-            var depth = depthTask != null ? await depthTask : null;
-            var confidence = confidenceTask != null ? await confidenceTask : null;
+            Screenshot? color, depth, confidence;
+            try
+            {
+                color = await colorTask;
+                depth = await depthTask;
+                confidence = await confidenceTask;
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Capture failed", e);
+                return;
+            }
 
             string frameId = TfModule.ResolveFrameId(CameraFrameId);
 

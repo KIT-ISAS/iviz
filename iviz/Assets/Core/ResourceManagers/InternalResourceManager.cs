@@ -34,7 +34,7 @@ namespace Iviz.Resources
             string? robotsFile = UnityEngine.Resources.Load<TextAsset>("Package/iviz/resources")?.text;
             if (robotsFile is null or "")
             {
-                RosLogger.Warn($"{this}: Empty resource file!");
+                RosLogger.Warn($"{ToString()}: Empty resource file!");
                 robotDescriptions = new Dictionary<string, string>();
                 return;
             }
@@ -47,7 +47,7 @@ namespace Iviz.Resources
                     UnityEngine.Resources.Load<TextAsset>("Package/iviz/robots/" + value)?.text;
                 if (robotDescription is null or "")
                 {
-                    RosLogger.Info($"{this}: Empty or null description file '{value}'!");
+                    RosLogger.Info($"{ToString()}: Empty or null description file '{value}'!");
                     continue;
                 }
 
@@ -106,7 +106,7 @@ namespace Iviz.Resources
 
             if (!Uri.TryCreate(uriString, UriKind.Absolute, out Uri uri))
             {
-                RosLogger.Warn($"{this}: Uri '{uriString}' is not a valid uri!");
+                RosLogger.Warn($"{ToString()}: Uri '{uriString}' is not a valid uri!");
                 blacklistedUris.Add(uriString);
                 info = null;
                 return false;

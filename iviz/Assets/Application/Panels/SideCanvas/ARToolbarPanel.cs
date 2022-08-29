@@ -128,7 +128,7 @@ namespace Iviz.App
             };
             reposition.Clicked += () => Controller.ResetSetupMode();
             meshEnabled.Clicked += () => Controller.EnableMeshing = (meshEnabled.Enabled = !meshEnabled.Enabled);
-            reset.Clicked += () => Controller.ResetSession();
+            reset.Clicked += () => _ = Controller.ResetSessionAsync();
             meshReset.Clicked += () =>
             {
                 Controller.EnableMeshing = false;

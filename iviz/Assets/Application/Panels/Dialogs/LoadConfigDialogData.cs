@@ -53,7 +53,7 @@ namespace Iviz.App
             switch (subIndex)
             {
                 case 0:
-                    ModuleListPanel.LoadStateConfiguration(files[index].FileName);
+                    ModuleListPanel.LoadStateConfigurationAsync(files[index].FileName);
                     Close();
                     break;
                 case 1:

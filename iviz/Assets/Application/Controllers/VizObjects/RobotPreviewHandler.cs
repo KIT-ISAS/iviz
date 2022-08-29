@@ -1,10 +1,12 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Displays.XR;
 using Iviz.Msgs.IvizMsgs;
+using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
@@ -31,10 +33,6 @@ namespace Iviz.Controllers
             }
         }
 
-        public RobotPreviewHandler()
-        {
-        }
-
         public void Handler(RobotPreview msg)
         {
             switch ((ActionType)msg.Action)
@@ -46,7 +44,7 @@ namespace Iviz.Controllers
                     RemoveAll();
                     break;
                 case ActionType.Add:
-                    HandleAdd(msg);
+                    _ = HandleAddAsync(msg);
                     break;
                 default:
                     RosLogger.Error($"{this}: Object '{msg.Id}' requested unknown " +
@@ -55,7 +53,7 @@ namespace Iviz.Controllers
             }
         }
 
-        async void HandleAdd(RobotPreview msg)
+        async ValueTask HandleAddAsync(RobotPreview msg)
         {
             if (string.IsNullOrWhiteSpace(msg.Id))
             {
@@ -81,14 +79,14 @@ namespace Iviz.Controllers
                     await RosManager.Connection.GetParameterAsync(msg.SourceParameter, nodeName: msg.SourceNode);
                 if (errorMsg != null)
                 {
-                    RosLogger.Error($"{this}: Preview '{msg.Id}' failed to load parameter '{msg.SourceParameter}. " +
+                    RosLogger.Error($"{this}: Preview '{msg.Id}' failed to load parameter '{msg.SourceParameter}'. " +
                                     $"Reason: {errorMsg}");
                     return;
                 }
 
                 if (!parameter.TryGet(out robotDescription))
                 {
-                    RosLogger.Error($"{this}: Preview '{msg.Id}' failed to load parameter '{msg.SourceParameter}. " +
+                    RosLogger.Error($"{this}: Preview '{msg.Id}' failed to load parameter '{msg.SourceParameter}'. " +
                                     $"Reason: Parameter not a string.");
                     return;
                 }
@@ -100,7 +98,7 @@ namespace Iviz.Controllers
                 if (!result)
                 {
                     RosLogger.Error(
-                        $"{this}: Preview '{msg.Id}' failed to load robot from saved name '{msg.SavedRobotName}. " +
+                        $"{this}: Preview '{msg.Id}' failed to load robot from saved name '{msg.SavedRobotName}'. " +
                         $"Reason: {robotDescription}");
                     return;
                 }
@@ -113,9 +111,11 @@ namespace Iviz.Controllers
 
             var robot = new RobotModel(robotDescription);
 
-            var vizObject = new PreviewObject(msg.Id, robot, nameof(RobotPreview))
+            var vizObject = new PreviewObject(msg.Id, robot, $"{nameof(RobotPreview)} - {robot.Name}")
                 { Interactable = Interactable, Visible = Visible };
             vizObjects[vizObject.id] = vizObject;
+            
+            await robot.StartAsync();
         }
 
         // ----------------------------------------------
@@ -137,17 +137,17 @@ namespace Iviz.Controllers
                     robot.OcclusionOnly = msg.RenderAsOcclusionOnly;
                 }
 
-                if (msg.Tint.ToUnity() != robot.Tint)
+                if (msg.Tint != default && msg.Tint.ToUnity() != robot.Tint)
                 {
                     robot.Tint = msg.Tint.ToUnity();
                 }
 
-                if (Mathf.Approximately(msg.Metallic, robot.Metallic))
+                if (msg.Metallic != 0 && Mathf.Approximately(msg.Metallic, robot.Metallic))
                 {
                     robot.Metallic = msg.Metallic;
                 }
 
-                if (Mathf.Approximately(msg.Smoothness, robot.Smoothness))
+                if (msg.Smoothness != 0 && Mathf.Approximately(msg.Smoothness, robot.Smoothness))
                 {
                     robot.Smoothness = msg.Smoothness;
                 }
@@ -165,12 +165,16 @@ namespace Iviz.Controllers
 
                 foreach (var (name, value) in msg.JointNames.Zip(msg.JointValues))
                 {
-                    if (!robot.TryWriteJoint(name, value))
-                    {
-                        RosLogger.Error($"{this}: Failed to set value for joint {name}.");
-                    }
+                    robot.TryWriteJoint(name, value);
                 }
-            } 
+            }
+
+            public override void Dispose()
+            {
+                robot.Dispose();
+                base.Dispose();
+            }
+            
         }
     }
 }

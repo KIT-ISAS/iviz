@@ -98,7 +98,10 @@ namespace Iviz.Controllers
                 return lastColor.AsTaskResultMaybeNull();
             }
 
-            token.ThrowIfCancellationRequested();
+            if (token.IsCancellationRequested)
+            {
+                return default; // completed, null
+            }
 
             if (!cameraManager.TryAcquireLatestCpuImage(out XRCpuImage image))
             {

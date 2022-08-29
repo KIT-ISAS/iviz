@@ -53,7 +53,7 @@ namespace Iviz.App
 
             if (!string.IsNullOrWhiteSpace(RobotController.SourceParameter))
             {
-                RobotController.TryLoadFromSourceParameter(RobotController.SourceParameter);
+                RobotController.TryLoadFromSourceParameterAsync(RobotController.SourceParameter);
             }
 
             panel.HelpText.Text = RobotController.HelpText;
@@ -124,7 +124,7 @@ namespace Iviz.App
             panel.EnableColliders.ValueChanged += f => RobotController.Interactable = f;
             panel.SavedRobotName.ValueChanged += (i, name) =>
             {
-                RobotController.TryLoadSavedRobot(i == 0 ? null : name);
+                _ = RobotController.TryLoadSavedRobotAsync(i == 0 ? null : name);
                 panel.SourceParameter.Value = "";
                 panel.Save.Value = IsRobotSaved;
 
@@ -137,7 +137,7 @@ namespace Iviz.App
             };
             panel.SourceParameter.Submit += f =>
             {
-                RobotController.TryLoadFromSourceParameter(f);
+                _ = RobotController.TryLoadFromSourceParameterAsync(f);
                 panel.SavedRobotName.Index = 0;
                 panel.Save.Value = IsRobotSaved;
 

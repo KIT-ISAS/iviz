@@ -80,16 +80,16 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Error creating directories", e);
+                RosLogger.Error($"{ToString()}: Error creating directories", e);
             }
 
             if (!File.Exists(Settings.ResourcesFilePath))
             {
-                RosLogger.Debug($"{this}: Failed to find file {Settings.ResourcesFilePath}");
+                RosLogger.Debug($"{ToString()}: Failed to find file {Settings.ResourcesFilePath}");
                 return;
             }
 
-            RosLogger.Debug($"{this}: Using resource file {Settings.ResourcesFilePath}");
+            RosLogger.Debug($"{ToString()}: Using resource file {Settings.ResourcesFilePath}");
 
             try
             {
@@ -98,7 +98,7 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Error reading config file", e);
+                RosLogger.Error($"{ToString()}: Error reading config file", e);
             }
         }
 
@@ -112,8 +112,8 @@ namespace Iviz.Displays
                 .Concat(resourceFiles.Textures.Values)
                 .Concat(resourceFiles.RobotDescriptions.Values);
 
-            RosLogger.Debug($"{this}: Removing all files in {Settings.SavedRobotsPath}");
-            RosLogger.Debug($"{this}: Removing all files in {Settings.ResourcesPath}");
+            RosLogger.Debug($"{ToString()}: Removing all files in {Settings.SavedRobotsPath}");
+            RosLogger.Debug($"{ToString()}: Removing all files in {Settings.ResourcesPath}");
 
             foreach (string path in allFiles)
             {
@@ -123,7 +123,7 @@ namespace Iviz.Displays
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Failed to delete file '{path}' :", e);
+                    RosLogger.Error($"{ToString()}: Failed to delete file '{path}' :", e);
                 }
             }
 
@@ -187,7 +187,7 @@ namespace Iviz.Displays
             }
             catch (IOException e)
             {
-                RosLogger.Error($"{this}: Failed to read robot '{robotName}' :", e);
+                RosLogger.Error($"{ToString()}: Failed to read robot '{robotName}' :", e);
                 return (false, "Cannot read robot resource file");
             }
         }
@@ -203,7 +203,7 @@ namespace Iviz.Displays
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
             await FileUtils.WriteAllTextAsync($"{Settings.SavedRobotsPath}/{localPath}", robotDescription,
                 tokenSource.Token);
-            RosLogger.Debug($"{this}: Saving to {Settings.SavedRobotsPath}/{localPath}");
+            RosLogger.Debug($"{ToString()}: Saving to {Settings.SavedRobotsPath}/{localPath}");
 
             resourceFiles.RobotDescriptions[robotName] = localPath;
             await WriteResourceFileAsync(tokenSource.Token);
@@ -226,7 +226,7 @@ namespace Iviz.Displays
             }
             catch (IOException)
             {
-                RosLogger.Warn($"{this}: Failed to delete robot file '" + localPath + "'");
+                RosLogger.Warn($"{ToString()}: Failed to delete robot file '" + localPath + "'");
             }
 
             resourceFiles.RobotDescriptions.Remove(robotName);
@@ -265,7 +265,7 @@ namespace Iviz.Displays
 
             if (!Uri.TryCreate(uriString, UriKind.Absolute, out Uri uri))
             {
-                RosLogger.Warn($"{this}:  Uri '{uriString}' is not a valid uri!");
+                RosLogger.Warn($"{ToString()}:  Uri '{uriString}' is not a valid uri!");
                 blacklistTimestamps.Add(uriString, float.MaxValue);
                 return default;
             }
@@ -286,7 +286,7 @@ namespace Iviz.Displays
             if (fileType is ".SDF" or ".WORLD")
             {
                 return await GetSceneAsync(uriString, provider, tokenSource.Token);
-                //RosLogger.Error($"{this}: SDF parsing is disabled");
+                //RosLogger.Error($"{ToString()}: SDF parsing is disabled");
                 //return null;
             }
 
@@ -363,7 +363,7 @@ namespace Iviz.Displays
             bool hasService = await provider.CallModelServiceAsync(ModelServiceName, msg, TimeoutInMs, token);
             if (!hasService)
             {
-                //RosLogger.Debug($"{this}: Call to model service failed.");
+                //RosLogger.Debug($"{ToString()}: Call to model service failed.");
                 return null;
             }
 
@@ -511,7 +511,7 @@ namespace Iviz.Displays
             if (buffer.Length < Md5SumLength ||
                 BuiltIns.UTF8.GetString(buffer[..Md5SumLength]) != Model.Md5Sum)
             {
-                RosLogger.Warn($"{this}: Resource {uriString} is out of date");
+                RosLogger.Warn($"{ToString()}: Resource {uriString} is out of date");
                 return null;
             }
 
@@ -534,7 +534,7 @@ namespace Iviz.Displays
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
-                RosLogger.Error($"{this}: Loading resource {uriString} failed with error", e);
+                RosLogger.Error($"{ToString()}: Loading resource {uriString} failed with error", e);
                 return null;
             }
 
@@ -557,7 +557,7 @@ namespace Iviz.Displays
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
-                RosLogger.Error($"{this}: Loading resource {uriString} failed with error", e);
+                RosLogger.Error($"{ToString()}: Loading resource {uriString} failed with error", e);
                 return null;
             }
 
@@ -583,7 +583,7 @@ namespace Iviz.Displays
                     if (buffer.Length < Md5SumLength ||
                         BuiltIns.UTF8.GetString(buffer[..Md5SumLength]) != Scene.Md5Sum)
                     {
-                        RosLogger.Warn($"{this}: Resource {uriString} is out of date");
+                        RosLogger.Warn($"{ToString()}: Resource {uriString} is out of date");
                         return null;
                     }
 
@@ -594,7 +594,7 @@ namespace Iviz.Displays
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
-                RosLogger.Error($"{this}: Loading resource {uriString} failed with error", e);
+                RosLogger.Error($"{ToString()}: Loading resource {uriString} failed with error", e);
                 return null;
             }
 
@@ -623,7 +623,7 @@ namespace Iviz.Displays
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                 }
 
-                RosLogger.Debug($"{this}: Saving to {Settings.ResourcesPath}/{localPath}");
+                RosLogger.Debug($"{ToString()}: Saving to {Settings.ResourcesPath}/{localPath}");
 
                 resourceFiles.Models[uriString] = localPath;
                 await WriteResourceFileAsync(token);
@@ -632,7 +632,7 @@ namespace Iviz.Displays
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
-                RosLogger.Error($"{this}: Error processing model response: ", e);
+                RosLogger.Error($"{ToString()}: Error processing model response: ", e);
                 return null;
             }
         }
@@ -654,7 +654,7 @@ namespace Iviz.Displays
                 string localPath = SanitizeFilename(uriString);
 
                 await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", msg.Image.Data, token);
-                RosLogger.Debug($"{this}: Saving to {Settings.ResourcesPath}/{localPath}");
+                RosLogger.Debug($"{ToString()}: Saving to {Settings.ResourcesPath}/{localPath}");
 
                 resourceFiles.Textures[uriString] = localPath;
                 await WriteResourceFileAsync(token);
@@ -663,7 +663,7 @@ namespace Iviz.Displays
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
-                RosLogger.Error($"{this}: Error processing texture response: ", e);
+                RosLogger.Error($"{ToString()}: Error processing texture response: ", e);
                 return null;
             }
         }
@@ -673,7 +673,7 @@ namespace Iviz.Displays
         {
             try
             {
-                Debug.Log($"{this}: Processing {uriString}");
+                Debug.Log($"{ToString()}: Processing {uriString}");
                 var sceneNode = await CreateSceneNodeAsync(msg.Scene, provider, token);
                 var info = new ResourceKey<GameObject>(sceneNode);
 
@@ -686,7 +686,7 @@ namespace Iviz.Displays
                     BuiltIns.UTF8.GetBytes(Scene.Md5Sum.AsSpan(), buffer[..Md5SumLength]);
                     msg.Scene.SerializeTo(buffer[Md5SumLength..]);
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
-                    RosLogger.Debug($"{this}: Saving to {Settings.ResourcesPath}/{localPath}");
+                    RosLogger.Debug($"{ToString()}: Saving to {Settings.ResourcesPath}/{localPath}");
                 }
 
                 resourceFiles.Scenes[uriString] = localPath;
@@ -696,7 +696,7 @@ namespace Iviz.Displays
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
-                RosLogger.Error($"{this}: Error processing scene response: ", e);
+                RosLogger.Error($"{ToString()}: Error processing scene response: ", e);
                 return null;
             }
         }

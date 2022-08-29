@@ -228,7 +228,7 @@ namespace Iviz.Ros
                 var currentVersion = version;
                 const int rpcTimeoutInMs = 3000;
 
-                Tools.Logger.LogDebugCallback = RosLogger.Debug;
+                //Tools.Logger.LogDebugCallback = RosLogger.Debug;
                 if (Settings.IsStandalone)
                 {
                     Tools.Logger.LogErrorCallback = RosLogger.Debug;
@@ -342,7 +342,7 @@ namespace Iviz.Ros
 
                 if (currentVersion == RosVersion.ROS1)
                 {
-                    LogConnectionCheck(token);
+                    _ = LogConnectionCheckAsync(token);
                 }
 
                 return true;
@@ -452,7 +452,7 @@ namespace Iviz.Ros
             }
         }
 
-        static async void LogConnectionCheck(CancellationToken token)
+        static async ValueTask LogConnectionCheckAsync(CancellationToken token)
         {
             try
             {

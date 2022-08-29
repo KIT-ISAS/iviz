@@ -141,7 +141,7 @@ namespace Iviz.Controllers
                             ? existingMarker
                             : CreateMarker(markerId);
 
-                        markerObject.SetAsync(marker); // TODO: deal with mesh loading
+                        _ = markerObject.SetAsync(marker); // TODO: deal with mesh loading
                         markerObject.Transform.SetParent(Transform,
                             marker.Header.FrameId.Length != 0); // world position stays
 

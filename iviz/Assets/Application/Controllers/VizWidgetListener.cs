@@ -31,7 +31,7 @@ namespace Iviz.Controllers
         readonly VizWidgetConfiguration config = new();
 
         readonly VizHandler vizHandler;
-        
+
         //readonly Dictionary<string, GuiObject> widgets = new();
         //readonly Dictionary<string, GuiObject> dialogs = new();
         uint feedbackSeq;
@@ -81,48 +81,58 @@ namespace Iviz.Controllers
 
         public VizWidgetListener(VizWidgetConfiguration? configuration, string topic, string type)
         {
-            Config = configuration ?? new VizWidgetConfiguration
-            {
-                Topic = topic,
-                Id = topic,
-                Type = type,
-            };
-            
-            switch (config.Type)
+            string configTopic = configuration?.Topic ?? topic; 
+            string configType = configuration?.Type ?? type;
+
+            switch (configType)
             {
                 case Widget.MessageType:
                 {
                     var handler = new WidgetHandler(this);
                     vizHandler = handler;
-                    Listener = new Listener<Widget>(Config.Topic, handler.Handler) { MaxQueueSize = 50 };
+                    Listener = new Listener<Widget>(configTopic, handler.Handler) { MaxQueueSize = 50 };
                     break;
                 }
                 case WidgetArray.MessageType:
                 {
                     var handler = new WidgetHandler(this);
                     vizHandler = handler;
-                    Listener = new Listener<WidgetArray>(Config.Topic, handler.Handler) { MaxQueueSize = 50 };
+                    Listener = new Listener<WidgetArray>(configTopic, handler.Handler) { MaxQueueSize = 50 };
                     break;
                 }
                 case Dialog.MessageType:
                 {
                     var handler = new DialogHandler(this);
                     vizHandler = handler;
-                    Listener = new Listener<Dialog>(Config.Topic, handler.Handler) { MaxQueueSize = 50 };
+                    Listener = new Listener<Dialog>(configTopic, handler.Handler) { MaxQueueSize = 50 };
                     break;
                 }
                 case DialogArray.MessageType:
                 {
                     var handler = new DialogHandler(this);
                     vizHandler = handler;
-                    Listener = new Listener<DialogArray>(Config.Topic, handler.Handler) { MaxQueueSize = 50 };
+                    Listener = new Listener<DialogArray>(configTopic, handler.Handler) { MaxQueueSize = 50 };
+                    break;
+                }
+                case RobotPreview.MessageType:
+                {
+                    var handler = new RobotPreviewHandler();
+                    vizHandler = handler;
+                    Listener = new Listener<RobotPreview>(configTopic, handler.Handler) { MaxQueueSize = 50 };
                     break;
                 }
                 default:
-                    Ros.Listener.ThrowUnsupportedMessageType(Config.Type);
+                    Ros.Listener.ThrowUnsupportedMessageType(configTopic);
                     break; // unreachable
             }
-            
+
+            Config = configuration ?? new VizWidgetConfiguration
+            {
+                Topic = topic,
+                Id = topic,
+                Type = type,
+            };
+
             FeedbackSender = new Sender<Feedback>($"{config.Topic}/feedback");
         }
 
@@ -336,7 +346,7 @@ namespace Iviz.Controllers
         {
             base.ResetController();
             vizHandler.RemoveAll();
-            
+
             //DestroyAll(dialogs);
             //DestroyAll(widgets);
         }
@@ -394,7 +404,6 @@ namespace Iviz.Controllers
         }
 
 
-        
         public void OnDialogButtonClicked(string id, string frameId, int buttonId)
         {
             FeedbackSender?.Publish(new Feedback

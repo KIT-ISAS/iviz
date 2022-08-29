@@ -272,7 +272,7 @@ namespace Iviz.Controllers
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Error while attaching to TF", e);
+                    RosLogger.Error($"{ToString()}: Error while attaching to TF", e);
                 }
             }
         }        
@@ -289,7 +289,6 @@ namespace Iviz.Controllers
         public bool TryWriteJoint(string joint, float value)
         {
             if (Robot == null) ThrowHelper.ThrowInvalidOperation("There is no robot to set joints to!");
-            
             return Robot.TryWriteJoint(joint, value);
         }
 
@@ -301,20 +300,20 @@ namespace Iviz.Controllers
                 {
                     config.SourceParameter = "";
                 }
-
-                TryLoadSavedRobot(savedRobotName);
+                
+                _ = TryLoadSavedRobotAsync(savedRobotName);
             }
             else if (!string.IsNullOrWhiteSpace(sourceParameter))
             {
-                TryLoadFromSourceParameter(sourceParameter);
+                _ = TryLoadFromSourceParameterAsync(sourceParameter);
             }
             else
             {
-                TryLoadFromSourceParameter(null);
+                _ = TryLoadFromSourceParameterAsync(null);
             }
         }
 
-        public async void TryLoadFromSourceParameter(string? value)
+        public async ValueTask TryLoadFromSourceParameterAsync(string? value)
         {
             config.SourceParameter = "";
             Robot = null;
@@ -337,12 +336,12 @@ namespace Iviz.Controllers
             catch (OperationCanceledException)
             {
                 HelpText = "<b>Error:</b> Task cancelled";
-                RosLogger.Debug($"{this}: Error while loading parameter '{value}': Task cancelled or timed out");
+                RosLogger.Debug($"{ToString()}: Error while loading parameter '{value}': Task cancelled or timed out");
                 return;
             }
             catch (Exception e)
             {
-                RosLogger.Debug($"{this}: Error while loading parameter '{value}'", e);
+                RosLogger.Debug($"{ToString()}: Error while loading parameter '{value}'", e);
                 HelpText = "<b>Error:</b> Failed to retrieve parameter";
                 return;
             }
@@ -350,13 +349,13 @@ namespace Iviz.Controllers
             if (errorMsg != null)
             {
                 HelpText = $"<b>Error:</b> {errorMsg}";
-                RosLogger.Debug($"{this}: Error while loading parameter '{value}': {errorMsg}");
+                RosLogger.Debug($"{ToString()}: Error while loading parameter '{value}': {errorMsg}");
                 return;
             }
 
             if (!parameterValue.TryGet(out string robotDescription))
             {
-                RosLogger.Debug($"{this}: Parameter '{value}' was not string!");
+                RosLogger.Debug($"{ToString()}: Parameter '{value}' was not string!");
                 HelpText = "<b>Error:</b> Expected string parameter";
                 return;
             }
@@ -370,7 +369,7 @@ namespace Iviz.Controllers
             config.SourceParameter = value;
         }
 
-        public async void TryLoadSavedRobot(string? robotName)
+        public async ValueTask TryLoadSavedRobotAsync(string? robotName)
         {
             config.SavedRobotName = "";
             Robot = null;
@@ -385,7 +384,7 @@ namespace Iviz.Controllers
             (bool result, string robotDescription) = await Resource.TryGetRobotAsync(robotName);
             if (!result)
             {
-                RosLogger.Debug($"{this}: Failed to load robot! Error message: {robotDescription}");
+                RosLogger.Debug($"{ToString()}: Failed to load robot! Error message: {robotDescription}");
                 HelpText = $"[{robotDescription}]";
                 return;
             }
@@ -399,7 +398,7 @@ namespace Iviz.Controllers
         {
             if (description is null or "")
             {
-                RosLogger.Debug($"{this}: Empty parameter '{description}'");
+                RosLogger.Debug($"{ToString()}: Empty parameter '{description}'");
                 HelpText = "[Robot Description is Empty]";
                 return false;
             }
@@ -412,7 +411,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                RosLogger.Debug($"{this}: Error parsing description'", e);
+                RosLogger.Debug($"{ToString()}: Error parsing description'", e);
                 HelpText = "[Failed to Parse Description]";
                 return false;
             }
@@ -422,14 +421,14 @@ namespace Iviz.Controllers
 
             HelpText = "[Loading Robot...]";
 
-            async void LoadRobotAsync()
+            async ValueTask LoadRobotAsync()
             {
                 robotLoadingTask = newRobot.StartAsync(RosManager.ServiceProvider, KeepMeshMaterials).AsTask();
                 await robotLoadingTask.AwaitNoThrow(this);
                 UpdateStartTaskStatus();
             }
 
-            LoadRobotAsync();
+            _ = LoadRobotAsync();
             UpdateStartTaskStatus();
             return true;
         }
@@ -495,7 +494,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Error in {nameof(UpdateStartTaskStatus)}", e);
+                RosLogger.Error($"{ToString()}: Error in {nameof(UpdateStartTaskStatus)}", e);
             }
         }
 
@@ -593,19 +592,21 @@ namespace Iviz.Controllers
                     config.SourceParameter = "";
                 }
 
-                TryLoadSavedRobot(SavedRobotName);
+                _ = TryLoadSavedRobotAsync(SavedRobotName);
             }
 
             if (!string.IsNullOrWhiteSpace(SourceParameter))
             {
-                TryLoadFromSourceParameter(SourceParameter);
+                _ = TryLoadFromSourceParameterAsync(SourceParameter);
             }
-
+            
             if (AttachedToTf)
             {
                 AttachedToTf = false;
                 AttachedToTf = true;
             }
         }
+
+        public override string ToString() => $"[{nameof(SimpleRobotController)} Robot: {(robot?.Name ?? "none")}]";
     }
 }

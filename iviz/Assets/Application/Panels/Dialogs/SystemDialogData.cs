@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Threading;
+using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Ros;
@@ -318,7 +319,7 @@ namespace Iviz.App
             {
                 tokenSource?.Cancel();
                 tokenSource = new CancellationTokenSource(5000);
-                GetServiceInfo(link, tokenSource.Token);
+                _ = GetServiceInfoAsync(link, tokenSource.Token);
             }
 
             description.Append("<color=#008000ff><b>Provider:</b></color>").AppendLine();
@@ -337,7 +338,7 @@ namespace Iviz.App
 
             panel.TextBottom.SetTextRent(description);
 
-            async void GetServiceInfo(string service, CancellationToken token)
+            async ValueTask GetServiceInfoAsync(string service, CancellationToken token)
             {
                 if (!RosManager.IsConnected)
                 {
@@ -400,13 +401,13 @@ namespace Iviz.App
             {
                 tokenSource?.Cancel();
                 tokenSource = new CancellationTokenSource(5000);
-                GetParamValue(link, tokenSource.Token);
+                _ = GetParamValueAsync(link, tokenSource.Token);
             }
 
             panel.TextBottom.SetTextRent(description);
         }
 
-        async void GetParamValue(string param, CancellationToken token)
+        async ValueTask GetParamValueAsync(string param, CancellationToken token)
         {
             if (!RosManager.IsConnected)
             {
@@ -446,7 +447,7 @@ namespace Iviz.App
             {
                 tokenSource?.Cancel();
                 tokenSource = new CancellationTokenSource(5000);
-                GetNodeInfo(link, tokenSource.Token);
+                _ = GetNodeInfoAsync(link, tokenSource.Token);
             }
 
             description.Append("<color=#800000ff><b>Advertises:</b></color>").AppendLine();
@@ -494,7 +495,7 @@ namespace Iviz.App
             panel.TextBottom.SetTextRent(description);
         }
 
-        async void GetNodeInfo(string node, CancellationToken token)
+        async ValueTask GetNodeInfoAsync(string node, CancellationToken token)
         {
             if (!RosManager.IsConnected)
             {

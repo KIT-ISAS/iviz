@@ -463,7 +463,7 @@ namespace Iviz.App
                         UpperCanvas.TopPanel.color = Resource.Colors.ConnectionPanelConnected;
                     }
 
-                    SaveSimpleConfiguration();
+                    _ = SaveSimpleConfigurationAsync();
                     break;
                 case ConnectionState.Disconnected:
                     GameThread.EveryTenthOfASecond -= RotateSprite;
@@ -508,7 +508,7 @@ namespace Iviz.App
             LeftHideGuiButton.gameObject.SetActive(isMobile);
         }
 
-        public async void SaveStateConfiguration(string file)
+        public async ValueTask SaveStateConfigurationAsync(string file)
         {
             ThrowHelper.ThrowIfNullOrEmpty(file, nameof(file));
 
@@ -535,7 +535,7 @@ namespace Iviz.App
                 return;
             }
 
-            RosLogger.Debug($"{this}: Writing config to {Settings.SavedFolder}/{file}");
+            RosLogger.Debug($"{ToString()}: Writing config to {Settings.SavedFolder}/{file}");
         }
 
         void TryLoadDefaultStateConfiguration()
@@ -544,16 +544,16 @@ namespace Iviz.App
             string fullPath = $"{Settings.SavedFolder}/{defaultConfigPrefix}{LoadConfigDialogData.Suffix}";
             if (File.Exists(fullPath))
             {
-                LoadStateConfiguration($"{defaultConfigPrefix}{LoadConfigDialogData.Suffix}");
+                _ = LoadStateConfigurationAsync($"{defaultConfigPrefix}{LoadConfigDialogData.Suffix}");
             }
         }
 
-        public async void LoadStateConfiguration(string file, CancellationToken token = default)
+        public async ValueTask LoadStateConfigurationAsync(string file, CancellationToken token = default)
         {
             ThrowHelper.ThrowIfNull(file, nameof(file));
 
             string fullPath = $"{Settings.SavedFolder}/{file}";
-            RosLogger.Debug($"{this}: Reading config from {fullPath}");
+            RosLogger.Debug($"{ToString()}: Reading config from {fullPath}");
 
             RosLogger.Internal("Loading config file...");
             if (!File.Exists(fullPath))
@@ -625,7 +625,7 @@ namespace Iviz.App
                     return;
                 }
 
-                RosLogger.Debug($"{this}: Using settings from {path}");
+                RosLogger.Debug($"{ToString()}: Using settings from {path}");
 
                 string text = File.ReadAllText(path);
                 var config = JsonUtils.DeserializeObject<ConnectionConfiguration?>(text);
@@ -669,7 +669,7 @@ namespace Iviz.App
             catch (Exception e) when
                 (e is IOException or SecurityException or JsonException)
             {
-                RosLogger.Debug($"{this}: Error loading simple configuration", e);
+                RosLogger.Debug($"{ToString()}: Error loading simple configuration", e);
                 // pass through
             }
 
@@ -679,11 +679,11 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                RosLogger.Debug($"{this}: Failed to reset simple configuration", e);
+                RosLogger.Debug($"{ToString()}: Failed to reset simple configuration", e);
             }
         }
 
-        async void SaveSimpleConfiguration()
+        async ValueTask SaveSimpleConfigurationAsync()
         {
             var connectionData = Dialogs.ConnectionData;
             connectionData.UpdateLastMasterUris();
@@ -711,7 +711,7 @@ namespace Iviz.App
             catch (Exception e) when
                 (e is IOException or SecurityException or JsonException)
             {
-                RosLogger.Debug($"{this}: Error saving simple configuration", e);
+                RosLogger.Debug($"{ToString()}: Error saving simple configuration", e);
             }
         }
 
@@ -734,7 +734,7 @@ namespace Iviz.App
             }
             catch (Exception e) when (e is IOException or SecurityException or JsonException)
             {
-                RosLogger.Debug($"{this}: Error updating simple configuration", e);
+                RosLogger.Debug($"{ToString()}: Error updating simple configuration", e);
             }
         }
 
@@ -774,7 +774,7 @@ namespace Iviz.App
             catch (Exception e) when
                 (e is IOException or SecurityException or JsonException)
             {
-                RosLogger.Debug($"{this}: Error loading XR configuration", e);
+                RosLogger.Debug($"{ToString()}: Error loading XR configuration", e);
                 unityPose = Pose.identity;
                 // pass through
             }
@@ -785,13 +785,13 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                RosLogger.Debug($"{this}: Failed to reset XR configuration", e);
+                RosLogger.Debug($"{ToString()}: Failed to reset XR configuration", e);
             }
 
             return false; // empty text
         }
 
-        public async void SaveXRConfiguration(Pose unityPose)
+        public async ValueTask SaveXRConfigurationAsync(Pose unityPose)
         {
             var (position, rotation) = unityPose;
             var config = new XRStartConfiguration
@@ -808,7 +808,7 @@ namespace Iviz.App
             catch (Exception e) when
                 (e is IOException or SecurityException or JsonException)
             {
-                RosLogger.Debug($"{this}: Error saving XR configuration", e);
+                RosLogger.Debug($"{ToString()}: Error saving XR configuration", e);
             }
         }
 
@@ -841,7 +841,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Error clearing cache", e);
+                RosLogger.Error($"{ToString()}: Error clearing cache", e);
             }
         }
 
@@ -1136,7 +1136,7 @@ namespace Iviz.App
             frameCounter++;
         }
 
-        async void OnApplicationPause(bool pauseStatus)
+        void OnApplicationPause(bool pauseStatus)
         {
             // app unpausing needs to be handled carefully because in mobile,
             // getting suspended sends us to the background and kills all connections
@@ -1148,7 +1148,7 @@ namespace Iviz.App
             }
 
             // try to recover!
-            await Dialogs.ConnectionData.TryResetConnectionsAsync();
+            _ =  Dialogs.ConnectionData.TryResetConnectionsAsync();
         }
 
         public override string ToString() => $"[{nameof(ModuleListPanel)}]";

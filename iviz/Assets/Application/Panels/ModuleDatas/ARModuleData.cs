@@ -57,7 +57,7 @@ namespace Iviz.App
 
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
-            panel.ResetButton.Clicked += controller.ResetSession;
+            panel.ResetButton.Clicked += () => _ = controller.ResetSessionAsync();
             panel.PublishFrequency.Index = (int)controller.PublicationFrequency;
 
 

@@ -235,13 +235,13 @@ namespace Iviz.Displays
             }
             catch (OperationCanceledException)
             {
-                RosLogger.Warn($"{this}: Robot building canceled.");
+                RosLogger.Warn($"{ToString()}: Robot building canceled.");
                 runningTs.Cancel();
                 throw;
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Failed to construct '{Name}'", e);
+                RosLogger.Error($"{ToString()}: Failed to construct '{Name}'", e);
                 runningTs.Cancel();
                 throw;
             }
@@ -382,7 +382,7 @@ namespace Iviz.Displays
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    RosLogger.Error($"{this}: Failed to retrieve '{meshUri}'", e);
+                    RosLogger.Error($"{ToString()}: Failed to retrieve '{meshUri}'", e);
                     Object.Destroy(collisionObject);
                     numErrors++;
                     return;
@@ -390,7 +390,7 @@ namespace Iviz.Displays
 
                 if (info == null)
                 {
-                    RosLogger.Error($"{this}: Failed to retrieve collision '{meshUri}'.");
+                    RosLogger.Error($"{ToString()}: Failed to retrieve collision '{meshUri}'.");
                     Object.Destroy(collisionObject);
                     numErrors++;
                     return;
@@ -467,14 +467,14 @@ namespace Iviz.Displays
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    RosLogger.Error($"{this}: Failed to retrieve '{meshUri}'", e);
+                    RosLogger.Error($"{ToString()}: Failed to retrieve '{meshUri}'", e);
                     numErrors++;
                     return;
                 }
 
                 if (info == null)
                 {
-                    RosLogger.Error($"{this}: Failed to retrieve visual '{meshUri}'.");
+                    RosLogger.Error($"{ToString()}: Failed to retrieve visual '{meshUri}'.");
                     numErrors++;
                     return;
                 }
@@ -677,7 +677,21 @@ namespace Iviz.Displays
 
             if (!joints.TryGetValue(jointName, out var joint))
             {
+                RosLogger.Error($"{ToString()}: Failed to set value for joint {jointName}. " +
+                                $"Reason: Joint does not exist.");
                 return false;
+            }
+
+            if (joint.Type is not (Joint.JointType.Continuous or Joint.JointType.Fixed))
+            {
+                var (lower, upper, _) = joint.Limit;
+                if (value < lower || value > upper)
+                {
+                    RosLogger.Error($"{ToString()}: Failed to set value for joint {jointName}. " +
+                                    "Reason: Joint value is outside the range " +
+                                    $"[{lower.ToString(BuiltIns.Culture)}..{upper.ToString(BuiltIns.Culture)}].");
+                    return false;
+                }
             }
 
             var axis = joint.Axis.Xyz.ToVector3();
@@ -692,6 +706,9 @@ namespace Iviz.Displays
 
             if (unityPose is not { } validatedPose)
             {
+                RosLogger.Error($"{ToString()}: Failed to set value for joint {jointName}. " +
+                                $"Reason: Joint is not {nameof(Joint.JointType.Revolute)}, " +
+                                $"{nameof(Joint.JointType.Continuous)} or {nameof(Joint.JointType.Prismatic)}.");
                 return false;
             }
 
@@ -722,7 +739,7 @@ namespace Iviz.Displays
             );
 
             stack.Clear();
-            
+
             foreach (var child in children[baseLink.Name])
             {
                 stack.Push((child, 4));

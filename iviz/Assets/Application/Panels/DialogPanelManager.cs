@@ -118,7 +118,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Exception during {nameof(UpdateDialogData)}:", e);
+                RosLogger.Error($"{ToString()}: Exception during {nameof(UpdateDialogData)}:", e);
             }
         }
 
@@ -143,7 +143,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Exception during {nameof(UpdateDialogDataFast)}:", e);
+                RosLogger.Error($"{ToString()}: Exception during {nameof(UpdateDialogDataFast)}:", e);
             }
         }
 
@@ -196,7 +196,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Exception during {nameof(ShowPanel)}: ", e);
+                RosLogger.Error($"{ToString()}: Exception during {nameof(ShowPanel)}: ", e);
             }
 
             ((MonoBehaviour)selectedDialogData.Panel).transform.SetAsLastSibling();
