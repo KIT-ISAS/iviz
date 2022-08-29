@@ -306,8 +306,17 @@ public unsafe struct ReadBuffer2
 
     #region Empties
 
-    static string EmptyString => "";
-    static string[] EmptyStringArray => EmptyArray<string>.Value;
+    static string EmptyString
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => EmptyArray.String;
+    }
+
+    static string[] EmptyStringArray
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => EmptyArray.StringArray;
+    }
 
     #endregion    
 

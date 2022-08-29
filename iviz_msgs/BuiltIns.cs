@@ -197,8 +197,7 @@ public static class BuiltIns
 
     // we use here the fact that 99% of the strings we get are ascii and with length <= 64 (i.e., frames in headers)
     // so we do a simple check and if it's ascii, we do a quick conversion that gets auto-vectorized in il2cpp
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [SkipLocalsInit]
+    [MethodImpl(MethodImplOptions.AggressiveInlining), SkipLocalsInit]
     internal static unsafe string GetString(byte* srcPtr, int length)
     {
         if (length > 64 || !CheckIfAllAscii(srcPtr, length))
@@ -207,9 +206,7 @@ public static class BuiltIns
         }
 
         char* strPtr = stackalloc char[64];
-        ushort* dstPtr = (ushort*)strPtr;
-
-        ConvertToChar(srcPtr, dstPtr, length);
+        ConvertToChar(srcPtr, strPtr, length);
         return new string(strPtr, 0, length);
     }
 
@@ -222,9 +219,10 @@ public static class BuiltIns
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static unsafe void ConvertToChar(byte* src, ushort* dst, int size)
+    static unsafe void ConvertToChar(byte* srcPtr, char* strPtr, int size)
     {
-        for (int i = 0; i < size; i++) dst[i] = src[i];
+        ushort* dstPtr = (ushort*)strPtr;
+        for (int i = 0; i < size; i++) dstPtr[i] = srcPtr[i];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

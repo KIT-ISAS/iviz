@@ -44,7 +44,7 @@ public unsafe struct ReadBuffer
     }
 
     #region strings
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeString(out string val)
     {
@@ -108,6 +108,7 @@ public unsafe struct ReadBuffer
 
         val = EmptyStringArray;
     }
+
     #endregion
 
     #region scalars
@@ -236,9 +237,9 @@ public unsafe struct ReadBuffer
     }
 
     #endregion
-    
+
     #region arrays
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray(void* value, int count)
     {
@@ -344,11 +345,20 @@ public unsafe struct ReadBuffer
     }
 
     #endregion
-    
+
     #region Empties
 
-    static string EmptyString => EmptyArray.String;
-    static string[] EmptyStringArray => EmptyArray.StringArray;
+    static string EmptyString
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => EmptyArray.String;
+    }
+
+    static string[] EmptyStringArray
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => EmptyArray.StringArray;
+    }
 
     #endregion
 
@@ -384,7 +394,7 @@ public unsafe struct ReadBuffer
             return generator.RosDeserialize(ref b);
         }
     }
-    
+
     #region extras
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -467,5 +477,6 @@ public unsafe struct ReadBuffer
         t = *(Triangle*)cursor;
         Advance(size);
     }
+
     #endregion
 }
