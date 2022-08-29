@@ -27,12 +27,11 @@ namespace Iviz.UtilsTests;
 [Category("Iviz")]
 public class IvizTests
 {
-    //static readonly Uri CallerUri = new Uri("http://localhost:7616");
+    static readonly Uri CallerUri = new Uri("http://localhost:7616");
+    static readonly Uri MasterUri = new Uri("http://localhost:11311");
 
-    //static readonly Uri MasterUri = new Uri("http://localhost:11311");
-
-    static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
-    static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
+    //static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
+    //static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
 
     const string CallerId = "/iviz_util_tests";
 
@@ -881,7 +880,7 @@ public class IvizTests
         ivizController.AddModuleFromTopic("/dialogs");
 
         var header = new Header(0, time.Now(), "dialogs");
-        
+
         var dialogArray = new DialogArray
         {
             Dialogs = new[]
@@ -1038,7 +1037,7 @@ public class IvizTests
         };
 
         writer.Write(dialogArray);
-        
+
         Thread.Sleep(2000);
     }
 
@@ -1063,6 +1062,28 @@ public class IvizTests
         };
         client.CallService($"{IvizId}/launch_dialog", service);
         Console.WriteLine(service.Response.Message);
+    }
+
+    [Test]
+    public void TestRobotPreviews()
+    {
+        using var writer = client.CreateWriter<RobotPreview>("/previews", latchingEnabled: true);
+
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.AddModuleFromTopic("/previews");
+
+        var header = new Header(0, time.Now(), "dialogs");
+
+        var preview = new RobotPreview
+        {
+            Header = header,
+            Id = "0",
+            SavedRobotName = "[Franka Emika] Panda",
+        };
+        
+        writer.Write(preview);
+
+        Thread.Sleep(2000);
     }
 
 
