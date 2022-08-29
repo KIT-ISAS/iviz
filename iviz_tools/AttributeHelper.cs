@@ -41,7 +41,7 @@ namespace Iviz
     public class PreserveAttribute : Attribute
     {
     }
-    
+
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class MonoPInvokeCallbackAttribute : Attribute
     {
@@ -49,10 +49,11 @@ namespace Iviz
         {
         }
     }
-    
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+}
+
+namespace Unity.IL2CPP.CompilerServices
+{
     public class Il2CppEagerStaticClassConstructionAttribute : Attribute
     {
     }
-}    
-
+}

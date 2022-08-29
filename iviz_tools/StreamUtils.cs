@@ -27,7 +27,7 @@ public static class StreamUtils
         }
 
         int received = socket.Receive(buffer, 0, toRead, SocketFlags.None);
-        return (received == toRead).AsTaskResult();
+        return (received != 0).AsTaskResult();
     }
 
     static async ValueTask<bool> DoReadChunkAsync(Socket socket, byte[] buffer, int toRead, CancellationToken token)

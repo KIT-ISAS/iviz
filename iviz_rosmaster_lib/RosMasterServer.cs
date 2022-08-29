@@ -294,13 +294,13 @@ public sealed class RosMasterServer : IDisposable
 
         foreach (var uri in subscribersToNotify)
         {
-            NotifySubscriber(uri, methodArgs, token);
+            _ = NotifySubscriberAsync(uri, methodArgs, token);
         }
 
         return default;
     }
 
-    async void NotifySubscriber(Uri remoteUri, XmlRpcArg[] methodArgs, CancellationToken token)
+    async ValueTask NotifySubscriberAsync(Uri remoteUri, XmlRpcArg[] methodArgs, CancellationToken token)
     {
         try
         {

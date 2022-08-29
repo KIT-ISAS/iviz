@@ -143,7 +143,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
         receiversByUri[receiver.RemoteUri] = receiver;
     }
 
-    public async void RetryConnection(Uri remoteUri)
+    public async ValueTask RetryConnectionAsync(Uri remoteUri)
     {
         var token = subscriber.CancellationToken;
         try

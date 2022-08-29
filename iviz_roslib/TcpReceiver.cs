@@ -130,19 +130,26 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
 
         Logger.LogDebugFormat("{0}: Stopped!", this);
 
-        if (shouldRetry)
+        if (runningTs.IsCancellationRequested)
         {
-            try
-            {
-                await Task.Delay(2000, runningTs.Token);
-                manager.RetryConnection(RemoteUri);
-            }
-            catch (OperationCanceledException)
-            {
-            }
+            return;
         }
-        
-        runningTs.Cancel();
+
+        if (!shouldRetry)
+        {
+            runningTs.Cancel();
+            return;
+        }
+
+        try
+        {
+            await Task.Delay(2000, runningTs.Token);
+            _ = manager.RetryConnectionAsync(RemoteUri);
+        }
+        finally
+        {
+            runningTs.Cancel();
+        }
     }
 
     async ValueTask<TcpClient?> StartTcpConnection()

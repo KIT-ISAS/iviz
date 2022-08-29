@@ -389,6 +389,11 @@ public static class ValueTaskUtils
     public static ValueTask<T> AsTaskResult<T>(this T t) => new(t);
 
     /// <summary>
+    /// Creates a completed <see cref="ValueTask{T}"/> that returns the given value.
+    /// </summary>
+    public static ValueTask<T?> AsTaskResultMaybeNull<T>(this T t) => new(t);
+
+    /// <summary>
     /// Creates a <see cref="ValueTask{T}"/> that wraps the given task.
     /// </summary>
     public static ValueTask<T> AsValueTask<T>(this Task<T> t) => new(t);
