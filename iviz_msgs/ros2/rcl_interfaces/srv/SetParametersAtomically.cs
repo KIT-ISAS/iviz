@@ -137,9 +137,9 @@ namespace Iviz.Msgs.RclInterfaces
             int c = d;
             c = WriteBuffer2.Align4(c);
             c += 4; // Parameters.Length
-            foreach (var t in Parameters)
+            for (int i = 0; i < Parameters.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Parameters[i].AddRos2MessageLength(c);
             }
             return c;
         }

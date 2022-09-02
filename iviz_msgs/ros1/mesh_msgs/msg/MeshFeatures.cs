@@ -103,9 +103,9 @@ namespace Iviz.Msgs.MeshMsgs
             c = WriteBuffer2.AddLength(c, MapUuid);
             c = WriteBuffer2.Align4(c);
             c += 4; // Features.Length
-            foreach (var t in Features)
+            for (int i = 0; i < Features.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Features[i].AddRos2MessageLength(c);
             }
             return c;
         }

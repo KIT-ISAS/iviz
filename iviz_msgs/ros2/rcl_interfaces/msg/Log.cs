@@ -69,6 +69,7 @@ namespace Iviz.Msgs.RclInterfaces
             Deserialize(ref b, out this);
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deserialize(ref ReadBuffer b, out Log h)
         {
             b.Deserialize(out h.Stamp);
@@ -86,6 +87,7 @@ namespace Iviz.Msgs.RclInterfaces
             Deserialize(ref b, out this);
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deserialize(ref ReadBuffer2 b, out Log h)
         {
             b.Align4();

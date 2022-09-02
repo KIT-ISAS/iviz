@@ -311,15 +311,15 @@ namespace Iviz.Msgs.IvizMsgs
             c += 4; // BiTangents length
             c += 12 * BiTangents.Length;
             c += 4; // TexCoords.Length
-            foreach (var t in TexCoords)
+            for (int i = 0; i < TexCoords.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = TexCoords[i].AddRos2MessageLength(c);
             }
             c = WriteBuffer2.Align4(c);
             c += 4; // ColorChannels.Length
-            foreach (var t in ColorChannels)
+            for (int i = 0; i < ColorChannels.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = ColorChannels[i].AddRos2MessageLength(c);
             }
             c = WriteBuffer2.Align4(c);
             c += 4; // Faces length

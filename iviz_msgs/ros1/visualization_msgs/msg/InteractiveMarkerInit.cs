@@ -119,9 +119,9 @@ namespace Iviz.Msgs.VisualizationMsgs
             c = WriteBuffer2.Align8(c);
             c += 8; // SeqNum
             c += 4; // Markers.Length
-            foreach (var t in Markers)
+            for (int i = 0; i < Markers.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Markers[i].AddRos2MessageLength(c);
             }
             return c;
         }

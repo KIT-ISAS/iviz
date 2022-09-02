@@ -123,9 +123,9 @@ namespace Iviz.Msgs.StdMsgs
             int c = d;
             c = WriteBuffer2.Align4(c);
             c += 4; // Dim.Length
-            foreach (var t in Dim)
+            for (int i = 0; i < Dim.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Dim[i].AddRos2MessageLength(c);
             }
             c = WriteBuffer2.Align4(c);
             c += 4; // DataOffset

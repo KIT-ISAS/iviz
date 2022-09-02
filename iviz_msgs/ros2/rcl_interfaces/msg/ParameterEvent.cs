@@ -203,21 +203,21 @@ namespace Iviz.Msgs.RclInterfaces
             c = WriteBuffer2.AddLength(c, Node);
             c = WriteBuffer2.Align4(c);
             c += 4; // NewParameters.Length
-            foreach (var t in NewParameters)
+            for (int i = 0; i < NewParameters.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = NewParameters[i].AddRos2MessageLength(c);
             }
             c = WriteBuffer2.Align4(c);
             c += 4; // ChangedParameters.Length
-            foreach (var t in ChangedParameters)
+            for (int i = 0; i < ChangedParameters.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = ChangedParameters[i].AddRos2MessageLength(c);
             }
             c = WriteBuffer2.Align4(c);
             c += 4; // DeletedParameters.Length
-            foreach (var t in DeletedParameters)
+            for (int i = 0; i < DeletedParameters.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = DeletedParameters[i].AddRos2MessageLength(c);
             }
             return c;
         }

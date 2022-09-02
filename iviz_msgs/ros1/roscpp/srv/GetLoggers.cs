@@ -180,9 +180,9 @@ namespace Iviz.Msgs.Roscpp
             int c = d;
             c = WriteBuffer2.Align4(c);
             c += 4; // Loggers.Length
-            foreach (var t in Loggers)
+            for (int i = 0; i < Loggers.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Loggers[i].AddRos2MessageLength(c);
             }
             return c;
         }

@@ -101,9 +101,9 @@ namespace Iviz.Msgs.ActionlibMsgs
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
             c += 4; // StatusList.Length
-            foreach (var t in StatusList)
+            for (int i = 0; i < StatusList.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = StatusList[i].AddRos2MessageLength(c);
             }
             return c;
         }

@@ -38,6 +38,7 @@ namespace Iviz.Msgs.StdMsgs
             Deserialize(ref b, out this);
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deserialize(ref ReadBuffer b, out Header h)
         {
             b.Deserialize(out h.Seq);
@@ -51,6 +52,7 @@ namespace Iviz.Msgs.StdMsgs
             Deserialize(ref b, out this);
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deserialize(ref ReadBuffer2 b, out Header h)
         {
             h.Seq = default;

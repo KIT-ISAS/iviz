@@ -159,9 +159,9 @@ namespace Iviz.Msgs.SensorMsgs
             c += 4; // Height
             c += 4; // Width
             c += 4; // Fields.Length
-            foreach (var t in Fields)
+            for (int i = 0; i < Fields.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Fields[i].AddRos2MessageLength(c);
             }
             c += 1; // IsBigendian
             c = WriteBuffer2.Align4(c);

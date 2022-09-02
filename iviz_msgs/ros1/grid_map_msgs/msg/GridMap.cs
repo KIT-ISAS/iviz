@@ -153,9 +153,9 @@ namespace Iviz.Msgs.GridMapMsgs
             c = WriteBuffer2.AddLength(c, BasicLayers);
             c = WriteBuffer2.Align4(c);
             c += 4; // Data.Length
-            foreach (var t in Data)
+            for (int i = 0; i < Data.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Data[i].AddRos2MessageLength(c);
             }
             c = WriteBuffer2.Align2(c);
             c += 2; // OuterStartIndex

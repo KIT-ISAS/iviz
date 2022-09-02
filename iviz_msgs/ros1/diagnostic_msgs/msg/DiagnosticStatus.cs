@@ -145,9 +145,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
             c = WriteBuffer2.AddLength(c, HardwareId);
             c = WriteBuffer2.Align4(c);
             c += 4; // Values.Length
-            foreach (var t in Values)
+            for (int i = 0; i < Values.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Values[i].AddRos2MessageLength(c);
             }
             return c;
         }

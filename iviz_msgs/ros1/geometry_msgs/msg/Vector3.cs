@@ -93,7 +93,6 @@ namespace Iviz.Msgs.GeometryMsgs
         public static Vector3 UnitX => new(1, 0, 0);
         public static Vector3 UnitY => new(0, 1, 0);
         public static Vector3 UnitZ => new(0, 0, 1);
-        public static implicit operator Point(in Vector3 p) => new(p.X, p.Y, p.Z);
         public static bool operator !=(in Vector3 a, in Vector3 b) => !(a == b);
         public static bool operator ==(in Vector3 a, in Vector3 b) => a.X == b.X && a.Y == b.Y && a.Z == b.Z;
         public static Vector3 operator +(in Vector3 v, in Vector3 w) => new(v.X + w.X, v.Y + w.Y, v.Z + w.Z);

@@ -34,6 +34,7 @@ namespace Iviz.Msgs.GeometryMsgs
             Deserialize(ref b, out this);
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deserialize(ref ReadBuffer b, out TransformStamped h)
         {
             StdMsgs.Header.Deserialize(ref b, out h.Header);
@@ -47,6 +48,7 @@ namespace Iviz.Msgs.GeometryMsgs
             Deserialize(ref b, out this);
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deserialize(ref ReadBuffer2 b, out TransformStamped h)
         {
             StdMsgs.Header.Deserialize(ref b, out h.Header);

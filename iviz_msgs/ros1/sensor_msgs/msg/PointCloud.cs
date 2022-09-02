@@ -148,9 +148,9 @@ namespace Iviz.Msgs.SensorMsgs
             c += 4; // Points length
             c += 12 * Points.Length;
             c += 4; // Channels.Length
-            foreach (var t in Channels)
+            for (int i = 0; i < Channels.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Channels[i].AddRos2MessageLength(c);
             }
             return c;
         }

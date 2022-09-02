@@ -60,6 +60,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             Deserialize(ref b, out this);
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deserialize(ref ReadBuffer b, out Log h)
         {
             StdMsgs.Header.Deserialize(ref b, out h.Header);
@@ -78,6 +79,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             Deserialize(ref b, out this);
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deserialize(ref ReadBuffer2 b, out Log h)
         {
             StdMsgs.Header.Deserialize(ref b, out h.Header);

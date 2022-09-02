@@ -171,15 +171,15 @@ namespace Iviz.Msgs.IvizMsgs
             c = WriteBuffer2.AddLength(c, Filename);
             c = WriteBuffer2.Align4(c);
             c += 4; // Includes.Length
-            foreach (var t in Includes)
+            for (int i = 0; i < Includes.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Includes[i].AddRos2MessageLength(c);
             }
             c = WriteBuffer2.Align4(c);
             c += 4; // Lights.Length
-            foreach (var t in Lights)
+            for (int i = 0; i < Lights.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Lights[i].AddRos2MessageLength(c);
             }
             return c;
         }

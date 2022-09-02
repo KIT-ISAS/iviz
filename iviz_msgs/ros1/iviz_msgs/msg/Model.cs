@@ -211,21 +211,21 @@ namespace Iviz.Msgs.IvizMsgs
             c = WriteBuffer2.AddLength(c, OrientationHint);
             c = WriteBuffer2.Align4(c);
             c += 4; // Meshes.Length
-            foreach (var t in Meshes)
+            for (int i = 0; i < Meshes.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Meshes[i].AddRos2MessageLength(c);
             }
             c = WriteBuffer2.Align4(c);
             c += 4; // Materials.Length
-            foreach (var t in Materials)
+            for (int i = 0; i < Materials.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Materials[i].AddRos2MessageLength(c);
             }
             c = WriteBuffer2.Align4(c);
             c += 4; // Nodes.Length
-            foreach (var t in Nodes)
+            for (int i = 0; i < Nodes.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Nodes[i].AddRos2MessageLength(c);
             }
             return c;
         }

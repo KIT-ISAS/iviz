@@ -155,9 +155,9 @@ namespace Iviz.Msgs.IvizMsgs
             c += 1; // BlendMode
             c = WriteBuffer2.Align4(c);
             c += 4; // Textures.Length
-            foreach (var t in Textures)
+            for (int i = 0; i < Textures.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Textures[i].AddRos2MessageLength(c);
             }
             return c;
         }

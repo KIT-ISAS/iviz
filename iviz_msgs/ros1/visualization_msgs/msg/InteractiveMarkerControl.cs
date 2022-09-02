@@ -198,9 +198,9 @@ namespace Iviz.Msgs.VisualizationMsgs
             c += 1; // AlwaysVisible
             c = WriteBuffer2.Align4(c);
             c += 4; // Markers.Length
-            foreach (var t in Markers)
+            for (int i = 0; i < Markers.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Markers[i].AddRos2MessageLength(c);
             }
             c += 1; // IndependentMarkerOrientation
             c = WriteBuffer2.Align4(c);

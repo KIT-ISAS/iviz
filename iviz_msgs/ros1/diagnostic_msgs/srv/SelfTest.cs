@@ -198,9 +198,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
             c += 1; // Passed
             c = WriteBuffer2.Align4(c);
             c += 4; // Status.Length
-            foreach (var t in Status)
+            for (int i = 0; i < Status.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Status[i].AddRos2MessageLength(c);
             }
             return c;
         }

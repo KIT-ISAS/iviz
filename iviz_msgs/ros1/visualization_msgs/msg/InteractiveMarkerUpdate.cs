@@ -192,15 +192,15 @@ namespace Iviz.Msgs.VisualizationMsgs
             c += 1; // Type
             c = WriteBuffer2.Align4(c);
             c += 4; // Markers.Length
-            foreach (var t in Markers)
+            for (int i = 0; i < Markers.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Markers[i].AddRos2MessageLength(c);
             }
             c = WriteBuffer2.Align4(c);
             c += 4; // Poses.Length
-            foreach (var t in Poses)
+            for (int i = 0; i < Poses.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Poses[i].AddRos2MessageLength(c);
             }
             c = WriteBuffer2.Align4(c);
             c = WriteBuffer2.AddLength(c, Erases);

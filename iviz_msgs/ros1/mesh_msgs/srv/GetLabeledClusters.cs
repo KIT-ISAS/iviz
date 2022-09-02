@@ -194,9 +194,9 @@ namespace Iviz.Msgs.MeshMsgs
             int c = d;
             c = WriteBuffer2.Align4(c);
             c += 4; // Clusters.Length
-            foreach (var t in Clusters)
+            for (int i = 0; i < Clusters.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Clusters[i].AddRos2MessageLength(c);
             }
             return c;
         }

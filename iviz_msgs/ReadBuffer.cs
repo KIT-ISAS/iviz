@@ -15,7 +15,7 @@ public unsafe struct ReadBuffer
     byte* cursor;
     readonly byte* end;
 
-    ReadBuffer(byte* ptr, int length)
+    public ReadBuffer(byte* ptr, int length)
     {
         cursor = ptr;
         end = ptr + length;

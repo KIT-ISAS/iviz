@@ -121,9 +121,9 @@ namespace Iviz.Msgs.PclMsgs
             c = Cloud.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
             c += 4; // Polygons.Length
-            foreach (var t in Polygons)
+            for (int i = 0; i < Polygons.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Polygons[i].AddRos2MessageLength(c);
             }
             return c;
         }

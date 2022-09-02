@@ -211,15 +211,15 @@ namespace Iviz.Msgs.SensorMsgs
             c += 4; // RangeMin
             c += 4; // RangeMax
             c += 4; // Ranges.Length
-            foreach (var t in Ranges)
+            for (int i = 0; i < Ranges.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Ranges[i].AddRos2MessageLength(c);
             }
             c = WriteBuffer2.Align4(c);
             c += 4; // Intensities.Length
-            foreach (var t in Intensities)
+            for (int i = 0; i < Intensities.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Intensities[i].AddRos2MessageLength(c);
             }
             return c;
         }

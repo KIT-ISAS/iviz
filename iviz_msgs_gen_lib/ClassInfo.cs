@@ -498,9 +498,9 @@ public sealed class ClassInfo
             {
                 WriteAlign(4);
                 fields.Add($"    c += 4; // {variable.CsFieldName}.Length");
-                fields.Add($"    foreach (var t in {variable.CsFieldName})");
+                fields.Add($"    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
                 fields.Add($"    {{");
-                fields.Add($"        c = t.AddRos2MessageLength(c);");
+                fields.Add($"        c = {variable.CsFieldName}[i].AddRos2MessageLength(c);");
                 fields.Add($"    }}");
 
                 currentAlignment = -1;
@@ -882,6 +882,7 @@ public sealed class ClassInfo
                 lines.Add("    Deserialize(ref b, out this);");
                 lines.Add("}");
                 lines.Add("");
+                lines.Add("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
                 lines.Add($"public static void Deserialize(ref ReadBuffer{ros2Suffix} b, out {name} h)");
                 lines.Add("{");
             }

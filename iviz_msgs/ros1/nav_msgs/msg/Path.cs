@@ -100,9 +100,9 @@ namespace Iviz.Msgs.NavMsgs
             c = Header.AddRos2MessageLength(c);
             c = WriteBuffer2.Align4(c);
             c += 4; // Poses.Length
-            foreach (var t in Poses)
+            for (int i = 0; i < Poses.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Poses[i].AddRos2MessageLength(c);
             }
             return c;
         }

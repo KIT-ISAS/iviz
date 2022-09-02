@@ -135,9 +135,9 @@ namespace Iviz.Msgs.RclInterfaces
             int c = d;
             c = WriteBuffer2.Align4(c);
             c += 4; // Parameters.Length
-            foreach (var t in Parameters)
+            for (int i = 0; i < Parameters.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Parameters[i].AddRos2MessageLength(c);
             }
             return c;
         }
@@ -233,9 +233,9 @@ namespace Iviz.Msgs.RclInterfaces
             int c = d;
             c = WriteBuffer2.Align4(c);
             c += 4; // Results.Length
-            foreach (var t in Results)
+            for (int i = 0; i < Results.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Results[i].AddRos2MessageLength(c);
             }
             return c;
         }

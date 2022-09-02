@@ -87,9 +87,9 @@ namespace Iviz.Msgs.Tf
             int c = d;
             c = WriteBuffer2.Align4(c);
             c += 4; // Transforms.Length
-            foreach (var t in Transforms)
+            for (int i = 0; i < Transforms.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Transforms[i].AddRos2MessageLength(c);
             }
             return c;
         }

@@ -395,15 +395,15 @@ namespace Iviz.Msgs.MeshMsgs
             c += (21 + 3) * FaceMaterials.Length - 3;
             c = WriteBuffer2.Align4(c);
             c += 4; // Textures.Length
-            foreach (var t in Textures)
+            for (int i = 0; i < Textures.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Textures[i].AddRos2MessageLength(c);
             }
             c = WriteBuffer2.Align4(c);
             c += 4; // Clusters.Length
-            foreach (var t in Clusters)
+            for (int i = 0; i < Clusters.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Clusters[i].AddRos2MessageLength(c);
             }
             return c;
         }

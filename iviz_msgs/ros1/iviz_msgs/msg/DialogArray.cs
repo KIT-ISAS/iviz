@@ -92,9 +92,9 @@ namespace Iviz.Msgs.IvizMsgs
             int c = d;
             c = WriteBuffer2.Align4(c);
             c += 4; // Dialogs.Length
-            foreach (var t in Dialogs)
+            for (int i = 0; i < Dialogs.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Dialogs[i].AddRos2MessageLength(c);
             }
             return c;
         }

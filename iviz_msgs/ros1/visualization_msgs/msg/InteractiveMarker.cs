@@ -190,15 +190,15 @@ namespace Iviz.Msgs.VisualizationMsgs
             c = WriteBuffer2.Align4(c);
             c += 4; // Scale
             c += 4; // MenuEntries.Length
-            foreach (var t in MenuEntries)
+            for (int i = 0; i < MenuEntries.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = MenuEntries[i].AddRos2MessageLength(c);
             }
             c = WriteBuffer2.Align4(c);
             c += 4; // Controls.Length
-            foreach (var t in Controls)
+            for (int i = 0; i < Controls.Length; i++)
             {
-                c = t.AddRos2MessageLength(c);
+                c = Controls[i].AddRos2MessageLength(c);
             }
             return c;
         }
