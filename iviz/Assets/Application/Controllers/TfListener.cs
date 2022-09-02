@@ -167,9 +167,9 @@ namespace Iviz.Controllers
             while (incomingMessages.TryDequeue(out var value))
             {
                 var (transforms, isStatic) = value;
-                foreach (ref readonly var transform in transforms.AsSpan())
+                for (int i = 0; i < transforms.Length; i++)
                 {
-                    Tf.Process(in transform, isStatic);
+                    Tf.Process(in transforms[i], isStatic);
                 }
             }
         }

@@ -462,6 +462,7 @@ namespace Iviz.Controllers
             });
         }
 
+        
         static int GeneratePointBuffer(float4[] pointBuffer, PointCloud2 msg, int xOffset, int yOffset,
             int zOffset, int iOffset, int iType, bool rgbaHint)
         {
@@ -899,6 +900,17 @@ namespace Iviz.Controllers
 
                 return o;
             }
+
+            [BurstCompile(CompileSynchronously = true)]
+            public static void Iterate([NoAlias] float3* input, int inputLength)
+            {
+                Span<float3> span = new(input, inputLength);
+                foreach (float3 var in span)
+                {
+                    
+                }
+            }
+
         }
     }
 }

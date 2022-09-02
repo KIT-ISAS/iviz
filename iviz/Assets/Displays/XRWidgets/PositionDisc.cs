@@ -56,7 +56,7 @@ namespace Iviz.App.ARDialogs
             }
         }
 
-        public Color SecondaryColor
+        public Color SecondColor
         {
             get => secondaryColor;
             set
@@ -94,7 +94,7 @@ namespace Iviz.App.ARDialogs
             Line.Visible = false;
 
             Color = Color;
-            SecondaryColor = SecondaryColor;
+            SecondColor = SecondColor;
             Glow.Visible = false;
 
             Button.Icon = XRIcon.Ok;
@@ -117,7 +117,7 @@ namespace Iviz.App.ARDialogs
                 Line.Visible = true;
                 TooltipX.Visible = true;
                 TooltipY.Visible = true;
-                InnerDisc.EmissiveColor = SecondaryColor;
+                InnerDisc.EmissiveColor = SecondColor;
                 OuterDisc.EmissiveColor = Color;
                 Glow.Visible = true;
             };

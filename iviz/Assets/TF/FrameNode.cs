@@ -23,7 +23,7 @@ namespace Iviz.Controllers.TF
 
         public string? ParentId => parent?.Id;
 
-        public virtual TfFrame? Parent
+        public TfFrame? Parent
         {
             get => parent;
             set => SetParent(value);

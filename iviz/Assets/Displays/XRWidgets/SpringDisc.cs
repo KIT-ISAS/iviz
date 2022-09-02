@@ -43,7 +43,7 @@ namespace Iviz.Displays.XR
             }
         }
 
-        public Color SecondaryColor
+        public Color SecondColor
         {
             get => secondaryColor;
             set
@@ -62,13 +62,13 @@ namespace Iviz.Displays.XR
         void Awake()
         {
             Color = Color;
-            SecondaryColor = SecondaryColor;
+            SecondColor = SecondColor;
             Glow.Visible = false;
 
             Draggable.StartDragging += () =>
             {
                 tokenSource?.Cancel();
-                InnerDisc.EmissiveColor = SecondaryColor;
+                InnerDisc.EmissiveColor = SecondColor;
                 OuterDisc.EmissiveColor = Color;
                 Glow.Visible = true;
             };

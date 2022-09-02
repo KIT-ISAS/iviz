@@ -7,10 +7,11 @@ using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using UnityEngine;
 
+/*
 namespace Iviz.Displays.XR
 {
     public sealed class BoundaryWidget : MonoBehaviour, IWidgetWithCaption, IWidgetWithColor, 
-        IWidgetWithBoundary, IWidgetWithSecondaryScale, IRecyclable
+        IWidgetWithBoundary, IWidgetWithSecondScale, IRecyclable
     {
         SelectionFrame? frame;
         Tooltip? tooltip;
@@ -103,3 +104,4 @@ namespace Iviz.Displays.XR
         }
     }
 }
+*/

@@ -13,10 +13,18 @@ namespace Iviz.Displays
     /// </summary>
     public readonly struct PointWithColor
     {
+        static float WhiteBits => UnityUtils.AsFloat(UnityEngine.Color.white);
+
         readonly float4 f;
 
         Color32 Color => UnityUtils.AsColor32(f.w);
         float Intensity => f.w;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        public PointWithColor(in Vector3 position) :
+            this(position.x, position.y, position.z, WhiteBits)
+        {
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public PointWithColor(in Vector3 position, Color32 color) :

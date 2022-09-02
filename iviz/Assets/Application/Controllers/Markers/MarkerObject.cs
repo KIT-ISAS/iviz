@@ -675,7 +675,7 @@ namespace Iviz.Controllers
 
             try
             {
-                return await Resource.GetGameObjectResourceAsync(meshResource, RosManager.ServiceProvider,
+                return await Resource.GetGameObjectResourceAsync(meshResource, RosManager.Connection,
                     runningTs.Token);
             }
             catch (Exception e) when (e is not OperationCanceledException)

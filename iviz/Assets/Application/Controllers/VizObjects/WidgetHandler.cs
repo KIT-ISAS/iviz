@@ -12,7 +12,7 @@ namespace Iviz.Controllers
     {
         void OnWidgetRotated(string id, string frameId, float angleInRad);
         void OnWidgetMoved(string id, string frameId, in Vector3 direction);
-        void OnTrajectoryDiscMoved(string id, string frameId, IReadOnlyList<Vector3> points, float periodInSec);
+        void OnWidgetProvidedTrajectory(string id, string frameId, List<Vector3> points, float periodInSec);
         void OnWidgetResized(string id, string frameId, in Bounds bounds);
         void OnWidgetClicked(string id, string frameId, int entryId);
     }
@@ -79,13 +79,13 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (msg.Color.IsInvalid() || msg.SecondaryColor.IsInvalid())
+            if (msg.Color.IsInvalid() || msg.SecondColor.IsInvalid())
             {
                 RosLogger.Info($"{this}: Color of widget '{msg.Id}' contains invalid values");
                 return;
             }
 
-            if (msg.Scale.IsInvalid() || msg.SecondaryScale.IsInvalid())
+            if (msg.Scale.IsInvalid() || msg.SecondScale.IsInvalid())
             {
                 RosLogger.Info($"{this}: Scale of widget '{msg.Id}' contains invalid values");
                 return;
@@ -119,11 +119,12 @@ namespace Iviz.Controllers
                 WidgetType.SpringDisc => Resource.Displays.SpringDisc,
                 WidgetType.SpringDisc3D => Resource.Displays.SpringDisc3D,
                 //WidgetType.TrajectoryDisc => Resource.Displays.TrajectoryDisc,
+                WidgetType.TrajectoryDisc3D => Resource.Displays.TrajectoryDisc3D,
                 WidgetType.TargetArea => Resource.Displays.TargetArea,
                 WidgetType.PositionDisc3D => Resource.Displays.PositionDisc3D,
                 WidgetType.PositionDisc => Resource.Displays.PositionDisc,
-                WidgetType.Boundary => Resource.Displays.Boundary,
-                WidgetType.BoundaryCheck => Resource.Displays.BoundaryCheck,
+                //WidgetType.Boundary => Resource.Displays.Boundary,
+                //WidgetType.BoundaryCheck => Resource.Displays.BoundaryCheck,
                 WidgetType.Tooltip => Resource.Displays.TooltipWidget,
                 _ => null
             };
@@ -183,6 +184,12 @@ namespace Iviz.Controllers
                     canBeClicked.Clicked += entry => feedback.OnWidgetClicked(id, FrameId, entry);
                 }
 
+                if (display is IWidgetProvidesTrajectory providesTrajectory)
+                {
+                    providesTrajectory.ProvidedTrajectory += (points, period) =>
+                        feedback.OnWidgetProvidedTrajectory(id, FrameId, points, period);
+                }
+
                 Update(msg);
             }
 
@@ -199,35 +206,29 @@ namespace Iviz.Controllers
                         withColor.Color = msg.Color.ToUnity();
                     }
 
-                    if (msg.SecondaryColor.A != 0)
+                    if (msg.SecondColor.A != 0)
                     {
-                        withColor.SecondaryColor = msg.SecondaryColor.ToUnity();
+                        withColor.SecondColor = msg.SecondColor.ToUnity();
                     }
                 }
 
-                if (msg.Scale != 0 && display is IWidgetWithScale withScale)
+                if (display is IWidgetWithScale withScale)
                 {
-                    withScale.Scale = scale;
-                }
+                    if (msg.Scale != 0)
+                    {
+                        withScale.Scale = (float)msg.Scale;
+                    }
 
-                if (msg.SecondaryScale != 0 && display is IWidgetWithSecondaryScale withSecondaryScale)
-                {
-                    withSecondaryScale.SecondaryScale = (float)msg.SecondaryScale;
-                }
-
-                if (!msg.Boundary.Size.ApproximatelyZero() && display is IWidgetWithBoundary withBoundary)
-                {
-                    withBoundary.Boundary = msg.Boundary;
-                }
-
-                if (msg.SecondaryBoundaries.Length != 0 && display is IWidgetWithBoundaries withBoundaries)
-                {
-                    withBoundaries.Set(new BoundingBoxStamped(msg.Header, msg.Boundary), msg.SecondaryBoundaries);
+                    if (msg.SecondScale != 0)
+                    {
+                        withScale.SecondScale = (float)msg.SecondScale;
+                    }
                 }
 
                 if (display is IWidgetWithCaption withCaption)
                 {
                     withCaption.Caption = msg.Caption;
+                    withCaption.SecondCaption = msg.SecondCaption;
                 }
 
                 var transform = node.Transform;

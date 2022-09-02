@@ -305,20 +305,20 @@ namespace Iviz.Controllers
                 // basic checks
                 if (msg.Data.Length < msg.Width * msg.Height)
                 {
-                    RosLogger.Error($"{this}: Image data is too small!");
+                    RosLogger.Error($"{ToString()}: Image data is too small!");
                     return true;
                 }
 
                 if (msg.Step < msg.Width || msg.Data.Length < msg.Step * msg.Height)
                 {
-                    RosLogger.Error($"{this}: Image step does not correspond to image size!");
+                    RosLogger.Error($"{ToString()}: Image step does not correspond to image size!");
                     return true;
                 }
             }
 
             if (msg.Encoding.Length == 0)
             {
-                RosLogger.Error($"{this}: Image encoding field is not set!");
+                RosLogger.Error($"{ToString()}: Image encoding field is not set!");
                 return true;
             }
 
@@ -358,13 +358,13 @@ namespace Iviz.Controllers
         {
             if (msg.Format.Length == 0)
             {
-                RosLogger.Error($"{this}: Image format field is not set!");
+                RosLogger.Error($"{ToString()}: Image format field is not set!");
                 return true;
             }
 
             if (msg.Data.Length == 0)
             {
-                RosLogger.Error($"{this}: Data field is not set!");
+                RosLogger.Error($"{ToString()}: Data field is not set!");
                 return true;
             }
 
@@ -405,7 +405,7 @@ namespace Iviz.Controllers
                     depthImageTexture.ProcessJpeg(msg.Data, PostProcess);
                     break;
                 default:
-                    RosLogger.Error($"{this}: Unknown format '{msg.Format}'");
+                    RosLogger.Error($"{ToString()}: Unknown format '{msg.Format}'");
                     GameThread.PostInListenerQueue(PostProcess);
                     break;
             }
@@ -428,20 +428,20 @@ namespace Iviz.Controllers
                 // basic checks
                 if (msg.Data.Length < msg.Width * msg.Height)
                 {
-                    RosLogger.Error($"{this}: Image data is too small!");
+                    RosLogger.Error($"{ToString()}: Image data is too small!");
                     return true;
                 }
 
                 if (msg.Step < msg.Width || msg.Data.Length < msg.Step * msg.Height)
                 {
-                    RosLogger.Error($"{this}: Image step does not correspond to image size!");
+                    RosLogger.Error($"{ToString()}: Image step does not correspond to image size!");
                     return true;
                 }
             }
 
             if (msg.Encoding.Length == 0)
             {
-                RosLogger.Error($"{this}: Image encoding field is not set!");
+                RosLogger.Error($"{ToString()}: Image encoding field is not set!");
                 return true;
             }
 
@@ -478,13 +478,13 @@ namespace Iviz.Controllers
         {
             if (msg.Format.Length == 0)
             {
-                RosLogger.Error($"{this}: Image format field is not set!");
+                RosLogger.Error($"{ToString()}: Image format field is not set!");
                 return true;
             }
 
             if (msg.Data.Length == 0)
             {
-                RosLogger.Error($"{this}: Data field is not set!");
+                RosLogger.Error($"{ToString()}: Data field is not set!");
                 return true;
             }
 
@@ -513,7 +513,7 @@ namespace Iviz.Controllers
                     colorImageTexture.ProcessJpeg(msg.Data, PostProcess);
                     break;
                 default:
-                    RosLogger.Error($"{this}: Unknown format '{msg.Format}'");
+                    RosLogger.Error($"{ToString()}: Unknown format '{msg.Format}'");
                     PostProcess();
                     break;
             }
@@ -526,7 +526,7 @@ namespace Iviz.Controllers
             var intrinsic = new Intrinsic(info.K);
             if (!intrinsic.IsValid)
             {
-                RosLogger.Error($"{this}: Ignoring invalid intrinsic {intrinsic.ToString()}");
+                RosLogger.Error($"{ToString()}: Ignoring invalid intrinsic {intrinsic.ToString()}");
                 return;
             }
 

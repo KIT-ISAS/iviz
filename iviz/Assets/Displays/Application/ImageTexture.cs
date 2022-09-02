@@ -6,11 +6,11 @@ using Iviz.Common;
 using Iviz.Core;
 using Iviz.ImageDecoders;
 using Iviz.Resources;
-using MarcusW.VncClient.Protocol.Implementation.Native;
 using Unity.Collections;
 using UnityEngine;
 using Vector2 = UnityEngine.Vector2;
 using Vector4 = UnityEngine.Vector4;
+using MarcusW.VncClient.Protocol.Implementation.Native; // jpeg-turbo stuff
 
 namespace Iviz.Displays
 {
@@ -156,7 +156,7 @@ namespace Iviz.Displays
 
             if (data.Length < 8)
             {
-                RosLogger.Error($"{this}: Error processing PNG image. Data array is too short to be a PNG file");
+                RosLogger.Error($"{ToString()}: Error processing PNG image. Data array is too short to be a PNG file");
                 GameThread.PostInListenerQueue(onFinished);
                 return;
             }
@@ -169,7 +169,7 @@ namespace Iviz.Displays
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Error processing PNG image", e);
+                    RosLogger.Error($"{ToString()}: Error processing PNG image", e);
                     GameThread.PostInListenerQueue(onFinished);
                 }
             });
@@ -186,7 +186,8 @@ namespace Iviz.Displays
                 var info = pngDecoder.PngInfo;
                 if (info.Width >= Settings.MaxTextureSize || info.Height >= Settings.MaxTextureSize)
                 {
-                    RosLogger.Error($"{this}: Error processing PNG image. Required destination buffer is too large");
+                    RosLogger.Error(
+                        $"{ToString()}: Error processing PNG image. Required destination buffer is too large");
                     GameThread.PostInListenerQueue(onFinished);
                     return;
                 }
@@ -203,7 +204,7 @@ namespace Iviz.Displays
 
                 if (encoding == null)
                 {
-                    RosLogger.Error($"{this}: Ignoring PNG with unsupported encoding '{info.ColorType}'");
+                    RosLogger.Error($"{ToString()}: Ignoring PNG with unsupported encoding '{info.ColorType}'");
                     GameThread.PostInListenerQueue(onFinished);
                     return;
                 }
@@ -240,7 +241,7 @@ namespace Iviz.Displays
 
             if (data.Length < 2)
             {
-                RosLogger.Error($"{this}: Error processing JPG image. Data array is too short to be a JPG file");
+                RosLogger.Error($"{ToString()}: Error processing JPG image. Data array is too short to be a JPG file");
                 GameThread.PostInListenerQueue(onFinished);
                 return;
             }
@@ -253,7 +254,7 @@ namespace Iviz.Displays
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Error processing JPG image", e);
+                    RosLogger.Error($"{ToString()}: Error processing JPG image", e);
                     GameThread.PostInListenerQueue(onFinished);
                 }
             });
@@ -270,7 +271,8 @@ namespace Iviz.Displays
                 var info = jpegDecoder.JpegInfo;
                 if (info.Width >= Settings.MaxTextureSize || info.Height >= Settings.MaxTextureSize)
                 {
-                    RosLogger.Error($"{this}: Error processing JPG image. Required destination buffer is too large");
+                    RosLogger.Error(
+                        $"{ToString()}: Error processing JPG image. Required destination buffer is too large");
                     GameThread.PostInListenerQueue(onFinished);
                     return;
                 }
@@ -287,7 +289,7 @@ namespace Iviz.Displays
 
                 if (encoding == null)
                 {
-                    RosLogger.Error($"{this}: Ignoring PNG with unsupported encoding '{info.Colorspace}'");
+                    RosLogger.Error($"{ToString()}: Ignoring PNG with unsupported encoding '{info.Colorspace}'");
                     GameThread.PostInListenerQueue(onFinished);
                     return;
                 }
@@ -326,22 +328,22 @@ namespace Iviz.Displays
         public void Set(int width, int height, string encoding, ReadOnlySpan<byte> data, bool generateMipmaps = false)
         {
             ThrowHelper.ThrowIfNull(encoding, nameof(encoding));
-            
+
             if (width < 0 || height < 0)
             {
-                RosLogger.Error($"{this}: Invalid size");
+                RosLogger.Error($"{ToString()}: Invalid size");
                 return;
             }
-            
+
             if (width >= Settings.MaxTextureSize || height >= Settings.MaxTextureSize)
             {
-                RosLogger.Error($"{this}: Required destination buffer is too large");
+                RosLogger.Error($"{ToString()}: Required destination buffer is too large");
                 return;
             }
 
             if (FieldSizeFromEncoding(encoding) is not { } bpp)
             {
-                RosLogger.Error($"{this}: Unsupported encoding '{encoding}'");
+                RosLogger.Error($"{ToString()}: Unsupported encoding '{encoding}'");
                 return;
             }
 
@@ -351,7 +353,7 @@ namespace Iviz.Displays
             if (data.Length < expectedLength)
             {
                 RosLogger.Error(
-                    $"{this}: Invalid image! Expected at least {(size * bpp).ToString()} bytes, " +
+                    $"{ToString()}: Invalid image! Expected at least {(size * bpp).ToString()} bytes, " +
                     $"but received {data.Length.ToString()}");
 
                 return;
@@ -412,7 +414,7 @@ namespace Iviz.Displays
                 normalizationFactor = 1;
                 return;
             }
-            
+
             Texture2D texture;
             Vector2 intensityBounds;
             switch (encoding.ToUpperInvariant())
@@ -567,7 +569,7 @@ namespace Iviz.Displays
             if (pickedColor is not { } validatedColor)
             {
                 color = default;
-                RosLogger.Debug($"{this}: Unhandled format {format}");
+                RosLogger.Debug($"{ToString()}: Unhandled format {format}");
                 return false;
             }
 

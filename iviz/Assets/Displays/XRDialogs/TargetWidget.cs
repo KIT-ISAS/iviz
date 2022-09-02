@@ -136,7 +136,7 @@ namespace Iviz.Displays.XR
             }
         }
 
-        public Color SecondaryColor
+        public Color SecondColor
         {
             get => secondaryColor;
             set
@@ -151,7 +151,7 @@ namespace Iviz.Displays.XR
         {
             Lines.ElementScale = 0.05f;
             Color = Color;
-            SecondaryColor = SecondaryColor;
+            SecondColor = SecondColor;
 
             TargetScale = Vector2.one;
             Mode = ModeType.Square;

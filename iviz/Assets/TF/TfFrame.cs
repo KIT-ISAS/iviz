@@ -54,14 +54,19 @@ namespace Iviz.Controllers.TF
         /// </summary>
         public Pose AbsoluteUnityPose => Transform.AsPose();
 
-        public sealed override TfFrame? Parent
+        public new TfFrame? Parent
         {
             get => base.Parent;
             set
             {
                 if (!TrySetParent(value))
                 {
-                    RosLogger.Error($"{this}: Failed to set parent '{value?.Id ?? "null"}'");
+                    string errorMsg = ToString() + (
+                        value == null
+                            ? ": Failed to reset parent"
+                            : $": Failed to set parent '{value.Id}'"
+                    );
+                    RosLogger.Error(errorMsg);
                 }
             }
         }
@@ -76,10 +81,10 @@ namespace Iviz.Controllers.TF
         internal void AddListener(FrameNode frame)
         {
             ThrowHelper.ThrowIfNull(frame, nameof(frame));
-            
+
             if (!frame.IsAlive)
             {
-                Debug.LogWarning($"{this}: Rejecting listener node '{frame}' that was already disposed.");
+                Debug.LogWarning($"{ToString()}: Rejecting listener node '{frame}' that was already disposed.");
                 return;
             }
 
@@ -126,7 +131,7 @@ namespace Iviz.Controllers.TF
         {
             if (listeners != null && listeners.RemoveAll(listener => !listener.IsAlive) != 0)
             {
-                Debug.LogWarning($"{this}: Frame has a listener that was previously destroyed.");
+                Debug.LogWarning($"{ToString()}: Frame has a listener that was previously destroyed.");
             }
 
             if (HasNoListeners && IsChildless)
@@ -173,7 +178,7 @@ namespace Iviz.Controllers.TF
             {
                 return;
             }
-            
+
             if (!localPose.EqualsApprox(newPose))
             {
                 Transform.SetLocalPose(localPose = newPose);

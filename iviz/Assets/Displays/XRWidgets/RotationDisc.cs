@@ -10,7 +10,7 @@ using UnityEngine;
 namespace Iviz.Displays.XR
 {
     public sealed class RotationDisc : MonoBehaviour,
-        IWidgetWithColor, IWidgetWithSecondaryScale, IWidgetCanBeRotated, IRecyclable
+        IWidgetWithColor, IWidgetCanBeRotated, IRecyclable
     {
         [SerializeField] CirclePlaneDraggable? planeCircle;
         [SerializeField] CircleFixedDistanceDraggable? fixedCircle;
@@ -49,7 +49,7 @@ namespace Iviz.Displays.XR
             }
         }
 
-        public Color SecondaryColor
+        public Color SecondColor
         {
             get => secondaryColor;
             set
@@ -60,7 +60,7 @@ namespace Iviz.Displays.XR
             }
         }
 
-        public float SecondaryScale
+        public float SecondScale
         {
             set => Disc.localScale = value * 0.5f * Vector3.one;
         }
@@ -75,7 +75,7 @@ namespace Iviz.Displays.XR
         void Awake()
         {
             Color = Color;
-            SecondaryColor = SecondaryColor;
+            SecondColor = SecondColor;
             Glow.Visible = false;
 
             PartialLines.ElementScale = 0.02f;
@@ -114,7 +114,7 @@ namespace Iviz.Displays.XR
 
             draggable.EndDragging += () =>
             {
-                Outer.Color = SecondaryColor;
+                Outer.Color = SecondColor;
                 Outer.EmissiveColor = Color.black;
                 Glow.Visible = false;
 
@@ -187,8 +187,8 @@ namespace Iviz.Displays.XR
             PartialLines.Reset();
 
             Color = Color;
-            SecondaryColor = SecondaryColor;
-            SecondaryScale = 1;
+            SecondColor = SecondColor;
+            SecondScale = 1;
             Glow.Visible = false;
         }
     }

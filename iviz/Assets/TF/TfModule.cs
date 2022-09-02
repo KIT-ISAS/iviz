@@ -323,14 +323,15 @@ namespace Iviz.Controllers.TF
                 ? parentIdUnchecked
                 : parentIdUnchecked[1..];
 
-            if (child.Parent != null && parentId == child.Parent.Id)
+            var currentParent = child.Parent;
+            if (currentParent != null && parentId == currentParent.Id)
             {
                 child.SetLocalPose(unityPose);
             }
             else
             {
-                var parent = GetOrCreateFrame(parentId);
-                if (child.TrySetParent(parent))
+                var newParent = GetOrCreateFrame(parentId);
+                if (child.TrySetParent(newParent))
                 {
                     child.SetLocalPose(unityPose);
                 }

@@ -75,7 +75,7 @@ namespace Iviz.Ros
                 }
                 catch (RoslibException e)
                 {
-                    RosLogger.Error($"{this}: Failed to advertise topic '{topic}' (try {t.ToString()}): ", e);
+                    RosLogger.Error($"{ToString()}: Failed to advertise topic '{topic}' (try {t.ToString()}): ", e);
                     await Task.Delay(WaitBetweenRetriesInMs, token);
                 }
             }

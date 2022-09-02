@@ -103,6 +103,8 @@ MonoBehaviour:
     type: 3}
   TrajectoryDisc: {fileID: 6036581522244349746, guid: c287762600d084ed6be063bf0f5a2ec8,
     type: 3}
+  TrajectoryDisc3D: {fileID: 6036581522244349746, guid: b49e1346d66ea49518b8c2f8bac64f6c,
+    type: 3}
   Tooltip: {fileID: 2498166935032724989, guid: 6303af998896f4ad29bf3fbf96bd0cdd, type: 3}
   TargetArea: {fileID: 5887126199942291436, guid: 409cbf21c450241b79b9e4327b57da61,
     type: 3}

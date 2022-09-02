@@ -168,9 +168,9 @@ namespace Iviz.Core
             }
 
             int actionsCount = actionsQueue.Count; // avoid processing new entries
-            foreach (int _ in ..actionsCount)
+            for (int i = 0; i < actionsCount; i++)
             {
-                if (!actionsQueue.TryDequeue(out Action action))
+                if (!actionsQueue.TryDequeue(out var action))
                 {
                     break;
                 }
@@ -200,7 +200,8 @@ namespace Iviz.Core
                 RosLogger.Error($"{ToString()}: Error during {nameof(ListenersEveryFrame)}", e);
             }
 
-            foreach (int _ in ..listenerQueue.Count)
+            int listenerCount = listenerQueue.Count;
+            for (int i = 0; i < listenerCount; i++)
             {
                 if (!listenerQueue.TryDequeue(out Action action))
                 {

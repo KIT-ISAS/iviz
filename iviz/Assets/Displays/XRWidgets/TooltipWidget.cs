@@ -1,9 +1,6 @@
 #nullable enable
 
-using System;
 using Iviz.Core;
-using Iviz.Displays;
-using Iviz.Displays.XR;
 using UnityEngine;
 
 namespace Iviz.Displays.XR
@@ -34,7 +31,7 @@ namespace Iviz.Displays.XR
             set => Tooltip.Color = value;
         }
 
-        public Color SecondaryColor
+        public Color SecondColor
         {
             set => Tooltip.CaptionColor = value;
         }

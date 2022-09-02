@@ -62,7 +62,7 @@ namespace Iviz.App.ARDialogs
             }
         }
 
-        public Color SecondaryColor
+        public Color SecondColor
         {
             get => secondaryColor;
             set
@@ -87,7 +87,7 @@ namespace Iviz.App.ARDialogs
             Line.Visible = false;
 
             Color = Color;
-            SecondaryColor = SecondaryColor;
+            SecondColor = SecondColor;
 
             Glow.Visible = false;
 

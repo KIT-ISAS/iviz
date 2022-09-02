@@ -49,6 +49,7 @@ namespace Iviz.Resources
         public ResourceKey<GameObject> SpringDisc { get; }
         public ResourceKey<GameObject> SpringDisc3D { get; }
         public ResourceKey<GameObject> TrajectoryDisc { get; }
+        public ResourceKey<GameObject> TrajectoryDisc3D { get; }
         public ResourceKey<GameObject> Tooltip { get; }
         public ResourceKey<GameObject> TooltipWidget { get; }
         public ResourceKey<GameObject> TargetArea { get; }
@@ -112,6 +113,7 @@ namespace Iviz.Resources
             SpringDisc = Create(appAssetHolder.SpringDisc, nameof(appAssetHolder.SpringDisc));
             SpringDisc3D = Create(appAssetHolder.SpringDisc3D, nameof(appAssetHolder.SpringDisc3D));
             TrajectoryDisc = Create(appAssetHolder.TrajectoryDisc, nameof(appAssetHolder.TrajectoryDisc));
+            TrajectoryDisc3D = Create(appAssetHolder.TrajectoryDisc3D, nameof(appAssetHolder.TrajectoryDisc3D));
             Tooltip = Create(appAssetHolder.Tooltip, nameof(appAssetHolder.Tooltip));
             TooltipWidget = Create(appAssetHolder.TooltipWidget, nameof(appAssetHolder.TooltipWidget));
             TargetArea = Create(appAssetHolder.TargetArea, nameof(appAssetHolder.TargetArea));

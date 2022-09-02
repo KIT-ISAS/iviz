@@ -25,22 +25,26 @@ namespace Iviz.Ros
         readonly ConcurrentQueue<T> messageQueue = new();
         readonly Action<T>? handlerOnGameThread;
         readonly Func<T, IRosConnection, bool>? directHandler;
-        readonly List<T> messageHelper = new(32);
+        
+        T?[] messageHelper = new T[32];
 
         int droppedMsgCounter;
         long lastMsgBytes;
         int totalMsgCounter;
         int recentMsgCounter;
         RosTransportHint transportHint;
+        bool subscribed;
 
-        bool CallbackInGameThread => handlerOnGameThread != null;
         int NumPublishers => Connection.GetNumPublishers(Topic);
 
         public string Topic { get; }
         public string Type { get; }
         public RosListenerStats Stats { get; private set; }
-        public int MaxQueueSize { get; set; } = 1;
-        public bool Subscribed { get; private set; }
+        
+        public int MaxQueueSize = 1;
+        
+        // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
+        public bool Subscribed => subscribed;
 
         public RosTransportHint TransportHint
         {
@@ -80,7 +84,7 @@ namespace Iviz.Ros
             handlerOnGameThread = handler;
             GameThread.ListenersEveryFrame += CallHandlerOnGameThread;
             Connection.Subscribe(this);
-            Subscribed = true;
+            subscribed = true;
         }
 
         /// <summary>
@@ -102,7 +106,7 @@ namespace Iviz.Ros
             ThrowHelper.ThrowIfNull(handler, nameof(handler));
             directHandler = handler;
             Connection.Subscribe(this);
-            Subscribed = true;
+            subscribed = true;
         }
 
         /// <summary>
@@ -135,7 +139,7 @@ namespace Iviz.Ros
         public void Dispose()
         {
             GameThread.EverySecond -= UpdateStats;
-            if (CallbackInGameThread)
+            if (handlerOnGameThread != null)
             {
                 GameThread.ListenersEveryFrame -= CallHandlerOnGameThread;
             }
@@ -161,7 +165,7 @@ namespace Iviz.Ros
             }
 
             Connection.Unsubscribe(this);
-            Subscribed = false;
+            subscribed = false;
         }
 
         /// <summary>
@@ -175,7 +179,7 @@ namespace Iviz.Ros
             }
 
             Connection.Subscribe(this);
-            Subscribed = true;
+            subscribed = true;
         }
 
         public void SetSuspend(bool value)
@@ -203,12 +207,12 @@ namespace Iviz.Ros
 
         internal void EnqueueMessage(in T msg, IRosConnection receiver)
         {
-            if (!Subscribed)
+            if (!subscribed)
             {
                 return;
             }
 
-            if (!CallbackInGameThread)
+            if (handlerOnGameThread == null)
             {
                 CallHandlerDirect(msg, receiver);
                 return;
@@ -225,31 +229,33 @@ namespace Iviz.Ros
 
         void CallHandlerOnGameThread()
         {
-            if (!Subscribed || handlerOnGameThread == null)
+            if (!subscribed || handlerOnGameThread == null)
             {
                 return;
             }
-
-            if (messageQueue.IsEmpty)
-            {
-                return;
-            }
-            
-            messageHelper.Clear();
 
             int messageCount = messageQueue.Count;
-            
-            foreach (int _ in ..messageCount) // copy a fixed amount, in case messages are still being added
+            if (messageCount == 0)
             {
-                if (messageQueue.TryDequeue(out T t))
-                {
-                    messageHelper.Add(t);
-                }
+                return;
             }
 
-            int start = Mathf.Max(0, messageHelper.Count - MaxQueueSize); // should be 0 unless MaxQueueSize changed
-            foreach (var msg in messageHelper.Skip(start))
+            if (messageHelper.Length < messageCount)
             {
+                messageHelper = new T[Mathf.NextPowerOfTwo(messageCount)];
+            }
+
+            for (int i = 0; i < messageCount; i++) // copy a fixed amount, in case messages are still being added
+            {
+                messageQueue.TryDequeue(out messageHelper[i]);
+            }
+
+            int start = Mathf.Max(0, messageCount - MaxQueueSize); // should be 0 unless MaxQueueSize changed
+            for (int i = start; i < messageCount; i++)
+            {
+                var msg = messageHelper[i]!;
+                messageHelper[i] = default; // early mark for collect gc
+                
                 try
                 {
                     Interlocked.Add(ref lastMsgBytes, msg.RosMessageLength);
@@ -257,7 +263,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this}: Error during callback", e);
+                    RosLogger.Error($"{ToString()}: Error during callback", e);
                 }
             }
 
@@ -284,7 +290,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Error during callback", e); // happens with annoying frequency
+                RosLogger.Error($"{ToString()}: Error during callback", e); // happens with annoying frequency
                 processed = false;
             }
 

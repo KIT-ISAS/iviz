@@ -192,7 +192,7 @@ namespace Iviz.Ros
             client = null;
         }
 
-        protected override async ValueTask<bool> ConnectAsync()
+        internal async ValueTask<bool> ConnectAsync()
         {
             if (MyId == null)
             {
@@ -381,8 +381,9 @@ namespace Iviz.Ros
 
         static void SetEnvironmentVariable(string variable, string? value)
         {
-            RosLogger.Info($"[{nameof(RosConnection)}]: Setting environment variable {variable}=" +
-                           $"{(value != null ? $"\"{value}\"" : "(none)")}");
+            string valueStr = value != null ? $"\"{value}\"" : "(none)";
+
+            RosLogger.Info($"[{nameof(RosConnection)}]: Setting environment variable {variable}={valueStr}");
 
             try
             {
@@ -681,17 +682,11 @@ namespace Iviz.Ros
             RosLogger.Internal("Disconnecting...");
             await DisposeClientAsync();
             RosLogger.Internal("<b>Disconnected.</b>");
-            if (watchdogTask != null)
-            {
-                await watchdogTask.AwaitNoThrow(this);
-                watchdogTask = null;
-            }
-
-            if (ntpTask != null)
-            {
-                await ntpTask.AwaitNoThrow(this);
-                ntpTask = null;
-            }
+            
+            await watchdogTask.AwaitNoThrow(this);
+            watchdogTask = null;
+            await ntpTask.AwaitNoThrow(this);
+            ntpTask = null;
 
             base.Disconnect();
         }
@@ -1135,7 +1130,7 @@ namespace Iviz.Ros
         }
 
         public async ValueTask<(RosValue result, string? errorMsg)> GetParameterAsync(string parameter,
-            int timeoutInMs, string? nodeName, CancellationToken token)
+            string? nodeName, int timeoutInMs, CancellationToken token)
         {
             ThrowHelper.ThrowIfNull(parameter, nameof(parameter));
 

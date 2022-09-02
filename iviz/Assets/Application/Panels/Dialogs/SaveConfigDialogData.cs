@@ -50,7 +50,7 @@ namespace Iviz.App
             switch (subIndex)
             {
                 case 0:
-                    ModuleListPanel.SaveStateConfigurationAsync(files[index].FileName);
+                    _ = ModuleListPanel.SaveStateConfigurationAsync(files[index].FileName);
                     Close();
                     break;
                 case 1:
@@ -73,7 +73,7 @@ namespace Iviz.App
         {
             string name = panel.Input.Value;
             string validatedName = name.HasSuffix(Suffix) ? name : name + Suffix;
-            ModuleListPanel.SaveStateConfigurationAsync(validatedName);
+            _ = ModuleListPanel.SaveStateConfigurationAsync(validatedName);
             Close();
         }
     }

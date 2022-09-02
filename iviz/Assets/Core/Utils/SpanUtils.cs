@@ -24,8 +24,7 @@ namespace Iviz.Core
         {
             return texture.GetRawTextureData<byte>().GetUnsafePtr();
         }
-
-
+        
         public static Span<T> AsSpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
             return new Span<T>(array.GetUnsafePtr(), array.Length);
@@ -46,15 +45,18 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this List<T> list) where T : unmanaged
         {
-            return new Span<T>(ExtractArray(list), 0, list.Count);
+            return new Span<T>((T[]?)ExtractArray(list), 0, list.Count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this List<T> list) where T : unmanaged
         {
-            return new ReadOnlySpan<T>(ExtractArray(list), 0, list.Count);
+            int count = list.Count;
+            return count == 0 
+                ? default 
+                : new ReadOnlySpan<T>((T[]?)ExtractArray(list), 0, count);
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyFrom<T>(this Texture2D dst, ReadOnlySpan<T> srcSpan) where T : unmanaged
         {
@@ -92,18 +94,18 @@ namespace Iviz.Core
             return MemoryMarshal.Cast<byte, T>(src);
         }
 
-        public static Span<T> Cast<T>(this Span<byte> src) where T : unmanaged
-        {
-            return MemoryMarshal.Cast<byte, T>(src);
-        }
+        public static Span<T> Cast<T>(this Span<byte> src) where T : unmanaged =>  MemoryMarshal.Cast<byte, T>(src);
 
+        public static T Read<T>(this ReadOnlySpan<byte> span) where T : unmanaged => MemoryMarshal.Read<T>(span);
+
+        
         [StructLayout(LayoutKind.Explicit)]
         struct ListConverter
         {
             [UsedImplicitly]
-            class OpenList
+            sealed class OpenList
             {
-                public Array? items;
+                public readonly Array? items;
             }
 
             [FieldOffset(0)] public IList list;
@@ -112,9 +114,9 @@ namespace Iviz.Core
             public Array? ExtractArray() => openList.items;
         }
 
-        static T[] ExtractArray<T>(List<T> list)
+        static Array? ExtractArray(IList list)
         {
-            return (T[]?)new ListConverter { list = list }.ExtractArray() ?? Array.Empty<T>();
+            return new ListConverter { list = list }.ExtractArray();
         }
 
         /// <summary>
@@ -125,26 +127,19 @@ namespace Iviz.Core
 
 
         /*
-        [StructLayout(LayoutKind.Explicit)]
         ref struct GetLengthHelper
         {
-            [FieldOffset(0)] public Span<byte> span;
-            [FieldOffset(0)] public OpenSpan open;
-            
-            public readonly struct OpenSpan
-            {
-                readonly IntPtr ptr;
-                public readonly int length;
-            }
+            public Span<byte> span;
+            public int length;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining), Preserve, SkipLocalsInit]
         public static int GetLength(this Span<byte> span)
         {
             GetLengthHelper h;
-            h.open = default;
             h.span = span;
-            return h.open.length;
+            h.length = 0;
+            return Unsafe.Subtract(ref h.length, 1);
         }
         */
     }

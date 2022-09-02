@@ -423,7 +423,7 @@ namespace Iviz.Controllers
 
             async ValueTask LoadRobotAsync()
             {
-                robotLoadingTask = newRobot.StartAsync(RosManager.ServiceProvider, KeepMeshMaterials).AsTask();
+                robotLoadingTask = newRobot.StartAsync(RosManager.Connection, KeepMeshMaterials).AsTask();
                 await robotLoadingTask.AwaitNoThrow(this);
                 UpdateStartTaskStatus();
             }

@@ -9,9 +9,10 @@ using Iviz.Sdf;
 using Iviz.Tools;
 using UnityEngine;
 
+/*
 namespace Iviz.Displays.XR
 {
-    public sealed class BoundaryCheckWidget : MonoBehaviour, IWidgetWithBoundaries, IWidgetWithSecondaryScale
+    public sealed class BoundaryCheckWidget : MonoBehaviour, IWidgetWithBoundaries, IWidgetWithSecondScale
     {
         FrameNode? mainNode;
         BoxCollider? mainCollider;
@@ -124,3 +125,4 @@ namespace Iviz.Displays.XR
         }
     }
 }
+*/

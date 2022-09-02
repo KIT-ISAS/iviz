@@ -14,22 +14,31 @@ namespace Iviz.Displays.XR
     public interface IWidgetWithColor : IWidget
     {
         Color Color { set; }
-        Color SecondaryColor { set; }
+
+        Color SecondColor
+        {
+            set { }
+        }
     }
 
     public interface IWidgetWithCaption : IWidget
     {
         string Caption { set; }
+
+        string SecondCaption
+        {
+            set { }
+        }
     }
 
     public interface IWidgetWithScale : IWidget
     {
         float Scale { set; }
-    }
 
-    public interface IWidgetWithSecondaryScale : IWidget
-    {
-        float SecondaryScale { set; }
+        float SecondScale
+        {
+            set { }
+        }
     }
 
     public interface IWidgetCanBeMoved : IWidget
@@ -41,24 +50,19 @@ namespace Iviz.Displays.XR
     {
         public event Action<float>? Moved;
     }
-    
+
     public interface IWidgetCanBeResized : IWidget
     {
         public event Action<Bounds>? Resized;
-    }    
-    
+    }
+
     public interface IWidgetCanBeClicked : IWidget
     {
         public event Action<int>? Clicked;
-    }        
-
-    public interface IWidgetWithBoundary : IWidget
-    {
-        BoundingBox Boundary { set; }
     }
 
-    public interface IWidgetWithBoundaries : IWidget
+    public interface IWidgetProvidesTrajectory : IWidget
     {
-        void Set(BoundingBoxStamped baseBox, IReadOnlyList<BoundingBoxStamped> boxes);
+        public event Action<List<Vector3>, float>? ProvidedTrajectory;
     }
 }

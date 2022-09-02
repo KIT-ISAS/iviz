@@ -129,7 +129,7 @@ namespace Iviz.Displays
             }
         }
 
-        async void CheckMesh()
+        void CheckMesh()
         {
             if (!dirty)
             {

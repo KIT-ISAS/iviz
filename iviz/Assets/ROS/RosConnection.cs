@@ -13,7 +13,7 @@ namespace Iviz.Ros
     /// Partial implementation of a ROS connection. The rest is in <see cref="RoslibConnection"/>.
     /// Here we only handle initializing connections and task queues.
     /// </summary>
-    internal abstract class RosConnection
+    internal class RosConnection
     {
         const int TaskWaitTimeInMs = 2000;
         const int ConnectionRetryTimeInMs = TaskWaitTimeInMs;
@@ -132,11 +132,12 @@ namespace Iviz.Ros
             try
             {
                 lastConnectionTry = now;
-                connectionResult = await ConnectAsync();
+                connectionResult =
+                    await ((RoslibConnection)this).ConnectAsync(); // hack! but faster than virtual dispatch
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Unexpected error in {nameof(TryToConnect)}", e);
+                RosLogger.Error($"{ToString()}: Unexpected error in {nameof(TryToConnect)}", e);
                 return;
             }
             finally
@@ -173,8 +174,6 @@ namespace Iviz.Ros
             tryConnectOnce = true;
             Signal();
         }
-
-        protected abstract ValueTask<bool> ConnectAsync();
 
         public virtual void Disconnect()
         {

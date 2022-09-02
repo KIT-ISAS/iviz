@@ -1,7 +1,6 @@
 ﻿#nullable enable
 
 using System;
-using IServiceProvider = Iviz.Displays.IServiceProvider;
 
 namespace Iviz.Ros
 {
@@ -15,7 +14,6 @@ namespace Iviz.Ros
         static Exception NewDisposeException() =>
             new ObjectDisposedException("The ROS manager has already been disposed");
 
-        public static IServiceProvider ServiceProvider => Connection;
         public static string? MyId => instance?.connection.MyId;
         public static bool IsConnected => instance?.connection.IsConnected ?? false;
         public static bool HasInstance => instance != null;

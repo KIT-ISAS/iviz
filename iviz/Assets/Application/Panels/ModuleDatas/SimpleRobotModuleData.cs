@@ -53,7 +53,7 @@ namespace Iviz.App
 
             if (!string.IsNullOrWhiteSpace(RobotController.SourceParameter))
             {
-                RobotController.TryLoadFromSourceParameterAsync(RobotController.SourceParameter);
+                _ = RobotController.TryLoadFromSourceParameterAsync(RobotController.SourceParameter);
             }
 
             panel.HelpText.Text = RobotController.HelpText;

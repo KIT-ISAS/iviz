@@ -703,7 +703,7 @@ namespace Iviz.Displays
                     Pose.identity.WithPosition(axis * value),
                 _ => (Pose?)null
             };
-
+            
             if (unityPose is not { } validatedPose)
             {
                 RosLogger.Error($"{ToString()}: Failed to set value for joint {jointName}. " +
@@ -712,8 +712,9 @@ namespace Iviz.Displays
                 return false;
             }
 
+            var originalPose = joint.Origin.ToPose();
             var jointObject = jointObjects[jointName];
-            jointObject.transform.SetLocalPose(validatedPose);
+            jointObject.transform.SetLocalPose(originalPose.Multiply(validatedPose));
             return true;
         }
 
@@ -822,6 +823,13 @@ namespace Iviz.Displays
                 .Append("<b>>> Link ").Append(link.Name).Append("</b>")
                 .Append("</color>")
                 .AppendLine();
+
+            if (link.Visuals.Count == 0 && link.Collisions.Count == 0)
+            {
+                builder.Append(' ', level).Append("(No visuals or colliders)").AppendLine();
+                return;
+            }
+            
             foreach (var visual in link.Visuals)
             {
                 builder.Append(' ', level)

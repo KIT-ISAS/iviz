@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Displays.XR;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
@@ -16,6 +14,8 @@ namespace Iviz.Controllers
 {
     public sealed class RobotPreviewHandler : VizHandler
     {
+        readonly Dictionary<string, RobotModel> cachedRobots = new();
+        
         public override string BriefDescription
         {
             get
@@ -47,7 +47,7 @@ namespace Iviz.Controllers
                     _ = HandleAddAsync(msg);
                     break;
                 default:
-                    RosLogger.Error($"{this}: Object '{msg.Id}' requested unknown " +
+                    RosLogger.Error($"{ToString()}: Object '{msg.Id}' requested unknown " +
                                     $"action {((int)msg.Action).ToString()}");
                     break;
             }
@@ -57,10 +57,10 @@ namespace Iviz.Controllers
         {
             if (string.IsNullOrWhiteSpace(msg.Id))
             {
-                RosLogger.Info($"{this}: Cannot add preview with empty id");
+                RosLogger.Info($"{ToString()}: Cannot add preview with empty id");
                 return;
             }
-            
+
             if (vizObjects.TryGetValue(msg.Id, out var existingObject))
             {
                 var previewObject = (PreviewObject)existingObject;
@@ -68,10 +68,11 @@ namespace Iviz.Controllers
                 return;
             }
 
-            string robotDescription;
+            RobotModel robot;
             if (msg.RobotDescription.Length != 0)
             {
-                robotDescription = msg.RobotDescription;
+                string robotDescription = msg.RobotDescription;
+                robot = new RobotModel(robotDescription);
             }
             else if (msg.SourceParameter.Length != 0)
             {
@@ -79,43 +80,62 @@ namespace Iviz.Controllers
                     await RosManager.Connection.GetParameterAsync(msg.SourceParameter, nodeName: msg.SourceNode);
                 if (errorMsg != null)
                 {
-                    RosLogger.Error($"{this}: Preview '{msg.Id}' failed to load parameter '{msg.SourceParameter}'. " +
-                                    $"Reason: {errorMsg}");
+                    RosLogger.Error(
+                        $"{ToString()}: Preview '{msg.Id}' failed to load parameter '{msg.SourceParameter}'. " +
+                        $"Reason: {errorMsg}");
                     return;
                 }
 
-                if (!parameter.TryGet(out robotDescription))
+                if (!parameter.TryGet(out string robotDescription))
                 {
-                    RosLogger.Error($"{this}: Preview '{msg.Id}' failed to load parameter '{msg.SourceParameter}'. " +
-                                    $"Reason: Parameter not a string.");
+                    RosLogger.Error(
+                        $"{ToString()}: Preview '{msg.Id}' failed to load parameter '{msg.SourceParameter}'. " +
+                        $"Reason: Parameter not a string.");
                     return;
                 }
+                
+                robot = new RobotModel(robotDescription);
             }
             else if (msg.SavedRobotName.Length != 0)
             {
-                bool result;
-                (result, robotDescription) = await Resource.TryGetRobotAsync(msg.SavedRobotName);
-                if (!result)
+                if (cachedRobots.TryGetValue(msg.SavedRobotName, out var existingRobot))
                 {
-                    RosLogger.Error(
-                        $"{this}: Preview '{msg.Id}' failed to load robot from saved name '{msg.SavedRobotName}'. " +
-                        $"Reason: {robotDescription}");
-                    return;
+                    robot = existingRobot.Clone();
+                }
+                else
+                {
+
+                    var (result, robotDescription) = await Resource.TryGetRobotAsync(msg.SavedRobotName);
+                    if (!result)
+                    {
+                        RosLogger.Error(
+                            $"{ToString()}: Preview '{msg.Id}' failed to load robot from saved name '{msg.SavedRobotName}'. " +
+                            $"Reason: {robotDescription}");
+                        return;
+                    }
+
+                    robot = new RobotModel(robotDescription);
+                    cachedRobots[msg.SavedRobotName] = robot;
                 }
             }
             else
             {
-                RosLogger.Error($"{this}: Preview '{msg.Id}' failed to load robot. All parameters were empty.");
+                RosLogger.Error($"{ToString()}: Preview '{msg.Id}' failed to load robot. All parameters were empty.");
                 return;
             }
-
-            var robot = new RobotModel(robotDescription);
 
             var vizObject = new PreviewObject(msg.Id, robot, $"{nameof(RobotPreview)} - {robot.Name}")
                 { Interactable = Interactable, Visible = Visible };
             vizObjects[vizObject.id] = vizObject;
-            
-            await robot.StartAsync();
+
+            try
+            {
+                await robot.StartAsync(RosManager.Connection, true, false);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{ToString()}: Preview '{msg.Id}' failed to initialize robot.", e);
+            }
         }
 
         // ----------------------------------------------
@@ -132,6 +152,12 @@ namespace Iviz.Controllers
 
             public void Update(RobotPreview msg)
             {
+                if (msg.JointNames.Length != msg.JointValues.Length)
+                {
+                    RosLogger.Error($"{ToString()}: Inconsistent lengths for joint names and values.");
+                    return;
+                }
+
                 if (msg.RenderAsOcclusionOnly != robot.OcclusionOnly)
                 {
                     robot.OcclusionOnly = msg.RenderAsOcclusionOnly;
@@ -157,12 +183,6 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                if (msg.JointNames.Length != msg.JointValues.Length)
-                {
-                    RosLogger.Error($"{this}: Inconsistent lengths for joint names and values.");
-                    return;
-                }
-
                 foreach (var (name, value) in msg.JointNames.Zip(msg.JointValues))
                 {
                     robot.TryWriteJoint(name, value);
@@ -174,7 +194,6 @@ namespace Iviz.Controllers
                 robot.Dispose();
                 base.Dispose();
             }
-            
         }
     }
 }

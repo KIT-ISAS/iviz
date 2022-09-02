@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
 
 namespace Iviz.Core
 {
@@ -43,4 +44,5 @@ namespace Iviz.Core
             return ptr.Reinterpret<TU>(Unsafe.SizeOf<TT>());
         }
     }
-}
+    }
+    
