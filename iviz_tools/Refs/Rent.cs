@@ -60,18 +60,7 @@ public readonly struct Rent<T> : IDisposable where T : unmanaged
                $"RealSize={(Array != null ? Array.Length : 0).ToString()}]";
     }
 
-    public ref T this[int index]
-    {
-        get
-        {
-            if ((uint)index >= Length)
-            {
-                Rent.ThrowOutOfRange();
-            }
-
-            return ref Array[index];
-        }
-    }
+    public ref T this[int index] => ref Array[index];
 
     public Span<T> AsSpan() => new(Array, 0, Length);
     public ReadOnlySpan<T> AsReadOnlySpan() => new(Array, 0, Length);
@@ -86,9 +75,66 @@ public readonly struct Rent<T> : IDisposable where T : unmanaged
     public static implicit operator ReadOnlyMemory<T>(Rent<T> rent) => new(rent.Array, 0, rent.Length);
 }
 
-public static class Rent
+public readonly struct Rent : IDisposable
 {
-    public static Rent<T> Empty<T>() where T : unmanaged => new(0);
+    public readonly int Length;
+    public readonly byte[] Array;
+
+    Rent(byte[] array, int length) => (Array, Length) = (array, length);
+
+    public Rent(int length)
+    {
+        switch (length)
+        {
+            case < 0:
+                ThrowArgumentNegative();
+                goto case 0; // unreachable
+            case 0:
+                Array = System.Array.Empty<byte>();
+                Length = 0;
+                break;
+            default:
+                Array = ArrayPool<byte>.Shared.Rent(length);
+                Length = length;
+                break;
+        }
+    }
+
+    public Rent(ReadOnlySpan<byte> span) : this(span.Length)
+    {
+        span.CopyTo(AsSpan());
+    }
+
+    public void Dispose()
+    {
+        if (Length > 0)
+        {
+            ArrayPool<byte>.Shared.Return(Array);
+        }
+    }
+
+    public override string ToString()
+    {
+        return $"[{nameof(Rent)} Type=byte Length={Length.ToString()} " +
+               $"RealSize={(Array != null ? Array.Length : 0).ToString()}]";
+    }
+    
+    public byte this[int index] => Array[index];
+    
+    public Span<byte> AsSpan() => new(Array, 0, Length);
+    public ReadOnlySpan<byte> AsReadOnlySpan() => new(Array, 0, Length);
+    public Span<byte> Slice(int start, int count) => new(Array, start, count);
+    public Memory<byte> AsMemory() => new(Array, 0, Length);
+    public RentEnumerator<byte> GetEnumerator() => new(Array, Length);
+    public Span<byte> this[Range range] => AsSpan()[range];
+    public Rent Resize(int newLength) => new(Array, newLength);
+    public static implicit operator Span<byte>(Rent rent) => rent.AsSpan();
+    public static implicit operator ReadOnlySpan<byte>(Rent rent) => rent.AsReadOnlySpan();
+    public static implicit operator Memory<byte>(Rent rent) => rent.AsMemory();
+    public static implicit operator ReadOnlyMemory<byte>(Rent rent) => new(rent.Array, 0, rent.Length);
+
+    public static Rent<T> Empty<T>() where T : unmanaged => default;
+    public static Rent Empty() => default;
 
     [DoesNotReturn]
     internal static void ThrowArgumentNegative() => throw new ArgumentException("Rent size cannot be negative");

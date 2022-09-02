@@ -7,7 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using JetBrains.Annotations;
@@ -102,13 +101,13 @@ public static class BaseUtils
     }
 
     /// <summary>
-    /// Copies the content of the string into a byte <see cref="Rent{T}"/>.
+    /// Copies the content of the string into a byte <see cref="Rent"/>.
     /// </summary>
     /// <param name="s"></param>
     /// <returns></returns>
-    public static Rent<byte> AsRent(this string s)
+    public static Rent AsRent(this string s)
     {
-        var bytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(s.Length));
+        var bytes = new Rent(Defaults.UTF8.GetMaxByteCount(s.Length));
         int size = Defaults.UTF8.GetBytes(s, 0, s.Length, bytes.Array, 0);
         return bytes.Resize(size);
     }
@@ -163,8 +162,6 @@ public static class BaseUtils
         ? Unsafe.ReadUnaligned<int>(ref array[0])
         : ThrowIndexOutOfRange();
 
-    public static T Read<T>(this ReadOnlySpan<byte> span) where T : unmanaged => MemoryMarshal.Read<T>(span);
-
     public static void WriteInt(this Span<byte> span, int t)
     {
         if (span.Length < sizeof(int))
@@ -174,8 +171,6 @@ public static class BaseUtils
 
         Unsafe.WriteUnaligned(ref span[0], t);
     }
-
-    public static void Write<T>(this Span<byte> span, T t) where T : unmanaged => MemoryMarshal.Write(span, ref t);
 
     [DoesNotReturn, AssertionMethod]
     public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);

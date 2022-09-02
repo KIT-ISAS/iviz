@@ -12,7 +12,7 @@ namespace Iviz.Tools;
 
 public static class StreamUtils
 {
-    public static ValueTask<bool> ReadChunkAsync(this TcpClient client, Rent<byte> buffer, CancellationToken token)
+    public static ValueTask<bool> ReadChunkAsync(this TcpClient client, Rent buffer, CancellationToken token)
     {
         return ReadChunkAsync(client, buffer.Array, buffer.Length, token);
     }
@@ -53,13 +53,13 @@ public static class StreamUtils
         const int bufferSize = 4096;
         if (toRead <= bufferSize)
         {
-            using var buffer = new Rent<byte>(toRead);
+            using var buffer = new Rent(toRead);
             return await ReadChunkAsync(client, buffer.Array, toRead, token);
         }
         else
         {
             int remaining = toRead;
-            using var buffer = new Rent<byte>(toRead);
+            using var buffer = new Rent(toRead);
             while (remaining > bufferSize)
             {
                 if (!await ReadChunkAsync(client, buffer.Array, bufferSize, token))
@@ -74,7 +74,7 @@ public static class StreamUtils
         }
     }
     
-    public static ValueTask<int> ReadChunkAsync(this UdpClient udpClient, Rent<byte> buffer, CancellationToken token)
+    public static ValueTask<int> ReadChunkAsync(this UdpClient udpClient, Rent buffer, CancellationToken token)
     {
         return ReadSubChunkAsync(udpClient.Client, buffer.Array, 0, buffer.Length, token);
     }
@@ -113,7 +113,7 @@ public static class StreamUtils
         }
     }
 
-    public static ValueTask WriteChunkAsync(this TcpClient client, Rent<byte> buffer, CancellationToken token) =>
+    public static ValueTask WriteChunkAsync(this TcpClient client, Rent buffer, CancellationToken token) =>
         WriteChunkAsync(client, buffer.Array, buffer.Length, token);
 
     public static async ValueTask WriteChunkAsync(this TcpClient client, byte[] buffer, int toWrite,
@@ -133,7 +133,7 @@ public static class StreamUtils
         }
     }
 
-    public static ValueTask<int> WriteChunkAsync(this UdpClient udpClient, Rent<byte> buffer, int toWrite,
+    public static ValueTask<int> WriteChunkAsync(this UdpClient udpClient, Rent buffer, int toWrite,
         CancellationToken token) => DoWriteChunkAsync(udpClient.Client, buffer.Array, 0, toWrite, token);
 
     static ValueTask<int> DoWriteChunkAsync(Socket socket, byte[] buffer, int offset, int toWrite,
@@ -158,7 +158,7 @@ public static class StreamUtils
         }
     }
 
-    public static async ValueTask WriteChunkAsync(this TcpClient client, Rent<byte> bytes, CancellationToken token,
+    public static async ValueTask WriteChunkAsync(this TcpClient client, Rent bytes, CancellationToken token,
         int timeoutInMs)
     {
         if (timeoutInMs == -1)
@@ -188,7 +188,7 @@ public static class StreamUtils
     {
         int totalLength = 4 * contents.Length + contents.Sum(entry => Defaults.UTF8.GetByteCount(entry));
 
-        using var array = new Rent<byte>(totalLength + 4);
+        using var array = new Rent(totalLength + 4);
 
         // ReSharper disable once UseAwaitUsing
         using var writer = new BinaryWriter(new MemoryStream(array.Array));

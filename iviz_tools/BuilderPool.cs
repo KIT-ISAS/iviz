@@ -223,12 +223,12 @@ public static class BuilderPool
         }
 
         /// <summary>
-        /// Copies the content of the string builder to a byte <see cref="Rent{T}"/>. 
+        /// Copies the content of the string builder to a byte <see cref="Rent"/>. 
         /// </summary>
-        public Rent<byte> AsRent()
+        public Rent AsRent()
         {
             int length = builder.Length;
-            var bytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(length));
+            var bytes = new Rent(Defaults.UTF8.GetMaxByteCount(length));
             int size;
 
             var mainChunk = Chunk;
@@ -270,7 +270,7 @@ public static class BuilderPool
             class OpenStringBuilder
             {
                 [UsedImplicitly]
-                public char[]? chunkChars;
+                public readonly char[]? chunkChars;
             }
 
             [FieldOffset(0)] public StringBuilder builder;
