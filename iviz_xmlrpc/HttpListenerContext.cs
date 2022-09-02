@@ -43,9 +43,9 @@ public sealed class HttpListenerContext : IDisposable
     /// <exception cref="ArgumentNullException">Thrown if msgOut is null</exception>
     /// <exception cref="TimeoutException">Thrown if the timeout wait expired</exception>
     /// <exception cref="OperationCanceledException">Thrown if the token expired</exception>
-    public async ValueTask RespondAsync(Rent<byte> msgOut, int timeoutInMs = 2000, CancellationToken token = default)
+    public async ValueTask RespondAsync(Rent msgOut, int timeoutInMs = 2000, CancellationToken token = default)
     {
-        Rent<byte> bytes;
+        Rent bytes;
         using (var str = BuilderPool.Rent())
         {
             str.Append("HTTP/1.0 200 OK\r\n");

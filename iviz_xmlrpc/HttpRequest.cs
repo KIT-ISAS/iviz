@@ -32,7 +32,7 @@ public sealed class HttpRequest : IDisposable
         return client.TryConnectAsync(remoteUri.Host, remoteUri.Port, token);
     }
 
-    Rent<byte> CreateRequest(int msgLength, bool keepAlive)
+    Rent CreateRequest(int msgLength, bool keepAlive)
     {
         using var str = BuilderPool.Rent();
 
@@ -48,9 +48,9 @@ public sealed class HttpRequest : IDisposable
         return str.AsRent();
     }
 
-    (Rent<byte>, Rent<byte>) CreateRequestGzipped(in Rent<byte> srcBytes, bool keepAlive = false)
+    (Rent header, Rent payload) CreateRequestGzipped(in Rent srcBytes, bool keepAlive = false)
     {
-        var dstBytes = new Rent<byte>(srcBytes.Length);
+        var dstBytes = new Rent(srcBytes.Length);
 
         using var outputStream = new MemoryStream(dstBytes.Array);
         using (var compressionStream = new GZipStream(outputStream, CompressionMode.Compress, true))
@@ -72,8 +72,7 @@ public sealed class HttpRequest : IDisposable
         return (str.AsRent(), dstBytes.Resize((int)outputStream.Position));
     }
 
-    internal async ValueTask<int> SendRequestAsync(Rent<byte> msgIn, bool keepAlive, bool gzipped,
-        CancellationToken token)
+    internal async ValueTask<int> SendRequestAsync(Rent msgIn, bool keepAlive, bool gzipped, CancellationToken token)
     {
         if (gzipped)
         {
@@ -201,14 +200,14 @@ public sealed class HttpRequest : IDisposable
         string? encodingStr;
         bool connectionClose;
 
-        using (var headerBytes = new Rent<byte>(maxHeaderSize))
+        using (var headerBytes = new Rent(maxHeaderSize))
         {
             headerLength = await ReadHeaderAsync(client, headerBytes.Array, token);
             using var reader = new StreamReader(new MemoryStream(headerBytes.Array, 0, headerLength));
             (contentLength, encodingStr, connectionClose) = ParseHeader(reader, isRequest);
         }
 
-        using var content = new Rent<byte>(contentLength);
+        using var content = new Rent(contentLength);
         if (!await client.ReadChunkAsync(content, token))
         {
             throw new IOException("Partner closed connection");
@@ -229,14 +228,14 @@ public sealed class HttpRequest : IDisposable
         return (result, headerLength + contentLength, connectionClose);
     }
 
-    static string Decompress(in Rent<byte> content)
+    static string Decompress(in Rent content)
     {
         try
         {
             // use a rented matrix, this lets us keep reusing the same buffer for all requests
             const int maxPayloadSize = 65536;
             using var inputStream = new MemoryStream(content.Array, 0, content.Length, false);
-            using var outputBytes = new Rent<byte>(maxPayloadSize);
+            using var outputBytes = new Rent(maxPayloadSize);
             using var outputStream = new MemoryStream(outputBytes.Array);
             using var decompressionStream = new GZipStream(inputStream, CompressionMode.Decompress);
 

@@ -131,7 +131,7 @@ public static class XmlRpcService
         return new RosValue(structValue.ToArray());                
     }
         
-    internal static Rent<byte> CreateRequest(string method, XmlRpcArg[] args)
+    internal static Rent CreateRequest(string method, XmlRpcArg[] args)
     {
         using var str = BuilderPool.Rent();
         str.Append("<?xml version=\"1.0\"?>\n" +
@@ -281,7 +281,7 @@ public static class XmlRpcService
 
             var response = method(args);
 
-            Rent<byte> outData;
+            Rent outData;
             using (var str = BuilderPool.Rent())
             {
                 str.Append("<?xml version=\"1.0\"?>\n");
@@ -309,7 +309,7 @@ public static class XmlRpcService
         }
         catch (ParseException e)
         {
-            Rent<byte> response;
+            Rent response;
             using (var str = BuilderPool.Rent())
             {
                 str.Append("<?xml version=\"1.0\"?>\n");
