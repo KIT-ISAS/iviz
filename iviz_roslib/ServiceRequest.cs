@@ -54,7 +54,7 @@ internal sealed class ServiceRequest
         await task.AwaitNoThrow(2000, this, token);
     }
 
-    async ValueTask<Rent<byte>> ReceivePacket(CancellationToken token)
+    async ValueTask<Rent> ReceivePacket(CancellationToken token)
     {
         byte[] lengthBuffer = new byte[4];
         if (!await tcpClient.ReadChunkAsync(lengthBuffer, 4, token))
@@ -65,10 +65,10 @@ internal sealed class ServiceRequest
         int length = BitConverter.ToInt32(lengthBuffer, 0);
         if (length == 0)
         {
-            return Rent.Empty<byte>();
+            return Rent.Empty();
         }
 
-        var readBuffer = new Rent<byte>(length);
+        var readBuffer = new Rent(length);
         try
         {
             if (!await tcpClient.ReadChunkAsync(readBuffer, token))
@@ -228,7 +228,7 @@ internal sealed class ServiceRequest
                 if (errorMessage == null)
                 {
                     int msgLength = responseMsg.RosMessageLength;
-                    using var writeBuffer = new Rent<byte>(msgLength + 5);
+                    using var writeBuffer = new Rent(msgLength + 5);
 
                     WriteHeader(writeBuffer, SuccessByte, msgLength);
                     WriteBuffer.Serialize(responseMsg, writeBuffer[5..]);
@@ -239,7 +239,7 @@ internal sealed class ServiceRequest
                 {
                     using var errorMessageBytes = errorMessage.AsRent();
 
-                    using (var headerBuffer = new Rent<byte>(5))
+                    using (var headerBuffer = new Rent(5))
                     {
                         WriteHeader(headerBuffer, ErrorByte, errorMessageBytes.Length);
                         await tcpClient.WriteChunkAsync(headerBuffer, runningTs.Token);

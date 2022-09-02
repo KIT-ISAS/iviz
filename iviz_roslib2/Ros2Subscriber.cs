@@ -57,24 +57,21 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
                 continue;
             }
 
-            MessageCallback(messageHandler.message!, receiverInfo);
+            var msg = messageHandler.message!;
+            foreach (var callback in cachedCallbacks)
+            {
+                try
+                {
+                    callback(in msg, receiverInfo);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogErrorFormat("{0}: Exception from " + nameof(Run) + ": {1}", this, e);
+                }
+            }
         }
     }
 
-    void MessageCallback(in TMessage msg, IRosConnection receiver)
-    {
-        foreach (var callback in cachedCallbacks)
-        {
-            try
-            {
-                callback(in msg, receiver);
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("{0}: Exception from " + nameof(MessageCallback) + ": {1}", this, e);
-            }
-        }
-    }
 
     void AssertIsAlive()
     {

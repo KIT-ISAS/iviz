@@ -71,10 +71,10 @@ public readonly struct MessageData
     /// <returns>The enclosed message.</returns>
     public T GetMessage<T>(in T generator) where T : IMessage, IDeserializable<T>, new()
     {
-        var rent = Rent.Empty<byte>();
+        var rent = Rent.Empty();
         Span<byte> span = dataSize < 256
             ? stackalloc byte[dataSize]
-            : (rent = new Rent<byte>(dataSize)).AsSpan();
+            : (rent = new Rent(dataSize)).AsSpan();
 
         using (rent)
         {
@@ -111,11 +111,11 @@ public readonly struct MessageData
             throw new InvalidOperationException($"Failed to create message of type '{type}'");
         }
 
-        var rent = Rent.Empty<byte>();
+        var rent = Rent.Empty();
 
         Span<byte> span = dataSize < 256
             ? stackalloc byte[dataSize]
-            : (rent = new Rent<byte>(dataSize)).AsSpan();
+            : (rent = new Rent(dataSize)).AsSpan();
         using (rent)
         {
             reader.Seek(dataStart, SeekOrigin.Begin);

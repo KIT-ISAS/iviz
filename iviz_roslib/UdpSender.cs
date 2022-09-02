@@ -170,7 +170,7 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
 
     async ValueTask ProcessLoop(ILatchedMessageProvider<TMessage> provider)
     {
-        using var writeBuffer = new Rent<byte>(MaxPacketSize);
+        using var writeBuffer = new Rent(MaxPacketSize);
         writeBuffer[..UdpRosParams.HeaderLength].Fill(0);
 
         _ = TaskUtils.Run(KeepAliveMessages);
@@ -198,7 +198,7 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
         }
     }
 
-    async ValueTask SendWithSocketAsync(RangeEnumerable<SenderQueue<TMessage>.Entry?> queue, Rent<byte> writeBuffer)
+    async ValueTask SendWithSocketAsync(RangeEnumerable<SenderQueue<TMessage>.Entry?> queue, Rent writeBuffer)
     {
         const int udpPlusSizeHeaders = UdpRosParams.HeaderLength + 4;
         //byte[] array = writeBuffer.Array;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -192,7 +193,7 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         }
 
         Status = ReceiverStatus.Running;
-        using var readBuffer = new Rent<byte>(MaxPacketSize);
+        using var readBuffer = new Rent(MaxPacketSize);
         using var resizableBuffer = new ResizableRent();
 
         int expectedBlockNr = 0;
@@ -297,14 +298,21 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         }
     }
 
-    void ProcessMessage(IDeserializableRos1<TMessage> generator, ReadOnlySpan<byte> array, int rcvLength)
+    void ProcessMessage(IDeserializableRos1<TMessage> generator, Span<byte> array, int rcvLength)
     {
         if (IsPaused)
         {
             return;
         }
 
-        int msgLength = BitConverter.ToInt32(array);
+        if (4 > rcvLength)
+        {
+            // incomplete packet
+            numDropped++;
+            return;
+        }
+
+        int msgLength = array.ReadInt();
         if (4 + msgLength > rcvLength)
         {
             // incomplete packet
@@ -313,7 +321,7 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         }
 
         var message = ReadBuffer.Deserialize(generator, array[4..]);
-        manager.MessageCallback(message, this);
+        MessageCallback(message);
 
         CheckBufferSize(rcvLength);
     }
@@ -335,7 +343,7 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         UdpClient.Client.ReceiveBufferSize = recommendedSize;
     }
 
-    void ILoopbackReceiver<TMessage>.Post(in TMessage message, int rcvLength)
+    public void Post(in TMessage message, int rcvLength)
     {
         if (!IsAlive)
         {
@@ -347,13 +355,29 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
 
         if (!IsPaused)
         {
-            manager.MessageCallback(message, this);
+            MessageCallback(message);
+        }
+    }
+    
+    void MessageCallback(in TMessage message)
+    {
+        var callbacks = manager.Callbacks;
+        foreach (var callback in callbacks)
+        {
+            try
+            {
+                callback(in message, this);
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Exception from " + nameof(MessageCallback) + ": {1}", this, e);
+            }
         }
     }
 
     public override string ToString()
     {
-        return $"[UdpReceiver for '{topicInfo.Topic}' :{Endpoint.Port.ToString()} PartnerUri={RemoteUri} " +
+        return $"[{nameof(UdpReceiver)} for '{topicInfo.Topic}' :{Endpoint.Port.ToString()} PartnerUri={RemoteUri} " +
                $"PartnerSocket={RemoteEndpoint.Hostname}:{RemoteEndpoint.Port.ToString()}]";
     }
 }

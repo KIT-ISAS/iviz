@@ -9,10 +9,10 @@ namespace Iviz.Rosbag.Writer;
 
 internal struct RentStream : IDisposable
 {
-    readonly Rent<byte> bytes;
+    readonly Rent bytes;
     int p;
 
-    public RentStream(int size) => (bytes, p) = (new Rent<byte>(size), 0);
+    public RentStream(int size) => (bytes, p) = (new Rent(size), 0);
 
     public void Dispose()
     {

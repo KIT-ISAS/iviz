@@ -91,7 +91,7 @@ internal sealed class RosServiceCaller : IDisposable
         await ProcessHandshakeAsync(persistent, token);
     }
 
-    async ValueTask<Rent<byte>> ReceivePacketAsync(CancellationToken token)
+    async ValueTask<Rent> ReceivePacketAsync(CancellationToken token)
     {
         byte[] lengthBuffer = new byte[4];
         if (!await tcpClient.ReadChunkAsync(lengthBuffer, 4, token))
@@ -103,10 +103,10 @@ internal sealed class RosServiceCaller : IDisposable
 
         if (length == 0)
         {
-            return Rent.Empty<byte>();
+            return Rent.Empty();
         }
 
-        var readBuffer = new Rent<byte>(length);
+        var readBuffer = new Rent(length);
         try
         {
             if (!await tcpClient.ReadChunkAsync(readBuffer, token))
@@ -140,7 +140,7 @@ internal sealed class RosServiceCaller : IDisposable
         var requestMsg = service.Request;
         int msgLength = requestMsg.RosMessageLength;
 
-        using var writeBuffer = new Rent<byte>(msgLength);
+        using var writeBuffer = new Rent(msgLength);
 
         WriteBuffer.Serialize(requestMsg, writeBuffer);
 

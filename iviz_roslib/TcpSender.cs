@@ -94,7 +94,7 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
         await task.AwaitNoThrow(5000, this, token);
     }
 
-    async ValueTask<Rent<byte>> ReceivePacket()
+    async ValueTask<Rent> ReceivePacket()
     {
         if (!await TcpClient.ReadChunkAsync(lengthBuffer, 4, runningTs.Token))
         {
@@ -104,10 +104,10 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
         int length = BitConverter.ToInt32(lengthBuffer, 0);
         if (length == 0)
         {
-            return Rent.Empty<byte>();
+            return Rent.Empty();
         }
 
-        var readBuffer = new Rent<byte>(length);
+        var readBuffer = new Rent(length);
         try
         {
             if (await TcpClient.ReadChunkAsync(readBuffer, runningTs.Token))

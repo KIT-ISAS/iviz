@@ -13,18 +13,16 @@ internal sealed class ResizableRent : IDisposable
     static ArrayPool<byte> Pool => ArrayPool<byte>.Shared;
 
     bool disposed;
-    byte[] buffer;
+    public byte[] Array;
 
-    public byte[] Array => buffer;
-
-    public Span<byte> AsSpan() => buffer;
-    public ReadOnlySpan<byte> AsReadOnlySpan() => buffer;
-    public Span<byte> this[Range range] => buffer.AsSpan(range);
+    public Span<byte> AsSpan() => new(Array);
+    public ReadOnlySpan<byte> AsReadOnlySpan() => new(Array);
+    public Span<byte> this[Range range] => Array.AsSpan(range);
     public Span<byte> Slice(int start, int count) => AsSpan().Slice(start, count);
 
     public ResizableRent()
     {
-        buffer = Pool.Rent(16);
+        Array = Pool.Rent(16);
     }
 
     public void EnsureCapacity(int size)
@@ -34,13 +32,13 @@ internal sealed class ResizableRent : IDisposable
             throw new ObjectDisposedException("this", "Dispose() has already been called on this object.");
         }
 
-        if (buffer.Length >= size)
+        if (Array.Length >= size)
         {
             return;
         }
 
-        Pool.Return(buffer);
-        buffer = Pool.Rent(size);
+        Pool.Return(Array);
+        Array = Pool.Rent(size);
     }
 
     public void Dispose()
@@ -51,16 +49,9 @@ internal sealed class ResizableRent : IDisposable
         }
 
         disposed = true;
-        Pool.Return(buffer);
+        Pool.Return(Array);
     }
 
-    public static implicit operator Span<byte>(ResizableRent rent)
-    {
-        return rent.AsSpan();
-    }
-
-    public static implicit operator ReadOnlySpan<byte>(ResizableRent rent)
-    {
-        return rent.AsReadOnlySpan();
-    }
+    public static implicit operator Span<byte>(ResizableRent rent) => rent.AsSpan();
+    public static implicit operator ReadOnlySpan<byte>(ResizableRent rent) => rent.AsReadOnlySpan();
 }

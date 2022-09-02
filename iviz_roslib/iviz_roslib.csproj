@@ -6,7 +6,8 @@
     <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
     <Nullable>enable</Nullable>
     <LangVersion>default</LangVersion>
-    <IsTrimmable>true</IsTrimmable>    
+    <IsTrimmable>true</IsTrimmable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>    
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

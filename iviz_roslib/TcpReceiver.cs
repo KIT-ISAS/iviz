@@ -34,13 +34,20 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
     long numReceived;
     long bytesReceived;
 
-    bool KeepRunning => !runningTs.IsCancellationRequested;
     public string Topic => topicInfo.Topic;
     public string Type => topicInfo.Type;
     public Endpoint RemoteEndpoint { get; }
     public Endpoint Endpoint { get; private set; }
     public IReadOnlyCollection<string> RosHeader { get; private set; } = Array.Empty<string>();
-    public bool IsPaused { get; set; }
+
+    bool isPaused;
+
+    public bool IsPaused
+    {
+        get => isPaused;
+        set => isPaused = value;
+    }
+
     public Uri RemoteUri { get; }
     public bool IsAlive => !task.IsCompleted;
     public bool IsConnected => TcpClient is { Connected: true };
@@ -245,17 +252,17 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
     {
         if (topicInfo.Generator is not IDeserializableRos1<TMessage> generator)
         {
-            throw new InvalidOperationException("Invalid generator!"); // shouldn'T happen
+            throw new InvalidOperationException("Invalid generator!"); // shouldn't happen
         }
 
         var token = runningTs.Token;
-
         using var readBuffer = new ResizableRent();
-        while (KeepRunning)
+        
+        while (true)
         {
-            bool isPaused = IsPaused;
+            bool cachedIsPaused = isPaused;
 
-            int rcvLength = isPaused
+            int rcvLength = cachedIsPaused
                 ? await ReceiveAndIgnore(client, readBuffer.Array, token)
                 : await ReceivePacket(client, readBuffer, token);
 
@@ -268,13 +275,38 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
             numReceived++;
             bytesReceived += rcvLength + 4;
 
-            if (isPaused)
+            if (cachedIsPaused)
             {
                 continue;
             }
-            
-            var message = ReadBuffer.Deserialize(generator, readBuffer[..rcvLength]);
-            manager.MessageCallback(message, this);
+
+            //var message = ReadBuffer.Deserialize(generator, readBuffer[..rcvLength]);
+            //MessageCallback(message);
+
+            TMessage message;
+            unsafe
+            {
+                fixed (byte* bufferPtr = readBuffer.Array)
+                {
+                    var b = new ReadBuffer(bufferPtr, rcvLength);
+                    message = generator.RosDeserialize(ref b);
+                }
+            }
+
+            {
+                var callbacks = manager.Callbacks;
+                foreach (var callback in callbacks)
+                {
+                    try
+                    {
+                        callback(in message, this);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogErrorFormat("{0}: Exception from " + nameof(ProcessMessages) + ": {1}", this, e);
+                    }
+                }
+            }
 
             CheckBufferSize(client, rcvLength, ref receiveBufferSize);
         }
@@ -287,9 +319,9 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
         await ProcessMessages(client);
     }
 
-    void ILoopbackReceiver<TMessage>.Post(in TMessage message, int rcvLength)
+    public void Post(in TMessage message, int rcvLength)
     {
-        if (!IsAlive)
+        if (task.IsCompleted) /* IsAlive */
         {
             return;
         }
@@ -297,12 +329,22 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
         numReceived++;
         bytesReceived += rcvLength + 4;
 
-        if (!IsPaused)
+        if (isPaused) return;
+        
+        var callbacks = manager.Callbacks;
+        foreach (var callback in callbacks)
         {
-            manager.MessageCallback(message, this);
+            try
+            {
+                callback(in message, this);
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Exception from " + nameof(Post) + ": {1}", this, e);
+            }
         }
     }
-
+    
     public async ValueTask DisposeAsync(CancellationToken token)
     {
         if (disposed)
@@ -326,7 +368,8 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
 
 internal class TcpReceiver
 {
-    protected static async ValueTask<int> ReceivePacket(TcpClient client, ResizableRent readBuffer, CancellationToken token)
+    protected static async ValueTask<int> ReceivePacket(TcpClient client, ResizableRent readBuffer,
+        CancellationToken token)
     {
         byte[] array = readBuffer.Array;
         if (!await client.ReadChunkAsync(array, 4, token))
@@ -391,5 +434,5 @@ internal class TcpReceiver
 
         receiveBufferSize = recommendedSize;
         client.Client.ReceiveBufferSize = recommendedSize;
-    }    
+    }
 }

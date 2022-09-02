@@ -26,6 +26,10 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
 
     bool isPaused;
 
+    static RosCallback<TMessage>[] EmptyCallback => Array.Empty<RosCallback<TMessage>>();
+
+    internal RosCallback<TMessage>[] Callbacks = EmptyCallback;
+    
     public string Topic => topicInfo.Topic;
     public string TopicType => topicInfo.Type;
     public int NumConnections => receiversByUri.Count;
@@ -54,11 +58,6 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
         this.topicInfo = topicInfo;
         this.transportHint = transportHint;
         RequestNoDelay = requestNoDelay;
-    }
-    
-    internal void MessageCallback(in TMessage msg, IRosReceiver receiver)
-    {
-        subscriber.MessageCallback(msg, receiver);
     }
 
     public async ValueTask PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
@@ -219,6 +218,8 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
 
     public async ValueTask StopAsync(CancellationToken token)
     {
+        Callbacks = EmptyCallback;
+
         var receivers = receiversByUri.Values.ToArray();
         receiversByUri.Clear();
         var connectors = connectorsByUri.Values.ToArray();

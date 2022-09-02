@@ -217,10 +217,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
 
     public bool Unadvertise(string id, CancellationToken token = default)
     {
-        if (!IsAlive)
-        {
-            return true;
-        }
+        if (!IsAlive) return true;
 
         bool removed = RemoveId(id ?? throw new ArgumentNullException(nameof(id)));
 
@@ -234,10 +231,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
 
     public async ValueTask<bool> UnadvertiseAsync(string id, CancellationToken token = default)
     {
-        if (!IsAlive)
-        {
-            return true;
-        }
+        if (!IsAlive) return true;
 
         bool removed = RemoveId(id ?? throw new ArgumentNullException(nameof(id)));
 

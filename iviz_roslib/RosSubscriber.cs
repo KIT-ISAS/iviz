@@ -15,14 +15,11 @@ using System;
 /// </summary>
 public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TMessage> where TMessage : IMessage
 {
-    static RosCallback<TMessage>[] EmptyCallback => Array.Empty<RosCallback<TMessage>>();
-
     readonly Dictionary<string, RosCallback<TMessage>> callbacksById = new();
     readonly CancellationTokenSource runningTs = new();
     readonly RosClient client;
     readonly ReceiverManager<TMessage> manager;
 
-    RosCallback<TMessage>[] cachedCallbacks = EmptyCallback; // cache to iterate through callbacks quickly
     int totalSubscribers;
     bool disposed;
 
@@ -71,21 +68,6 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
         this.client = client;
         manager = new ReceiverManager<TMessage>(this, client, topicInfo, requestNoDelay, transportHint)
             { TimeoutInMs = timeoutInMs };
-    }
-
-    internal void MessageCallback(in TMessage msg, IRosReceiver receiver)
-    {
-        foreach (var callback in cachedCallbacks)
-        {
-            try
-            {
-                callback(in msg, receiver);
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("{0}: Exception from " + nameof(MessageCallback) + ": {1}", this, e);
-            }
-        }
     }
 
     internal void RaiseNumPublishersChanged()
@@ -151,7 +133,6 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
         disposed = true;
         runningTs.Cancel();
         callbacksById.Clear();
-        cachedCallbacks = EmptyCallback;
         NumPublishersChanged = null;
         manager.Stop();
     }
@@ -166,7 +147,6 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
         disposed = true;
         runningTs.Cancel();
         callbacksById.Clear();
-        cachedCallbacks = EmptyCallback;
         NumPublishersChanged = null;
         return manager.StopAsync(token).AwaitNoThrow(this).AsValueTask();
     }
@@ -195,25 +175,19 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
 
     public string Subscribe(RosCallback<TMessage> callback)
     {
-        if (callback is null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(callback));
-        }
+        if (callback is null) BuiltIns.ThrowArgumentNull(nameof(callback));
 
         AssertIsAlive();
 
         string id = GenerateId();
         callbacksById.Add(id, callback);
-        cachedCallbacks = callbacksById.Values.ToArray();
+        manager.Callbacks = callbacksById.Values.ToArray();
         return id;
     }
 
     public bool ContainsId(string id)
     {
-        if (id is null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(id));
-        }
+        if (id is null) BuiltIns.ThrowArgumentNull(nameof(id));
 
         return callbacksById.ContainsKey(id);
     }
@@ -235,11 +209,10 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
         bool removed = callbacksById.Remove(id);
         if (callbacksById.Count != 0)
         {
-            cachedCallbacks = callbacksById.Values.ToArray();
+            manager.Callbacks = callbacksById.Values.ToArray();
         }
         else
         {
-            cachedCallbacks = EmptyCallback;
             var disposeTask = DisposeAsync(token).AwaitNoThrow(this);
             var unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
             await (disposeTask, unsubscribeTask).WhenAll();

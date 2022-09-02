@@ -131,7 +131,7 @@ public sealed class RosbagFileWriter : IDisposable
             .WriteValue(indexPosEntry);
 
         const int dataLength = 4096 - headerLength;
-        using var padding = new Rent<byte>(dataLength);
+        using var padding = new Rent(dataLength);
         padding.AsSpan().Fill(0x20);
 
         writer.WriteValue(dataLength)
@@ -154,7 +154,7 @@ public sealed class RosbagFileWriter : IDisposable
         await writer.WriteValueAsync(indexPosEntry);
 
         const int dataLength = 4096 - headerLength;
-        using var padding = new Rent<byte>(dataLength);
+        using var padding = new Rent(dataLength);
         padding.AsSpan().Fill(0x20);
 
         await writer.WriteValueAsync(dataLength);
@@ -223,7 +223,7 @@ public sealed class RosbagFileWriter : IDisposable
 
         int dataLength = message.RosMessageLength;
 
-        using Rent<byte> bytes = new Rent<byte>(dataLength);
+        using var bytes = new Rent(dataLength);
         WriteBuffer.Serialize(message, bytes);
 
         writer.WriteValue(dataLength)
@@ -245,7 +245,7 @@ public sealed class RosbagFileWriter : IDisposable
 
         int dataLength = message.RosMessageLength;
 
-        using Rent<byte> bytes = new Rent<byte>(dataLength);
+        using var bytes = new Rent(dataLength);
         WriteBuffer.Serialize(message, bytes);
 
         await writer.WriteValueAsync(dataLength);

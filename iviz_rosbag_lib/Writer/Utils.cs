@@ -31,7 +31,7 @@ internal static class Utils
 
     public static async ValueTask WriteValueAsync(this Stream stream, int value)
     {
-        using var bytes = new Rent<byte>(4);
+        using var bytes = new Rent(4);
         bytes.AsSpan().WriteInt(value);
         await stream.WriteAsync(bytes);
     }
@@ -42,7 +42,7 @@ internal static class Utils
 
     public static Stream WriteValueAscii(this Stream stream, string value)
     {
-        using var bytes = new Rent<byte>(value.Length);
+        using var bytes = new Rent(value.Length);
         byte[] array = bytes.Array;
         for (int i = 0; i < value.Length; i++)
         {
@@ -55,7 +55,7 @@ internal static class Utils
 
     public static async ValueTask WriteValueAsciiAsync(this Stream stream, string value)
     {
-        using var bytes = new Rent<byte>(value.Length);
+        using var bytes = new Rent(value.Length);
         byte[] array = bytes.Array;
         for (int i = 0; i < value.Length; i++)
         {

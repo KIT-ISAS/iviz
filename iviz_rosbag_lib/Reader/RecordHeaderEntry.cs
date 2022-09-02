@@ -62,10 +62,10 @@ public readonly struct RecordHeaderEntry
             reader.Seek(valueStart, SeekOrigin.Begin);
 
             int msgSize = valueSize;
-            var rent = Rent.Empty<byte>();
+            var rent = Rent.Empty();
             Span<byte> span = msgSize < 256
                 ? stackalloc byte[msgSize]
-                : (rent = new Rent<byte>(msgSize)).AsSpan();
+                : (rent = new Rent(msgSize)).AsSpan();
 
             using (rent)
             {

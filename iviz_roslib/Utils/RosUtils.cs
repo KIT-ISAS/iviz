@@ -16,7 +16,7 @@ internal static class RosUtils
     public const string ProtocolTcpRosName = "TCPROS";
     public const string ProtocolUdpRosName = "UDPROS";
 
-    internal static List<string> ParseHeader(in Rent<byte> readBuffer) =>
+    internal static List<string> ParseHeader(in Rent readBuffer) =>
         ParseHeader(readBuffer, readBuffer.Length);
 
     internal static List<string> ParseHeader(byte[] readBuffer) =>
