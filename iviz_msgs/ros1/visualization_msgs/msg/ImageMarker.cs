@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class ImageMarker : IDeserializable<ImageMarker>, IMessage
+    public sealed class ImageMarker : IDeserializable<ImageMarker>, IHasSerializer<ImageMarker>, IMessage
     {
         public const byte CIRCLE = 0;
         public const byte LINE_STRIP = 1;
@@ -242,5 +242,21 @@ namespace Iviz.Msgs.VisualizationMsgs
                 "4GzrBEWlOZwG4aeP9NTv9v3un9+V/q+Xvh/Irt/t+t2m33GW/QvNDPeoJAcAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ImageMarker> CreateSerializer() => new Serializer();
+        public Deserializer<ImageMarker> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ImageMarker>
+        {
+            public override void RosSerialize(ImageMarker msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ImageMarker msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ImageMarker msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ImageMarker msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ImageMarker>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ImageMarker msg) => msg = new ImageMarker(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ImageMarker msg) => msg = new ImageMarker(ref b);
+        }
     }
 }

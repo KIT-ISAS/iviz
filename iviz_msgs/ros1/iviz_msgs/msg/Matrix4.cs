@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Matrix4 : IDeserializable<Matrix4>, IMessage
+    public sealed class Matrix4 : IDeserializable<Matrix4>, IHasSerializer<Matrix4>, IMessage
     {
         /// <summary> Row major </summary>
         [DataMember (Name = "m")] public float[/*16*/] M;
@@ -87,5 +87,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "H4sIAAAAAAAAE0vLyU8sMTaKNjSLVchVUFYoyi9XyE3Myi9S4OICAE9KojAcAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Matrix4> CreateSerializer() => new Serializer();
+        public Deserializer<Matrix4> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Matrix4>
+        {
+            public override void RosSerialize(Matrix4 msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Matrix4 msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Matrix4 msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Matrix4 msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Matrix4>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Matrix4 msg) => msg = new Matrix4(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Matrix4 msg) => msg = new Matrix4(ref b);
+        }
     }
 }

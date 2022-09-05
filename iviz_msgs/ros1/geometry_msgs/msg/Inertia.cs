@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Inertia : IDeserializable<Inertia>, IMessage
+    public sealed class Inertia : IDeserializable<Inertia>, IHasSerializer<Inertia>, IMessage
     {
         // Mass [kg]
         [DataMember (Name = "m")] public double M;
@@ -115,5 +115,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "cd58p74BX6ix6tcCAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Inertia> CreateSerializer() => new Serializer();
+        public Deserializer<Inertia> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Inertia>
+        {
+            public override void RosSerialize(Inertia msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Inertia msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Inertia msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Inertia msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Inertia>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Inertia msg) => msg = new Inertia(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Inertia msg) => msg = new Inertia(ref b);
+        }
     }
 }

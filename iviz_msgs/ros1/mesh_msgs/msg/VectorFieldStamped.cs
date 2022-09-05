@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class VectorFieldStamped : IDeserializable<VectorFieldStamped>, IMessage
+    public sealed class VectorFieldStamped : IDeserializable<VectorFieldStamped>, IHasSerializer<VectorFieldStamped>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "vector_field")] public MeshMsgs.VectorField VectorField;
@@ -92,5 +92,21 @@ namespace Iviz.Msgs.MeshMsgs
                 "Gt1AuxQQFn5/3znayKwrj2N0bpUuuz3FkX5IDR24weTaEHHTlsUfav0To+aXkykGAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<VectorFieldStamped> CreateSerializer() => new Serializer();
+        public Deserializer<VectorFieldStamped> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<VectorFieldStamped>
+        {
+            public override void RosSerialize(VectorFieldStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(VectorFieldStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(VectorFieldStamped msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(VectorFieldStamped msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<VectorFieldStamped>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out VectorFieldStamped msg) => msg = new VectorFieldStamped(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out VectorFieldStamped msg) => msg = new VectorFieldStamped(ref b);
+        }
     }
 }

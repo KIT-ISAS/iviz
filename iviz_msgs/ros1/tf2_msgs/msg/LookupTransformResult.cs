@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformResult : IDeserializable<LookupTransformResult>, IMessage, IResult<LookupTransformActionResult>
+    public sealed class LookupTransformResult : IDeserializable<LookupTransformResult>, IHasSerializer<LookupTransformResult>, IMessage, IResult<LookupTransformActionResult>
     {
         [DataMember (Name = "transform")] public GeometryMsgs.TransformStamped Transform;
         [DataMember (Name = "error")] public Tf2Msgs.TF2Error Error;
@@ -97,5 +97,21 @@ namespace Iviz.Msgs.Tf2Msgs
                 "s9ut/KdePh9Pby5m86vh5k3UXbU/m7pNFw7L9hBFfwMDb9ZIjQkAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<LookupTransformResult> CreateSerializer() => new Serializer();
+        public Deserializer<LookupTransformResult> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<LookupTransformResult>
+        {
+            public override void RosSerialize(LookupTransformResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(LookupTransformResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(LookupTransformResult msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(LookupTransformResult msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<LookupTransformResult>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out LookupTransformResult msg) => msg = new LookupTransformResult(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out LookupTransformResult msg) => msg = new LookupTransformResult(ref b);
+        }
     }
 }

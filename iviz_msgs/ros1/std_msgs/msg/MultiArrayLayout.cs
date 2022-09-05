@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class MultiArrayLayout : IDeserializable<MultiArrayLayout>, IMessage
+    public sealed class MultiArrayLayout : IDeserializable<MultiArrayLayout>, IHasSerializer<MultiArrayLayout>, IMessage
     {
         // The multiarray declares a generic multi-dimensional array of a
         // particular data type.  Dimensions are ordered from outer most
@@ -155,5 +155,21 @@ namespace Iviz.Msgs.StdMsgs
                 "K+/GXWIjWUhsTh/0+AtWkePpkQQAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MultiArrayLayout> CreateSerializer() => new Serializer();
+        public Deserializer<MultiArrayLayout> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MultiArrayLayout>
+        {
+            public override void RosSerialize(MultiArrayLayout msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MultiArrayLayout msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MultiArrayLayout msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MultiArrayLayout msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MultiArrayLayout>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MultiArrayLayout msg) => msg = new MultiArrayLayout(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MultiArrayLayout msg) => msg = new MultiArrayLayout(ref b);
+        }
     }
 }

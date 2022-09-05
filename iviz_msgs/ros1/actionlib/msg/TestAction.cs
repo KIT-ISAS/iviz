@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestAction : IDeserializable<TestAction>, IMessage,
+    public sealed class TestAction : IDeserializable<TestAction>, IHasSerializer<TestAction>, IMessage,
 		IAction<TestActionGoal, TestActionFeedback, TestActionResult>
     {
         [DataMember (Name = "action_goal")] public TestActionGoal ActionGoal { get; set; }
@@ -124,5 +124,21 @@ namespace Iviz.Msgs.Actionlib
                 "mxYz9g4AAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<TestAction> CreateSerializer() => new Serializer();
+        public Deserializer<TestAction> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<TestAction>
+        {
+            public override void RosSerialize(TestAction msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(TestAction msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(TestAction msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(TestAction msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<TestAction>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out TestAction msg) => msg = new TestAction(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out TestAction msg) => msg = new TestAction(ref b);
+        }
     }
 }

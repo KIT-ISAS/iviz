@@ -8,7 +8,7 @@ namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Log : IMessage, IDeserializable<Log>
+    public struct Log : IMessage, IDeserializable<Log>, IHasSerializer<Log>
     {
         //#
         //# Severity level constants
@@ -194,5 +194,21 @@ namespace Iviz.Msgs.RosgraphMsgs
                 "kplYpmEjCaheGqwyBFdoKKHoqGM1/hwpc6tVlv0Ea64vs1UEAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Log> CreateSerializer() => new Serializer();
+        public Deserializer<Log> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Log>
+        {
+            public override void RosSerialize(Log msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Log msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Log msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Log msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Log>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Log msg) => msg = new Log(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Log msg) => msg = new Log(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class JoyFeedback : IDeserializable<JoyFeedback>, IMessage
+    public sealed class JoyFeedback : IDeserializable<JoyFeedback>, IHasSerializer<JoyFeedback>, IMessage
     {
         // Declare of the type of feedback
         public const byte TYPE_LED = 0;
@@ -97,5 +97,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "VX1bVeUSMnGaKVi+vKN6PhJfCuOCzC8LTnq0EkL8AOJe5DueAQAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<JoyFeedback> CreateSerializer() => new Serializer();
+        public Deserializer<JoyFeedback> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<JoyFeedback>
+        {
+            public override void RosSerialize(JoyFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(JoyFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(JoyFeedback msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(JoyFeedback msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<JoyFeedback>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out JoyFeedback msg) => msg = new JoyFeedback(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out JoyFeedback msg) => msg = new JoyFeedback(ref b);
+        }
     }
 }

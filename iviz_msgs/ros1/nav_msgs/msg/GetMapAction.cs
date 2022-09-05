@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapAction : IDeserializable<GetMapAction>, IMessage,
+    public sealed class GetMapAction : IDeserializable<GetMapAction>, IHasSerializer<GetMapAction>, IMessage,
 		IAction<GetMapActionGoal, GetMapActionFeedback, GetMapActionResult>
     {
         [DataMember (Name = "action_goal")] public GetMapActionGoal ActionGoal { get; set; }
@@ -131,5 +131,21 @@ namespace Iviz.Msgs.NavMsgs
                 "rZ76mp/4/t+5r/2BcLu/DLagk/8Anb2ZVOwUAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<GetMapAction> CreateSerializer() => new Serializer();
+        public Deserializer<GetMapAction> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<GetMapAction>
+        {
+            public override void RosSerialize(GetMapAction msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(GetMapAction msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(GetMapAction msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(GetMapAction msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<GetMapAction>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out GetMapAction msg) => msg = new GetMapAction(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out GetMapAction msg) => msg = new GetMapAction(ref b);
+        }
     }
 }

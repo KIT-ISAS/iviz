@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TwoIntsFeedback : IDeserializable<TwoIntsFeedback>, IMessage, IFeedback<TwoIntsActionFeedback>
+    public sealed class TwoIntsFeedback : IDeserializable<TwoIntsFeedback>, IHasSerializer<TwoIntsFeedback>, IMessage, IFeedback<TwoIntsActionFeedback>
     {
     
         public TwoIntsFeedback()
@@ -61,5 +61,21 @@ namespace Iviz.Msgs.Actionlib
         public string RosDependenciesBase64 => BuiltIns.EmptyDependenciesBase64;
     
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<TwoIntsFeedback> CreateSerializer() => new Serializer();
+        public Deserializer<TwoIntsFeedback> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<TwoIntsFeedback>
+        {
+            public override void RosSerialize(TwoIntsFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(TwoIntsFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(TwoIntsFeedback msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(TwoIntsFeedback msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<TwoIntsFeedback>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out TwoIntsFeedback msg) => msg = new TwoIntsFeedback(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out TwoIntsFeedback msg) => msg = new TwoIntsFeedback(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib2;
 
-public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> where TMessage : IMessage
+public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> where TMessage : IMessage, new()
 {
     readonly Ros2Client client;
     readonly RclPublisher publisher;
@@ -48,7 +48,8 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
     async Task Run()
     {
         var token = CancellationToken;
-        var handler = new RclSerializeHandler<TMessage>();
+        var serializer = ((IHasSerializer<TMessage>)new TMessage()).CreateSerializer();
+        var handler = new RclSerializeHandler<TMessage>(serializer);
         using var handle = new GCHandleWrapper(handler);
 
         while (true)

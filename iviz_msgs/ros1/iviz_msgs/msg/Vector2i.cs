@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Vector2i : IDeserializable<Vector2i>, IMessage
+    public sealed class Vector2i : IDeserializable<Vector2i>, IHasSerializer<Vector2i>, IMessage
     {
         [DataMember (Name = "x")] public int X;
         [DataMember (Name = "y")] public int Y;
@@ -79,5 +79,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "H4sIAAAAAAAAE8vMKzE2UqjgygTTlVxcAN81niARAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Vector2i> CreateSerializer() => new Serializer();
+        public Deserializer<Vector2i> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Vector2i>
+        {
+            public override void RosSerialize(Vector2i msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Vector2i msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Vector2i msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Vector2i msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Vector2i>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Vector2i msg) => msg = new Vector2i(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Vector2i msg) => msg = new Vector2i(ref b);
+        }
     }
 }

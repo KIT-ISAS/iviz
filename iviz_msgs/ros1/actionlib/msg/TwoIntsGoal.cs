@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TwoIntsGoal : IDeserializable<TwoIntsGoal>, IMessage, IGoal<TwoIntsActionGoal>
+    public sealed class TwoIntsGoal : IDeserializable<TwoIntsGoal>, IHasSerializer<TwoIntsGoal>, IMessage, IGoal<TwoIntsActionGoal>
     {
         [DataMember (Name = "a")] public long A;
         [DataMember (Name = "b")] public long B;
@@ -79,5 +79,21 @@ namespace Iviz.Msgs.Actionlib
                 "H4sIAAAAAAAAE+PKzCsxM1FI5ILQSVwAD962hBEAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<TwoIntsGoal> CreateSerializer() => new Serializer();
+        public Deserializer<TwoIntsGoal> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<TwoIntsGoal>
+        {
+            public override void RosSerialize(TwoIntsGoal msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(TwoIntsGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(TwoIntsGoal msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(TwoIntsGoal msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<TwoIntsGoal>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out TwoIntsGoal msg) => msg = new TwoIntsGoal(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out TwoIntsGoal msg) => msg = new TwoIntsGoal(ref b);
+        }
     }
 }

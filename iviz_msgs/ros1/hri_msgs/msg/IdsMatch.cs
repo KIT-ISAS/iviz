@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class IdsMatch : IDeserializable<IdsMatch>, IMessage
+    public sealed class IdsMatch : IDeserializable<IdsMatch>, IHasSerializer<IdsMatch>, IMessage
     {
         // This message encodes possible matches between transient IDs (face, body,
         // voice) and permanent IDs (person), with their corresponding confidence level.
@@ -160,5 +160,21 @@ namespace Iviz.Msgs.HriMsgs
                 "RhSDyOJ6eWMo/LaxGDZyKqNRbb2Ky8UJp9HoB1rtiJkrBwAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<IdsMatch> CreateSerializer() => new Serializer();
+        public Deserializer<IdsMatch> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<IdsMatch>
+        {
+            public override void RosSerialize(IdsMatch msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(IdsMatch msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(IdsMatch msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(IdsMatch msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<IdsMatch>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out IdsMatch msg) => msg = new IdsMatch(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out IdsMatch msg) => msg = new IdsMatch(ref b);
+        }
     }
 }

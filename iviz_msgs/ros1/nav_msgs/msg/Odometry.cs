@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class Odometry : IDeserializable<Odometry>, IMessage
+    public sealed class Odometry : IDeserializable<Odometry>, IHasSerializer<Odometry>, IMessage
     {
         // This represents an estimate of a position and velocity in free space.  
         // The pose in this message should be specified in the coordinate frame given by header.frame_id.
@@ -123,5 +123,21 @@ namespace Iviz.Msgs.NavMsgs
                 "a5exSQYTJwbxvOhjCAdstF8cSZ8B99pLQ9gMAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Odometry> CreateSerializer() => new Serializer();
+        public Deserializer<Odometry> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Odometry>
+        {
+            public override void RosSerialize(Odometry msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Odometry msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Odometry msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Odometry msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Odometry>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Odometry msg) => msg = new Odometry(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Odometry msg) => msg = new Odometry(ref b);
+        }
     }
 }

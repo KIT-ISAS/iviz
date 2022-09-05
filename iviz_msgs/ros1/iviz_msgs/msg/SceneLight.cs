@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class SceneLight : IDeserializable<SceneLight>, IMessage
+    public sealed class SceneLight : IDeserializable<SceneLight>, IHasSerializer<SceneLight>, IMessage
     {
         public const byte POINT = 0;
         public const byte DIRECTIONAL = 1;
@@ -130,5 +130,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "1vgOvGQlskj2hXERaOa86XkKefb6u36tt/N6e3G/AfygDAlNAwAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<SceneLight> CreateSerializer() => new Serializer();
+        public Deserializer<SceneLight> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<SceneLight>
+        {
+            public override void RosSerialize(SceneLight msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(SceneLight msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(SceneLight msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(SceneLight msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<SceneLight>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out SceneLight msg) => msg = new SceneLight(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out SceneLight msg) => msg = new SceneLight(ref b);
+        }
     }
 }

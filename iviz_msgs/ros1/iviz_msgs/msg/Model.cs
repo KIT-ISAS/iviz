@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Model : IDeserializable<Model>, IMessage
+    public sealed class Model : IDeserializable<Model>, IHasSerializer<Model>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "filename")] public string Filename;
@@ -260,5 +260,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "T3JkMKX1+9sP4Bu9QII/wA78zQU8OX4CDIKj+ggMAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Model> CreateSerializer() => new Serializer();
+        public Deserializer<Model> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Model>
+        {
+            public override void RosSerialize(Model msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Model msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Model msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Model msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Model>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Model msg) => msg = new Model(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Model msg) => msg = new Model(ref b);
+        }
     }
 }

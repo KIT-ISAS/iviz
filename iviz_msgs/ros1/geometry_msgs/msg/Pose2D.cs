@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Pose2D : IDeserializable<Pose2D>, IMessage
+    public sealed class Pose2D : IDeserializable<Pose2D>, IHasSerializer<Pose2D>, IMessage
     {
         // Deprecated
         // Please use the full 3D pose.
@@ -98,5 +98,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "JaJlAwAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Pose2D> CreateSerializer() => new Serializer();
+        public Deserializer<Pose2D> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Pose2D>
+        {
+            public override void RosSerialize(Pose2D msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Pose2D msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Pose2D msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Pose2D msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Pose2D>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Pose2D msg) => msg = new Pose2D(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Pose2D msg) => msg = new Pose2D(ref b);
+        }
     }
 }

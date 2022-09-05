@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class Skeleton2D : IDeserializable<Skeleton2D>, IMessage
+    public sealed class Skeleton2D : IDeserializable<Skeleton2D>, IHasSerializer<Skeleton2D>, IMessage
     {
         // This message contains a list of skeletal keypoints 
         // (0, 0) is at top-left corner of image
@@ -155,5 +155,21 @@ namespace Iviz.Msgs.HriMsgs
                 "FJtOAkM6OTmuLEiCDFfLebSRmnvt/jx8dYevPIp+A43u5MoVBwAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Skeleton2D> CreateSerializer() => new Serializer();
+        public Deserializer<Skeleton2D> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Skeleton2D>
+        {
+            public override void RosSerialize(Skeleton2D msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Skeleton2D msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Skeleton2D msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Skeleton2D msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Skeleton2D>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Skeleton2D msg) => msg = new Skeleton2D(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Skeleton2D msg) => msg = new Skeleton2D(ref b);
+        }
     }
 }

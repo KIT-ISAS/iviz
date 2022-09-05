@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract]
-    public sealed class SolidPrimitive : IDeserializable<SolidPrimitive>, IMessage
+    public sealed class SolidPrimitive : IDeserializable<SolidPrimitive>, IHasSerializer<SolidPrimitive>, IMessage
     {
         // Define box, sphere, cylinder, cone 
         // All shapes are defined to have their bounding boxes centered around 0,0,0.
@@ -144,5 +144,21 @@ namespace Iviz.Msgs.ShapeMsgs
                 "YbLwZGQz7JBnyvGahsT73jZpIAufItTk5CVGfv1KnTRPyzV6qf85D2DY8R/CXFx5cwQAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<SolidPrimitive> CreateSerializer() => new Serializer();
+        public Deserializer<SolidPrimitive> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<SolidPrimitive>
+        {
+            public override void RosSerialize(SolidPrimitive msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(SolidPrimitive msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(SolidPrimitive msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(SolidPrimitive msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<SolidPrimitive>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out SolidPrimitive msg) => msg = new SolidPrimitive(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out SolidPrimitive msg) => msg = new SolidPrimitive(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapFeedback : IDeserializable<GetMapFeedback>, IMessage, IFeedback<GetMapActionFeedback>
+    public sealed class GetMapFeedback : IDeserializable<GetMapFeedback>, IHasSerializer<GetMapFeedback>, IMessage, IFeedback<GetMapActionFeedback>
     {
         // no feedback
     
@@ -62,5 +62,21 @@ namespace Iviz.Msgs.NavMsgs
         public string RosDependenciesBase64 => BuiltIns.EmptyDependenciesBase64;
     
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<GetMapFeedback> CreateSerializer() => new Serializer();
+        public Deserializer<GetMapFeedback> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<GetMapFeedback>
+        {
+            public override void RosSerialize(GetMapFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(GetMapFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(GetMapFeedback msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(GetMapFeedback msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<GetMapFeedback>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out GetMapFeedback msg) => msg = new GetMapFeedback(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out GetMapFeedback msg) => msg = new GetMapFeedback(ref b);
+        }
     }
 }

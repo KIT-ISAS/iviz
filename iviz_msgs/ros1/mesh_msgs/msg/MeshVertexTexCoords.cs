@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshVertexTexCoords : IDeserializable<MeshVertexTexCoords>, IMessage
+    public sealed class MeshVertexTexCoords : IDeserializable<MeshVertexTexCoords>, IHasSerializer<MeshVertexTexCoords>, IMessage
     {
         // Mesh Attribute Type
         [DataMember (Name = "u")] public float U;
@@ -80,5 +80,21 @@ namespace Iviz.Msgs.MeshMsgs
                 "H4sIAAAAAAAAE1NW8E0tzlBwLCkpykwqLUlVCKksSOVKy8lPLDE2UiiFs8q4uADIua4VKwAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MeshVertexTexCoords> CreateSerializer() => new Serializer();
+        public Deserializer<MeshVertexTexCoords> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MeshVertexTexCoords>
+        {
+            public override void RosSerialize(MeshVertexTexCoords msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MeshVertexTexCoords msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MeshVertexTexCoords msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MeshVertexTexCoords msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MeshVertexTexCoords>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MeshVertexTexCoords msg) => msg = new MeshVertexTexCoords(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MeshVertexTexCoords msg) => msg = new MeshVertexTexCoords(ref b);
+        }
     }
 }

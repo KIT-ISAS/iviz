@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class IntegerRange : IDeserializable<IntegerRange>, IMessage
+    public sealed class IntegerRange : IDeserializable<IntegerRange>, IHasSerializer<IntegerRange>, IMessage
     {
         // Represents bounds and a step value for an integer typed parameter.
         // Start value for valid values, inclusive.
@@ -110,5 +110,21 @@ namespace Iviz.Msgs.RclInterfaces
                 "u4Q+MUHjU1u4bLom1T9VucnNN4eXWvYNBAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<IntegerRange> CreateSerializer() => new Serializer();
+        public Deserializer<IntegerRange> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<IntegerRange>
+        {
+            public override void RosSerialize(IntegerRange msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(IntegerRange msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(IntegerRange msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(IntegerRange msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<IntegerRange>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out IntegerRange msg) => msg = new IntegerRange(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out IntegerRange msg) => msg = new IntegerRange(ref b);
+        }
     }
 }

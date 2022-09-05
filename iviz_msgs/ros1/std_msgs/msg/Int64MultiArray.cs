@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class Int64MultiArray : IDeserializable<Int64MultiArray>, IMessage
+    public sealed class Int64MultiArray : IDeserializable<Int64MultiArray>, IHasSerializer<Int64MultiArray>, IMessage
     {
         // Please look at the MultiArrayLayout message definition for
         // documentation on all multiarrays.
@@ -125,5 +125,21 @@ namespace Iviz.Msgs.StdMsgs
                 "Va/o+LZzT/PVqBEuv+Zo3m2kizAluAaowoXrLtvAWrIQWK/+UuMP7mz+Q9QFAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Int64MultiArray> CreateSerializer() => new Serializer();
+        public Deserializer<Int64MultiArray> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Int64MultiArray>
+        {
+            public override void RosSerialize(Int64MultiArray msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Int64MultiArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Int64MultiArray msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Int64MultiArray msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Int64MultiArray>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Int64MultiArray msg) => msg = new Int64MultiArray(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Int64MultiArray msg) => msg = new Int64MultiArray(ref b);
+        }
     }
 }

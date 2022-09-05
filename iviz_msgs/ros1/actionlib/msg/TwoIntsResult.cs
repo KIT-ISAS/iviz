@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TwoIntsResult : IDeserializable<TwoIntsResult>, IMessage, IResult<TwoIntsActionResult>
+    public sealed class TwoIntsResult : IDeserializable<TwoIntsResult>, IHasSerializer<TwoIntsResult>, IMessage, IResult<TwoIntsActionResult>
     {
         [DataMember (Name = "sum")] public long Sum;
     
@@ -73,5 +73,21 @@ namespace Iviz.Msgs.Actionlib
                 "H4sIAAAAAAAAE8vMKzEzUSguzeUCAHohbPwKAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<TwoIntsResult> CreateSerializer() => new Serializer();
+        public Deserializer<TwoIntsResult> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<TwoIntsResult>
+        {
+            public override void RosSerialize(TwoIntsResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(TwoIntsResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(TwoIntsResult msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(TwoIntsResult msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<TwoIntsResult>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out TwoIntsResult msg) => msg = new TwoIntsResult(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out TwoIntsResult msg) => msg = new TwoIntsResult(ref b);
+        }
     }
 }

@@ -56,6 +56,11 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     string Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
         RosTransportHint transportHint = RosTransportHint.PreferTcp)
         where T : IMessage, new();
+    
+    string Subscribe<T>(string topic, RosCallback<T> callback, out IRosSubscriber<T> subscriber, 
+        RosTransportHint transportHint = RosTransportHint.PreferTcp)
+        where T : IMessage, new();
+
 
     /// <summary>
     /// Subscribes to the given topic.

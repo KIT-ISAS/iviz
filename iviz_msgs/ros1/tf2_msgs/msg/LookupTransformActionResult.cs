@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformActionResult : IDeserializable<LookupTransformActionResult>, IMessage, IActionResult<LookupTransformResult>
+    public sealed class LookupTransformActionResult : IDeserializable<LookupTransformActionResult>, IHasSerializer<LookupTransformActionResult>, IMessage, IActionResult<LookupTransformResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -127,5 +127,21 @@ namespace Iviz.Msgs.Tf2Msgs
                 "7Q3GLcHrmmDcP+0NL5brb5r1UXdw/nE4Om133kb1VuhPdZX0L5fhJYr+B/bf0GHUEgAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<LookupTransformActionResult> CreateSerializer() => new Serializer();
+        public Deserializer<LookupTransformActionResult> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<LookupTransformActionResult>
+        {
+            public override void RosSerialize(LookupTransformActionResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(LookupTransformActionResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(LookupTransformActionResult msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(LookupTransformActionResult msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<LookupTransformActionResult>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out LookupTransformActionResult msg) => msg = new LookupTransformActionResult(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out LookupTransformActionResult msg) => msg = new LookupTransformActionResult(ref b);
+        }
     }
 }

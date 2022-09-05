@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class VectorField : IDeserializable<VectorField>, IMessage
+    public sealed class VectorField : IDeserializable<VectorField>, IHasSerializer<VectorField>, IMessage
     {
         [DataMember (Name = "positions")] public GeometryMsgs.Point[] Positions;
         [DataMember (Name = "vectors")] public GeometryMsgs.Vector3[] Vectors;
@@ -140,5 +140,21 @@ namespace Iviz.Msgs.MeshMsgs
                 "P7wHr0UVI3l3aoR1GX6563c9vu0P6wIAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<VectorField> CreateSerializer() => new Serializer();
+        public Deserializer<VectorField> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<VectorField>
+        {
+            public override void RosSerialize(VectorField msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(VectorField msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(VectorField msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(VectorField msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<VectorField>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out VectorField msg) => msg = new VectorField(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out VectorField msg) => msg = new VectorField(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class PointCloud : IDeserializable<PointCloud>, IMessage
+    public sealed class PointCloud : IDeserializable<PointCloud>, IHasSerializer<PointCloud>, IMessage
     {
         // This message holds a collection of 3d points, plus optional additional
         // information about each point.
@@ -189,5 +189,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "/woAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<PointCloud> CreateSerializer() => new Serializer();
+        public Deserializer<PointCloud> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<PointCloud>
+        {
+            public override void RosSerialize(PointCloud msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(PointCloud msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(PointCloud msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(PointCloud msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<PointCloud>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out PointCloud msg) => msg = new PointCloud(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out PointCloud msg) => msg = new PointCloud(ref b);
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct ColorRGBA : IMessage, IDeserializable<ColorRGBA>
+    public struct ColorRGBA : IMessage, IDeserializable<ColorRGBA>, IHasSerializer<ColorRGBA>
     {
         [DataMember (Name = "r")] public float R;
         [DataMember (Name = "g")] public float G;
@@ -98,5 +98,21 @@ namespace Iviz.Msgs.StdMsgs
         public static bool operator ==(in ColorRGBA a, in ColorRGBA b) => a.R == b.R && a.G == b.G && a.B == b.B && a.A == b.A;
         public override bool Equals(object? b) => b is ColorRGBA pb && this == pb;
         public override int GetHashCode() => System.HashCode.Combine(R, G, B, A);
+    
+        public Serializer<ColorRGBA> CreateSerializer() => new Serializer();
+        public Deserializer<ColorRGBA> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ColorRGBA>
+        {
+            public override void RosSerialize(ColorRGBA msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ColorRGBA msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ColorRGBA msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ColorRGBA msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ColorRGBA>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ColorRGBA msg) => msg = new ColorRGBA(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ColorRGBA msg) => msg = new ColorRGBA(ref b);
+        }
     }
 }

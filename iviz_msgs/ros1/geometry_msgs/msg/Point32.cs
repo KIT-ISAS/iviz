@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Point32 : IMessage, IDeserializable<Point32>
+    public struct Point32 : IMessage, IDeserializable<Point32>, IHasSerializer<Point32>
     {
         // This contains the position of a point in free space(with 32 bits of precision).
         // It is recommeded to use Point wherever possible instead of Point32.  
@@ -109,5 +109,21 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly Point32 Normalized => this / Norm;
         public readonly Point32 Cross(in Point32 v) => new(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
         public static implicit operator Point32(in (float X, float Y, float Z) p) => new(p.X, p.Y, p.Z);
+    
+        public Serializer<Point32> CreateSerializer() => new Serializer();
+        public Deserializer<Point32> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Point32>
+        {
+            public override void RosSerialize(Point32 msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Point32 msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Point32 msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Point32 msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Point32>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Point32 msg) => msg = new Point32(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Point32 msg) => msg = new Point32(ref b);
+        }
     }
 }

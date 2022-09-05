@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ModelMesh : IDeserializable<ModelMesh>, IMessage
+    public sealed class ModelMesh : IDeserializable<ModelMesh>, IHasSerializer<ModelMesh>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "vertices")] public GeometryMsgs.Point32[] Vertices;
@@ -349,5 +349,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "1vYEAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ModelMesh> CreateSerializer() => new Serializer();
+        public Deserializer<ModelMesh> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ModelMesh>
+        {
+            public override void RosSerialize(ModelMesh msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ModelMesh msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ModelMesh msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ModelMesh msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ModelMesh>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ModelMesh msg) => msg = new ModelMesh(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ModelMesh msg) => msg = new ModelMesh(ref b);
+        }
     }
 }

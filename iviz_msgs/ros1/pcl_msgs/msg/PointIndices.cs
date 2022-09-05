@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class PointIndices : IDeserializable<PointIndices>, IMessage
+    public sealed class PointIndices : IDeserializable<PointIndices>, IHasSerializer<PointIndices>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "indices")] public int[] Indices;
@@ -112,5 +112,21 @@ namespace Iviz.Msgs.PclMsgs
                 "nWip6tNYthyc+wCoH7bctwIAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<PointIndices> CreateSerializer() => new Serializer();
+        public Deserializer<PointIndices> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<PointIndices>
+        {
+            public override void RosSerialize(PointIndices msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(PointIndices msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(PointIndices msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(PointIndices msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<PointIndices>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out PointIndices msg) => msg = new PointIndices(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out PointIndices msg) => msg = new PointIndices(ref b);
+        }
     }
 }

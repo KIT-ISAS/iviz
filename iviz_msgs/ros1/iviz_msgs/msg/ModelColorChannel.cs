@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ModelColorChannel : IDeserializable<ModelColorChannel>, IMessage
+    public sealed class ModelColorChannel : IDeserializable<ModelColorChannel>, IHasSerializer<ModelColorChannel>, IMessage
     {
         [DataMember (Name = "colors")] public Color32[] Colors;
     
@@ -100,5 +100,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "nQSlE7m4AEmfKA6bAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ModelColorChannel> CreateSerializer() => new Serializer();
+        public Deserializer<ModelColorChannel> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ModelColorChannel>
+        {
+            public override void RosSerialize(ModelColorChannel msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ModelColorChannel msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ModelColorChannel msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ModelColorChannel msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ModelColorChannel>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ModelColorChannel msg) => msg = new ModelColorChannel(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ModelColorChannel msg) => msg = new ModelColorChannel(ref b);
+        }
     }
 }

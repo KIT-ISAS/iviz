@@ -714,7 +714,7 @@ public sealed class ClassInfo
     }
 
     internal static IEnumerable<string> CreateConstructors(IReadOnlyCollection<VariableElement> variables,
-        string name, bool forceStruct, bool structIsBlittable, bool isAction, RosVersion version)
+        string name, bool forceStruct, bool structIsBlittable, bool isAction)
     {
         var lines = new List<string>();
 
@@ -760,45 +760,21 @@ public sealed class ClassInfo
             lines.Add("");
         }
 
-        switch (version)
-        {
-            case RosVersion.Ros1:
-                CreateConstructorWithBuffer(lines, variables, name, forceStruct, structIsBlittable, isAction, false);
-                break;
-            case RosVersion.Ros2:
-                CreateConstructorWithBuffer(lines, variables, name, forceStruct, structIsBlittable, isAction, true);
-                break;
-            case RosVersion.Common:
-                CreateConstructorWithBuffer(lines, variables, name, forceStruct, structIsBlittable, isAction, false);
-                lines.Add("");
-                CreateConstructorWithBuffer(lines, variables, name, forceStruct, structIsBlittable, isAction, true);
-                break;
-            default:
-                throw new IndexOutOfRangeException();
-        }
+        CreateConstructorWithBuffer(lines, variables, name, forceStruct, structIsBlittable, isAction, false);
+        lines.Add("");
+        CreateConstructorWithBuffer(lines, variables, name, forceStruct, structIsBlittable, isAction, true);
 
         lines.Add("");
 
         string readOnlyId = forceStruct ? "readonly " : "";
 
-        if ((version & RosVersion.Ros1) != 0)
-        {
-            lines.Add(variables.Any()
-                ? $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer b) => new {name}(ref b);"
-                : $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer b) => Singleton;");
-        }
-
-        if (version == RosVersion.Common)
-        {
-            lines.Add("");
-        }
-
-        if ((version & RosVersion.Ros2) != 0)
-        {
-            lines.Add(variables.Any()
-                ? $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer2 b) => new {name}(ref b);"
-                : $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer2 b) => Singleton;");
-        }
+        lines.Add(variables.Any()
+            ? $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer b) => new {name}(ref b);"
+            : $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer b) => Singleton;");
+        lines.Add("");
+        lines.Add(variables.Any()
+            ? $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer2 b) => new {name}(ref b);"
+            : $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer2 b) => Singleton;");
 
         if (!variables.Any())
         {
@@ -1153,26 +1129,13 @@ public sealed class ClassInfo
     }
 
     internal static IEnumerable<string> CreateSerializers(IReadOnlyCollection<VariableElement> variables,
-        bool forceStruct, bool isBlittable, RosVersion version)
+        bool forceStruct, bool isBlittable)
     {
         var lines = new List<string>();
 
-        switch (version)
-        {
-            case RosVersion.Ros1:
-                CreateSerializer(lines, variables, forceStruct, isBlittable, false);
-                break;
-            case RosVersion.Ros2:
-                CreateSerializer(lines, variables, forceStruct, isBlittable, true);
-                break;
-            case RosVersion.Common:
-                CreateSerializer(lines, variables, forceStruct, isBlittable, false);
-                lines.Add("");
-                CreateSerializer(lines, variables, forceStruct, isBlittable, true);
-                break;
-            default:
-                throw new IndexOutOfRangeException();
-        }
+        CreateSerializer(lines, variables, forceStruct, isBlittable, false);
+        lines.Add("");
+        CreateSerializer(lines, variables, forceStruct, isBlittable, true);
 
         lines.Add("");
 
@@ -1463,26 +1426,13 @@ public sealed class ClassInfo
         return lines;
     }
 
-    IEnumerable<string> CreateClassContent(RosVersion version)
+    IEnumerable<string> CreateClassContent()
     {
         var lines = new List<string>();
         lines.Add($"[DataContract]");
 
-        string messageType = version switch
-        {
-            RosVersion.Ros1 => "IMessageRos1",
-            RosVersion.Ros2 => "IMessageRos2",
-            RosVersion.Common => "IMessage",
-            _ => throw new IndexOutOfRangeException()
-        };
-
-        string deserializableType = version switch
-        {
-            RosVersion.Ros1 => $"IDeserializableRos1<{Name}>",
-            RosVersion.Ros2 => $"IDeserializableRos2<{Name}>",
-            RosVersion.Common => $"IDeserializable<{Name}>",
-            _ => throw new IndexOutOfRangeException()
-        };
+        string messageType = "IMessage";
+        string deserializableType = $"IDeserializable<{Name}>, IHasSerializer<{Name}>";
 
         if (ForceStruct)
         {
@@ -1524,14 +1474,14 @@ public sealed class ClassInfo
         }
 
         var constructors = CreateConstructors(variables, Name, ForceStruct, IsBlittable,
-            actionMessageType != ActionMessageType.None, version);
+            actionMessageType != ActionMessageType.None);
         foreach (string entry in constructors)
         {
             lines.Add($"    {entry}");
         }
 
         lines.Add("");
-        var serializer = CreateSerializers(variables, ForceStruct, IsBlittable, version);
+        var serializer = CreateSerializers(variables, ForceStruct, IsBlittable);
         foreach (string entry in serializer)
         {
             lines.Add($"    {entry}");
@@ -1542,16 +1492,9 @@ public sealed class ClassInfo
         CheckFixedSize();
         CheckRos2FixedSize();
 
-        var lengthProperty = version switch
-        {
-            RosVersion.Ros1 => CreateLengthProperty1(variables, Ros1FixedSize, ForceStruct),
-            RosVersion.Ros2 => CreateLengthProperty2(variables, Ros2FixedSize, ForceStruct, Ros2HeadAlignment),
-            RosVersion.Common =>
-                CreateLengthProperty1(variables, Ros1FixedSize, ForceStruct)
-                    .Append("")
-                    .Concat(CreateLengthProperty2(variables, Ros2FixedSize, ForceStruct, Ros2HeadAlignment)),
-            _ => throw new IndexOutOfRangeException()
-        };
+        var lengthProperty = CreateLengthProperty1(variables, Ros1FixedSize, ForceStruct)
+            .Append("")
+            .Concat(CreateLengthProperty2(variables, Ros2FixedSize, ForceStruct, Ros2HeadAlignment));
 
         foreach (string entry in lengthProperty)
         {
@@ -1566,7 +1509,6 @@ public sealed class ClassInfo
 
         lines.Add("");
 
-        if ((version & RosVersion.Ros1) != 0)
         {
             const string emptyMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
             const string emptyDependenciesBase64 = "H4sIAAAAAAAAE+MCAJMG1zIBAAAA";
@@ -1630,8 +1572,7 @@ public sealed class ClassInfo
             lines.Add("    }");
         }
 
-        if ((version & RosVersion.Ros1) != 0 &&
-            Additions.Contents.TryGetValue($"{RosPackage}/{Name}", out var extraLines))
+        if (Additions.Contents.TryGetValue($"{RosPackage}/{Name}", out string[]? extraLines))
         {
             lines.Add("");
             lines.Add("    /// Custom iviz code");
@@ -1639,6 +1580,29 @@ public sealed class ClassInfo
             {
                 lines.Add($"    {entry}");
             }
+        }
+
+        {
+            lines.Add("");
+            lines.Add($"    public Serializer<{Name}> CreateSerializer() => new Serializer();");
+            lines.Add($"    public Deserializer<{Name}> CreateDeserializer() => new Deserializer();");
+            lines.Add("");
+            lines.Add($"    sealed class Serializer : Serializer<{Name}>");
+            lines.Add("    {");
+            lines.Add(
+                $"        public override void RosSerialize({Name} msg, ref WriteBuffer b) => msg.RosSerialize(ref b);");
+            lines.Add(
+                $"        public override void RosSerialize({Name} msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);");
+            lines.Add($"        public override int RosMessageLength({Name} msg) => msg.RosMessageLength;");
+            lines.Add($"        public override int Ros2MessageLength({Name} msg) => msg.Ros2MessageLength;");
+            lines.Add("    }");
+            lines.Add($"    sealed class Deserializer : Deserializer<{Name}>");
+            lines.Add("    {");
+            lines.Add(
+                $"        public override void RosDeserialize(ref ReadBuffer b, out {Name} msg) => msg = new {Name}(ref b);");
+            lines.Add(
+                $"        public override void RosDeserialize(ref ReadBuffer2 b, out {Name} msg) => msg = new {Name}(ref b);");
+            lines.Add("    }");
         }
 
         lines.Add("}");
@@ -1674,7 +1638,7 @@ public sealed class ClassInfo
         str.AppendNewLine($"namespace Iviz.{@namespace}.{CsPackage}");
         str.AppendNewLine("{");
 
-        foreach (string entry in CreateClassContent(version))
+        foreach (string entry in CreateClassContent())
         {
             str.Append("    ").AppendNewLine(entry);
         }

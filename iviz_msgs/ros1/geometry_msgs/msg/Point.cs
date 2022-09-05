@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Point : IMessage, IDeserializable<Point>
+    public struct Point : IMessage, IDeserializable<Point>, IHasSerializer<Point>
     {
         // This contains the position of a point in free space
         [DataMember (Name = "x")] public double X;
@@ -102,5 +102,21 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly Vector3 Normalized => this / Norm;
         public override bool Equals(object? b) => b is Point pb && this == pb;
         public override int GetHashCode() => System.HashCode.Combine(X, Y, Z);
+    
+        public Serializer<Point> CreateSerializer() => new Serializer();
+        public Deserializer<Point> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Point>
+        {
+            public override void RosSerialize(Point msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Point msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Point msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Point msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Point>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Point msg) => msg = new Point(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Point msg) => msg = new Point(ref b);
+        }
     }
 }

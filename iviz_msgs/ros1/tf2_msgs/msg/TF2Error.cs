@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class TF2Error : IDeserializable<TF2Error>, IMessage
+    public sealed class TF2Error : IDeserializable<TF2Error>, IHasSerializer<TF2Error>, IMessage
     {
         public const byte NO_ERROR = 0;
         public const byte LOOKUP_ERROR = 1;
@@ -92,5 +92,21 @@ namespace Iviz.Msgs.Tf2Msgs
                 "nVF6lPIq5j2WfnjOI8/DmA8cjH3N2gAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<TF2Error> CreateSerializer() => new Serializer();
+        public Deserializer<TF2Error> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<TF2Error>
+        {
+            public override void RosSerialize(TF2Error msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(TF2Error msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(TF2Error msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(TF2Error msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<TF2Error>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out TF2Error msg) => msg = new TF2Error(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out TF2Error msg) => msg = new TF2Error(ref b);
+        }
     }
 }

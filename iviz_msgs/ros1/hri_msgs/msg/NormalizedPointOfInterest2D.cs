@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class NormalizedPointOfInterest2D : IDeserializable<NormalizedPointOfInterest2D>, IMessage
+    public sealed class NormalizedPointOfInterest2D : IDeserializable<NormalizedPointOfInterest2D>, IHasSerializer<NormalizedPointOfInterest2D>, IMessage
     {
         // This contains the position of a point of interest (typically in an image)
         // the coordinates are always normalized and must belong to [0.,1.].
@@ -91,5 +91,21 @@ namespace Iviz.Msgs.HriMsgs
                 "ik3zBVDCj9P0AAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<NormalizedPointOfInterest2D> CreateSerializer() => new Serializer();
+        public Deserializer<NormalizedPointOfInterest2D> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<NormalizedPointOfInterest2D>
+        {
+            public override void RosSerialize(NormalizedPointOfInterest2D msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(NormalizedPointOfInterest2D msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(NormalizedPointOfInterest2D msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(NormalizedPointOfInterest2D msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<NormalizedPointOfInterest2D>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out NormalizedPointOfInterest2D msg) => msg = new NormalizedPointOfInterest2D(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out NormalizedPointOfInterest2D msg) => msg = new NormalizedPointOfInterest2D(ref b);
+        }
     }
 }

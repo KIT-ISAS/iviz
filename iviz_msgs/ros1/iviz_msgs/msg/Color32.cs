@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Color32 : IMessage, IDeserializable<Color32>
+    public struct Color32 : IMessage, IDeserializable<Color32>, IHasSerializer<Color32>
     {
         [DataMember (Name = "r")] public byte R;
         [DataMember (Name = "g")] public byte G;
@@ -78,5 +78,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "H4sIAAAAAAAAEyvNzCuxUCjiKgXT6VA6CUoncnEBACHBa7shAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Color32> CreateSerializer() => new Serializer();
+        public Deserializer<Color32> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Color32>
+        {
+            public override void RosSerialize(Color32 msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Color32 msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Color32 msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Color32 msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Color32>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Color32 msg) => msg = new Color32(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Color32 msg) => msg = new Color32(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Feedback : IDeserializable<Feedback>, IMessage
+    public sealed class Feedback : IDeserializable<Feedback>, IHasSerializer<Feedback>, IMessage
     {
         public const byte TYPE_EXPIRED = 0;
         public const byte TYPE_BUTTON_CLICK = 1;
@@ -167,5 +167,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "sSYF79huBw78c+SPs5W8IxDw5vYgok/vPPHfedSjr7JR/4RECQAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Feedback> CreateSerializer() => new Serializer();
+        public Deserializer<Feedback> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Feedback>
+        {
+            public override void RosSerialize(Feedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Feedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Feedback msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Feedback msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Feedback>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Feedback msg) => msg = new Feedback(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Feedback msg) => msg = new Feedback(ref b);
+        }
     }
 }

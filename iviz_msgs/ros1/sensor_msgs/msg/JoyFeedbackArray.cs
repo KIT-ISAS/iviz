@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class JoyFeedbackArray : IDeserializable<JoyFeedbackArray>, IMessage
+    public sealed class JoyFeedbackArray : IDeserializable<JoyFeedbackArray>, IHasSerializer<JoyFeedbackArray>, IMessage
     {
         // This message publishes values for multiple feedback at once. 
         [DataMember (Name = "array")] public JoyFeedback[] Array;
@@ -116,5 +116,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "ew6+6ZWDIx54epcd7tLkGtKzWj1m8usjlE16xCSi1laGq0tWOrkSQnwDdkrRZGACAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<JoyFeedbackArray> CreateSerializer() => new Serializer();
+        public Deserializer<JoyFeedbackArray> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<JoyFeedbackArray>
+        {
+            public override void RosSerialize(JoyFeedbackArray msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(JoyFeedbackArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(JoyFeedbackArray msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(JoyFeedbackArray msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<JoyFeedbackArray>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out JoyFeedbackArray msg) => msg = new JoyFeedbackArray(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out JoyFeedbackArray msg) => msg = new JoyFeedbackArray(ref b);
+        }
     }
 }

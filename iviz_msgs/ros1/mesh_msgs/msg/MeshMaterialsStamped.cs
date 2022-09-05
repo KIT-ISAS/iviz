@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshMaterialsStamped : IDeserializable<MeshMaterialsStamped>, IMessage
+    public sealed class MeshMaterialsStamped : IDeserializable<MeshMaterialsStamped>, IHasSerializer<MeshMaterialsStamped>, IMessage
     {
         // Mesh Attribute Message
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -112,5 +112,21 @@ namespace Iviz.Msgs.MeshMsgs
                 "tTSOs1I/Ws1olaPF75O+N+329yDMcQ2PotJorZX6DSQDhsadBgAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MeshMaterialsStamped> CreateSerializer() => new Serializer();
+        public Deserializer<MeshMaterialsStamped> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MeshMaterialsStamped>
+        {
+            public override void RosSerialize(MeshMaterialsStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MeshMaterialsStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MeshMaterialsStamped msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MeshMaterialsStamped msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MeshMaterialsStamped>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MeshMaterialsStamped msg) => msg = new MeshMaterialsStamped(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MeshMaterialsStamped msg) => msg = new MeshMaterialsStamped(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class LaserScan : IDeserializable<LaserScan>, IMessage
+    public sealed class LaserScan : IDeserializable<LaserScan>, IHasSerializer<LaserScan>, IMessage
     {
         // Single scan from a planar laser range-finder
         //
@@ -221,5 +221,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "uixY9cb+DcaiEnVZDVXKsSyEaWtV1T+oEVNQhwgAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<LaserScan> CreateSerializer() => new Serializer();
+        public Deserializer<LaserScan> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<LaserScan>
+        {
+            public override void RosSerialize(LaserScan msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(LaserScan msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(LaserScan msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(LaserScan msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<LaserScan>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out LaserScan msg) => msg = new LaserScan(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out LaserScan msg) => msg = new LaserScan(ref b);
+        }
     }
 }

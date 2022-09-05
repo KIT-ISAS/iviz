@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class MagneticField : IDeserializable<MagneticField>, IMessage
+    public sealed class MagneticField : IDeserializable<MagneticField>, IHasSerializer<MagneticField>, IMessage
     {
         // Measurement of the Magnetic Field vector at a specific location.
         // If the covariance of the measurement is known, it should be filled in
@@ -134,5 +134,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "ZP8AOp3TrAEJAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MagneticField> CreateSerializer() => new Serializer();
+        public Deserializer<MagneticField> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MagneticField>
+        {
+            public override void RosSerialize(MagneticField msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MagneticField msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MagneticField msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MagneticField msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MagneticField>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MagneticField msg) => msg = new MagneticField(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MagneticField msg) => msg = new MagneticField(ref b);
+        }
     }
 }

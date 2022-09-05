@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class Feature : IDeserializable<Feature>, IMessage
+    public sealed class Feature : IDeserializable<Feature>, IHasSerializer<Feature>, IMessage
     {
         [DataMember (Name = "location")] public GeometryMsgs.Point Location;
         [DataMember (Name = "descriptor")] public StdMsgs.Float32[] Descriptor;
@@ -119,5 +119,21 @@ namespace Iviz.Msgs.MeshMsgs
                 "k1wiNpkZLVFgaCb1doOPJY1Lev6L//mz+WJZYE1O8AKMerHtbwEAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Feature> CreateSerializer() => new Serializer();
+        public Deserializer<Feature> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Feature>
+        {
+            public override void RosSerialize(Feature msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Feature msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Feature msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Feature msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Feature>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Feature msg) => msg = new Feature(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Feature msg) => msg = new Feature(ref b);
+        }
     }
 }

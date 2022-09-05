@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class RegionOfInterest : IDeserializable<RegionOfInterest>, IMessage
+    public sealed class RegionOfInterest : IDeserializable<RegionOfInterest>, IHasSerializer<RegionOfInterest>, IMessage
     {
         // This message is used to specify a region of interest within an image.
         //
@@ -111,5 +111,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "G2kDAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<RegionOfInterest> CreateSerializer() => new Serializer();
+        public Deserializer<RegionOfInterest> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<RegionOfInterest>
+        {
+            public override void RosSerialize(RegionOfInterest msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(RegionOfInterest msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(RegionOfInterest msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(RegionOfInterest msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<RegionOfInterest>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out RegionOfInterest msg) => msg = new RegionOfInterest(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out RegionOfInterest msg) => msg = new RegionOfInterest(ref b);
+        }
     }
 }

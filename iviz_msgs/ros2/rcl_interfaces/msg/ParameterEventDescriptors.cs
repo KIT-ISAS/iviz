@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class ParameterEventDescriptors : IDeserializable<ParameterEventDescriptors>, IMessage
+    public sealed class ParameterEventDescriptors : IDeserializable<ParameterEventDescriptors>, IHasSerializer<ParameterEventDescriptors>, IMessage
     {
         // This message contains descriptors of a parameter event.
         // It was an atomic update.
@@ -240,5 +240,21 @@ namespace Iviz.Msgs.RclInterfaces
                 "KP2XVOznH+PK0dRkDwAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ParameterEventDescriptors> CreateSerializer() => new Serializer();
+        public Deserializer<ParameterEventDescriptors> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ParameterEventDescriptors>
+        {
+            public override void RosSerialize(ParameterEventDescriptors msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ParameterEventDescriptors msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ParameterEventDescriptors msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ParameterEventDescriptors msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ParameterEventDescriptors>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ParameterEventDescriptors msg) => msg = new ParameterEventDescriptors(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ParameterEventDescriptors msg) => msg = new ParameterEventDescriptors(ref b);
+        }
     }
 }

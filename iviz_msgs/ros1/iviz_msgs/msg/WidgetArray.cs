@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class WidgetArray : IDeserializable<WidgetArray>, IMessage
+    public sealed class WidgetArray : IDeserializable<WidgetArray>, IHasSerializer<WidgetArray>, IMessage
     {
         [DataMember (Name = "widgets")] public IvizMsgs.Widget[] Widgets;
     
@@ -125,5 +125,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "r34lNjd6nZMuFN1IaSNNG4kz9huH8zcLPwgAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<WidgetArray> CreateSerializer() => new Serializer();
+        public Deserializer<WidgetArray> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<WidgetArray>
+        {
+            public override void RosSerialize(WidgetArray msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(WidgetArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(WidgetArray msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(WidgetArray msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<WidgetArray>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out WidgetArray msg) => msg = new WidgetArray(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out WidgetArray msg) => msg = new WidgetArray(ref b);
+        }
     }
 }

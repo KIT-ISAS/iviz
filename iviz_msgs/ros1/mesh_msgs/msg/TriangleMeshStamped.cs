@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class TriangleMeshStamped : IDeserializable<TriangleMeshStamped>, IMessage
+    public sealed class TriangleMeshStamped : IDeserializable<TriangleMeshStamped>, IHasSerializer<TriangleMeshStamped>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "mesh")] public MeshMsgs.TriangleMesh Mesh;
@@ -105,6 +105,22 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void Dispose()
         {
+        }
+    
+        public Serializer<TriangleMeshStamped> CreateSerializer() => new Serializer();
+        public Deserializer<TriangleMeshStamped> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<TriangleMeshStamped>
+        {
+            public override void RosSerialize(TriangleMeshStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(TriangleMeshStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(TriangleMeshStamped msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(TriangleMeshStamped msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<TriangleMeshStamped>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out TriangleMeshStamped msg) => msg = new TriangleMeshStamped(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out TriangleMeshStamped msg) => msg = new TriangleMeshStamped(ref b);
         }
     }
 }

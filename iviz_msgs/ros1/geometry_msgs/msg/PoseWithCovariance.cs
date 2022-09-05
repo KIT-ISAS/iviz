@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PoseWithCovariance : IDeserializable<PoseWithCovariance>, IMessage
+    public sealed class PoseWithCovariance : IDeserializable<PoseWithCovariance>, IHasSerializer<PoseWithCovariance>, IMessage
     {
         // This represents a pose in free space with uncertainty.
         [DataMember (Name = "pose")] public Pose Pose;
@@ -102,5 +102,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "A1Vn1Z21Ok77vXQth+FJbem5c1ry993rnlnO5bj+ZtRaS6V+AcIN90zAAwAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<PoseWithCovariance> CreateSerializer() => new Serializer();
+        public Deserializer<PoseWithCovariance> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<PoseWithCovariance>
+        {
+            public override void RosSerialize(PoseWithCovariance msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(PoseWithCovariance msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(PoseWithCovariance msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(PoseWithCovariance msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<PoseWithCovariance>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out PoseWithCovariance msg) => msg = new PoseWithCovariance(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out PoseWithCovariance msg) => msg = new PoseWithCovariance(ref b);
+        }
     }
 }

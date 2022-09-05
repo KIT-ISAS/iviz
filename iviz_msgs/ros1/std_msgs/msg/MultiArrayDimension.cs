@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class MultiArrayDimension : IDeserializable<MultiArrayDimension>, IMessage
+    public sealed class MultiArrayDimension : IDeserializable<MultiArrayDimension>, IHasSerializer<MultiArrayDimension>, IMessage
     {
         /// <summary> Label of given dimension </summary>
         [DataMember (Name = "label")] public string Label;
@@ -96,5 +96,21 @@ namespace Iviz.Msgs.StdMsgs
                 "jVGrTE19B+MhKGahr4iGirQvgqxM1r7hdXJSwpt+HicAFGWdjgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MultiArrayDimension> CreateSerializer() => new Serializer();
+        public Deserializer<MultiArrayDimension> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MultiArrayDimension>
+        {
+            public override void RosSerialize(MultiArrayDimension msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MultiArrayDimension msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MultiArrayDimension msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MultiArrayDimension msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MultiArrayDimension>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MultiArrayDimension msg) => msg = new MultiArrayDimension(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MultiArrayDimension msg) => msg = new MultiArrayDimension(ref b);
+        }
     }
 }

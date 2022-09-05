@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapResult : IDeserializable<GetMapResult>, IMessage, IResult<GetMapActionResult>
+    public sealed class GetMapResult : IDeserializable<GetMapResult>, IHasSerializer<GetMapResult>, IMessage, IResult<GetMapActionResult>
     {
         [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map;
     
@@ -89,5 +89,21 @@ namespace Iviz.Msgs.NavMsgs
                 "oQgAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<GetMapResult> CreateSerializer() => new Serializer();
+        public Deserializer<GetMapResult> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<GetMapResult>
+        {
+            public override void RosSerialize(GetMapResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(GetMapResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(GetMapResult msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(GetMapResult msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<GetMapResult>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out GetMapResult msg) => msg = new GetMapResult(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out GetMapResult msg) => msg = new GetMapResult(ref b);
+        }
     }
 }

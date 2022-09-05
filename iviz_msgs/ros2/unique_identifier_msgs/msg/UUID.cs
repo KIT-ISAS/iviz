@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.UniqueIdentifierMsgs
 {
     [DataContract]
-    public sealed class UUID : IDeserializable<UUID>, IMessage
+    public sealed class UUID : IDeserializable<UUID>, IHasSerializer<UUID>, IMessage
     {
         // A universally unique identifier (UUID).
         //
@@ -91,5 +91,21 @@ namespace Iviz.Msgs.UniqueIdentifierMsgs
                 "pm11FYDCUXanZnvGUtgBfACu5uuRpgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<UUID> CreateSerializer() => new Serializer();
+        public Deserializer<UUID> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<UUID>
+        {
+            public override void RosSerialize(UUID msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(UUID msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(UUID msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(UUID msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<UUID>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out UUID msg) => msg = new UUID(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out UUID msg) => msg = new UUID(ref b);
+        }
     }
 }

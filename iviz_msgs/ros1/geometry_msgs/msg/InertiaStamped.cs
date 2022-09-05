@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class InertiaStamped : IDeserializable<InertiaStamped>, IMessage
+    public sealed class InertiaStamped : IDeserializable<InertiaStamped>, IHasSerializer<InertiaStamped>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "inertia")] public Inertia Inertia;
@@ -94,5 +94,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "FgsGafGeS0yp8QFbNc8OlT32xLHyQ/Yb0/+X//kFAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<InertiaStamped> CreateSerializer() => new Serializer();
+        public Deserializer<InertiaStamped> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<InertiaStamped>
+        {
+            public override void RosSerialize(InertiaStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(InertiaStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(InertiaStamped msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(InertiaStamped msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<InertiaStamped>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out InertiaStamped msg) => msg = new InertiaStamped(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out InertiaStamped msg) => msg = new InertiaStamped(ref b);
+        }
     }
 }

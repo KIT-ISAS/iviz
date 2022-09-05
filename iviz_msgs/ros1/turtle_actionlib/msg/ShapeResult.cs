@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TurtleActionlib
 {
     [DataContract]
-    public sealed class ShapeResult : IDeserializable<ShapeResult>, IMessage, IResult<ShapeActionResult>
+    public sealed class ShapeResult : IDeserializable<ShapeResult>, IHasSerializer<ShapeResult>, IMessage, IResult<ShapeActionResult>
     {
         //result definition
         [DataMember (Name = "interior_angle")] public float InteriorAngle;
@@ -80,5 +80,21 @@ namespace Iviz.Msgs.TurtleActionlib
                 "H4sIAAAAAAAAE+NKy8lPLDE2UsjMK0ktyswvik/MS89J5YIJJxbkl2Sk5nIBAEOeaCAoAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ShapeResult> CreateSerializer() => new Serializer();
+        public Deserializer<ShapeResult> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ShapeResult>
+        {
+            public override void RosSerialize(ShapeResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ShapeResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ShapeResult msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ShapeResult msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ShapeResult>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ShapeResult msg) => msg = new ShapeResult(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ShapeResult msg) => msg = new ShapeResult(ref b);
+        }
     }
 }

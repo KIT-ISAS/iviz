@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerControl : IDeserializable<InteractiveMarkerControl>, IMessage
+    public sealed class InteractiveMarkerControl : IDeserializable<InteractiveMarkerControl>, IHasSerializer<InteractiveMarkerControl>, IMessage
     {
         // Represents a control that is to be displayed together with an interactive marker
         // Identifying string for this control.
@@ -264,5 +264,21 @@ namespace Iviz.Msgs.VisualizationMsgs
                 "NKueJtWTbDT+C7jqy5mrGQAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<InteractiveMarkerControl> CreateSerializer() => new Serializer();
+        public Deserializer<InteractiveMarkerControl> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<InteractiveMarkerControl>
+        {
+            public override void RosSerialize(InteractiveMarkerControl msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(InteractiveMarkerControl msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(InteractiveMarkerControl msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(InteractiveMarkerControl msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<InteractiveMarkerControl>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out InteractiveMarkerControl msg) => msg = new InteractiveMarkerControl(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out InteractiveMarkerControl msg) => msg = new InteractiveMarkerControl(ref b);
+        }
     }
 }

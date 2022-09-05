@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class RobotPreview : IDeserializable<RobotPreview>, IMessage
+    public sealed class RobotPreview : IDeserializable<RobotPreview>, IHasSerializer<RobotPreview>, IMessage
     {
         public const byte ACTION_ADD = 0;
         public const byte ACTION_REMOVE = 1;
@@ -226,5 +226,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "3a3pFqVp10y7etqhMb8AZAoIe5gEAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<RobotPreview> CreateSerializer() => new Serializer();
+        public Deserializer<RobotPreview> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<RobotPreview>
+        {
+            public override void RosSerialize(RobotPreview msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(RobotPreview msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(RobotPreview msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(RobotPreview msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<RobotPreview>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out RobotPreview msg) => msg = new RobotPreview(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out RobotPreview msg) => msg = new RobotPreview(ref b);
+        }
     }
 }

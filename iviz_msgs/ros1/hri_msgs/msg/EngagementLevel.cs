@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class EngagementLevel : IDeserializable<EngagementLevel>, IMessage
+    public sealed class EngagementLevel : IDeserializable<EngagementLevel>, IHasSerializer<EngagementLevel>, IMessage
     {
         // Discrete engagement levels of a person with respect to the robot
         // It is for instance published on /humans/persons/person_id/engagement_status 
@@ -105,5 +105,21 @@ namespace Iviz.Msgs.HriMsgs
                 "twW3oRB/ARfAP16OBQAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<EngagementLevel> CreateSerializer() => new Serializer();
+        public Deserializer<EngagementLevel> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<EngagementLevel>
+        {
+            public override void RosSerialize(EngagementLevel msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(EngagementLevel msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(EngagementLevel msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(EngagementLevel msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<EngagementLevel>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out EngagementLevel msg) => msg = new EngagementLevel(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out EngagementLevel msg) => msg = new EngagementLevel(ref b);
+        }
     }
 }

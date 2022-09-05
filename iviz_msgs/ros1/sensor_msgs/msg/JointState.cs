@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class JointState : IDeserializable<JointState>, IMessage
+    public sealed class JointState : IDeserializable<JointState>, IHasSerializer<JointState>, IMessage
     {
         // This is a message that holds data to describe the state of a set of torque controlled joints. 
         //
@@ -224,5 +224,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "XGR50Kqq/gLoi6OzewYAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<JointState> CreateSerializer() => new Serializer();
+        public Deserializer<JointState> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<JointState>
+        {
+            public override void RosSerialize(JointState msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(JointState msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(JointState msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(JointState msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<JointState>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out JointState msg) => msg = new JointState(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out JointState msg) => msg = new JointState(ref b);
+        }
     }
 }

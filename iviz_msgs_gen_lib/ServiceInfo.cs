@@ -116,14 +116,14 @@ namespace Iviz.MsgsGen
             lines.Add("");
 
             IEnumerable<string> deserializer =
-                ClassInfo.CreateConstructors(variables, name, false, false, false, RosVersion.Common);
+                ClassInfo.CreateConstructors(variables, name, false, false, false);
             foreach (string entry in deserializer)
             {
                 lines.Add($"    {entry}");
             }
 
             lines.Add("");
-            IEnumerable<string> serializer = ClassInfo.CreateSerializers(variables, false, false, RosVersion.Common);
+            IEnumerable<string> serializer = ClassInfo.CreateSerializers(variables, false, false);
             foreach (string entry in serializer)
             {
                 lines.Add($"    {entry}");

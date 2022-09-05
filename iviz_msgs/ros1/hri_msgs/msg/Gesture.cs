@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class Gesture : IDeserializable<Gesture>, IMessage
+    public sealed class Gesture : IDeserializable<Gesture>, IHasSerializer<Gesture>, IMessage
     {
         // Describes body language/attitude/gesture detected from a body.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -101,5 +101,21 @@ namespace Iviz.Msgs.HriMsgs
                 "KbR4+ic4a1D3SgQAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Gesture> CreateSerializer() => new Serializer();
+        public Deserializer<Gesture> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Gesture>
+        {
+            public override void RosSerialize(Gesture msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Gesture msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Gesture msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Gesture msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Gesture>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Gesture msg) => msg = new Gesture(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Gesture msg) => msg = new Gesture(ref b);
+        }
     }
 }

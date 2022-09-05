@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ModelTexture : IDeserializable<ModelTexture>, IMessage
+    public sealed class ModelTexture : IDeserializable<ModelTexture>, IHasSerializer<ModelTexture>, IMessage
     {
         public const byte TYPE_NONE = 0;
         public const byte TYPE_DIFFUSE = 1;
@@ -158,5 +158,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "3hem/0fOnvcDILAaeDADAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ModelTexture> CreateSerializer() => new Serializer();
+        public Deserializer<ModelTexture> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ModelTexture>
+        {
+            public override void RosSerialize(ModelTexture msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ModelTexture msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ModelTexture msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ModelTexture msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ModelTexture>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ModelTexture msg) => msg = new ModelTexture(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ModelTexture msg) => msg = new ModelTexture(ref b);
+        }
     }
 }

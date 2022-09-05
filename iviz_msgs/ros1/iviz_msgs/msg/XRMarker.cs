@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class XRMarker : IDeserializable<XRMarker>, IMessage
+    public sealed class XRMarker : IDeserializable<XRMarker>, IHasSerializer<XRMarker>, IMessage
     {
         public const byte TYPE_ARUCO = 0;
         public const byte TYPE_QRCODE = 1;
@@ -183,5 +183,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "fvDy9GXHuzTBdwU3rTZZ9jfFmbkAogkAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<XRMarker> CreateSerializer() => new Serializer();
+        public Deserializer<XRMarker> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<XRMarker>
+        {
+            public override void RosSerialize(XRMarker msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(XRMarker msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(XRMarker msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(XRMarker msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<XRMarker>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out XRMarker msg) => msg = new XRMarker(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out XRMarker msg) => msg = new XRMarker(ref b);
+        }
     }
 }

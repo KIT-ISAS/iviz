@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshFeatures : IDeserializable<MeshFeatures>, IMessage
+    public sealed class MeshFeatures : IDeserializable<MeshFeatures>, IHasSerializer<MeshFeatures>, IMessage
     {
         [DataMember (Name = "map_uuid")] public string MapUuid;
         [DataMember (Name = "features")] public MeshMsgs.Feature[] Features;
@@ -127,5 +127,21 @@ namespace Iviz.Msgs.MeshMsgs
                 "LIB6BQIAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MeshFeatures> CreateSerializer() => new Serializer();
+        public Deserializer<MeshFeatures> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MeshFeatures>
+        {
+            public override void RosSerialize(MeshFeatures msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MeshFeatures msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MeshFeatures msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MeshFeatures msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MeshFeatures>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MeshFeatures msg) => msg = new MeshFeatures(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MeshFeatures msg) => msg = new MeshFeatures(ref b);
+        }
     }
 }

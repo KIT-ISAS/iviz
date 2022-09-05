@@ -2,27 +2,27 @@ using Iviz.Msgs;
 
 namespace Iviz.Roslib2.RclInterop;
 
-internal interface IRclDeserializeHandler
+internal abstract class RclDeserializeHandler
 {
-    void DeserializeFrom(IntPtr ptr, int length);
+    public abstract void DeserializeFrom(IntPtr ptr, int length);
 }
 
-internal sealed class RclDeserializeHandler<TMessage> : IRclDeserializeHandler where TMessage : IMessage
+internal sealed class RclDeserializeHandler<TMessage> : RclDeserializeHandler where TMessage : IMessage
 {
-    readonly IDeserializable<TMessage> generator;
+    readonly Deserializer<TMessage> deserializer;
     readonly Ros2Subscriber subscriber;
     public TMessage? message;
     public int messageLength;
     public bool hasMessage;
 
-    public RclDeserializeHandler(Ros2Subscriber subscriber, IDeserializable<TMessage> generator)
+    public RclDeserializeHandler(Ros2Subscriber subscriber, Deserializer<TMessage> deserializer)
     {
         this.subscriber = subscriber;
-        this.generator = generator;
+        this.deserializer = deserializer;
         Clear();
     }
 
-    public unsafe void DeserializeFrom(IntPtr ptr, int length)
+    public override unsafe void DeserializeFrom(IntPtr ptr, int length)
     {
         const int headerSize = 4;
         int size = length - headerSize;
@@ -31,7 +31,7 @@ internal sealed class RclDeserializeHandler<TMessage> : IRclDeserializeHandler w
         if (subscriber.IsPaused) return;
 
         var b = new ReadBuffer2((byte*)ptr + headerSize, size);
-        message = generator.RosDeserialize(ref b);
+        deserializer.RosDeserialize(ref b, out message);
         hasMessage = true;
     }
 

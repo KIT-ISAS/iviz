@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class ParameterDescriptor : IDeserializable<ParameterDescriptor>, IMessage
+    public sealed class ParameterDescriptor : IDeserializable<ParameterDescriptor>, IHasSerializer<ParameterDescriptor>, IMessage
     {
         // This is the message to communicate a parameter's descriptor.
         // The name of the parameter.
@@ -237,5 +237,21 @@ namespace Iviz.Msgs.RclInterfaces
                 "EzsazWh4A35dXnTiRNmHBk1GYS+7EDxocqD0X1K2n78BJieAHtsNAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ParameterDescriptor> CreateSerializer() => new Serializer();
+        public Deserializer<ParameterDescriptor> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ParameterDescriptor>
+        {
+            public override void RosSerialize(ParameterDescriptor msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ParameterDescriptor msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ParameterDescriptor msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ParameterDescriptor msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ParameterDescriptor>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ParameterDescriptor msg) => msg = new ParameterDescriptor(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ParameterDescriptor msg) => msg = new ParameterDescriptor(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract]
-    public sealed class Mesh : IDeserializable<Mesh>, IMessage
+    public sealed class Mesh : IDeserializable<Mesh>, IHasSerializer<Mesh>, IMessage
     {
         // Definition of a mesh
         // list of triangles; the index values refer to positions in vertices[]
@@ -152,5 +152,21 @@ namespace Iviz.Msgs.ShapeMsgs
                 "mB+gQ/ZdMgIAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Mesh> CreateSerializer() => new Serializer();
+        public Deserializer<Mesh> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Mesh>
+        {
+            public override void RosSerialize(Mesh msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Mesh msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Mesh msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Mesh msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Mesh>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Mesh msg) => msg = new Mesh(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Mesh msg) => msg = new Mesh(ref b);
+        }
     }
 }

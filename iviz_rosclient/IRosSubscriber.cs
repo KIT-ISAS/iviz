@@ -93,8 +93,6 @@ public interface IRosSubscriber : IDisposable
     public ValueTask DisposeAsync(CancellationToken token);
 }
 
-public delegate void RosCallback<T>(in T message, IRosConnection info) where T : IMessage;
-
 public interface IRosSubscriber<T> : IRosSubscriber where T : IMessage
 {
     /// <summary>

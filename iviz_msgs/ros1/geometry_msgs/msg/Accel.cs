@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Accel : IDeserializable<Accel>, IMessage
+    public sealed class Accel : IDeserializable<Accel>, IHasSerializer<Accel>, IMessage
     {
         // This expresses acceleration in free space broken into its linear and angular parts.
         [DataMember (Name = "linear")] public Vector3 Linear;
@@ -85,5 +85,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "7ooytbVzXcykjw84rdO4Tj/uF/F1eHFjAgAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Accel> CreateSerializer() => new Serializer();
+        public Deserializer<Accel> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Accel>
+        {
+            public override void RosSerialize(Accel msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Accel msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Accel msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Accel msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Accel>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Accel msg) => msg = new Accel(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Accel msg) => msg = new Accel(ref b);
+        }
     }
 }

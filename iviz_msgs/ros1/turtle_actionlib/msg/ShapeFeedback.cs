@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TurtleActionlib
 {
     [DataContract]
-    public sealed class ShapeFeedback : IDeserializable<ShapeFeedback>, IMessage, IFeedback<ShapeActionFeedback>
+    public sealed class ShapeFeedback : IDeserializable<ShapeFeedback>, IHasSerializer<ShapeFeedback>, IMessage, IFeedback<ShapeActionFeedback>
     {
         //feedback
     
@@ -63,5 +63,21 @@ namespace Iviz.Msgs.TurtleActionlib
                 "H4sIAAAAAAAAE+PiAgBrE+NbAgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ShapeFeedback> CreateSerializer() => new Serializer();
+        public Deserializer<ShapeFeedback> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ShapeFeedback>
+        {
+            public override void RosSerialize(ShapeFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ShapeFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ShapeFeedback msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ShapeFeedback msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ShapeFeedback>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ShapeFeedback msg) => msg = new ShapeFeedback(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ShapeFeedback msg) => msg = new ShapeFeedback(ref b);
+        }
     }
 }

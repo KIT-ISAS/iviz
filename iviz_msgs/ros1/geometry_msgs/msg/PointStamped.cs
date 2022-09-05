@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PointStamped : IDeserializable<PointStamped>, IMessage
+    public sealed class PointStamped : IDeserializable<PointStamped>, IHasSerializer<PointStamped>, IMessage
     {
         // This represents a Point with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -89,5 +89,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "UilykkZmysLKJk/uqoXafTHNukJGakJProsZ9c1reNpmyzb74dxP2ruPWrkDAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<PointStamped> CreateSerializer() => new Serializer();
+        public Deserializer<PointStamped> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<PointStamped>
+        {
+            public override void RosSerialize(PointStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(PointStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(PointStamped msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(PointStamped msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<PointStamped>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out PointStamped msg) => msg = new PointStamped(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out PointStamped msg) => msg = new PointStamped(ref b);
+        }
     }
 }

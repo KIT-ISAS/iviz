@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class RobotConfiguration : IDeserializable<RobotConfiguration>, IMessage
+    public sealed class RobotConfiguration : IDeserializable<RobotConfiguration>, IHasSerializer<RobotConfiguration>, IMessage
     {
         [DataMember (Name = "source_parameter")] public string SourceParameter;
         [DataMember (Name = "saved_robot_name")] public string SavedRobotName;
@@ -161,5 +161,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "7gmdyuiccQEAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<RobotConfiguration> CreateSerializer() => new Serializer();
+        public Deserializer<RobotConfiguration> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<RobotConfiguration>
+        {
+            public override void RosSerialize(RobotConfiguration msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(RobotConfiguration msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(RobotConfiguration msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(RobotConfiguration msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<RobotConfiguration>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out RobotConfiguration msg) => msg = new RobotConfiguration(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out RobotConfiguration msg) => msg = new RobotConfiguration(ref b);
+        }
     }
 }

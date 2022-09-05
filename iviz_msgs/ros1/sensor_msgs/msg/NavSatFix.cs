@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class NavSatFix : IDeserializable<NavSatFix>, IMessage
+    public sealed class NavSatFix : IDeserializable<NavSatFix>, IHasSerializer<NavSatFix>, IMessage
     {
         // Navigation Satellite fix for any Global Navigation Satellite System
         //
@@ -172,5 +172,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "lb1z9Gb2bl4dnTc5YqyzkpfiJakrUw6/QhvdTG7GM5i8aoNwZLeK9/TfaDX2eDUMAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<NavSatFix> CreateSerializer() => new Serializer();
+        public Deserializer<NavSatFix> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<NavSatFix>
+        {
+            public override void RosSerialize(NavSatFix msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(NavSatFix msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(NavSatFix msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(NavSatFix msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<NavSatFix>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out NavSatFix msg) => msg = new NavSatFix(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out NavSatFix msg) => msg = new NavSatFix(ref b);
+        }
     }
 }

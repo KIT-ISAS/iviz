@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class Parameter : IDeserializable<Parameter>, IMessage
+    public sealed class Parameter : IDeserializable<Parameter>, IHasSerializer<Parameter>, IMessage
     {
         // This is the message to communicate a parameter. It is an open struct with an enum in
         // the descriptor to select which value is active.
@@ -102,5 +102,21 @@ namespace Iviz.Msgs.RclInterfaces
                 "bZE+qPtvhOc0djtFAdVr+gpSr9qQ2j0is5fxIPMPeJQPi/0FAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Parameter> CreateSerializer() => new Serializer();
+        public Deserializer<Parameter> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Parameter>
+        {
+            public override void RosSerialize(Parameter msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Parameter msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Parameter msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Parameter msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Parameter>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Parameter msg) => msg = new Parameter(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Parameter msg) => msg = new Parameter(ref b);
+        }
     }
 }

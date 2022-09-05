@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.DiagnosticMsgs
 {
     [DataContract]
-    public sealed class DiagnosticStatus : IDeserializable<DiagnosticStatus>, IMessage
+    public sealed class DiagnosticStatus : IDeserializable<DiagnosticStatus>, IHasSerializer<DiagnosticStatus>, IMessage
     {
         // This message holds the status of an individual component of the robot.
         // 
@@ -171,5 +171,21 @@ namespace Iviz.Msgs.DiagnosticMsgs
                 "5KBj6i8GOEfiNGY06jRgfoLxhQIo12TMD2XzWS14AgAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<DiagnosticStatus> CreateSerializer() => new Serializer();
+        public Deserializer<DiagnosticStatus> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<DiagnosticStatus>
+        {
+            public override void RosSerialize(DiagnosticStatus msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(DiagnosticStatus msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(DiagnosticStatus msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(DiagnosticStatus msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<DiagnosticStatus>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out DiagnosticStatus msg) => msg = new DiagnosticStatus(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out DiagnosticStatus msg) => msg = new DiagnosticStatus(ref b);
+        }
     }
 }

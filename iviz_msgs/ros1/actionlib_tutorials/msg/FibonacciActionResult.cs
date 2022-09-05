@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class FibonacciActionResult : IDeserializable<FibonacciActionResult>, IMessage, IActionResult<FibonacciResult>
+    public sealed class FibonacciActionResult : IDeserializable<FibonacciActionResult>, IHasSerializer<FibonacciActionResult>, IMessage, IActionResult<FibonacciResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -118,5 +118,21 @@ namespace Iviz.Msgs.ActionlibTutorials
                 "56GvWQBSVYhFgT6nsaq/TR4PId89dT4gORpyPX0wnSdJHDU/fe6m0+Q/UFQvTO8LAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<FibonacciActionResult> CreateSerializer() => new Serializer();
+        public Deserializer<FibonacciActionResult> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<FibonacciActionResult>
+        {
+            public override void RosSerialize(FibonacciActionResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(FibonacciActionResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(FibonacciActionResult msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(FibonacciActionResult msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<FibonacciActionResult>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out FibonacciActionResult msg) => msg = new FibonacciActionResult(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out FibonacciActionResult msg) => msg = new FibonacciActionResult(ref b);
+        }
     }
 }

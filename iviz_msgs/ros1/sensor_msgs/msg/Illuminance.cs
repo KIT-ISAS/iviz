@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Illuminance : IDeserializable<Illuminance>, IMessage
+    public sealed class Illuminance : IDeserializable<Illuminance>, IHasSerializer<Illuminance>, IMessage
     {
         // Single photometric illuminance measurement.  Light should be assumed to be
         // measured along the sensor's x-axis (the area of detection is the y-z plane).
@@ -117,5 +117,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "CTXScgYAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Illuminance> CreateSerializer() => new Serializer();
+        public Deserializer<Illuminance> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Illuminance>
+        {
+            public override void RosSerialize(Illuminance msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Illuminance msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Illuminance msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Illuminance msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Illuminance>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Illuminance msg) => msg = new Illuminance(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Illuminance msg) => msg = new Illuminance(ref b);
+        }
     }
 }

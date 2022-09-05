@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class XRMarkerArray : IDeserializable<XRMarkerArray>, IMessage
+    public sealed class XRMarkerArray : IDeserializable<XRMarkerArray>, IHasSerializer<XRMarkerArray>, IMessage
     {
         [DataMember (Name = "markers")] public XRMarker[] Markers;
     
@@ -129,5 +129,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "Fz9yUek98DDd75TnScLfU/dYNz7g82Hw8vRlz7s0wXcFN65WWfYVyg8zVR8KAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<XRMarkerArray> CreateSerializer() => new Serializer();
+        public Deserializer<XRMarkerArray> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<XRMarkerArray>
+        {
+            public override void RosSerialize(XRMarkerArray msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(XRMarkerArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(XRMarkerArray msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(XRMarkerArray msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<XRMarkerArray>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out XRMarkerArray msg) => msg = new XRMarkerArray(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out XRMarkerArray msg) => msg = new XRMarkerArray(ref b);
+        }
     }
 }

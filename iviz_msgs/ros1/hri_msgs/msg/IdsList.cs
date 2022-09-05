@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class IdsList : IDeserializable<IdsList>, IMessage
+    public sealed class IdsList : IDeserializable<IdsList>, IHasSerializer<IdsList>, IMessage
     {
         // This message encodes a list of ROS4HRI IDs (eg face ids, body ids, person
         // ids...).
@@ -99,5 +99,21 @@ namespace Iviz.Msgs.HriMsgs
                 "M+Y37aP+bnQDAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<IdsList> CreateSerializer() => new Serializer();
+        public Deserializer<IdsList> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<IdsList>
+        {
+            public override void RosSerialize(IdsList msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(IdsList msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(IdsList msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(IdsList msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<IdsList>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out IdsList msg) => msg = new IdsList(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out IdsList msg) => msg = new IdsList(ref b);
+        }
     }
 }

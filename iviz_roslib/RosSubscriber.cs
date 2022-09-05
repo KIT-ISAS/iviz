@@ -159,8 +159,11 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
     string IRosSubscriber.Subscribe(Action<IMessage> callback) =>
         Subscribe(msg => callback(msg));
 
-    string IRosSubscriber.Subscribe(Action<IMessage, IRosConnection> callback) =>
-        Subscribe((in TMessage msg, IRosConnection receiver) => callback(msg, receiver));
+    string IRosSubscriber.Subscribe(Action<IMessage, IRosConnection> callback)
+    {
+        void Callback(in TMessage msg, IRosConnection receiver) => callback(msg, receiver);
+        return Subscribe(new ActionRosCallback<TMessage>(Callback));
+    }
 
 
     /// <summary>
@@ -170,8 +173,10 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
     /// <typeparam name="TMessage">The message type</typeparam>
     /// <returns>The subscribed id.</returns>
     /// <exception cref="ArgumentNullException">The callback is null.</exception>
-    public string Subscribe(Action<TMessage> callback) =>
-        Subscribe((in TMessage t, IRosConnection _) => callback(t));
+    public string Subscribe(Action<TMessage> callback)
+    {
+        return Subscribe(new DirectRosCallback<TMessage>(callback));
+    }
 
     public string Subscribe(RosCallback<TMessage> callback)
     {
@@ -181,7 +186,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
 
         string id = GenerateId();
         callbacksById.Add(id, callback);
-        manager.Callbacks = callbacksById.Values.ToArray();
+        manager.callbacks = callbacksById.Values.ToArray();
         return id;
     }
 
@@ -209,7 +214,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
         bool removed = callbacksById.Remove(id);
         if (callbacksById.Count != 0)
         {
-            manager.Callbacks = callbacksById.Values.ToArray();
+            manager.callbacks = callbacksById.Values.ToArray();
         }
         else
         {

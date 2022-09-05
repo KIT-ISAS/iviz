@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Scene : IDeserializable<Scene>, IMessage
+    public sealed class Scene : IDeserializable<Scene>, IHasSerializer<Scene>, IMessage
     {
         // A complete scene 
         /// <summary> Name of the scene </summary>
@@ -215,5 +215,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "oI+ERu419F1GCSMSVA6dBBo5r1oxNGbuZVGfNtnTXf7d+xdBzvP0PQsAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Scene> CreateSerializer() => new Serializer();
+        public Deserializer<Scene> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Scene>
+        {
+            public override void RosSerialize(Scene msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Scene msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Scene msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Scene msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Scene>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Scene msg) => msg = new Scene(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Scene msg) => msg = new Scene(ref b);
+        }
     }
 }

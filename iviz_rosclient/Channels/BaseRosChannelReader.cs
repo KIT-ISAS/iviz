@@ -17,7 +17,7 @@ namespace Iviz.Roslib;
 /// Base class with common functionality for <see cref="RosChannelReader"/> and <see cref="RosChannelReader{T}"/>.
 /// </summary>
 /// <typeparam name="T">The ROS message type</typeparam>
-public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReader, IAsyncEnumerable<T>
+public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, IRosChannelReader, IAsyncEnumerable<T>
     where T : IMessage
 {
     readonly ConcurrentQueue<T> backQueue = new();

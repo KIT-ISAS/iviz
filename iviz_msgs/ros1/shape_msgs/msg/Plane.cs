@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract]
-    public sealed class Plane : IDeserializable<Plane>, IMessage
+    public sealed class Plane : IDeserializable<Plane>, IHasSerializer<Plane>, IMessage
     {
         // Representation of a plane, using the plane equation ax + by + cz + d = 0
         // a := coef[0]
@@ -93,5 +93,21 @@ namespace Iviz.Msgs.ShapeMsgs
                 "EZ3An1dFmgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Plane> CreateSerializer() => new Serializer();
+        public Deserializer<Plane> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Plane>
+        {
+            public override void RosSerialize(Plane msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Plane msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Plane msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Plane msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Plane>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Plane msg) => msg = new Plane(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Plane msg) => msg = new Plane(ref b);
+        }
     }
 }

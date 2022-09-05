@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapActionGoal : IDeserializable<GetMapActionGoal>, IMessage, IActionGoal<GetMapGoal>
+    public sealed class GetMapActionGoal : IDeserializable<GetMapActionGoal>, IHasSerializer<GetMapActionGoal>, IMessage, IActionGoal<GetMapGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
@@ -101,5 +101,21 @@ namespace Iviz.Msgs.NavMsgs
                 "AJDqBk1gRlg/RG0u+mXlXkk6z+dFtOsfWFX9Aty4sNv5BAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<GetMapActionGoal> CreateSerializer() => new Serializer();
+        public Deserializer<GetMapActionGoal> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<GetMapActionGoal>
+        {
+            public override void RosSerialize(GetMapActionGoal msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(GetMapActionGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(GetMapActionGoal msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(GetMapActionGoal msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<GetMapActionGoal>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out GetMapActionGoal msg) => msg = new GetMapActionGoal(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out GetMapActionGoal msg) => msg = new GetMapActionGoal(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class PolygonMesh : IDeserializable<PolygonMesh>, IMessage
+    public sealed class PolygonMesh : IDeserializable<PolygonMesh>, IHasSerializer<PolygonMesh>, IMessage
     {
         // Separate header for the polygonal surface
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -163,6 +163,22 @@ namespace Iviz.Msgs.PclMsgs
     
         public void Dispose()
         {
+        }
+    
+        public Serializer<PolygonMesh> CreateSerializer() => new Serializer();
+        public Deserializer<PolygonMesh> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<PolygonMesh>
+        {
+            public override void RosSerialize(PolygonMesh msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(PolygonMesh msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(PolygonMesh msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(PolygonMesh msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<PolygonMesh>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out PolygonMesh msg) => msg = new PolygonMesh(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out PolygonMesh msg) => msg = new PolygonMesh(ref b);
         }
     }
 }

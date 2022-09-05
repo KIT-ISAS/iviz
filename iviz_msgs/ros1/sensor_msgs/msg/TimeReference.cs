@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class TimeReference : IDeserializable<TimeReference>, IMessage
+    public sealed class TimeReference : IDeserializable<TimeReference>, IHasSerializer<TimeReference>, IMessage
     {
         // Measurement from an external time source not actively synchronized with the system clock.
         /// <summary> Stamp is system time for which measurement was valid </summary>
@@ -103,5 +103,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "fKhmzwvbotE7lpJs0CTmv++yuJffwpjfcAJBaNkDAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<TimeReference> CreateSerializer() => new Serializer();
+        public Deserializer<TimeReference> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<TimeReference>
+        {
+            public override void RosSerialize(TimeReference msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(TimeReference msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(TimeReference msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(TimeReference msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<TimeReference>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out TimeReference msg) => msg = new TimeReference(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out TimeReference msg) => msg = new TimeReference(ref b);
+        }
     }
 }

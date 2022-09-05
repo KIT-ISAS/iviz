@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class BoundingBox : IDeserializable<BoundingBox>, IMessage
+    public sealed class BoundingBox : IDeserializable<BoundingBox>, IHasSerializer<BoundingBox>, IMessage
     {
         [DataMember (Name = "center")] public GeometryMsgs.Pose Center;
         [DataMember (Name = "size")] public GeometryMsgs.Vector3 Size;
@@ -85,5 +85,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "0YZGXbipol5OYBuF9xRHsi5j8R51DIAPhPnJrf8Ad8VqnZ0EAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<BoundingBox> CreateSerializer() => new Serializer();
+        public Deserializer<BoundingBox> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<BoundingBox>
+        {
+            public override void RosSerialize(BoundingBox msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(BoundingBox msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(BoundingBox msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(BoundingBox msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<BoundingBox>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out BoundingBox msg) => msg = new BoundingBox(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out BoundingBox msg) => msg = new BoundingBox(ref b);
+        }
     }
 }

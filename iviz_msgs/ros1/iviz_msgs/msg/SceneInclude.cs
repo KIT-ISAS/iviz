@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class SceneInclude : IDeserializable<SceneInclude>, IMessage
+    public sealed class SceneInclude : IDeserializable<SceneInclude>, IHasSerializer<SceneInclude>, IMessage
     {
         // Reference to an external asset
         /// <summary> Uri of the asset </summary>
@@ -132,5 +132,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "Sl6Vav7c0LrvFGn7jhwM4w/igY0L6AYAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<SceneInclude> CreateSerializer() => new Serializer();
+        public Deserializer<SceneInclude> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<SceneInclude>
+        {
+            public override void RosSerialize(SceneInclude msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(SceneInclude msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(SceneInclude msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(SceneInclude msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<SceneInclude>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out SceneInclude msg) => msg = new SceneInclude(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out SceneInclude msg) => msg = new SceneInclude(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class Char : IDeserializable<Char>, IMessage
+    public sealed class Char : IDeserializable<Char>, IHasSerializer<Char>, IMessage
     {
         [DataMember (Name = "data")] public sbyte Data;
     
@@ -72,5 +72,21 @@ namespace Iviz.Msgs.StdMsgs
                 "H4sIAAAAAAAAE0vOSCxSSEksSeQCADeiGH4KAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Char> CreateSerializer() => new Serializer();
+        public Deserializer<Char> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Char>
+        {
+            public override void RosSerialize(Char msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Char msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Char msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Char msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Char>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Char msg) => msg = new Char(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Char msg) => msg = new Char(ref b);
+        }
     }
 }

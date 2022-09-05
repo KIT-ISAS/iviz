@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class FluidPressure : IDeserializable<FluidPressure>, IMessage
+    public sealed class FluidPressure : IDeserializable<FluidPressure>, IHasSerializer<FluidPressure>, IMessage
     {
         // Single pressure reading.  This message is appropriate for measuring the
         // pressure inside of a fluid (air, water, etc).  This also includes
@@ -105,5 +105,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "4aDgN5nzvilZc8lm8aGIjSBkVWvKyVdNrhzVlnbe+katfksO56dpfgNJCWrYnQQAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<FluidPressure> CreateSerializer() => new Serializer();
+        public Deserializer<FluidPressure> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<FluidPressure>
+        {
+            public override void RosSerialize(FluidPressure msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(FluidPressure msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(FluidPressure msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(FluidPressure msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<FluidPressure>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out FluidPressure msg) => msg = new FluidPressure(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out FluidPressure msg) => msg = new FluidPressure(ref b);
+        }
     }
 }

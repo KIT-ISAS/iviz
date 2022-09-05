@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Vector3Stamped : IDeserializable<Vector3Stamped>, IMessage
+    public sealed class Vector3Stamped : IDeserializable<Vector3Stamped>, IHasSerializer<Vector3Stamped>, IMessage
     {
         // This represents a Vector3 with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -92,5 +92,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "X/aZhrTqBAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Vector3Stamped> CreateSerializer() => new Serializer();
+        public Deserializer<Vector3Stamped> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Vector3Stamped>
+        {
+            public override void RosSerialize(Vector3Stamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Vector3Stamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Vector3Stamped msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Vector3Stamped msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Vector3Stamped>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Vector3Stamped msg) => msg = new Vector3Stamped(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Vector3Stamped msg) => msg = new Vector3Stamped(ref b);
+        }
     }
 }

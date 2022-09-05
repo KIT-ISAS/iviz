@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Imu : IDeserializable<Imu>, IMessage
+    public sealed class Imu : IDeserializable<Imu>, IHasSerializer<Imu>, IMessage
     {
         // This is a message to hold data from an IMU (Inertial Measurement Unit)
         //
@@ -177,5 +177,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "oeliWGc7DSht1Dxf0iYf/ErlH52bjd4DHgv6yqHJjy92xoaIyfaXWf8TMuF3bBUKAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Imu> CreateSerializer() => new Serializer();
+        public Deserializer<Imu> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Imu>
+        {
+            public override void RosSerialize(Imu msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Imu msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Imu msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Imu msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Imu>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Imu msg) => msg = new Imu(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Imu msg) => msg = new Imu(ref b);
+        }
     }
 }

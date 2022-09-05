@@ -187,10 +187,12 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
 
     async ValueTask ProcessLoop()
     {
-        if (topicInfo.Generator is not IDeserializableRos1<TMessage> generator)
+        if (topicInfo.Generator is not IHasSerializer<TMessage> generator)
         {
             throw new InvalidOperationException("Invalid generator!"); // shouldn'T happen
         }
+
+        var deserializer = generator.CreateDeserializer();
 
         Status = ReceiverStatus.Running;
         using var readBuffer = new Rent(MaxPacketSize);
@@ -236,7 +238,7 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
                         MarkDropped();
                     }
 
-                    ProcessMessage(generator, readBuffer[UdpRosParams.HeaderLength..],
+                    ProcessMessage(deserializer, readBuffer[UdpRosParams.HeaderLength..],
                         received - UdpRosParams.HeaderLength);
                     continue;
                 case UdpRosParams.OpCodeData0:
@@ -278,7 +280,7 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
 
                     if (expectedBlockNr == totalBlocks)
                     {
-                        ProcessMessage(generator, resizableBuffer, offset);
+                        ProcessMessage(deserializer, resizableBuffer, offset);
                         totalBlocks = 0;
                         expectedBlockNr = 0;
                         offset = 0;
@@ -298,7 +300,7 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         }
     }
 
-    void ProcessMessage(IDeserializableRos1<TMessage> generator, Span<byte> array, int rcvLength)
+    unsafe void ProcessMessage(Deserializer<TMessage> deserializer, Span<byte> buffer, int rcvLength)
     {
         if (IsPaused)
         {
@@ -312,7 +314,7 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
             return;
         }
 
-        int msgLength = array.ReadInt();
+        int msgLength = buffer.ReadInt();
         if (4 + msgLength > rcvLength)
         {
             // incomplete packet
@@ -320,7 +322,13 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
             return;
         }
 
-        var message = ReadBuffer.Deserialize(generator, array[4..]);
+        TMessage message;
+        fixed (byte* bufferPtr = buffer)
+        {
+            var b = new ReadBuffer(bufferPtr + 4, buffer.Length - 4);
+            deserializer.RosDeserialize(ref b, out message);
+        }
+
         MessageCallback(message);
 
         CheckBufferSize(rcvLength);
@@ -361,12 +369,12 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
     
     void MessageCallback(in TMessage message)
     {
-        var callbacks = manager.Callbacks;
+        var callbacks = manager.callbacks;
         foreach (var callback in callbacks)
         {
             try
             {
-                callback(in message, this);
+                callback.Handle(in message, this);
             }
             catch (Exception e)
             {

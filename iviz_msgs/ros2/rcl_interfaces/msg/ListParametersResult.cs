@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class ListParametersResult : IDeserializable<ListParametersResult>, IMessage
+    public sealed class ListParametersResult : IDeserializable<ListParametersResult>, IHasSerializer<ListParametersResult>, IMessage
     {
         // The resulting parameters under the given prefixes.
         [DataMember (Name = "names")] public string[] Names;
@@ -100,5 +100,21 @@ namespace Iviz.Msgs.RclInterfaces
                 "0Jo3x19RCB/nsVrwwQAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ListParametersResult> CreateSerializer() => new Serializer();
+        public Deserializer<ListParametersResult> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ListParametersResult>
+        {
+            public override void RosSerialize(ListParametersResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ListParametersResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ListParametersResult msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ListParametersResult msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ListParametersResult>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ListParametersResult msg) => msg = new ListParametersResult(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ListParametersResult msg) => msg = new ListParametersResult(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapActionFeedback : IDeserializable<GetMapActionFeedback>, IMessage, IActionFeedback<GetMapFeedback>
+    public sealed class GetMapActionFeedback : IDeserializable<GetMapActionFeedback>, IHasSerializer<GetMapActionFeedback>, IMessage, IActionFeedback<GetMapFeedback>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -109,5 +109,21 @@ namespace Iviz.Msgs.NavMsgs
                 "oa9ZAFJlHYsCfU5j1XCXPB5CvlDqrFy3STuYyZPkP5sw3+vTCwAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<GetMapActionFeedback> CreateSerializer() => new Serializer();
+        public Deserializer<GetMapActionFeedback> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<GetMapActionFeedback>
+        {
+            public override void RosSerialize(GetMapActionFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(GetMapActionFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(GetMapActionFeedback msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(GetMapActionFeedback msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<GetMapActionFeedback>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out GetMapActionFeedback msg) => msg = new GetMapActionFeedback(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out GetMapActionFeedback msg) => msg = new GetMapActionFeedback(ref b);
+        }
     }
 }

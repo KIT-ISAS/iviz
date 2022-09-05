@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class FibonacciFeedback : IDeserializable<FibonacciFeedback>, IMessage, IFeedback<FibonacciActionFeedback>
+    public sealed class FibonacciFeedback : IDeserializable<FibonacciFeedback>, IHasSerializer<FibonacciFeedback>, IMessage, IFeedback<FibonacciActionFeedback>
     {
         //feedback
         [DataMember (Name = "sequence")] public int[] Sequence;
@@ -100,5 +100,21 @@ namespace Iviz.Msgs.ActionlibTutorials
                 "H4sIAAAAAAAAE+PKzCsxNoqOVShOLSxNzUtO5eICAHPWhAoTAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<FibonacciFeedback> CreateSerializer() => new Serializer();
+        public Deserializer<FibonacciFeedback> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<FibonacciFeedback>
+        {
+            public override void RosSerialize(FibonacciFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(FibonacciFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(FibonacciFeedback msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(FibonacciFeedback msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<FibonacciFeedback>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out FibonacciFeedback msg) => msg = new FibonacciFeedback(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out FibonacciFeedback msg) => msg = new FibonacciFeedback(ref b);
+        }
     }
 }

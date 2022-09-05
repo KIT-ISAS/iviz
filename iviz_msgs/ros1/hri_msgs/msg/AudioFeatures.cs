@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class AudioFeatures : IDeserializable<AudioFeatures>, IMessage
+    public sealed class AudioFeatures : IDeserializable<AudioFeatures>, IHasSerializer<AudioFeatures>, IMessage
     {
         // This message encodes the 16 audio features selected
         // in the INTERSPEECH2009 challenge.
@@ -136,5 +136,21 @@ namespace Iviz.Msgs.HriMsgs
                 "kvwCsvCCuyICAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<AudioFeatures> CreateSerializer() => new Serializer();
+        public Deserializer<AudioFeatures> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<AudioFeatures>
+        {
+            public override void RosSerialize(AudioFeatures msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(AudioFeatures msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(AudioFeatures msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(AudioFeatures msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<AudioFeatures>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out AudioFeatures msg) => msg = new AudioFeatures(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out AudioFeatures msg) => msg = new AudioFeatures(ref b);
+        }
     }
 }

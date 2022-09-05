@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Quaternion : IMessage, IDeserializable<Quaternion>
+    public struct Quaternion : IMessage, IDeserializable<Quaternion>, IHasSerializer<Quaternion>
     {
         // This represents an orientation in free space in quaternion form.
         [DataMember (Name = "x")] public double X;
@@ -97,5 +97,21 @@ namespace Iviz.Msgs.GeometryMsgs
         public static bool operator ==(in Quaternion a, in Quaternion b) => a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
         public override bool Equals(object? b) => b is Quaternion pb && this == pb;
         public override int GetHashCode() => System.HashCode.Combine(X, Y, Z, W);
+    
+        public Serializer<Quaternion> CreateSerializer() => new Serializer();
+        public Deserializer<Quaternion> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Quaternion>
+        {
+            public override void RosSerialize(Quaternion msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Quaternion msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Quaternion msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Quaternion msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Quaternion>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Quaternion msg) => msg = new Quaternion(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Quaternion msg) => msg = new Quaternion(ref b);
+        }
     }
 }

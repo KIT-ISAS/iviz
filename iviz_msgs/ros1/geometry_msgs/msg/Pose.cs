@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Pose : IMessage, IDeserializable<Pose>
+    public struct Pose : IMessage, IDeserializable<Pose>, IHasSerializer<Pose>
     {
         // A representation of pose in free space, composed of position and orientation. 
         [DataMember (Name = "position")] public Point Position;
@@ -83,5 +83,21 @@ namespace Iviz.Msgs.GeometryMsgs
         public static Pose Identity => new(Point.Zero, Quaternion.Identity);
         public static implicit operator Transform(in Pose p) => p.AsTransform();
         public static implicit operator Pose(in (Point position, Quaternion orientation) p) => new(p.position, p.orientation);
+    
+        public Serializer<Pose> CreateSerializer() => new Serializer();
+        public Deserializer<Pose> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Pose>
+        {
+            public override void RosSerialize(Pose msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Pose msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Pose msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Pose msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Pose>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Pose msg) => msg = new Pose(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Pose msg) => msg = new Pose(ref b);
+        }
     }
 }

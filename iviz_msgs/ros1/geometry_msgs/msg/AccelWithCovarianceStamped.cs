@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class AccelWithCovarianceStamped : IDeserializable<AccelWithCovarianceStamped>, IMessage
+    public sealed class AccelWithCovarianceStamped : IDeserializable<AccelWithCovarianceStamped>, IHasSerializer<AccelWithCovarianceStamped>, IMessage
     {
         // This represents an estimated accel with reference coordinate frame and timestamp.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -97,5 +97,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "By3ec4WVZ33AJwqju5Uxbaa7Ybq7yX4Bc0iLTqQHAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<AccelWithCovarianceStamped> CreateSerializer() => new Serializer();
+        public Deserializer<AccelWithCovarianceStamped> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<AccelWithCovarianceStamped>
+        {
+            public override void RosSerialize(AccelWithCovarianceStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(AccelWithCovarianceStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(AccelWithCovarianceStamped msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(AccelWithCovarianceStamped msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<AccelWithCovarianceStamped>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out AccelWithCovarianceStamped msg) => msg = new AccelWithCovarianceStamped(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out AccelWithCovarianceStamped msg) => msg = new AccelWithCovarianceStamped(ref b);
+        }
     }
 }

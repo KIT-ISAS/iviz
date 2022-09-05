@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class MultiEchoLaserScan : IDeserializable<MultiEchoLaserScan>, IMessage
+    public sealed class MultiEchoLaserScan : IDeserializable<MultiEchoLaserScan>, IHasSerializer<MultiEchoLaserScan>, IMessage
     {
         // Single scan from a multi-echo planar laser range-finder
         //
@@ -256,5 +256,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "ZR6xwns/dKdpuC7+AxVVmCeICgAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MultiEchoLaserScan> CreateSerializer() => new Serializer();
+        public Deserializer<MultiEchoLaserScan> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MultiEchoLaserScan>
+        {
+            public override void RosSerialize(MultiEchoLaserScan msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MultiEchoLaserScan msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MultiEchoLaserScan msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MultiEchoLaserScan msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MultiEchoLaserScan>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MultiEchoLaserScan msg) => msg = new MultiEchoLaserScan(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MultiEchoLaserScan msg) => msg = new MultiEchoLaserScan(ref b);
+        }
     }
 }

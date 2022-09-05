@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3 : IMessage, IDeserializable<Vector3>
+    public struct Vector3 : IMessage, IDeserializable<Vector3>, IHasSerializer<Vector3>
     {
         // This represents a vector in free space. 
         // It is only meant to represent a direction. Therefore, it does not
@@ -107,5 +107,21 @@ namespace Iviz.Msgs.GeometryMsgs
         public static implicit operator Vector3(in (double X, double Y, double Z) p) => new(p.X, p.Y, p.Z);
         public override bool Equals(object? b) => b is Vector3 pb && this == pb;
         public override int GetHashCode() => System.HashCode.Combine(X, Y, Z);
+    
+        public Serializer<Vector3> CreateSerializer() => new Serializer();
+        public Deserializer<Vector3> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Vector3>
+        {
+            public override void RosSerialize(Vector3 msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Vector3 msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Vector3 msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Vector3 msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Vector3>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Vector3 msg) => msg = new Vector3(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Vector3 msg) => msg = new Vector3(ref b);
+        }
     }
 }

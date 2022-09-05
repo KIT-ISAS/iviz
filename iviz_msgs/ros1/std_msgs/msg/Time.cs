@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class Time : IDeserializable<Time>, IMessage
+    public sealed class Time : IDeserializable<Time>, IHasSerializer<Time>, IMessage
     {
         [DataMember (Name = "data")] public time Data;
     
@@ -73,5 +73,21 @@ namespace Iviz.Msgs.StdMsgs
                 "H4sIAAAAAAAAEyvJzE1VSEksSeTiAgBuylFyCwAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Time> CreateSerializer() => new Serializer();
+        public Deserializer<Time> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Time>
+        {
+            public override void RosSerialize(Time msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Time msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Time msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Time msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Time>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Time msg) => msg = new Time(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Time msg) => msg = new Time(ref b);
+        }
     }
 }

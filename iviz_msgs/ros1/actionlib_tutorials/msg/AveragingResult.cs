@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class AveragingResult : IDeserializable<AveragingResult>, IMessage, IResult<AveragingActionResult>
+    public sealed class AveragingResult : IDeserializable<AveragingResult>, IHasSerializer<AveragingResult>, IMessage, IResult<AveragingActionResult>
     {
         //result definition
         [DataMember (Name = "interior_angle")] public float InteriorAngle;
@@ -80,5 +80,21 @@ namespace Iviz.Msgs.ActionlibTutorials
                 "H4sIAAAAAAAAE+NKy8lPLDE2UsjMK0ktyswvik/MS89J5YIJJxbkl2Sk5nIBAEOeaCAoAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<AveragingResult> CreateSerializer() => new Serializer();
+        public Deserializer<AveragingResult> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<AveragingResult>
+        {
+            public override void RosSerialize(AveragingResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(AveragingResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(AveragingResult msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(AveragingResult msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<AveragingResult>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out AveragingResult msg) => msg = new AveragingResult(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out AveragingResult msg) => msg = new AveragingResult(ref b);
+        }
     }
 }

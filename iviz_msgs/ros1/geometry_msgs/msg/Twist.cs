@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Twist : IDeserializable<Twist>, IMessage
+    public sealed class Twist : IDeserializable<Twist>, IHasSerializer<Twist>, IMessage
     {
         // This expresses velocity in free space broken into its linear and angular parts.
         [DataMember (Name = "linear")] public Vector3 Linear;
@@ -89,5 +89,21 @@ namespace Iviz.Msgs.GeometryMsgs
         /// Custom iviz code
         public static Twist Zero => new(Vector3.Zero, Vector3.Zero);
         public static implicit operator Twist(in (Vector3 linear, Vector3 angular) p) => new(p.linear, p.angular);
+    
+        public Serializer<Twist> CreateSerializer() => new Serializer();
+        public Deserializer<Twist> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Twist>
+        {
+            public override void RosSerialize(Twist msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Twist msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Twist msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Twist msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Twist>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Twist msg) => msg = new Twist(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Twist msg) => msg = new Twist(ref b);
+        }
     }
 }

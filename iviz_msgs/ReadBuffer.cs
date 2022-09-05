@@ -385,16 +385,6 @@ public unsafe struct ReadBuffer
         }
     }
 
-    public static T Deserialize<T>(in T generator, ReadOnlySpan<byte> buffer)
-        where T : ISerializableRos1, IDeserializableRos1<T>
-    {
-        fixed (byte* bufferPtr = buffer)
-        {
-            var b = new ReadBuffer(bufferPtr, buffer.Length);
-            return generator.RosDeserialize(ref b);
-        }
-    }
-
     #region extras
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

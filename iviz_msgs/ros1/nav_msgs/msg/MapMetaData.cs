@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class MapMetaData : IDeserializable<MapMetaData>, IMessage
+    public sealed class MapMetaData : IDeserializable<MapMetaData>, IHasSerializer<MapMetaData>, IMessage
     {
         // This hold basic information about the characterists of the OccupancyGrid
         // The time at which the map was loaded
@@ -102,5 +102,21 @@ namespace Iviz.Msgs.NavMsgs
                 "/lTPc/LJ+jjqnn7Xgv0x0XBrGfsGRIxpGPMDAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MapMetaData> CreateSerializer() => new Serializer();
+        public Deserializer<MapMetaData> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MapMetaData>
+        {
+            public override void RosSerialize(MapMetaData msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MapMetaData msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MapMetaData msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MapMetaData msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MapMetaData>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MapMetaData msg) => msg = new MapMetaData(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MapMetaData msg) => msg = new MapMetaData(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Joy : IDeserializable<Joy>, IMessage
+    public sealed class Joy : IDeserializable<Joy>, IHasSerializer<Joy>, IMessage
     {
         // Reports the state of a joysticks axes and buttons.
         /// <summary> Timestamp in the header is the time the data is received from the joystick </summary>
@@ -158,5 +158,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "pnj0DqH7uYLY3mPCqPf7xGk29R5UStN8LWIjCFnrrWDVaD064ejR585oTgW9tmXnnTF/APWAXZq2AwAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Joy> CreateSerializer() => new Serializer();
+        public Deserializer<Joy> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Joy>
+        {
+            public override void RosSerialize(Joy msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Joy msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Joy msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Joy msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Joy>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Joy msg) => msg = new Joy(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Joy msg) => msg = new Joy(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class Group : IDeserializable<Group>, IMessage
+    public sealed class Group : IDeserializable<Group>, IHasSerializer<Group>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "group_id")] public string GroupId;
@@ -114,5 +114,21 @@ namespace Iviz.Msgs.HriMsgs
                 "pBXmko4crHS/NBI/MkWFkfcFy+Iqam3puutq9voKWzS2o0jybEkEeGEdXl92i6W97N9vCLMR+gIAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Group> CreateSerializer() => new Serializer();
+        public Deserializer<Group> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Group>
+        {
+            public override void RosSerialize(Group msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Group msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Group msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Group msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Group>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Group msg) => msg = new Group(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Group msg) => msg = new Group(ref b);
+        }
     }
 }

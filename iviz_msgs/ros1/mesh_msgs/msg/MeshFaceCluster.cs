@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshFaceCluster : IDeserializable<MeshFaceCluster>, IMessage
+    public sealed class MeshFaceCluster : IDeserializable<MeshFaceCluster>, IHasSerializer<MeshFaceCluster>, IMessage
     {
         //Cluster
         [DataMember (Name = "face_indices")] public uint[] FaceIndices;
@@ -111,5 +111,21 @@ namespace Iviz.Msgs.MeshMsgs
                 "TErN4eICAKZztFU3AAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MeshFaceCluster> CreateSerializer() => new Serializer();
+        public Deserializer<MeshFaceCluster> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MeshFaceCluster>
+        {
+            public override void RosSerialize(MeshFaceCluster msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MeshFaceCluster msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MeshFaceCluster msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MeshFaceCluster msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MeshFaceCluster>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MeshFaceCluster msg) => msg = new MeshFaceCluster(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MeshFaceCluster msg) => msg = new MeshFaceCluster(ref b);
+        }
     }
 }

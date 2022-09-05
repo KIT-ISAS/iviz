@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshGeometry : IDeserializable<MeshGeometry>, IMessage
+    public sealed class MeshGeometry : IDeserializable<MeshGeometry>, IHasSerializer<MeshGeometry>, IMessage
     {
         // Mesh Geometry Message
         [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices;
@@ -191,5 +191,21 @@ namespace Iviz.Msgs.MeshMsgs
                 "kTGXpzmXcEe0zKLJEBrH1R0jxS0C7gEAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MeshGeometry> CreateSerializer() => new Serializer();
+        public Deserializer<MeshGeometry> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MeshGeometry>
+        {
+            public override void RosSerialize(MeshGeometry msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MeshGeometry msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MeshGeometry msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MeshGeometry msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MeshGeometry>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MeshGeometry msg) => msg = new MeshGeometry(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MeshGeometry msg) => msg = new MeshGeometry(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class OccupancyGrid : IDeserializable<OccupancyGrid>, IMessage
+    public sealed class OccupancyGrid : IDeserializable<OccupancyGrid>, IHasSerializer<OccupancyGrid>, IMessage
     {
         // This represents a 2-D grid map, in which each cell represents the probability of
         // occupancy.
@@ -134,5 +134,21 @@ namespace Iviz.Msgs.NavMsgs
                 "Id8pd9DUs6f0/XDXH+5+/B/4R+rGGk6/1Xf4vAs+PX078p7GFZ/jP1c03u2U+gkDSqydGQgAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<OccupancyGrid> CreateSerializer() => new Serializer();
+        public Deserializer<OccupancyGrid> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<OccupancyGrid>
+        {
+            public override void RosSerialize(OccupancyGrid msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(OccupancyGrid msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(OccupancyGrid msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(OccupancyGrid msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<OccupancyGrid>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out OccupancyGrid msg) => msg = new OccupancyGrid(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out OccupancyGrid msg) => msg = new OccupancyGrid(ref b);
+        }
     }
 }

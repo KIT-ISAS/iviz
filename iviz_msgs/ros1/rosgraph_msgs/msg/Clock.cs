@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract]
-    public sealed class Clock : IDeserializable<Clock>, IMessage
+    public sealed class Clock : IDeserializable<Clock>, IHasSerializer<Clock>, IMessage
     {
         // roslib/Clock is used for publishing simulated time in ROS. 
         // This message simply communicates the current time.
@@ -78,5 +78,21 @@ namespace Iviz.Msgs.RosgraphMsgs
                 "PhSnwpIuUCL4Urarta01038ZyYttvPL/3XCOu1MOP+0lWhy5AAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Clock> CreateSerializer() => new Serializer();
+        public Deserializer<Clock> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Clock>
+        {
+            public override void RosSerialize(Clock msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Clock msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Clock msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Clock msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Clock>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Clock msg) => msg = new Clock(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Clock msg) => msg = new Clock(ref b);
+        }
     }
 }

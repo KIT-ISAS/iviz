@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class BoundingBoxStamped : IDeserializable<BoundingBoxStamped>, IMessage
+    public sealed class BoundingBoxStamped : IDeserializable<BoundingBoxStamped>, IHasSerializer<BoundingBoxStamped>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "boundary")] public BoundingBox Boundary;
@@ -95,5 +95,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "4MDzxAcAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<BoundingBoxStamped> CreateSerializer() => new Serializer();
+        public Deserializer<BoundingBoxStamped> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<BoundingBoxStamped>
+        {
+            public override void RosSerialize(BoundingBoxStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(BoundingBoxStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(BoundingBoxStamped msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(BoundingBoxStamped msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<BoundingBoxStamped>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out BoundingBoxStamped msg) => msg = new BoundingBoxStamped(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out BoundingBoxStamped msg) => msg = new BoundingBoxStamped(ref b);
+        }
     }
 }

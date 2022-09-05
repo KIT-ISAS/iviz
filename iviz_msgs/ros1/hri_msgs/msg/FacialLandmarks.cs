@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class FacialLandmarks : IDeserializable<FacialLandmarks>, IMessage
+    public sealed class FacialLandmarks : IDeserializable<FacialLandmarks>, IHasSerializer<FacialLandmarks>, IMessage
     {
         // This message contains a list of facial features detected on a face
         // (0, 0) is at top-left corner of image
@@ -233,5 +233,21 @@ namespace Iviz.Msgs.HriMsgs
                 "vYtjZYHEtOF8NnY2qSC6d9+bb/vmW+w4/wAFzyXncw0AAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<FacialLandmarks> CreateSerializer() => new Serializer();
+        public Deserializer<FacialLandmarks> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<FacialLandmarks>
+        {
+            public override void RosSerialize(FacialLandmarks msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(FacialLandmarks msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(FacialLandmarks msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(FacialLandmarks msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<FacialLandmarks>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out FacialLandmarks msg) => msg = new FacialLandmarks(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out FacialLandmarks msg) => msg = new FacialLandmarks(ref b);
+        }
     }
 }

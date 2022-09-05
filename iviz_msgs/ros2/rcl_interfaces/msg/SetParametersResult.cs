@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class SetParametersResult : IDeserializable<SetParametersResult>, IMessage
+    public sealed class SetParametersResult : IDeserializable<SetParametersResult>, IHasSerializer<SetParametersResult>, IMessage
     {
         // A true value of the same index indicates that the parameter was set
         // successfully. A false value indicates the change was rejected.
@@ -90,5 +90,21 @@ namespace Iviz.Msgs.RclInterfaces
                 "ye7JkR7CP3f1+n8gAQAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<SetParametersResult> CreateSerializer() => new Serializer();
+        public Deserializer<SetParametersResult> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<SetParametersResult>
+        {
+            public override void RosSerialize(SetParametersResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(SetParametersResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(SetParametersResult msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(SetParametersResult msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<SetParametersResult>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out SetParametersResult msg) => msg = new SetParametersResult(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out SetParametersResult msg) => msg = new SetParametersResult(ref b);
+        }
     }
 }

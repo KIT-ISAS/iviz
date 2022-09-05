@@ -92,13 +92,20 @@ public sealed class Ros2Client : IRosClient
         (string id, subscriber) = TaskUtils.RunSync(() => SubscribeAsync(topic, callback, transportHint));
         return id;
     }
+    
+    public string Subscribe<T>(string topic, RosCallback<T> callback, out IRosSubscriber<T> subscriber,
+        RosTransportHint transportHint = RosTransportHint.PreferTcp)
+        where T : IMessage, new()
+    {
+        (string id, subscriber) = TaskUtils.RunSync(() => SubscribeAsync(topic, callback, transportHint));
+        return id;
+    }
 
     public string Subscribe<T>(string topic, Action<T> callback, out Ros2Subscriber<T> subscriber,
         RosTransportHint transportHint = RosTransportHint.PreferTcp)
         where T : IMessage, new()
     {
-        void Callback(in T message, IRosConnection info) => callback(message);
-        return Subscribe(topic, Callback, out subscriber, transportHint);
+        return Subscribe(topic, new DirectRosCallback<T>(callback), out subscriber, transportHint);
     }
 
     public ValueTask<(string id, Ros2Subscriber<T> subscriber)>
@@ -107,8 +114,7 @@ public sealed class Ros2Client : IRosClient
             CancellationToken token = default)
         where T : IMessage, new()
     {
-        void Callback(in T message, IRosConnection info) => callback(message);
-        return SubscribeAsync<T>(topic, Callback, transportHint, token);
+        return SubscribeAsync(topic, new DirectRosCallback<T>(callback), transportHint, token);
     }
 
     public ValueTask<(string id, Ros2Subscriber<T> subscriber)>

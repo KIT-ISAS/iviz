@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class ParameterEvent : IDeserializable<ParameterEvent>, IMessage
+    public sealed class ParameterEvent : IDeserializable<ParameterEvent>, IHasSerializer<ParameterEvent>, IMessage
     {
         // This message contains a parameter event.
         // Because the parameter event was an atomic update, a specific parameter name
@@ -251,5 +251,21 @@ namespace Iviz.Msgs.RclInterfaces
                 "kAgAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ParameterEvent> CreateSerializer() => new Serializer();
+        public Deserializer<ParameterEvent> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ParameterEvent>
+        {
+            public override void RosSerialize(ParameterEvent msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ParameterEvent msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ParameterEvent msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ParameterEvent msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ParameterEvent>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ParameterEvent msg) => msg = new ParameterEvent(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ParameterEvent msg) => msg = new ParameterEvent(ref b);
+        }
     }
 }

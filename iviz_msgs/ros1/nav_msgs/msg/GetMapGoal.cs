@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapGoal : IDeserializable<GetMapGoal>, IMessage, IGoal<GetMapActionGoal>
+    public sealed class GetMapGoal : IDeserializable<GetMapGoal>, IHasSerializer<GetMapGoal>, IMessage, IGoal<GetMapActionGoal>
     {
         // Get the map as a nav_msgs/OccupancyGrid
     
@@ -62,5 +62,21 @@ namespace Iviz.Msgs.NavMsgs
         public string RosDependenciesBase64 => BuiltIns.EmptyDependenciesBase64;
     
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<GetMapGoal> CreateSerializer() => new Serializer();
+        public Deserializer<GetMapGoal> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<GetMapGoal>
+        {
+            public override void RosSerialize(GetMapGoal msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(GetMapGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(GetMapGoal msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(GetMapGoal msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<GetMapGoal>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out GetMapGoal msg) => msg = new GetMapGoal(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out GetMapGoal msg) => msg = new GetMapGoal(ref b);
+        }
     }
 }

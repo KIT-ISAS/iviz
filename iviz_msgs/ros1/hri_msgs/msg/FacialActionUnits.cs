@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class FacialActionUnits : IDeserializable<FacialActionUnits>, IMessage
+    public sealed class FacialActionUnits : IDeserializable<FacialActionUnits>, IHasSerializer<FacialActionUnits>, IMessage
     {
         // This message the intensity of each actions unit (AU), with their confidence, for a specific face.
         //
@@ -378,5 +378,21 @@ namespace Iviz.Msgs.HriMsgs
                 "o/rFjq69SBIRjyTGYPbWIqnSZOtsSMEGCFI6NfgLXkFcJ4c8vZ5q0aKEdp2WQC5brT8BN7T9kO0SAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<FacialActionUnits> CreateSerializer() => new Serializer();
+        public Deserializer<FacialActionUnits> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<FacialActionUnits>
+        {
+            public override void RosSerialize(FacialActionUnits msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(FacialActionUnits msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(FacialActionUnits msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(FacialActionUnits msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<FacialActionUnits>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out FacialActionUnits msg) => msg = new FacialActionUnits(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out FacialActionUnits msg) => msg = new FacialActionUnits(ref b);
+        }
     }
 }

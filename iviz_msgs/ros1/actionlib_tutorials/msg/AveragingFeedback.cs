@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class AveragingFeedback : IDeserializable<AveragingFeedback>, IMessage, IFeedback<AveragingActionFeedback>
+    public sealed class AveragingFeedback : IDeserializable<AveragingFeedback>, IHasSerializer<AveragingFeedback>, IMessage, IFeedback<AveragingActionFeedback>
     {
         //feedback
     
@@ -63,5 +63,21 @@ namespace Iviz.Msgs.ActionlibTutorials
                 "H4sIAAAAAAAAE+PiAgBrE+NbAgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<AveragingFeedback> CreateSerializer() => new Serializer();
+        public Deserializer<AveragingFeedback> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<AveragingFeedback>
+        {
+            public override void RosSerialize(AveragingFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(AveragingFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(AveragingFeedback msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(AveragingFeedback msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<AveragingFeedback>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out AveragingFeedback msg) => msg = new AveragingFeedback(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out AveragingFeedback msg) => msg = new AveragingFeedback(ref b);
+        }
     }
 }

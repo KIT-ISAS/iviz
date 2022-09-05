@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestActionGoal : IDeserializable<TestActionGoal>, IMessage, IActionGoal<TestGoal>
+    public sealed class TestActionGoal : IDeserializable<TestActionGoal>, IHasSerializer<TestActionGoal>, IMessage, IActionGoal<TestGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
@@ -102,5 +102,21 @@ namespace Iviz.Msgs.Actionlib
                 "qX7UDGaE9UPU6qJfUe61pbu//L+aeRvrX+wXBfrCcAAFAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<TestActionGoal> CreateSerializer() => new Serializer();
+        public Deserializer<TestActionGoal> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<TestActionGoal>
+        {
+            public override void RosSerialize(TestActionGoal msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(TestActionGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(TestActionGoal msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(TestActionGoal msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<TestActionGoal>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out TestActionGoal msg) => msg = new TestActionGoal(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out TestActionGoal msg) => msg = new TestActionGoal(ref b);
+        }
     }
 }

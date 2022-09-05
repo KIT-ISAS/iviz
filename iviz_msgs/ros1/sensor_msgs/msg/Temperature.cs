@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Temperature : IDeserializable<Temperature>, IMessage
+    public sealed class Temperature : IDeserializable<Temperature>, IHasSerializer<Temperature>, IMessage
     {
         // Single temperature reading.
         /// <summary> Timestamp is the time the temperature was measured </summary>
@@ -101,5 +101,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "W+/UcmE//U/O/QQqbgGn4wMAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Temperature> CreateSerializer() => new Serializer();
+        public Deserializer<Temperature> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Temperature>
+        {
+            public override void RosSerialize(Temperature msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Temperature msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Temperature msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Temperature msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Temperature>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Temperature msg) => msg = new Temperature(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Temperature msg) => msg = new Temperature(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class BodyPosture : IDeserializable<BodyPosture>, IMessage
+    public sealed class BodyPosture : IDeserializable<BodyPosture>, IHasSerializer<BodyPosture>, IMessage
     {
         // Describes the general body posture in a symbolic manner.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -94,5 +94,21 @@ namespace Iviz.Msgs.HriMsgs
                 "AA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<BodyPosture> CreateSerializer() => new Serializer();
+        public Deserializer<BodyPosture> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<BodyPosture>
+        {
+            public override void RosSerialize(BodyPosture msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(BodyPosture msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(BodyPosture msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(BodyPosture msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<BodyPosture>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out BodyPosture msg) => msg = new BodyPosture(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out BodyPosture msg) => msg = new BodyPosture(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class Vertices : IDeserializable<Vertices>, IMessage
+    public sealed class Vertices : IDeserializable<Vertices>, IHasSerializer<Vertices>, IMessage
     {
         // List of point indices
         [DataMember (Name = "vertices")] public uint[] Vertices_;
@@ -100,5 +100,21 @@ namespace Iviz.Msgs.PclMsgs
                 "H4sIAAAAAAAAE1NW8MksLlHIT1MoyM/MK1HIzEvJTE4t5ioFcoyNomMVylKLSsAiXAA/hR0KKwAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Vertices> CreateSerializer() => new Serializer();
+        public Deserializer<Vertices> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Vertices>
+        {
+            public override void RosSerialize(Vertices msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Vertices msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Vertices msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Vertices msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Vertices>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Vertices msg) => msg = new Vertices(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Vertices msg) => msg = new Vertices(ref b);
+        }
     }
 }

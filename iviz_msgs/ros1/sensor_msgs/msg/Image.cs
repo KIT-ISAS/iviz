@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Image : IDeserializable<Image>, IMessage
+    public sealed class Image : IDeserializable<Image>, IHasSerializer<Image>, IMessage
     {
         // This message contains an uncompressed image
         // (0, 0) is at top-left corner of image
@@ -161,6 +161,22 @@ namespace Iviz.Msgs.SensorMsgs
         public void Dispose()
         {
             Data.Dispose();
+        }
+    
+        public Serializer<Image> CreateSerializer() => new Serializer();
+        public Deserializer<Image> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Image>
+        {
+            public override void RosSerialize(Image msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Image msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Image msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Image msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Image>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Image msg) => msg = new Image(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Image msg) => msg = new Image(ref b);
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class Expression : IDeserializable<Expression>, IMessage
+    public sealed class Expression : IDeserializable<Expression>, IHasSerializer<Expression>, IMessage
     {
         // Represents a human facial expression, either in a categorical way, or
         // using the valence/arousal model of emotions
@@ -150,5 +150,21 @@ namespace Iviz.Msgs.HriMsgs
                 "KhrvVnL+N7xRj7MSPsuzKKPobyrWNcSQBwAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Expression> CreateSerializer() => new Serializer();
+        public Deserializer<Expression> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Expression>
+        {
+            public override void RosSerialize(Expression msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Expression msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Expression msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Expression msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Expression>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Expression msg) => msg = new Expression(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Expression msg) => msg = new Expression(ref b);
+        }
     }
 }

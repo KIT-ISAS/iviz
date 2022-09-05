@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ModelTexCoords : IDeserializable<ModelTexCoords>, IMessage
+    public sealed class ModelTexCoords : IDeserializable<ModelTexCoords>, IHasSerializer<ModelTexCoords>, IMessage
     {
         [DataMember (Name = "coords")] public GeometryMsgs.Point32[] Coords;
     
@@ -103,5 +103,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "0DWClkuUIzXBEy0HWjzf9zLFol3tewkeAd/naj5XP9UvIXnll/wBAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ModelTexCoords> CreateSerializer() => new Serializer();
+        public Deserializer<ModelTexCoords> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ModelTexCoords>
+        {
+            public override void RosSerialize(ModelTexCoords msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ModelTexCoords msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ModelTexCoords msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ModelTexCoords msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ModelTexCoords>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ModelTexCoords msg) => msg = new ModelTexCoords(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ModelTexCoords msg) => msg = new ModelTexCoords(ref b);
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Header : IMessage, IDeserializable<Header>
+    public struct Header : IMessage, IDeserializable<Header>, IHasSerializer<Header>
     {
         // Standard metadata for higher-level stamped data types.
         // This is generally used to communicate timestamped data 
@@ -119,5 +119,21 @@ namespace Iviz.Msgs.StdMsgs
         public static implicit operator Header((uint seqId, string frameId) p) => new(p.seqId, time.Now(), p.frameId);
         public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new(p.seqId, p.stamp, p.frameId);
         public static implicit operator Header(string frameId) => new(0, time.Now(), frameId);
+    
+        public Serializer<Header> CreateSerializer() => new Serializer();
+        public Deserializer<Header> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Header>
+        {
+            public override void RosSerialize(Header msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Header msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Header msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Header msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Header>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Header msg) => msg = new Header(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Header msg) => msg = new Header(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class TriangleIndices : IDeserializable<TriangleIndices>, IMessage
+    public sealed class TriangleIndices : IDeserializable<TriangleIndices>, IHasSerializer<TriangleIndices>, IMessage
     {
         // Definition of a triangle's vertices
         [DataMember (Name = "vertex_indices")] public uint[/*3*/] VertexIndices;
@@ -88,5 +88,21 @@ namespace Iviz.Msgs.MeshMsgs
                 "VsRn5qWAJbgAjDTRWEAAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<TriangleIndices> CreateSerializer() => new Serializer();
+        public Deserializer<TriangleIndices> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<TriangleIndices>
+        {
+            public override void RosSerialize(TriangleIndices msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(TriangleIndices msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(TriangleIndices msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(TriangleIndices msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<TriangleIndices>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out TriangleIndices msg) => msg = new TriangleIndices(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out TriangleIndices msg) => msg = new TriangleIndices(ref b);
+        }
     }
 }

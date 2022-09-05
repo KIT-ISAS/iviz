@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshMaterials : IDeserializable<MeshMaterials>, IMessage
+    public sealed class MeshMaterials : IDeserializable<MeshMaterials>, IHasSerializer<MeshMaterials>, IMessage
     {
         // Mesh Attribute Message
         [DataMember (Name = "clusters")] public MeshMsgs.MeshFaceCluster[] Clusters;
@@ -250,5 +250,21 @@ namespace Iviz.Msgs.MeshMsgs
                 "IasLwBX0cFhyNAMAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MeshMaterials> CreateSerializer() => new Serializer();
+        public Deserializer<MeshMaterials> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MeshMaterials>
+        {
+            public override void RosSerialize(MeshMaterials msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MeshMaterials msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MeshMaterials msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MeshMaterials msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MeshMaterials>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MeshMaterials msg) => msg = new MeshMaterials(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MeshMaterials msg) => msg = new MeshMaterials(ref b);
+        }
     }
 }

@@ -25,8 +25,7 @@ namespace Iviz.Roslib;
 /// </example>
 /// </summary>
 /// <typeparam name="T">The message type</typeparam>
-public sealed class RosChannelReader<T> : BaseRosChannelReader<T>
-    where T : IMessage, new()
+public sealed class RosChannelReader<T> : BaseRosChannelReader<T> where T : IMessage, new()
 {
     /// <summary>
     /// Initializes the channel. <see cref="Start"/> or <see cref="StartAsync"/> must be called after this.
@@ -48,17 +47,10 @@ public sealed class RosChannelReader<T> : BaseRosChannelReader<T>
 
     public override async ValueTask StartAsync(IRosClient client, string topic, CancellationToken token = default)
     {
-        if (client == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(client));
-        }
+        if (client == null) BuiltIns.ThrowArgumentNull(nameof(client));
+        if (subscriber != null) throw new InvalidOperationException("Channel has already been started!");
 
-        if (subscriber != null)
-        {
-            throw new InvalidOperationException("Channel has already been started!");
-        }
-
-        var (newId, newSubscriber) = await client.SubscribeAsync<T>(topic, Callback, token: token);
+        var (newId, newSubscriber) = await client.SubscribeAsync(topic, this, token: token);
 
         subscriberId = newId;
         subscriber = newSubscriber;
@@ -72,11 +64,11 @@ public sealed class RosChannelReader<T> : BaseRosChannelReader<T>
             BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
-        subscriberId = client.Subscribe(topic, Callback, out subscriber);
+        subscriberId = client.Subscribe(topic, this, out subscriber);
         subscriberToken = subscriber.CancellationToken.Register(OnSubscriberDisposed);
     }
 
-    void Callback(T t)
+    public override void Handle(in T t, IRosConnection _)
     {
         if (disposed)
         {

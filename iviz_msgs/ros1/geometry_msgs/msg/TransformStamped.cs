@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct TransformStamped : IMessage, IDeserializable<TransformStamped>
+    public struct TransformStamped : IMessage, IDeserializable<TransformStamped>, IHasSerializer<TransformStamped>
     {
         // This expresses a transform from coordinate frame header.frame_id
         // to the coordinate frame child_frame_id
@@ -122,5 +122,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "PklETZUHAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<TransformStamped> CreateSerializer() => new Serializer();
+        public Deserializer<TransformStamped> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<TransformStamped>
+        {
+            public override void RosSerialize(TransformStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(TransformStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(TransformStamped msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(TransformStamped msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<TransformStamped>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out TransformStamped msg) => msg = new TransformStamped(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out TransformStamped msg) => msg = new TransformStamped(ref b);
+        }
     }
 }

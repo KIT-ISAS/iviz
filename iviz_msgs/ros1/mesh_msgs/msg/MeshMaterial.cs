@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshMaterial : IDeserializable<MeshMaterial>, IMessage
+    public sealed class MeshMaterial : IDeserializable<MeshMaterial>, IHasSerializer<MeshMaterial>, IMessage
     {
         [DataMember (Name = "texture_index")] public uint TextureIndex;
         [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color;
@@ -86,5 +86,21 @@ namespace Iviz.Msgs.MeshMsgs
                 "Eovjoeq5uGypDLh8g92tFDAdwJWWk58IcmkRnJUOZyXBWYlcXABOlNZm0gAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MeshMaterial> CreateSerializer() => new Serializer();
+        public Deserializer<MeshMaterial> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MeshMaterial>
+        {
+            public override void RosSerialize(MeshMaterial msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MeshMaterial msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MeshMaterial msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MeshMaterial msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MeshMaterial>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MeshMaterial msg) => msg = new MeshMaterial(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MeshMaterial msg) => msg = new MeshMaterial(ref b);
+        }
     }
 }

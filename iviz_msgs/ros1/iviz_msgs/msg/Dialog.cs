@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Dialog : IDeserializable<Dialog>, IMessage
+    public sealed class Dialog : IDeserializable<Dialog>, IHasSerializer<Dialog>, IMessage
     {
         public const byte ACTION_ADD = 0;
         public const byte ACTION_REMOVE = 1;
@@ -267,5 +267,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "1sSwSEkSrO9cKpxHHau5F96bp03z9MP6B/O18Dr5CwAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Dialog> CreateSerializer() => new Serializer();
+        public Deserializer<Dialog> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Dialog>
+        {
+            public override void RosSerialize(Dialog msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Dialog msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Dialog msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Dialog msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Dialog>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Dialog msg) => msg = new Dialog(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Dialog msg) => msg = new Dialog(ref b);
+        }
     }
 }

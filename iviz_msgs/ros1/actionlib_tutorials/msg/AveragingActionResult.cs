@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class AveragingActionResult : IDeserializable<AveragingActionResult>, IMessage, IActionResult<AveragingResult>
+    public sealed class AveragingActionResult : IDeserializable<AveragingActionResult>, IHasSerializer<AveragingActionResult>, IMessage, IActionResult<AveragingResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -111,5 +111,21 @@ namespace Iviz.Msgs.ActionlibTutorials
                 "DAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<AveragingActionResult> CreateSerializer() => new Serializer();
+        public Deserializer<AveragingActionResult> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<AveragingActionResult>
+        {
+            public override void RosSerialize(AveragingActionResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(AveragingActionResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(AveragingActionResult msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(AveragingActionResult msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<AveragingActionResult>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out AveragingActionResult msg) => msg = new AveragingActionResult(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out AveragingActionResult msg) => msg = new AveragingActionResult(ref b);
+        }
     }
 }

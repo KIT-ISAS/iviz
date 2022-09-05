@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Roscpp
 {
     [DataContract]
-    public sealed class Logger : IDeserializable<Logger>, IMessage
+    public sealed class Logger : IDeserializable<Logger>, IHasSerializer<Logger>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "level")] public string Level;
@@ -87,5 +87,21 @@ namespace Iviz.Msgs.Roscpp
                 "H4sIAAAAAAAAEysuKcrMS1fIS8xN5SqGsHNSy1JzuLi4AGqsOFEbAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Logger> CreateSerializer() => new Serializer();
+        public Deserializer<Logger> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Logger>
+        {
+            public override void RosSerialize(Logger msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Logger msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Logger msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Logger msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Logger>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Logger msg) => msg = new Logger(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Logger msg) => msg = new Logger(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class ModelCoefficients : IDeserializable<ModelCoefficients>, IMessage
+    public sealed class ModelCoefficients : IDeserializable<ModelCoefficients>, IHasSerializer<ModelCoefficients>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "values")] public float[] Values;
@@ -112,5 +112,21 @@ namespace Iviz.Msgs.PclMsgs
                 "EoGetPbOamnqy1i2Gpz7DzMLnaW4AgAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ModelCoefficients> CreateSerializer() => new Serializer();
+        public Deserializer<ModelCoefficients> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ModelCoefficients>
+        {
+            public override void RosSerialize(ModelCoefficients msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ModelCoefficients msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ModelCoefficients msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ModelCoefficients msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ModelCoefficients>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ModelCoefficients msg) => msg = new ModelCoefficients(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ModelCoefficients msg) => msg = new ModelCoefficients(ref b);
+        }
     }
 }

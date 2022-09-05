@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PoseArray : IDeserializable<PoseArray>, IMessage
+    public sealed class PoseArray : IDeserializable<PoseArray>, IHasSerializer<PoseArray>, IMessage
     {
         // An array of poses with a header for global reference.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -118,5 +118,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "ruiw2hvzCzR+fYtpBQAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<PoseArray> CreateSerializer() => new Serializer();
+        public Deserializer<PoseArray> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<PoseArray>
+        {
+            public override void RosSerialize(PoseArray msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(PoseArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(PoseArray msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(PoseArray msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<PoseArray>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out PoseArray msg) => msg = new PoseArray(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out PoseArray msg) => msg = new PoseArray(ref b);
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Triangle : IMessage, IDeserializable<Triangle>
+    public struct Triangle : IMessage, IDeserializable<Triangle>, IHasSerializer<Triangle>
     {
         [DataMember (Name = "a")] public uint A;
         [DataMember (Name = "b")] public uint B;
@@ -76,5 +76,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "H4sIAAAAAAAAEyvNzCsxNlJI5CqFMJJgjGQuLgA3MPMeHAAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Triangle> CreateSerializer() => new Serializer();
+        public Deserializer<Triangle> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Triangle>
+        {
+            public override void RosSerialize(Triangle msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Triangle msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Triangle msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Triangle msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Triangle>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Triangle msg) => msg = new Triangle(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Triangle msg) => msg = new Triangle(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TurtleActionlib
 {
     [DataContract]
-    public sealed class ShapeActionResult : IDeserializable<ShapeActionResult>, IMessage, IActionResult<ShapeResult>
+    public sealed class ShapeActionResult : IDeserializable<ShapeActionResult>, IHasSerializer<ShapeActionResult>, IMessage, IActionResult<ShapeResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -111,5 +111,21 @@ namespace Iviz.Msgs.TurtleActionlib
                 "AAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ShapeActionResult> CreateSerializer() => new Serializer();
+        public Deserializer<ShapeActionResult> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ShapeActionResult>
+        {
+            public override void RosSerialize(ShapeActionResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ShapeActionResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ShapeActionResult msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ShapeActionResult msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ShapeActionResult>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ShapeActionResult msg) => msg = new ShapeActionResult(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ShapeActionResult msg) => msg = new ShapeActionResult(ref b);
+        }
     }
 }

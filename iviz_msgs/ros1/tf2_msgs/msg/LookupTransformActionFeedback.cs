@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformActionFeedback : IDeserializable<LookupTransformActionFeedback>, IMessage, IActionFeedback<LookupTransformFeedback>
+    public sealed class LookupTransformActionFeedback : IDeserializable<LookupTransformActionFeedback>, IHasSerializer<LookupTransformActionFeedback>, IMessage, IActionFeedback<LookupTransformFeedback>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -109,5 +109,21 @@ namespace Iviz.Msgs.Tf2Msgs
                 "GCIDN+zQeehrF4BUHWJRoM8prBpuksdDyDdKnV+ct0k7MJwnyX97lDpR5QsAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<LookupTransformActionFeedback> CreateSerializer() => new Serializer();
+        public Deserializer<LookupTransformActionFeedback> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<LookupTransformActionFeedback>
+        {
+            public override void RosSerialize(LookupTransformActionFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(LookupTransformActionFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(LookupTransformActionFeedback msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(LookupTransformActionFeedback msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<LookupTransformActionFeedback>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out LookupTransformActionFeedback msg) => msg = new LookupTransformActionFeedback(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out LookupTransformActionFeedback msg) => msg = new LookupTransformActionFeedback(ref b);
+        }
     }
 }

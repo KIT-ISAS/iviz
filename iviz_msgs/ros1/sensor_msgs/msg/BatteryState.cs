@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class BatteryState : IDeserializable<BatteryState>, IMessage
+    public sealed class BatteryState : IDeserializable<BatteryState>, IHasSerializer<BatteryState>, IMessage
     {
         // Constants are chosen to match the enums in the linux kernel
         // defined in include/linux/power_supply.h as of version 3.7
@@ -293,5 +293,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "/Qt9Fo7EvAwAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<BatteryState> CreateSerializer() => new Serializer();
+        public Deserializer<BatteryState> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<BatteryState>
+        {
+            public override void RosSerialize(BatteryState msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(BatteryState msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(BatteryState msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(BatteryState msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<BatteryState>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out BatteryState msg) => msg = new BatteryState(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out BatteryState msg) => msg = new BatteryState(ref b);
+        }
     }
 }

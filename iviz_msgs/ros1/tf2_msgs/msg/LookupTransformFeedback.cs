@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformFeedback : IDeserializable<LookupTransformFeedback>, IMessage, IFeedback<LookupTransformActionFeedback>
+    public sealed class LookupTransformFeedback : IDeserializable<LookupTransformFeedback>, IHasSerializer<LookupTransformFeedback>, IMessage, IFeedback<LookupTransformActionFeedback>
     {
         public LookupTransformFeedback()
         {
@@ -60,5 +60,21 @@ namespace Iviz.Msgs.Tf2Msgs
         public string RosDependenciesBase64 => BuiltIns.EmptyDependenciesBase64;
     
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<LookupTransformFeedback> CreateSerializer() => new Serializer();
+        public Deserializer<LookupTransformFeedback> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<LookupTransformFeedback>
+        {
+            public override void RosSerialize(LookupTransformFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(LookupTransformFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(LookupTransformFeedback msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(LookupTransformFeedback msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<LookupTransformFeedback>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out LookupTransformFeedback msg) => msg = new LookupTransformFeedback(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out LookupTransformFeedback msg) => msg = new LookupTransformFeedback(ref b);
+        }
     }
 }

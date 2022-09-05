@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerPose : IDeserializable<InteractiveMarkerPose>, IMessage
+    public sealed class InteractiveMarkerPose : IDeserializable<InteractiveMarkerPose>, IHasSerializer<InteractiveMarkerPose>, IMessage
     {
         // Time/frame info.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -104,5 +104,21 @@ namespace Iviz.Msgs.VisualizationMsgs
                 "enrY+44PTV+YPyhaVo/G/AQXDOMv+AUAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<InteractiveMarkerPose> CreateSerializer() => new Serializer();
+        public Deserializer<InteractiveMarkerPose> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<InteractiveMarkerPose>
+        {
+            public override void RosSerialize(InteractiveMarkerPose msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(InteractiveMarkerPose msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(InteractiveMarkerPose msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(InteractiveMarkerPose msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<InteractiveMarkerPose>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out InteractiveMarkerPose msg) => msg = new InteractiveMarkerPose(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out InteractiveMarkerPose msg) => msg = new InteractiveMarkerPose(ref b);
+        }
     }
 }

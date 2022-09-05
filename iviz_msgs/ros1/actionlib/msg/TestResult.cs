@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestResult : IDeserializable<TestResult>, IMessage, IResult<TestActionResult>
+    public sealed class TestResult : IDeserializable<TestResult>, IHasSerializer<TestResult>, IMessage, IResult<TestActionResult>
     {
         [DataMember (Name = "result")] public int Result;
     
@@ -73,5 +73,21 @@ namespace Iviz.Msgs.Actionlib
                 "H4sIAAAAAAAAE8vMKzE2UihKLS7NKeECAJhJ6VgNAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<TestResult> CreateSerializer() => new Serializer();
+        public Deserializer<TestResult> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<TestResult>
+        {
+            public override void RosSerialize(TestResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(TestResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(TestResult msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(TestResult msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<TestResult>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out TestResult msg) => msg = new TestResult(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out TestResult msg) => msg = new TestResult(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class AccelStamped : IDeserializable<AccelStamped>, IMessage
+    public sealed class AccelStamped : IDeserializable<AccelStamped>, IHasSerializer<AccelStamped>, IMessage
     {
         // An accel with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -95,5 +95,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "BQAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<AccelStamped> CreateSerializer() => new Serializer();
+        public Deserializer<AccelStamped> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<AccelStamped>
+        {
+            public override void RosSerialize(AccelStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(AccelStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(AccelStamped msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(AccelStamped msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<AccelStamped>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out AccelStamped msg) => msg = new AccelStamped(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out AccelStamped msg) => msg = new AccelStamped(ref b);
+        }
     }
 }

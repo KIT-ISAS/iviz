@@ -28,7 +28,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
 
     static RosCallback<TMessage>[] EmptyCallback => Array.Empty<RosCallback<TMessage>>();
 
-    internal RosCallback<TMessage>[] Callbacks = EmptyCallback;
+    internal RosCallback<TMessage>[] callbacks = EmptyCallback;
     
     public string Topic => topicInfo.Topic;
     public string TopicType => topicInfo.Type;
@@ -218,7 +218,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
 
     public async ValueTask StopAsync(CancellationToken token)
     {
-        Callbacks = EmptyCallback;
+        callbacks = EmptyCallback;
 
         var receivers = receiversByUri.Values.ToArray();
         receiversByUri.Clear();

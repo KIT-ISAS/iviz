@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class NormalizedPointOfInterest2DStamped : IDeserializable<NormalizedPointOfInterest2DStamped>, IMessage
+    public sealed class NormalizedPointOfInterest2DStamped : IDeserializable<NormalizedPointOfInterest2DStamped>, IHasSerializer<NormalizedPointOfInterest2DStamped>, IMessage
     {
         // This contains the position of a point of interest (typically in an image)
         // the coordinates are always normalized and must belong to [0.,1.].
@@ -107,5 +107,21 @@ namespace Iviz.Msgs.HriMsgs
                 "kcRpPjvWCA6bNfvAYVIlkKWlqr5lsfETqoo1+ZBc0n8yqVMxhYxebNmZRqm/wcvI490DAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<NormalizedPointOfInterest2DStamped> CreateSerializer() => new Serializer();
+        public Deserializer<NormalizedPointOfInterest2DStamped> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<NormalizedPointOfInterest2DStamped>
+        {
+            public override void RosSerialize(NormalizedPointOfInterest2DStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(NormalizedPointOfInterest2DStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(NormalizedPointOfInterest2DStamped msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(NormalizedPointOfInterest2DStamped msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<NormalizedPointOfInterest2DStamped>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out NormalizedPointOfInterest2DStamped msg) => msg = new NormalizedPointOfInterest2DStamped(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out NormalizedPointOfInterest2DStamped msg) => msg = new NormalizedPointOfInterest2DStamped(ref b);
+        }
     }
 }

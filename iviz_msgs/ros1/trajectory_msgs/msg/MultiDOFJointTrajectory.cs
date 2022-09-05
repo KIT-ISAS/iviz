@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract]
-    public sealed class MultiDOFJointTrajectory : IDeserializable<MultiDOFJointTrajectory>, IMessage
+    public sealed class MultiDOFJointTrajectory : IDeserializable<MultiDOFJointTrajectory>, IHasSerializer<MultiDOFJointTrajectory>, IMessage
     {
         // The header is used to specify the coordinate frame and the reference time for the trajectory durations
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -165,5 +165,21 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 "kgliATvGMpaQfDRpW6bVLlseXwvTrI4iy/sop9RnJhydHMwKAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MultiDOFJointTrajectory> CreateSerializer() => new Serializer();
+        public Deserializer<MultiDOFJointTrajectory> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MultiDOFJointTrajectory>
+        {
+            public override void RosSerialize(MultiDOFJointTrajectory msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MultiDOFJointTrajectory msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MultiDOFJointTrajectory msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MultiDOFJointTrajectory msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MultiDOFJointTrajectory>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MultiDOFJointTrajectory msg) => msg = new MultiDOFJointTrajectory(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MultiDOFJointTrajectory msg) => msg = new MultiDOFJointTrajectory(ref b);
+        }
     }
 }

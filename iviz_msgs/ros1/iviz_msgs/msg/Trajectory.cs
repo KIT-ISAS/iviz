@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Trajectory : IDeserializable<Trajectory>, IMessage
+    public sealed class Trajectory : IDeserializable<Trajectory>, IHasSerializer<Trajectory>, IMessage
     {
         [DataMember (Name = "poses")] public GeometryMsgs.Pose[] Poses;
         [DataMember (Name = "timestamps")] public time[] Timestamps;
@@ -136,5 +136,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "xFtT3Zvq8R/8NrraQ/NRrMG/59mFT+rc5p6H6DL44qiurgBPjHOw/qsCAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Trajectory> CreateSerializer() => new Serializer();
+        public Deserializer<Trajectory> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Trajectory>
+        {
+            public override void RosSerialize(Trajectory msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Trajectory msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Trajectory msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Trajectory msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Trajectory>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Trajectory msg) => msg = new Trajectory(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Trajectory msg) => msg = new Trajectory(ref b);
+        }
     }
 }

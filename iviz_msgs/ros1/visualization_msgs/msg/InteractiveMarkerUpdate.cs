@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerUpdate : IDeserializable<InteractiveMarkerUpdate>, IMessage
+    public sealed class InteractiveMarkerUpdate : IDeserializable<InteractiveMarkerUpdate>, IHasSerializer<InteractiveMarkerUpdate>, IMessage
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
@@ -284,5 +284,21 @@ namespace Iviz.Msgs.VisualizationMsgs
                 "3vj06P/v85o/AR49bT+SKQAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<InteractiveMarkerUpdate> CreateSerializer() => new Serializer();
+        public Deserializer<InteractiveMarkerUpdate> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<InteractiveMarkerUpdate>
+        {
+            public override void RosSerialize(InteractiveMarkerUpdate msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(InteractiveMarkerUpdate msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(InteractiveMarkerUpdate msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(InteractiveMarkerUpdate msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<InteractiveMarkerUpdate>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out InteractiveMarkerUpdate msg) => msg = new InteractiveMarkerUpdate(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out InteractiveMarkerUpdate msg) => msg = new InteractiveMarkerUpdate(ref b);
+        }
     }
 }

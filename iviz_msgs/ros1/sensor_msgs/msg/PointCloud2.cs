@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class PointCloud2 : IDeserializable<PointCloud2>, IMessage
+    public sealed class PointCloud2 : IDeserializable<PointCloud2>, IHasSerializer<PointCloud2>, IMessage
     {
         // This message holds a collection of N-dimensional points, which may
         // contain additional information such as normals, intensity, etc. The
@@ -208,6 +208,22 @@ namespace Iviz.Msgs.SensorMsgs
         public void Dispose()
         {
             Data.Dispose();
+        }
+    
+        public Serializer<PointCloud2> CreateSerializer() => new Serializer();
+        public Deserializer<PointCloud2> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<PointCloud2>
+        {
+            public override void RosSerialize(PointCloud2 msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(PointCloud2 msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(PointCloud2 msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(PointCloud2 msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<PointCloud2>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out PointCloud2 msg) => msg = new PointCloud2(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out PointCloud2 msg) => msg = new PointCloud2(ref b);
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GridMapMsgs
 {
     [DataContract]
-    public sealed class GridMapInfo : IDeserializable<GridMapInfo>, IMessage
+    public sealed class GridMapInfo : IDeserializable<GridMapInfo>, IHasSerializer<GridMapInfo>, IMessage
     {
         // Header (time and frame)
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -108,5 +108,21 @@ namespace Iviz.Msgs.GridMapMsgs
                 "oekW6hlH26cHpX4DyQZzYi0GAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<GridMapInfo> CreateSerializer() => new Serializer();
+        public Deserializer<GridMapInfo> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<GridMapInfo>
+        {
+            public override void RosSerialize(GridMapInfo msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(GridMapInfo msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(GridMapInfo msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(GridMapInfo msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<GridMapInfo>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out GridMapInfo msg) => msg = new GridMapInfo(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out GridMapInfo msg) => msg = new GridMapInfo(ref b);
+        }
     }
 }

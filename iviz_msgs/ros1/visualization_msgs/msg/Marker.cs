@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class Marker : IDeserializable<Marker>, IMessage
+    public sealed class Marker : IDeserializable<Marker>, IHasSerializer<Marker>, IMessage
     {
         // See http://www.ros.org/wiki/rviz/DisplayTypes/Marker and http://www.ros.org/wiki/rviz/Tutorials/Markers%3A%20Basic%20Shapes for more information on using this message with rviz
         public const byte ARROW = 0;
@@ -288,5 +288,21 @@ namespace Iviz.Msgs.VisualizationMsgs
                 "uMbl6clp3fKzPqh4oNabf95Q5w6T56dZ/zWpvn8HCCYxO0yzmjWrSbMSUfQNjzQLOCAPAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Marker> CreateSerializer() => new Serializer();
+        public Deserializer<Marker> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Marker>
+        {
+            public override void RosSerialize(Marker msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Marker msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Marker msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Marker msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Marker>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Marker msg) => msg = new Marker(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Marker msg) => msg = new Marker(ref b);
+        }
     }
 }

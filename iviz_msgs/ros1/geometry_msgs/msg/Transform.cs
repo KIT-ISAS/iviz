@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Transform : IMessage, IDeserializable<Transform>
+    public struct Transform : IMessage, IDeserializable<Transform>, IHasSerializer<Transform>
     {
         // This represents the transform between two coordinate frames in free space.
         [DataMember (Name = "translation")] public Vector3 Translation;
@@ -93,5 +93,21 @@ namespace Iviz.Msgs.GeometryMsgs
         public static Quaternion operator *(in Transform t, in Quaternion q) => t.Rotation * q;
         public static Transform RotateAround(in Quaternion q, in Point p) => new(p - q * p, q);
         public static implicit operator Transform(in (Vector3 translation, Quaternion rotation) p) => new(p.translation, p.rotation);
+    
+        public Serializer<Transform> CreateSerializer() => new Serializer();
+        public Deserializer<Transform> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Transform>
+        {
+            public override void RosSerialize(Transform msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Transform msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Transform msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Transform msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Transform>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Transform msg) => msg = new Transform(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Transform msg) => msg = new Transform(ref b);
+        }
     }
 }

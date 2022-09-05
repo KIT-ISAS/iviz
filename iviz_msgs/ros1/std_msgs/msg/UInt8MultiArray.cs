@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class UInt8MultiArray : IDeserializable<UInt8MultiArray>, IMessage
+    public sealed class UInt8MultiArray : IDeserializable<UInt8MultiArray>, IHasSerializer<UInt8MultiArray>, IMessage
     {
         // Please look at the MultiArrayLayout message definition for
         // documentation on all multiarrays.
@@ -123,5 +123,21 @@ namespace Iviz.Msgs.StdMsgs
                 "io5vO/c0X40a4fJrjubdRroIU4JrgCpcuO6yDawlC4H16i81/gAxI/UV1AUAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<UInt8MultiArray> CreateSerializer() => new Serializer();
+        public Deserializer<UInt8MultiArray> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<UInt8MultiArray>
+        {
+            public override void RosSerialize(UInt8MultiArray msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(UInt8MultiArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(UInt8MultiArray msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(UInt8MultiArray msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<UInt8MultiArray>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out UInt8MultiArray msg) => msg = new UInt8MultiArray(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out UInt8MultiArray msg) => msg = new UInt8MultiArray(ref b);
+        }
     }
 }

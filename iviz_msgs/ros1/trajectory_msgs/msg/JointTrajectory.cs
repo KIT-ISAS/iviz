@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract]
-    public sealed class JointTrajectory : IDeserializable<JointTrajectory>, IMessage
+    public sealed class JointTrajectory : IDeserializable<JointTrajectory>, IHasSerializer<JointTrajectory>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "joint_names")] public string[] JointNames;
@@ -153,5 +153,21 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 "ZYZJVRmzbWLotiAAFOon0pFogqYEAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<JointTrajectory> CreateSerializer() => new Serializer();
+        public Deserializer<JointTrajectory> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<JointTrajectory>
+        {
+            public override void RosSerialize(JointTrajectory msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(JointTrajectory msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(JointTrajectory msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(JointTrajectory msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<JointTrajectory>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out JointTrajectory msg) => msg = new JointTrajectory(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out JointTrajectory msg) => msg = new JointTrajectory(ref b);
+        }
     }
 }

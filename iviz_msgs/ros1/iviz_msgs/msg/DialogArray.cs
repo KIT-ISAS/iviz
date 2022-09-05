@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class DialogArray : IDeserializable<DialogArray>, IMessage
+    public sealed class DialogArray : IDeserializable<DialogArray>, IHasSerializer<DialogArray>, IMessage
     {
         [DataMember (Name = "dialogs")] public IvizMsgs.Dialog[] Dialogs;
     
@@ -133,5 +133,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "mgpcT/ualylaxfFKKDRxA9EN6CPH1sSwSEkSrO9cKpxHPau5F96a1bpZvVv/ALCPTiV9DAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<DialogArray> CreateSerializer() => new Serializer();
+        public Deserializer<DialogArray> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<DialogArray>
+        {
+            public override void RosSerialize(DialogArray msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(DialogArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(DialogArray msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(DialogArray msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<DialogArray>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out DialogArray msg) => msg = new DialogArray(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out DialogArray msg) => msg = new DialogArray(ref b);
+        }
     }
 }

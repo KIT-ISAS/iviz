@@ -15,7 +15,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
     readonly Dictionary<string, RosCallback<TMessage>> callbacksById = new();
     readonly Ros2Client client;
 
-    RosCallback<TMessage>[] cachedCallbacks = EmptyCallback; // cache to iterate through callbacks quickly
+    RosCallback<TMessage>[] callbacks = EmptyCallback; // cache to iterate through callbacks quickly
     Task? task;
     int totalSubscribers;
     bool disposed;
@@ -35,9 +35,9 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
     {
         var token = CancellationToken;
         var rclSubscriber = Subscriber;
-        var generator = (IDeserializable<TMessage>)new TMessage();
+        var deserializer = ((IHasSerializer<TMessage>)new TMessage()).CreateDeserializer();
         var receiverInfo = new Ros2Receiver(Topic, TopicType);
-        var messageHandler = new RclDeserializeHandler<TMessage>(this, generator);
+        var messageHandler = new RclDeserializeHandler<TMessage>(this, deserializer);
         using var gcHandle = new GCHandleWrapper(messageHandler);
 
         while (true)
@@ -58,11 +58,11 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
             }
 
             var msg = messageHandler.message!;
-            foreach (var callback in cachedCallbacks)
+            foreach (var callback in callbacks)
             {
                 try
                 {
-                    callback(in msg, receiverInfo);
+                    callback.Handle(in msg, receiverInfo);
                 }
                 catch (Exception e)
                 {
@@ -110,11 +110,16 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
     string IRosSubscriber.Subscribe(Action<IMessage> callback) =>
         Subscribe(msg => callback(msg));
 
-    string IRosSubscriber.Subscribe(Action<IMessage, IRosConnection> callback) =>
-        Subscribe((in TMessage msg, IRosConnection receiver) => callback(msg, receiver));
+    string IRosSubscriber.Subscribe(Action<IMessage, IRosConnection> callback)
+    {
+        void Callback(in TMessage msg, IRosConnection receiver) => callback(msg, receiver);
+        return Subscribe(new ActionRosCallback<TMessage>(Callback));
+    }
 
-    public string Subscribe(Action<TMessage> callback) =>
-        Subscribe((in TMessage t, IRosConnection _) => callback(t));
+    public string Subscribe(Action<TMessage> callback)
+    {
+        return Subscribe(new DirectRosCallback<TMessage>(callback));
+    }
 
     public string Subscribe(RosCallback<TMessage> callback)
     {
@@ -124,7 +129,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
 
         string id = GenerateId();
         callbacksById.Add(id, callback);
-        cachedCallbacks = callbacksById.Values.ToArray();
+        callbacks = callbacksById.Values.ToArray();
         return id;
     }
 
@@ -138,7 +143,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
         }
 
         bool removed = callbacksById.Remove(id);
-        cachedCallbacks = callbacksById.Values.ToArray();
+        callbacks = callbacksById.Values.ToArray();
 
         if (callbacksById.Count == 0)
         {
@@ -160,11 +165,11 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
         bool removed = callbacksById.Remove(id);
         if (callbacksById.Count != 0)
         {
-            cachedCallbacks = callbacksById.Values.ToArray();
+            callbacks = callbacksById.Values.ToArray();
         }
         else
         {
-            cachedCallbacks = EmptyCallback;
+            callbacks = EmptyCallback;
             await DisposeAsync(token).AwaitNoThrow(this);
         }
 
@@ -189,7 +194,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
         await client.Rcl.UnsubscribeAsync(Subscriber, default).AwaitNoThrow(this);
 
         callbacksById.Clear();
-        cachedCallbacks = EmptyCallback;
+        callbacks = EmptyCallback;
 
         client.RemoveSubscriber(this);
     }

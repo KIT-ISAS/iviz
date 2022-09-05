@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class Path : IDeserializable<Path>, IMessage
+    public sealed class Path : IDeserializable<Path>, IHasSerializer<Path>, IMessage
     {
         //An array of poses that represents a Path for a robot to follow
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -130,5 +130,21 @@ namespace Iviz.Msgs.NavMsgs
                 "o/tpNUyrn89D/5i6g4bHt/hJPk/Jp93dMe+4KNuF+YOiw2pvzC9gdHLNRAYAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Path> CreateSerializer() => new Serializer();
+        public Deserializer<Path> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Path>
+        {
+            public override void RosSerialize(Path msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Path msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Path msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Path msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Path>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Path msg) => msg = new Path(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Path msg) => msg = new Path(ref b);
+        }
     }
 }

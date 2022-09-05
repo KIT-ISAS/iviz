@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ModelMaterial : IDeserializable<ModelMaterial>, IMessage
+    public sealed class ModelMaterial : IDeserializable<ModelMaterial>, IHasSerializer<ModelMaterial>, IMessage
     {
         public const byte BLEND_DEFAULT = 0;
         public const byte BLEND_ADDITIVE = 1;
@@ -185,5 +185,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "JgUAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ModelMaterial> CreateSerializer() => new Serializer();
+        public Deserializer<ModelMaterial> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ModelMaterial>
+        {
+            public override void RosSerialize(ModelMaterial msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ModelMaterial msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ModelMaterial msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ModelMaterial msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ModelMaterial>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ModelMaterial msg) => msg = new ModelMaterial(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ModelMaterial msg) => msg = new ModelMaterial(ref b);
+        }
     }
 }

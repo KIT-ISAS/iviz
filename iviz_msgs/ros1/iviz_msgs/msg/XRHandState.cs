@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class XRHandState : IDeserializable<XRHandState>, IMessage
+    public sealed class XRHandState : IDeserializable<XRHandState>, IHasSerializer<XRHandState>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "palm")] public GeometryMsgs.Transform Palm;
@@ -269,5 +269,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "XHXj6seLtHrnsae67ciHPKKDfI96nt/udgbNIv+xoO1qrdRPVX5I2R8HAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<XRHandState> CreateSerializer() => new Serializer();
+        public Deserializer<XRHandState> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<XRHandState>
+        {
+            public override void RosSerialize(XRHandState msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(XRHandState msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(XRHandState msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(XRHandState msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<XRHandState>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out XRHandState msg) => msg = new XRHandState(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out XRHandState msg) => msg = new XRHandState(ref b);
+        }
     }
 }

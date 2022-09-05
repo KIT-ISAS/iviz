@@ -250,10 +250,12 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
 
     async ValueTask ProcessMessages(TcpClient client)
     {
-        if (topicInfo.Generator is not IDeserializableRos1<TMessage> generator)
+        if (topicInfo.Generator is not IHasSerializer<TMessage> generator)
         {
             throw new InvalidOperationException("Invalid generator!"); // shouldn't happen
         }
+
+        var deserializer = generator.CreateDeserializer();
 
         var token = runningTs.Token;
         using var readBuffer = new ResizableRent();
@@ -280,26 +282,23 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
                 continue;
             }
 
-            //var message = ReadBuffer.Deserialize(generator, readBuffer[..rcvLength]);
-            //MessageCallback(message);
-
             TMessage message;
             unsafe
             {
                 fixed (byte* bufferPtr = readBuffer.Array)
                 {
                     var b = new ReadBuffer(bufferPtr, rcvLength);
-                    message = generator.RosDeserialize(ref b);
+                    deserializer.RosDeserialize(ref b, out message);
                 }
             }
 
             {
-                var callbacks = manager.Callbacks;
+                var callbacks = manager.callbacks;
                 foreach (var callback in callbacks)
                 {
                     try
                     {
-                        callback(in message, this);
+                        callback.Handle(in message, this);
                     }
                     catch (Exception e)
                     {
@@ -331,12 +330,12 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
 
         if (isPaused) return;
         
-        var callbacks = manager.Callbacks;
+        var callbacks = manager.callbacks;
         foreach (var callback in callbacks)
         {
             try
             {
-                callback(in message, this);
+                callback.Handle(in message, this);
             }
             catch (Exception e)
             {

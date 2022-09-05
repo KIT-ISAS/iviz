@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class ParameterType : IDeserializable<ParameterType>, IMessage
+    public sealed class ParameterType : IDeserializable<ParameterType>, IHasSerializer<ParameterType>, IMessage
     {
         // These types correspond to the value that is set in the ParameterValue message.
         // Default value, which implies this is not a valid parameter.
@@ -77,5 +77,21 @@ namespace Iviz.Msgs.RclInterfaces
                 "zUHw1wBOSu7jHV+GEVclskjK6MpXD/NHfJtqMfr7RJeR1xONRv5g7AeqfHV4pwEAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<ParameterType> CreateSerializer() => new Serializer();
+        public Deserializer<ParameterType> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<ParameterType>
+        {
+            public override void RosSerialize(ParameterType msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(ParameterType msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(ParameterType msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(ParameterType msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<ParameterType>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out ParameterType msg) => msg = new ParameterType(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out ParameterType msg) => msg = new ParameterType(ref b);
+        }
     }
 }

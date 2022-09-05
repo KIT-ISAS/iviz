@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibMsgs
 {
     [DataContract]
-    public sealed class GoalID : IDeserializable<GoalID>, IMessage
+    public sealed class GoalID : IDeserializable<GoalID>, IHasSerializer<GoalID>, IMessage
     {
         // The stamp should store the time at which this goal was requested.
         // It is used by an action server when it tries to preempt all
@@ -99,5 +99,21 @@ namespace Iviz.Msgs.ActionlibMsgs
         public override int GetHashCode() => System.HashCode.Combine(Stamp, Id);
         public static bool operator ==(GoalID? left, GoalID? right) => ReferenceEquals(left, right) || !ReferenceEquals(left, null) && left.Equals(right);
         public static bool operator !=(GoalID? left, GoalID? right) => !(left == right);
+    
+        public Serializer<GoalID> CreateSerializer() => new Serializer();
+        public Deserializer<GoalID> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<GoalID>
+        {
+            public override void RosSerialize(GoalID msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(GoalID msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(GoalID msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(GoalID msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<GoalID>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out GoalID msg) => msg = new GoalID(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out GoalID msg) => msg = new GoalID(ref b);
+        }
     }
 }

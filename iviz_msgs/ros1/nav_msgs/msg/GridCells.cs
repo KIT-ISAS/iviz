@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GridCells : IDeserializable<GridCells>, IMessage
+    public sealed class GridCells : IDeserializable<GridCells>, IHasSerializer<GridCells>, IMessage
     {
         //an array of cells in a 2D grid
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -130,5 +130,21 @@ namespace Iviz.Msgs.NavMsgs
                 "/zSWf7gJLxMGq5R9LEsxYypePezBLcQIVVydpjYLihrZynrPPn6g59NqPq1+GPMTaZDOMMgDAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<GridCells> CreateSerializer() => new Serializer();
+        public Deserializer<GridCells> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<GridCells>
+        {
+            public override void RosSerialize(GridCells msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(GridCells msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(GridCells msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(GridCells msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<GridCells>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out GridCells msg) => msg = new GridCells(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out GridCells msg) => msg = new GridCells(ref b);
+        }
     }
 }

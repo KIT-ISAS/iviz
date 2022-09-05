@@ -111,7 +111,7 @@ internal static class Rcl
     static void CdrDeserializeCallback(IntPtr messageContextHandle, IntPtr ptr, int length)
     {
         var gcHandle = (GCHandle)messageContextHandle;
-        var handler = (IRclDeserializeHandler?)gcHandle.Target;
+        var handler = (RclDeserializeHandler?)gcHandle.Target;
 
         try
         {
@@ -127,7 +127,7 @@ internal static class Rcl
     static void CdrSerializeCallback(IntPtr messageContextHandle, IntPtr ptr, int length)
     {
         var gcHandle = (GCHandle)messageContextHandle;
-        var handler = (IRclSerializeHandler?)gcHandle.Target;
+        var handler = (RclSerializeHandler?)gcHandle.Target;
 
         try
         {
@@ -143,7 +143,7 @@ internal static class Rcl
     static int CdrGetSerializedSizeCallback(IntPtr messageContextHandle)
     {
         var gcHandle = (GCHandle)messageContextHandle;
-        var handler = (IRclSerializeHandler?)gcHandle.Target;
+        var handler = (RclSerializeHandler?)gcHandle.Target;
 
         try
         {

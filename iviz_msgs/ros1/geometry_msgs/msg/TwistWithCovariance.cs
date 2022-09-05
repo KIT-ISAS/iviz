@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class TwistWithCovariance : IDeserializable<TwistWithCovariance>, IMessage
+    public sealed class TwistWithCovariance : IDeserializable<TwistWithCovariance>, IHasSerializer<TwistWithCovariance>, IMessage
     {
         // This expresses velocity in free space with uncertainty.
         [DataMember (Name = "twist")] public Twist Twist;
@@ -107,5 +107,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "QFFRpES04/VctGvTeSWfL8mR4lTQj2KzN1lCoIZNuxCZKru2i4UxrtG0Ro/ZbyhtY0kQBAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<TwistWithCovariance> CreateSerializer() => new Serializer();
+        public Deserializer<TwistWithCovariance> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<TwistWithCovariance>
+        {
+            public override void RosSerialize(TwistWithCovariance msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(TwistWithCovariance msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(TwistWithCovariance msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(TwistWithCovariance msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<TwistWithCovariance>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out TwistWithCovariance msg) => msg = new TwistWithCovariance(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out TwistWithCovariance msg) => msg = new TwistWithCovariance(ref b);
+        }
     }
 }

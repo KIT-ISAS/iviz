@@ -4,7 +4,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
-        <LangVersion>default</LangVersion>
+        <LangVersion>10</LangVersion>
         <RootNamespace>Iviz.Roslib2</RootNamespace>
         <AssemblyName>Iviz.Roslib2</AssemblyName>
     </PropertyGroup>

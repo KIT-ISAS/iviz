@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class AccelWithCovariance : IDeserializable<AccelWithCovariance>, IMessage
+    public sealed class AccelWithCovariance : IDeserializable<AccelWithCovariance>, IHasSerializer<AccelWithCovariance>, IMessage
     {
         // This expresses acceleration in free space with uncertainty.
         [DataMember (Name = "accel")] public Accel Accel;
@@ -107,5 +107,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "iiIloj1vc9G+TfNKPj+UheLU0Pdid2+2hEANm3chMlX2dNc1xrhF0xY9ZL8AxPBx3BgEAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<AccelWithCovariance> CreateSerializer() => new Serializer();
+        public Deserializer<AccelWithCovariance> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<AccelWithCovariance>
+        {
+            public override void RosSerialize(AccelWithCovariance msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(AccelWithCovariance msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(AccelWithCovariance msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(AccelWithCovariance msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<AccelWithCovariance>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out AccelWithCovariance msg) => msg = new AccelWithCovariance(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out AccelWithCovariance msg) => msg = new AccelWithCovariance(ref b);
+        }
     }
 }

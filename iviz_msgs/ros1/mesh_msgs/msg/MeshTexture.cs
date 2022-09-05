@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshTexture : IDeserializable<MeshTexture>, IMessage
+    public sealed class MeshTexture : IDeserializable<MeshTexture>, IHasSerializer<MeshTexture>, IMessage
     {
         // Mesh Attribute Message
         [DataMember (Name = "uuid")] public string Uuid;
@@ -114,6 +114,22 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void Dispose()
         {
+        }
+    
+        public Serializer<MeshTexture> CreateSerializer() => new Serializer();
+        public Deserializer<MeshTexture> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MeshTexture>
+        {
+            public override void RosSerialize(MeshTexture msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MeshTexture msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MeshTexture msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MeshTexture msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MeshTexture>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MeshTexture msg) => msg = new MeshTexture(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MeshTexture msg) => msg = new MeshTexture(ref b);
         }
     }
 }

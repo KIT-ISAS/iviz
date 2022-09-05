@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class QuaternionStamped : IDeserializable<QuaternionStamped>, IMessage
+    public sealed class QuaternionStamped : IDeserializable<QuaternionStamped>, IHasSerializer<QuaternionStamped>, IMessage
     {
         // This represents an orientation with reference coordinate frame and timestamp.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -89,5 +89,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "j+dlNh9fxGXM/vz2TLGWyUoa0bQMT99QGeTBnlsbM+qb1/CwWvNq/Vyts3O/AIiCGdbpAwAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<QuaternionStamped> CreateSerializer() => new Serializer();
+        public Deserializer<QuaternionStamped> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<QuaternionStamped>
+        {
+            public override void RosSerialize(QuaternionStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(QuaternionStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(QuaternionStamped msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(QuaternionStamped msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<QuaternionStamped>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out QuaternionStamped msg) => msg = new QuaternionStamped(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out QuaternionStamped msg) => msg = new QuaternionStamped(ref b);
+        }
     }
 }

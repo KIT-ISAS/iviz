@@ -69,7 +69,6 @@ public interface IDeserializableRos2<out T>
     /// <param name="b">
     /// Buffer object.
     /// </param>
-    //T RosDeserialize(ref ReadBuffer b) => throw new RosInvalidMessageForVersion();
     T RosDeserialize(ref ReadBuffer2 b);
 }
 
@@ -77,4 +76,24 @@ public interface IDeserializableRos2<out T>
 public interface IDeserializable<out T> : IDeserializableRos1<T>, IDeserializableRos2<T>
     where T : ISerializableRos1, ISerializableRos2
 {
+}
+
+public interface IHasSerializer<T>
+{
+    Serializer<T> CreateSerializer();
+    Deserializer<T> CreateDeserializer();
+}
+
+public abstract class Serializer<T>
+{
+    public abstract void RosSerialize(T msg, ref WriteBuffer b);
+    public abstract void RosSerialize(T msg, ref WriteBuffer2 b);
+    public abstract int RosMessageLength(T msg);
+    public abstract int Ros2MessageLength(T msg);
+}
+
+public abstract class Deserializer<T>
+{
+    public abstract void RosDeserialize(ref ReadBuffer b, out T msg);
+    public abstract void RosDeserialize(ref ReadBuffer2 b, out T msg);
 }

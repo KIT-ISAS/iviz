@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract]
-    public sealed class MultiDOFJointTrajectoryPoint : IDeserializable<MultiDOFJointTrajectoryPoint>, IMessage
+    public sealed class MultiDOFJointTrajectoryPoint : IDeserializable<MultiDOFJointTrajectoryPoint>, IHasSerializer<MultiDOFJointTrajectoryPoint>, IMessage
     {
         // Each multi-dof joint can specify a transform (up to 6 DOF)
         [DataMember (Name = "transforms")] public GeometryMsgs.Transform[] Transforms;
@@ -218,5 +218,21 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 "M62kq7a8fsd8dkx3mEmOK5Yg+IiWVYNSv3UXNG71mUnFclfnlPU85xnzG339a7jVBQAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MultiDOFJointTrajectoryPoint> CreateSerializer() => new Serializer();
+        public Deserializer<MultiDOFJointTrajectoryPoint> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MultiDOFJointTrajectoryPoint>
+        {
+            public override void RosSerialize(MultiDOFJointTrajectoryPoint msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MultiDOFJointTrajectoryPoint msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MultiDOFJointTrajectoryPoint msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MultiDOFJointTrajectoryPoint msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MultiDOFJointTrajectoryPoint>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MultiDOFJointTrajectoryPoint msg) => msg = new MultiDOFJointTrajectoryPoint(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MultiDOFJointTrajectoryPoint msg) => msg = new MultiDOFJointTrajectoryPoint(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class TwistStamped : IDeserializable<TwistStamped>, IMessage
+    public sealed class TwistStamped : IDeserializable<TwistStamped>, IHasSerializer<TwistStamped>, IMessage
     {
         // A twist with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -95,5 +95,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "AAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<TwistStamped> CreateSerializer() => new Serializer();
+        public Deserializer<TwistStamped> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<TwistStamped>
+        {
+            public override void RosSerialize(TwistStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(TwistStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(TwistStamped msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(TwistStamped msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<TwistStamped>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out TwistStamped msg) => msg = new TwistStamped(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out TwistStamped msg) => msg = new TwistStamped(ref b);
+        }
     }
 }

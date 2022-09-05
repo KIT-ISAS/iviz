@@ -756,7 +756,6 @@ public sealed class RosClient : IRosClient
         return id;
     }
 
-    /// <inheritdoc cref="IRosClient.Subscribe{T}"/>
     string IRosClient.Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
         RosTransportHint transportHint)
     {
@@ -780,6 +779,23 @@ public sealed class RosClient : IRosClient
     {
         (string id, subscriber) =
             TaskUtils.RunSync(() => SubscribeAsync(topic, callback, requestNoDelay, transportHint));
+        return id;
+    }
+
+    public string Subscribe<T>(string topic, RosCallback<T> callback, out RosSubscriber<T> subscriber,
+        bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.PreferTcp)
+        where T : IMessage, new()
+    {
+        (string id, subscriber) =
+            TaskUtils.RunSync(() => SubscribeAsync(topic, callback, requestNoDelay, transportHint));
+        return id;
+    }
+
+    string IRosClient.Subscribe<T>(string topic, RosCallback<T> callback, out IRosSubscriber<T> subscriber,
+        RosTransportHint transportHint)
+    {
+        string id = Subscribe(topic, callback, out var newSubscriber, transportHint: transportHint);
+        subscriber = newSubscriber;
         return id;
     }
 
@@ -817,8 +833,7 @@ public sealed class RosClient : IRosClient
         RosTransportHint transportHint = RosTransportHint.PreferTcp, CancellationToken token = default)
         where T : IMessage, new()
     {
-        void Callback(in T t, IRosConnection _) => callback(t);
-        return SubscribeAsyncCore(topic, (RosCallback<T>)Callback, requestNoDelay, transportHint, token);
+        return SubscribeAsyncCore(topic, new DirectRosCallback<T>(callback), requestNoDelay, transportHint, token);
     }
 
     /// <inheritdoc cref="IRosClient.SubscribeAsync{T}(string,System.Action{T},Iviz.Roslib.RosTransportHint,System.Threading.CancellationToken)"/>
@@ -847,8 +862,7 @@ public sealed class RosClient : IRosClient
         string resolvedTopic = ResolveResourceName(topic);
         if (!TryGetSubscriberImpl(resolvedTopic, out var existingSubscriber))
         {
-            void Callback(in IMessage t, IRosConnection _) => callback(t);
-            return CreateSubscriberAsync(resolvedTopic, (RosCallback<IMessage>)Callback, requestNoDelay,
+            return CreateSubscriberAsync(resolvedTopic, new DirectRosCallback<IMessage>(callback), requestNoDelay,
                 new DynamicMessage(), transportHint, token);
         }
 

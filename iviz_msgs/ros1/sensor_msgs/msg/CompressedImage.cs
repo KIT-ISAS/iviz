@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class CompressedImage : IDeserializable<CompressedImage>, IMessage
+    public sealed class CompressedImage : IDeserializable<CompressedImage>, IHasSerializer<CompressedImage>, IMessage
     {
         // This message contains a compressed image
         /// <summary> Header timestamp should be acquisition time of image </summary>
@@ -146,5 +146,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "tfjQboBS69hKg5VzDtqiEoZubOnvxmdz7yj1E6YtGYIYBQAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<CompressedImage> CreateSerializer() => new Serializer();
+        public Deserializer<CompressedImage> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<CompressedImage>
+        {
+            public override void RosSerialize(CompressedImage msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(CompressedImage msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(CompressedImage msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(CompressedImage msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<CompressedImage>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out CompressedImage msg) => msg = new CompressedImage(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out CompressedImage msg) => msg = new CompressedImage(ref b);
+        }
     }
 }

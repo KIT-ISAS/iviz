@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class MultiDOFJointState : IDeserializable<MultiDOFJointState>, IMessage
+    public sealed class MultiDOFJointState : IDeserializable<MultiDOFJointState>, IHasSerializer<MultiDOFJointState>, IMessage
     {
         // Representation of state for joints with multiple degrees of freedom, 
         // following the structure of JointState.
@@ -253,5 +253,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "aCoEL7OTE+RF92UpCtjhFn+x+Irib7w5FE2CDAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<MultiDOFJointState> CreateSerializer() => new Serializer();
+        public Deserializer<MultiDOFJointState> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<MultiDOFJointState>
+        {
+            public override void RosSerialize(MultiDOFJointState msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(MultiDOFJointState msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(MultiDOFJointState msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(MultiDOFJointState msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<MultiDOFJointState>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out MultiDOFJointState msg) => msg = new MultiDOFJointState(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out MultiDOFJointState msg) => msg = new MultiDOFJointState(ref b);
+        }
     }
 }

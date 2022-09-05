@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Wrench : IDeserializable<Wrench>, IMessage
+    public sealed class Wrench : IDeserializable<Wrench>, IHasSerializer<Wrench>, IMessage
     {
         // This represents force in free space, separated into
         // its linear and angular parts.
@@ -86,5 +86,21 @@ namespace Iviz.Msgs.GeometryMsgs
                 "nTWmixnl7ha+12peqx/zCz82wB5hAgAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<Wrench> CreateSerializer() => new Serializer();
+        public Deserializer<Wrench> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<Wrench>
+        {
+            public override void RosSerialize(Wrench msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(Wrench msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(Wrench msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(Wrench msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<Wrench>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out Wrench msg) => msg = new Wrench(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out Wrench msg) => msg = new Wrench(ref b);
+        }
     }
 }

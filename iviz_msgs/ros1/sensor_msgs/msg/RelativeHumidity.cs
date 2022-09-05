@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class RelativeHumidity : IDeserializable<RelativeHumidity>, IMessage
+    public sealed class RelativeHumidity : IDeserializable<RelativeHumidity>, IHasSerializer<RelativeHumidity>, IMessage
     {
         // Single reading from a relative humidity sensor.  Defines the ratio of partial
         // pressure of water vapor to the saturated vapor pressure at a temperature.
@@ -106,5 +106,21 @@ namespace Iviz.Msgs.SensorMsgs
                 "x5Kzy8hxZzRqSmmqdyo2QIgqo8GTUwqNLdfN1ubOpBynW266AYz5CbcRowwCBQAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<RelativeHumidity> CreateSerializer() => new Serializer();
+        public Deserializer<RelativeHumidity> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<RelativeHumidity>
+        {
+            public override void RosSerialize(RelativeHumidity msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(RelativeHumidity msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(RelativeHumidity msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(RelativeHumidity msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<RelativeHumidity>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out RelativeHumidity msg) => msg = new RelativeHumidity(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out RelativeHumidity msg) => msg = new RelativeHumidity(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class FloatingPointRange : IDeserializable<FloatingPointRange>, IMessage
+    public sealed class FloatingPointRange : IDeserializable<FloatingPointRange>, IHasSerializer<FloatingPointRange>, IMessage
     {
         // Represents bounds and a step value for a floating point typed parameter.
         // Start value for valid values, inclusive.
@@ -115,5 +115,21 @@ namespace Iviz.Msgs.RclInterfaces
                 "+ZN9GKKdIXr7g5tL0/wESe+ahqMEAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<FloatingPointRange> CreateSerializer() => new Serializer();
+        public Deserializer<FloatingPointRange> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<FloatingPointRange>
+        {
+            public override void RosSerialize(FloatingPointRange msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(FloatingPointRange msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(FloatingPointRange msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(FloatingPointRange msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<FloatingPointRange>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out FloatingPointRange msg) => msg = new FloatingPointRange(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out FloatingPointRange msg) => msg = new FloatingPointRange(ref b);
+        }
     }
 }

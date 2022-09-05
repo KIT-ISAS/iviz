@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformActionGoal : IDeserializable<LookupTransformActionGoal>, IMessage, IActionGoal<LookupTransformGoal>
+    public sealed class LookupTransformActionGoal : IDeserializable<LookupTransformActionGoal>, IHasSerializer<LookupTransformActionGoal>, IMessage, IActionGoal<LookupTransformGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
@@ -111,5 +111,21 @@ namespace Iviz.Msgs.Tf2Msgs
                 "F3IC/xqzINWYoznds9gFp2m2IfTEds94W+j6NxX+YlOMBQAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<LookupTransformActionGoal> CreateSerializer() => new Serializer();
+        public Deserializer<LookupTransformActionGoal> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<LookupTransformActionGoal>
+        {
+            public override void RosSerialize(LookupTransformActionGoal msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(LookupTransformActionGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(LookupTransformActionGoal msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(LookupTransformActionGoal msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<LookupTransformActionGoal>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out LookupTransformActionGoal msg) => msg = new LookupTransformActionGoal(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out LookupTransformActionGoal msg) => msg = new LookupTransformActionGoal(ref b);
+        }
     }
 }

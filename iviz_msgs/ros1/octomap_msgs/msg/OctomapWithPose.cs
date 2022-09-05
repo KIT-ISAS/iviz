@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.OctomapMsgs
 {
     [DataContract]
-    public sealed class OctomapWithPose : IDeserializable<OctomapWithPose>, IMessage
+    public sealed class OctomapWithPose : IDeserializable<OctomapWithPose>, IHasSerializer<OctomapWithPose>, IMessage
     {
         // A 3D map in binary format, as Octree
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -106,5 +106,21 @@ namespace Iviz.Msgs.OctomapMsgs
                 "WmLCSdq0hQSMaFMb8SbaPN+lSaGmn19+riNHqW+zpoClqQcAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<OctomapWithPose> CreateSerializer() => new Serializer();
+        public Deserializer<OctomapWithPose> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<OctomapWithPose>
+        {
+            public override void RosSerialize(OctomapWithPose msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(OctomapWithPose msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(OctomapWithPose msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(OctomapWithPose msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<OctomapWithPose>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out OctomapWithPose msg) => msg = new OctomapWithPose(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out OctomapWithPose msg) => msg = new OctomapWithPose(ref b);
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class XRGazeState : IDeserializable<XRGazeState>, IMessage
+    public sealed class XRGazeState : IDeserializable<XRGazeState>, IHasSerializer<XRGazeState>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "transform")] public GeometryMsgs.Transform Transform;
@@ -99,5 +99,21 @@ namespace Iviz.Msgs.IvizMsgs
                 "aqvUD46fegyDBgAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<XRGazeState> CreateSerializer() => new Serializer();
+        public Deserializer<XRGazeState> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<XRGazeState>
+        {
+            public override void RosSerialize(XRGazeState msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(XRGazeState msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(XRGazeState msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(XRGazeState msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<XRGazeState>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out XRGazeState msg) => msg = new XRGazeState(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out XRGazeState msg) => msg = new XRGazeState(ref b);
+        }
     }
 }

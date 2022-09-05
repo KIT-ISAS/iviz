@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class AveragingGoal : IDeserializable<AveragingGoal>, IMessage, IGoal<AveragingActionGoal>
+    public sealed class AveragingGoal : IDeserializable<AveragingGoal>, IHasSerializer<AveragingGoal>, IMessage, IGoal<AveragingActionGoal>
     {
         //goal definition
         [DataMember (Name = "edges")] public int Edges;
@@ -80,5 +80,21 @@ namespace Iviz.Msgs.ActionlibTutorials
                 "H4sIAAAAAAAAE+PKzCsxNlJITUlPLeZKy8lPBPGKElMyS4u5AJplSSgcAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<AveragingGoal> CreateSerializer() => new Serializer();
+        public Deserializer<AveragingGoal> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<AveragingGoal>
+        {
+            public override void RosSerialize(AveragingGoal msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(AveragingGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(AveragingGoal msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(AveragingGoal msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<AveragingGoal>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out AveragingGoal msg) => msg = new AveragingGoal(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out AveragingGoal msg) => msg = new AveragingGoal(ref b);
+        }
     }
 }

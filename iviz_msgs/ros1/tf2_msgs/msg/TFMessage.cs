@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class TFMessage : IDeserializable<TFMessage>, IMessage
+    public sealed class TFMessage : IDeserializable<TFMessage>, IHasSerializer<TFMessage>, IMessage
     {
         [DataMember (Name = "transforms")] public GeometryMsgs.TransformStamped[] Transforms;
     
@@ -121,5 +121,21 @@ namespace Iviz.Msgs.Tf2Msgs
                 "a4HGJP+R0LzaZtkPSzp7rTcIAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public Serializer<TFMessage> CreateSerializer() => new Serializer();
+        public Deserializer<TFMessage> CreateDeserializer() => new Deserializer();
+    
+        sealed class Serializer : Serializer<TFMessage>
+        {
+            public override void RosSerialize(TFMessage msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+            public override void RosSerialize(TFMessage msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+            public override int RosMessageLength(TFMessage msg) => msg.RosMessageLength;
+            public override int Ros2MessageLength(TFMessage msg) => msg.Ros2MessageLength;
+        }
+        sealed class Deserializer : Deserializer<TFMessage>
+        {
+            public override void RosDeserialize(ref ReadBuffer b, out TFMessage msg) => msg = new TFMessage(ref b);
+            public override void RosDeserialize(ref ReadBuffer2 b, out TFMessage msg) => msg = new TFMessage(ref b);
+        }
     }
 }
