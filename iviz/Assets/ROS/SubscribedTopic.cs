@@ -11,7 +11,7 @@ using Iviz.Tools;
 
 namespace Iviz.Ros
 {
-    internal sealed class SubscribedTopic<T> : ISubscribedTopic where T : IMessage, IDeserializable<T>, new()
+    internal sealed class SubscribedTopic<T> : RosCallback<T>, ISubscribedTopic where T : IMessage, IDeserializable<T>, new()
     {
         const int NumRetries = 3;
         const int WaitBetweenRetriesInMs = 500;
@@ -72,8 +72,7 @@ namespace Iviz.Ros
                 try
                 {
                     IRosSubscriber subscriber;
-                    (subscriberId, subscriber) =
-                        await client.SubscribeAsync<T>(topic, Callback, transportHint, token);
+                    (subscriberId, subscriber) = await client.SubscribeAsync<T>(topic, this, transportHint, token);
                     if (bagListener != null)
                     {
                         bagId = subscriber.Subscribe(bagListener.EnqueueMessage);
@@ -144,7 +143,7 @@ namespace Iviz.Ros
             Subscriber = null;
         }
 
-        void Callback(in T msg, IRosConnection receiver)
+        public override void Handle(in T msg, IRosConnection receiver)
         {
             var cache = listeners;
             try
@@ -157,7 +156,7 @@ namespace Iviz.Ros
                     }
                     catch (Exception e)
                     {
-                        RosLogger.Error($"{this}: Error in {nameof(Callback)}", e);
+                        RosLogger.Error($"{this}: Error in {nameof(Handle)}", e);
                     }
                 }
             }

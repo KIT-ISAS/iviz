@@ -91,7 +91,7 @@ namespace Iviz.App
                 .Append(MessagesPerSecond)
                 .Append(" msg/s | ");
 
-            RosUtils.AppendBandwidth(description, BytesPerSecond);
+            description.AppendBandwidth(BytesPerSecond);
 
             description.Append("/s</b>");
 
