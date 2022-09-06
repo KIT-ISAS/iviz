@@ -145,6 +145,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override int Ros2MessageLength(SceneInclude msg) => msg.Ros2MessageLength;
             public override void RosValidate(SceneInclude msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<SceneInclude>
         {
             public override void RosDeserialize(ref ReadBuffer b, out SceneInclude msg) => msg = new SceneInclude(ref b);

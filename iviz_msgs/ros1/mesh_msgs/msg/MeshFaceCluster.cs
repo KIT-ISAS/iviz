@@ -132,6 +132,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override int Ros2MessageLength(MeshFaceCluster msg) => msg.Ros2MessageLength;
             public override void RosValidate(MeshFaceCluster msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<MeshFaceCluster>
         {
             public override void RosDeserialize(ref ReadBuffer b, out MeshFaceCluster msg) => msg = new MeshFaceCluster(ref b);

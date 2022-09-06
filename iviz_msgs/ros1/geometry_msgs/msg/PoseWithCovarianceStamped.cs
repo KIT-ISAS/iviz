@@ -115,6 +115,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override int Ros2MessageLength(PoseWithCovarianceStamped msg) => msg.Ros2MessageLength;
             public override void RosValidate(PoseWithCovarianceStamped msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<PoseWithCovarianceStamped>
         {
             public override void RosDeserialize(ref ReadBuffer b, out PoseWithCovarianceStamped msg) => msg = new PoseWithCovarianceStamped(ref b);

@@ -159,6 +159,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(CompressedImage msg) => msg.Ros2MessageLength;
             public override void RosValidate(CompressedImage msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<CompressedImage>
         {
             public override void RosDeserialize(ref ReadBuffer b, out CompressedImage msg) => msg = new CompressedImage(ref b);

@@ -158,6 +158,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(ChannelFloat32 msg) => msg.Ros2MessageLength;
             public override void RosValidate(ChannelFloat32 msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<ChannelFloat32>
         {
             public override void RosDeserialize(ref ReadBuffer b, out ChannelFloat32 msg) => msg = new ChannelFloat32(ref b);

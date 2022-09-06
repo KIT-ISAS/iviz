@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class TriangleMeshStamped : IDeserializable<TriangleMeshStamped>, IHasSerializer<TriangleMeshStamped>, IMessage
+    public sealed class TriangleMeshStamped : IDeserializable<TriangleMeshStamped>, IHasSerializer<TriangleMeshStamped>, System.IDisposable, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "mesh")] public MeshMsgs.TriangleMesh Mesh;
@@ -114,6 +114,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void Dispose()
         {
+            Mesh.Dispose();
         }
     
         public Serializer<TriangleMeshStamped> CreateSerializer() => new Serializer();
@@ -127,6 +128,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override int Ros2MessageLength(TriangleMeshStamped msg) => msg.Ros2MessageLength;
             public override void RosValidate(TriangleMeshStamped msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<TriangleMeshStamped>
         {
             public override void RosDeserialize(ref ReadBuffer b, out TriangleMeshStamped msg) => msg = new TriangleMeshStamped(ref b);

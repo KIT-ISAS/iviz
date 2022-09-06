@@ -280,6 +280,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override int Ros2MessageLength(Dialog msg) => msg.Ros2MessageLength;
             public override void RosValidate(Dialog msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Dialog>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Dialog msg) => msg = new Dialog(ref b);

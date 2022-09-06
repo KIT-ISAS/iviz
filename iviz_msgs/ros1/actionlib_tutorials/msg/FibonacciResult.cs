@@ -120,6 +120,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             public override int Ros2MessageLength(FibonacciResult msg) => msg.Ros2MessageLength;
             public override void RosValidate(FibonacciResult msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<FibonacciResult>
         {
             public override void RosDeserialize(ref ReadBuffer b, out FibonacciResult msg) => msg = new FibonacciResult(ref b);

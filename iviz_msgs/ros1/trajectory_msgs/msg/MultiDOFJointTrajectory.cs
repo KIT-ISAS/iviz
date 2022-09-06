@@ -175,6 +175,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             public override int Ros2MessageLength(MultiDOFJointTrajectory msg) => msg.Ros2MessageLength;
             public override void RosValidate(MultiDOFJointTrajectory msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<MultiDOFJointTrajectory>
         {
             public override void RosDeserialize(ref ReadBuffer b, out MultiDOFJointTrajectory msg) => msg = new MultiDOFJointTrajectory(ref b);

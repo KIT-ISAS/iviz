@@ -137,6 +137,7 @@ namespace Iviz.Msgs.Actionlib
             public override int Ros2MessageLength(TestAction msg) => msg.Ros2MessageLength;
             public override void RosValidate(TestAction msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<TestAction>
         {
             public override void RosDeserialize(ref ReadBuffer b, out TestAction msg) => msg = new TestAction(ref b);

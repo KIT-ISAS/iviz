@@ -115,6 +115,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override int Ros2MessageLength(BoundingBoxStamped msg) => msg.Ros2MessageLength;
             public override void RosValidate(BoundingBoxStamped msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<BoundingBoxStamped>
         {
             public override void RosDeserialize(ref ReadBuffer b, out BoundingBoxStamped msg) => msg = new BoundingBoxStamped(ref b);

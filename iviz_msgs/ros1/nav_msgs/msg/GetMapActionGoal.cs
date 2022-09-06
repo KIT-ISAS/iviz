@@ -122,6 +122,7 @@ namespace Iviz.Msgs.NavMsgs
             public override int Ros2MessageLength(GetMapActionGoal msg) => msg.Ros2MessageLength;
             public override void RosValidate(GetMapActionGoal msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<GetMapActionGoal>
         {
             public override void RosDeserialize(ref ReadBuffer b, out GetMapActionGoal msg) => msg = new GetMapActionGoal(ref b);

@@ -128,6 +128,7 @@ namespace Iviz.Msgs.GridMapMsgs
             public override int Ros2MessageLength(GridMapInfo msg) => msg.Ros2MessageLength;
             public override void RosValidate(GridMapInfo msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<GridMapInfo>
         {
             public override void RosDeserialize(ref ReadBuffer b, out GridMapInfo msg) => msg = new GridMapInfo(ref b);

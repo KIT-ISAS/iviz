@@ -98,6 +98,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override int RosMessageLength(Matrix4 _) => RosFixedMessageLength;
             public override int Ros2MessageLength(Matrix4 _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<Matrix4>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Matrix4 msg) => msg = new Matrix4(ref b);

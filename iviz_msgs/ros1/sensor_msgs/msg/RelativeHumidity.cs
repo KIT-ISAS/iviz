@@ -126,6 +126,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(RelativeHumidity msg) => msg.Ros2MessageLength;
             public override void RosValidate(RelativeHumidity msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<RelativeHumidity>
         {
             public override void RosDeserialize(ref ReadBuffer b, out RelativeHumidity msg) => msg = new RelativeHumidity(ref b);

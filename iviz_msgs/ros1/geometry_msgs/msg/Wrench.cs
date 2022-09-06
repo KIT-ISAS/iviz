@@ -97,6 +97,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override int RosMessageLength(Wrench _) => RosFixedMessageLength;
             public override int Ros2MessageLength(Wrench _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<Wrench>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Wrench msg) => msg = new Wrench(ref b);

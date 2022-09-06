@@ -70,11 +70,8 @@ namespace Iviz.Msgs.NavMsgs
     
         sealed class Serializer : Serializer<GetMapFeedback>
         {
-            public override void RosSerialize(GetMapFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
-            public override void RosSerialize(GetMapFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(GetMapFeedback _) => RosFixedMessageLength;
-            public override int Ros2MessageLength(GetMapFeedback _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<GetMapFeedback>
         {
             public override void RosDeserialize(ref ReadBuffer _, out GetMapFeedback msg) => msg = Singleton;

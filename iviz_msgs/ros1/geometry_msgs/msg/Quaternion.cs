@@ -108,6 +108,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override int RosMessageLength(Quaternion _) => RosFixedMessageLength;
             public override int Ros2MessageLength(Quaternion _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<Quaternion>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Quaternion msg) => msg = new Quaternion(ref b);

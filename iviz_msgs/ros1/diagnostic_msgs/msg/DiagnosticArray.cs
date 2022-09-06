@@ -152,6 +152,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             public override int Ros2MessageLength(DiagnosticArray msg) => msg.Ros2MessageLength;
             public override void RosValidate(DiagnosticArray msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<DiagnosticArray>
         {
             public override void RosDeserialize(ref ReadBuffer b, out DiagnosticArray msg) => msg = new DiagnosticArray(ref b);

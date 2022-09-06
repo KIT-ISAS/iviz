@@ -125,6 +125,7 @@ namespace Iviz.Msgs.HriMsgs
             public override int Ros2MessageLength(EngagementLevel msg) => msg.Ros2MessageLength;
             public override void RosValidate(EngagementLevel msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<EngagementLevel>
         {
             public override void RosDeserialize(ref ReadBuffer b, out EngagementLevel msg) => msg = new EngagementLevel(ref b);

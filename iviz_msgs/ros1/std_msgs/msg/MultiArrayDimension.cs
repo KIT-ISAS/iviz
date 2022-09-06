@@ -116,6 +116,7 @@ namespace Iviz.Msgs.StdMsgs
             public override int Ros2MessageLength(MultiArrayDimension msg) => msg.Ros2MessageLength;
             public override void RosValidate(MultiArrayDimension msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<MultiArrayDimension>
         {
             public override void RosDeserialize(ref ReadBuffer b, out MultiArrayDimension msg) => msg = new MultiArrayDimension(ref b);

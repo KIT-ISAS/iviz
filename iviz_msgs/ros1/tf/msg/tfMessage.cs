@@ -29,7 +29,7 @@ namespace Iviz.Msgs.Tf
                     : new GeometryMsgs.TransformStamped[n];
                 for (int i = 0; i < n; i++)
                 {
-                    GeometryMsgs.TransformStamped.Deserialize(ref b, out array[i]);
+                    array[i] = new GeometryMsgs.TransformStamped(ref b);
                 }
                 Transforms = array;
             }
@@ -45,7 +45,7 @@ namespace Iviz.Msgs.Tf
                     : new GeometryMsgs.TransformStamped[n];
                 for (int i = 0; i < n; i++)
                 {
-                    GeometryMsgs.TransformStamped.Deserialize(ref b, out array[i]);
+                    array[i] = new GeometryMsgs.TransformStamped(ref b);
                 }
                 Transforms = array;
             }
@@ -76,6 +76,11 @@ namespace Iviz.Msgs.Tf
         public void RosValidate()
         {
             if (Transforms is null) BuiltIns.ThrowNullReference();
+            for (int i = 0; i < Transforms.Length; i++)
+            {
+                if (Transforms[i] is null) BuiltIns.ThrowNullReference(nameof(Transforms), i);
+                Transforms[i].RosValidate();
+            }
         }
     
         public int RosMessageLength
@@ -138,6 +143,7 @@ namespace Iviz.Msgs.Tf
             public override int Ros2MessageLength(tfMessage msg) => msg.Ros2MessageLength;
             public override void RosValidate(tfMessage msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<tfMessage>
         {
             public override void RosDeserialize(ref ReadBuffer b, out tfMessage msg) => msg = new tfMessage(ref b);

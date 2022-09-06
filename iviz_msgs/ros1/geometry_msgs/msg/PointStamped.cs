@@ -109,6 +109,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override int Ros2MessageLength(PointStamped msg) => msg.Ros2MessageLength;
             public override void RosValidate(PointStamped msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<PointStamped>
         {
             public override void RosDeserialize(ref ReadBuffer b, out PointStamped msg) => msg = new PointStamped(ref b);

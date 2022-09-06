@@ -118,6 +118,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override int RosMessageLength(AccelWithCovariance _) => RosFixedMessageLength;
             public override int Ros2MessageLength(AccelWithCovariance _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<AccelWithCovariance>
         {
             public override void RosDeserialize(ref ReadBuffer b, out AccelWithCovariance msg) => msg = new AccelWithCovariance(ref b);

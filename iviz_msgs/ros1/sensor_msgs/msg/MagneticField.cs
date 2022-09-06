@@ -154,6 +154,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(MagneticField msg) => msg.Ros2MessageLength;
             public override void RosValidate(MagneticField msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<MagneticField>
         {
             public override void RosDeserialize(ref ReadBuffer b, out MagneticField msg) => msg = new MagneticField(ref b);

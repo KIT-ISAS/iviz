@@ -125,6 +125,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(FluidPressure msg) => msg.Ros2MessageLength;
             public override void RosValidate(FluidPressure msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<FluidPressure>
         {
             public override void RosDeserialize(ref ReadBuffer b, out FluidPressure msg) => msg = new FluidPressure(ref b);

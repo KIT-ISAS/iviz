@@ -650,7 +650,8 @@ public sealed class ClassInfo
 
                     if (variable.ClassInfo != null && variable.ClassInfo.Ros1FixedSize != UnknownSizeAtCompileTime)
                     {
-                        fieldsWithSize.Add($"size += {variable.ClassInfo.Ros1FixedSize} * {variable.CsFieldName}.Length;");
+                        fieldsWithSize.Add(
+                            $"size += {variable.ClassInfo.Ros1FixedSize} * {variable.CsFieldName}.Length;");
                     }
                     else if (variable.ClassIsBlittable)
                     {
@@ -663,7 +664,8 @@ public sealed class ClassInfo
                     }
                     else
                     {
-                        fieldsWithSize.Add($"foreach (var msg in {variable.CsFieldName}) size += msg.RosMessageLength;");
+                        fieldsWithSize.Add(
+                            $"foreach (var msg in {variable.CsFieldName}) size += msg.RosMessageLength;");
                         //fieldsWithSize.Add($"size += WriteBuffer.GetArraySize({variable.CsFieldName});");
                     }
                 }
@@ -681,7 +683,7 @@ public sealed class ClassInfo
         lines.Add("    }");
         lines.Add("}");
         return lines;
-        
+
         /*
         switch (fieldsWithSize.Count)
         {
@@ -1448,8 +1450,12 @@ public sealed class ClassInfo
         var lines = new List<string>();
         lines.Add($"[DataContract]");
 
-        string messageType = "IMessage";
+        const string messageType = "IMessage";
         string deserializableType = $"IDeserializable<{Name}>, IHasSerializer<{Name}>";
+        if (RequiresDispose)
+        {
+            deserializableType += ", System.IDisposable";
+        }
 
         if (ForceStruct)
         {
@@ -1575,9 +1581,16 @@ public sealed class ClassInfo
             lines.Add("    {");
             foreach (var variable in elements.OfType<VariableElement>().Where(ElementRequiresDispose))
             {
-                if (variable.IsArray && variable.ClassInfo is { RequiresDispose: true })
+                if (variable.ClassInfo is { RequiresDispose: true })
                 {
-                    lines.Add($"        foreach (var e in {variable.CsFieldName}) e.Dispose();");
+                    if (variable.IsArray)
+                    {
+                        lines.Add($"        foreach (var e in {variable.CsFieldName}) e.Dispose();");
+                    }
+                    else
+                    {
+                        lines.Add($"        {variable.CsFieldName}.Dispose();");
+                    }
                 }
 
                 if (variable.RentHint)
@@ -1606,35 +1619,40 @@ public sealed class ClassInfo
             lines.Add("");
             lines.Add($"    sealed class Serializer : Serializer<{Name}>");
             lines.Add("    {");
-            lines.Add(
-                $"        public override void RosSerialize({Name} msg, ref WriteBuffer b) => msg.RosSerialize(ref b);");
-            lines.Add(
-                $"        public override void RosSerialize({Name} msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);");
 
-            if (Ros1FixedSize >= 0)
+            if (variables.Any())
             {
-                lines.Add($"        public override int RosMessageLength({Name} _) => RosFixedMessageLength;");
-            }
-            else
-            {
-                lines.Add($"        public override int RosMessageLength({Name} msg) => msg.RosMessageLength;");
-            }
-            
-            if (Ros2FixedSize >= 0)
-            {
-                lines.Add($"        public override int Ros2MessageLength({Name} _) => Ros2FixedMessageLength;");
-            }
-            else
-            {
-                lines.Add($"        public override int Ros2MessageLength({Name} msg) => msg.Ros2MessageLength;");
+                lines.Add(
+                    $"        public override void RosSerialize({Name} msg, ref WriteBuffer b) => msg.RosSerialize(ref b);");
+                lines.Add(
+                    $"        public override void RosSerialize({Name} msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);");
+
+                if (Ros1FixedSize >= 0)
+                {
+                    lines.Add($"        public override int RosMessageLength({Name} _) => RosFixedMessageLength;");
+                }
+                else
+                {
+                    lines.Add($"        public override int RosMessageLength({Name} msg) => msg.RosMessageLength;");
+                }
+
+                if (Ros2FixedSize >= 0)
+                {
+                    lines.Add($"        public override int Ros2MessageLength({Name} _) => Ros2FixedMessageLength;");
+                }
+                else
+                {
+                    lines.Add($"        public override int Ros2MessageLength({Name} msg) => msg.Ros2MessageLength;");
+                }
             }
 
             if (Ros1FixedSize < 0)
             {
                 lines.Add($"        public override void RosValidate({Name} msg) => msg.RosValidate();");
             }
-            
+
             lines.Add("    }");
+            lines.Add("");
             lines.Add($"    sealed class Deserializer : Deserializer<{Name}>");
             lines.Add("    {");
             if (variables.Any())
@@ -1703,9 +1721,7 @@ public sealed class ClassInfo
         && (variableElement.RentHint || variableElement.ClassInfo is { RequiresDispose: true });
 
     bool RequiresDispose =>
-        requiresDispose is { } result
-            ? result
-            : (requiresDispose = elements.Any(ElementRequiresDispose)).Value;
+        requiresDispose ?? (requiresDispose = elements.Any(ElementRequiresDispose)).Value;
 
     void AddDependencies(ICollection<ClassInfo> dependencies)
     {

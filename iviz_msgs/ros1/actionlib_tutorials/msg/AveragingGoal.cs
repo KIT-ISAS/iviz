@@ -91,6 +91,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             public override int RosMessageLength(AveragingGoal _) => RosFixedMessageLength;
             public override int Ros2MessageLength(AveragingGoal _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<AveragingGoal>
         {
             public override void RosDeserialize(ref ReadBuffer b, out AveragingGoal msg) => msg = new AveragingGoal(ref b);

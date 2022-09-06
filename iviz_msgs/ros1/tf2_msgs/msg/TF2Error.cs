@@ -112,6 +112,7 @@ namespace Iviz.Msgs.Tf2Msgs
             public override int Ros2MessageLength(TF2Error msg) => msg.Ros2MessageLength;
             public override void RosValidate(TF2Error msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<TF2Error>
         {
             public override void RosDeserialize(ref ReadBuffer b, out TF2Error msg) => msg = new TF2Error(ref b);

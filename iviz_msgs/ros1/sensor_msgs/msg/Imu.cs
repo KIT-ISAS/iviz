@@ -197,6 +197,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(Imu msg) => msg.Ros2MessageLength;
             public override void RosValidate(Imu msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Imu>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Imu msg) => msg = new Imu(ref b);

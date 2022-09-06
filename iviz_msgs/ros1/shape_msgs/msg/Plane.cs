@@ -104,6 +104,7 @@ namespace Iviz.Msgs.ShapeMsgs
             public override int RosMessageLength(Plane _) => RosFixedMessageLength;
             public override int Ros2MessageLength(Plane _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<Plane>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Plane msg) => msg = new Plane(ref b);

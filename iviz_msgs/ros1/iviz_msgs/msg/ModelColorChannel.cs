@@ -120,6 +120,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override int Ros2MessageLength(ModelColorChannel msg) => msg.Ros2MessageLength;
             public override void RosValidate(ModelColorChannel msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<ModelColorChannel>
         {
             public override void RosDeserialize(ref ReadBuffer b, out ModelColorChannel msg) => msg = new ModelColorChannel(ref b);

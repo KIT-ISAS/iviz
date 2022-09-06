@@ -90,6 +90,7 @@ namespace Iviz.Msgs.Actionlib
             public override int RosMessageLength(TwoIntsGoal _) => RosFixedMessageLength;
             public override int Ros2MessageLength(TwoIntsGoal _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<TwoIntsGoal>
         {
             public override void RosDeserialize(ref ReadBuffer b, out TwoIntsGoal msg) => msg = new TwoIntsGoal(ref b);

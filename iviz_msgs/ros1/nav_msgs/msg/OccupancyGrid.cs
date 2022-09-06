@@ -155,6 +155,7 @@ namespace Iviz.Msgs.NavMsgs
             public override int Ros2MessageLength(OccupancyGrid msg) => msg.Ros2MessageLength;
             public override void RosValidate(OccupancyGrid msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<OccupancyGrid>
         {
             public override void RosDeserialize(ref ReadBuffer b, out OccupancyGrid msg) => msg = new OccupancyGrid(ref b);

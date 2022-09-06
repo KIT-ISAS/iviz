@@ -68,11 +68,8 @@ namespace Iviz.Msgs.Tf2Msgs
     
         sealed class Serializer : Serializer<LookupTransformFeedback>
         {
-            public override void RosSerialize(LookupTransformFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
-            public override void RosSerialize(LookupTransformFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(LookupTransformFeedback _) => RosFixedMessageLength;
-            public override int Ros2MessageLength(LookupTransformFeedback _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<LookupTransformFeedback>
         {
             public override void RosDeserialize(ref ReadBuffer _, out LookupTransformFeedback msg) => msg = Singleton;

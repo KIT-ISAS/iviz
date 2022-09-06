@@ -381,6 +381,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(CameraInfo msg) => msg.Ros2MessageLength;
             public override void RosValidate(CameraInfo msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<CameraInfo>
         {
             public override void RosDeserialize(ref ReadBuffer b, out CameraInfo msg) => msg = new CameraInfo(ref b);

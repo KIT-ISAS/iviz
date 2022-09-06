@@ -133,6 +133,7 @@ namespace Iviz.Msgs.PclMsgs
             public override int Ros2MessageLength(PointIndices msg) => msg.Ros2MessageLength;
             public override void RosValidate(PointIndices msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<PointIndices>
         {
             public override void RosDeserialize(ref ReadBuffer b, out PointIndices msg) => msg = new PointIndices(ref b);

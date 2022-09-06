@@ -120,6 +120,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override int Ros2MessageLength(MeshVertexCosts msg) => msg.Ros2MessageLength;
             public override void RosValidate(MeshVertexCosts msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<MeshVertexCosts>
         {
             public override void RosDeserialize(ref ReadBuffer b, out MeshVertexCosts msg) => msg = new MeshVertexCosts(ref b);

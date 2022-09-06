@@ -158,6 +158,7 @@ namespace Iviz.Msgs.OctomapMsgs
             public override int Ros2MessageLength(Octomap msg) => msg.Ros2MessageLength;
             public override void RosValidate(Octomap msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Octomap>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Octomap msg) => msg = new Octomap(ref b);

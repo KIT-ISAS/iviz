@@ -121,6 +121,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(Temperature msg) => msg.Ros2MessageLength;
             public override void RosValidate(Temperature msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Temperature>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Temperature msg) => msg = new Temperature(ref b);

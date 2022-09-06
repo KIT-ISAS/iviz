@@ -84,6 +84,7 @@ namespace Iviz.Msgs.StdMsgs
             public override int RosMessageLength(Time _) => RosFixedMessageLength;
             public override int Ros2MessageLength(Time _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<Time>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Time msg) => msg = new Time(ref b);

@@ -139,6 +139,7 @@ namespace Iviz.Msgs.HriMsgs
             public override int Ros2MessageLength(LiveSpeech msg) => msg.Ros2MessageLength;
             public override void RosValidate(LiveSpeech msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<LiveSpeech>
         {
             public override void RosDeserialize(ref ReadBuffer b, out LiveSpeech msg) => msg = new LiveSpeech(ref b);

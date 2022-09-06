@@ -121,6 +121,7 @@ namespace Iviz.Msgs.HriMsgs
             public override int Ros2MessageLength(Gesture msg) => msg.Ros2MessageLength;
             public override void RosValidate(Gesture msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Gesture>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Gesture msg) => msg = new Gesture(ref b);

@@ -144,6 +144,7 @@ namespace Iviz.Msgs.NavMsgs
             public override int Ros2MessageLength(Odometry msg) => msg.Ros2MessageLength;
             public override void RosValidate(Odometry msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Odometry>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Odometry msg) => msg = new Odometry(ref b);

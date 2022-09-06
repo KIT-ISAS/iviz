@@ -170,6 +170,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(Range msg) => msg.Ros2MessageLength;
             public override void RosValidate(Range msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Range>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Range msg) => msg = new Range(ref b);

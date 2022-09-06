@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Image : IDeserializable<Image>, IHasSerializer<Image>, IMessage
+    public sealed class Image : IDeserializable<Image>, IHasSerializer<Image>, System.IDisposable, IMessage
     {
         // This message contains an uncompressed image
         // (0, 0) is at top-left corner of image
@@ -175,6 +175,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(Image msg) => msg.Ros2MessageLength;
             public override void RosValidate(Image msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Image>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Image msg) => msg = new Image(ref b);

@@ -108,6 +108,7 @@ namespace Iviz.Msgs.Roscpp
             public override int Ros2MessageLength(Logger msg) => msg.Ros2MessageLength;
             public override void RosValidate(Logger msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Logger>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Logger msg) => msg = new Logger(ref b);

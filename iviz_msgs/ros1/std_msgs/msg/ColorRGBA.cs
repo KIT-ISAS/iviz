@@ -109,6 +109,7 @@ namespace Iviz.Msgs.StdMsgs
             public override int RosMessageLength(ColorRGBA _) => RosFixedMessageLength;
             public override int Ros2MessageLength(ColorRGBA _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<ColorRGBA>
         {
             public override void RosDeserialize(ref ReadBuffer b, out ColorRGBA msg) => msg = new ColorRGBA(ref b);

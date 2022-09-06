@@ -130,6 +130,7 @@ namespace Iviz.Msgs.TurtleActionlib
             public override int Ros2MessageLength(ShapeActionFeedback msg) => msg.Ros2MessageLength;
             public override void RosValidate(ShapeActionFeedback msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<ShapeActionFeedback>
         {
             public override void RosDeserialize(ref ReadBuffer b, out ShapeActionFeedback msg) => msg = new ShapeActionFeedback(ref b);

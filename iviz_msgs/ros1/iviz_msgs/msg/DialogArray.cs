@@ -150,6 +150,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override int Ros2MessageLength(DialogArray msg) => msg.Ros2MessageLength;
             public override void RosValidate(DialogArray msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<DialogArray>
         {
             public override void RosDeserialize(ref ReadBuffer b, out DialogArray msg) => msg = new DialogArray(ref b);

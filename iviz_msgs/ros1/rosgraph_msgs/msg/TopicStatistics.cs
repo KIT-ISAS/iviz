@@ -197,6 +197,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             public override int Ros2MessageLength(TopicStatistics msg) => msg.Ros2MessageLength;
             public override void RosValidate(TopicStatistics msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<TopicStatistics>
         {
             public override void RosDeserialize(ref ReadBuffer b, out TopicStatistics msg) => msg = new TopicStatistics(ref b);

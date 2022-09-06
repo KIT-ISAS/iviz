@@ -89,6 +89,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override int RosMessageLength(Color32 _) => RosFixedMessageLength;
             public override int Ros2MessageLength(Color32 _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<Color32>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Color32 msg) => msg = new Color32(ref b);

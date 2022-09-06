@@ -71,11 +71,8 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         sealed class Serializer : Serializer<AveragingFeedback>
         {
-            public override void RosSerialize(AveragingFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
-            public override void RosSerialize(AveragingFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(AveragingFeedback _) => RosFixedMessageLength;
-            public override int Ros2MessageLength(AveragingFeedback _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<AveragingFeedback>
         {
             public override void RosDeserialize(ref ReadBuffer _, out AveragingFeedback msg) => msg = Singleton;

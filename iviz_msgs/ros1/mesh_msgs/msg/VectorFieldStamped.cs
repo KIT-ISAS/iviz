@@ -113,6 +113,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override int Ros2MessageLength(VectorFieldStamped msg) => msg.Ros2MessageLength;
             public override void RosValidate(VectorFieldStamped msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<VectorFieldStamped>
         {
             public override void RosDeserialize(ref ReadBuffer b, out VectorFieldStamped msg) => msg = new VectorFieldStamped(ref b);

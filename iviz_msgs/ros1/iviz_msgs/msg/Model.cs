@@ -264,6 +264,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override int Ros2MessageLength(Model msg) => msg.Ros2MessageLength;
             public override void RosValidate(Model msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Model>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Model msg) => msg = new Model(ref b);

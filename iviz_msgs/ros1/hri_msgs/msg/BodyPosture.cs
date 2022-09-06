@@ -114,6 +114,7 @@ namespace Iviz.Msgs.HriMsgs
             public override int Ros2MessageLength(BodyPosture msg) => msg.Ros2MessageLength;
             public override void RosValidate(BodyPosture msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<BodyPosture>
         {
             public override void RosDeserialize(ref ReadBuffer b, out BodyPosture msg) => msg = new BodyPosture(ref b);

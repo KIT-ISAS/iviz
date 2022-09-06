@@ -120,6 +120,7 @@ namespace Iviz.Msgs.PclMsgs
             public override int Ros2MessageLength(Vertices msg) => msg.Ros2MessageLength;
             public override void RosValidate(Vertices msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Vertices>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Vertices msg) => msg = new Vertices(ref b);

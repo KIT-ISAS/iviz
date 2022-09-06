@@ -148,6 +148,7 @@ namespace Iviz.Msgs.NavMsgs
             public override int Ros2MessageLength(Path msg) => msg.Ros2MessageLength;
             public override void RosValidate(Path msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Path>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Path msg) => msg = new Path(ref b);

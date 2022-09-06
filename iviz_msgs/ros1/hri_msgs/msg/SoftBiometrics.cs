@@ -129,6 +129,7 @@ namespace Iviz.Msgs.HriMsgs
             public override int Ros2MessageLength(SoftBiometrics msg) => msg.Ros2MessageLength;
             public override void RosValidate(SoftBiometrics msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<SoftBiometrics>
         {
             public override void RosDeserialize(ref ReadBuffer b, out SoftBiometrics msg) => msg = new SoftBiometrics(ref b);

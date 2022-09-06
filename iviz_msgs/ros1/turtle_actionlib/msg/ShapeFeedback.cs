@@ -71,11 +71,8 @@ namespace Iviz.Msgs.TurtleActionlib
     
         sealed class Serializer : Serializer<ShapeFeedback>
         {
-            public override void RosSerialize(ShapeFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
-            public override void RosSerialize(ShapeFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(ShapeFeedback _) => RosFixedMessageLength;
-            public override int Ros2MessageLength(ShapeFeedback _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<ShapeFeedback>
         {
             public override void RosDeserialize(ref ReadBuffer _, out ShapeFeedback msg) => msg = Singleton;

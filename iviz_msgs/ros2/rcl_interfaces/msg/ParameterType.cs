@@ -85,11 +85,8 @@ namespace Iviz.Msgs.RclInterfaces
     
         sealed class Serializer : Serializer<ParameterType>
         {
-            public override void RosSerialize(ParameterType msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
-            public override void RosSerialize(ParameterType msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(ParameterType _) => RosFixedMessageLength;
-            public override int Ros2MessageLength(ParameterType _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<ParameterType>
         {
             public override void RosDeserialize(ref ReadBuffer _, out ParameterType msg) => msg = Singleton;

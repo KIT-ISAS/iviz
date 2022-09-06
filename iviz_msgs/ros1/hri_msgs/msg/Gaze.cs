@@ -129,6 +129,7 @@ namespace Iviz.Msgs.HriMsgs
             public override int Ros2MessageLength(Gaze msg) => msg.Ros2MessageLength;
             public override void RosValidate(Gaze msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Gaze>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Gaze msg) => msg = new Gaze(ref b);

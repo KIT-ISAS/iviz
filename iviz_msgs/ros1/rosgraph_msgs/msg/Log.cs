@@ -1,14 +1,12 @@
 /* This file was created automatically, do not edit! */
 
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract]
-    [StructLayout(LayoutKind.Sequential)]
-    public struct Log : IMessage, IDeserializable<Log>, IHasSerializer<Log>
+    public sealed class Log : IDeserializable<Log>, IHasSerializer<Log>, IMessage
     {
         //#
         //# Severity level constants
@@ -42,101 +40,86 @@ namespace Iviz.Msgs.RosgraphMsgs
         /// <summary> [Ignore] </summary>
         [DataMember (Name = "topics")] public string[] Topics;
     
-        public Log(in StdMsgs.Header Header, byte Level, string Name, string Msg, string File, string Function, uint Line, string[] Topics)
+        public Log()
         {
-            this.Header = Header;
-            this.Level = Level;
-            this.Name = Name;
-            this.Msg = Msg;
-            this.File = File;
-            this.Function = Function;
-            this.Line = Line;
-            this.Topics = Topics;
+            Name = "";
+            Msg = "";
+            File = "";
+            Function = "";
+            Topics = EmptyArray<string>.Value;
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Log(ref ReadBuffer b)
         {
-            Deserialize(ref b, out this);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Level);
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Msg);
+            b.SkipString(out File);
+            b.SkipString(out Function);
+            b.Deserialize(out Line);
+            b.SkipStringArray(out Topics);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deserialize(ref ReadBuffer b, out Log h)
-        {
-            StdMsgs.Header.Deserialize(ref b, out h.Header);
-            b.Deserialize(out h.Level);
-            b.DeserializeString(out h.Name);
-            b.DeserializeString(out h.Msg);
-            b.SkipString(out h.File);
-            b.SkipString(out h.Function);
-            b.Deserialize(out h.Line);
-            b.SkipStringArray(out h.Topics);
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Log(ref ReadBuffer2 b)
         {
-            Deserialize(ref b, out this);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Level);
+            b.Align4();
+            b.DeserializeString(out Name);
+            b.Align4();
+            b.DeserializeString(out Msg);
+            b.Align4();
+            b.SkipString(out File);
+            b.Align4();
+            b.SkipString(out Function);
+            b.Align4();
+            b.Deserialize(out Line);
+            b.SkipStringArray(out Topics);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deserialize(ref ReadBuffer2 b, out Log h)
-        {
-            StdMsgs.Header.Deserialize(ref b, out h.Header);
-            b.Deserialize(out h.Level);
-            b.Align4();
-            b.DeserializeString(out h.Name);
-            b.Align4();
-            b.DeserializeString(out h.Msg);
-            b.Align4();
-            b.SkipString(out h.File);
-            b.Align4();
-            b.SkipString(out h.Function);
-            b.Align4();
-            b.Deserialize(out h.Line);
-            b.SkipStringArray(out h.Topics);
-        }
+        public Log RosDeserialize(ref ReadBuffer b) => new Log(ref b);
         
-        public readonly Log RosDeserialize(ref ReadBuffer b) => new Log(ref b);
-        
-        public readonly Log RosDeserialize(ref ReadBuffer2 b) => new Log(ref b);
+        public Log RosDeserialize(ref ReadBuffer2 b) => new Log(ref b);
     
-        public readonly void RosSerialize(ref WriteBuffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Level);
-            b.Serialize(Name ?? "");
-            b.Serialize(Msg ?? "");
-            b.Serialize(File ?? "");
-            b.Serialize(Function ?? "");
+            b.Serialize(Name);
+            b.Serialize(Msg);
+            b.Serialize(File);
+            b.Serialize(Function);
             b.Serialize(Line);
-            b.SerializeArray(Topics ?? EmptyArray<string>.Value);
+            b.SerializeArray(Topics);
         }
         
-        public readonly void RosSerialize(ref WriteBuffer2 b)
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Level);
-            b.Serialize(Name ?? "");
-            b.Serialize(Msg ?? "");
-            b.Serialize(File ?? "");
-            b.Serialize(Function ?? "");
+            b.Serialize(Name);
+            b.Serialize(Msg);
+            b.Serialize(File);
+            b.Serialize(Function);
             b.Serialize(Line);
-            b.SerializeArray(Topics ?? EmptyArray<string>.Value);
+            b.SerializeArray(Topics);
         }
         
-        public readonly void RosValidate()
+        public void RosValidate()
         {
-            if (Topics != null)
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Msg is null) BuiltIns.ThrowNullReference();
+            if (File is null) BuiltIns.ThrowNullReference();
+            if (Function is null) BuiltIns.ThrowNullReference();
+            if (Topics is null) BuiltIns.ThrowNullReference();
+            for (int i = 0; i < Topics.Length; i++)
             {
-                for (int i = 0; i < Topics.Length; i++)
-                {
-                    if (Topics[i] is null) BuiltIns.ThrowNullReference(nameof(Topics), i);
-                }
+                if (Topics[i] is null) BuiltIns.ThrowNullReference(nameof(Topics), i);
             }
         }
     
-        public readonly int RosMessageLength
+        public int RosMessageLength
         {
             get
             {
@@ -151,9 +134,9 @@ namespace Iviz.Msgs.RosgraphMsgs
             }
         }
         
-        public readonly int Ros2MessageLength => AddRos2MessageLength(0);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public readonly int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int c)
         {
             int size = c;
             size = Header.AddRos2MessageLength(size);
@@ -174,15 +157,15 @@ namespace Iviz.Msgs.RosgraphMsgs
     
         public const string MessageType = "rosgraph_msgs/Log";
     
-        public readonly string RosMessageType => MessageType;
+        public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "acffd30cd6b6de30f120938c17c593fb";
     
-        public readonly string RosMd5Sum => Md5Sum;
+        public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
-        public readonly string RosDependenciesBase64 =>
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61T0WrbMBR991dc0EPbQVrSjVECfshI0wW2dqQZeyglKNaNLZAlT5KT+e93ZC9exl72" +
                 "MGOQrHvPuVf3HAuRCUHPfGCvY0cGG0OFsyFKGwNi2a6LTIv7D18f8ikJxbu2HNKGyOpx+ZTfEomSLXtp" +
                 "zmPf5uvH/B1iR+mttn/g7tfrp3V+R4K9d/48spxv5p/y6XsSexmluSnQmS5GZtF3vNRsVN/fR5aKPVX9" +
@@ -207,6 +190,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             public override int Ros2MessageLength(Log msg) => msg.Ros2MessageLength;
             public override void RosValidate(Log msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Log>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Log msg) => msg = new Log(ref b);

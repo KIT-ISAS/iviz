@@ -125,6 +125,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override int Ros2MessageLength(MeshMaterialsStamped msg) => msg.Ros2MessageLength;
             public override void RosValidate(MeshMaterialsStamped msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<MeshMaterialsStamped>
         {
             public override void RosDeserialize(ref ReadBuffer b, out MeshMaterialsStamped msg) => msg = new MeshMaterialsStamped(ref b);

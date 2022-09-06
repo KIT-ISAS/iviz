@@ -124,6 +124,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(TimeReference msg) => msg.Ros2MessageLength;
             public override void RosValidate(TimeReference msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<TimeReference>
         {
             public override void RosDeserialize(ref ReadBuffer b, out TimeReference msg) => msg = new TimeReference(ref b);

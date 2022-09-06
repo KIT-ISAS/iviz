@@ -147,6 +147,7 @@ namespace Iviz.Msgs.Tf2Msgs
             public override int Ros2MessageLength(LookupTransformAction msg) => msg.Ros2MessageLength;
             public override void RosValidate(LookupTransformAction msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<LookupTransformAction>
         {
             public override void RosDeserialize(ref ReadBuffer b, out LookupTransformAction msg) => msg = new LookupTransformAction(ref b);

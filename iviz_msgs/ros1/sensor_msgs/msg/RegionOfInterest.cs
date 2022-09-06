@@ -122,6 +122,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int RosMessageLength(RegionOfInterest _) => RosFixedMessageLength;
             public override int Ros2MessageLength(RegionOfInterest _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<RegionOfInterest>
         {
             public override void RosDeserialize(ref ReadBuffer b, out RegionOfInterest msg) => msg = new RegionOfInterest(ref b);

@@ -69,11 +69,8 @@ namespace Iviz.Msgs.Actionlib
     
         sealed class Serializer : Serializer<TwoIntsFeedback>
         {
-            public override void RosSerialize(TwoIntsFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
-            public override void RosSerialize(TwoIntsFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(TwoIntsFeedback _) => RosFixedMessageLength;
-            public override int Ros2MessageLength(TwoIntsFeedback _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<TwoIntsFeedback>
         {
             public override void RosDeserialize(ref ReadBuffer _, out TwoIntsFeedback msg) => msg = Singleton;

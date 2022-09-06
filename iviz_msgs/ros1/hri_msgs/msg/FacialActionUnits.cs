@@ -391,6 +391,7 @@ namespace Iviz.Msgs.HriMsgs
             public override int Ros2MessageLength(FacialActionUnits msg) => msg.Ros2MessageLength;
             public override void RosValidate(FacialActionUnits msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<FacialActionUnits>
         {
             public override void RosDeserialize(ref ReadBuffer b, out FacialActionUnits msg) => msg = new FacialActionUnits(ref b);

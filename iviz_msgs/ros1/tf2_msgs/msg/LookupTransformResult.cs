@@ -13,10 +13,11 @@ namespace Iviz.Msgs.Tf2Msgs
     
         public LookupTransformResult()
         {
+            Transform = new GeometryMsgs.TransformStamped();
             Error = new Tf2Msgs.TF2Error();
         }
         
-        public LookupTransformResult(in GeometryMsgs.TransformStamped Transform, Tf2Msgs.TF2Error Error)
+        public LookupTransformResult(GeometryMsgs.TransformStamped Transform, Tf2Msgs.TF2Error Error)
         {
             this.Transform = Transform;
             this.Error = Error;
@@ -52,6 +53,8 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
+            if (Transform is null) BuiltIns.ThrowNullReference();
+            Transform.RosValidate();
             if (Error is null) BuiltIns.ThrowNullReference();
             Error.RosValidate();
         }
@@ -118,6 +121,7 @@ namespace Iviz.Msgs.Tf2Msgs
             public override int Ros2MessageLength(LookupTransformResult msg) => msg.Ros2MessageLength;
             public override void RosValidate(LookupTransformResult msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<LookupTransformResult>
         {
             public override void RosDeserialize(ref ReadBuffer b, out LookupTransformResult msg) => msg = new LookupTransformResult(ref b);

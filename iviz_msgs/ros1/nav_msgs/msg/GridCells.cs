@@ -151,6 +151,7 @@ namespace Iviz.Msgs.NavMsgs
             public override int Ros2MessageLength(GridCells msg) => msg.Ros2MessageLength;
             public override void RosValidate(GridCells msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<GridCells>
         {
             public override void RosDeserialize(ref ReadBuffer b, out GridCells msg) => msg = new GridCells(ref b);

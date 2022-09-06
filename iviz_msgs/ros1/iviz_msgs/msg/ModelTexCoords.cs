@@ -123,6 +123,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override int Ros2MessageLength(ModelTexCoords msg) => msg.Ros2MessageLength;
             public override void RosValidate(ModelTexCoords msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<ModelTexCoords>
         {
             public override void RosDeserialize(ref ReadBuffer b, out ModelTexCoords msg) => msg = new ModelTexCoords(ref b);

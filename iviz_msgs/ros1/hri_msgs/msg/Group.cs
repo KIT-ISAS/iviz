@@ -127,6 +127,7 @@ namespace Iviz.Msgs.HriMsgs
             public override int Ros2MessageLength(Group msg) => msg.Ros2MessageLength;
             public override void RosValidate(Group msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Group>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Group msg) => msg = new Group(ref b);

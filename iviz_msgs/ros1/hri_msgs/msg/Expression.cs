@@ -171,6 +171,7 @@ namespace Iviz.Msgs.HriMsgs
             public override int Ros2MessageLength(Expression msg) => msg.Ros2MessageLength;
             public override void RosValidate(Expression msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Expression>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Expression msg) => msg = new Expression(ref b);

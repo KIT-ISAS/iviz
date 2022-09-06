@@ -87,6 +87,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override int RosMessageLength(Triangle _) => RosFixedMessageLength;
             public override int Ros2MessageLength(Triangle _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<Triangle>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Triangle msg) => msg = new Triangle(ref b);

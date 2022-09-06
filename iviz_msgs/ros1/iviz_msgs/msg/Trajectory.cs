@@ -157,6 +157,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override int Ros2MessageLength(Trajectory msg) => msg.Ros2MessageLength;
             public override void RosValidate(Trajectory msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Trajectory>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Trajectory msg) => msg = new Trajectory(ref b);

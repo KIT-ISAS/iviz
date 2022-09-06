@@ -161,6 +161,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override int Ros2MessageLength(VectorField msg) => msg.Ros2MessageLength;
             public override void RosValidate(VectorField msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<VectorField>
         {
             public override void RosDeserialize(ref ReadBuffer b, out VectorField msg) => msg = new VectorField(ref b);

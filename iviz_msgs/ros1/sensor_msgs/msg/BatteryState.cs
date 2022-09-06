@@ -306,6 +306,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(BatteryState msg) => msg.Ros2MessageLength;
             public override void RosValidate(BatteryState msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<BatteryState>
         {
             public override void RosDeserialize(ref ReadBuffer b, out BatteryState msg) => msg = new BatteryState(ref b);

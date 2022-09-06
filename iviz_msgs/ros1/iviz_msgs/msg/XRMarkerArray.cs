@@ -146,6 +146,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override int Ros2MessageLength(XRMarkerArray msg) => msg.Ros2MessageLength;
             public override void RosValidate(XRMarkerArray msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<XRMarkerArray>
         {
             public override void RosDeserialize(ref ReadBuffer b, out XRMarkerArray msg) => msg = new XRMarkerArray(ref b);

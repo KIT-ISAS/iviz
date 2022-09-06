@@ -324,7 +324,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deconstruct(this in TransformStamped t, out Header Header, out string ChildFrameId,
+        public static void Deconstruct(this TransformStamped t, out Header Header, out string ChildFrameId,
             out Transform Transform)
         {
             Header = t.Header;
@@ -367,22 +367,22 @@ namespace Iviz.Msgs
             return new Header(h.Seq + 1, time.Now(), h.FrameId ?? "");
         }
 
-        public static TransformStamped WithTransform(this in TransformStamped ts, in Transform t)
+        public static TransformStamped WithTransform(this TransformStamped ts, in Transform t)
         {
             return new TransformStamped(ts.Header, ts.ChildFrameId ?? "", t);
         }
 
-        public static TransformStamped WithNextTransform(this in TransformStamped ts, in Transform t)
+        public static TransformStamped WithNextTransform(this TransformStamped ts, in Transform t)
         {
             return new TransformStamped(ts.Header.WithNextSeq(), ts.ChildFrameId ?? "", t);
         }
 
-        public static TransformStamped WithHeader(this in TransformStamped ts, in Header h)
+        public static TransformStamped WithHeader(this TransformStamped ts, in Header h)
         {
             return new TransformStamped(h, ts.ChildFrameId ?? "", ts.Transform);
         }
 
-        public static TransformStamped WithChildFrameId(this in TransformStamped ts, string? s)
+        public static TransformStamped WithChildFrameId(this TransformStamped ts, string? s)
         {
             return new TransformStamped(ts.Header, s ?? "", ts.Transform);
         }

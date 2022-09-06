@@ -19,14 +19,10 @@ public interface IMessageRos2
 /// Interface for all ROS messages.
 /// All classes or structs representing ROS messages derive from this.
 /// </summary>
-public interface IMessage : IMessageRos1, IMessageRos2, ISerializable, IDisposable
+public interface IMessage : IMessageRos1, IMessageRos2, ISerializable
 {
     /// <summary>
     /// Full ROS name of the message.
     /// </summary>
     string RosMessageType { get; }
-        
-    void IDisposable.Dispose()
-    {
-    }
 }

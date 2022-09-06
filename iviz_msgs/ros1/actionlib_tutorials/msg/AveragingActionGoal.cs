@@ -123,6 +123,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             public override int Ros2MessageLength(AveragingActionGoal msg) => msg.Ros2MessageLength;
             public override void RosValidate(AveragingActionGoal msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<AveragingActionGoal>
         {
             public override void RosDeserialize(ref ReadBuffer b, out AveragingActionGoal msg) => msg = new AveragingActionGoal(ref b);

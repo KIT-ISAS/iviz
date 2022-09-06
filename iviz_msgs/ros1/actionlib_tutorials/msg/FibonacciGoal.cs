@@ -85,6 +85,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             public override int RosMessageLength(FibonacciGoal _) => RosFixedMessageLength;
             public override int Ros2MessageLength(FibonacciGoal _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<FibonacciGoal>
         {
             public override void RosDeserialize(ref ReadBuffer b, out FibonacciGoal msg) => msg = new FibonacciGoal(ref b);

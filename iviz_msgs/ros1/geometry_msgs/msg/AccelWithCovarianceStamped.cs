@@ -117,6 +117,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override int Ros2MessageLength(AccelWithCovarianceStamped msg) => msg.Ros2MessageLength;
             public override void RosValidate(AccelWithCovarianceStamped msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<AccelWithCovarianceStamped>
         {
             public override void RosDeserialize(ref ReadBuffer b, out AccelWithCovarianceStamped msg) => msg = new AccelWithCovarianceStamped(ref b);

@@ -254,6 +254,7 @@ namespace Iviz.Msgs.HriMsgs
             public override int Ros2MessageLength(FacialLandmarks msg) => msg.Ros2MessageLength;
             public override void RosValidate(FacialLandmarks msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<FacialLandmarks>
         {
             public override void RosDeserialize(ref ReadBuffer b, out FacialLandmarks msg) => msg = new FacialLandmarks(ref b);

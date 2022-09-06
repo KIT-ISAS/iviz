@@ -99,6 +99,7 @@ namespace Iviz.Msgs.ShapeMsgs
             public override int RosMessageLength(MeshTriangle _) => RosFixedMessageLength;
             public override int Ros2MessageLength(MeshTriangle _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<MeshTriangle>
         {
             public override void RosDeserialize(ref ReadBuffer b, out MeshTriangle msg) => msg = new MeshTriangle(ref b);

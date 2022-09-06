@@ -174,6 +174,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override int Ros2MessageLength(MenuEntry msg) => msg.Ros2MessageLength;
             public override void RosValidate(MenuEntry msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<MenuEntry>
         {
             public override void RosDeserialize(ref ReadBuffer b, out MenuEntry msg) => msg = new MenuEntry(ref b);

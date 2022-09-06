@@ -234,6 +234,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(LaserScan msg) => msg.Ros2MessageLength;
             public override void RosValidate(LaserScan msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<LaserScan>
         {
             public override void RosDeserialize(ref ReadBuffer b, out LaserScan msg) => msg = new LaserScan(ref b);

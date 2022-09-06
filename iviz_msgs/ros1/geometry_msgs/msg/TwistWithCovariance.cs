@@ -118,6 +118,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override int RosMessageLength(TwistWithCovariance _) => RosFixedMessageLength;
             public override int Ros2MessageLength(TwistWithCovariance _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<TwistWithCovariance>
         {
             public override void RosDeserialize(ref ReadBuffer b, out TwistWithCovariance msg) => msg = new TwistWithCovariance(ref b);

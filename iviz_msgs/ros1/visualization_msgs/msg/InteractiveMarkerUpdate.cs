@@ -291,6 +291,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override int Ros2MessageLength(InteractiveMarkerUpdate msg) => msg.Ros2MessageLength;
             public override void RosValidate(InteractiveMarkerUpdate msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<InteractiveMarkerUpdate>
         {
             public override void RosDeserialize(ref ReadBuffer b, out InteractiveMarkerUpdate msg) => msg = new InteractiveMarkerUpdate(ref b);

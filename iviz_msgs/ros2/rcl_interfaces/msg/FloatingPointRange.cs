@@ -126,6 +126,7 @@ namespace Iviz.Msgs.RclInterfaces
             public override int RosMessageLength(FloatingPointRange _) => RosFixedMessageLength;
             public override int Ros2MessageLength(FloatingPointRange _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<FloatingPointRange>
         {
             public override void RosDeserialize(ref ReadBuffer b, out FloatingPointRange msg) => msg = new FloatingPointRange(ref b);

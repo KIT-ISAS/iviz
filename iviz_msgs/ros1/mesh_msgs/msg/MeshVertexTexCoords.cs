@@ -91,6 +91,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override int RosMessageLength(MeshVertexTexCoords _) => RosFixedMessageLength;
             public override int Ros2MessageLength(MeshVertexTexCoords _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<MeshVertexTexCoords>
         {
             public override void RosDeserialize(ref ReadBuffer b, out MeshVertexTexCoords msg) => msg = new MeshVertexTexCoords(ref b);

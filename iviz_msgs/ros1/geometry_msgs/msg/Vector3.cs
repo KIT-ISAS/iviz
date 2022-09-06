@@ -118,6 +118,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override int RosMessageLength(Vector3 _) => RosFixedMessageLength;
             public override int Ros2MessageLength(Vector3 _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<Vector3>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Vector3 msg) => msg = new Vector3(ref b);

@@ -115,6 +115,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int RosMessageLength(NavSatStatus _) => RosFixedMessageLength;
             public override int Ros2MessageLength(NavSatStatus _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<NavSatStatus>
         {
             public override void RosDeserialize(ref ReadBuffer b, out NavSatStatus msg) => msg = new NavSatStatus(ref b);

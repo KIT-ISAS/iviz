@@ -176,6 +176,7 @@ namespace Iviz.Msgs.HriMsgs
             public override int Ros2MessageLength(Skeleton2D msg) => msg.Ros2MessageLength;
             public override void RosValidate(Skeleton2D msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Skeleton2D>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Skeleton2D msg) => msg = new Skeleton2D(ref b);

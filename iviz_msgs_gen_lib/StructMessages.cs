@@ -20,8 +20,8 @@ public static class StructMessages
     public static readonly HashSet<string> ForceStructs = new()
     {
         "std_msgs/Header",
-        "geometry_msgs/TransformStamped",
-        "rosgraph_msgs/Log",
-        "rcl_interfaces/Log",
+        //"geometry_msgs/TransformStamped",
+        //"rosgraph_msgs/Log",
+        //"rcl_interfaces/Log",
     };
 }

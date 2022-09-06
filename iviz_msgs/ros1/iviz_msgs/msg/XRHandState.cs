@@ -282,6 +282,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override int Ros2MessageLength(XRHandState msg) => msg.Ros2MessageLength;
             public override void RosValidate(XRHandState msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<XRHandState>
         {
             public override void RosDeserialize(ref ReadBuffer b, out XRHandState msg) => msg = new XRHandState(ref b);

@@ -127,6 +127,7 @@ namespace Iviz.Msgs.HriMsgs
             public override int Ros2MessageLength(NormalizedPointOfInterest2DStamped msg) => msg.Ros2MessageLength;
             public override void RosValidate(NormalizedPointOfInterest2DStamped msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<NormalizedPointOfInterest2DStamped>
         {
             public override void RosDeserialize(ref ReadBuffer b, out NormalizedPointOfInterest2DStamped msg) => msg = new NormalizedPointOfInterest2DStamped(ref b);

@@ -91,6 +91,7 @@ namespace Iviz.Msgs.TurtleActionlib
             public override int RosMessageLength(ShapeResult _) => RosFixedMessageLength;
             public override int Ros2MessageLength(ShapeResult _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<ShapeResult>
         {
             public override void RosDeserialize(ref ReadBuffer b, out ShapeResult msg) => msg = new ShapeResult(ref b);

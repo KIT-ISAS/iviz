@@ -155,6 +155,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override int Ros2MessageLength(MarkerArray msg) => msg.Ros2MessageLength;
             public override void RosValidate(MarkerArray msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<MarkerArray>
         {
             public override void RosDeserialize(ref ReadBuffer b, out MarkerArray msg) => msg = new MarkerArray(ref b);

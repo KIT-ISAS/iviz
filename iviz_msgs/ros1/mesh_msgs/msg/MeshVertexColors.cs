@@ -121,6 +121,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override int Ros2MessageLength(MeshVertexColors msg) => msg.Ros2MessageLength;
             public override void RosValidate(MeshVertexColors msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<MeshVertexColors>
         {
             public override void RosDeserialize(ref ReadBuffer b, out MeshVertexColors msg) => msg = new MeshVertexColors(ref b);

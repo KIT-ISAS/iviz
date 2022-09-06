@@ -237,6 +237,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(JointState msg) => msg.Ros2MessageLength;
             public override void RosValidate(JointState msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<JointState>
         {
             public override void RosDeserialize(ref ReadBuffer b, out JointState msg) => msg = new JointState(ref b);

@@ -133,6 +133,7 @@ namespace Iviz.Msgs.PclMsgs
             public override int Ros2MessageLength(ModelCoefficients msg) => msg.Ros2MessageLength;
             public override void RosValidate(ModelCoefficients msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<ModelCoefficients>
         {
             public override void RosDeserialize(ref ReadBuffer b, out ModelCoefficients msg) => msg = new ModelCoefficients(ref b);

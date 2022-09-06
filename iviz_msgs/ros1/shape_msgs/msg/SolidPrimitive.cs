@@ -164,6 +164,7 @@ namespace Iviz.Msgs.ShapeMsgs
             public override int Ros2MessageLength(SolidPrimitive msg) => msg.Ros2MessageLength;
             public override void RosValidate(SolidPrimitive msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<SolidPrimitive>
         {
             public override void RosDeserialize(ref ReadBuffer b, out SolidPrimitive msg) => msg = new SolidPrimitive(ref b);

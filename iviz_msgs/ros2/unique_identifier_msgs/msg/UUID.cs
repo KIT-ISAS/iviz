@@ -102,6 +102,7 @@ namespace Iviz.Msgs.UniqueIdentifierMsgs
             public override int RosMessageLength(UUID _) => RosFixedMessageLength;
             public override int Ros2MessageLength(UUID _) => Ros2FixedMessageLength;
         }
+    
         sealed class Deserializer : Deserializer<UUID>
         {
             public override void RosDeserialize(ref ReadBuffer b, out UUID msg) => msg = new UUID(ref b);

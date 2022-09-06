@@ -1,14 +1,12 @@
 /* This file was created automatically, do not edit! */
 
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    [StructLayout(LayoutKind.Sequential)]
-    public struct TransformStamped : IMessage, IDeserializable<TransformStamped>, IHasSerializer<TransformStamped>
+    public sealed class TransformStamped : IDeserializable<TransformStamped>, IHasSerializer<TransformStamped>, IMessage
     {
         // This expresses a transform from coordinate frame header.frame_id
         // to the coordinate frame child_frame_id
@@ -21,6 +19,11 @@ namespace Iviz.Msgs.GeometryMsgs
         [DataMember (Name = "child_frame_id")] public string ChildFrameId;
         [DataMember (Name = "transform")] public Transform Transform;
     
+        public TransformStamped()
+        {
+            ChildFrameId = "";
+        }
+        
         public TransformStamped(in StdMsgs.Header Header, string ChildFrameId, in Transform Transform)
         {
             this.Header = Header;
@@ -28,59 +31,46 @@ namespace Iviz.Msgs.GeometryMsgs
             this.Transform = Transform;
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TransformStamped(ref ReadBuffer b)
         {
-            Deserialize(ref b, out this);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.DeserializeString(out ChildFrameId);
+            b.Deserialize(out Transform);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deserialize(ref ReadBuffer b, out TransformStamped h)
-        {
-            StdMsgs.Header.Deserialize(ref b, out h.Header);
-            b.DeserializeString(out h.ChildFrameId);
-            b.Deserialize(out h.Transform);
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TransformStamped(ref ReadBuffer2 b)
         {
-            Deserialize(ref b, out this);
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deserialize(ref ReadBuffer2 b, out TransformStamped h)
-        {
-            StdMsgs.Header.Deserialize(ref b, out h.Header);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
-            b.DeserializeString(out h.ChildFrameId);
+            b.DeserializeString(out ChildFrameId);
             b.Align8();
-            b.Deserialize(out h.Transform);
+            b.Deserialize(out Transform);
         }
         
-        public readonly TransformStamped RosDeserialize(ref ReadBuffer b) => new TransformStamped(ref b);
+        public TransformStamped RosDeserialize(ref ReadBuffer b) => new TransformStamped(ref b);
         
-        public readonly TransformStamped RosDeserialize(ref ReadBuffer2 b) => new TransformStamped(ref b);
+        public TransformStamped RosDeserialize(ref ReadBuffer2 b) => new TransformStamped(ref b);
     
-        public readonly void RosSerialize(ref WriteBuffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
-            b.Serialize(ChildFrameId ?? "");
+            b.Serialize(ChildFrameId);
             b.Serialize(in Transform);
         }
         
-        public readonly void RosSerialize(ref WriteBuffer2 b)
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
-            b.Serialize(ChildFrameId ?? "");
+            b.Serialize(ChildFrameId);
             b.Serialize(in Transform);
         }
         
-        public readonly void RosValidate()
+        public void RosValidate()
         {
+            if (ChildFrameId is null) BuiltIns.ThrowNullReference();
         }
     
-        public readonly int RosMessageLength
+        public int RosMessageLength
         {
             get
             {
@@ -91,9 +81,9 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
         
-        public readonly int Ros2MessageLength => AddRos2MessageLength(0);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public readonly int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int c)
         {
             int size = c;
             size = Header.AddRos2MessageLength(size);
@@ -106,15 +96,15 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public const string MessageType = "geometry_msgs/TransformStamped";
     
-        public readonly string RosMessageType => MessageType;
+        public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "b5764a33bfeb3588febc2682852579b0";
     
-        public readonly string RosMd5Sum => Md5Sum;
+        public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
-        public readonly string RosDependenciesBase64 =>
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71VTW/UMBC951eMugdatM2KgjhUtCcE9IAEtOKCUDVNJonVxA72pNvw63l2drNLiwQH" +
                 "YBVpbcfz9d6byYKuGhNI7nsvIUggJvVsQ+V8R5V3HRXO+dJYVsGeO6FGuBSfp821KbMFqSNt5PHNojFt" +
                 "eb27iKspWodQXAvFpQvajjQEKelmTG5w6xVT46U6O2hU+9PVam1uTe5dyJ2vV1odnGv1asXn1HNxC0d5" +
@@ -143,6 +133,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override int Ros2MessageLength(TransformStamped msg) => msg.Ros2MessageLength;
             public override void RosValidate(TransformStamped msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<TransformStamped>
         {
             public override void RosDeserialize(ref ReadBuffer b, out TransformStamped msg) => msg = new TransformStamped(ref b);

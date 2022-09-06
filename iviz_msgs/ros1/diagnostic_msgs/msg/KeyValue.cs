@@ -111,6 +111,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             public override int Ros2MessageLength(KeyValue msg) => msg.Ros2MessageLength;
             public override void RosValidate(KeyValue msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<KeyValue>
         {
             public override void RosDeserialize(ref ReadBuffer b, out KeyValue msg) => msg = new KeyValue(ref b);

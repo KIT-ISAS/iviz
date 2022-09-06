@@ -265,6 +265,16 @@ public static class BuiltIns
         return result < 128;
     }
 
+    public static Serializer<T> CreateSerializer<T>(this T t) where T : IMessage
+    {
+        return ((IHasSerializer<T>)t).CreateSerializer();
+    }
+
+    public static Deserializer<T> CreateDeserializer<T>(this T t) where T : IMessage
+    {
+        return ((IHasSerializer<T>)t).CreateDeserializer();
+    }
+
     [DoesNotReturn, AssertionMethod]
     public static void ThrowArgument(string arg, string message) => throw new ArgumentNullException(arg, message);
 

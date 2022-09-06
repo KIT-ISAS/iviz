@@ -85,10 +85,17 @@ public interface IHasSerializer<T>
 
 public abstract class Serializer<T>
 {
-    public abstract void RosSerialize(T msg, ref WriteBuffer b);
-    public abstract void RosSerialize(T msg, ref WriteBuffer2 b);
-    public abstract int RosMessageLength(T msg);
-    public abstract int Ros2MessageLength(T msg);
+    public virtual void RosSerialize(T msg, ref WriteBuffer b)
+    {
+    }
+
+    public virtual void RosSerialize(T msg, ref WriteBuffer2 b)
+    {
+    }
+
+    public virtual int RosMessageLength(T msg) => 0;
+
+    public virtual int Ros2MessageLength(T msg) => 0;
 
     public virtual void RosValidate(T msg)
     {

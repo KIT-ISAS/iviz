@@ -156,6 +156,7 @@ namespace Iviz.Msgs.HriMsgs
             public override int Ros2MessageLength(AudioFeatures msg) => msg.Ros2MessageLength;
             public override void RosValidate(AudioFeatures msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<AudioFeatures>
         {
             public override void RosDeserialize(ref ReadBuffer b, out AudioFeatures msg) => msg = new AudioFeatures(ref b);

@@ -180,6 +180,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override int Ros2MessageLength(Feedback msg) => msg.Ros2MessageLength;
             public override void RosValidate(Feedback msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Feedback>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Feedback msg) => msg = new Feedback(ref b);

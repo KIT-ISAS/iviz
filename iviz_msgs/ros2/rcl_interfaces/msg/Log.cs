@@ -1,14 +1,12 @@
 /* This file was created automatically, do not edit! */
 
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    [StructLayout(LayoutKind.Sequential)]
-    public struct Log : IMessage, IDeserializable<Log>, IHasSerializer<Log>
+    public sealed class Log : IDeserializable<Log>, IHasSerializer<Log>, IMessage
     {
         //#
         //# Severity level constants
@@ -52,90 +50,77 @@ namespace Iviz.Msgs.RclInterfaces
         // The line in the file the message came from.
         [DataMember (Name = "line")] public uint Line;
     
-        public Log(time Stamp, byte Level, string Name, string Msg, string File, string Function, uint Line)
+        public Log()
         {
-            this.Stamp = Stamp;
-            this.Level = Level;
-            this.Name = Name;
-            this.Msg = Msg;
-            this.File = File;
-            this.Function = Function;
-            this.Line = Line;
+            Name = "";
+            Msg = "";
+            File = "";
+            Function = "";
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Log(ref ReadBuffer b)
         {
-            Deserialize(ref b, out this);
+            b.Deserialize(out Stamp);
+            b.Deserialize(out Level);
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Msg);
+            b.DeserializeString(out File);
+            b.DeserializeString(out Function);
+            b.Deserialize(out Line);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deserialize(ref ReadBuffer b, out Log h)
-        {
-            b.Deserialize(out h.Stamp);
-            b.Deserialize(out h.Level);
-            b.DeserializeString(out h.Name);
-            b.DeserializeString(out h.Msg);
-            b.DeserializeString(out h.File);
-            b.DeserializeString(out h.Function);
-            b.Deserialize(out h.Line);
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Log(ref ReadBuffer2 b)
         {
-            Deserialize(ref b, out this);
+            b.Align4();
+            b.Deserialize(out Stamp);
+            b.Deserialize(out Level);
+            b.Align4();
+            b.DeserializeString(out Name);
+            b.Align4();
+            b.DeserializeString(out Msg);
+            b.Align4();
+            b.DeserializeString(out File);
+            b.Align4();
+            b.DeserializeString(out Function);
+            b.Align4();
+            b.Deserialize(out Line);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deserialize(ref ReadBuffer2 b, out Log h)
-        {
-            b.Align4();
-            b.Deserialize(out h.Stamp);
-            b.Deserialize(out h.Level);
-            b.Align4();
-            b.DeserializeString(out h.Name);
-            b.Align4();
-            b.DeserializeString(out h.Msg);
-            b.Align4();
-            b.DeserializeString(out h.File);
-            b.Align4();
-            b.DeserializeString(out h.Function);
-            b.Align4();
-            b.Deserialize(out h.Line);
-        }
+        public Log RosDeserialize(ref ReadBuffer b) => new Log(ref b);
         
-        public readonly Log RosDeserialize(ref ReadBuffer b) => new Log(ref b);
-        
-        public readonly Log RosDeserialize(ref ReadBuffer2 b) => new Log(ref b);
+        public Log RosDeserialize(ref ReadBuffer2 b) => new Log(ref b);
     
-        public readonly void RosSerialize(ref WriteBuffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Stamp);
             b.Serialize(Level);
-            b.Serialize(Name ?? "");
-            b.Serialize(Msg ?? "");
-            b.Serialize(File ?? "");
-            b.Serialize(Function ?? "");
+            b.Serialize(Name);
+            b.Serialize(Msg);
+            b.Serialize(File);
+            b.Serialize(Function);
             b.Serialize(Line);
         }
         
-        public readonly void RosSerialize(ref WriteBuffer2 b)
+        public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Stamp);
             b.Serialize(Level);
-            b.Serialize(Name ?? "");
-            b.Serialize(Msg ?? "");
-            b.Serialize(File ?? "");
-            b.Serialize(Function ?? "");
+            b.Serialize(Name);
+            b.Serialize(Msg);
+            b.Serialize(File);
+            b.Serialize(Function);
             b.Serialize(Line);
         }
         
-        public readonly void RosValidate()
+        public void RosValidate()
         {
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Msg is null) BuiltIns.ThrowNullReference();
+            if (File is null) BuiltIns.ThrowNullReference();
+            if (Function is null) BuiltIns.ThrowNullReference();
         }
     
-        public readonly int RosMessageLength
+        public int RosMessageLength
         {
             get
             {
@@ -148,9 +133,9 @@ namespace Iviz.Msgs.RclInterfaces
             }
         }
         
-        public readonly int Ros2MessageLength => AddRos2MessageLength(0);
+        public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public readonly int AddRos2MessageLength(int c)
+        public int AddRos2MessageLength(int c)
         {
             int size = c;
             size = WriteBuffer2.Align4(size);
@@ -171,15 +156,15 @@ namespace Iviz.Msgs.RclInterfaces
     
         public const string MessageType = "rcl_interfaces/Log";
     
-        public readonly string RosMessageType => MessageType;
+        public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "2e550226619c297add0debbcdcf7d29b";
     
-        public readonly string RosMd5Sum => Md5Sum;
+        public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
-        public readonly string RosDependenciesBase64 =>
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE31US0/jMBC+91dY6hWatimvlXroLrBCQrAqrDiuHHuSWHLsyI92++93xnFDQVoOqDie" +
                 "7zHfTDKdTqZT9gI7cCocmMZ/NBPW+MBN8HRHf68teGDaNo0yzVDkWW21tnsWWmC/DqG1hr0gSHInCdKG" +
                 "0PtvRSGt8LM+3c+sa4qy0Kpy3B2KTDdrQ6en+XA+cBPBxkjGHTDV9Ro6MAEkU4Y5EYNCde7ZHrQ+lWpU" +
@@ -207,6 +192,7 @@ namespace Iviz.Msgs.RclInterfaces
             public override int Ros2MessageLength(Log msg) => msg.Ros2MessageLength;
             public override void RosValidate(Log msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Log>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Log msg) => msg = new Log(ref b);

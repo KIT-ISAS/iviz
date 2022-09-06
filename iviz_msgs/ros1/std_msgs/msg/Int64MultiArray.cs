@@ -146,6 +146,7 @@ namespace Iviz.Msgs.StdMsgs
             public override int Ros2MessageLength(Int64MultiArray msg) => msg.Ros2MessageLength;
             public override void RosValidate(Int64MultiArray msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<Int64MultiArray>
         {
             public override void RosDeserialize(ref ReadBuffer b, out Int64MultiArray msg) => msg = new Int64MultiArray(ref b);

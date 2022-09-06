@@ -125,6 +125,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override int Ros2MessageLength(LaserEcho msg) => msg.Ros2MessageLength;
             public override void RosValidate(LaserEcho msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<LaserEcho>
         {
             public override void RosDeserialize(ref ReadBuffer b, out LaserEcho msg) => msg = new LaserEcho(ref b);

@@ -110,6 +110,7 @@ namespace Iviz.Msgs.RclInterfaces
             public override int Ros2MessageLength(SetParametersResult msg) => msg.Ros2MessageLength;
             public override void RosValidate(SetParametersResult msg) => msg.RosValidate();
         }
+    
         sealed class Deserializer : Deserializer<SetParametersResult>
         {
             public override void RosDeserialize(ref ReadBuffer b, out SetParametersResult msg) => msg = new SetParametersResult(ref b);
