@@ -17,7 +17,16 @@ public class Message2Tests
     public void TestMessageConsistency()
     {
         var header = new Header(1, new time(10, 20), "abcd");
-        var log = new Msgs.RosgraphMsgs.Log(header, 1, "name", "message", "file", "function", 2000, new[] { "topic1, topic2" });
+        var log = new Msgs.RosgraphMsgs.Log{
+            Header = header, 
+            Level = 1, 
+            Name = "name", 
+            Msg = "message", 
+            File = "file", 
+            Function = "function",
+            Line = 2000, 
+            Topics = new[] { "topic1, topic2" }
+        };
 
         byte[] logArray = log.SerializeToArrayRos2();
         //Assert.AreEqual(BaseUtils.GetMd5Hash(logArray), "2da79d032c7392f78627aff94eda903a");
