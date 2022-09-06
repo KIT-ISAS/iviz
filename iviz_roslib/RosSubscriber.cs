@@ -243,7 +243,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
         TaskUtils.RunSync(() => PublisherUpdateRcpAsync(publisherUris, token).AwaitNoThrow(this), token);
     }
 
-    internal bool TryGetLoopbackReceiver(in Endpoint endPoint, out ILoopbackReceiver<TMessage>? receiver) =>
+    internal bool TryGetLoopbackReceiver(in Endpoint endPoint, out LoopbackReceiver<TMessage>? receiver) =>
         manager.TryGetLoopbackReceiver(endPoint, out receiver);
 
     public override string ToString() => $"[{nameof(RosSubscriber<TMessage>)} {Topic} [{TopicType}] ]";

@@ -679,7 +679,7 @@ public sealed class RosClient : IRosClient
 
     #region subscriber
 
-    internal bool TryGetLoopbackReceiver<T>(string topic, in Endpoint endpoint, out ILoopbackReceiver<T>? receiver)
+    internal bool TryGetLoopbackReceiver<T>(string topic, in Endpoint endpoint, out LoopbackReceiver<T>? receiver)
         where T : IMessage
     {
         if (subscribersByTopic.TryGetValue(topic, out var existingSubscriber) &&

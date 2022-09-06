@@ -484,8 +484,8 @@ public sealed class RosMasterServer : IDisposable
             .Concat(subscribersLookup)
             .FirstOrDefault(tuple => tuple.Key == node)
             .Value;
-
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+        
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         return uri == null
             ? ErrorResponse($"No node with id '{node}'")
             : OkResponse(uri);

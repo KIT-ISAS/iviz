@@ -12,11 +12,13 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
+using static TcpReceiverUtils;
+
 /// <summary>
 /// Handles a ROS TCP connection.
 /// </summary>
 /// <typeparam name="TMessage"></typeparam>
-internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, ILoopbackReceiver<TMessage>, ITcpReceiver
+internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProtocolReceiver, ITcpReceiver
     where TMessage : IMessage
 {
     const int DisposeTimeoutInMs = 2000;
@@ -250,16 +252,11 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
 
     async ValueTask ProcessMessages(TcpClient client)
     {
-        if (topicInfo.Generator is not IHasSerializer<TMessage> generator)
-        {
-            throw new InvalidOperationException("Invalid generator!"); // shouldn't happen
-        }
-
-        var deserializer = generator.CreateDeserializer();
+        var deserializer = topicInfo.CreateDeserializer<TMessage>();
 
         var token = runningTs.Token;
         using var readBuffer = new ResizableRent();
-        
+
         while (true)
         {
             bool cachedIsPaused = isPaused;
@@ -292,18 +289,16 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
                 }
             }
 
+            var callbacks = manager.callbacks;
+            foreach (var callback in callbacks)
             {
-                var callbacks = manager.callbacks;
-                foreach (var callback in callbacks)
+                try
                 {
-                    try
-                    {
-                        callback.Handle(in message, this);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.LogErrorFormat("{0}: Exception from " + nameof(ProcessMessages) + ": {1}", this, e);
-                    }
+                    callback.Handle(in message, this);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogErrorFormat("{0}: Exception from " + nameof(ProcessMessages) + ": {1}", this, e);
                 }
             }
 
@@ -318,7 +313,7 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
         await ProcessMessages(client);
     }
 
-    public void Post(in TMessage message, int rcvLength)
+    internal override void Post(in TMessage message, int rcvLength)
     {
         if (task.IsCompleted) /* IsAlive */
         {
@@ -329,7 +324,7 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
         bytesReceived += rcvLength + 4;
 
         if (isPaused) return;
-        
+
         var callbacks = manager.callbacks;
         foreach (var callback in callbacks)
         {
@@ -343,7 +338,7 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
             }
         }
     }
-    
+
     public async ValueTask DisposeAsync(CancellationToken token)
     {
         if (disposed)
@@ -365,9 +360,9 @@ internal sealed class TcpReceiver<TMessage> : TcpReceiver, IProtocolReceiver, IL
     }
 }
 
-internal class TcpReceiver
+internal static class TcpReceiverUtils
 {
-    protected static async ValueTask<int> ReceivePacket(TcpClient client, ResizableRent readBuffer,
+    public static async ValueTask<int> ReceivePacket(TcpClient client, ResizableRent readBuffer,
         CancellationToken token)
     {
         byte[] array = readBuffer.Array;
@@ -397,7 +392,7 @@ internal class TcpReceiver
         return length;
     }
 
-    protected static async ValueTask<int> ReceiveAndIgnore(TcpClient client, byte[] readBuffer, CancellationToken token)
+    public static async ValueTask<int> ReceiveAndIgnore(TcpClient client, byte[] readBuffer, CancellationToken token)
     {
         if (!await client.ReadChunkAsync(readBuffer, 4, token))
         {
@@ -418,7 +413,7 @@ internal class TcpReceiver
         return length;
     }
 
-    protected static void CheckBufferSize(TcpClient client, int rcvLength, ref int receiveBufferSize)
+    public static void CheckBufferSize(TcpClient client, int rcvLength, ref int receiveBufferSize)
     {
         if (receiveBufferSize >= rcvLength)
         {

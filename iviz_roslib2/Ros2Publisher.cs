@@ -12,6 +12,7 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
     readonly RclPublisher publisher;
     readonly List<string> ids = new();
     readonly CancellationTokenSource runningTs = new();
+    readonly Serializer<TMessage> serializer;
 
     readonly SemaphoreSlim signal = new(0);
     readonly ConcurrentQueue<TMessage> queue = new();
@@ -34,6 +35,7 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
     {
         this.client = client;
         this.publisher = publisher;
+        serializer = ((IHasSerializer<TMessage>)new TMessage()).CreateSerializer();
         task = Task.Run(() => Run().AwaitNoThrow(this));
     }
 
@@ -48,7 +50,6 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
     async Task Run()
     {
         var token = CancellationToken;
-        var serializer = ((IHasSerializer<TMessage>)new TMessage()).CreateSerializer();
         var handler = new RclSerializeHandler<TMessage>(serializer);
         using var handle = new GCHandleWrapper(handler);
 
@@ -154,7 +155,7 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
     public void Publish(in TMessage message)
     {
         AssertIsAlive();
-        message.RosValidate();
+        serializer.RosValidate(message);
 
         queue.Enqueue(message);
         signal.Release();

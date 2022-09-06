@@ -17,6 +17,7 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
 {
     readonly CancellationTokenSource runningTs = new();
     readonly SenderQueue<TMessage> senderQueue;
+    readonly Serializer<TMessage> serializer;
     readonly TopicInfo topicInfo;
     readonly Task task;
 
@@ -39,11 +40,9 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
 
     bool KeepRunning => !runningTs.IsCancellationRequested;
 
-    bool IsRunning => !task.IsCompleted;
+    public override bool IsAlive => !task.IsCompleted;
 
-    public bool IsAlive => IsRunning;
-
-    public long MaxQueueSizeInBytes
+    public override long MaxQueueSizeInBytes
     {
         get => senderQueue.MaxQueueSizeInBytes;
         set => senderQueue.MaxQueueSizeInBytes = value;
@@ -51,14 +50,15 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
 
     public UdpClient UdpClient { get; }
     public int MaxPacketSize { get; }
-    public ILoopbackReceiver<TMessage>? LoopbackReceiver { private get; set; }
+    public LoopbackReceiver<TMessage>? LoopbackReceiver { private get; set; }
 
-    public UdpSender(RpcUdpTopicRequest request, TopicInfo topicInfo, 
+    public UdpSender(RpcUdpTopicRequest request, TopicInfo topicInfo,
         ILatchedMessageProvider<TMessage> provider,
         out byte[] responseHeader)
     {
         this.topicInfo = topicInfo;
-        senderQueue = new SenderQueue<TMessage>(this);
+        senderQueue = new SenderQueue<TMessage>(this, topicInfo);
+        serializer = topicInfo.CreateSerializer<TMessage>();
 
         RemoteEndpoint = new Endpoint(request.Hostname, request.Port);
 
@@ -219,13 +219,13 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
                 if (msgLength + udpPlusSizeHeaders <= MaxPacketSize)
                 {
                     WriteUnfragmented(writeBuffer, msgLength);
-                    WriteBuffer.Serialize(msg, writeBuffer[udpPlusSizeHeaders..]);
+                    Serialize(msg, writeBuffer[udpPlusSizeHeaders..]);
                     await WriteChunkAsync(msgLength + udpPlusSizeHeaders);
                 }
                 else
                 {
                     messageBuffer.EnsureCapacity(msgLength);
-                    WriteBuffer.Serialize(msg, messageBuffer);
+                    Serialize(msg, messageBuffer);
 
                     int maxPayloadSize = MaxPacketSize - UdpRosParams.HeaderLength;
                     int totalBlocks = (4 + msgLength + maxPayloadSize - 1) / maxPayloadSize;
@@ -269,6 +269,15 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
         }
 
         ValueTask<int> WriteChunkAsync(int toWrite) => UdpClient.WriteChunkAsync(writeBuffer, toWrite, runningTs.Token);
+    }
+
+    unsafe void Serialize(TMessage msg, Span<byte> buffer)
+    {
+        fixed (byte* bufferPtr = buffer)
+        {
+            var b = new WriteBuffer(bufferPtr, buffer.Length);
+            serializer.RosSerialize(msg, ref b);
+        }
     }
 
     void WriteKeepAlive(Span<byte> array)
@@ -344,7 +353,7 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
         }
     }
 
-    public async ValueTask DisposeAsync(CancellationToken token)
+    public override async ValueTask DisposeAsync(CancellationToken token)
     {
         if (disposed)
         {
@@ -359,7 +368,7 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
         await task.AwaitNoThrow(5000, this, token);
     }
 
-    public Ros1SenderState State =>
+    public override Ros1SenderState State =>
         new()
         {
             IsAlive = IsAlive,
@@ -375,24 +384,17 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
             BytesDropped = bytesDropped
         };
 
-    public void Publish(in TMessage message)
+    public override void Publish(in TMessage message)
     {
-        if (!IsRunning)
+        if (!task.IsCompleted)
         {
-            return;
+            senderQueue.Enqueue(message, ref numDropped, ref bytesDropped);
         }
-        
-        if (!senderQueue.TryEnqueue(message))
-        {
-            numDropped++;
-            bytesDropped += message.RosMessageLength;
-        }
-        
     }
 
-    public ValueTask PublishAndWaitAsync(in TMessage message, CancellationToken token)
+    public override ValueTask PublishAndWaitAsync(in TMessage message, CancellationToken token)
     {
-        return !IsRunning
+        return task.IsCompleted
             ? Task.FromException(new ObjectDisposedException("this")).AsValueTask()
             : senderQueue.EnqueueAsync(message, token, ref numDropped, ref bytesDropped);
     }

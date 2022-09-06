@@ -177,10 +177,10 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
         }
     }
     
-    public bool TryGetLoopbackReceiver(Endpoint endPoint, out ILoopbackReceiver<TMessage>? receiver)
+    public bool TryGetLoopbackReceiver(Endpoint endPoint, out LoopbackReceiver<TMessage>? receiver)
     {
         var newReceiver = receiversByUri.FirstOrDefault(pair => endPoint.Equals(pair.Value.Endpoint)).Value;
-        receiver = newReceiver as ILoopbackReceiver<TMessage>;
+        receiver = newReceiver as LoopbackReceiver<TMessage>;
         return receiver != null;
     }
 

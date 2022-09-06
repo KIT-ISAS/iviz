@@ -18,6 +18,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
     readonly List<string> ids = new();
     readonly SenderManager<TMessage> manager;
     readonly CancellationTokenSource runningTs = new();
+    readonly Serializer<TMessage> serializer;
     int totalPublishers;
     bool disposed;
 
@@ -79,6 +80,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
     internal RosPublisher(RosClient client, TopicInfo topicInfo)
     {
         this.client = client;
+        serializer = topicInfo.CreateSerializer<TMessage>();
         manager = new SenderManager<TMessage>(this, topicInfo) { ForceTcpNoDelay = true };
     }
 
@@ -122,7 +124,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
     public void Publish(in TMessage message)
     {
         AssertIsAlive();
-        message.RosValidate();
+        serializer.RosValidate(message);
         manager.Publish(message);
     }
 
@@ -130,7 +132,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
         CancellationToken token = default)
     {
         AssertIsAlive();
-        message.RosValidate();
+        serializer.RosValidate(message);
 
         switch (policy)
         {
@@ -309,7 +311,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
         return ids.Remove(topicId);
     }
 
-    internal bool TryGetLoopbackReceiver(in Endpoint endpoint, out ILoopbackReceiver<TMessage>? receiver)
+    internal bool TryGetLoopbackReceiver(in Endpoint endpoint, out LoopbackReceiver<TMessage>? receiver)
     {
         return client.TryGetLoopbackReceiver(Topic, endpoint, out receiver);
     }

@@ -15,7 +15,7 @@ using Buffer = System.Buffer;
 
 namespace Iviz.Roslib;
 
-internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiver<TMessage>, IUdpReceiver
+internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProtocolReceiver, IUdpReceiver
     where TMessage : IMessage
 {
     const int DisposeTimeoutInMs = 2000;
@@ -187,12 +187,7 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
 
     async ValueTask ProcessLoop()
     {
-        if (topicInfo.Generator is not IHasSerializer<TMessage> generator)
-        {
-            throw new InvalidOperationException("Invalid generator!"); // shouldn'T happen
-        }
-
-        var deserializer = generator.CreateDeserializer();
+        var deserializer = topicInfo.CreateDeserializer<TMessage>();
 
         Status = ReceiverStatus.Running;
         using var readBuffer = new Rent(MaxPacketSize);
@@ -300,7 +295,7 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         }
     }
 
-    unsafe void ProcessMessage(Deserializer<TMessage> deserializer, Span<byte> buffer, int rcvLength)
+    void ProcessMessage(Deserializer<TMessage> deserializer, Span<byte> buffer, int rcvLength)
     {
         if (IsPaused)
         {
@@ -323,10 +318,13 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         }
 
         TMessage message;
-        fixed (byte* bufferPtr = buffer)
+        unsafe
         {
-            var b = new ReadBuffer(bufferPtr + 4, buffer.Length - 4);
-            deserializer.RosDeserialize(ref b, out message);
+            fixed (byte* bufferPtr = buffer)
+            {
+                var b = new ReadBuffer(bufferPtr + 4, buffer.Length - 4);
+                deserializer.RosDeserialize(ref b, out message);
+            }
         }
 
         MessageCallback(message);
@@ -351,7 +349,7 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         UdpClient.Client.ReceiveBufferSize = recommendedSize;
     }
 
-    public void Post(in TMessage message, int rcvLength)
+    internal override void Post(in TMessage message, int rcvLength)
     {
         if (!IsAlive)
         {

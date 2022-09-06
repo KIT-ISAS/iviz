@@ -33,7 +33,8 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
     public Endpoint RemoteEndpoint { get; }
     public TransportType TransportType => TransportType.Tcp;
     public TcpClient TcpClient { get; }
-    public ILoopbackReceiver<TMessage>? LoopbackReceiver { private get; set; }
+    
+    public LoopbackReceiver<TMessage>? LoopbackReceiver;
 
     bool KeepRunning => !runningTs.IsCancellationRequested;
 
@@ -45,16 +46,15 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
 
     public string Topic => topicInfo.Topic;
     public string Type => topicInfo.Type;
-    bool IsRunning => !task.IsCompleted;
-    public bool IsAlive => IsRunning && TcpClient.Client.CheckIfAlive();
+    public override bool IsAlive => !task.IsCompleted && TcpClient.Client.CheckIfAlive();
 
-    public long MaxQueueSizeInBytes
+    public override long MaxQueueSizeInBytes
     {
         get => senderQueue.MaxQueueSizeInBytes;
         set => senderQueue.MaxQueueSizeInBytes = value;
     }
 
-    public Ros1SenderState State =>
+    public override Ros1SenderState State =>
         new()
         {
             IsAlive = IsAlive,
@@ -72,14 +72,14 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
     public TcpSender(TcpClient client, TopicInfo topicInfo, ILatchedMessageProvider<TMessage> provider)
     {
         this.topicInfo = topicInfo;
-        senderQueue = new SenderQueue<TMessage>(this);
+        senderQueue = new SenderQueue<TMessage>(this, topicInfo);
         TcpClient = client;
         Endpoint = new Endpoint((IPEndPoint)TcpClient.Client.LocalEndPoint!);
         RemoteEndpoint = new Endpoint((IPEndPoint)TcpClient.Client.RemoteEndPoint!);
         task = TaskUtils.Run(() => StartSession(provider).AwaitNoThrow(this), runningTs.Token);
     }
 
-    public async ValueTask DisposeAsync(CancellationToken token)
+    public override async ValueTask DisposeAsync(CancellationToken token)
     {
         if (disposed)
         {
@@ -274,71 +274,71 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
             Publish(latchedMsg.value!);
         }
 
-        while (KeepRunning)
+        var serializer = topicInfo.CreateSerializer<TMessage>();
+        var token = runningTs.Token;
+        var tcpClient = TcpClient;
+
+        while (true)
         {
-            await senderQueue.WaitAsync(runningTs.Token);
+            await senderQueue.WaitAsync(token);
 
             var queue = senderQueue.ReadAll(ref numDropped, ref bytesDropped);
 
             if (LoopbackReceiver != null)
             {
                 senderQueue.DirectSendToLoopback(queue, LoopbackReceiver, ref numSent, ref bytesSent);
+                continue;
             }
-            else
-            {
-                await SendWithSocketAsync(queue, writeBuffer);
-            }
-        }
-    }
 
-    async ValueTask SendWithSocketAsync(RangeEnumerable<SenderQueue<TMessage>.Entry?> queue, ResizableRent writeBuffer)
-    {
-        try
-        {
-            foreach (var entry in queue)
+            try
             {
-                if (entry is not var (msg, msgLength, msgSignal))
+                foreach (var entry in queue)
                 {
-                    continue;
-                }
+                    if (entry is not var (msg, msgLength, msgSignal))
+                    {
+                        continue;
+                    }
 
-                writeBuffer.EnsureCapacity(msgLength + 4);
+                    writeBuffer.EnsureCapacity(msgLength + 4);
+                    byte[] buffer = writeBuffer.Array;
+                    buffer.WriteInt(msgLength);
 
-                writeBuffer[..4].WriteInt(msgLength);
+                    //WriteBuffer.Serialize(msg, writeBuffer[4..]);
+                    unsafe
+                    {
+                        fixed (byte* bufferPtr = buffer)
+                        {
+                            var b = new WriteBuffer(bufferPtr + 4, msgLength);
+                            serializer.RosSerialize(msg, ref b);
+                        }
+                    }
 
-                WriteBuffer.Serialize(msg, writeBuffer[4..]);
+                    await tcpClient.WriteChunkAsync(buffer, msgLength + 4, token);
 
-                await TcpClient.WriteChunkAsync(writeBuffer.Array, msgLength + 4, runningTs.Token);
-
-                numSent++;
-                bytesSent += msgLength + 4;
-                msgSignal?.TrySetResult();
+                    numSent++;
+                    bytesSent += msgLength + 4;
+                    msgSignal?.TrySetResult();
+                }                
+            }
+            catch (Exception e)
+            {
+                senderQueue.FlushFrom(queue, e);
+                throw;
             }
         }
-        catch (Exception e)
+    }
+
+    public override void Publish(in TMessage message)
+    {
+        if (!task.IsCompleted)
         {
-            senderQueue.FlushFrom(queue, e);
-            throw;
+            senderQueue.Enqueue(message, ref numDropped, ref bytesDropped);
         }
     }
 
-    public void Publish(in TMessage message)
+    public override ValueTask PublishAndWaitAsync(in TMessage message, CancellationToken token)
     {
-        if (!IsRunning)
-        {
-            return;
-        }
-
-        if (!senderQueue.TryEnqueue(message))
-        {
-            numDropped++;
-            bytesDropped += message.RosMessageLength;
-        }
-    }
-
-    public ValueTask PublishAndWaitAsync(in TMessage message, CancellationToken token)
-    {
-        return !IsRunning
+        return task.IsCompleted
             ? Task.FromException(new ObjectDisposedException("this")).AsValueTask()
             : senderQueue.EnqueueAsync(message, token, ref numDropped, ref bytesDropped);
     }

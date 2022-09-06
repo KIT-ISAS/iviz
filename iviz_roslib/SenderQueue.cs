@@ -8,62 +8,23 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
-internal sealed class SenderQueue<TMessage> where TMessage : IMessage
+internal class SenderQueue
 {
-    const int NumPacketsWithoutConstraint = 2;
-    const int MaxPacketsInQueue = 2048;
-
-    readonly IRosSender sender;
-    readonly SemaphoreSlim signal = new(0);
-    readonly ConcurrentQueue<Entry?> messageQueue = new();
-    readonly List<Entry?> sendQueue = new();
-    int messagesInQueue;
+    protected const int NumPacketsWithoutConstraint = 2;
+    protected const int MaxPacketsInQueue = 2048;
 
     public long MaxQueueSizeInBytes { get; set; } = 50000;
 
+    protected readonly IRosSender sender;
+    protected readonly SemaphoreSlim signal = new(0);
+    protected int messagesInQueue;
+
     public int Count => messagesInQueue;
 
-    public SenderQueue(IRosSender sender) => this.sender = sender;
+    protected SenderQueue(IRosSender sender) => this.sender = sender;
 
-    public bool TryEnqueue(in TMessage message)
-    {
-        if (messagesInQueue > MaxPacketsInQueue)
-        {
-             return false;
-        }
 
-        messageQueue.Enqueue(new Entry(message));
-        Interlocked.Increment(ref messagesInQueue);
-        signal.Release();
-        return true;
-    }
-
-    public void EnqueueEmpty()
-    {
-        messageQueue.Enqueue(null);
-        Interlocked.Increment(ref messagesInQueue);
-        signal.Release();
-    }
-
-    public ValueTask EnqueueAsync(in TMessage message, CancellationToken token, ref int numDropped, ref long bytesDropped)
-    {
-        if (messagesInQueue > MaxPacketsInQueue)
-        {
-            bytesDropped += message.RosMessageLength;
-            numDropped++;
-            return default;
-        }
-
-        var tcs = TaskUtils.CreateCompletionSource();
-        messageQueue.Enqueue(new Entry(message, tcs));
-        signal.Release();
-
-        return token.CanBeCanceled
-            ? WaitForSignal(tcs, token)
-            : tcs.Task.AsValueTask();
-    }
-
-    static async ValueTask WaitForSignal(TaskCompletionSource msgSignal, CancellationToken token)
+    protected static async ValueTask WaitForSignal(TaskCompletionSource msgSignal, CancellationToken token)
     {
         // ReSharper disable once UseAwaitUsing
         using (token.Register(CallbackHelpers.OnCanceled, msgSignal))
@@ -78,6 +39,66 @@ internal sealed class SenderQueue<TMessage> where TMessage : IMessage
         {
             await signal.WaitAsync(token);
         }
+    }
+    
+    protected RosQueueOverflowException CreateOverflowException() =>
+        new($"Message could not be sent to node '{sender.RemoteCallerId}'", sender);
+
+    protected RosQueueException CreateQueueException(Exception e) =>
+        new($"An unexpected exception was thrown while sending to node '{sender.RemoteCallerId}'", e, sender);
+}
+
+internal sealed class SenderQueue<TMessage> : SenderQueue where TMessage : IMessage
+{
+    readonly ConcurrentQueue<Entry?> messageQueue = new();
+    readonly List<Entry?> sendQueue = new();
+    readonly Serializer<TMessage> serializer;
+
+    public SenderQueue(IRosSender sender, TopicInfo topicInfo) : base(sender)
+    {
+        serializer = topicInfo.CreateSerializer<TMessage>();
+    }
+
+    public void Enqueue(in TMessage message, ref int numDropped, ref long bytesDropped)
+    {
+        int messageLength = serializer.RosMessageLength(message);
+        if (messagesInQueue > MaxPacketsInQueue)
+        {
+            bytesDropped += messageLength;
+            numDropped++;
+            return;
+        }
+
+        messageQueue.Enqueue(new Entry(message, messageLength));
+        Interlocked.Increment(ref messagesInQueue);
+        signal.Release();
+    }
+
+    public void EnqueueEmpty()
+    {
+        messageQueue.Enqueue(null);
+        Interlocked.Increment(ref messagesInQueue);
+        signal.Release();
+    }
+
+    public ValueTask EnqueueAsync(in TMessage message, CancellationToken token, ref int numDropped,
+        ref long bytesDropped)
+    {
+        int messageLength = serializer.RosMessageLength(message);
+        if (messagesInQueue > MaxPacketsInQueue)
+        {
+            bytesDropped += messageLength;
+            numDropped++;
+            return default;
+        }
+
+        var tcs = TaskUtils.CreateCompletionSource();
+        messageQueue.Enqueue(new Entry(message, messageLength, tcs));
+        signal.Release();
+
+        return token.CanBeCanceled
+            ? WaitForSignal(tcs, token)
+            : tcs.Task.AsValueTask();
     }
 
     public RangeEnumerable<Entry?> ReadAll(ref int numDropped, ref long bytesDropped)
@@ -164,12 +185,6 @@ internal sealed class SenderQueue<TMessage> where TMessage : IMessage
         bytesDropped = totalQueueSizeInBytes - maxQueueSizeInBytes + remainingBytes;
     }
 
-    RosQueueOverflowException CreateOverflowException() =>
-        new($"Message could not be sent to node '{sender.RemoteCallerId}'", sender);
-
-    RosQueueException CreateQueueException(Exception e) =>
-        new($"An unexpected exception was thrown while sending to node '{sender.RemoteCallerId}'", e, sender);
-
     public void FlushRemaining()
     {
         foreach (var entry in messageQueue)
@@ -192,13 +207,10 @@ internal sealed class SenderQueue<TMessage> where TMessage : IMessage
         }
     }
 
-    public void DirectSendToLoopback(in RangeEnumerable<Entry?> queue, ILoopbackReceiver<TMessage> loopbackReceiver,
+    public void DirectSendToLoopback(in RangeEnumerable<Entry?> queue, LoopbackReceiver<TMessage> loopbackReceiver,
         ref long numSent, ref long bytesSent)
     {
-        if (loopbackReceiver == null)
-        {
-            throw new ArgumentNullException(nameof(loopbackReceiver));
-        }
+        if (loopbackReceiver == null) BuiltIns.ThrowArgumentNull(nameof(loopbackReceiver));
 
         try
         {
@@ -229,14 +241,15 @@ internal sealed class SenderQueue<TMessage> where TMessage : IMessage
         public readonly int messageLength;
         public readonly TaskCompletionSource? signal;
 
-        public Entry(in TMessage message, TaskCompletionSource? signal = null)
+        public Entry(in TMessage message, int messageLength, TaskCompletionSource? signal = null)
         {
             this.message = message;
+            this.messageLength = messageLength;
             this.signal = signal;
-            messageLength = message.RosMessageLength;
         }
 
-        public void Deconstruct(out TMessage outMessage, out int outMessageLength, out TaskCompletionSource? outSignal) =>
+        public void Deconstruct(out TMessage outMessage, out int outMessageLength,
+            out TaskCompletionSource? outSignal) =>
             (outMessage, outMessageLength, outSignal) = (message, messageLength, signal);
     }
 }

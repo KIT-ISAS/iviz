@@ -4,12 +4,12 @@ using Iviz.Msgs;
 
 namespace Iviz.Roslib;
 
-internal interface IProtocolSender<TMessage> where TMessage : IMessage
+internal abstract class IProtocolSender<TMessage> where TMessage : IMessage
 {
-    bool IsAlive { get; }
-    long MaxQueueSizeInBytes { set; }
-    ValueTask DisposeAsync(CancellationToken token);
-    void Publish(in TMessage msg);
-    ValueTask PublishAndWaitAsync(in TMessage message, CancellationToken token);
-    Ros1SenderState State { get; }
+    public abstract bool IsAlive { get; }
+    public abstract long MaxQueueSizeInBytes { get; set; }
+    public abstract ValueTask DisposeAsync(CancellationToken token);
+    public abstract void Publish(in TMessage msg);
+    public abstract ValueTask PublishAndWaitAsync(in TMessage message, CancellationToken token);
+    public abstract Ros1SenderState State { get; }
 }
