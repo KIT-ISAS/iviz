@@ -238,12 +238,12 @@ namespace Iviz.Controllers
             var transportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
             Listener = Config.Type switch
             {
-                PoseStamped.MessageType => CreateListener<PoseStamped>(Handler),
-                Pose.MessageType => CreateListener<Pose>(Handler),
+                PoseStamped.MessageType =>  CreateListener<PoseStamped>(Handler),
+                //Pose.MessageType => CreateListener<Pose>(Handler),
                 PointStamped.MessageType => CreateListener<PointStamped>(Handler),
-                Point.MessageType => CreateListener<Point>(Handler),
+                //Point.MessageType => CreateListener<Point>(Handler),
                 WrenchStamped.MessageType => CreateListener<WrenchStamped>(Handler),
-                Wrench.MessageType => CreateListener<Wrench>(Handler),
+                //Wrench.MessageType => CreateListener<Wrench>(Handler),
                 TwistStamped.MessageType => CreateListener<TwistStamped>(Handler),
                 Twist.MessageType => CreateListener<Twist>(Handler),
                 Odometry.MessageType => CreateListener<Odometry>(Handler),
@@ -256,15 +256,15 @@ namespace Iviz.Controllers
             switch (Config.Type)
             {
                 case PoseStamped.MessageType:
-                case Pose.MessageType:
+                //case Pose.MessageType:
                     RentFrame(frameNode, out axisFrame);
                     break;
                 case PointStamped.MessageType:
-                case Point.MessageType:
+                //case Point.MessageType:
                     RentSphere(frameNode, VectorColor, out sphere);
                     break;
                 case WrenchStamped.MessageType:
-                case Wrench.MessageType:
+                //case Wrench.MessageType:
                     RentFrame(frameNode, out axisFrame);
                     RentArrow(frameNode, VectorColor, out arrow);
                     RentAngleAxis(frameNode, AngleColor, out angleAxis);

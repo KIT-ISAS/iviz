@@ -6,6 +6,7 @@ using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.Configurations;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
 using Iviz.Roslib;
@@ -241,7 +242,7 @@ namespace Iviz.Controllers
             infoListener = new Listener<CameraInfo>(infoTopic, InfoHandler);
         }
 
-        bool HandlerCompressed(CompressedImage msg)
+        bool HandlerCompressed(CompressedImage msg, IRosConnection _)
         {
             if (msg.Format.Length == 0)
             {
@@ -314,7 +315,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        bool Handler(Image msg)
+        bool Handler(Image msg, IRosConnection _)
         {
             checked
             {

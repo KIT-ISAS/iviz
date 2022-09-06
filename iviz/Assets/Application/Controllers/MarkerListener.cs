@@ -10,6 +10,7 @@ using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.Configurations;
+using Iviz.Msgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Ros;
 using Iviz.Roslib;
@@ -318,7 +319,7 @@ namespace Iviz.Controllers
             markers.Clear();
         }
 
-        bool Handle(MarkerArray msg)
+        bool Handle(MarkerArray msg, IRosConnection _)
         {
             lock (newMarkerBuffer)
             {
@@ -336,7 +337,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        bool Handle(Marker marker)
+        bool Handle(Marker marker, IRosConnection _)
         {
             lock (newMarkerBuffer)
             {

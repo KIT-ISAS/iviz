@@ -21,9 +21,9 @@ namespace Iviz.Ros
         /// The number of bytes received in the last second.
         /// </summary>
         [DataMember]
-        public long BytesPerSecond { get; }
+        public int BytesPerSecond { get; }
 
-        public RosSenderStats(int messagesPerSecond, long bytesPerSecond)
+        public RosSenderStats(int messagesPerSecond, int bytesPerSecond)
         {
             MessagesPerSecond = messagesPerSecond;
             BytesPerSecond = bytesPerSecond;

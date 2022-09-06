@@ -14,7 +14,8 @@ namespace Iviz.Ros
     {
         static RoslibConnection Connection => RosManager.RosConnection;
 
-        long lastMsgBytes;
+        readonly Serializer<T> serializer;
+        int lastMsgBytes;
         int recentMsgs;
 
         public string Topic { get; }
@@ -29,7 +30,10 @@ namespace Iviz.Ros
             ThrowHelper.ThrowIfNullOrEmpty(topic, nameof(topic));
 
             Topic = topic;
-            Type = BuiltIns.GetMessageType<T>();
+
+            var generator = new T();
+            Type = generator.RosMessageType;
+            serializer = generator.CreateSerializer();
 
             GameThread.EverySecond += UpdateStats;
             Connection.Advertise(this);
@@ -54,12 +58,12 @@ namespace Iviz.Ros
             }
         }
 
-        public void Publish(in T msg)
+        public void Publish(T msg)
         {
             Connection.Publish(this, msg);
 
-            Interlocked.Increment(ref recentMsgs);
-            Interlocked.Add(ref lastMsgBytes, msg.RosMessageLength);
+            recentMsgs++;
+            lastMsgBytes += serializer.RosMessageLength(msg);
         }
 
         public void Reset()
@@ -81,8 +85,8 @@ namespace Iviz.Ros
 
             RosManager.ReportBandwidthUp(lastMsgBytes);
 
-            Interlocked.Exchange(ref recentMsgs, 0);
-            Interlocked.Exchange(ref lastMsgBytes, 0);
+            recentMsgs = 0;
+            lastMsgBytes = 0;
 
             NumSubscribers = Connection.GetNumSubscribers(this);
         }

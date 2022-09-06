@@ -7,6 +7,7 @@ using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.Configurations;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
 using Iviz.Roslib;
@@ -298,7 +299,7 @@ namespace Iviz.Controllers
             Config = config ?? new DepthCloudConfiguration();
         }
 
-        bool DepthHandler(Image msg)
+        bool DepthHandler(Image msg, IRosConnection _)
         {
             checked
             {
@@ -354,7 +355,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        bool DepthHandlerCompressed(CompressedImage msg)
+        bool DepthHandlerCompressed(CompressedImage msg, IRosConnection _)
         {
             if (msg.Format.Length == 0)
             {
@@ -421,7 +422,7 @@ namespace Iviz.Controllers
             }
         }
 
-        bool ColorHandler(Image msg)
+        bool ColorHandler(Image msg, IRosConnection _)
         {
             checked
             {
@@ -474,7 +475,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        bool ColorHandlerCompressed(CompressedImage msg)
+        bool ColorHandlerCompressed(CompressedImage msg, IRosConnection _)
         {
             if (msg.Format.Length == 0)
             {

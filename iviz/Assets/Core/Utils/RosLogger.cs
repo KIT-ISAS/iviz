@@ -13,7 +13,7 @@ namespace Iviz.Core
         const string NullException = "[null exception]";
 
         const int MaxPublishedPerSecond = 30;
-        static int publishedThisSec;
+        static volatile int publishedThisSec;
 
         public delegate void ExternalLogDelegate(in LogMessage msg);
 

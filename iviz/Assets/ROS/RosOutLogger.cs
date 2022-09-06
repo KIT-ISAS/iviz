@@ -1,6 +1,7 @@
 #nullable enable
 
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Roslib;
 
@@ -51,13 +52,13 @@ namespace Iviz.Ros
             );
         }
 
-        static bool Handle(Msgs.RosgraphMsgs.Log msg)
+        static bool Handle(Msgs.RosgraphMsgs.Log msg, IRosConnection _)
         {
             MessageArrived?.Invoke(new LogMessage(msg));
             return true;
         }
 
-        static bool Handle(Msgs.RclInterfaces.Log msg)
+        static bool Handle(Msgs.RclInterfaces.Log msg, IRosConnection _)
         {
             MessageArrived?.Invoke(new LogMessage(msg));
             return true;

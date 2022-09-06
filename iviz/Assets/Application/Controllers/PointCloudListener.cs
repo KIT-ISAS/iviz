@@ -239,7 +239,7 @@ namespace Iviz.Controllers
             }
         }
 
-        bool Handler(PointCloud2 msg)
+        bool Handler(PointCloud2 msg, IRosConnection _)
         {
             if (IsProcessing)
             {
@@ -900,17 +900,6 @@ namespace Iviz.Controllers
 
                 return o;
             }
-
-            [BurstCompile(CompileSynchronously = true)]
-            public static void Iterate([NoAlias] float3* input, int inputLength)
-            {
-                Span<float3> span = new(input, inputLength);
-                foreach (float3 var in span)
-                {
-                    
-                }
-            }
-
         }
     }
 }

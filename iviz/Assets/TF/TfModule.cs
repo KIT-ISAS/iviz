@@ -258,7 +258,7 @@ namespace Iviz.Controllers.TF
             }
         }
 
-        public void Process(in TransformStamped transform, bool isStatic)
+        public void Process(TransformStamped transform, bool isStatic)
         {
             ref readonly var rosTransform = ref transform.Transform;
 

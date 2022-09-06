@@ -1,7 +1,7 @@
 #nullable enable
 
-using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -12,8 +12,6 @@ using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Ros;
 using Iviz.Roslib;
-using Iviz.Tools;
-using UnityEngine;
 using Pose = UnityEngine.Pose;
 
 namespace Iviz.Controllers
@@ -23,7 +21,10 @@ namespace Iviz.Controllers
         const int MaxQueueSize = 10000;
 
         readonly TfConfiguration config = new();
+        
         readonly ConcurrentQueue<(TransformStamped[] frame, bool isStatic)> incomingMessages = new();
+        int incomingMessagesCount;
+        
         readonly ConcurrentQueue<TransformStamped> outgoingMessages = new();
         uint tfSeq;
 
@@ -167,32 +168,36 @@ namespace Iviz.Controllers
             while (incomingMessages.TryDequeue(out var value))
             {
                 var (transforms, isStatic) = value;
-                for (int i = 0; i < transforms.Length; i++)
+                foreach (var transform in transforms)
                 {
-                    Tf.Process(in transforms[i], isStatic);
+                    Tf.Process(transform, isStatic);
                 }
+
+                Interlocked.Decrement(ref incomingMessagesCount);
             }
         }
 
         bool HandleNonStatic(TFMessage msg, IRosConnection? _)
         {
-            if (incomingMessages.Count > MaxQueueSize)
+            if (incomingMessagesCount > MaxQueueSize)
             {
                 return false;
             }
 
             incomingMessages.Enqueue((msg.Transforms, false));
+            Interlocked.Increment(ref incomingMessagesCount);
             return true;
         }
 
         bool HandleStatic(TFMessage msg, IRosConnection? _)
         {
-            if (incomingMessages.Count > MaxQueueSize)
+            if (incomingMessagesCount > MaxQueueSize)
             {
                 return false;
             }
 
             incomingMessages.Enqueue((msg.Transforms, true));
+            Interlocked.Increment(ref incomingMessagesCount);
             return true;
         }
 
@@ -238,7 +243,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            TransformStamped t;
+            var t = new TransformStamped();
             t.Header.Seq = tfSeq++;
             t.Header.Stamp = GameThread.TimeNow;
             t.Header.FrameId = parentFrameId;
@@ -249,12 +254,12 @@ namespace Iviz.Controllers
 
         void DoPublish()
         {
-            int count = outgoingMessages.Count;
-            if (count == 0)
+            if (outgoingMessages.IsEmpty)
             {
                 return;
             }
 
+            int count = outgoingMessages.Count;
             var transforms = new TransformStamped[count];
             for (int i = 0; i < count; i++)
             {
@@ -268,6 +273,7 @@ namespace Iviz.Controllers
             else
             {
                 incomingMessages.Enqueue((transforms, false));
+                Interlocked.Increment(ref incomingMessagesCount);
             }
         }
 

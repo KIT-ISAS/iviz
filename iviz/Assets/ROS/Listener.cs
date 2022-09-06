@@ -23,13 +23,16 @@ namespace Iviz.Ros
         static RoslibConnection Connection => RosManager.RosConnection;
 
         readonly ConcurrentQueue<T> messageQueue = new();
+        int messageQueueCount;
+        
         readonly Action<T>? handlerOnGameThread;
         readonly Func<T, IRosConnection, bool>? directHandler;
-        
+        readonly Serializer<T> serializer;
+
         T?[] messageHelper = new T[32];
 
         int droppedMsgCounter;
-        long lastMsgBytes;
+        int lastMsgBytes;
         int totalMsgCounter;
         int recentMsgCounter;
         RosTransportHint transportHint;
@@ -65,7 +68,11 @@ namespace Iviz.Ros
         {
             ThrowHelper.ThrowIfNullOrEmpty(topic, nameof(topic));
             Topic = topic;
-            Type = BuiltIns.GetMessageType<T>();
+
+            var generator = new T();
+            Type = generator.RosMessageType;
+            serializer = generator.CreateSerializer();
+
             this.transportHint = transportHint;
             GameThread.EverySecond += UpdateStats;
         }
@@ -107,23 +114,6 @@ namespace Iviz.Ros
             directHandler = handler;
             Connection.Subscribe(this);
             subscribed = true;
-        }
-
-        /// <summary>
-        /// Creates a listener with a synchronous handler.
-        /// The callback will be executed as soon as a message arrives.
-        /// </summary>
-        /// <param name="topic">The topic to subscribe to</param>
-        /// <param name="handler">
-        /// The callback to execute as soon as a message is available.
-        /// It returns a boolean which indicates whether the message was processed.
-        /// This is only used for logging purposes.
-        /// </param>
-        /// <param name="transportHint">Tells the subscriber which protocol is preferred</param>
-        public Listener(string topic, Func<T, bool> handler,
-            RosTransportHint transportHint = RosTransportHint.PreferTcp) :
-            this(topic, (t, _) => handler(t), transportHint)
-        {
         }
 
         /// <summary>
@@ -205,7 +195,7 @@ namespace Iviz.Ros
             Subscribe();
         }
 
-        internal void EnqueueMessage(in T msg, IRosConnection receiver)
+        internal void EnqueueMessage(T msg, IRosConnection receiver)
         {
             if (!subscribed)
             {
@@ -218,13 +208,15 @@ namespace Iviz.Ros
                 return;
             }
 
-            if (messageQueue.Count >= MaxQueueSize)
+            if (messageQueueCount >= MaxQueueSize)
             {
                 messageQueue.TryDequeue(out _);
-                Interlocked.Increment(ref droppedMsgCounter);
+                droppedMsgCounter++;
+                Interlocked.Decrement(ref messageQueueCount);
             }
 
             messageQueue.Enqueue(msg);
+            Interlocked.Increment(ref messageQueueCount);
         }
 
         void CallHandlerOnGameThread()
@@ -234,7 +226,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            int messageCount = messageQueue.Count;
+            int messageCount = messageQueueCount;
             if (messageCount == 0)
             {
                 return;
@@ -250,6 +242,8 @@ namespace Iviz.Ros
                 messageQueue.TryDequeue(out messageHelper[i]);
             }
 
+            Interlocked.Add(ref messageQueueCount, -messageCount);
+
             int start = Mathf.Max(0, messageCount - MaxQueueSize); // should be 0 unless MaxQueueSize changed
             for (int i = start; i < messageCount; i++)
             {
@@ -258,7 +252,7 @@ namespace Iviz.Ros
                 
                 try
                 {
-                    Interlocked.Add(ref lastMsgBytes, msg.RosMessageLength);
+                    lastMsgBytes += serializer.RosMessageLength(msg);
                     handlerOnGameThread(msg);
                 }
                 catch (Exception e)
@@ -267,25 +261,25 @@ namespace Iviz.Ros
                 }
             }
 
-            Interlocked.Add(ref droppedMsgCounter, start);
-            Interlocked.Add(ref totalMsgCounter, messageCount);
-            Interlocked.Add(ref recentMsgCounter, messageCount);
+            droppedMsgCounter += start;
+            totalMsgCounter += messageCount;
+            recentMsgCounter += messageCount;
         }
 
-        void CallHandlerDirect(in T msg, IRosConnection receiver)
+        void CallHandlerDirect(T msg, IRosConnection receiver)
         {
             if (directHandler == null) // shouldn't happen
             {
                 return;
             }
 
-            Interlocked.Increment(ref totalMsgCounter);
-            Interlocked.Increment(ref recentMsgCounter);
+            totalMsgCounter++;
+            recentMsgCounter++;
 
             bool processed;
             try
             {
-                Interlocked.Add(ref lastMsgBytes, msg.RosMessageLength);
+                lastMsgBytes += serializer.RosMessageLength(msg);
                 processed = directHandler(msg, receiver);
             }
             catch (Exception e)
@@ -296,7 +290,7 @@ namespace Iviz.Ros
 
             if (!processed)
             {
-                Interlocked.Increment(ref droppedMsgCounter);
+                droppedMsgCounter++;
             }
         }
 
@@ -312,15 +306,15 @@ namespace Iviz.Ros
                 totalMsgCounter,
                 recentMsgCounter,
                 lastMsgBytes,
-                messageQueue.Count,
+                messageQueueCount,
                 droppedMsgCounter
             );
 
             RosManager.ReportBandwidthDown(lastMsgBytes);
 
-            Interlocked.Exchange(ref lastMsgBytes, 0);
-            Interlocked.Exchange(ref droppedMsgCounter, 0);
-            Interlocked.Exchange(ref recentMsgCounter, 0);
+            lastMsgBytes = 0;
+            droppedMsgCounter = 0;
+            recentMsgCounter = 0;
         }
 
         public void WriteDescriptionTo(StringBuilder description)

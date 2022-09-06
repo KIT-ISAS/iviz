@@ -11,13 +11,15 @@ using Iviz.Tools;
 
 namespace Iviz.Ros
 {
-    internal sealed class SubscribedTopic<T> : RosCallback<T>, ISubscribedTopic where T : IMessage, IDeserializable<T>, new()
+    internal sealed class SubscribedTopic<T> : RosCallback<T>, ISubscribedTopic
+        where T : IMessage, IDeserializable<T>, new()
     {
         const int NumRetries = 3;
         const int WaitBetweenRetriesInMs = 500;
 
         readonly string topic;
         readonly RosTransportHint transportHint;
+        readonly bool requiresDispose;
 
         Listener<T>[] listeners = Array.Empty<Listener<T>>();
         BagListener? bagListener;
@@ -31,6 +33,7 @@ namespace Iviz.Ros
             ThrowHelper.ThrowIfNull(topic, nameof(topic));
             this.topic = topic;
             this.transportHint = transportHint;
+            requiresDispose = typeof(IDisposable).IsAssignableFrom(typeof(T));
         }
 
         public void Add(IListener subscriber)
@@ -72,7 +75,7 @@ namespace Iviz.Ros
                 try
                 {
                     IRosSubscriber subscriber;
-                    (subscriberId, subscriber) = await client.SubscribeAsync<T>(topic, this, transportHint, token);
+                    (subscriberId, subscriber) = await client.SubscribeAsync(topic, this, transportHint, token);
                     if (bagListener != null)
                     {
                         bagId = subscriber.Subscribe(bagListener.EnqueueMessage);
@@ -143,26 +146,24 @@ namespace Iviz.Ros
             Subscriber = null;
         }
 
-        public override void Handle(in T msg, IRosConnection receiver)
+        public override void Handle(T msg, IRosConnection receiver)
         {
             var cache = listeners;
-            try
+            foreach (var listener in cache)
             {
-                foreach (var listener in cache)
+                try
                 {
-                    try
-                    {
-                        listener.EnqueueMessage(in msg, receiver);
-                    }
-                    catch (Exception e)
-                    {
-                        RosLogger.Error($"{this}: Error in {nameof(Handle)}", e);
-                    }
+                    listener.EnqueueMessage(msg, receiver);
+                }
+                catch (Exception e)
+                {
+                    RosLogger.Error($"{ToString()}: Error in {nameof(Handle)}", e);
                 }
             }
-            finally
+
+            if (requiresDispose)
             {
-                msg.Dispose();
+                ((IDisposable)msg).Dispose();
             }
         }
 

@@ -848,7 +848,7 @@ namespace Iviz.Ros
             }
         }
 
-        internal void Publish<T>(Sender<T> advertiser, in T msg) where T : IMessage, new()
+        internal void Publish<T>(Sender<T> advertiser, T msg) where T : IMessage, new()
         {
             if (advertiser.Id is not { } id || runningTs.IsCancellationRequested)
             {
