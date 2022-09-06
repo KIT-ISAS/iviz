@@ -139,18 +139,16 @@ public static class BaseUtils
         }
     }
 
-    public static string GetMd5Hash(byte[] input, MD5? md5Hash = null)
+    public static string GetMd5Hash(byte[] input)
     {
-        MD5? ownMd5Hash = null;
-        MD5 validatedMd5Hash = md5Hash ?? (ownMd5Hash = MD5.Create());
-        byte[] data = validatedMd5Hash.ComputeHash(input);
+        using var md5Hash = MD5.Create();
+        byte[] data = md5Hash.ComputeHash(input);
         var sBuilder = new StringBuilder(data.Length * 2);
         foreach (byte b in data)
         {
             sBuilder.Append(b.ToString("x2"));
         }
 
-        ownMd5Hash?.Dispose();
         return sBuilder.ToString();
     }
 
@@ -162,13 +160,15 @@ public static class BaseUtils
         ? Unsafe.ReadUnaligned<int>(ref array[0])
         : ThrowIndexOutOfRange();
 
+    public static void WriteInt(this byte[] span, int t)
+    {
+        if (span.Length < sizeof(int)) ThrowIndexOutOfRange();
+        Unsafe.WriteUnaligned(ref span[0], t);
+    }
+    
     public static void WriteInt(this Span<byte> span, int t)
     {
-        if (span.Length < sizeof(int))
-        {
-            ThrowIndexOutOfRange();
-        }
-
+        if (span.Length < sizeof(int)) ThrowIndexOutOfRange();
         Unsafe.WriteUnaligned(ref span[0], t);
     }
 

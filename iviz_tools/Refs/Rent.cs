@@ -18,8 +18,8 @@ namespace Iviz.Tools;
 /// </typeparam>
 public readonly struct Rent<T> : IDisposable where T : unmanaged
 {
-    public readonly int Length;
     public readonly T[] Array;
+    public readonly int Length;
 
     Rent(T[] array, int length) => (Array, Length) = (array, length);
 
@@ -77,8 +77,8 @@ public readonly struct Rent<T> : IDisposable where T : unmanaged
 
 public readonly struct Rent : IDisposable
 {
-    public readonly int Length;
     public readonly byte[] Array;
+    public readonly int Length;
 
     Rent(byte[] array, int length) => (Array, Length) = (array, length);
 

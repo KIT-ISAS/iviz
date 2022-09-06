@@ -27,7 +27,7 @@ public static class StreamUtils
         }
 
         int received = socket.Receive(buffer, 0, toRead, SocketFlags.None);
-        return (received != 0).AsTaskResult();
+        return new ValueTask<bool>(received != 0);
     }
 
     static async ValueTask<bool> DoReadChunkAsync(Socket socket, byte[] buffer, int toRead, CancellationToken token)
@@ -88,18 +88,18 @@ public static class StreamUtils
         }
 
         int received = socket.Receive(buffer, offset, toRead, SocketFlags.None);
-        return received.AsTaskResult();
+        return new ValueTask<int>(received);
     }
 
     static ValueTask<int> DoReadSubChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
         CancellationToken token)
     {
-        var tcs = TaskUtils.CreateCompletionSource<IAsyncResult>();
+        var tcs = new TaskCompletionSource<IAsyncResult>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         socket.BeginReceive(buffer, offset, toRead, SocketFlags.None, CallbackHelpers.OnComplete, tcs);
 
         return tcs.Task.IsCompleted
-            ? socket.EndReceive(tcs.Task.Result).AsTaskResult()
+            ? new ValueTask<int>(socket.EndReceive(tcs.Task.Result))
             : DoReadSubChunkWithTokenAsync(tcs, socket, token);
     }
 
