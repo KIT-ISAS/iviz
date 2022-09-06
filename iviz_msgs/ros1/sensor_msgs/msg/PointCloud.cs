@@ -129,30 +129,28 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 8;
                 size += Header.RosMessageLength;
                 size += 12 * Points.Length;
-                size += WriteBuffer.GetArraySize(Channels);
+                foreach (var msg in Channels) size += msg.RosMessageLength;
                 return size;
             }
         }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Points length
-            c += 12 * Points.Length;
-            c += 4; // Channels.Length
-            for (int i = 0; i < Channels.Length; i++)
-            {
-                c = Channels[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Points.Length
+            size += 12 * Points.Length;
+            size += 4; // Channels.Length
+            foreach (var msg in Channels) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/PointCloud";
@@ -199,6 +197,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(PointCloud msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(PointCloud msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(PointCloud msg) => msg.Ros2MessageLength;
+            public override void RosValidate(PointCloud msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<PointCloud>
         {

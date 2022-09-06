@@ -99,8 +99,8 @@ namespace Iviz.Msgs.UniqueIdentifierMsgs
         {
             public override void RosSerialize(UUID msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(UUID msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(UUID msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(UUID msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(UUID _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(UUID _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<UUID>
         {

@@ -62,17 +62,25 @@ namespace Iviz.Msgs.ActionlibMsgs
             if (Id is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 12 + WriteBuffer.GetStringSize(Id);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 12;
+                size += WriteBuffer.GetStringSize(Id);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 8; // Stamp
-            c = WriteBuffer2.AddLength(c, Id);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 8; // Stamp
+            size = WriteBuffer2.AddLength(size, Id);
+            return size;
         }
     
         public const string MessageType = "actionlib_msgs/GoalID";
@@ -109,6 +117,7 @@ namespace Iviz.Msgs.ActionlibMsgs
             public override void RosSerialize(GoalID msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(GoalID msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(GoalID msg) => msg.Ros2MessageLength;
+            public override void RosValidate(GoalID msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<GoalID>
         {

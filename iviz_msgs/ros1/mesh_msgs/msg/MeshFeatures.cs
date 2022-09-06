@@ -92,22 +92,28 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        public int RosMessageLength => 8 + WriteBuffer.GetStringSize(MapUuid) + WriteBuffer.GetArraySize(Features);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 8;
+                size += WriteBuffer.GetStringSize(MapUuid);
+                foreach (var msg in Features) size += msg.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, MapUuid);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Features.Length
-            for (int i = 0; i < Features.Length; i++)
-            {
-                c = Features[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, MapUuid);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Features.Length
+            foreach (var msg in Features) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "mesh_msgs/MeshFeatures";
@@ -137,6 +143,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(MeshFeatures msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MeshFeatures msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(MeshFeatures msg) => msg.Ros2MessageLength;
+            public override void RosValidate(MeshFeatures msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<MeshFeatures>
         {

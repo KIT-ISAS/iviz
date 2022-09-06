@@ -116,7 +116,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 118;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(Id);
@@ -128,25 +129,25 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c += 1; // Action
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Id);
-            c += 1; // Type
-            c = WriteBuffer2.Align8(c);
-            c += 56; // Pose
-            c += 16; // Color
-            c += 16; // SecondColor
-            c = WriteBuffer2.Align8(c);
-            c += 8; // Scale
-            c += 8; // SecondScale
-            c = WriteBuffer2.AddLength(c, Caption);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, SecondCaption);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size += 1; // Action
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Id);
+            size += 1; // Type
+            size = WriteBuffer2.Align8(size);
+            size += 56; // Pose
+            size += 16; // Color
+            size += 16; // SecondColor
+            size = WriteBuffer2.Align8(size);
+            size += 8; // Scale
+            size += 8; // SecondScale
+            size = WriteBuffer2.AddLength(size, Caption);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, SecondCaption);
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/Widget";
@@ -185,6 +186,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(Widget msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Widget msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Widget msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Widget msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Widget>
         {

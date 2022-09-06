@@ -70,18 +70,27 @@ namespace Iviz.Msgs.RclInterfaces
             }
         }
     
-        public int RosMessageLength => 8 + WriteBuffer.GetArraySize(Names) + WriteBuffer.GetArraySize(Prefixes);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 8;
+                size += WriteBuffer.GetArraySize(Names);
+                size += WriteBuffer.GetArraySize(Prefixes);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Names);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Prefixes);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Names);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Prefixes);
+            return size;
         }
     
         public const string MessageType = "rcl_interfaces/ListParametersResult";
@@ -110,6 +119,7 @@ namespace Iviz.Msgs.RclInterfaces
             public override void RosSerialize(ListParametersResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ListParametersResult msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(ListParametersResult msg) => msg.Ros2MessageLength;
+            public override void RosValidate(ListParametersResult msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<ListParametersResult>
         {

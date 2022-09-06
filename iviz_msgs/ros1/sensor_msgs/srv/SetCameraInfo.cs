@@ -100,15 +100,23 @@ namespace Iviz.Msgs.SensorMsgs
             CameraInfo.RosValidate();
         }
     
-        public int RosMessageLength => 0 + CameraInfo.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += CameraInfo.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = CameraInfo.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = CameraInfo.AddRos2MessageLength(size);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -167,17 +175,25 @@ namespace Iviz.Msgs.SensorMsgs
             if (StatusMessage is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(StatusMessage);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 5;
+                size += WriteBuffer.GetStringSize(StatusMessage);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c += 1; // Success
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, StatusMessage);
-            return c;
+            int size = c;
+            size += 1; // Success
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, StatusMessage);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

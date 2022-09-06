@@ -109,7 +109,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 47;
                 size += WriteBuffer.GetStringSize(SourceParameter);
                 size += WriteBuffer.GetStringSize(SavedRobotName);
@@ -122,26 +123,26 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, SourceParameter);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, SavedRobotName);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, FramePrefix);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, FrameSuffix);
-            c += 1; // AttachedToTf
-            c += 1; // RenderAsOcclusionOnly
-            c = WriteBuffer2.Align4(c);
-            c += 16; // Tint
-            c += 4; // Metallic
-            c += 4; // Smoothness
-            c = WriteBuffer2.AddLength(c, Id);
-            c += 1; // Visible
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, SourceParameter);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, SavedRobotName);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, FramePrefix);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, FrameSuffix);
+            size += 1; // AttachedToTf
+            size += 1; // RenderAsOcclusionOnly
+            size = WriteBuffer2.Align4(size);
+            size += 16; // Tint
+            size += 4; // Metallic
+            size += 4; // Smoothness
+            size = WriteBuffer2.AddLength(size, Id);
+            size += 1; // Visible
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/RobotConfiguration";
@@ -171,6 +172,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(RobotConfiguration msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(RobotConfiguration msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(RobotConfiguration msg) => msg.Ros2MessageLength;
+            public override void RosValidate(RobotConfiguration msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<RobotConfiguration>
         {

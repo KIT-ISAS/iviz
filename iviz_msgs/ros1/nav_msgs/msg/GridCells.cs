@@ -92,21 +92,30 @@ namespace Iviz.Msgs.NavMsgs
             if (Cells is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 12 + Header.RosMessageLength + 24 * Cells.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 12;
+                size += Header.RosMessageLength;
+                size += 24 * Cells.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // CellWidth
-            c += 4; // CellHeight
-            c += 4; // Cells length
-            c = WriteBuffer2.Align8(c);
-            c += 24 * Cells.Length;
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // CellWidth
+            size += 4; // CellHeight
+            size += 4; // Cells.Length
+            size = WriteBuffer2.Align8(size);
+            size += 24 * Cells.Length;
+            return size;
         }
     
         public const string MessageType = "nav_msgs/GridCells";
@@ -140,6 +149,7 @@ namespace Iviz.Msgs.NavMsgs
             public override void RosSerialize(GridCells msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(GridCells msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(GridCells msg) => msg.Ros2MessageLength;
+            public override void RosValidate(GridCells msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<GridCells>
         {

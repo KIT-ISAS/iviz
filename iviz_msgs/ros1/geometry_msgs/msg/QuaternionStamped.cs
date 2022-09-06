@@ -55,17 +55,25 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        public int RosMessageLength => 32 + Header.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 32;
+                size += Header.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align8(c);
-            c += 32; // Quaternion
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align8(size);
+            size += 32; // Quaternion
+            return size;
         }
     
         public const string MessageType = "geometry_msgs/QuaternionStamped";
@@ -99,6 +107,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(QuaternionStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(QuaternionStamped msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(QuaternionStamped msg) => msg.Ros2MessageLength;
+            public override void RosValidate(QuaternionStamped msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<QuaternionStamped>
         {

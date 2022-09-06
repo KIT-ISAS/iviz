@@ -119,7 +119,8 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 98;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(ClientId);
@@ -131,24 +132,24 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, ClientId);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, MarkerName);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, ControlName);
-            c += 1; // EventType
-            c = WriteBuffer2.Align8(c);
-            c += 56; // Pose
-            c += 4; // MenuEntryId
-            c = WriteBuffer2.Align8(c);
-            c += 24; // MousePoint
-            c += 1; // MousePointValid
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, ClientId);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, MarkerName);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, ControlName);
+            size += 1; // EventType
+            size = WriteBuffer2.Align8(size);
+            size += 56; // Pose
+            size += 4; // MenuEntryId
+            size = WriteBuffer2.Align8(size);
+            size += 24; // MousePoint
+            size += 1; // MousePointValid
+            return size;
         }
     
         public const string MessageType = "visualization_msgs/InteractiveMarkerFeedback";
@@ -192,6 +193,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override void RosSerialize(InteractiveMarkerFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(InteractiveMarkerFeedback msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(InteractiveMarkerFeedback msg) => msg.Ros2MessageLength;
+            public override void RosValidate(InteractiveMarkerFeedback msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<InteractiveMarkerFeedback>
         {

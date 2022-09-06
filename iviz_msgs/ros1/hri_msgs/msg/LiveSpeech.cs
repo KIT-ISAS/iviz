@@ -80,7 +80,8 @@ namespace Iviz.Msgs.HriMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 16;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(Incremental);
@@ -91,17 +92,17 @@ namespace Iviz.Msgs.HriMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Incremental);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Final);
-            c = WriteBuffer2.Align8(c);
-            c += 8; // Confidence
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Incremental);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Final);
+            size = WriteBuffer2.Align8(size);
+            size += 8; // Confidence
+            return size;
         }
     
         public const string MessageType = "hri_msgs/LiveSpeech";
@@ -136,6 +137,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(LiveSpeech msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(LiveSpeech msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(LiveSpeech msg) => msg.Ros2MessageLength;
+            public override void RosValidate(LiveSpeech msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<LiveSpeech>
         {

@@ -67,18 +67,27 @@ namespace Iviz.Msgs.SensorMsgs
             if (Source is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 12 + Header.RosMessageLength + WriteBuffer.GetStringSize(Source);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 12;
+                size += Header.RosMessageLength;
+                size += WriteBuffer.GetStringSize(Source);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 8; // TimeRef
-            c = WriteBuffer2.AddLength(c, Source);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 8; // TimeRef
+            size = WriteBuffer2.AddLength(size, Source);
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/TimeReference";
@@ -113,6 +122,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(TimeReference msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TimeReference msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(TimeReference msg) => msg.Ros2MessageLength;
+            public override void RosValidate(TimeReference msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<TimeReference>
         {

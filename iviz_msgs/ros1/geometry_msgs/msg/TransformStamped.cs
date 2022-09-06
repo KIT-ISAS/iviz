@@ -80,19 +80,28 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        public readonly int RosMessageLength => 60 + Header.RosMessageLength + WriteBuffer.GetStringSize(ChildFrameId);
+        public readonly int RosMessageLength
+        {
+            get
+            {
+                int size = 60;
+                size += Header.RosMessageLength;
+                size += WriteBuffer.GetStringSize(ChildFrameId);
+                return size;
+            }
+        }
         
         public readonly int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public readonly int AddRos2MessageLength(int d)
+        public readonly int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, ChildFrameId);
-            c = WriteBuffer2.Align8(c);
-            c += 56; // Transform
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, ChildFrameId);
+            size = WriteBuffer2.Align8(size);
+            size += 56; // Transform
+            return size;
         }
     
         public const string MessageType = "geometry_msgs/TransformStamped";
@@ -132,6 +141,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(TransformStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TransformStamped msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(TransformStamped msg) => msg.Ros2MessageLength;
+            public override void RosValidate(TransformStamped msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<TransformStamped>
         {

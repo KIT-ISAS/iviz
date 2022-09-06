@@ -183,43 +183,35 @@ namespace Iviz.Msgs.RclInterfaces
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 24;
                 size += WriteBuffer.GetStringSize(Node);
-                size += WriteBuffer.GetArraySize(NewParameters);
-                size += WriteBuffer.GetArraySize(ChangedParameters);
-                size += WriteBuffer.GetArraySize(DeletedParameters);
+                foreach (var msg in NewParameters) size += msg.RosMessageLength;
+                foreach (var msg in ChangedParameters) size += msg.RosMessageLength;
+                foreach (var msg in DeletedParameters) size += msg.RosMessageLength;
                 return size;
             }
         }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 8; // Stamp
-            c = WriteBuffer2.AddLength(c, Node);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // NewParameters.Length
-            for (int i = 0; i < NewParameters.Length; i++)
-            {
-                c = NewParameters[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align4(c);
-            c += 4; // ChangedParameters.Length
-            for (int i = 0; i < ChangedParameters.Length; i++)
-            {
-                c = ChangedParameters[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align4(c);
-            c += 4; // DeletedParameters.Length
-            for (int i = 0; i < DeletedParameters.Length; i++)
-            {
-                c = DeletedParameters[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 8; // Stamp
+            size = WriteBuffer2.AddLength(size, Node);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // NewParameters.Length
+            foreach (var msg in NewParameters) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // ChangedParameters.Length
+            foreach (var msg in ChangedParameters) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // DeletedParameters.Length
+            foreach (var msg in DeletedParameters) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "rcl_interfaces/ParameterEvent";
@@ -261,6 +253,7 @@ namespace Iviz.Msgs.RclInterfaces
             public override void RosSerialize(ParameterEvent msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ParameterEvent msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(ParameterEvent msg) => msg.Ros2MessageLength;
+            public override void RosValidate(ParameterEvent msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<ParameterEvent>
         {

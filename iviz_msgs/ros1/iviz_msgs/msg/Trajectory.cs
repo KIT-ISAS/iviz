@@ -103,20 +103,29 @@ namespace Iviz.Msgs.IvizMsgs
             if (Timestamps is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 8 + 56 * Poses.Length + 8 * Timestamps.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 8;
+                size += 56 * Poses.Length;
+                size += 8 * Timestamps.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Poses length
-            c = WriteBuffer2.Align8(c);
-            c += 56 * Poses.Length;
-            c += 4; // Timestamps length
-            c += 8 * Timestamps.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Poses.Length
+            size = WriteBuffer2.Align8(size);
+            size += 56 * Poses.Length;
+            size += 4; // Timestamps.Length
+            size += 8 * Timestamps.Length;
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/Trajectory";
@@ -146,6 +155,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(Trajectory msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Trajectory msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Trajectory msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Trajectory msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Trajectory>
         {

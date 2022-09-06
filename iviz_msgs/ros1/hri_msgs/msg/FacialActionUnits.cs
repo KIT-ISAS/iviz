@@ -303,7 +303,8 @@ namespace Iviz.Msgs.HriMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 12;
                 size += Header.RosMessageLength;
                 size += 4 * FAU.Length;
@@ -315,18 +316,18 @@ namespace Iviz.Msgs.HriMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // FAU length
-            c += 4 * FAU.Length;
-            c += 4; // Intensity length
-            c += 4 * Intensity.Length;
-            c += 4; // Confidence length
-            c += 4 * Confidence.Length;
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // FAU.Length
+            size += 4 * FAU.Length;
+            size += 4; // Intensity.Length
+            size += 4 * Intensity.Length;
+            size += 4; // Confidence.Length
+            size += 4 * Confidence.Length;
+            return size;
         }
     
         public const string MessageType = "hri_msgs/FacialActionUnits";
@@ -388,6 +389,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(FacialActionUnits msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(FacialActionUnits msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(FacialActionUnits msg) => msg.Ros2MessageLength;
+            public override void RosValidate(FacialActionUnits msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<FacialActionUnits>
         {

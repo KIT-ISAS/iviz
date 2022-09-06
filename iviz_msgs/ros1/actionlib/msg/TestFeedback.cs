@@ -81,8 +81,8 @@ namespace Iviz.Msgs.Actionlib
         {
             public override void RosSerialize(TestFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(TestFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(TestFeedback msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(TestFeedback msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(TestFeedback _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(TestFeedback _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<TestFeedback>
         {

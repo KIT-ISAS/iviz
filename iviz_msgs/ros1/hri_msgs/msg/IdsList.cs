@@ -64,17 +64,26 @@ namespace Iviz.Msgs.HriMsgs
             }
         }
     
-        public int RosMessageLength => 4 + Header.RosMessageLength + WriteBuffer.GetArraySize(Ids);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += Header.RosMessageLength;
+                size += WriteBuffer.GetArraySize(Ids);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Ids);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Ids);
+            return size;
         }
     
         public const string MessageType = "hri_msgs/IdsList";
@@ -109,6 +118,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(IdsList msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(IdsList msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(IdsList msg) => msg.Ros2MessageLength;
+            public override void RosValidate(IdsList msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<IdsList>
         {

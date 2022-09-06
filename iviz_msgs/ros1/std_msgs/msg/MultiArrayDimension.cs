@@ -66,19 +66,27 @@ namespace Iviz.Msgs.StdMsgs
             if (Label is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 12 + WriteBuffer.GetStringSize(Label);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 12;
+                size += WriteBuffer.GetStringSize(Label);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Label);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Size
-            c += 4; // Stride
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Label);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Size
+            size += 4; // Stride
+            return size;
         }
     
         public const string MessageType = "std_msgs/MultiArrayDimension";
@@ -106,6 +114,7 @@ namespace Iviz.Msgs.StdMsgs
             public override void RosSerialize(MultiArrayDimension msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MultiArrayDimension msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(MultiArrayDimension msg) => msg.Ros2MessageLength;
+            public override void RosValidate(MultiArrayDimension msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<MultiArrayDimension>
         {

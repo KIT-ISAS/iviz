@@ -72,17 +72,25 @@ namespace Iviz.Msgs.IvizMsgs
             if (Coords is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + 12 * Coords.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += 12 * Coords.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Coords length
-            c += 12 * Coords.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Coords.Length
+            size += 12 * Coords.Length;
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/ModelTexCoords";
@@ -113,6 +121,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(ModelTexCoords msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ModelTexCoords msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(ModelTexCoords msg) => msg.Ros2MessageLength;
+            public override void RosValidate(ModelTexCoords msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<ModelTexCoords>
         {

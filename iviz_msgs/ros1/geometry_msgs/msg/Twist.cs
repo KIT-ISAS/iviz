@@ -97,8 +97,8 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             public override void RosSerialize(Twist msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Twist msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(Twist msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Twist msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(Twist _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(Twist _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<Twist>
         {

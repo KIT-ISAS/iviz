@@ -219,7 +219,8 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 48;
                 size += Header.RosMessageLength;
                 size += 4 * CellVoltage.Length;
@@ -232,31 +233,31 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Voltage
-            c += 4; // Temperature
-            c += 4; // Current
-            c += 4; // Charge
-            c += 4; // Capacity
-            c += 4; // DesignCapacity
-            c += 4; // Percentage
-            c += 1; // PowerSupplyStatus
-            c += 1; // PowerSupplyHealth
-            c += 1; // PowerSupplyTechnology
-            c += 1; // Present
-            c = WriteBuffer2.Align4(c);
-            c += 4; // CellVoltage length
-            c += 4 * CellVoltage.Length;
-            c += 4; // CellTemperature length
-            c += 4 * CellTemperature.Length;
-            c = WriteBuffer2.AddLength(c, Location);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, SerialNumber);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Voltage
+            size += 4; // Temperature
+            size += 4; // Current
+            size += 4; // Charge
+            size += 4; // Capacity
+            size += 4; // DesignCapacity
+            size += 4; // Percentage
+            size += 1; // PowerSupplyStatus
+            size += 1; // PowerSupplyHealth
+            size += 1; // PowerSupplyTechnology
+            size += 1; // Present
+            size = WriteBuffer2.Align4(size);
+            size += 4; // CellVoltage.Length
+            size += 4 * CellVoltage.Length;
+            size += 4; // CellTemperature.Length
+            size += 4 * CellTemperature.Length;
+            size = WriteBuffer2.AddLength(size, Location);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, SerialNumber);
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/BatteryState";
@@ -303,6 +304,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(BatteryState msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(BatteryState msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(BatteryState msg) => msg.Ros2MessageLength;
+            public override void RosValidate(BatteryState msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<BatteryState>
         {

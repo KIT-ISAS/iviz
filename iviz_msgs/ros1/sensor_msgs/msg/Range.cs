@@ -101,21 +101,29 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
-        public int RosMessageLength => 17 + Header.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 17;
+                size += Header.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c += 1; // RadiationType
-            c = WriteBuffer2.Align4(c);
-            c += 4; // FieldOfView
-            c += 4; // MinRange
-            c += 4; // MaxRange
-            c += 4; // Range_
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size += 1; // RadiationType
+            size = WriteBuffer2.Align4(size);
+            size += 4; // FieldOfView
+            size += 4; // MinRange
+            size += 4; // MaxRange
+            size += 4; // Range_
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/Range";
@@ -160,6 +168,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(Range msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Range msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Range msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Range msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Range>
         {

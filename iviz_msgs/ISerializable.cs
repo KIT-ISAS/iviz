@@ -72,7 +72,6 @@ public interface IDeserializableRos2<out T>
     T RosDeserialize(ref ReadBuffer2 b);
 }
 
-
 public interface IDeserializable<out T> : IDeserializableRos1<T>, IDeserializableRos2<T>
     where T : ISerializableRos1, ISerializableRos2
 {
@@ -90,6 +89,10 @@ public abstract class Serializer<T>
     public abstract void RosSerialize(T msg, ref WriteBuffer2 b);
     public abstract int RosMessageLength(T msg);
     public abstract int Ros2MessageLength(T msg);
+
+    public virtual void RosValidate(T msg)
+    {
+    }
 }
 
 public abstract class Deserializer<T>

@@ -78,20 +78,25 @@ namespace Iviz.Msgs.Tf2Msgs
             if (Transforms is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Transforms);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                foreach (var msg in Transforms) size += msg.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Transforms.Length
-            for (int i = 0; i < Transforms.Length; i++)
-            {
-                c = Transforms[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Transforms.Length
+            foreach (var msg in Transforms) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "tf2_msgs/TFMessage";
@@ -131,6 +136,7 @@ namespace Iviz.Msgs.Tf2Msgs
             public override void RosSerialize(TFMessage msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TFMessage msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(TFMessage msg) => msg.Ros2MessageLength;
+            public override void RosValidate(TFMessage msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<TFMessage>
         {

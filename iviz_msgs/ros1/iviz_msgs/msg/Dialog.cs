@@ -189,7 +189,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 127;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(Id);
@@ -202,35 +203,35 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c += 1; // Action
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Id);
-            c = WriteBuffer2.Align4(c);
-            c += 8; // Lifetime
-            c = WriteBuffer2.Align8(c);
-            c += 8; // Scale
-            c += 1; // Type
-            c += 1; // Buttons
-            c += 1; // Icon
-            c = WriteBuffer2.Align4(c);
-            c += 16; // BackgroundColor
-            c = WriteBuffer2.AddLength(c, Title);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Caption);
-            c = WriteBuffer2.Align2(c);
-            c += 2; // CaptionAlignment
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, MenuEntries);
-            c += 1; // BindingType
-            c = WriteBuffer2.Align8(c);
-            c += 24; // TfOffset
-            c += 24; // DialogDisplacement
-            c += 24; // TfDisplacement
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size += 1; // Action
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Id);
+            size = WriteBuffer2.Align4(size);
+            size += 8; // Lifetime
+            size = WriteBuffer2.Align8(size);
+            size += 8; // Scale
+            size += 1; // Type
+            size += 1; // Buttons
+            size += 1; // Icon
+            size = WriteBuffer2.Align4(size);
+            size += 16; // BackgroundColor
+            size = WriteBuffer2.AddLength(size, Title);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Caption);
+            size = WriteBuffer2.Align2(size);
+            size += 2; // CaptionAlignment
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, MenuEntries);
+            size += 1; // BindingType
+            size = WriteBuffer2.Align8(size);
+            size += 24; // TfOffset
+            size += 24; // DialogDisplacement
+            size += 24; // TfDisplacement
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/Dialog";
@@ -277,6 +278,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(Dialog msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Dialog msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Dialog msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Dialog msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Dialog>
         {

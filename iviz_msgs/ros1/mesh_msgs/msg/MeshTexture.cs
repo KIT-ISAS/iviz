@@ -67,19 +67,28 @@ namespace Iviz.Msgs.MeshMsgs
             Image.RosValidate();
         }
     
-        public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Uuid) + Image.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 8;
+                size += WriteBuffer.GetStringSize(Uuid);
+                size += Image.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Uuid);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // TextureIndex
-            c = Image.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Uuid);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // TextureIndex
+            size = Image.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "mesh_msgs/MeshTexture";
@@ -125,6 +134,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(MeshTexture msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MeshTexture msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(MeshTexture msg) => msg.Ros2MessageLength;
+            public override void RosValidate(MeshTexture msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<MeshTexture>
         {

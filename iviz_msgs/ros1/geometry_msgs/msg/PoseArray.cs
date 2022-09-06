@@ -80,19 +80,28 @@ namespace Iviz.Msgs.GeometryMsgs
             if (Poses is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + Header.RosMessageLength + 56 * Poses.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += Header.RosMessageLength;
+                size += 56 * Poses.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Poses length
-            c = WriteBuffer2.Align8(c);
-            c += 56 * Poses.Length;
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Poses.Length
+            size = WriteBuffer2.Align8(size);
+            size += 56 * Poses.Length;
+            return size;
         }
     
         public const string MessageType = "geometry_msgs/PoseArray";
@@ -128,6 +137,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(PoseArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(PoseArray msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(PoseArray msg) => msg.Ros2MessageLength;
+            public override void RosValidate(PoseArray msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<PoseArray>
         {

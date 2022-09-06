@@ -44,7 +44,9 @@ namespace Iviz.Msgs.Actionlib
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => 0;
+        public const int Ros2FixedMessageLength = 0;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     
@@ -69,13 +71,13 @@ namespace Iviz.Msgs.Actionlib
         {
             public override void RosSerialize(TwoIntsFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(TwoIntsFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(TwoIntsFeedback msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(TwoIntsFeedback msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(TwoIntsFeedback _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(TwoIntsFeedback _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<TwoIntsFeedback>
         {
-            public override void RosDeserialize(ref ReadBuffer b, out TwoIntsFeedback msg) => msg = new TwoIntsFeedback(ref b);
-            public override void RosDeserialize(ref ReadBuffer2 b, out TwoIntsFeedback msg) => msg = new TwoIntsFeedback(ref b);
+            public override void RosDeserialize(ref ReadBuffer _, out TwoIntsFeedback msg) => msg = Singleton;
+            public override void RosDeserialize(ref ReadBuffer2 _, out TwoIntsFeedback msg) => msg = Singleton;
         }
     }
 }

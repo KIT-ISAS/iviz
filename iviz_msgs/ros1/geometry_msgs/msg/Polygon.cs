@@ -73,17 +73,25 @@ namespace Iviz.Msgs.GeometryMsgs
             if (Points is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + 12 * Points.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += 12 * Points.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Points length
-            c += 12 * Points.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Points.Length
+            size += 12 * Points.Length;
+            return size;
         }
     
         public const string MessageType = "geometry_msgs/Polygon";
@@ -115,6 +123,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(Polygon msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Polygon msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Polygon msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Polygon msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Polygon>
         {

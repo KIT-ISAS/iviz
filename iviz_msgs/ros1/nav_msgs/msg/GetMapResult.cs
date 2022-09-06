@@ -50,15 +50,23 @@ namespace Iviz.Msgs.NavMsgs
             Map.RosValidate();
         }
     
-        public int RosMessageLength => 0 + Map.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += Map.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Map.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Map.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "nav_msgs/GetMapResult";
@@ -99,6 +107,7 @@ namespace Iviz.Msgs.NavMsgs
             public override void RosSerialize(GetMapResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(GetMapResult msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(GetMapResult msg) => msg.Ros2MessageLength;
+            public override void RosValidate(GetMapResult msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<GetMapResult>
         {

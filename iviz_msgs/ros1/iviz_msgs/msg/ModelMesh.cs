@@ -280,15 +280,16 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 36;
                 size += WriteBuffer.GetStringSize(Name);
                 size += 12 * Vertices.Length;
                 size += 12 * Normals.Length;
                 size += 12 * Tangents.Length;
                 size += 12 * BiTangents.Length;
-                size += WriteBuffer.GetArraySize(TexCoords);
-                size += WriteBuffer.GetArraySize(ColorChannels);
+                foreach (var msg in TexCoords) size += msg.RosMessageLength;
+                foreach (var msg in ColorChannels) size += msg.RosMessageLength;
                 size += 12 * Faces.Length;
                 return size;
             }
@@ -296,36 +297,30 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Name);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Vertices length
-            c += 12 * Vertices.Length;
-            c += 4; // Normals length
-            c += 12 * Normals.Length;
-            c += 4; // Tangents length
-            c += 12 * Tangents.Length;
-            c += 4; // BiTangents length
-            c += 12 * BiTangents.Length;
-            c += 4; // TexCoords.Length
-            for (int i = 0; i < TexCoords.Length; i++)
-            {
-                c = TexCoords[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align4(c);
-            c += 4; // ColorChannels.Length
-            for (int i = 0; i < ColorChannels.Length; i++)
-            {
-                c = ColorChannels[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Faces length
-            c += 12 * Faces.Length;
-            c += 4; // MaterialIndex
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Name);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Vertices.Length
+            size += 12 * Vertices.Length;
+            size += 4; // Normals.Length
+            size += 12 * Normals.Length;
+            size += 4; // Tangents.Length
+            size += 12 * Tangents.Length;
+            size += 4; // BiTangents.Length
+            size += 12 * BiTangents.Length;
+            size += 4; // TexCoords.Length
+            foreach (var msg in TexCoords) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // ColorChannels.Length
+            foreach (var msg in ColorChannels) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Faces.Length
+            size += 12 * Faces.Length;
+            size += 4; // MaterialIndex
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/ModelMesh";
@@ -359,6 +354,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(ModelMesh msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ModelMesh msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(ModelMesh msg) => msg.Ros2MessageLength;
+            public override void RosValidate(ModelMesh msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<ModelMesh>
         {

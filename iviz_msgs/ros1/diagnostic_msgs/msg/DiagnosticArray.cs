@@ -92,21 +92,27 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
     
-        public int RosMessageLength => 4 + Header.RosMessageLength + WriteBuffer.GetArraySize(Status);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += Header.RosMessageLength;
+                foreach (var msg in Status) size += msg.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Status.Length
-            for (int i = 0; i < Status.Length; i++)
-            {
-                c = Status[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Status.Length
+            foreach (var msg in Status) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "diagnostic_msgs/DiagnosticArray";
@@ -144,6 +150,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             public override void RosSerialize(DiagnosticArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(DiagnosticArray msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(DiagnosticArray msg) => msg.Ros2MessageLength;
+            public override void RosValidate(DiagnosticArray msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<DiagnosticArray>
         {

@@ -55,17 +55,25 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        public int RosMessageLength => 24 + Header.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 24;
+                size += Header.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align8(c);
-            c += 24; // Vector
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align8(size);
+            size += 24; // Vector
+            return size;
         }
     
         public const string MessageType = "geometry_msgs/Vector3Stamped";
@@ -102,6 +110,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(Vector3Stamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Vector3Stamped msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Vector3Stamped msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Vector3Stamped msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Vector3Stamped>
         {

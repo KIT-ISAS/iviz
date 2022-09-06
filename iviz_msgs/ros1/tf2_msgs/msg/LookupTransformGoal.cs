@@ -86,7 +86,8 @@ namespace Iviz.Msgs.Tf2Msgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 37;
                 size += WriteBuffer.GetStringSize(TargetFrame);
                 size += WriteBuffer.GetStringSize(SourceFrame);
@@ -97,20 +98,20 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, TargetFrame);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, SourceFrame);
-            c = WriteBuffer2.Align4(c);
-            c += 8; // SourceTime
-            c += 8; // Timeout
-            c += 8; // TargetTime
-            c = WriteBuffer2.AddLength(c, FixedFrame);
-            c += 1; // Advanced
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, TargetFrame);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, SourceFrame);
+            size = WriteBuffer2.Align4(size);
+            size += 8; // SourceTime
+            size += 8; // Timeout
+            size += 8; // TargetTime
+            size = WriteBuffer2.AddLength(size, FixedFrame);
+            size += 1; // Advanced
+            return size;
         }
     
         public const string MessageType = "tf2_msgs/LookupTransformGoal";
@@ -138,6 +139,7 @@ namespace Iviz.Msgs.Tf2Msgs
             public override void RosSerialize(LookupTransformGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(LookupTransformGoal msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(LookupTransformGoal msg) => msg.Ros2MessageLength;
+            public override void RosValidate(LookupTransformGoal msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<LookupTransformGoal>
         {

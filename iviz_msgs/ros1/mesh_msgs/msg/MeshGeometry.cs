@@ -148,7 +148,8 @@ namespace Iviz.Msgs.MeshMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 12;
                 size += 24 * Vertices.Length;
                 size += 24 * VertexNormals.Length;
@@ -159,19 +160,19 @@ namespace Iviz.Msgs.MeshMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Vertices length
-            c = WriteBuffer2.Align8(c);
-            c += 24 * Vertices.Length;
-            c += 4; // VertexNormals length
-            c = WriteBuffer2.Align8(c);
-            c += 24 * VertexNormals.Length;
-            c += 4; // Faces length
-            c += 12 * Faces.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Vertices.Length
+            size = WriteBuffer2.Align8(size);
+            size += 24 * Vertices.Length;
+            size += 4; // VertexNormals.Length
+            size = WriteBuffer2.Align8(size);
+            size += 24 * VertexNormals.Length;
+            size += 4; // Faces.Length
+            size += 12 * Faces.Length;
+            return size;
         }
     
         public const string MessageType = "mesh_msgs/MeshGeometry";
@@ -201,6 +202,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(MeshGeometry msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MeshGeometry msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(MeshGeometry msg) => msg.Ros2MessageLength;
+            public override void RosValidate(MeshGeometry msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<MeshGeometry>
         {

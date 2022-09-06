@@ -114,7 +114,8 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 8;
                 size += Header.RosMessageLength;
                 size += 4 * Axes.Length;
@@ -125,16 +126,16 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Axes length
-            c += 4 * Axes.Length;
-            c += 4; // Buttons length
-            c += 4 * Buttons.Length;
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Axes.Length
+            size += 4 * Axes.Length;
+            size += 4; // Buttons.Length
+            size += 4 * Buttons.Length;
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/Joy";
@@ -168,6 +169,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(Joy msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Joy msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Joy msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Joy msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Joy>
         {

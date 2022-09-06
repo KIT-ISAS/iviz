@@ -187,41 +187,36 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 36;
                 size += Header.RosMessageLength;
-                size += WriteBuffer.GetArraySize(Ranges);
-                size += WriteBuffer.GetArraySize(Intensities);
+                foreach (var msg in Ranges) size += msg.RosMessageLength;
+                foreach (var msg in Intensities) size += msg.RosMessageLength;
                 return size;
             }
         }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // AngleMin
-            c += 4; // AngleMax
-            c += 4; // AngleIncrement
-            c += 4; // TimeIncrement
-            c += 4; // ScanTime
-            c += 4; // RangeMin
-            c += 4; // RangeMax
-            c += 4; // Ranges.Length
-            for (int i = 0; i < Ranges.Length; i++)
-            {
-                c = Ranges[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Intensities.Length
-            for (int i = 0; i < Intensities.Length; i++)
-            {
-                c = Intensities[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // AngleMin
+            size += 4; // AngleMax
+            size += 4; // AngleIncrement
+            size += 4; // TimeIncrement
+            size += 4; // ScanTime
+            size += 4; // RangeMin
+            size += 4; // RangeMax
+            size += 4; // Ranges.Length
+            foreach (var msg in Ranges) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Intensities.Length
+            foreach (var msg in Intensities) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/MultiEchoLaserScan";
@@ -266,6 +261,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(MultiEchoLaserScan msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MultiEchoLaserScan msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(MultiEchoLaserScan msg) => msg.Ros2MessageLength;
+            public override void RosValidate(MultiEchoLaserScan msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<MultiEchoLaserScan>
         {

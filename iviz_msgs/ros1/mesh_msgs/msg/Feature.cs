@@ -89,18 +89,26 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        public int RosMessageLength => 28 + 4 * Descriptor.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 28;
+                size += 4 * Descriptor.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align8(c);
-            c += 24; // Location
-            c += 4; // Descriptor length
-            c += 4 * Descriptor.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align8(size);
+            size += 24; // Location
+            size += 4; // Descriptor.Length
+            size += 4 * Descriptor.Length;
+            return size;
         }
     
         public const string MessageType = "mesh_msgs/Feature";
@@ -129,6 +137,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(Feature msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Feature msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Feature msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Feature msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Feature>
         {

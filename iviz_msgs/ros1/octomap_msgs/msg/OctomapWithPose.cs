@@ -66,18 +66,27 @@ namespace Iviz.Msgs.OctomapMsgs
             Octomap.RosValidate();
         }
     
-        public int RosMessageLength => 56 + Header.RosMessageLength + Octomap.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 56;
+                size += Header.RosMessageLength;
+                size += Octomap.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align8(c);
-            c += 56; // Origin
-            c = Octomap.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align8(size);
+            size += 56; // Origin
+            size = Octomap.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "octomap_msgs/OctomapWithPose";
@@ -116,6 +125,7 @@ namespace Iviz.Msgs.OctomapMsgs
             public override void RosSerialize(OctomapWithPose msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(OctomapWithPose msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(OctomapWithPose msg) => msg.Ros2MessageLength;
+            public override void RosValidate(OctomapWithPose msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<OctomapWithPose>
         {

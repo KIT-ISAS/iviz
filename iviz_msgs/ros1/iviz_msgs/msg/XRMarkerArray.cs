@@ -83,20 +83,25 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Markers);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                foreach (var msg in Markers) size += msg.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Markers.Length
-            for (int i = 0; i < Markers.Length; i++)
-            {
-                c = Markers[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Markers.Length
+            foreach (var msg in Markers) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/XRMarkerArray";
@@ -139,6 +144,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(XRMarkerArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(XRMarkerArray msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(XRMarkerArray msg) => msg.Ros2MessageLength;
+            public override void RosValidate(XRMarkerArray msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<XRMarkerArray>
         {

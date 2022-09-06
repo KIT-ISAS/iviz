@@ -84,21 +84,29 @@ namespace Iviz.Msgs.SensorMsgs
             if (Name is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 13 + WriteBuffer.GetStringSize(Name);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 13;
+                size += WriteBuffer.GetStringSize(Name);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Name);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Offset
-            c += 1; // Datatype
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Count
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Name);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Offset
+            size += 1; // Datatype
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Count
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/PointField";
@@ -129,6 +137,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(PointField msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(PointField msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(PointField msg) => msg.Ros2MessageLength;
+            public override void RosValidate(PointField msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<PointField>
         {

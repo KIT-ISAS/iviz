@@ -103,24 +103,33 @@ namespace Iviz.Msgs.StereoMsgs
             ValidWindow.RosValidate();
         }
     
-        public int RosMessageLength => 37 + Header.RosMessageLength + Image.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 37;
+                size += Header.RosMessageLength;
+                size += Image.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = Image.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // F
-            c += 4; // T
-            c += 17; // ValidWindow
-            c = WriteBuffer2.Align4(c);
-            c += 4; // MinDisparity
-            c += 4; // MaxDisparity
-            c += 4; // DeltaD
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = Image.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // F
+            size += 4; // T
+            size += 17; // ValidWindow
+            size = WriteBuffer2.Align4(size);
+            size += 4; // MinDisparity
+            size += 4; // MaxDisparity
+            size += 4; // DeltaD
+            return size;
         }
     
         public const string MessageType = "stereo_msgs/DisparityImage";
@@ -179,6 +188,7 @@ namespace Iviz.Msgs.StereoMsgs
             public override void RosSerialize(DisparityImage msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(DisparityImage msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(DisparityImage msg) => msg.Ros2MessageLength;
+            public override void RosValidate(DisparityImage msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<DisparityImage>
         {

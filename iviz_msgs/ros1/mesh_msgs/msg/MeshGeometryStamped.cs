@@ -68,7 +68,8 @@ namespace Iviz.Msgs.MeshMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 4;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(Uuid);
@@ -79,14 +80,14 @@ namespace Iviz.Msgs.MeshMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Uuid);
-            c = MeshGeometry.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Uuid);
+            size = MeshGeometry.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "mesh_msgs/MeshGeometryStamped";
@@ -121,6 +122,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(MeshGeometryStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MeshGeometryStamped msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(MeshGeometryStamped msg) => msg.Ros2MessageLength;
+            public override void RosValidate(MeshGeometryStamped msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<MeshGeometryStamped>
         {

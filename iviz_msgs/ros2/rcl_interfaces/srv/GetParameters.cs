@@ -103,16 +103,24 @@ namespace Iviz.Msgs.RclInterfaces
             }
         }
     
-        public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Names);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += WriteBuffer.GetArraySize(Names);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Names);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Names);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -199,20 +207,25 @@ namespace Iviz.Msgs.RclInterfaces
             }
         }
     
-        public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Values);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                foreach (var msg in Values) size += msg.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Values.Length
-            for (int i = 0; i < Values.Length; i++)
-            {
-                c = Values[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Values.Length
+            foreach (var msg in Values) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

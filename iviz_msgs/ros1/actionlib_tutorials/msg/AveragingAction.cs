@@ -71,7 +71,8 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 0;
                 size += ActionGoal.RosMessageLength;
                 size += ActionResult.RosMessageLength;
@@ -82,13 +83,13 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = ActionGoal.AddRos2MessageLength(c);
-            c = ActionResult.AddRos2MessageLength(c);
-            c = ActionFeedback.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = ActionGoal.AddRos2MessageLength(size);
+            size = ActionResult.AddRos2MessageLength(size);
+            size = ActionFeedback.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "actionlib_tutorials/AveragingAction";
@@ -134,6 +135,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             public override void RosSerialize(AveragingAction msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(AveragingAction msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(AveragingAction msg) => msg.Ros2MessageLength;
+            public override void RosValidate(AveragingAction msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<AveragingAction>
         {

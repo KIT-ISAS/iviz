@@ -86,7 +86,9 @@ namespace Iviz.Msgs.Roscpp
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => 0;
+        public const int Ros2FixedMessageLength = 0;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     
@@ -171,20 +173,25 @@ namespace Iviz.Msgs.Roscpp
             }
         }
     
-        public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Loggers);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                foreach (var msg in Loggers) size += msg.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Loggers.Length
-            for (int i = 0; i < Loggers.Length; i++)
-            {
-                c = Loggers[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Loggers.Length
+            foreach (var msg in Loggers) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

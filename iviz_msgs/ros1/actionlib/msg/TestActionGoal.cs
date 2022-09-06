@@ -65,18 +65,27 @@ namespace Iviz.Msgs.Actionlib
             Goal.RosValidate();
         }
     
-        public int RosMessageLength => 4 + Header.RosMessageLength + GoalId.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += Header.RosMessageLength;
+                size += GoalId.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = GoalId.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Goal
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = GoalId.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Goal
+            return size;
         }
     
         public const string MessageType = "actionlib/TestActionGoal";
@@ -112,6 +121,7 @@ namespace Iviz.Msgs.Actionlib
             public override void RosSerialize(TestActionGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TestActionGoal msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(TestActionGoal msg) => msg.Ros2MessageLength;
+            public override void RosValidate(TestActionGoal msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<TestActionGoal>
         {

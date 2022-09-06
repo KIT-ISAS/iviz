@@ -97,11 +97,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c += 1; // Compress
-            return c;
+            int size = c;
+            size += 1; // Compress
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -228,7 +228,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 149;
                 size += WriteBuffer.GetStringSize(Message);
                 size += Header.RosMessageLength;
@@ -239,23 +240,23 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c += 1; // Success
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Message);
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Width
-            c += 4; // Height
-            c += 4; // Bpp
-            c = WriteBuffer2.Align8(c);
-            c += 8 * 9; // Intrinsics
-            c += 56; // Pose
-            c += 4; // Data length
-            c += 1 * Data.Length;
-            return c;
+            int size = c;
+            size += 1; // Success
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Message);
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Width
+            size += 4; // Height
+            size += 4; // Bpp
+            size = WriteBuffer2.Align8(size);
+            size += 8 * 9; // Intrinsics
+            size += 56; // Pose
+            size += 4; // Data.Length
+            size += 1 * Data.Length;
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

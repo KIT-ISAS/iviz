@@ -66,18 +66,27 @@ namespace Iviz.Msgs.VisualizationMsgs
             if (Name is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 60 + Header.RosMessageLength + WriteBuffer.GetStringSize(Name);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 60;
+                size += Header.RosMessageLength;
+                size += WriteBuffer.GetStringSize(Name);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align8(c);
-            c += 56; // Pose
-            c = WriteBuffer2.AddLength(c, Name);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align8(size);
+            size += 56; // Pose
+            size = WriteBuffer2.AddLength(size, Name);
+            return size;
         }
     
         public const string MessageType = "visualization_msgs/InteractiveMarkerPose";
@@ -114,6 +123,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override void RosSerialize(InteractiveMarkerPose msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(InteractiveMarkerPose msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(InteractiveMarkerPose msg) => msg.Ros2MessageLength;
+            public override void RosValidate(InteractiveMarkerPose msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<InteractiveMarkerPose>
         {

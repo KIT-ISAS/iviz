@@ -105,8 +105,8 @@ namespace Iviz.Msgs.SensorMsgs
         {
             public override void RosSerialize(JoyFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(JoyFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(JoyFeedback msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(JoyFeedback msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(JoyFeedback _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(JoyFeedback _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<JoyFeedback>
         {

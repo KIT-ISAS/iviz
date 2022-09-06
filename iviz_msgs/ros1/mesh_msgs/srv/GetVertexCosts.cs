@@ -92,16 +92,24 @@ namespace Iviz.Msgs.MeshMsgs
             if (Uuid is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uuid);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += WriteBuffer.GetStringSize(Uuid);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Uuid);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Uuid);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -152,15 +160,23 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexCostsStamped.RosValidate();
         }
     
-        public int RosMessageLength => 0 + MeshVertexCostsStamped.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += MeshVertexCostsStamped.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = MeshVertexCostsStamped.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = MeshVertexCostsStamped.AddRos2MessageLength(size);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

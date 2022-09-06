@@ -131,36 +131,34 @@ namespace Iviz.Msgs.GridMapMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 16;
                 size += Info.RosMessageLength;
                 size += WriteBuffer.GetArraySize(Layers);
                 size += WriteBuffer.GetArraySize(BasicLayers);
-                size += WriteBuffer.GetArraySize(Data);
+                foreach (var msg in Data) size += msg.RosMessageLength;
                 return size;
             }
         }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Info.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Layers);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, BasicLayers);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Data.Length
-            for (int i = 0; i < Data.Length; i++)
-            {
-                c = Data[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align2(c);
-            c += 2; // OuterStartIndex
-            c += 2; // InnerStartIndex
-            return c;
+            int size = c;
+            size = Info.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Layers);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, BasicLayers);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Data.Length
+            foreach (var msg in Data) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align2(size);
+            size += 2; // OuterStartIndex
+            size += 2; // InnerStartIndex
+            return size;
         }
     
         public const string MessageType = "grid_map_msgs/GridMap";
@@ -209,6 +207,7 @@ namespace Iviz.Msgs.GridMapMsgs
             public override void RosSerialize(GridMap msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(GridMap msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(GridMap msg) => msg.Ros2MessageLength;
+            public override void RosValidate(GridMap msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<GridMap>
         {

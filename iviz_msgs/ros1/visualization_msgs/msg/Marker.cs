@@ -207,7 +207,8 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 138;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(Ns);
@@ -221,33 +222,33 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Ns);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Id
-            c += 4; // Type
-            c += 4; // Action
-            c = WriteBuffer2.Align8(c);
-            c += 56; // Pose
-            c += 24; // Scale
-            c += 16; // Color
-            c += 8; // Lifetime
-            c += 1; // FrameLocked
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Points length
-            c = WriteBuffer2.Align8(c);
-            c += 24 * Points.Length;
-            c += 4; // Colors length
-            c += 16 * Colors.Length;
-            c = WriteBuffer2.AddLength(c, Text);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, MeshResource);
-            c += 1; // MeshUseEmbeddedMaterials
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Ns);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Id
+            size += 4; // Type
+            size += 4; // Action
+            size = WriteBuffer2.Align8(size);
+            size += 56; // Pose
+            size += 24; // Scale
+            size += 16; // Color
+            size += 8; // Lifetime
+            size += 1; // FrameLocked
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Points.Length
+            size = WriteBuffer2.Align8(size);
+            size += 24 * Points.Length;
+            size += 4; // Colors.Length
+            size += 16 * Colors.Length;
+            size = WriteBuffer2.AddLength(size, Text);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, MeshResource);
+            size += 1; // MeshUseEmbeddedMaterials
+            return size;
         }
     
         public const string MessageType = "visualization_msgs/Marker";
@@ -298,6 +299,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override void RosSerialize(Marker msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Marker msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Marker msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Marker msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Marker>
         {

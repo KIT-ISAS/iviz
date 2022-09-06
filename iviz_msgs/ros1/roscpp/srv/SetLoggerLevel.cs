@@ -101,18 +101,27 @@ namespace Iviz.Msgs.Roscpp
             if (Level is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Logger) + WriteBuffer.GetStringSize(Level);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 8;
+                size += WriteBuffer.GetStringSize(Logger);
+                size += WriteBuffer.GetStringSize(Level);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Logger);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Level);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Logger);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Level);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -157,7 +166,9 @@ namespace Iviz.Msgs.Roscpp
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => 0;
+        public const int Ros2FixedMessageLength = 0;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     

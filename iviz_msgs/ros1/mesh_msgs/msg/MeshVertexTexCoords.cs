@@ -88,8 +88,8 @@ namespace Iviz.Msgs.MeshMsgs
         {
             public override void RosSerialize(MeshVertexTexCoords msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MeshVertexTexCoords msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(MeshVertexTexCoords msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MeshVertexTexCoords msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(MeshVertexTexCoords _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(MeshVertexTexCoords _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<MeshVertexTexCoords>
         {

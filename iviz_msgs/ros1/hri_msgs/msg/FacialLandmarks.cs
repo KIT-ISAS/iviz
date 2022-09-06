@@ -182,20 +182,29 @@ namespace Iviz.Msgs.HriMsgs
             }
         }
     
-        public int RosMessageLength => 12 + Header.RosMessageLength + 12 * Landmarks.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 12;
+                size += Header.RosMessageLength;
+                size += 12 * Landmarks.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Landmarks length
-            c += 12 * Landmarks.Length;
-            c += 4; // Height
-            c += 4; // Width
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Landmarks.Length
+            size += 12 * Landmarks.Length;
+            size += 4; // Height
+            size += 4; // Width
+            return size;
         }
     
         public const string MessageType = "hri_msgs/FacialLandmarks";
@@ -243,6 +252,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(FacialLandmarks msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(FacialLandmarks msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(FacialLandmarks msg) => msg.Ros2MessageLength;
+            public override void RosValidate(FacialLandmarks msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<FacialLandmarks>
         {

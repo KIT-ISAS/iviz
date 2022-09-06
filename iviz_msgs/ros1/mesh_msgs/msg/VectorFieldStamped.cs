@@ -56,16 +56,25 @@ namespace Iviz.Msgs.MeshMsgs
             VectorField.RosValidate();
         }
     
-        public int RosMessageLength => 0 + Header.RosMessageLength + VectorField.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += Header.RosMessageLength;
+                size += VectorField.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = VectorField.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = VectorField.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "mesh_msgs/VectorFieldStamped";
@@ -102,6 +111,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(VectorFieldStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(VectorFieldStamped msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(VectorFieldStamped msg) => msg.Ros2MessageLength;
+            public override void RosValidate(VectorFieldStamped msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<VectorFieldStamped>
         {

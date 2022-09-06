@@ -100,7 +100,8 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 8;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(Format);
@@ -111,16 +112,16 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Format);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Data length
-            c += 1 * Data.Length;
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Format);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Data.Length
+            size += 1 * Data.Length;
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/CompressedImage";
@@ -156,6 +157,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(CompressedImage msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(CompressedImage msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(CompressedImage msg) => msg.Ros2MessageLength;
+            public override void RosValidate(CompressedImage msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<CompressedImage>
         {

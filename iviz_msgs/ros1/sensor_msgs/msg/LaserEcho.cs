@@ -76,17 +76,25 @@ namespace Iviz.Msgs.SensorMsgs
             if (Echoes is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + 4 * Echoes.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += 4 * Echoes.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Echoes length
-            c += 4 * Echoes.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Echoes.Length
+            size += 4 * Echoes.Length;
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/LaserEcho";
@@ -115,6 +123,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(LaserEcho msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(LaserEcho msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(LaserEcho msg) => msg.Ros2MessageLength;
+            public override void RosValidate(LaserEcho msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<LaserEcho>
         {

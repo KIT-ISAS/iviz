@@ -82,18 +82,27 @@ namespace Iviz.Msgs.MeshMsgs
             if (Label is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 8 + 4 * FaceIndices.Length + WriteBuffer.GetStringSize(Label);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 8;
+                size += 4 * FaceIndices.Length;
+                size += WriteBuffer.GetStringSize(Label);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // FaceIndices length
-            c += 4 * FaceIndices.Length;
-            c = WriteBuffer2.AddLength(c, Label);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // FaceIndices.Length
+            size += 4 * FaceIndices.Length;
+            size = WriteBuffer2.AddLength(size, Label);
+            return size;
         }
     
         public const string MessageType = "mesh_msgs/MeshFaceCluster";
@@ -121,6 +130,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(MeshFaceCluster msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MeshFaceCluster msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(MeshFaceCluster msg) => msg.Ros2MessageLength;
+            public override void RosValidate(MeshFaceCluster msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<MeshFaceCluster>
         {

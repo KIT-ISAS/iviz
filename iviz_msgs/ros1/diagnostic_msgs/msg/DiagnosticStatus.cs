@@ -121,35 +121,33 @@ namespace Iviz.Msgs.DiagnosticMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 17;
                 size += WriteBuffer.GetStringSize(Name);
                 size += WriteBuffer.GetStringSize(Message);
                 size += WriteBuffer.GetStringSize(HardwareId);
-                size += WriteBuffer.GetArraySize(Values);
+                foreach (var msg in Values) size += msg.RosMessageLength;
                 return size;
             }
         }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c += 1; // Level
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Name);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Message);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, HardwareId);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Values.Length
-            for (int i = 0; i < Values.Length; i++)
-            {
-                c = Values[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size += 1; // Level
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Name);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Message);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, HardwareId);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Values.Length
+            foreach (var msg in Values) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "diagnostic_msgs/DiagnosticStatus";
@@ -181,6 +179,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             public override void RosSerialize(DiagnosticStatus msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(DiagnosticStatus msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(DiagnosticStatus msg) => msg.Ros2MessageLength;
+            public override void RosValidate(DiagnosticStatus msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<DiagnosticStatus>
         {

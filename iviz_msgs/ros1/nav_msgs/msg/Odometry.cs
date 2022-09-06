@@ -77,20 +77,29 @@ namespace Iviz.Msgs.NavMsgs
             Twist.RosValidate();
         }
     
-        public int RosMessageLength => 684 + Header.RosMessageLength + WriteBuffer.GetStringSize(ChildFrameId);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 684;
+                size += Header.RosMessageLength;
+                size += WriteBuffer.GetStringSize(ChildFrameId);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, ChildFrameId);
-            c = WriteBuffer2.Align8(c);
-            c += 344; // Pose
-            c += 336; // Twist
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, ChildFrameId);
+            size = WriteBuffer2.Align8(size);
+            size += 344; // Pose
+            size += 336; // Twist
+            return size;
         }
     
         public const string MessageType = "nav_msgs/Odometry";
@@ -133,6 +142,7 @@ namespace Iviz.Msgs.NavMsgs
             public override void RosSerialize(Odometry msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Odometry msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Odometry msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Odometry msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Odometry>
         {

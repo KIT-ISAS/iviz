@@ -114,22 +114,31 @@ namespace Iviz.Msgs.HriMsgs
             if (Id2 is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 14 + WriteBuffer.GetStringSize(Id1) + WriteBuffer.GetStringSize(Id2);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 14;
+                size += WriteBuffer.GetStringSize(Id1);
+                size += WriteBuffer.GetStringSize(Id2);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Id1);
-            c += 1; // Id1Type
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Id2);
-            c += 1; // Id2Type
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Confidence
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Id1);
+            size += 1; // Id1Type
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Id2);
+            size += 1; // Id2Type
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Confidence
+            return size;
         }
     
         public const string MessageType = "hri_msgs/IdsMatch";
@@ -170,6 +179,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(IdsMatch msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(IdsMatch msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(IdsMatch msg) => msg.Ros2MessageLength;
+            public override void RosValidate(IdsMatch msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<IdsMatch>
         {

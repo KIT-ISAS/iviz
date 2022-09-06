@@ -94,8 +94,8 @@ namespace Iviz.Msgs.MeshMsgs
         {
             public override void RosSerialize(MeshMaterial msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MeshMaterial msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(MeshMaterial msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MeshMaterial msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(MeshMaterial _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(MeshMaterial _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<MeshMaterial>
         {

@@ -134,32 +134,38 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public int RosMessageLength => 41 + WriteBuffer.GetStringSize(Name) + WriteBuffer.GetArraySize(Textures);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 41;
+                size += WriteBuffer.GetStringSize(Name);
+                foreach (var msg in Textures) size += msg.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Name);
-            c += 4; // Ambient
-            c += 4; // Diffuse
-            c += 4; // Emissive
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Opacity
-            c += 4; // BumpScaling
-            c += 4; // Shininess
-            c += 4; // ShininessStrength
-            c += 4; // Reflectivity
-            c += 1; // BlendMode
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Textures.Length
-            for (int i = 0; i < Textures.Length; i++)
-            {
-                c = Textures[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Name);
+            size += 4; // Ambient
+            size += 4; // Diffuse
+            size += 4; // Emissive
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Opacity
+            size += 4; // BumpScaling
+            size += 4; // Shininess
+            size += 4; // ShininessStrength
+            size += 4; // Reflectivity
+            size += 1; // BlendMode
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Textures.Length
+            foreach (var msg in Textures) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/ModelMaterial";
@@ -195,6 +201,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(ModelMaterial msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ModelMaterial msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(ModelMaterial msg) => msg.Ros2MessageLength;
+            public override void RosValidate(ModelMaterial msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<ModelMaterial>
         {

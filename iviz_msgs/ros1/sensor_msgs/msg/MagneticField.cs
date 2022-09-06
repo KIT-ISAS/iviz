@@ -90,18 +90,26 @@ namespace Iviz.Msgs.SensorMsgs
             if (MagneticFieldCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(MagneticFieldCovariance.Length, 9);
         }
     
-        public int RosMessageLength => 96 + Header.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 96;
+                size += Header.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align8(c);
-            c += 24; // MagneticField_
-            c += 8 * 9; // MagneticFieldCovariance
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align8(size);
+            size += 24; // MagneticField_
+            size += 8 * 9; // MagneticFieldCovariance
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/MagneticField";
@@ -144,6 +152,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(MagneticField msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MagneticField msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(MagneticField msg) => msg.Ros2MessageLength;
+            public override void RosValidate(MagneticField msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<MagneticField>
         {

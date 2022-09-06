@@ -56,16 +56,25 @@ namespace Iviz.Msgs.MeshMsgs
             Mesh.RosValidate();
         }
     
-        public int RosMessageLength => 0 + Header.RosMessageLength + Mesh.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += Header.RosMessageLength;
+                size += Mesh.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = Mesh.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = Mesh.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "mesh_msgs/TriangleMeshStamped";
@@ -116,6 +125,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(TriangleMeshStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TriangleMeshStamped msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(TriangleMeshStamped msg) => msg.Ros2MessageLength;
+            public override void RosValidate(TriangleMeshStamped msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<TriangleMeshStamped>
         {

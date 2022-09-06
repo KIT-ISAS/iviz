@@ -85,18 +85,27 @@ namespace Iviz.Msgs.StdMsgs
             if (Data is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + Layout.RosMessageLength + 4 * Data.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += Layout.RosMessageLength;
+                size += 4 * Data.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Layout.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Data length
-            c += 4 * Data.Length;
-            return c;
+            int size = c;
+            size = Layout.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Data.Length
+            size += 4 * Data.Length;
+            return size;
         }
     
         public const string MessageType = "std_msgs/Int32MultiArray";
@@ -133,6 +142,7 @@ namespace Iviz.Msgs.StdMsgs
             public override void RosSerialize(Int32MultiArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Int32MultiArray msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Int32MultiArray msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Int32MultiArray msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Int32MultiArray>
         {

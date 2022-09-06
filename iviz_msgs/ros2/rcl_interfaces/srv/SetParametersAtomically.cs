@@ -128,20 +128,25 @@ namespace Iviz.Msgs.RclInterfaces
             }
         }
     
-        public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Parameters);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                foreach (var msg in Parameters) size += msg.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Parameters.Length
-            for (int i = 0; i < Parameters.Length; i++)
-            {
-                c = Parameters[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Parameters.Length
+            foreach (var msg in Parameters) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -193,15 +198,23 @@ namespace Iviz.Msgs.RclInterfaces
             Result.RosValidate();
         }
     
-        public int RosMessageLength => 0 + Result.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += Result.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Result.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Result.AddRos2MessageLength(size);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

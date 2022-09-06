@@ -99,18 +99,26 @@ namespace Iviz.Msgs.MeshMsgs
             if (Uuid is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Uuid);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 8;
+                size += WriteBuffer.GetStringSize(Uuid);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Uuid);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // TextureIndex
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Uuid);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // TextureIndex
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -161,15 +169,23 @@ namespace Iviz.Msgs.MeshMsgs
             Texture.RosValidate();
         }
     
-        public int RosMessageLength => 0 + Texture.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += Texture.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Texture.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Texture.AddRos2MessageLength(size);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

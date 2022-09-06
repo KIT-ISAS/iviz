@@ -63,17 +63,25 @@ namespace Iviz.Msgs.Tf2Msgs
             if (ErrorString is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(ErrorString);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 5;
+                size += WriteBuffer.GetStringSize(ErrorString);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c += 1; // Error
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, ErrorString);
-            return c;
+            int size = c;
+            size += 1; // Error
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, ErrorString);
+            return size;
         }
     
         public const string MessageType = "tf2_msgs/TF2Error";
@@ -102,6 +110,7 @@ namespace Iviz.Msgs.Tf2Msgs
             public override void RosSerialize(TF2Error msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TF2Error msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(TF2Error msg) => msg.Ros2MessageLength;
+            public override void RosValidate(TF2Error msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<TF2Error>
         {

@@ -102,16 +102,25 @@ namespace Iviz.Msgs.NavMsgs
             InitialPose.RosValidate();
         }
     
-        public int RosMessageLength => 0 + Map.RosMessageLength + InitialPose.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += Map.RosMessageLength;
+                size += InitialPose.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Map.AddRos2MessageLength(c);
-            c = InitialPose.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Map.AddRos2MessageLength(size);
+            size = InitialPose.AddRos2MessageLength(size);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -167,11 +176,11 @@ namespace Iviz.Msgs.NavMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c += 1; // Success
-            return c;
+            int size = c;
+            size += 1; // Success
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

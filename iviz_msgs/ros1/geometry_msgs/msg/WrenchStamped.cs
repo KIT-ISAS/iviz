@@ -57,17 +57,25 @@ namespace Iviz.Msgs.GeometryMsgs
             Wrench.RosValidate();
         }
     
-        public int RosMessageLength => 48 + Header.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 48;
+                size += Header.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align8(c);
-            c += 48; // Wrench
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align8(size);
+            size += 48; // Wrench
+            return size;
         }
     
         public const string MessageType = "geometry_msgs/WrenchStamped";
@@ -105,6 +113,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(WrenchStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(WrenchStamped msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(WrenchStamped msg) => msg.Ros2MessageLength;
+            public override void RosValidate(WrenchStamped msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<WrenchStamped>
         {

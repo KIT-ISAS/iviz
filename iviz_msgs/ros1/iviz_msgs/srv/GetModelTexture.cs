@@ -92,16 +92,24 @@ namespace Iviz.Msgs.IvizMsgs
             if (Uri is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Uri);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += WriteBuffer.GetStringSize(Uri);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Uri);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Uri);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -167,18 +175,27 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + Image.RosMessageLength + WriteBuffer.GetStringSize(Message);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 5;
+                size += Image.RosMessageLength;
+                size += WriteBuffer.GetStringSize(Message);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c += 1; // Success
-            c = Image.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Message);
-            return c;
+            int size = c;
+            size += 1; // Success
+            size = Image.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Message);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

@@ -118,22 +118,30 @@ namespace Iviz.Msgs.SensorMsgs
             if (PositionCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(PositionCovariance.Length, 9);
         }
     
-        public int RosMessageLength => 100 + Header.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 100;
+                size += Header.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c += 4; // Status
-            c = WriteBuffer2.Align8(c);
-            c += 8; // Latitude
-            c += 8; // Longitude
-            c += 8; // Altitude
-            c += 8 * 9; // PositionCovariance
-            c += 1; // PositionCovarianceType
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size += 4; // Status
+            size = WriteBuffer2.Align8(size);
+            size += 8; // Latitude
+            size += 8; // Longitude
+            size += 8; // Altitude
+            size += 8 * 9; // PositionCovariance
+            size += 1; // PositionCovarianceType
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/NavSatFix";
@@ -182,6 +190,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(NavSatFix msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(NavSatFix msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(NavSatFix msg) => msg.Ros2MessageLength;
+            public override void RosValidate(NavSatFix msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<NavSatFix>
         {

@@ -82,17 +82,25 @@ namespace Iviz.Msgs.StdMsgs
         {
         }
     
-        public readonly int RosMessageLength => 16 + WriteBuffer.GetStringSize(FrameId);
+        public readonly int RosMessageLength
+        {
+            get
+            {
+                int size = 16;
+                size += WriteBuffer.GetStringSize(FrameId);
+                return size;
+            }
+        }
         
         public readonly int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public readonly int AddRos2MessageLength(int d)
+        public readonly int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 8; // Stamp
-            c = WriteBuffer2.AddLength(c, FrameId);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 8; // Stamp
+            size = WriteBuffer2.AddLength(size, FrameId);
+            return size;
         }
     
         public const string MessageType = "std_msgs/Header";
@@ -129,6 +137,7 @@ namespace Iviz.Msgs.StdMsgs
             public override void RosSerialize(Header msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Header msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Header msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Header msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Header>
         {

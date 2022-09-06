@@ -162,7 +162,8 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 36;
                 size += Header.RosMessageLength;
                 size += 4 * Ranges.Length;
@@ -173,23 +174,23 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // AngleMin
-            c += 4; // AngleMax
-            c += 4; // AngleIncrement
-            c += 4; // TimeIncrement
-            c += 4; // ScanTime
-            c += 4; // RangeMin
-            c += 4; // RangeMax
-            c += 4; // Ranges length
-            c += 4 * Ranges.Length;
-            c += 4; // Intensities length
-            c += 4 * Intensities.Length;
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // AngleMin
+            size += 4; // AngleMax
+            size += 4; // AngleIncrement
+            size += 4; // TimeIncrement
+            size += 4; // ScanTime
+            size += 4; // RangeMin
+            size += 4; // RangeMax
+            size += 4; // Ranges.Length
+            size += 4 * Ranges.Length;
+            size += 4; // Intensities.Length
+            size += 4 * Intensities.Length;
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/LaserScan";
@@ -231,6 +232,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(LaserScan msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(LaserScan msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(LaserScan msg) => msg.Ros2MessageLength;
+            public override void RosValidate(LaserScan msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<LaserScan>
         {

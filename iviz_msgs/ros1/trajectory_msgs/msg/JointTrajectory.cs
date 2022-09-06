@@ -104,30 +104,28 @@ namespace Iviz.Msgs.TrajectoryMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 8;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetArraySize(JointNames);
-                size += WriteBuffer.GetArraySize(Points);
+                foreach (var msg in Points) size += msg.RosMessageLength;
                 return size;
             }
         }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, JointNames);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Points.Length
-            for (int i = 0; i < Points.Length; i++)
-            {
-                c = Points[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, JointNames);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Points.Length
+            foreach (var msg in Points) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "trajectory_msgs/JointTrajectory";
@@ -163,6 +161,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             public override void RosSerialize(JointTrajectory msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(JointTrajectory msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(JointTrajectory msg) => msg.Ros2MessageLength;
+            public override void RosValidate(JointTrajectory msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<JointTrajectory>
         {

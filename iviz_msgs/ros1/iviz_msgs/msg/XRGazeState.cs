@@ -60,18 +60,26 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        public int RosMessageLength => 57 + Header.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 57;
+                size += Header.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align8(c);
-            c += 56; // Transform
-            c += 1; // IsValid
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align8(size);
+            size += 56; // Transform
+            size += 1; // IsValid
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/XRGazeState";
@@ -109,6 +117,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(XRGazeState msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(XRGazeState msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(XRGazeState msg) => msg.Ros2MessageLength;
+            public override void RosValidate(XRGazeState msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<XRGazeState>
         {

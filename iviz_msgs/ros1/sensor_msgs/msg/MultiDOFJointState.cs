@@ -187,7 +187,8 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 16;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetArraySize(JointNames);
@@ -200,23 +201,23 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, JointNames);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Transforms length
-            c = WriteBuffer2.Align8(c);
-            c += 56 * Transforms.Length;
-            c += 4; // Twist length
-            c = WriteBuffer2.Align8(c);
-            c += 48 * Twist.Length;
-            c += 4; // Wrench length
-            c = WriteBuffer2.Align8(c);
-            c += 48 * Wrench.Length;
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, JointNames);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Transforms.Length
+            size = WriteBuffer2.Align8(size);
+            size += 56 * Transforms.Length;
+            size += 4; // Twist.Length
+            size = WriteBuffer2.Align8(size);
+            size += 48 * Twist.Length;
+            size += 4; // Wrench.Length
+            size = WriteBuffer2.Align8(size);
+            size += 48 * Wrench.Length;
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/MultiDOFJointState";
@@ -263,6 +264,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(MultiDOFJointState msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MultiDOFJointState msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(MultiDOFJointState msg) => msg.Ros2MessageLength;
+            public override void RosValidate(MultiDOFJointState msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<MultiDOFJointState>
         {

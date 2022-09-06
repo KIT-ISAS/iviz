@@ -114,22 +114,27 @@ namespace Iviz.Msgs.StdMsgs
             }
         }
     
-        public int RosMessageLength => 8 + WriteBuffer.GetArraySize(Dim);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 8;
+                foreach (var msg in Dim) size += msg.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Dim.Length
-            for (int i = 0; i < Dim.Length; i++)
-            {
-                c = Dim[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align4(c);
-            c += 4; // DataOffset
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Dim.Length
+            foreach (var msg in Dim) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // DataOffset
+            return size;
         }
     
         public const string MessageType = "std_msgs/MultiArrayLayout";
@@ -165,6 +170,7 @@ namespace Iviz.Msgs.StdMsgs
             public override void RosSerialize(MultiArrayLayout msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MultiArrayLayout msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(MultiArrayLayout msg) => msg.Ros2MessageLength;
+            public override void RosValidate(MultiArrayLayout msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<MultiArrayLayout>
         {

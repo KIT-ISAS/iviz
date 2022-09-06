@@ -109,18 +109,26 @@ namespace Iviz.Msgs.RclInterfaces
             }
         }
     
-        public int RosMessageLength => 12 + WriteBuffer.GetArraySize(Prefixes);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 12;
+                size += WriteBuffer.GetArraySize(Prefixes);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Prefixes);
-            c = WriteBuffer2.Align8(c);
-            c += 8; // Depth
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Prefixes);
+            size = WriteBuffer2.Align8(size);
+            size += 8; // Depth
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -172,15 +180,23 @@ namespace Iviz.Msgs.RclInterfaces
             Result.RosValidate();
         }
     
-        public int RosMessageLength => 0 + Result.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += Result.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Result.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Result.AddRos2MessageLength(size);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

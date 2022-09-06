@@ -137,7 +137,8 @@ namespace Iviz.Msgs.RclInterfaces
     
         public readonly int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 29;
                 size += WriteBuffer.GetStringSize(Name);
                 size += WriteBuffer.GetStringSize(Msg);
@@ -149,23 +150,23 @@ namespace Iviz.Msgs.RclInterfaces
         
         public readonly int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public readonly int AddRos2MessageLength(int d)
+        public readonly int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 8; // Stamp
-            c += 1; // Level
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Name);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Msg);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, File);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Function);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Line
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 8; // Stamp
+            size += 1; // Level
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Name);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Msg);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, File);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Function);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Line
+            return size;
         }
     
         public const string MessageType = "rcl_interfaces/Log";
@@ -204,6 +205,7 @@ namespace Iviz.Msgs.RclInterfaces
             public override void RosSerialize(Log msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Log msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Log msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Log msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Log>
         {

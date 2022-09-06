@@ -90,21 +90,27 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
     
-        public int RosMessageLength => 4 + Header.RosMessageLength + WriteBuffer.GetArraySize(Poses);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += Header.RosMessageLength;
+                foreach (var msg in Poses) size += msg.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Poses.Length
-            for (int i = 0; i < Poses.Length; i++)
-            {
-                c = Poses[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Poses.Length
+            foreach (var msg in Poses) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "nav_msgs/Path";
@@ -140,6 +146,7 @@ namespace Iviz.Msgs.NavMsgs
             public override void RosSerialize(Path msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Path msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Path msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Path msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Path>
         {

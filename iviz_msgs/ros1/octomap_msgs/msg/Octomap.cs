@@ -97,7 +97,8 @@ namespace Iviz.Msgs.OctomapMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 17;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(Id);
@@ -108,18 +109,18 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c += 1; // Binary
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Id);
-            c = WriteBuffer2.Align8(c);
-            c += 8; // Resolution
-            c += 4; // Data length
-            c += 1 * Data.Length;
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size += 1; // Binary
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Id);
+            size = WriteBuffer2.Align8(size);
+            size += 8; // Resolution
+            size += 4; // Data.Length
+            size += 1 * Data.Length;
+            return size;
         }
     
         public const string MessageType = "octomap_msgs/Octomap";
@@ -155,6 +156,7 @@ namespace Iviz.Msgs.OctomapMsgs
             public override void RosSerialize(Octomap msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Octomap msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Octomap msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Octomap msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Octomap>
         {

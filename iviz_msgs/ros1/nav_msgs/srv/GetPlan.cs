@@ -113,18 +113,27 @@ namespace Iviz.Msgs.NavMsgs
             Goal.RosValidate();
         }
     
-        public int RosMessageLength => 4 + Start.RosMessageLength + Goal.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += Start.RosMessageLength;
+                size += Goal.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Start.AddRos2MessageLength(c);
-            c = Goal.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Tolerance
-            return c;
+            int size = c;
+            size = Start.AddRos2MessageLength(size);
+            size = Goal.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Tolerance
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -175,15 +184,23 @@ namespace Iviz.Msgs.NavMsgs
             Plan.RosValidate();
         }
     
-        public int RosMessageLength => 0 + Plan.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += Plan.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Plan.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Plan.AddRos2MessageLength(size);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

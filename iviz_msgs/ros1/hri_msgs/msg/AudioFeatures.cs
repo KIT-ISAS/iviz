@@ -99,21 +99,29 @@ namespace Iviz.Msgs.HriMsgs
             if (MFCC is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 20 + 4 * MFCC.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 20;
+                size += 4 * MFCC.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // ZCR
-            c += 4; // RMS
-            c += 4; // Pitch
-            c += 4; // HNR
-            c += 4; // MFCC length
-            c += 4 * MFCC.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // ZCR
+            size += 4; // RMS
+            size += 4; // Pitch
+            size += 4; // HNR
+            size += 4; // MFCC.Length
+            size += 4 * MFCC.Length;
+            return size;
         }
     
         public const string MessageType = "hri_msgs/AudioFeatures";
@@ -146,6 +154,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(AudioFeatures msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(AudioFeatures msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(AudioFeatures msg) => msg.Ros2MessageLength;
+            public override void RosValidate(AudioFeatures msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<AudioFeatures>
         {

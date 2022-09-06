@@ -420,7 +420,9 @@ public sealed class ClassInfo
         {
             return new[]
             {
-                $"public {readOnlyId}int Ros2MessageLength => 0;",
+                $"public const int Ros2FixedMessageLength = 0;",
+                "",
+                $"public {readOnlyId}int Ros2MessageLength => Ros2FixedMessageLength;",
                 "",
                 $"public {readOnlyId}int AddRos2MessageLength(int c) => c;"
             };
@@ -457,9 +459,9 @@ public sealed class ClassInfo
 
         int currentAlignment = -1;
 
-        fields.Add($"public {readOnlyId}int AddRos2MessageLength(int d)");
+        fields.Add($"public {readOnlyId}int AddRos2MessageLength(int c)");
         fields.Add("{");
-        fields.Add("    int c = d;"); // weird bug fix
+        fields.Add("    int size = c;"); // weird bug fix
         foreach (var variable in variables)
         {
             if ((variable.Version & RosVersion.Ros2) == 0)
@@ -484,12 +486,12 @@ public sealed class ClassInfo
                 if (!variable.IsFixedSizeArray)
                 {
                     WriteAlign(4);
-                    fields.Add($"    c = WriteBuffer2.AddLength(c, {variable.CsFieldName});");
+                    fields.Add($"    size = WriteBuffer2.AddLength(size, {variable.CsFieldName});");
                 }
                 else
                 {
                     fields.Add(
-                        $"    c = WriteBuffer2.AddLength(c, {variable.CsFieldName}, {variable.FixedArraySize});");
+                        $"    size = WriteBuffer2.AddLength(size, {variable.CsFieldName}, {variable.FixedArraySize});");
                 }
 
                 currentAlignment = -1;
@@ -497,17 +499,13 @@ public sealed class ClassInfo
             else if (variable.IsArray)
             {
                 WriteAlign(4);
-                fields.Add($"    c += 4; // {variable.CsFieldName}.Length");
-                fields.Add($"    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
-                fields.Add($"    {{");
-                fields.Add($"        c = {variable.CsFieldName}[i].AddRos2MessageLength(c);");
-                fields.Add($"    }}");
-
+                fields.Add($"    size += 4; // {variable.CsFieldName}.Length");
+                fields.Add($"    foreach (var msg in {variable.CsFieldName}) size = msg.AddRos2MessageLength(size);");
                 currentAlignment = -1;
             }
             else
             {
-                fields.Add($"    c = {variable.CsFieldName}.AddRos2MessageLength(c);");
+                fields.Add($"    size = {variable.CsFieldName}.AddRos2MessageLength(size);");
                 currentAlignment = -1;
             }
 
@@ -531,24 +529,24 @@ public sealed class ClassInfo
                 {
                     WriteAlign(fieldAlignment);
                     fields.Add(selfPadding == 0
-                        ? $"    c += {fieldFixedSize} * {variable.FixedArraySize}; // {variable.CsFieldName}"
-                        : $"    c += ({fieldFixedSize} + {selfPadding}) * {variable.FixedArraySize} - {selfPadding}; // {variable.CsFieldName}");
+                        ? $"    size += {fieldFixedSize} * {variable.FixedArraySize}; // {variable.CsFieldName}"
+                        : $"    size += ({fieldFixedSize} + {selfPadding}) * {variable.FixedArraySize} - {selfPadding}; // {variable.CsFieldName}");
                 }
                 else if (variable.IsDynamicSizeArray)
                 {
                     WriteAlign(4);
-                    fields.Add($"    c += 4; // {variable.CsFieldName} length");
+                    fields.Add($"    size += 4; // {variable.CsFieldName}.Length");
                     currentAlignment = 4;
                     WriteAlign(fieldAlignment);
 
                     fields.Add(selfPadding == 0
-                        ? $"    c += {fieldFixedSize} * {variable.CsFieldName}.Length;"
-                        : $"    c += ({fieldFixedSize} + {selfPadding}) * {variable.CsFieldName}.Length - {selfPadding};");
+                        ? $"    size += {fieldFixedSize} * {variable.CsFieldName}.Length;"
+                        : $"    size += ({fieldFixedSize} + {selfPadding}) * {variable.CsFieldName}.Length - {selfPadding};");
                 }
                 else
                 {
                     WriteAlign(fieldAlignment);
-                    fields.Add($"    c += {fieldFixedSize}; // {variable.CsFieldName}");
+                    fields.Add($"    size += {fieldFixedSize}; // {variable.CsFieldName}");
                 }
 
                 currentAlignment = fieldFixedSize % fieldAlignment == 0
@@ -560,13 +558,13 @@ public sealed class ClassInfo
             {
                 if (fieldAlignment > 1 && (currentAlignment == -1 || fieldAlignment > currentAlignment))
                 {
-                    fields.Add($"    c = WriteBuffer2.Align{fieldAlignment}(c);");
+                    fields.Add($"    size = WriteBuffer2.Align{fieldAlignment}(size);");
                     currentAlignment = fieldAlignment;
                 }
             }
         }
 
-        fields.Add($"    return c;");
+        fields.Add($"    return size;");
         fields.Add("}");
 
         return fields;
@@ -612,8 +610,8 @@ public sealed class ClassInfo
                 else if (variable.IsDynamicSizeArray)
                 {
                     fieldsWithSize.Add(size == 1
-                        ? $"{variable.CsFieldName}.Length"
-                        : $"{size} * {variable.CsFieldName}.Length");
+                        ? $"size += {variable.CsFieldName}.Length;"
+                        : $"size += {size} * {variable.CsFieldName}.Length;");
                     fieldSize += 4;
                 }
                 else
@@ -632,15 +630,15 @@ public sealed class ClassInfo
                     else if (variable.CsClassType == "string")
                     {
                         fieldSize += 4;
-                        fieldsWithSize.Add($"WriteBuffer.GetStringSize({variable.CsFieldName})");
+                        fieldsWithSize.Add($"size += WriteBuffer.GetStringSize({variable.CsFieldName});");
                     }
                     else if (variable.ClassIsBlittable)
                     {
-                        fieldsWithSize.Add($"{variable.CsClassType}.RosFixedMessageLength");
+                        fieldsWithSize.Add($"size += {variable.CsClassType}.RosFixedMessageLength;");
                     }
                     else
                     {
-                        fieldsWithSize.Add($"{variable.CsFieldName}.RosMessageLength");
+                        fieldsWithSize.Add($"size += {variable.CsFieldName}.RosMessageLength;");
                     }
                 }
                 else
@@ -652,21 +650,39 @@ public sealed class ClassInfo
 
                     if (variable.ClassInfo != null && variable.ClassInfo.Ros1FixedSize != UnknownSizeAtCompileTime)
                     {
-                        fieldsWithSize.Add($"{variable.ClassInfo.Ros1FixedSize} * {variable.CsFieldName}.Length");
+                        fieldsWithSize.Add($"size += {variable.ClassInfo.Ros1FixedSize} * {variable.CsFieldName}.Length;");
                     }
                     else if (variable.ClassIsBlittable)
                     {
                         fieldsWithSize.Add(
-                            $" {variable.CsClassType}.RosFixedMessageLength * {variable.CsFieldName}.Length");
+                            $"size += {variable.CsClassType}.RosFixedMessageLength * {variable.CsFieldName}.Length;");
+                    }
+                    else if (variable.CsClassType == "string")
+                    {
+                        fieldsWithSize.Add($"size += WriteBuffer.GetArraySize({variable.CsFieldName});");
                     }
                     else
                     {
-                        fieldsWithSize.Add($"WriteBuffer.GetArraySize({variable.CsFieldName})");
+                        fieldsWithSize.Add($"foreach (var msg in {variable.CsFieldName}) size += msg.RosMessageLength;");
+                        //fieldsWithSize.Add($"size += WriteBuffer.GetArraySize({variable.CsFieldName});");
                     }
                 }
             }
         }
 
+        var lines = new List<string>();
+        lines.Add($"public {readOnlyId}int RosMessageLength");
+        lines.Add("{");
+        lines.Add("    get");
+        lines.Add("    {");
+        lines.Add($"        int size = {fieldSize};");
+        lines.AddRange(fieldsWithSize.Select(entry => $"        " + entry));
+        lines.Add("        return size;");
+        lines.Add("    }");
+        lines.Add("}");
+        return lines;
+        
+        /*
         switch (fieldsWithSize.Count)
         {
             case 0:
@@ -696,6 +712,7 @@ public sealed class ClassInfo
                 lines.Add("}");
                 return lines;
         }
+        */
     }
 
     static string ParamToArg(VariableElement v)
@@ -1593,16 +1610,49 @@ public sealed class ClassInfo
                 $"        public override void RosSerialize({Name} msg, ref WriteBuffer b) => msg.RosSerialize(ref b);");
             lines.Add(
                 $"        public override void RosSerialize({Name} msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);");
-            lines.Add($"        public override int RosMessageLength({Name} msg) => msg.RosMessageLength;");
-            lines.Add($"        public override int Ros2MessageLength({Name} msg) => msg.Ros2MessageLength;");
+
+            if (Ros1FixedSize >= 0)
+            {
+                lines.Add($"        public override int RosMessageLength({Name} _) => RosFixedMessageLength;");
+            }
+            else
+            {
+                lines.Add($"        public override int RosMessageLength({Name} msg) => msg.RosMessageLength;");
+            }
+            
+            if (Ros2FixedSize >= 0)
+            {
+                lines.Add($"        public override int Ros2MessageLength({Name} _) => Ros2FixedMessageLength;");
+            }
+            else
+            {
+                lines.Add($"        public override int Ros2MessageLength({Name} msg) => msg.Ros2MessageLength;");
+            }
+
+            if (Ros1FixedSize < 0)
+            {
+                lines.Add($"        public override void RosValidate({Name} msg) => msg.RosValidate();");
+            }
+            
             lines.Add("    }");
             lines.Add($"    sealed class Deserializer : Deserializer<{Name}>");
             lines.Add("    {");
-            lines.Add(
-                $"        public override void RosDeserialize(ref ReadBuffer b, out {Name} msg) => msg = new {Name}(ref b);");
-            lines.Add(
-                $"        public override void RosDeserialize(ref ReadBuffer2 b, out {Name} msg) => msg = new {Name}(ref b);");
-            lines.Add("    }");
+            if (variables.Any())
+            {
+                lines.Add(
+                    $"        public override void RosDeserialize(ref ReadBuffer b, out {Name} msg) => msg = new {Name}(ref b);");
+                lines.Add(
+                    $"        public override void RosDeserialize(ref ReadBuffer2 b, out {Name} msg) => msg = new {Name}(ref b);");
+                lines.Add("    }");
+            }
+            else
+            {
+                lines.Add(
+                    $"        public override void RosDeserialize(ref ReadBuffer _, out {Name} msg) => msg = Singleton;");
+                lines.Add(
+                    $"        public override void RosDeserialize(ref ReadBuffer2 _, out {Name} msg) => msg = Singleton;");
+                lines.Add("    }");
+            }
         }
 
         lines.Add("}");

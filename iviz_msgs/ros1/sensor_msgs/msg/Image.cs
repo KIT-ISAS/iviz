@@ -102,7 +102,8 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 21;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(Encoding);
@@ -113,20 +114,20 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Height
-            c += 4; // Width
-            c = WriteBuffer2.AddLength(c, Encoding);
-            c += 1; // IsBigendian
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Step
-            c += 4; // Data length
-            c += 1 * Data.Length;
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Height
+            size += 4; // Width
+            size = WriteBuffer2.AddLength(size, Encoding);
+            size += 1; // IsBigendian
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Step
+            size += 4; // Data.Length
+            size += 1 * Data.Length;
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/Image";
@@ -172,6 +173,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(Image msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Image msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Image msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Image msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Image>
         {

@@ -172,7 +172,8 @@ namespace Iviz.Msgs.RclInterfaces
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 22;
                 size += WriteBuffer.GetStringSize(Name);
                 size += WriteBuffer.GetStringSize(Description);
@@ -185,25 +186,25 @@ namespace Iviz.Msgs.RclInterfaces
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Name);
-            c += 1; // Type
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Description);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, AdditionalConstraints);
-            c += 1; // ReadOnly
-            c = WriteBuffer2.Align4(c);
-            c += 4; // FloatingPointRange length
-            c = WriteBuffer2.Align8(c);
-            c += 24 * FloatingPointRange.Length;
-            c += 4; // IntegerRange length
-            c = WriteBuffer2.Align8(c);
-            c += 24 * IntegerRange.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Name);
+            size += 1; // Type
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Description);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, AdditionalConstraints);
+            size += 1; // ReadOnly
+            size = WriteBuffer2.Align4(size);
+            size += 4; // FloatingPointRange.Length
+            size = WriteBuffer2.Align8(size);
+            size += 24 * FloatingPointRange.Length;
+            size += 4; // IntegerRange.Length
+            size = WriteBuffer2.Align8(size);
+            size += 24 * IntegerRange.Length;
+            return size;
         }
     
         public const string MessageType = "rcl_interfaces/ParameterDescriptor";
@@ -247,6 +248,7 @@ namespace Iviz.Msgs.RclInterfaces
             public override void RosSerialize(ParameterDescriptor msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ParameterDescriptor msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(ParameterDescriptor msg) => msg.Ros2MessageLength;
+            public override void RosValidate(ParameterDescriptor msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<ParameterDescriptor>
         {

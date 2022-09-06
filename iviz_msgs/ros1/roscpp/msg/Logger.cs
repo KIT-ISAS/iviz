@@ -59,18 +59,27 @@ namespace Iviz.Msgs.Roscpp
             if (Level is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Name) + WriteBuffer.GetStringSize(Level);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 8;
+                size += WriteBuffer.GetStringSize(Name);
+                size += WriteBuffer.GetStringSize(Level);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Name);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Level);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Name);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Level);
+            return size;
         }
     
         public const string MessageType = "roscpp/Logger";
@@ -97,6 +106,7 @@ namespace Iviz.Msgs.Roscpp
             public override void RosSerialize(Logger msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Logger msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Logger msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Logger msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Logger>
         {

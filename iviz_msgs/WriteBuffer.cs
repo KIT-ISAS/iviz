@@ -10,13 +10,13 @@ namespace Iviz.Msgs;
 /// <summary>
 /// Contains utilities to serialize ROS messages into a byte array. 
 /// </summary>
-public unsafe ref struct WriteBuffer
+public unsafe struct WriteBuffer
 {
     readonly byte* ptr;
     int offset;
     int remaining;
 
-    WriteBuffer(byte* ptr, int length)
+    public WriteBuffer(byte* ptr, int length)
     {
         this.ptr = ptr;
         offset = 0;
@@ -111,7 +111,7 @@ public unsafe ref struct WriteBuffer
             Serialize(str);
         }
     }
-    
+
     public void SerializeStructArray(byte[] val)
     {
         const int sizeOfT = sizeof(byte);
@@ -126,7 +126,7 @@ public unsafe ref struct WriteBuffer
 
         Advance(size);
     }
-    
+
     public void SerializeStructArray(Point32[] val)
     {
         const int sizeOfT = Point32.RosFixedMessageLength;
@@ -185,15 +185,6 @@ public unsafe ref struct WriteBuffer
 
         Advance(size);
     }
-    
-    public void SerializeArray(TransformStamped[] val)
-    {
-        WriteInt(val.Length);
-        for (int i = 0; i < val.Length; i++)
-        {
-            val[i].RosSerialize(ref this);
-        }
-    }
 
     public void SerializeArray(IMessage[] val)
     {
@@ -212,7 +203,7 @@ public unsafe ref struct WriteBuffer
             val[i].RosSerialize(ref this);
         }
     }
-    
+
     public void SerializeArrayGeneric<T>(T[] val) where T : IMessage
     {
         WriteInt(val.Length);
@@ -221,7 +212,7 @@ public unsafe ref struct WriteBuffer
             val[i].RosSerialize(ref this);
         }
     }
-    
+
     public void SerializeArrayGeneric<T>(T[] val, int count) where T : IMessage
     {
         ThrowIfWrongSize(val, count);
@@ -229,29 +220,6 @@ public unsafe ref struct WriteBuffer
         {
             val[i].RosSerialize(ref this);
         }
-    }
-        
-    public static int GetArraySize(TransformStamped[] array)
-    {
-        int size = 0;
-        for (int i = 0; i < array.Length; i++)
-        {
-            size += array[i].RosMessageLength;
-        }
-
-        return size;
-    }
-
-    /// Returns the size in bytes of a message array when serialized in ROS
-    public static int GetArraySize(IMessage[] array)
-    {
-        int size = 0;
-        for (int i = 0; i < array.Length; i++)
-        {
-            size += array[i].RosMessageLength;
-        }
-
-        return size;
     }
 
     /// Returns the size in bytes of a string array when serialized in ROS
@@ -263,9 +231,9 @@ public unsafe ref struct WriteBuffer
         }
 
         int size = 4 * array.Length;
-        for (int i = 0; i < array.Length; i++)
+        foreach (string t in array)
         {
-            size += BuiltIns.UTF8.GetByteCount(array[i]);
+            size += BuiltIns.UTF8.GetByteCount(t);
         }
 
         return size;
@@ -275,8 +243,8 @@ public unsafe ref struct WriteBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetStringSize(string? s)
     {
-        return s is not {Length: not 0} ? 0 : BuiltIns.GetByteCount(s);
-    }        
+        return s is not { Length: not 0 } ? 0 : BuiltIns.GetByteCount(s);
+    }
 
     /// <summary>
     /// Serializes the given message into the buffer array.
@@ -284,17 +252,12 @@ public unsafe ref struct WriteBuffer
     /// <param name="message">The ROS message.</param>
     /// <param name="buffer">The destination byte array.</param>
     /// <returns>The number of bytes written.</returns>
-    public static uint Serialize<T>(in T message, Span<byte> buffer) where T : ISerializableRos1
+    public static void Serialize<T>(in T message, Span<byte> buffer) where T : ISerializableRos1
     {
         fixed (byte* bufferPtr = buffer)
         {
             var b = new WriteBuffer(bufferPtr, buffer.Length);
             message.RosSerialize(ref b);
-
-            int oldLength = buffer.Length;
-            int newLength = b.offset;
-
-            return (uint)(oldLength - newLength);
         }
     }
 }

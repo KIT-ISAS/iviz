@@ -70,19 +70,27 @@ namespace Iviz.Msgs.HriMsgs
         {
         }
     
-        public int RosMessageLength => 12 + Header.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 12;
+                size += Header.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // X
-            c += 4; // Y
-            c += 4; // C
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // X
+            size += 4; // Y
+            size += 4; // C
+            return size;
         }
     
         public const string MessageType = "hri_msgs/NormalizedPointOfInterest2DStamped";
@@ -117,6 +125,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(NormalizedPointOfInterest2DStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(NormalizedPointOfInterest2DStamped msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(NormalizedPointOfInterest2DStamped msg) => msg.Ros2MessageLength;
+            public override void RosValidate(NormalizedPointOfInterest2DStamped msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<NormalizedPointOfInterest2DStamped>
         {

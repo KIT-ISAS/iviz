@@ -116,26 +116,34 @@ namespace Iviz.Msgs.IvizMsgs
             if (Path is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 21 + WriteBuffer.GetStringSize(Path);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 21;
+                size += WriteBuffer.GetStringSize(Path);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Path);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Index
-            c += 1; // Type
-            c += 1; // Mapping
-            c = WriteBuffer2.Align4(c);
-            c += 4; // UvIndex
-            c += 4; // BlendFactor
-            c += 1; // Operation
-            c += 1; // WrapModeU
-            c += 1; // WrapModeV
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Path);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Index
+            size += 1; // Type
+            size += 1; // Mapping
+            size = WriteBuffer2.Align4(size);
+            size += 4; // UvIndex
+            size += 4; // BlendFactor
+            size += 1; // Operation
+            size += 1; // WrapModeU
+            size += 1; // WrapModeV
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/ModelTexture";
@@ -168,6 +176,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(ModelTexture msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ModelTexture msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(ModelTexture msg) => msg.Ros2MessageLength;
+            public override void RosValidate(ModelTexture msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<ModelTexture>
         {

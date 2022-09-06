@@ -124,7 +124,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 198;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(Code);
@@ -135,22 +136,22 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c += 1; // Type
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Code);
-            c = WriteBuffer2.Align8(c);
-            c += 24 * 4; // Corners
-            c += 8 * 9; // CameraIntrinsic
-            c += 56; // CameraPose
-            c += 1; // HasReliablePose
-            c = WriteBuffer2.Align8(c);
-            c += 8; // MarkerSizeInMm
-            c += 56; // PoseRelativeToCamera
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size += 1; // Type
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Code);
+            size = WriteBuffer2.Align8(size);
+            size += 24 * 4; // Corners
+            size += 8 * 9; // CameraIntrinsic
+            size += 56; // CameraPose
+            size += 1; // HasReliablePose
+            size = WriteBuffer2.Align8(size);
+            size += 8; // MarkerSizeInMm
+            size += 56; // PoseRelativeToCamera
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/XRMarker";
@@ -193,6 +194,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(XRMarker msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(XRMarker msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(XRMarker msg) => msg.Ros2MessageLength;
+            public override void RosValidate(XRMarker msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<XRMarker>
         {

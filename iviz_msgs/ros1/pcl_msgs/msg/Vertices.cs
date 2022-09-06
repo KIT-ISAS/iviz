@@ -73,17 +73,25 @@ namespace Iviz.Msgs.PclMsgs
             if (Vertices_ is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + 4 * Vertices_.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += 4 * Vertices_.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Vertices_ length
-            c += 4 * Vertices_.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Vertices_.Length
+            size += 4 * Vertices_.Length;
+            return size;
         }
     
         public const string MessageType = "pcl_msgs/Vertices";
@@ -110,6 +118,7 @@ namespace Iviz.Msgs.PclMsgs
             public override void RosSerialize(Vertices msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Vertices msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Vertices msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Vertices msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Vertices>
         {

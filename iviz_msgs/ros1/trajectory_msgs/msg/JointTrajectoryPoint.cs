@@ -168,7 +168,8 @@ namespace Iviz.Msgs.TrajectoryMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 24;
                 size += 8 * Positions.Length;
                 size += 8 * Velocities.Length;
@@ -180,24 +181,24 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Positions length
-            c = WriteBuffer2.Align8(c);
-            c += 8 * Positions.Length;
-            c += 4; // Velocities length
-            c = WriteBuffer2.Align8(c);
-            c += 8 * Velocities.Length;
-            c += 4; // Accelerations length
-            c = WriteBuffer2.Align8(c);
-            c += 8 * Accelerations.Length;
-            c += 4; // Effort length
-            c = WriteBuffer2.Align8(c);
-            c += 8 * Effort.Length;
-            c += 8; // TimeFromStart
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Positions.Length
+            size = WriteBuffer2.Align8(size);
+            size += 8 * Positions.Length;
+            size += 4; // Velocities.Length
+            size = WriteBuffer2.Align8(size);
+            size += 8 * Velocities.Length;
+            size += 4; // Accelerations.Length
+            size = WriteBuffer2.Align8(size);
+            size += 8 * Accelerations.Length;
+            size += 4; // Effort.Length
+            size = WriteBuffer2.Align8(size);
+            size += 8 * Effort.Length;
+            size += 8; // TimeFromStart
+            return size;
         }
     
         public const string MessageType = "trajectory_msgs/JointTrajectoryPoint";
@@ -227,6 +228,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             public override void RosSerialize(JointTrajectoryPoint msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(JointTrajectoryPoint msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(JointTrajectoryPoint msg) => msg.Ros2MessageLength;
+            public override void RosValidate(JointTrajectoryPoint msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<JointTrajectoryPoint>
         {

@@ -119,8 +119,8 @@ namespace Iviz.Msgs.SensorMsgs
         {
             public override void RosSerialize(RegionOfInterest msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(RegionOfInterest msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(RegionOfInterest msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(RegionOfInterest msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(RegionOfInterest _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(RegionOfInterest _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<RegionOfInterest>
         {

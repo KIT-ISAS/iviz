@@ -84,17 +84,25 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        public int RosMessageLength => 4 + 6 * Array.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += 6 * Array.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Array length
-            c += 8 * Array.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Array.Length
+            size += 8 * Array.Length;
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/JoyFeedbackArray";
@@ -126,6 +134,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(JoyFeedbackArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(JoyFeedbackArray msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(JoyFeedbackArray msg) => msg.Ros2MessageLength;
+            public override void RosValidate(JoyFeedbackArray msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<JoyFeedbackArray>
         {

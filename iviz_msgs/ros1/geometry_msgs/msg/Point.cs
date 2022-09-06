@@ -110,8 +110,8 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             public override void RosSerialize(Point msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Point msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(Point msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Point msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(Point _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(Point _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<Point>
         {

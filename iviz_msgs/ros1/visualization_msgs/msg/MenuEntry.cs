@@ -110,21 +110,30 @@ namespace Iviz.Msgs.VisualizationMsgs
             if (Command is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 17 + WriteBuffer.GetStringSize(Title) + WriteBuffer.GetStringSize(Command);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 17;
+                size += WriteBuffer.GetStringSize(Title);
+                size += WriteBuffer.GetStringSize(Command);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Id
-            c += 4; // ParentId
-            c = WriteBuffer2.AddLength(c, Title);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Command);
-            c += 1; // CommandType
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Id
+            size += 4; // ParentId
+            size = WriteBuffer2.AddLength(size, Title);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Command);
+            size += 1; // CommandType
+            return size;
         }
     
         public const string MessageType = "visualization_msgs/MenuEntry";
@@ -163,6 +172,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override void RosSerialize(MenuEntry msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MenuEntry msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(MenuEntry msg) => msg.Ros2MessageLength;
+            public override void RosValidate(MenuEntry msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<MenuEntry>
         {

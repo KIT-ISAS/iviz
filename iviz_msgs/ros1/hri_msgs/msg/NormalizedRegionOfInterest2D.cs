@@ -74,21 +74,29 @@ namespace Iviz.Msgs.HriMsgs
         {
         }
     
-        public int RosMessageLength => 20 + Header.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 20;
+                size += Header.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Xmin
-            c += 4; // Ymin
-            c += 4; // Xmax
-            c += 4; // Ymax
-            c += 4; // C
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Xmin
+            size += 4; // Ymin
+            size += 4; // Xmax
+            size += 4; // Ymax
+            size += 4; // C
+            return size;
         }
     
         public const string MessageType = "hri_msgs/NormalizedRegionOfInterest2D";
@@ -125,6 +133,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(NormalizedRegionOfInterest2D msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(NormalizedRegionOfInterest2D msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(NormalizedRegionOfInterest2D msg) => msg.Ros2MessageLength;
+            public override void RosValidate(NormalizedRegionOfInterest2D msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<NormalizedRegionOfInterest2D>
         {

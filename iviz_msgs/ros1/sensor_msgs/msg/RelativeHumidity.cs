@@ -69,18 +69,26 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
-        public int RosMessageLength => 16 + Header.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 16;
+                size += Header.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align8(c);
-            c += 8; // RelativeHumidity_
-            c += 8; // Variance
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align8(size);
+            size += 8; // RelativeHumidity_
+            size += 8; // Variance
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/RelativeHumidity";
@@ -116,6 +124,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(RelativeHumidity msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(RelativeHumidity msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(RelativeHumidity msg) => msg.Ros2MessageLength;
+            public override void RosValidate(RelativeHumidity msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<RelativeHumidity>
         {

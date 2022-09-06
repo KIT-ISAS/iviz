@@ -125,22 +125,31 @@ namespace Iviz.Msgs.GridMapMsgs
             }
         }
     
-        public int RosMessageLength => 40 + WriteBuffer.GetStringSize(FrameId) + WriteBuffer.GetArraySize(Layers);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 40;
+                size += WriteBuffer.GetStringSize(FrameId);
+                size += WriteBuffer.GetArraySize(Layers);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, FrameId);
-            c = WriteBuffer2.Align8(c);
-            c += 8; // PositionX
-            c += 8; // PositionY
-            c += 8; // LengthX
-            c += 8; // LengthY
-            c = WriteBuffer2.AddLength(c, Layers);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, FrameId);
+            size = WriteBuffer2.Align8(size);
+            size += 8; // PositionX
+            size += 8; // PositionY
+            size += 8; // LengthX
+            size += 8; // LengthY
+            size = WriteBuffer2.AddLength(size, Layers);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -192,15 +201,23 @@ namespace Iviz.Msgs.GridMapMsgs
             Map.RosValidate();
         }
     
-        public int RosMessageLength => 0 + Map.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += Map.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Map.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Map.AddRos2MessageLength(size);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

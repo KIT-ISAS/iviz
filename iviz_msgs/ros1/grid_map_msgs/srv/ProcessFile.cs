@@ -103,18 +103,27 @@ namespace Iviz.Msgs.GridMapMsgs
             if (TopicName is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 8 + WriteBuffer.GetStringSize(FilePath) + WriteBuffer.GetStringSize(TopicName);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 8;
+                size += WriteBuffer.GetStringSize(FilePath);
+                size += WriteBuffer.GetStringSize(TopicName);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, FilePath);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, TopicName);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, FilePath);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, TopicName);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -171,11 +180,11 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c += 1; // Success
-            return c;
+            int size = c;
+            size += 1; // Success
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

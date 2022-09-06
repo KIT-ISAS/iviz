@@ -107,19 +107,27 @@ namespace Iviz.Msgs.ShapeMsgs
             if (Dimensions is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + 8 * Dimensions.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 5;
+                size += 8 * Dimensions.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c += 1; // Type
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Dimensions length
-            c = WriteBuffer2.Align8(c);
-            c += 8 * Dimensions.Length;
-            return c;
+            int size = c;
+            size += 1; // Type
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Dimensions.Length
+            size = WriteBuffer2.Align8(size);
+            size += 8 * Dimensions.Length;
+            return size;
         }
     
         public const string MessageType = "shape_msgs/SolidPrimitive";
@@ -154,6 +162,7 @@ namespace Iviz.Msgs.ShapeMsgs
             public override void RosSerialize(SolidPrimitive msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(SolidPrimitive msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(SolidPrimitive msg) => msg.Ros2MessageLength;
+            public override void RosValidate(SolidPrimitive msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<SolidPrimitive>
         {

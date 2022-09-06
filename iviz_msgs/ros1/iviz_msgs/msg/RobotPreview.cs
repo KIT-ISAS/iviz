@@ -159,7 +159,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 55;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(Id);
@@ -175,32 +176,32 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c += 1; // Action
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Id);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, JointNames);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // JointValues length
-            c += 4 * JointValues.Length;
-            c = WriteBuffer2.AddLength(c, RobotDescription);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, SourceNode);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, SourceParameter);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, SavedRobotName);
-            c = WriteBuffer2.Align4(c);
-            c += 16; // Tint
-            c += 4; // Metallic
-            c += 4; // Smoothness
-            c += 1; // AttachedToTf
-            c += 1; // RenderAsOcclusionOnly
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size += 1; // Action
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Id);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, JointNames);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // JointValues.Length
+            size += 4 * JointValues.Length;
+            size = WriteBuffer2.AddLength(size, RobotDescription);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, SourceNode);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, SourceParameter);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, SavedRobotName);
+            size = WriteBuffer2.Align4(size);
+            size += 16; // Tint
+            size += 4; // Metallic
+            size += 4; // Smoothness
+            size += 1; // AttachedToTf
+            size += 1; // RenderAsOcclusionOnly
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/RobotPreview";
@@ -236,6 +237,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(RobotPreview msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(RobotPreview msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(RobotPreview msg) => msg.Ros2MessageLength;
+            public override void RosValidate(RobotPreview msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<RobotPreview>
         {

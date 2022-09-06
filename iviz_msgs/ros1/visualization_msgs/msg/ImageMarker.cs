@@ -177,7 +177,8 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 93;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(Ns);
@@ -189,30 +190,30 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Ns);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Id
-            c += 4; // Type
-            c += 4; // Action
-            c = WriteBuffer2.Align8(c);
-            c += 24; // Position
-            c += 4; // Scale
-            c += 16; // OutlineColor
-            c += 1; // Filled
-            c = WriteBuffer2.Align4(c);
-            c += 16; // FillColor
-            c += 8; // Lifetime
-            c += 4; // Points length
-            c = WriteBuffer2.Align8(c);
-            c += 24 * Points.Length;
-            c += 4; // OutlineColors length
-            c += 16 * OutlineColors.Length;
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Ns);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Id
+            size += 4; // Type
+            size += 4; // Action
+            size = WriteBuffer2.Align8(size);
+            size += 24; // Position
+            size += 4; // Scale
+            size += 16; // OutlineColor
+            size += 1; // Filled
+            size = WriteBuffer2.Align4(size);
+            size += 16; // FillColor
+            size += 8; // Lifetime
+            size += 4; // Points.Length
+            size = WriteBuffer2.Align8(size);
+            size += 24 * Points.Length;
+            size += 4; // OutlineColors.Length
+            size += 16 * OutlineColors.Length;
+            return size;
         }
     
         public const string MessageType = "visualization_msgs/ImageMarker";
@@ -252,6 +253,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override void RosSerialize(ImageMarker msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ImageMarker msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(ImageMarker msg) => msg.Ros2MessageLength;
+            public override void RosValidate(ImageMarker msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<ImageMarker>
         {

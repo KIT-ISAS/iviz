@@ -103,21 +103,30 @@ namespace Iviz.Msgs.HriMsgs
             if (Expression_ is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 16 + Header.RosMessageLength + WriteBuffer.GetStringSize(Expression_);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 16;
+                size += Header.RosMessageLength;
+                size += WriteBuffer.GetStringSize(Expression_);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Expression_);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Valence
-            c += 4; // Arousal
-            c += 4; // Confidence
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Expression_);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Valence
+            size += 4; // Arousal
+            size += 4; // Confidence
+            return size;
         }
     
         public const string MessageType = "hri_msgs/Expression";
@@ -160,6 +169,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(Expression msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Expression msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Expression msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Expression msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Expression>
         {

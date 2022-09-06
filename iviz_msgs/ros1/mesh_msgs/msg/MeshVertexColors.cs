@@ -73,17 +73,25 @@ namespace Iviz.Msgs.MeshMsgs
             if (VertexColors is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + 16 * VertexColors.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += 16 * VertexColors.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // VertexColors length
-            c += 16 * VertexColors.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // VertexColors.Length
+            size += 16 * VertexColors.Length;
+            return size;
         }
     
         public const string MessageType = "mesh_msgs/MeshVertexColors";
@@ -111,6 +119,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(MeshVertexColors msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MeshVertexColors msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(MeshVertexColors msg) => msg.Ros2MessageLength;
+            public override void RosValidate(MeshVertexColors msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<MeshVertexColors>
         {

@@ -130,7 +130,8 @@ namespace Iviz.Msgs.RosgraphMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 88;
                 size += WriteBuffer.GetStringSize(Topic);
                 size += WriteBuffer.GetStringSize(NodePub);
@@ -141,28 +142,28 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Topic);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, NodePub);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, NodeSub);
-            c = WriteBuffer2.Align4(c);
-            c += 8; // WindowStart
-            c += 8; // WindowStop
-            c += 4; // DeliveredMsgs
-            c += 4; // DroppedMsgs
-            c += 4; // Traffic
-            c += 8; // PeriodMean
-            c += 8; // PeriodStddev
-            c += 8; // PeriodMax
-            c += 8; // StampAgeMean
-            c += 8; // StampAgeStddev
-            c += 8; // StampAgeMax
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Topic);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, NodePub);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, NodeSub);
+            size = WriteBuffer2.Align4(size);
+            size += 8; // WindowStart
+            size += 8; // WindowStop
+            size += 4; // DeliveredMsgs
+            size += 4; // DroppedMsgs
+            size += 4; // Traffic
+            size += 8; // PeriodMean
+            size += 8; // PeriodStddev
+            size += 8; // PeriodMax
+            size += 8; // StampAgeMean
+            size += 8; // StampAgeStddev
+            size += 8; // StampAgeMax
+            return size;
         }
     
         public const string MessageType = "rosgraph_msgs/TopicStatistics";
@@ -194,6 +195,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             public override void RosSerialize(TopicStatistics msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TopicStatistics msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(TopicStatistics msg) => msg.Ros2MessageLength;
+            public override void RosValidate(TopicStatistics msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<TopicStatistics>
         {

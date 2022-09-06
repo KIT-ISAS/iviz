@@ -86,7 +86,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => 0;
+        public const int Ros2FixedMessageLength = 0;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     
@@ -186,20 +188,29 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public int RosMessageLength => 9 + WriteBuffer.GetStringSize(Message) + 8 * Resolutions.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 9;
+                size += WriteBuffer.GetStringSize(Message);
+                size += 8 * Resolutions.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c += 1; // Success
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Message);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Resolutions length
-            c += 8 * Resolutions.Length;
-            return c;
+            int size = c;
+            size += 1; // Success
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Message);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Resolutions.Length
+            size += 8 * Resolutions.Length;
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

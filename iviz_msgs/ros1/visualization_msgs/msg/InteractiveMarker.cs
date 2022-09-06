@@ -165,42 +165,37 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 76;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(Name);
                 size += WriteBuffer.GetStringSize(Description);
-                size += WriteBuffer.GetArraySize(MenuEntries);
-                size += WriteBuffer.GetArraySize(Controls);
+                foreach (var msg in MenuEntries) size += msg.RosMessageLength;
+                foreach (var msg in Controls) size += msg.RosMessageLength;
                 return size;
             }
         }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align8(c);
-            c += 56; // Pose
-            c = WriteBuffer2.AddLength(c, Name);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Description);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Scale
-            c += 4; // MenuEntries.Length
-            for (int i = 0; i < MenuEntries.Length; i++)
-            {
-                c = MenuEntries[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Controls.Length
-            for (int i = 0; i < Controls.Length; i++)
-            {
-                c = Controls[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align8(size);
+            size += 56; // Pose
+            size = WriteBuffer2.AddLength(size, Name);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Description);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Scale
+            size += 4; // MenuEntries.Length
+            foreach (var msg in MenuEntries) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Controls.Length
+            foreach (var msg in Controls) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "visualization_msgs/InteractiveMarker";
@@ -283,6 +278,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override void RosSerialize(InteractiveMarker msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(InteractiveMarker msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(InteractiveMarker msg) => msg.Ros2MessageLength;
+            public override void RosValidate(InteractiveMarker msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<InteractiveMarker>
         {

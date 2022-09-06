@@ -110,8 +110,8 @@ namespace Iviz.Msgs.NavMsgs
         {
             public override void RosSerialize(MapMetaData msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MapMetaData msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(MapMetaData msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MapMetaData msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(MapMetaData _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(MapMetaData _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<MapMetaData>
         {

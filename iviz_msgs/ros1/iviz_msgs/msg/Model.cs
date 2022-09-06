@@ -186,48 +186,40 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 24;
                 size += WriteBuffer.GetStringSize(Name);
                 size += WriteBuffer.GetStringSize(Filename);
                 size += WriteBuffer.GetStringSize(OrientationHint);
-                size += WriteBuffer.GetArraySize(Meshes);
-                size += WriteBuffer.GetArraySize(Materials);
-                size += WriteBuffer.GetArraySize(Nodes);
+                foreach (var msg in Meshes) size += msg.RosMessageLength;
+                foreach (var msg in Materials) size += msg.RosMessageLength;
+                foreach (var msg in Nodes) size += msg.RosMessageLength;
                 return size;
             }
         }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Name);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Filename);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, OrientationHint);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Meshes.Length
-            for (int i = 0; i < Meshes.Length; i++)
-            {
-                c = Meshes[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Materials.Length
-            for (int i = 0; i < Materials.Length; i++)
-            {
-                c = Materials[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Nodes.Length
-            for (int i = 0; i < Nodes.Length; i++)
-            {
-                c = Nodes[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Name);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Filename);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, OrientationHint);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Meshes.Length
+            foreach (var msg in Meshes) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Materials.Length
+            foreach (var msg in Materials) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Nodes.Length
+            foreach (var msg in Nodes) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/Model";
@@ -270,6 +262,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(Model msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Model msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Model msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Model msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Model>
         {

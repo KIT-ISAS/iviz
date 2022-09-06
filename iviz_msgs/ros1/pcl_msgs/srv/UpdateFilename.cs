@@ -92,16 +92,24 @@ namespace Iviz.Msgs.PclMsgs
             if (Filename is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Filename);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += WriteBuffer.GetStringSize(Filename);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Filename);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Filename);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -157,11 +165,11 @@ namespace Iviz.Msgs.PclMsgs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c += 1; // Success
-            return c;
+            int size = c;
+            size += 1; // Success
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

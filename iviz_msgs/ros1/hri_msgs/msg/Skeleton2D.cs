@@ -113,18 +113,27 @@ namespace Iviz.Msgs.HriMsgs
             }
         }
     
-        public int RosMessageLength => 4 + Header.RosMessageLength + 12 * Skeleton.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += Header.RosMessageLength;
+                size += 12 * Skeleton.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Skeleton length
-            c += 12 * Skeleton.Length;
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Skeleton.Length
+            size += 12 * Skeleton.Length;
+            return size;
         }
     
         public const string MessageType = "hri_msgs/Skeleton2D";
@@ -165,6 +174,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(Skeleton2D msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Skeleton2D msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Skeleton2D msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Skeleton2D msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Skeleton2D>
         {

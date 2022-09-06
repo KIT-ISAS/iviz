@@ -56,16 +56,25 @@ namespace Iviz.Msgs.Tf2Msgs
             Error.RosValidate();
         }
     
-        public int RosMessageLength => 0 + Transform.RosMessageLength + Error.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += Transform.RosMessageLength;
+                size += Error.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Transform.AddRos2MessageLength(c);
-            c = Error.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Transform.AddRos2MessageLength(size);
+            size = Error.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "tf2_msgs/LookupTransformResult";
@@ -107,6 +116,7 @@ namespace Iviz.Msgs.Tf2Msgs
             public override void RosSerialize(LookupTransformResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(LookupTransformResult msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(LookupTransformResult msg) => msg.Ros2MessageLength;
+            public override void RosValidate(LookupTransformResult msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<LookupTransformResult>
         {

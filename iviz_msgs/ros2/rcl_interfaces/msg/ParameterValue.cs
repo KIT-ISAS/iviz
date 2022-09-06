@@ -216,7 +216,8 @@ namespace Iviz.Msgs.RclInterfaces
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 42;
                 size += WriteBuffer.GetStringSize(StringValue);
                 size += ByteArrayValue.Length;
@@ -230,30 +231,30 @@ namespace Iviz.Msgs.RclInterfaces
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c += 1; // Type
-            c += 1; // BoolValue
-            c = WriteBuffer2.Align8(c);
-            c += 8; // IntegerValue
-            c += 8; // DoubleValue
-            c = WriteBuffer2.AddLength(c, StringValue);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // ByteArrayValue length
-            c += 1 * ByteArrayValue.Length;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // BoolArrayValue length
-            c += 1 * BoolArrayValue.Length;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // IntegerArrayValue length
-            c = WriteBuffer2.Align8(c);
-            c += 8 * IntegerArrayValue.Length;
-            c += 4; // DoubleArrayValue length
-            c = WriteBuffer2.Align8(c);
-            c += 8 * DoubleArrayValue.Length;
-            c = WriteBuffer2.AddLength(c, StringArrayValue);
-            return c;
+            int size = c;
+            size += 1; // Type
+            size += 1; // BoolValue
+            size = WriteBuffer2.Align8(size);
+            size += 8; // IntegerValue
+            size += 8; // DoubleValue
+            size = WriteBuffer2.AddLength(size, StringValue);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // ByteArrayValue.Length
+            size += 1 * ByteArrayValue.Length;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // BoolArrayValue.Length
+            size += 1 * BoolArrayValue.Length;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // IntegerArrayValue.Length
+            size = WriteBuffer2.Align8(size);
+            size += 8 * IntegerArrayValue.Length;
+            size += 4; // DoubleArrayValue.Length
+            size = WriteBuffer2.Align8(size);
+            size += 8 * DoubleArrayValue.Length;
+            size = WriteBuffer2.AddLength(size, StringArrayValue);
+            return size;
         }
     
         public const string MessageType = "rcl_interfaces/ParameterValue";
@@ -289,6 +290,7 @@ namespace Iviz.Msgs.RclInterfaces
             public override void RosSerialize(ParameterValue msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ParameterValue msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(ParameterValue msg) => msg.Ros2MessageLength;
+            public override void RosValidate(ParameterValue msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<ParameterValue>
         {

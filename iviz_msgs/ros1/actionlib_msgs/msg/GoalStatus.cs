@@ -93,18 +93,27 @@ namespace Iviz.Msgs.ActionlibMsgs
             if (Text is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + GoalId.RosMessageLength + WriteBuffer.GetStringSize(Text);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 5;
+                size += GoalId.RosMessageLength;
+                size += WriteBuffer.GetStringSize(Text);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = GoalId.AddRos2MessageLength(c);
-            c += 1; // Status
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Text);
-            return c;
+            int size = c;
+            size = GoalId.AddRos2MessageLength(size);
+            size += 1; // Status
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Text);
+            return size;
         }
     
         public const string MessageType = "actionlib_msgs/GoalStatus";
@@ -143,6 +152,7 @@ namespace Iviz.Msgs.ActionlibMsgs
             public override void RosSerialize(GoalStatus msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(GoalStatus msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(GoalStatus msg) => msg.Ros2MessageLength;
+            public override void RosValidate(GoalStatus msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<GoalStatus>
         {

@@ -78,18 +78,27 @@ namespace Iviz.Msgs.PclMsgs
             if (Values is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + Header.RosMessageLength + 4 * Values.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += Header.RosMessageLength;
+                size += 4 * Values.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Values length
-            c += 4 * Values.Length;
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Values.Length
+            size += 4 * Values.Length;
+            return size;
         }
     
         public const string MessageType = "pcl_msgs/ModelCoefficients";
@@ -122,6 +131,7 @@ namespace Iviz.Msgs.PclMsgs
             public override void RosSerialize(ModelCoefficients msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ModelCoefficients msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(ModelCoefficients msg) => msg.Ros2MessageLength;
+            public override void RosValidate(ModelCoefficients msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<ModelCoefficients>
         {

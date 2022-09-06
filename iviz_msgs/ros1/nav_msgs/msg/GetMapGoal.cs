@@ -45,7 +45,9 @@ namespace Iviz.Msgs.NavMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => 0;
+        public const int Ros2FixedMessageLength = 0;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     
@@ -70,13 +72,13 @@ namespace Iviz.Msgs.NavMsgs
         {
             public override void RosSerialize(GetMapGoal msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(GetMapGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(GetMapGoal msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(GetMapGoal msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(GetMapGoal _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(GetMapGoal _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<GetMapGoal>
         {
-            public override void RosDeserialize(ref ReadBuffer b, out GetMapGoal msg) => msg = new GetMapGoal(ref b);
-            public override void RosDeserialize(ref ReadBuffer2 b, out GetMapGoal msg) => msg = new GetMapGoal(ref b);
+            public override void RosDeserialize(ref ReadBuffer _, out GetMapGoal msg) => msg = Singleton;
+            public override void RosDeserialize(ref ReadBuffer2 _, out GetMapGoal msg) => msg = Singleton;
         }
     }
 }

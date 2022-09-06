@@ -103,29 +103,27 @@ namespace Iviz.Msgs.PclMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 4;
                 size += Header.RosMessageLength;
                 size += Cloud.RosMessageLength;
-                size += WriteBuffer.GetArraySize(Polygons);
+                foreach (var msg in Polygons) size += msg.RosMessageLength;
                 return size;
             }
         }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = Cloud.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Polygons.Length
-            for (int i = 0; i < Polygons.Length; i++)
-            {
-                c = Polygons[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = Cloud.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Polygons.Length
+            foreach (var msg in Polygons) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "pcl_msgs/PolygonMesh";
@@ -174,6 +172,7 @@ namespace Iviz.Msgs.PclMsgs
             public override void RosSerialize(PolygonMesh msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(PolygonMesh msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(PolygonMesh msg) => msg.Ros2MessageLength;
+            public override void RosValidate(PolygonMesh msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<PolygonMesh>
         {

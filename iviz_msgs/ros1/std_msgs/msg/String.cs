@@ -50,16 +50,24 @@ namespace Iviz.Msgs.StdMsgs
             if (Data is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + WriteBuffer.GetStringSize(Data);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += WriteBuffer.GetStringSize(Data);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Data);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Data);
+            return size;
         }
     
         public const string MessageType = "std_msgs/String";
@@ -86,6 +94,7 @@ namespace Iviz.Msgs.StdMsgs
             public override void RosSerialize(String msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(String msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(String msg) => msg.Ros2MessageLength;
+            public override void RosValidate(String msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<String>
         {

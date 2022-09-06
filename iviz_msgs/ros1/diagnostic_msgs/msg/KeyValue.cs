@@ -61,18 +61,27 @@ namespace Iviz.Msgs.DiagnosticMsgs
             if (Value is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 8 + WriteBuffer.GetStringSize(Key) + WriteBuffer.GetStringSize(Value);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 8;
+                size += WriteBuffer.GetStringSize(Key);
+                size += WriteBuffer.GetStringSize(Value);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Key);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Value);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Key);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Value);
+            return size;
         }
     
         public const string MessageType = "diagnostic_msgs/KeyValue";
@@ -100,6 +109,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             public override void RosSerialize(KeyValue msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(KeyValue msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(KeyValue msg) => msg.Ros2MessageLength;
+            public override void RosValidate(KeyValue msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<KeyValue>
         {

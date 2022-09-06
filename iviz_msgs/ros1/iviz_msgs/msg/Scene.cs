@@ -150,38 +150,33 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 16;
                 size += WriteBuffer.GetStringSize(Name);
                 size += WriteBuffer.GetStringSize(Filename);
-                size += WriteBuffer.GetArraySize(Includes);
-                size += WriteBuffer.GetArraySize(Lights);
+                foreach (var msg in Includes) size += msg.RosMessageLength;
+                foreach (var msg in Lights) size += msg.RosMessageLength;
                 return size;
             }
         }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Name);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Filename);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Includes.Length
-            for (int i = 0; i < Includes.Length; i++)
-            {
-                c = Includes[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Lights.Length
-            for (int i = 0; i < Lights.Length; i++)
-            {
-                c = Lights[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Name);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Filename);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Includes.Length
+            foreach (var msg in Includes) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Lights.Length
+            foreach (var msg in Lights) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/Scene";
@@ -225,6 +220,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(Scene msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Scene msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Scene msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Scene msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Scene>
         {

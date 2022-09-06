@@ -43,7 +43,9 @@ namespace Iviz.Msgs.StdMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => 0;
+        public const int Ros2FixedMessageLength = 0;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     
@@ -68,13 +70,13 @@ namespace Iviz.Msgs.StdMsgs
         {
             public override void RosSerialize(Empty msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Empty msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(Empty msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Empty msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(Empty _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(Empty _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<Empty>
         {
-            public override void RosDeserialize(ref ReadBuffer b, out Empty msg) => msg = new Empty(ref b);
-            public override void RosDeserialize(ref ReadBuffer2 b, out Empty msg) => msg = new Empty(ref b);
+            public override void RosDeserialize(ref ReadBuffer _, out Empty msg) => msg = Singleton;
+            public override void RosDeserialize(ref ReadBuffer2 _, out Empty msg) => msg = Singleton;
         }
     }
 }

@@ -57,17 +57,25 @@ namespace Iviz.Msgs.GeometryMsgs
             Pose.RosValidate();
         }
     
-        public int RosMessageLength => 344 + Header.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 344;
+                size += Header.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align8(c);
-            c += 344; // Pose
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align8(size);
+            size += 344; // Pose
+            return size;
         }
     
         public const string MessageType = "geometry_msgs/PoseWithCovarianceStamped";
@@ -105,6 +113,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(PoseWithCovarianceStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(PoseWithCovarianceStamped msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(PoseWithCovarianceStamped msg) => msg.Ros2MessageLength;
+            public override void RosValidate(PoseWithCovarianceStamped msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<PoseWithCovarianceStamped>
         {

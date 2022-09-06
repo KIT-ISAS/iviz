@@ -57,16 +57,25 @@ namespace Iviz.Msgs.GeometryMsgs
             Polygon.RosValidate();
         }
     
-        public int RosMessageLength => 0 + Header.RosMessageLength + Polygon.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += Header.RosMessageLength;
+                size += Polygon.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = Polygon.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = Polygon.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "geometry_msgs/PolygonStamped";
@@ -104,6 +113,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(PolygonStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(PolygonStamped msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(PolygonStamped msg) => msg.Ros2MessageLength;
+            public override void RosValidate(PolygonStamped msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<PolygonStamped>
         {

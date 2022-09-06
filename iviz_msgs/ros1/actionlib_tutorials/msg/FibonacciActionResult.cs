@@ -67,7 +67,8 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 0;
                 size += Header.RosMessageLength;
                 size += Status.RosMessageLength;
@@ -78,13 +79,13 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = Status.AddRos2MessageLength(c);
-            c = Result.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = Status.AddRos2MessageLength(size);
+            size = Result.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "actionlib_tutorials/FibonacciActionResult";
@@ -128,6 +129,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             public override void RosSerialize(FibonacciActionResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(FibonacciActionResult msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(FibonacciActionResult msg) => msg.Ros2MessageLength;
+            public override void RosValidate(FibonacciActionResult msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<FibonacciActionResult>
         {

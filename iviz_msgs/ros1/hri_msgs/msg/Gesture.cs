@@ -65,16 +65,24 @@ namespace Iviz.Msgs.HriMsgs
         {
         }
     
-        public int RosMessageLength => 1 + Header.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 1;
+                size += Header.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c += 1; // Gesture_
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size += 1; // Gesture_
+            return size;
         }
     
         public const string MessageType = "hri_msgs/Gesture";
@@ -111,6 +119,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(Gesture msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Gesture msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Gesture msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Gesture msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Gesture>
         {

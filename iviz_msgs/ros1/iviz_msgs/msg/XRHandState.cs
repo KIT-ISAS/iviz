@@ -205,7 +205,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 77;
                 size += Header.RosMessageLength;
                 size += 56 * Thumb.Length;
@@ -219,29 +220,29 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align8(c);
-            c += 56; // Palm
-            c += 4; // Thumb length
-            c = WriteBuffer2.Align8(c);
-            c += 56 * Thumb.Length;
-            c += 4; // Index length
-            c = WriteBuffer2.Align8(c);
-            c += 56 * Index.Length;
-            c += 4; // Middle length
-            c = WriteBuffer2.Align8(c);
-            c += 56 * Middle.Length;
-            c += 4; // Ring length
-            c = WriteBuffer2.Align8(c);
-            c += 56 * Ring.Length;
-            c += 4; // Little length
-            c = WriteBuffer2.Align8(c);
-            c += 56 * Little.Length;
-            c += 1; // IsValid
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align8(size);
+            size += 56; // Palm
+            size += 4; // Thumb.Length
+            size = WriteBuffer2.Align8(size);
+            size += 56 * Thumb.Length;
+            size += 4; // Index.Length
+            size = WriteBuffer2.Align8(size);
+            size += 56 * Index.Length;
+            size += 4; // Middle.Length
+            size = WriteBuffer2.Align8(size);
+            size += 56 * Middle.Length;
+            size += 4; // Ring.Length
+            size = WriteBuffer2.Align8(size);
+            size += 56 * Ring.Length;
+            size += 4; // Little.Length
+            size = WriteBuffer2.Align8(size);
+            size += 56 * Little.Length;
+            size += 1; // IsValid
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/XRHandState";
@@ -279,6 +280,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(XRHandState msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(XRHandState msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(XRHandState msg) => msg.Ros2MessageLength;
+            public override void RosValidate(XRHandState msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<XRHandState>
         {

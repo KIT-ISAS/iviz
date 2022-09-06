@@ -94,26 +94,34 @@ namespace Iviz.Msgs.Actionlib
             if (ResultText is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 38 + WriteBuffer.GetStringSize(ResultText);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 38;
+                size += WriteBuffer.GetStringSize(ResultText);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // TerminateStatus
-            c += 1; // IgnoreCancel
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, ResultText);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // TheResult
-            c += 1; // IsSimpleClient
-            c = WriteBuffer2.Align4(c);
-            c += 8; // DelayAccept
-            c += 8; // DelayTerminate
-            c += 8; // PauseStatus
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // TerminateStatus
+            size += 1; // IgnoreCancel
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, ResultText);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // TheResult
+            size += 1; // IsSimpleClient
+            size = WriteBuffer2.Align4(size);
+            size += 8; // DelayAccept
+            size += 8; // DelayTerminate
+            size += 8; // PauseStatus
+            return size;
         }
     
         public const string MessageType = "actionlib/TestRequestGoal";
@@ -143,6 +151,7 @@ namespace Iviz.Msgs.Actionlib
             public override void RosSerialize(TestRequestGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TestRequestGoal msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(TestRequestGoal msg) => msg.Ros2MessageLength;
+            public override void RosValidate(TestRequestGoal msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<TestRequestGoal>
         {

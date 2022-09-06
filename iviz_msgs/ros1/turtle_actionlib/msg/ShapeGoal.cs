@@ -88,8 +88,8 @@ namespace Iviz.Msgs.TurtleActionlib
         {
             public override void RosSerialize(ShapeGoal msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(ShapeGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(ShapeGoal msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(ShapeGoal msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(ShapeGoal _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(ShapeGoal _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<ShapeGoal>
         {

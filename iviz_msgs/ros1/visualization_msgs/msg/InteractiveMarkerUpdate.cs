@@ -170,11 +170,12 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 25;
                 size += WriteBuffer.GetStringSize(ServerId);
-                size += WriteBuffer.GetArraySize(Markers);
-                size += WriteBuffer.GetArraySize(Poses);
+                foreach (var msg in Markers) size += msg.RosMessageLength;
+                foreach (var msg in Poses) size += msg.RosMessageLength;
                 size += WriteBuffer.GetArraySize(Erases);
                 return size;
             }
@@ -182,29 +183,23 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, ServerId);
-            c = WriteBuffer2.Align8(c);
-            c += 8; // SeqNum
-            c += 1; // Type
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Markers.Length
-            for (int i = 0; i < Markers.Length; i++)
-            {
-                c = Markers[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Poses.Length
-            for (int i = 0; i < Poses.Length; i++)
-            {
-                c = Poses[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Erases);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, ServerId);
+            size = WriteBuffer2.Align8(size);
+            size += 8; // SeqNum
+            size += 1; // Type
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Markers.Length
+            foreach (var msg in Markers) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Poses.Length
+            foreach (var msg in Poses) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Erases);
+            return size;
         }
     
         public const string MessageType = "visualization_msgs/InteractiveMarkerUpdate";
@@ -294,6 +289,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override void RosSerialize(InteractiveMarkerUpdate msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(InteractiveMarkerUpdate msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(InteractiveMarkerUpdate msg) => msg.Ros2MessageLength;
+            public override void RosValidate(InteractiveMarkerUpdate msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<InteractiveMarkerUpdate>
         {

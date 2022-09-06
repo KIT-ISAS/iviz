@@ -83,7 +83,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 72;
                 size += WriteBuffer.GetStringSize(Uri);
                 size += Material.RosMessageLength;
@@ -94,17 +95,17 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Uri);
-            c = WriteBuffer2.Align4(c);
-            c += 64; // Pose
-            c = Material.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Package);
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Uri);
+            size = WriteBuffer2.Align4(size);
+            size += 64; // Pose
+            size = Material.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Package);
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/SceneInclude";
@@ -142,6 +143,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(SceneInclude msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(SceneInclude msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(SceneInclude msg) => msg.Ros2MessageLength;
+            public override void RosValidate(SceneInclude msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<SceneInclude>
         {

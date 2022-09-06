@@ -65,18 +65,27 @@ namespace Iviz.Msgs.Actionlib
             Result.RosValidate();
         }
     
-        public int RosMessageLength => 5 + Header.RosMessageLength + Status.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 5;
+                size += Header.RosMessageLength;
+                size += Status.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = Status.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 5; // Result
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = Status.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 5; // Result
+            return size;
         }
     
         public const string MessageType = "actionlib/TestRequestActionResult";
@@ -120,6 +129,7 @@ namespace Iviz.Msgs.Actionlib
             public override void RosSerialize(TestRequestActionResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TestRequestActionResult msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(TestRequestActionResult msg) => msg.Ros2MessageLength;
+            public override void RosValidate(TestRequestActionResult msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<TestRequestActionResult>
         {

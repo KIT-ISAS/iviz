@@ -128,22 +128,30 @@ namespace Iviz.Msgs.SensorMsgs
             if (LinearAccelerationCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(LinearAccelerationCovariance.Length, 9);
         }
     
-        public int RosMessageLength => 296 + Header.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 296;
+                size += Header.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align8(c);
-            c += 32; // Orientation
-            c += 8 * 9; // OrientationCovariance
-            c += 24; // AngularVelocity
-            c += 8 * 9; // AngularVelocityCovariance
-            c += 24; // LinearAcceleration
-            c += 8 * 9; // LinearAccelerationCovariance
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align8(size);
+            size += 32; // Orientation
+            size += 8 * 9; // OrientationCovariance
+            size += 24; // AngularVelocity
+            size += 8 * 9; // AngularVelocityCovariance
+            size += 24; // LinearAcceleration
+            size += 8 * 9; // LinearAccelerationCovariance
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/Imu";
@@ -187,6 +195,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(Imu msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Imu msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Imu msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Imu msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Imu>
         {

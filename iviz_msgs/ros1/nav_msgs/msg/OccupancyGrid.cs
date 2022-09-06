@@ -92,19 +92,28 @@ namespace Iviz.Msgs.NavMsgs
             if (Data is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 80 + Header.RosMessageLength + Data.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 80;
+                size += Header.RosMessageLength;
+                size += Data.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 80; // Info
-            c += 4; // Data length
-            c += 1 * Data.Length;
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 80; // Info
+            size += 4; // Data.Length
+            size += 1 * Data.Length;
+            return size;
         }
     
         public const string MessageType = "nav_msgs/OccupancyGrid";
@@ -144,6 +153,7 @@ namespace Iviz.Msgs.NavMsgs
             public override void RosSerialize(OccupancyGrid msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(OccupancyGrid msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(OccupancyGrid msg) => msg.Ros2MessageLength;
+            public override void RosValidate(OccupancyGrid msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<OccupancyGrid>
         {

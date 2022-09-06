@@ -107,7 +107,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 101;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(VizId);
@@ -119,24 +120,24 @@ namespace Iviz.Msgs.IvizMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, VizId);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Id);
-            c += 1; // Type
-            c = WriteBuffer2.Align4(c);
-            c += 4; // EntryId
-            c = WriteBuffer2.Align8(c);
-            c += 8; // Angle
-            c += 24; // Position
-            c += 32; // Orientation
-            c += 24; // Scale
-            c = Trajectory.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, VizId);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Id);
+            size += 1; // Type
+            size = WriteBuffer2.Align4(size);
+            size += 4; // EntryId
+            size = WriteBuffer2.Align8(size);
+            size += 8; // Angle
+            size += 24; // Position
+            size += 32; // Orientation
+            size += 24; // Scale
+            size = Trajectory.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/Feedback";
@@ -177,6 +178,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(Feedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Feedback msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Feedback msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Feedback msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Feedback>
         {

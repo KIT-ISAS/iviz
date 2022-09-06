@@ -200,9 +200,10 @@ namespace Iviz.Msgs.MeshMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 16;
-                size += WriteBuffer.GetArraySize(Clusters);
+                foreach (var msg in Clusters) size += msg.RosMessageLength;
                 size += 21 * Materials.Length;
                 size += 4 * ClusterMaterials.Length;
                 size += 8 * VertexTexCoords.Length;
@@ -212,24 +213,21 @@ namespace Iviz.Msgs.MeshMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Clusters.Length
-            for (int i = 0; i < Clusters.Length; i++)
-            {
-                c = Clusters[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Materials length
-            c += (21 + 3) * Materials.Length - 3;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // ClusterMaterials length
-            c += 4 * ClusterMaterials.Length;
-            c += 4; // VertexTexCoords length
-            c += 8 * VertexTexCoords.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Clusters.Length
+            foreach (var msg in Clusters) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Materials.Length
+            size += (21 + 3) * Materials.Length - 3;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // ClusterMaterials.Length
+            size += 4 * ClusterMaterials.Length;
+            size += 4; // VertexTexCoords.Length
+            size += 8 * VertexTexCoords.Length;
+            return size;
         }
     
         public const string MessageType = "mesh_msgs/MeshMaterials";
@@ -260,6 +258,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(MeshMaterials msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MeshMaterials msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(MeshMaterials msg) => msg.Ros2MessageLength;
+            public override void RosValidate(MeshMaterials msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<MeshMaterials>
         {

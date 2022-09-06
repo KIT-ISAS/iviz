@@ -72,17 +72,25 @@ namespace Iviz.Msgs.IvizMsgs
             if (Colors is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + 4 * Colors.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += 4 * Colors.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Colors length
-            c += 4 * Colors.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Colors.Length
+            size += 4 * Colors.Length;
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/ModelColorChannel";
@@ -110,6 +118,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(ModelColorChannel msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ModelColorChannel msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(ModelColorChannel msg) => msg.Ros2MessageLength;
+            public override void RosValidate(ModelColorChannel msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<ModelColorChannel>
         {

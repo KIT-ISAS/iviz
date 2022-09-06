@@ -72,7 +72,8 @@ namespace Iviz.Msgs.HriMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 8;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(Sender);
@@ -83,15 +84,15 @@ namespace Iviz.Msgs.HriMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Sender);
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Receiver);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Sender);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Receiver);
+            return size;
         }
     
         public const string MessageType = "hri_msgs/Gaze";
@@ -126,6 +127,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(Gaze msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Gaze msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(Gaze msg) => msg.Ros2MessageLength;
+            public override void RosValidate(Gaze msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<Gaze>
         {

@@ -73,17 +73,25 @@ namespace Iviz.Msgs.MeshMsgs
             if (Costs is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 4 + 4 * Costs.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                size += 4 * Costs.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Costs length
-            c += 4 * Costs.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Costs.Length
+            size += 4 * Costs.Length;
+            return size;
         }
     
         public const string MessageType = "mesh_msgs/MeshVertexCosts";
@@ -110,6 +118,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(MeshVertexCosts msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MeshVertexCosts msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(MeshVertexCosts msg) => msg.Ros2MessageLength;
+            public override void RosValidate(MeshVertexCosts msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<MeshVertexCosts>
         {

@@ -56,17 +56,25 @@ namespace Iviz.Msgs.GeometryMsgs
             Inertia.RosValidate();
         }
     
-        public int RosMessageLength => 80 + Header.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 80;
+                size += Header.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align8(c);
-            c += 80; // Inertia
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align8(size);
+            size += 80; // Inertia
+            return size;
         }
     
         public const string MessageType = "geometry_msgs/InertiaStamped";
@@ -104,6 +112,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(InertiaStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(InertiaStamped msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(InertiaStamped msg) => msg.Ros2MessageLength;
+            public override void RosValidate(InertiaStamped msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<InertiaStamped>
         {

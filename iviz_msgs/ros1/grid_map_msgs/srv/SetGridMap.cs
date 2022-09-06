@@ -93,15 +93,23 @@ namespace Iviz.Msgs.GridMapMsgs
             Map.RosValidate();
         }
     
-        public int RosMessageLength => 0 + Map.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += Map.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Map.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Map.AddRos2MessageLength(size);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -146,7 +154,9 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => 0;
+        public const int Ros2FixedMessageLength = 0;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     

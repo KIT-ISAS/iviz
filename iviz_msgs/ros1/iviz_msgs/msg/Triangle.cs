@@ -84,8 +84,8 @@ namespace Iviz.Msgs.IvizMsgs
         {
             public override void RosSerialize(Triangle msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Triangle msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(Triangle msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Triangle msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(Triangle _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(Triangle _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<Triangle>
         {

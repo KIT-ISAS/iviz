@@ -89,7 +89,7 @@ public unsafe partial struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int AddLength(int c, string? s)
     {
-        int d = c + (sizeof(int) + 1); // * trailing '\0'
+        int d = c + (sizeof(int) + 1); // trailing '\0'
         return s is not { Length: not 0 }
             ? d
             : d + BuiltIns.GetByteCount(s);
@@ -651,41 +651,18 @@ public unsafe partial struct WriteBuffer2
         Advance(size);
     }
 
-    public void SerializeArray(IMessage[] msgs)
-    {
-        WriteInt(msgs.Length);
-        foreach (var msg in msgs)
-        {
-            msg.RosSerialize(ref this);
-        }
-    }
-
-    public void SerializeArray(IMessage[] msgs, int count)
-    {
-        ThrowIfWrongSize(msgs, count);
-        foreach (var msg in msgs)
-        {
-            msg.RosSerialize(ref this);
-        }
-    }
-
     /// <summary>
     /// Serializes the given message into the buffer array.
     /// </summary>
     /// <param name="message">The ROS message.</param>
     /// <param name="buffer">The destination byte array.</param>
     /// <returns>The number of bytes written.</returns>
-    public static uint Serialize<T>(in T message, Span<byte> buffer) where T : ISerializable
+    public static void Serialize<T>(in T message, Span<byte> buffer) where T : ISerializable
     {
         fixed (byte* bufferPtr = buffer)
         {
             var b = new WriteBuffer2(bufferPtr, buffer.Length);
             message.RosSerialize(ref b);
-
-            int oldLength = buffer.Length;
-            int newLength = b.offset;
-
-            return (uint)(oldLength - newLength);
         }
     }
 }

@@ -43,7 +43,9 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public int RosMessageLength => RosFixedMessageLength;
         
-        public int Ros2MessageLength => 0;
+        public const int Ros2FixedMessageLength = 0;
+        
+        public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     
@@ -68,13 +70,13 @@ namespace Iviz.Msgs.Tf2Msgs
         {
             public override void RosSerialize(LookupTransformFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(LookupTransformFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(LookupTransformFeedback msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(LookupTransformFeedback msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(LookupTransformFeedback _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(LookupTransformFeedback _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<LookupTransformFeedback>
         {
-            public override void RosDeserialize(ref ReadBuffer b, out LookupTransformFeedback msg) => msg = new LookupTransformFeedback(ref b);
-            public override void RosDeserialize(ref ReadBuffer2 b, out LookupTransformFeedback msg) => msg = new LookupTransformFeedback(ref b);
+            public override void RosDeserialize(ref ReadBuffer _, out LookupTransformFeedback msg) => msg = Singleton;
+            public override void RosDeserialize(ref ReadBuffer2 _, out LookupTransformFeedback msg) => msg = Singleton;
         }
     }
 }

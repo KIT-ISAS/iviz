@@ -80,8 +80,8 @@ namespace Iviz.Msgs.StdMsgs
         {
             public override void RosSerialize(Char msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Char msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
-            public override int RosMessageLength(Char msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Char msg) => msg.Ros2MessageLength;
+            public override int RosMessageLength(Char _) => RosFixedMessageLength;
+            public override int Ros2MessageLength(Char _) => Ros2FixedMessageLength;
         }
         sealed class Deserializer : Deserializer<Char>
         {

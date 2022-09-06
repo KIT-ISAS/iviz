@@ -355,7 +355,8 @@ namespace Iviz.Msgs.MeshMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 36;
                 size += 12 * Triangles.Length;
                 size += 24 * Vertices.Length;
@@ -364,48 +365,42 @@ namespace Iviz.Msgs.MeshMsgs
                 size += 16 * TriangleColors.Length;
                 size += 24 * VertexTextureCoords.Length;
                 size += 21 * FaceMaterials.Length;
-                size += WriteBuffer.GetArraySize(Textures);
-                size += WriteBuffer.GetArraySize(Clusters);
+                foreach (var msg in Textures) size += msg.RosMessageLength;
+                foreach (var msg in Clusters) size += msg.RosMessageLength;
                 return size;
             }
         }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Triangles length
-            c += 12 * Triangles.Length;
-            c += 4; // Vertices length
-            c = WriteBuffer2.Align8(c);
-            c += 24 * Vertices.Length;
-            c += 4; // VertexNormals length
-            c = WriteBuffer2.Align8(c);
-            c += 24 * VertexNormals.Length;
-            c += 4; // VertexColors length
-            c += 16 * VertexColors.Length;
-            c += 4; // TriangleColors length
-            c += 16 * TriangleColors.Length;
-            c += 4; // VertexTextureCoords length
-            c = WriteBuffer2.Align8(c);
-            c += 24 * VertexTextureCoords.Length;
-            c += 4; // FaceMaterials length
-            c += (21 + 3) * FaceMaterials.Length - 3;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Textures.Length
-            for (int i = 0; i < Textures.Length; i++)
-            {
-                c = Textures[i].AddRos2MessageLength(c);
-            }
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Clusters.Length
-            for (int i = 0; i < Clusters.Length; i++)
-            {
-                c = Clusters[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Triangles.Length
+            size += 12 * Triangles.Length;
+            size += 4; // Vertices.Length
+            size = WriteBuffer2.Align8(size);
+            size += 24 * Vertices.Length;
+            size += 4; // VertexNormals.Length
+            size = WriteBuffer2.Align8(size);
+            size += 24 * VertexNormals.Length;
+            size += 4; // VertexColors.Length
+            size += 16 * VertexColors.Length;
+            size += 4; // TriangleColors.Length
+            size += 16 * TriangleColors.Length;
+            size += 4; // VertexTextureCoords.Length
+            size = WriteBuffer2.Align8(size);
+            size += 24 * VertexTextureCoords.Length;
+            size += 4; // FaceMaterials.Length
+            size += (21 + 3) * FaceMaterials.Length - 3;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Textures.Length
+            foreach (var msg in Textures) size = msg.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Clusters.Length
+            foreach (var msg in Clusters) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "mesh_msgs/TriangleMesh";
@@ -457,6 +452,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(TriangleMesh msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TriangleMesh msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(TriangleMesh msg) => msg.Ros2MessageLength;
+            public override void RosValidate(TriangleMesh msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<TriangleMesh>
         {

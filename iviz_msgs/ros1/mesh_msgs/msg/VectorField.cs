@@ -104,21 +104,30 @@ namespace Iviz.Msgs.MeshMsgs
             if (Vectors is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 8 + 24 * Positions.Length + 24 * Vectors.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 8;
+                size += 24 * Positions.Length;
+                size += 24 * Vectors.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Positions length
-            c = WriteBuffer2.Align8(c);
-            c += 24 * Positions.Length;
-            c += 4; // Vectors length
-            c = WriteBuffer2.Align8(c);
-            c += 24 * Vectors.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Positions.Length
+            size = WriteBuffer2.Align8(size);
+            size += 24 * Positions.Length;
+            size += 4; // Vectors.Length
+            size = WriteBuffer2.Align8(size);
+            size += 24 * Vectors.Length;
+            return size;
         }
     
         public const string MessageType = "mesh_msgs/VectorField";
@@ -150,6 +159,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(VectorField msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(VectorField msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(VectorField msg) => msg.Ros2MessageLength;
+            public override void RosValidate(VectorField msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<VectorField>
         {

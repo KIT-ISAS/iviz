@@ -83,20 +83,25 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public int RosMessageLength => 4 + WriteBuffer.GetArraySize(Widgets);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 4;
+                foreach (var msg in Widgets) size += msg.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Widgets.Length
-            for (int i = 0; i < Widgets.Length; i++)
-            {
-                c = Widgets[i].AddRos2MessageLength(c);
-            }
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Widgets.Length
+            foreach (var msg in Widgets) size = msg.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/WidgetArray";
@@ -135,6 +140,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(WidgetArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(WidgetArray msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(WidgetArray msg) => msg.Ros2MessageLength;
+            public override void RosValidate(WidgetArray msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<WidgetArray>
         {

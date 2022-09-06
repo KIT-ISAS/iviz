@@ -89,25 +89,33 @@ namespace Iviz.Msgs.IvizMsgs
             if (Name is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 46 + WriteBuffer.GetStringSize(Name);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 46;
+                size += WriteBuffer.GetStringSize(Name);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Name);
-            c += 1; // Type
-            c += 1; // CastShadows
-            c += 4; // Diffuse
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Range
-            c += 12; // Position
-            c += 12; // Direction
-            c += 4; // InnerAngle
-            c += 4; // OuterAngle
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Name);
+            size += 1; // Type
+            size += 1; // CastShadows
+            size += 4; // Diffuse
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Range
+            size += 12; // Position
+            size += 12; // Direction
+            size += 4; // InnerAngle
+            size += 4; // OuterAngle
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/SceneLight";
@@ -140,6 +148,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(SceneLight msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(SceneLight msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(SceneLight msg) => msg.Ros2MessageLength;
+            public override void RosValidate(SceneLight msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<SceneLight>
         {

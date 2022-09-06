@@ -275,7 +275,8 @@ namespace Iviz.Msgs.SensorMsgs
     
         public int RosMessageLength
         {
-            get {
+            get
+            {
                 int size = 281;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(DistortionModel);
@@ -286,25 +287,25 @@ namespace Iviz.Msgs.SensorMsgs
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Height
-            c += 4; // Width
-            c = WriteBuffer2.AddLength(c, DistortionModel);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // D length
-            c = WriteBuffer2.Align8(c);
-            c += 8 * D.Length;
-            c += 8 * 9; // K
-            c += 8 * 9; // R
-            c += 8 * 12; // P
-            c += 4; // BinningX
-            c += 4; // BinningY
-            c += 17; // Roi
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Height
+            size += 4; // Width
+            size = WriteBuffer2.AddLength(size, DistortionModel);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // D.Length
+            size = WriteBuffer2.Align8(size);
+            size += 8 * D.Length;
+            size += 8 * 9; // K
+            size += 8 * 9; // R
+            size += 8 * 12; // P
+            size += 4; // BinningX
+            size += 4; // BinningY
+            size += 17; // Roi
+            return size;
         }
     
         public const string MessageType = "sensor_msgs/CameraInfo";
@@ -378,6 +379,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(CameraInfo msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(CameraInfo msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(CameraInfo msg) => msg.Ros2MessageLength;
+            public override void RosValidate(CameraInfo msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<CameraInfo>
         {

@@ -65,17 +65,26 @@ namespace Iviz.Msgs.NavMsgs
             Goal.RosValidate();
         }
     
-        public int RosMessageLength => 0 + Header.RosMessageLength + GoalId.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += Header.RosMessageLength;
+                size += GoalId.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = GoalId.AddRos2MessageLength(c);
-            c = Goal.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = GoalId.AddRos2MessageLength(size);
+            size = Goal.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "nav_msgs/GetMapActionGoal";
@@ -111,6 +120,7 @@ namespace Iviz.Msgs.NavMsgs
             public override void RosSerialize(GetMapActionGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(GetMapActionGoal msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(GetMapActionGoal msg) => msg.Ros2MessageLength;
+            public override void RosValidate(GetMapActionGoal msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<GetMapActionGoal>
         {

@@ -65,17 +65,26 @@ namespace Iviz.Msgs.TurtleActionlib
             Feedback.RosValidate();
         }
     
-        public int RosMessageLength => 0 + Header.RosMessageLength + Status.RosMessageLength;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 0;
+                size += Header.RosMessageLength;
+                size += Status.RosMessageLength;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = Header.AddRos2MessageLength(c);
-            c = Status.AddRos2MessageLength(c);
-            c = Feedback.AddRos2MessageLength(c);
-            return c;
+            int size = c;
+            size = Header.AddRos2MessageLength(size);
+            size = Status.AddRos2MessageLength(size);
+            size = Feedback.AddRos2MessageLength(size);
+            return size;
         }
     
         public const string MessageType = "turtle_actionlib/ShapeActionFeedback";
@@ -119,6 +128,7 @@ namespace Iviz.Msgs.TurtleActionlib
             public override void RosSerialize(ShapeActionFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ShapeActionFeedback msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(ShapeActionFeedback msg) => msg.Ros2MessageLength;
+            public override void RosValidate(ShapeActionFeedback msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<ShapeActionFeedback>
         {

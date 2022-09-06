@@ -98,11 +98,11 @@ namespace Iviz.Msgs.StdSrvs
         
         public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c += 1; // Data
-            return c;
+            int size = c;
+            size += 1; // Data
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);
@@ -161,17 +161,25 @@ namespace Iviz.Msgs.StdSrvs
             if (Message is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 5 + WriteBuffer.GetStringSize(Message);
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 5;
+                size += WriteBuffer.GetStringSize(Message);
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c += 1; // Success
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Message);
-            return c;
+            int size = c;
+            size += 1; // Success
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Message);
+            return size;
         }
     
         public override string ToString() => Extensions.ToString(this);

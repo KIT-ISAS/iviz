@@ -97,21 +97,30 @@ namespace Iviz.Msgs.IvizMsgs
             if (Meshes is null) BuiltIns.ThrowNullReference();
         }
     
-        public int RosMessageLength => 76 + WriteBuffer.GetStringSize(Name) + 4 * Meshes.Length;
+        public int RosMessageLength
+        {
+            get
+            {
+                int size = 76;
+                size += WriteBuffer.GetStringSize(Name);
+                size += 4 * Meshes.Length;
+                return size;
+            }
+        }
         
         public int Ros2MessageLength => AddRos2MessageLength(0);
         
-        public int AddRos2MessageLength(int d)
+        public int AddRos2MessageLength(int c)
         {
-            int c = d;
-            c = WriteBuffer2.Align4(c);
-            c = WriteBuffer2.AddLength(c, Name);
-            c = WriteBuffer2.Align4(c);
-            c += 4; // Parent
-            c += 64; // Transform
-            c += 4; // Meshes length
-            c += 4 * Meshes.Length;
-            return c;
+            int size = c;
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, Name);
+            size = WriteBuffer2.Align4(size);
+            size += 4; // Parent
+            size += 64; // Transform
+            size += 4; // Meshes.Length
+            size += 4 * Meshes.Length;
+            return size;
         }
     
         public const string MessageType = "iviz_msgs/ModelNode";
@@ -140,6 +149,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(ModelNode msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ModelNode msg) => msg.RosMessageLength;
             public override int Ros2MessageLength(ModelNode msg) => msg.Ros2MessageLength;
+            public override void RosValidate(ModelNode msg) => msg.RosValidate();
         }
         sealed class Deserializer : Deserializer<ModelNode>
         {
