@@ -57,8 +57,8 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
         out byte[] responseHeader)
     {
         this.topicInfo = topicInfo;
-        senderQueue = new SenderQueue<TMessage>(this, topicInfo);
-        serializer = topicInfo.CreateSerializer<TMessage>();
+        serializer = ((TMessage)topicInfo.Generator).CreateSerializer();
+        senderQueue = new SenderQueue<TMessage>(this, serializer);
 
         RemoteEndpoint = new Endpoint(request.Hostname, request.Port);
 

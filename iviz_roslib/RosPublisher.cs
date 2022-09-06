@@ -80,7 +80,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
     internal RosPublisher(RosClient client, TopicInfo topicInfo)
     {
         this.client = client;
-        serializer = topicInfo.CreateSerializer<TMessage>();
+        serializer = ((TMessage)topicInfo.Generator).CreateSerializer();
         manager = new SenderManager<TMessage>(this, topicInfo) { ForceTcpNoDelay = true };
     }
 

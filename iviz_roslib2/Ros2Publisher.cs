@@ -35,7 +35,7 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
     {
         this.client = client;
         this.publisher = publisher;
-        serializer = ((IHasSerializer<TMessage>)new TMessage()).CreateSerializer();
+        serializer = new TMessage().CreateSerializer();
         task = Task.Run(() => Run().AwaitNoThrow(this));
     }
 

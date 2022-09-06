@@ -46,7 +46,6 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
     public bool IsPaused
     {
-        get => isPaused;
         set => isPaused = value;
     }
 
@@ -252,7 +251,7 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
     async ValueTask ProcessMessages(TcpClient client)
     {
-        var deserializer = topicInfo.CreateDeserializer<TMessage>();
+        var deserializer = ((TMessage)topicInfo.Generator).CreateDeserializer();
 
         var token = runningTs.Token;
         using var readBuffer = new ResizableRent();
@@ -294,7 +293,7 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
             {
                 try
                 {
-                    callback.Handle(in message, this);
+                    callback.Handle(message, this);
                 }
                 catch (Exception e)
                 {
@@ -313,7 +312,7 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
         await ProcessMessages(client);
     }
 
-    internal override void Post(in TMessage message, int rcvLength)
+    internal override void Post(TMessage message, int rcvLength)
     {
         if (task.IsCompleted) /* IsAlive */
         {
@@ -330,7 +329,7 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
         {
             try
             {
-                callback.Handle(in message, this);
+                callback.Handle(message, this);
             }
             catch (Exception e)
             {

@@ -14,5 +14,5 @@ public abstract class LoopbackReceiver<T> where T : IMessageRos1
     /// </summary>
     /// <param name="message">The message being sent.</param>
     /// <param name="messageSize">The cached message size.</param>
-    internal abstract void Post(in T message, int messageSize);
+    internal abstract void Post(T message, int messageSize);
 }

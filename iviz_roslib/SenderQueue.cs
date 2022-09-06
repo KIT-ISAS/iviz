@@ -54,9 +54,9 @@ internal sealed class SenderQueue<TMessage> : SenderQueue where TMessage : IMess
     readonly List<Entry?> sendQueue = new();
     readonly Serializer<TMessage> serializer;
 
-    public SenderQueue(IRosSender sender, TopicInfo topicInfo) : base(sender)
+    public SenderQueue(IRosSender sender, Serializer<TMessage> serializer) : base(sender)
     {
-        serializer = topicInfo.CreateSerializer<TMessage>();
+        this.serializer = serializer;
     }
 
     public void Enqueue(in TMessage message, ref int numDropped, ref long bytesDropped)
@@ -146,7 +146,8 @@ internal sealed class SenderQueue<TMessage> : SenderQueue where TMessage : IMess
     void DiscardOldMessages(long totalQueueSizeInBytes, long maxQueueSizeInBytes,
         out int numDropped, out long bytesDropped)
     {
-        int c = sendQueue.Count - 1;
+        int sendQueueCount = sendQueue.Count;
+        int c = sendQueueCount - 1;
 
         long remainingBytes = maxQueueSizeInBytes;
         for (int i = 0; i < NumPacketsWithoutConstraint; i++)
@@ -162,7 +163,7 @@ internal sealed class SenderQueue<TMessage> : SenderQueue where TMessage : IMess
         if (remainingBytes > 0)
         {
             // start discarding old messages
-            for (int i = NumPacketsWithoutConstraint; i < sendQueue.Count; i++)
+            for (int i = NumPacketsWithoutConstraint; i < sendQueueCount; i++)
             {
                 var element = sendQueue[c - i];
                 if (element is not { } notNullElement)
@@ -181,7 +182,7 @@ internal sealed class SenderQueue<TMessage> : SenderQueue where TMessage : IMess
             }
         }
 
-        numDropped = sendQueue.Count - consideredPackets;
+        numDropped = sendQueueCount - consideredPackets;
         bytesDropped = totalQueueSizeInBytes - maxQueueSizeInBytes + remainingBytes;
     }
 

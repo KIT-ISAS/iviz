@@ -20,7 +20,6 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
     int totalSubscribers;
     bool disposed;
 
-
     internal Ros2Subscriber(Ros2Client client)
     {
         this.client = client;
@@ -35,7 +34,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
     {
         var token = CancellationToken;
         var rclSubscriber = Subscriber;
-        var deserializer = ((IHasSerializer<TMessage>)new TMessage()).CreateDeserializer();
+        var deserializer = new TMessage().CreateDeserializer();
         var receiverInfo = new Ros2Receiver(Topic, TopicType);
         var messageHandler = new RclDeserializeHandler<TMessage>(this, deserializer);
         using var gcHandle = new GCHandleWrapper(messageHandler);
@@ -62,7 +61,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
             {
                 try
                 {
-                    callback.Handle(in msg, receiverInfo);
+                    callback.Handle(msg, receiverInfo);
                 }
                 catch (Exception e)
                 {

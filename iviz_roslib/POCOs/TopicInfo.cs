@@ -41,21 +41,7 @@ internal sealed class TopicInfo
     /// Instance of the message used to generate others of the same type.
     /// </summary>
     public IMessage Generator { get; }
-
-    public Serializer<TMessage> CreateSerializer<TMessage>()
-    {
-        return Generator is IHasSerializer<TMessage> generator
-            ? generator.CreateSerializer()
-            : throw new InvalidOperationException("Invalid generator!");
-    }
     
-    public Deserializer<TMessage> CreateDeserializer<TMessage>()
-    {
-        return Generator is IHasSerializer<TMessage> generator
-            ? generator.CreateDeserializer()
-            : throw new InvalidOperationException("Invalid generator!");
-    }
-
     public TopicInfo(string callerId, string topic, IMessage generator)
     {
         CallerId = callerId;

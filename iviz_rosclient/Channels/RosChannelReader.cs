@@ -68,7 +68,7 @@ public sealed class RosChannelReader<T> : BaseRosChannelReader<T> where T : IMes
         subscriberToken = subscriber.CancellationToken.Register(OnSubscriberDisposed);
     }
 
-    public override void Handle(in T t, IRosConnection _)
+    public override void Handle(T t, IRosConnection _)
     {
         if (disposed)
         {

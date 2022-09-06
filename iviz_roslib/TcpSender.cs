@@ -15,6 +15,7 @@ namespace Iviz.Roslib;
 internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSender where TMessage : IMessage
 {
     readonly SenderQueue<TMessage> senderQueue;
+    readonly Serializer<TMessage> serializer;
     readonly CancellationTokenSource runningTs = new();
     readonly TopicInfo topicInfo;
     readonly Task task;
@@ -72,7 +73,8 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
     public TcpSender(TcpClient client, TopicInfo topicInfo, ILatchedMessageProvider<TMessage> provider)
     {
         this.topicInfo = topicInfo;
-        senderQueue = new SenderQueue<TMessage>(this, topicInfo);
+        serializer = ((TMessage)topicInfo.Generator).CreateSerializer();
+        senderQueue = new SenderQueue<TMessage>(this, serializer);
         TcpClient = client;
         Endpoint = new Endpoint((IPEndPoint)TcpClient.Client.LocalEndPoint!);
         RemoteEndpoint = new Endpoint((IPEndPoint)TcpClient.Client.RemoteEndPoint!);
@@ -274,7 +276,6 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
             Publish(latchedMsg.value!);
         }
 
-        var serializer = topicInfo.CreateSerializer<TMessage>();
         var token = runningTs.Token;
         var tcpClient = TcpClient;
 

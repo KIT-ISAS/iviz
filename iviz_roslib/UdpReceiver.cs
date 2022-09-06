@@ -35,7 +35,14 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
     public ErrorMessage? ErrorDescription { get; private set; }
     public bool IsAlive => !task.IsCompleted;
-    public bool IsPaused { get; set; }
+    
+    bool isPaused;
+
+    public bool IsPaused
+    {
+        set => isPaused = value;
+    }
+    
     public bool IsConnected => Status == ReceiverStatus.Running;
     public Endpoint Endpoint { get; }
     public Endpoint RemoteEndpoint { get; }
@@ -187,7 +194,7 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
     async ValueTask ProcessLoop()
     {
-        var deserializer = topicInfo.CreateDeserializer<TMessage>();
+        var deserializer = ((TMessage)topicInfo.Generator).CreateDeserializer();
 
         Status = ReceiverStatus.Running;
         using var readBuffer = new Rent(MaxPacketSize);
@@ -297,7 +304,7 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
     void ProcessMessage(Deserializer<TMessage> deserializer, Span<byte> buffer, int rcvLength)
     {
-        if (IsPaused)
+        if (isPaused)
         {
             return;
         }
@@ -349,9 +356,9 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
         UdpClient.Client.ReceiveBufferSize = recommendedSize;
     }
 
-    internal override void Post(in TMessage message, int rcvLength)
+    internal override void Post(TMessage message, int rcvLength)
     {
-        if (!IsAlive)
+        if (task.IsCompleted)
         {
             return;
         }
@@ -359,20 +366,20 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
         numReceived++;
         bytesReceived += rcvLength + UdpRosParams.HeaderLength + 4;
 
-        if (!IsPaused)
+        if (!isPaused)
         {
             MessageCallback(message);
         }
     }
     
-    void MessageCallback(in TMessage message)
+    void MessageCallback(TMessage message)
     {
         var callbacks = manager.callbacks;
         foreach (var callback in callbacks)
         {
             try
             {
-                callback.Handle(in message, this);
+                callback.Handle(message, this);
             }
             catch (Exception e)
             {
