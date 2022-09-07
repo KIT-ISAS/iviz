@@ -5,14 +5,12 @@ using Iviz.Tools;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Msgs.StdMsgs;
-using ISerializable = Iviz.Msgs.ISerializable;
 
 
 namespace Iviz.MsgsGen.Dynamic;
 
-public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMessage>
+public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMessage>, IHasSerializer<DynamicMessage>
 {
     static Dictionary<string, IGenerator>? structTypes;
 
@@ -45,8 +43,6 @@ public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMe
         [Triangle.MessageType] = new MessageGenerator<Triangle>(),
 
         [Header.MessageType] = new MessageGenerator<Header>(),
-        [TransformStamped.MessageType] = new MessageGenerator<TransformStamped>(),
-        [Log.MessageType] = new MessageGenerator<Log>(),
     };
 
     public const string RosAny = "*";
@@ -319,7 +315,7 @@ public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMe
         public IField CreateFixedArrayField(int size) => new StructFixedArrayField<T>(size);
     }
 
-    sealed class MessageGenerator<T> : IGenerator where T : IMessage, IDeserializable<T>, new()
+    sealed class MessageGenerator<T> : IGenerator where T : IMessage, new()
     {
         public IField CreateField() => new MessageField<T>();
         public IField CreateArrayField() => new MessageArrayField<T>();
@@ -329,4 +325,29 @@ public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMe
     public void RosSerialize(ref WriteBuffer2 b) => throw new RosInvalidMessageForVersion();
     public int Ros2MessageLength => throw new RosInvalidMessageForVersion();
     public int AddRos2MessageLength(int offset) => throw new RosInvalidMessageForVersion();
+
+
+    sealed class Serializer : Serializer<DynamicMessage>
+    {
+        public override void RosSerialize(DynamicMessage msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
+        public override void RosSerialize(DynamicMessage msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
+        public override int RosMessageLength(DynamicMessage msg) => msg.RosMessageLength;
+        public override int Ros2MessageLength(DynamicMessage msg) => msg.Ros2MessageLength;
+        public override void RosValidate(DynamicMessage msg) => msg.RosValidate();
+    }
+
+    sealed class Deserializer : Deserializer<DynamicMessage>
+    {
+        readonly DynamicMessage generator;
+        public Deserializer(DynamicMessage generator) => this.generator = generator;
+
+        public override void RosDeserialize(ref ReadBuffer b, out DynamicMessage msg) =>
+            msg = generator.RosDeserialize(ref b);
+
+        public override void RosDeserialize(ref ReadBuffer2 b, out DynamicMessage msg) =>
+            msg = generator.RosDeserialize(ref b);
+    }
+
+    public Serializer<DynamicMessage> CreateSerializer() => new Serializer();
+    public Deserializer<DynamicMessage> CreateDeserializer() => new Deserializer(this);
 }

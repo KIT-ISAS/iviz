@@ -3,13 +3,20 @@ using Iviz.Msgs;
 
 namespace Iviz.MsgsGen.Dynamic;
 
-public sealed class MessageArrayField<T> : IField<T[]> where T : IMessage, IDeserializable<T>, new()
+public sealed class MessageArrayField<T> : IField<T[]> where T : IMessage, new()
 {
-    static readonly IDeserializableRos1<T> Generator = new T();
+    static readonly Serializer<T> Serializer = new T().CreateSerializer();
+    static readonly Deserializer<T> Deserializer = new T().CreateDeserializer();
 
-    public T[] Value { get; set; } = Array.Empty<T>();
+    T[] value = Array.Empty<T>();
 
-    object IField.Value => Value;
+    public T[] Value
+    {
+        get => value;
+        set => this.value = value;
+    }
+
+    object IField.Value => value;
         
     public FieldType Type => FieldType.MessageArray;
         
@@ -18,9 +25,9 @@ public sealed class MessageArrayField<T> : IField<T[]> where T : IMessage, IDese
         get
         {
             int size = 4;
-            foreach (T t in Value)
+            foreach (var t in value)
             {
-                size += t.RosMessageLength;
+                size += Serializer.RosMessageLength(t);
             }
 
             return size;
@@ -29,34 +36,35 @@ public sealed class MessageArrayField<T> : IField<T[]> where T : IMessage, IDese
 
     public void RosValidate()
     {
-        if (Value == null)
-        {
-            BuiltIns.ThrowNullReference(nameof(Value));
-        }
+        if (value == null) BuiltIns.ThrowNullReference(nameof(value));
 
-        for (int i = 0; i < Value.Length; i++)
+        for (int i = 0; i < value.Length; i++)
         {
-            if (Value[i] is null)
+            if (value[i] is null)
             {
-                BuiltIns.ThrowNullReference(nameof(Value), i);
+                BuiltIns.ThrowNullReference(nameof(value), i);
             }
 
-            Value[i].RosValidate();
+            Serializer.RosValidate(value[i]);
         }
     }
 
     public void RosSerialize(ref WriteBuffer b)
     {
-        b.SerializeArrayGeneric(Value);
+        b.Serialize(value.Length);
+        foreach (var t in value)
+        {
+            Serializer.RosSerialize(t, ref b);
+        }
     }
 
     public void RosDeserializeInPlace(ref ReadBuffer b)
     {
         b.DeserializeArray(out T[] array);
-        Value = array;
-        for (int i = 0; i < Value.Length; i++)
+        value = array;
+        for (int i = 0; i < value.Length; i++)
         {
-            Value[i] = Generator.RosDeserialize(ref b);
+            Deserializer.RosDeserialize(ref b, out value[i]);
         }
     }
 

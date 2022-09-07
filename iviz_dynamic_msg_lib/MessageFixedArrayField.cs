@@ -2,25 +2,32 @@ using Iviz.Msgs;
 
 namespace Iviz.MsgsGen.Dynamic;
 
-public sealed class MessageFixedArrayField<T> : IField<T[]> where T : IMessage, IDeserializable<T>, new()
+public sealed class MessageFixedArrayField<T> : IField<T[]> where T : IMessage, new()
 {
-    static readonly IDeserializableRos1<T> Generator = new T();
+    static readonly Serializer<T> Serializer = new T().CreateSerializer();
+    static readonly Deserializer<T> Deserializer = new T().CreateDeserializer();
 
-    public int Count { get; }
+    public readonly int Count;
 
-    public T[] Value { get; set; }
+    T[] value;
 
-    object IField.Value => Value;
+    public T[] Value
+    {
+        get => value;
+        set => this.value = value;
+    }
+
+    object IField.Value => value;
         
     public FieldType Type => FieldType.MessageFixedArray;
 
     public MessageFixedArrayField(int count)
     {
         Count = count;
-        Value = new T[count];
+        value = new T[count];
         for (int i = 0; i < count; i++)
         {
-            Value[i] = new T();
+            value[i] = new T();
         }
     }
 
@@ -31,7 +38,7 @@ public sealed class MessageFixedArrayField<T> : IField<T[]> where T : IMessage, 
             int size = 0;
             for (int i = 0; i < Count; i++)
             {
-                size += Value[i].RosMessageLength;
+                size += Serializer.RosMessageLength(value[i]);
             }
 
             return size;
@@ -40,37 +47,37 @@ public sealed class MessageFixedArrayField<T> : IField<T[]> where T : IMessage, 
 
     public void RosValidate()
     {
-        if (Value == null)
+        if (value == null) BuiltIns.ThrowNullReference(nameof(value));
+
+        if (value.Length != Count)
         {
-            BuiltIns.ThrowNullReference(nameof(Value));
+            BuiltIns.ThrowInvalidSizeForFixedArray(value.Length, Count);
         }
 
-        if (Value.Length != Count)
+        for (int i = 0; i < Count; i++)
         {
-            BuiltIns.ThrowInvalidSizeForFixedArray(Value.Length, Count);
-        }
-
-        for (int i = 0; i < Value.Length; i++)
-        {
-            if (Value[i] is null)
+            if (value[i] is null)
             {
-                BuiltIns.ThrowNullReference(nameof(Value), i);
+                BuiltIns.ThrowNullReference(nameof(value), i);
             }
 
-            Value[i].RosValidate();
+            Serializer.RosValidate(value[i]);
         }
     }
 
     public void RosSerialize(ref WriteBuffer b)
     {
-        b.SerializeArrayGeneric(Value, Count);
+        for (int i = 0; i < Count; i++)
+        {
+            Serializer.RosSerialize(value[i], ref b);
+        }
     }
 
     public void RosDeserializeInPlace(ref ReadBuffer b)
     {
         for (int i = 0; i < Count; i++)
         {
-            Value[i] = Generator.RosDeserialize(ref b);
+            Deserializer.RosDeserialize(ref b, out value[i]);
         }
     }
 

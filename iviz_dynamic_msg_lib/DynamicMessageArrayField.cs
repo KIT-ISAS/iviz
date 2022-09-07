@@ -47,7 +47,11 @@ internal sealed class DynamicMessageArrayField : IField
 
     public void RosSerialize(ref WriteBuffer b)
     {
-        b.SerializeArray(Value);
+        b.Serialize(Value.Length);
+        foreach (var t in Value)
+        {
+            t.RosSerialize(ref b);
+        }
     }
 
     public void RosDeserializeInPlace(ref ReadBuffer b)

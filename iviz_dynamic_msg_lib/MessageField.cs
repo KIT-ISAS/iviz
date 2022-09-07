@@ -2,36 +2,38 @@ using Iviz.Msgs;
 
 namespace Iviz.MsgsGen.Dynamic;
 
-public sealed class MessageField<T> : IField<T> where T : IMessage, IDeserializable<T>, new()
+public sealed class MessageField<T> : IField<T> where T : IMessage, new()
 {
-    static readonly IDeserializableRos1<T> Generator = new T();
+    static readonly Serializer<T> Serializer = new T().CreateSerializer();
+    static readonly Deserializer<T> Deserializer = new T().CreateDeserializer();
 
-    public T Value { get; set; } = new();
+    T value = new T();
 
-    object IField.Value => Value;
+    public T Value
+    {
+        get => value;
+        set => this.value = value;
+    }
+
+    object IField.Value => value;
 
     public FieldType Type => FieldType.Message;
 
-    public int RosLength => Value.RosMessageLength;
+    public int RosLength => Serializer.RosMessageLength(value);
 
     public void RosValidate()
     {
-        if (Value == null)
-        {
-            BuiltIns.ThrowNullReference(nameof(Value));
-        }
-
-        Value.RosValidate();
+        Serializer.RosValidate(value);
     }
 
     public void RosSerialize(ref WriteBuffer b)
     {
-        Value.RosSerialize(ref b);
+        Serializer.RosSerialize(value, ref b);
     }
 
     public void RosDeserializeInPlace(ref ReadBuffer b)
     {
-        Value = Generator.RosDeserialize(ref b);
+        Deserializer.RosDeserialize(ref b, out value);
     }
 
     public IField Generate()

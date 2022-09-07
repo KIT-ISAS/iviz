@@ -5,8 +5,8 @@ namespace Iviz.MsgsGen.Dynamic;
 internal sealed class DynamicMessageFixedArrayField : IField
 {
     readonly DynamicMessage generator;
-        
-    public int Count { get; }
+    public readonly int Count;
+    
     public DynamicMessage[] Value { get; set; }
 
     object IField.Value => Value;
@@ -41,20 +41,16 @@ internal sealed class DynamicMessageFixedArrayField : IField
 
     public void RosValidate()
     {
-        if (Value == null)
-        {
-            BuiltIns.ThrowNullReference(nameof(Value));
-        }
-
-        if (Value.Length != Count)
-        {
-            BuiltIns.ThrowInvalidSizeForFixedArray(Value.Length, Count);
-        }
+        if (Value == null) BuiltIns.ThrowNullReference(nameof(Value));
+        if (Value.Length != Count) BuiltIns.ThrowInvalidSizeForFixedArray(Value.Length, Count);
     }
 
     public void RosSerialize(ref WriteBuffer b)
     {
-        b.SerializeArray(Value, Count);
+        for (int i = 0; i < Count; i++)
+        {
+            Value[i].RosSerialize(ref b);
+        }        
     }
 
     public void RosDeserializeInPlace(ref ReadBuffer b)
