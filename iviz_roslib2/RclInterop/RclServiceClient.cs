@@ -43,12 +43,12 @@ internal sealed class RclServiceClient : IDisposable, IHasHandle
         }
     }
 
-    public void SendRequest(ISerializable request, out long sequenceNumber)
+    public void SendRequest(IRequest request, out long sequenceNumber)
     {
         using var messageBuffer = new SerializedMessage();
         const int headerSize = 4;
 
-        int messageLength = request.Ros2MessageLength;
+        int messageLength = request.GetRos2MessageLength();
         int serializedLength = messageLength + headerSize;
 
         var span = messageBuffer.Resize(serializedLength);

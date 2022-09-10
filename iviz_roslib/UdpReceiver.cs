@@ -327,7 +327,7 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
         TMessage message;
         unsafe
         {
-            fixed (byte* bufferPtr = buffer)
+            fixed (byte* bufferPtr = &buffer[0])
             {
                 var b = new ReadBuffer(bufferPtr + 4, buffer.Length - 4);
                 deserializer.RosDeserialize(ref b, out message);
