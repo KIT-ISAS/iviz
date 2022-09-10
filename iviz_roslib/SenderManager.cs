@@ -253,17 +253,13 @@ internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage
 
     public async ValueTask DisposeAsync(CancellationToken token)
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
+        
         tokenSource.Cancel();
 
         // try to make the listener come out
-        await StreamUtils.EnqueueConnectionAsync(Endpoint.Port, this, token);
-
+        await StreamUtils.EnqueueLocalConnectionAsync(Endpoint.Port, this, token);
         listener.Stop();
         
         await task.AwaitNoThrow(2000, this, token);

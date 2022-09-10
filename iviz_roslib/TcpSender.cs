@@ -83,11 +83,7 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
 
     public override async ValueTask DisposeAsync(CancellationToken token)
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
 
         runningTs.Cancel();

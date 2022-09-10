@@ -43,11 +43,7 @@ internal sealed class ResizableRent : IDisposable
 
     public void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
         Pool.Return(Array);
     }

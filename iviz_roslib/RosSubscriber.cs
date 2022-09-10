@@ -125,12 +125,9 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
 
     void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
+        
         runningTs.Cancel();
         callbacksById.Clear();
         NumPublishersChanged = null;
@@ -139,12 +136,9 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
 
     public ValueTask DisposeAsync(CancellationToken token)
     {
-        if (disposed)
-        {
-            return default;
-        }
-
+        if (disposed) return default;
         disposed = true;
+        
         runningTs.Cancel();
         callbacksById.Clear();
         NumPublishersChanged = null;

@@ -144,12 +144,9 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
     public async ValueTask DisposeAsync(CancellationToken token)
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
+        
         runningTs.Cancel();
         UdpClient.Dispose();
 

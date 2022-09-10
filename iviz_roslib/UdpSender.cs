@@ -355,11 +355,7 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
 
     public override async ValueTask DisposeAsync(CancellationToken token)
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
 
         runningTs.Cancel();

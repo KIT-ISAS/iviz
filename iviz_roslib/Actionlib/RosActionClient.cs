@@ -62,11 +62,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable,
 
     public void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
 
         if (goalPublisher == null)
@@ -83,11 +79,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable,
 
     public async ValueTask DisposeAsync()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
 
         if (goalPublisher == null)

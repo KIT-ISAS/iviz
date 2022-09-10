@@ -40,11 +40,7 @@ internal sealed class RosServiceCaller : IDisposable
 
     public void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
         tcpClient.Dispose();
     }

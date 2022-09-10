@@ -57,11 +57,7 @@ internal sealed class RosNodeServer
 
     public async ValueTask DisposeAsync()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
 
         runningTs.Cancel();

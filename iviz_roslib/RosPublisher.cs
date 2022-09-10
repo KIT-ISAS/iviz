@@ -180,12 +180,9 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
 
     public async ValueTask DisposeAsync(CancellationToken token)
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
+        
         runningTs.Cancel();
         ids.Clear();
 
@@ -196,12 +193,9 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
 
     void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
+        
         runningTs.Cancel();
         ids.Clear();
         manager.Dispose();

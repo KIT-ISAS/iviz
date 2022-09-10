@@ -97,17 +97,13 @@ internal sealed class RosServiceListener
 
     public async ValueTask DisposeAsync(CancellationToken token)
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
 
         tokenSource.Cancel();
 
         // try to make the listener come out
-        await StreamUtils.EnqueueConnectionAsync(Uri.Port, this, token);
+        await StreamUtils.EnqueueLocalConnectionAsync(Uri.Port, this, token);
 
         listener.Stop();
         
