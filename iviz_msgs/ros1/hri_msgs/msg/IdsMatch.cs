@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class IdsMatch : IDeserializable<IdsMatch>, IHasSerializer<IdsMatch>, IMessage
+    public sealed class IdsMatch : IHasSerializer<IdsMatch>, IMessage
     {
         // This message encodes possible matches between transient IDs (face, body,
         // voice) and permanent IDs (person), with their corresponding confidence level.
@@ -178,7 +178,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(IdsMatch msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(IdsMatch msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(IdsMatch msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(IdsMatch msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(IdsMatch msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(IdsMatch msg) => msg.RosValidate();
         }
     

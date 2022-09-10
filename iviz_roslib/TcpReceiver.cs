@@ -219,13 +219,13 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
         using var readBuffer = new ResizableRent();
 
-        int receivedLength = await ReceivePacket(client, readBuffer, runningTs.Token);
-        if (receivedLength == -1)
+        int rcvLength = await ReceivePacket(client, readBuffer, runningTs.Token);
+        if (rcvLength < 0)
         {
             throw new IOException("Connection closed during handshake");
         }
 
-        var responseHeader = RosUtils.ParseHeader(readBuffer, receivedLength);
+        var responseHeader = RosUtils.ParseHeader(readBuffer, rcvLength);
         var dictionary = RosUtils.CreateHeaderDictionary(responseHeader);
 
         if (dictionary.TryGetValue("callerid", out string? remoteCallerId))
@@ -264,7 +264,7 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
                 ? await ReceiveAndIgnore(client, readBuffer.Array, token)
                 : await ReceivePacket(client, readBuffer, token);
 
-            if (rcvLength == -1)
+            if (rcvLength < 0)
             {
                 Logger.LogDebugFormat("{0}: Partner closed connection", this);
                 return;

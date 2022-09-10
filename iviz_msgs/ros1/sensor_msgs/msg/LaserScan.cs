@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class LaserScan : IDeserializable<LaserScan>, IHasSerializer<LaserScan>, IMessage
+    public sealed class LaserScan : IHasSerializer<LaserScan>, IMessage
     {
         // Single scan from a planar laser range-finder
         //
@@ -231,7 +231,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(LaserScan msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(LaserScan msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(LaserScan msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(LaserScan msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(LaserScan msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(LaserScan msg) => msg.RosValidate();
         }
     

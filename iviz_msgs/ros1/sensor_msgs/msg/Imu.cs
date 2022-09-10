@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Imu : IDeserializable<Imu>, IHasSerializer<Imu>, IMessage
+    public sealed class Imu : IHasSerializer<Imu>, IMessage
     {
         // This is a message to hold data from an IMU (Inertial Measurement Unit)
         //
@@ -194,7 +194,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(Imu msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Imu msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Imu msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Imu msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Imu msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Imu msg) => msg.RosValidate();
         }
     

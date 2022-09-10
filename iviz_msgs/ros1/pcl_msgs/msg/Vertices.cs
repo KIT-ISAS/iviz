@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class Vertices : IDeserializable<Vertices>, IHasSerializer<Vertices>, IMessage
+    public sealed class Vertices : IHasSerializer<Vertices>, IMessage
     {
         // List of point indices
         [DataMember (Name = "vertices")] public uint[] Vertices_;
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.PclMsgs
             public override void RosSerialize(Vertices msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Vertices msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Vertices msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Vertices msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Vertices msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Vertices msg) => msg.RosValidate();
         }
     

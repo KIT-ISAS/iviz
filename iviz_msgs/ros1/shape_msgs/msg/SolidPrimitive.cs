@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract]
-    public sealed class SolidPrimitive : IDeserializable<SolidPrimitive>, IHasSerializer<SolidPrimitive>, IMessage
+    public sealed class SolidPrimitive : IHasSerializer<SolidPrimitive>, IMessage
     {
         // Define box, sphere, cylinder, cone 
         // All shapes are defined to have their bounding boxes centered around 0,0,0.
@@ -161,7 +161,7 @@ namespace Iviz.Msgs.ShapeMsgs
             public override void RosSerialize(SolidPrimitive msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(SolidPrimitive msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(SolidPrimitive msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(SolidPrimitive msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(SolidPrimitive msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(SolidPrimitive msg) => msg.RosValidate();
         }
     

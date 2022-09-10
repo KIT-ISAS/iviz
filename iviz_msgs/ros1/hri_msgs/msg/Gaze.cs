@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class Gaze : IDeserializable<Gaze>, IHasSerializer<Gaze>, IMessage
+    public sealed class Gaze : IHasSerializer<Gaze>, IMessage
     {
         // Represents the gaze direction from a particular person (sender ID) to the
         // person that is being gazed to (receiver ID).
@@ -126,7 +126,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(Gaze msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Gaze msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Gaze msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Gaze msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Gaze msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Gaze msg) => msg.RosValidate();
         }
     

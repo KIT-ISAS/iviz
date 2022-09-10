@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract]
-    public sealed class Log : IDeserializable<Log>, IHasSerializer<Log>, IMessage
+    public sealed class Log : IHasSerializer<Log>, IMessage
     {
         //#
         //# Severity level constants
@@ -187,7 +187,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             public override void RosSerialize(Log msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Log msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Log msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Log msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Log msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Log msg) => msg.RosValidate();
         }
     

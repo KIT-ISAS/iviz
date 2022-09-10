@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class XRMarker : IDeserializable<XRMarker>, IHasSerializer<XRMarker>, IMessage
+    public sealed class XRMarker : IHasSerializer<XRMarker>, IMessage
     {
         public const byte TYPE_ARUCO = 0;
         public const byte TYPE_QRCODE = 1;
@@ -193,7 +193,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(XRMarker msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(XRMarker msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(XRMarker msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(XRMarker msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(XRMarker msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(XRMarker msg) => msg.RosValidate();
         }
     

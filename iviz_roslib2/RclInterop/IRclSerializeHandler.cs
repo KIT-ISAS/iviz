@@ -9,7 +9,7 @@ internal abstract class RclSerializeHandler
     public abstract int GetSerializedSize();
 }
 
-internal sealed class RclSerializeHandler<TMessage> : RclSerializeHandler
+internal sealed class RclSerializeHandler<TMessage> : RclSerializeHandler where TMessage : IMessage
 {
     readonly Serializer<TMessage> serializer;
     public TMessage? message;
@@ -22,7 +22,7 @@ internal sealed class RclSerializeHandler<TMessage> : RclSerializeHandler
     
     public override int GetSerializedSize() => serializer.Ros2MessageLength(message!);
 
-    public override unsafe void SerializeInto(IntPtr ptr, int length)
+    public override void SerializeInto(IntPtr ptr, int length)
     {
         const int header = 0x00000100; // CDR_LE { 0x00, 0x01}, serialization options { 0x00, 0x00 } 
         const int headerSize = 4;
@@ -32,7 +32,7 @@ internal sealed class RclSerializeHandler<TMessage> : RclSerializeHandler
 
         int size = length - headerSize;
         
-        var b = new WriteBuffer2((byte*)ptr + headerSize, size);
+        var b = new WriteBuffer2(ptr + headerSize, size);
         serializer.RosSerialize(message!, ref b);
         
         messageLength = size;

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapActionGoal : IDeserializable<GetMapActionGoal>, IHasSerializer<GetMapActionGoal>, IMessage, IActionGoal<GetMapGoal>
+    public sealed class GetMapActionGoal : IHasSerializer<GetMapActionGoal>, IMessage, IActionGoal<GetMapGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
@@ -119,7 +119,7 @@ namespace Iviz.Msgs.NavMsgs
             public override void RosSerialize(GetMapActionGoal msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(GetMapActionGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(GetMapActionGoal msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(GetMapActionGoal msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(GetMapActionGoal msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(GetMapActionGoal msg) => msg.RosValidate();
         }
     

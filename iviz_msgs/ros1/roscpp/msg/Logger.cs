@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Roscpp
 {
     [DataContract]
-    public sealed class Logger : IDeserializable<Logger>, IHasSerializer<Logger>, IMessage
+    public sealed class Logger : IHasSerializer<Logger>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "level")] public string Level;
@@ -105,7 +105,7 @@ namespace Iviz.Msgs.Roscpp
             public override void RosSerialize(Logger msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Logger msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Logger msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Logger msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Logger msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Logger msg) => msg.RosValidate();
         }
     

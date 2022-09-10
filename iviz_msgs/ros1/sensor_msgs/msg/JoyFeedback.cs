@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class JoyFeedback : IDeserializable<JoyFeedback>, IHasSerializer<JoyFeedback>, IMessage
+    public sealed class JoyFeedback : IHasSerializer<JoyFeedback>, IMessage
     {
         // Declare of the type of feedback
         public const byte TYPE_LED = 0;

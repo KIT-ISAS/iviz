@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class BoundingBoxStamped : IDeserializable<BoundingBoxStamped>, IHasSerializer<BoundingBoxStamped>, IMessage
+    public sealed class BoundingBoxStamped : IHasSerializer<BoundingBoxStamped>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "boundary")] public BoundingBox Boundary;
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(BoundingBoxStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(BoundingBoxStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(BoundingBoxStamped msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(BoundingBoxStamped msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(BoundingBoxStamped msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(BoundingBoxStamped msg) => msg.RosValidate();
         }
     

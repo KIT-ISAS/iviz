@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class Int64 : IDeserializable<Int64>, IHasSerializer<Int64>, IMessage
+    public sealed class Int64 : IHasSerializer<Int64>, IMessage
     {
         [DataMember (Name = "data")] public long Data;
     

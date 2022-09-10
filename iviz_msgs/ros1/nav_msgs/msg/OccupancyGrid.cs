@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class OccupancyGrid : IDeserializable<OccupancyGrid>, IHasSerializer<OccupancyGrid>, IMessage
+    public sealed class OccupancyGrid : IHasSerializer<OccupancyGrid>, IMessage
     {
         // This represents a 2-D grid map, in which each cell represents the probability of
         // occupancy.
@@ -152,7 +152,7 @@ namespace Iviz.Msgs.NavMsgs
             public override void RosSerialize(OccupancyGrid msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(OccupancyGrid msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(OccupancyGrid msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(OccupancyGrid msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(OccupancyGrid msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(OccupancyGrid msg) => msg.RosValidate();
         }
     

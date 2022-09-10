@@ -65,12 +65,12 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
         }
     }
 
-    public void SendResponse(ISerializable response, in RmwRequestId requestId)
+    public void SendResponse(IResponse response, in RmwRequestId requestId)
     {
         using var messageBuffer = new SerializedMessage();
         const int headerSize = 4;
 
-        int messageLength = response.Ros2MessageLength;
+        int messageLength = response.GetRos2MessageLength();
         int serializedLength = messageLength + headerSize;
 
         var span = messageBuffer.Resize(serializedLength);

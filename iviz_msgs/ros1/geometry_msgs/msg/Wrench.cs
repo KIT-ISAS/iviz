@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Wrench : IDeserializable<Wrench>, IHasSerializer<Wrench>, IMessage
+    public sealed class Wrench : IHasSerializer<Wrench>, IMessage
     {
         // This represents force in free space, separated into
         // its linear and angular parts.

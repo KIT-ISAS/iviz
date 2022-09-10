@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class JoyFeedbackArray : IDeserializable<JoyFeedbackArray>, IHasSerializer<JoyFeedbackArray>, IMessage
+    public sealed class JoyFeedbackArray : IHasSerializer<JoyFeedbackArray>, IMessage
     {
         // This message publishes values for multiple feedback at once. 
         [DataMember (Name = "array")] public JoyFeedback[] Array;
@@ -133,7 +133,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(JoyFeedbackArray msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(JoyFeedbackArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(JoyFeedbackArray msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(JoyFeedbackArray msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(JoyFeedbackArray msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(JoyFeedbackArray msg) => msg.RosValidate();
         }
     

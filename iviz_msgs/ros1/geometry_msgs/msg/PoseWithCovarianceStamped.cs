@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PoseWithCovarianceStamped : IDeserializable<PoseWithCovarianceStamped>, IHasSerializer<PoseWithCovarianceStamped>, IMessage
+    public sealed class PoseWithCovarianceStamped : IHasSerializer<PoseWithCovarianceStamped>, IMessage
     {
         // This expresses an estimated pose with a reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(PoseWithCovarianceStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(PoseWithCovarianceStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(PoseWithCovarianceStamped msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(PoseWithCovarianceStamped msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(PoseWithCovarianceStamped msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(PoseWithCovarianceStamped msg) => msg.RosValidate();
         }
     

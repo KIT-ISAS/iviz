@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.DiagnosticMsgs
 {
     [DataContract]
-    public sealed class KeyValue : IDeserializable<KeyValue>, IHasSerializer<KeyValue>, IMessage
+    public sealed class KeyValue : IHasSerializer<KeyValue>, IMessage
     {
         /// <summary> What to label this value when viewing </summary>
         [DataMember (Name = "key")] public string Key;
@@ -108,7 +108,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             public override void RosSerialize(KeyValue msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(KeyValue msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(KeyValue msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(KeyValue msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(KeyValue msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(KeyValue msg) => msg.RosValidate();
         }
     

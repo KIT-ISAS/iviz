@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ModelMaterial : IDeserializable<ModelMaterial>, IHasSerializer<ModelMaterial>, IMessage
+    public sealed class ModelMaterial : IHasSerializer<ModelMaterial>, IMessage
     {
         public const byte BLEND_DEFAULT = 0;
         public const byte BLEND_ADDITIVE = 1;
@@ -200,7 +200,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(ModelMaterial msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(ModelMaterial msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ModelMaterial msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(ModelMaterial msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(ModelMaterial msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(ModelMaterial msg) => msg.RosValidate();
         }
     

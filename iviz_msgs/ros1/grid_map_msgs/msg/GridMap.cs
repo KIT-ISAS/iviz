@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GridMapMsgs
 {
     [DataContract]
-    public sealed class GridMap : IDeserializable<GridMap>, IHasSerializer<GridMap>, IMessage
+    public sealed class GridMap : IHasSerializer<GridMap>, IMessage
     {
         // Grid map header
         [DataMember (Name = "info")] public GridMapInfo Info;
@@ -206,7 +206,7 @@ namespace Iviz.Msgs.GridMapMsgs
             public override void RosSerialize(GridMap msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(GridMap msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(GridMap msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(GridMap msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(GridMap msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(GridMap msg) => msg.RosValidate();
         }
     

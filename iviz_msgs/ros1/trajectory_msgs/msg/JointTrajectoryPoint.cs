@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract]
-    public sealed class JointTrajectoryPoint : IDeserializable<JointTrajectoryPoint>, IHasSerializer<JointTrajectoryPoint>, IMessage
+    public sealed class JointTrajectoryPoint : IHasSerializer<JointTrajectoryPoint>, IMessage
     {
         // Each trajectory point specifies either positions[, velocities[, accelerations]]
         // or positions[, effort] for the trajectory to be executed.
@@ -227,7 +227,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             public override void RosSerialize(JointTrajectoryPoint msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(JointTrajectoryPoint msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(JointTrajectoryPoint msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(JointTrajectoryPoint msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(JointTrajectoryPoint msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(JointTrajectoryPoint msg) => msg.RosValidate();
         }
     

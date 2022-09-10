@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapFeedback : IDeserializable<GetMapFeedback>, IHasSerializer<GetMapFeedback>, IMessage, IFeedback<GetMapActionFeedback>
+    public sealed class GetMapFeedback : IHasSerializer<GetMapFeedback>, IMessage, IFeedback<GetMapActionFeedback>
     {
         // no feedback
     

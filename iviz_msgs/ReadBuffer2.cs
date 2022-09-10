@@ -16,6 +16,7 @@ public unsafe struct ReadBuffer2
     /// Current position.
     /// </summary>
     byte* cursor;
+
     readonly byte* end;
 
     public ReadBuffer2(byte* ptr, int length)
@@ -23,7 +24,11 @@ public unsafe struct ReadBuffer2
         cursor = ptr;
         end = ptr + length;
     }
-    
+
+    public ReadBuffer2(IntPtr ptr, int length) : this((byte*)ptr, length)
+    {
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Align2() => cursor = (byte*)(((nint)cursor + 1) & ~1);
 
@@ -54,7 +59,7 @@ public unsafe struct ReadBuffer2
         Deserialize(out int i);
         return i;
     }
-    
+
     #region strings
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -128,7 +133,7 @@ public unsafe struct ReadBuffer2
 
         val = EmptyStringArray;
     }
-    
+
     #endregion
 
     #region scalars
@@ -301,7 +306,7 @@ public unsafe struct ReadBuffer2
 
         return count;
     }
-    
+
     #endregion
 
     #region Empties
@@ -318,7 +323,7 @@ public unsafe struct ReadBuffer2
         get => EmptyArray.StringArray;
     }
 
-    #endregion    
+    #endregion
 
     /// <summary>
     /// Deserializes a message of the given type from the buffer array.  
@@ -342,8 +347,20 @@ public unsafe struct ReadBuffer2
             return generator.RosDeserialize(ref b);
         }
     }
+    
+    public static T Deserialize<T>(Deserializer<T> generator, ReadOnlySpan<byte> buffer)
+        where T : IMessage
+    {
+        fixed (byte* bufferPtr = buffer)
+        {
+            var b = new ReadBuffer2(bufferPtr, buffer.Length);
+            generator.RosDeserialize(ref b, out var msg);
+            return msg;
+        }
+    }    
 
     #region extras
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Vector3 t)
     {
@@ -424,5 +441,6 @@ public unsafe struct ReadBuffer2
         t = *(ColorRGBA*)cursor;
         Advance(size);
     }
+
     #endregion
 }

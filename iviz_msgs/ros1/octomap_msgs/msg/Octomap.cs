@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.OctomapMsgs
 {
     [DataContract]
-    public sealed class Octomap : IDeserializable<Octomap>, IHasSerializer<Octomap>, IMessage
+    public sealed class Octomap : IHasSerializer<Octomap>, IMessage
     {
         // A 3D map in binary format, as Octree
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -155,7 +155,7 @@ namespace Iviz.Msgs.OctomapMsgs
             public override void RosSerialize(Octomap msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Octomap msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Octomap msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Octomap msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Octomap msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Octomap msg) => msg.RosValidate();
         }
     

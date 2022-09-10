@@ -1451,7 +1451,7 @@ public sealed class ClassInfo
         lines.Add($"[DataContract]");
 
         const string messageType = "IMessage";
-        string deserializableType = $"IDeserializable<{Name}>, IHasSerializer<{Name}>";
+        string deserializableType = $"IHasSerializer<{Name}>";
         if (RequiresDispose)
         {
             deserializableType += ", System.IDisposable";
@@ -1642,7 +1642,7 @@ public sealed class ClassInfo
                 }
                 else
                 {
-                    lines.Add($"        public override int Ros2MessageLength({Name} msg) => msg.Ros2MessageLength;");
+                    lines.Add($"        public override int Ros2MessageLength({Name} msg) => msg.AddRos2MessageLength(0);");
                 }
             }
 

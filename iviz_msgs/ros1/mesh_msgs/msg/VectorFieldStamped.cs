@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class VectorFieldStamped : IDeserializable<VectorFieldStamped>, IHasSerializer<VectorFieldStamped>, IMessage
+    public sealed class VectorFieldStamped : IHasSerializer<VectorFieldStamped>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "vector_field")] public MeshMsgs.VectorField VectorField;
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(VectorFieldStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(VectorFieldStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(VectorFieldStamped msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(VectorFieldStamped msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(VectorFieldStamped msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(VectorFieldStamped msg) => msg.RosValidate();
         }
     

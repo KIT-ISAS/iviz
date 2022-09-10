@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class MultiArrayDimension : IDeserializable<MultiArrayDimension>, IHasSerializer<MultiArrayDimension>, IMessage
+    public sealed class MultiArrayDimension : IHasSerializer<MultiArrayDimension>, IMessage
     {
         /// <summary> Label of given dimension </summary>
         [DataMember (Name = "label")] public string Label;
@@ -113,7 +113,7 @@ namespace Iviz.Msgs.StdMsgs
             public override void RosSerialize(MultiArrayDimension msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MultiArrayDimension msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MultiArrayDimension msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MultiArrayDimension msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(MultiArrayDimension msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(MultiArrayDimension msg) => msg.RosValidate();
         }
     

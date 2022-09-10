@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class BatteryState : IDeserializable<BatteryState>, IHasSerializer<BatteryState>, IMessage
+    public sealed class BatteryState : IHasSerializer<BatteryState>, IMessage
     {
         // Constants are chosen to match the enums in the linux kernel
         // defined in include/linux/power_supply.h as of version 3.7
@@ -303,7 +303,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(BatteryState msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(BatteryState msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(BatteryState msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(BatteryState msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(BatteryState msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(BatteryState msg) => msg.RosValidate();
         }
     

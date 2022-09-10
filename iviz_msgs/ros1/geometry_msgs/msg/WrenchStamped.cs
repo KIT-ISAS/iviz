@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class WrenchStamped : IDeserializable<WrenchStamped>, IHasSerializer<WrenchStamped>, IMessage
+    public sealed class WrenchStamped : IHasSerializer<WrenchStamped>, IMessage
     {
         // A wrench with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(WrenchStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(WrenchStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(WrenchStamped msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(WrenchStamped msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(WrenchStamped msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(WrenchStamped msg) => msg.RosValidate();
         }
     

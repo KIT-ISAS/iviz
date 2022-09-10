@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshFeatures : IDeserializable<MeshFeatures>, IHasSerializer<MeshFeatures>, IMessage
+    public sealed class MeshFeatures : IHasSerializer<MeshFeatures>, IMessage
     {
         [DataMember (Name = "map_uuid")] public string MapUuid;
         [DataMember (Name = "features")] public MeshMsgs.Feature[] Features;
@@ -142,7 +142,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(MeshFeatures msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MeshFeatures msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MeshFeatures msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MeshFeatures msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(MeshFeatures msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(MeshFeatures msg) => msg.RosValidate();
         }
     

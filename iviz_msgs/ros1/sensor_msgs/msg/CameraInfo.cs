@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class CameraInfo : IDeserializable<CameraInfo>, IHasSerializer<CameraInfo>, IMessage
+    public sealed class CameraInfo : IHasSerializer<CameraInfo>, IMessage
     {
         // This message defines meta information for a camera. It should be in a
         // camera namespace on topic "camera_info" and accompanied by up to five
@@ -378,7 +378,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(CameraInfo msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(CameraInfo msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(CameraInfo msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(CameraInfo msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(CameraInfo msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(CameraInfo msg) => msg.RosValidate();
         }
     

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerControl : IDeserializable<InteractiveMarkerControl>, IHasSerializer<InteractiveMarkerControl>, IMessage
+    public sealed class InteractiveMarkerControl : IHasSerializer<InteractiveMarkerControl>, IMessage
     {
         // Represents a control that is to be displayed together with an interactive marker
         // Identifying string for this control.
@@ -271,7 +271,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override void RosSerialize(InteractiveMarkerControl msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(InteractiveMarkerControl msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(InteractiveMarkerControl msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(InteractiveMarkerControl msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(InteractiveMarkerControl msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(InteractiveMarkerControl msg) => msg.RosValidate();
         }
     

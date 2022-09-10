@@ -22,7 +22,7 @@ internal sealed class RclDeserializeHandler<TMessage> : RclDeserializeHandler wh
         Clear();
     }
 
-    public override unsafe void DeserializeFrom(IntPtr ptr, int length)
+    public override void DeserializeFrom(IntPtr ptr, int length)
     {
         const int headerSize = 4;
         int size = length - headerSize;
@@ -30,7 +30,7 @@ internal sealed class RclDeserializeHandler<TMessage> : RclDeserializeHandler wh
 
         if (subscriber.IsPaused) return;
 
-        var b = new ReadBuffer2((byte*)ptr + headerSize, size);
+        var b = new ReadBuffer2(ptr + headerSize, size);
         deserializer.RosDeserialize(ref b, out message);
         hasMessage = true;
     }

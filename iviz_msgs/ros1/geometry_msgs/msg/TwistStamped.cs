@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class TwistStamped : IDeserializable<TwistStamped>, IHasSerializer<TwistStamped>, IMessage
+    public sealed class TwistStamped : IHasSerializer<TwistStamped>, IMessage
     {
         // A twist with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(TwistStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(TwistStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TwistStamped msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(TwistStamped msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(TwistStamped msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(TwistStamped msg) => msg.RosValidate();
         }
     

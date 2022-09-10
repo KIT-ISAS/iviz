@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class MenuEntry : IDeserializable<MenuEntry>, IHasSerializer<MenuEntry>, IMessage
+    public sealed class MenuEntry : IHasSerializer<MenuEntry>, IMessage
     {
         // MenuEntry message.
         // Each InteractiveMarker message has an array of MenuEntry messages.
@@ -171,7 +171,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override void RosSerialize(MenuEntry msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MenuEntry msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MenuEntry msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MenuEntry msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(MenuEntry msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(MenuEntry msg) => msg.RosValidate();
         }
     

@@ -8,7 +8,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct ColorRGBA : IMessage, IDeserializable<ColorRGBA>, IHasSerializer<ColorRGBA>
+    public struct ColorRGBA : IMessage, IHasSerializer<ColorRGBA>
     {
         [DataMember (Name = "r")] public float R;
         [DataMember (Name = "g")] public float G;

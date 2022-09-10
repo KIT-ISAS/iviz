@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Vector3Stamped : IDeserializable<Vector3Stamped>, IHasSerializer<Vector3Stamped>, IMessage
+    public sealed class Vector3Stamped : IHasSerializer<Vector3Stamped>, IMessage
     {
         // This represents a Vector3 with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(Vector3Stamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Vector3Stamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Vector3Stamped msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Vector3Stamped msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Vector3Stamped msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Vector3Stamped msg) => msg.RosValidate();
         }
     

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract]
-    public sealed class MultiDOFJointTrajectory : IDeserializable<MultiDOFJointTrajectory>, IHasSerializer<MultiDOFJointTrajectory>, IMessage
+    public sealed class MultiDOFJointTrajectory : IHasSerializer<MultiDOFJointTrajectory>, IMessage
     {
         // The header is used to specify the coordinate frame and the reference time for the trajectory durations
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -172,7 +172,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             public override void RosSerialize(MultiDOFJointTrajectory msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MultiDOFJointTrajectory msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MultiDOFJointTrajectory msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MultiDOFJointTrajectory msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(MultiDOFJointTrajectory msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(MultiDOFJointTrajectory msg) => msg.RosValidate();
         }
     

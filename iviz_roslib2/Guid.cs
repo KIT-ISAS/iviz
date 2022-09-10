@@ -49,10 +49,10 @@ public readonly struct Guid : IEquatable<Guid>, IComparable<Guid>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator >(in Guid left, in Guid right) => left.CompareTo(right) == 1;
+    public static bool operator >(in Guid left, in Guid right) => left.CompareTo(right) > 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator <(in Guid left, in Guid right) => left.CompareTo(right) == -1;
+    public static bool operator <(in Guid left, in Guid right) => left.CompareTo(right) < 0;
 
     public override string ToString()
     {

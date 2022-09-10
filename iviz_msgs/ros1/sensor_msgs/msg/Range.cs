@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Range : IDeserializable<Range>, IHasSerializer<Range>, IMessage
+    public sealed class Range : IHasSerializer<Range>, IMessage
     {
         // Single range reading from an active ranger that emits energy and reports
         // one range reading that is valid along an arc at the distance measured. 
@@ -167,7 +167,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(Range msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Range msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Range msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Range msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Range msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Range msg) => msg.RosValidate();
         }
     

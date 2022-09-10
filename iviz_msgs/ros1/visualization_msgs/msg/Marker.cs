@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class Marker : IDeserializable<Marker>, IHasSerializer<Marker>, IMessage
+    public sealed class Marker : IHasSerializer<Marker>, IMessage
     {
         // See http://www.ros.org/wiki/rviz/DisplayTypes/Marker and http://www.ros.org/wiki/rviz/Tutorials/Markers%3A%20Basic%20Shapes for more information on using this message with rviz
         public const byte ARROW = 0;
@@ -298,7 +298,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override void RosSerialize(Marker msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Marker msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Marker msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Marker msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Marker msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Marker msg) => msg.RosValidate();
         }
     

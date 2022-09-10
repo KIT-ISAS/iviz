@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract]
-    public sealed class Clock : IDeserializable<Clock>, IHasSerializer<Clock>, IMessage
+    public sealed class Clock : IHasSerializer<Clock>, IMessage
     {
         // roslib/Clock is used for publishing simulated time in ROS. 
         // This message simply communicates the current time.

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class AccelStamped : IDeserializable<AccelStamped>, IHasSerializer<AccelStamped>, IMessage
+    public sealed class AccelStamped : IHasSerializer<AccelStamped>, IMessage
     {
         // An accel with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(AccelStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(AccelStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(AccelStamped msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(AccelStamped msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(AccelStamped msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(AccelStamped msg) => msg.RosValidate();
         }
     

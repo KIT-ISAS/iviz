@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshGeometry : IDeserializable<MeshGeometry>, IHasSerializer<MeshGeometry>, IMessage
+    public sealed class MeshGeometry : IHasSerializer<MeshGeometry>, IMessage
     {
         // Mesh Geometry Message
         [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices;
@@ -201,7 +201,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(MeshGeometry msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MeshGeometry msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MeshGeometry msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MeshGeometry msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(MeshGeometry msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(MeshGeometry msg) => msg.RosValidate();
         }
     

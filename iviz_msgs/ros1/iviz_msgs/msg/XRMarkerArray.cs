@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class XRMarkerArray : IDeserializable<XRMarkerArray>, IHasSerializer<XRMarkerArray>, IMessage
+    public sealed class XRMarkerArray : IHasSerializer<XRMarkerArray>, IMessage
     {
         [DataMember (Name = "markers")] public XRMarker[] Markers;
     
@@ -143,7 +143,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(XRMarkerArray msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(XRMarkerArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(XRMarkerArray msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(XRMarkerArray msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(XRMarkerArray msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(XRMarkerArray msg) => msg.RosValidate();
         }
     

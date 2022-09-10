@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class IntegerRange : IDeserializable<IntegerRange>, IHasSerializer<IntegerRange>, IMessage
+    public sealed class IntegerRange : IHasSerializer<IntegerRange>, IMessage
     {
         // Represents bounds and a step value for an integer typed parameter.
         // Start value for valid values, inclusive.

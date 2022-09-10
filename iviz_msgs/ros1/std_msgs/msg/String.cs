@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class String : IDeserializable<String>, IHasSerializer<String>, IMessage
+    public sealed class String : IHasSerializer<String>, IMessage
     {
         [DataMember (Name = "data")] public string Data;
     
@@ -93,7 +93,7 @@ namespace Iviz.Msgs.StdMsgs
             public override void RosSerialize(String msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(String msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(String msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(String msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(String msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(String msg) => msg.RosValidate();
         }
     

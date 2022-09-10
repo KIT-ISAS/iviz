@@ -124,6 +124,11 @@ public static class BuiltIns
         return null;
     }
 
+    public static string ToJsonString(this IMessage o, bool indented = true)
+    {
+        return ToJsonString((object)o, indented);
+    }
+
     public static string ToJsonString(this ISerializable o, bool indented = true)
     {
         return ToJsonString((object)o, indented);
@@ -149,50 +154,41 @@ public static class BuiltIns
         return JsonConvert.SerializeObject(o, indented ? Formatting.Indented : Formatting.None);
     }
 
+    public static int GetRos2MessageLength(this ISerializable serializable)
+    {
+        return serializable.AddRos2MessageLength(0);
+    }
+    
     public static byte[] SerializeToArrayRos1(this IMessage o)
     {
-        o.RosValidate();
-        byte[] bytes = new byte[o.RosMessageLength];
-        WriteBuffer.Serialize(o, bytes);
+        var serializer = o.CreateSerializer();
+        serializer.RosValidate(o);
+        byte[] bytes = new byte[serializer.RosMessageLength(o)];
+        WriteBuffer.Serialize(serializer, o, bytes);
 
         return bytes;
     }
 
     public static byte[] SerializeToArrayRos2(this IMessage o)
     {
-        o.RosValidate();
-        byte[] bytes = new byte[o.Ros2MessageLength];
-        WriteBuffer2.Serialize(o, bytes);
-
-        return bytes;
-    }
-
-    public static byte[] SerializeToArrayRos1(this ISerializable o)
-    {
-        o.RosValidate();
-        byte[] bytes = new byte[o.RosMessageLength];
-        WriteBuffer.Serialize(o, bytes);
-
-        return bytes;
-    }
-
-    public static byte[] SerializeToArrayRos2(this ISerializable o)
-    {
-        o.RosValidate();
-        byte[] bytes = new byte[o.Ros2MessageLength];
-        WriteBuffer2.Serialize(o, bytes);
+        var serializer = o.CreateSerializer();
+        serializer.RosValidate(o);
+        byte[] bytes = new byte[serializer.Ros2MessageLength(o)];
+        WriteBuffer2.Serialize(serializer, o, bytes);
 
         return bytes;
     }
     
-    public static T DeserializeRos1<T>(this IDeserializable<T> generator, Span<byte> src) where T : IMessage
+    public static T DeserializeRos1<T>(this T generator, Span<byte> src) where T : IMessage, IHasSerializer<T>
     {
-        return ReadBuffer.Deserialize(generator, src);
+        var deserializer = generator.CreateDeserializer();
+        return ReadBuffer.Deserialize(deserializer, src);
     }
 
-    public static T DeserializeRos2<T>(this IDeserializable<T> generator, Span<byte> src) where T : IMessage
+    public static T DeserializeRos2<T>(this T generator, Span<byte> src) where T : IMessage, IHasSerializer<T>
     {
-        return ReadBuffer2.Deserialize(generator, src);
+        var deserializer = generator.CreateDeserializer();
+        return ReadBuffer2.Deserialize(deserializer, src);
     }
 
     // we use here the fact that 99% of the strings we get are ascii and with length <= 64 (i.e., frames in headers)

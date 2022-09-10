@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ModelTexCoords : IDeserializable<ModelTexCoords>, IHasSerializer<ModelTexCoords>, IMessage
+    public sealed class ModelTexCoords : IHasSerializer<ModelTexCoords>, IMessage
     {
         [DataMember (Name = "coords")] public GeometryMsgs.Point32[] Coords;
     
@@ -120,7 +120,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(ModelTexCoords msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(ModelTexCoords msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ModelTexCoords msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(ModelTexCoords msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(ModelTexCoords msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(ModelTexCoords msg) => msg.RosValidate();
         }
     

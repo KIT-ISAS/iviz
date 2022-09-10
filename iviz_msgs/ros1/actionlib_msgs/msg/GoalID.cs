@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibMsgs
 {
     [DataContract]
-    public sealed class GoalID : IDeserializable<GoalID>, IHasSerializer<GoalID>, IMessage
+    public sealed class GoalID : IHasSerializer<GoalID>, IMessage
     {
         // The stamp should store the time at which this goal was requested.
         // It is used by an action server when it tries to preempt all
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.ActionlibMsgs
             public override void RosSerialize(GoalID msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(GoalID msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(GoalID msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(GoalID msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(GoalID msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(GoalID msg) => msg.RosValidate();
         }
     

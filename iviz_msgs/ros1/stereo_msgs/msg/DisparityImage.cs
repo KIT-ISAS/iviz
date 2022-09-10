@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StereoMsgs
 {
     [DataContract]
-    public sealed class DisparityImage : IDeserializable<DisparityImage>, IHasSerializer<DisparityImage>, System.IDisposable, IMessage
+    public sealed class DisparityImage : IHasSerializer<DisparityImage>, System.IDisposable, IMessage
     {
         // Separate header for compatibility with current TimeSynchronizer.
         // Likely to be removed in a later release, use image.header instead.
@@ -188,7 +188,7 @@ namespace Iviz.Msgs.StereoMsgs
             public override void RosSerialize(DisparityImage msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(DisparityImage msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(DisparityImage msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(DisparityImage msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(DisparityImage msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(DisparityImage msg) => msg.RosValidate();
         }
     

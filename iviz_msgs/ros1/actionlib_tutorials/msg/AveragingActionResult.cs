@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class AveragingActionResult : IDeserializable<AveragingActionResult>, IHasSerializer<AveragingActionResult>, IMessage, IActionResult<AveragingResult>
+    public sealed class AveragingActionResult : IHasSerializer<AveragingActionResult>, IMessage, IActionResult<AveragingResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -129,7 +129,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             public override void RosSerialize(AveragingActionResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(AveragingActionResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(AveragingActionResult msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(AveragingActionResult msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(AveragingActionResult msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(AveragingActionResult msg) => msg.RosValidate();
         }
     

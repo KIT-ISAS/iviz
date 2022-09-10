@@ -186,6 +186,7 @@ public unsafe struct WriteBuffer
         Advance(size);
     }
 
+    /*
     public void SerializeArray(IMessage[] val)
     {
         WriteInt(val.Length);
@@ -221,6 +222,7 @@ public unsafe struct WriteBuffer
             val[i].RosSerialize(ref this);
         }
     }
+    */
 
     /// Returns the size in bytes of a string array when serialized in ROS
     public static int GetArraySize(string[]? array)
@@ -260,4 +262,13 @@ public unsafe struct WriteBuffer
             message.RosSerialize(ref b);
         }
     }
+    
+    public static void Serialize(Serializer serializer, IMessage message, Span<byte> buffer)
+    {
+        fixed (byte* bufferPtr = buffer)
+        {
+            var b = new WriteBuffer2(bufferPtr, buffer.Length);
+            serializer.RosSerialize(message, ref b);
+        }
+    }    
 }

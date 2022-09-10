@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TrajectoryMsgs
 {
     [DataContract]
-    public sealed class JointTrajectory : IDeserializable<JointTrajectory>, IHasSerializer<JointTrajectory>, IMessage
+    public sealed class JointTrajectory : IHasSerializer<JointTrajectory>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "joint_names")] public string[] JointNames;
@@ -160,7 +160,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             public override void RosSerialize(JointTrajectory msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(JointTrajectory msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(JointTrajectory msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(JointTrajectory msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(JointTrajectory msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(JointTrajectory msg) => msg.RosValidate();
         }
     

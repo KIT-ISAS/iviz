@@ -332,7 +332,7 @@ public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMe
         public override void RosSerialize(DynamicMessage msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
         public override void RosSerialize(DynamicMessage msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
         public override int RosMessageLength(DynamicMessage msg) => msg.RosMessageLength;
-        public override int Ros2MessageLength(DynamicMessage msg) => msg.Ros2MessageLength;
+        public override int Ros2MessageLength(DynamicMessage msg) => msg.AddRos2MessageLength(0);
         public override void RosValidate(DynamicMessage msg) => msg.RosValidate();
     }
 

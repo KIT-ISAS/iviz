@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class ModelColorChannel : IDeserializable<ModelColorChannel>, IHasSerializer<ModelColorChannel>, IMessage
+    public sealed class ModelColorChannel : IHasSerializer<ModelColorChannel>, IMessage
     {
         [DataMember (Name = "colors")] public Color32[] Colors;
     
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(ModelColorChannel msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(ModelColorChannel msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ModelColorChannel msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(ModelColorChannel msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(ModelColorChannel msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(ModelColorChannel msg) => msg.RosValidate();
         }
     

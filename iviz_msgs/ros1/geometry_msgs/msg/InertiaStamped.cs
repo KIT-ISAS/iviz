@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class InertiaStamped : IDeserializable<InertiaStamped>, IHasSerializer<InertiaStamped>, IMessage
+    public sealed class InertiaStamped : IHasSerializer<InertiaStamped>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "inertia")] public Inertia Inertia;
@@ -111,7 +111,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(InertiaStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(InertiaStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(InertiaStamped msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(InertiaStamped msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(InertiaStamped msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(InertiaStamped msg) => msg.RosValidate();
         }
     

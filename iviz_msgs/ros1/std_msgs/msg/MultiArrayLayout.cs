@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class MultiArrayLayout : IDeserializable<MultiArrayLayout>, IHasSerializer<MultiArrayLayout>, IMessage
+    public sealed class MultiArrayLayout : IHasSerializer<MultiArrayLayout>, IMessage
     {
         // The multiarray declares a generic multi-dimensional array of a
         // particular data type.  Dimensions are ordered from outer most
@@ -169,7 +169,7 @@ namespace Iviz.Msgs.StdMsgs
             public override void RosSerialize(MultiArrayLayout msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MultiArrayLayout msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MultiArrayLayout msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MultiArrayLayout msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(MultiArrayLayout msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(MultiArrayLayout msg) => msg.RosValidate();
         }
     

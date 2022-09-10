@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class FibonacciAction : IDeserializable<FibonacciAction>, IHasSerializer<FibonacciAction>, IMessage,
+    public sealed class FibonacciAction : IHasSerializer<FibonacciAction>, IMessage,
 		IAction<FibonacciActionGoal, FibonacciActionFeedback, FibonacciActionResult>
     {
         [DataMember (Name = "action_goal")] public FibonacciActionGoal ActionGoal { get; set; }
@@ -134,7 +134,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             public override void RosSerialize(FibonacciAction msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(FibonacciAction msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(FibonacciAction msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(FibonacciAction msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(FibonacciAction msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(FibonacciAction msg) => msg.RosValidate();
         }
     

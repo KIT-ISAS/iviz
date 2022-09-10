@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class ParameterEventDescriptors : IDeserializable<ParameterEventDescriptors>, IHasSerializer<ParameterEventDescriptors>, IMessage
+    public sealed class ParameterEventDescriptors : IHasSerializer<ParameterEventDescriptors>, IMessage
     {
         // This message contains descriptors of a parameter event.
         // It was an atomic update.
@@ -241,7 +241,7 @@ namespace Iviz.Msgs.RclInterfaces
             public override void RosSerialize(ParameterEventDescriptors msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(ParameterEventDescriptors msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ParameterEventDescriptors msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(ParameterEventDescriptors msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(ParameterEventDescriptors msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(ParameterEventDescriptors msg) => msg.RosValidate();
         }
     

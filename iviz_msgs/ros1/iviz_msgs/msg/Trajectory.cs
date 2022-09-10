@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Trajectory : IDeserializable<Trajectory>, IHasSerializer<Trajectory>, IMessage
+    public sealed class Trajectory : IHasSerializer<Trajectory>, IMessage
     {
         [DataMember (Name = "poses")] public GeometryMsgs.Pose[] Poses;
         [DataMember (Name = "timestamps")] public time[] Timestamps;
@@ -154,7 +154,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(Trajectory msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Trajectory msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Trajectory msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Trajectory msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Trajectory msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Trajectory msg) => msg.RosValidate();
         }
     

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class ImageMarker : IDeserializable<ImageMarker>, IHasSerializer<ImageMarker>, IMessage
+    public sealed class ImageMarker : IHasSerializer<ImageMarker>, IMessage
     {
         public const byte CIRCLE = 0;
         public const byte LINE_STRIP = 1;
@@ -252,7 +252,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override void RosSerialize(ImageMarker msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(ImageMarker msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ImageMarker msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(ImageMarker msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(ImageMarker msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(ImageMarker msg) => msg.RosValidate();
         }
     

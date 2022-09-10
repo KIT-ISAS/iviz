@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class QuaternionStamped : IDeserializable<QuaternionStamped>, IHasSerializer<QuaternionStamped>, IMessage
+    public sealed class QuaternionStamped : IHasSerializer<QuaternionStamped>, IMessage
     {
         // This represents an orientation with reference coordinate frame and timestamp.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -106,7 +106,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(QuaternionStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(QuaternionStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(QuaternionStamped msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(QuaternionStamped msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(QuaternionStamped msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(QuaternionStamped msg) => msg.RosValidate();
         }
     

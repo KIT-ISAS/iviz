@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformActionGoal : IDeserializable<LookupTransformActionGoal>, IHasSerializer<LookupTransformActionGoal>, IMessage, IActionGoal<LookupTransformGoal>
+    public sealed class LookupTransformActionGoal : IHasSerializer<LookupTransformActionGoal>, IMessage, IActionGoal<LookupTransformGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
@@ -121,7 +121,7 @@ namespace Iviz.Msgs.Tf2Msgs
             public override void RosSerialize(LookupTransformActionGoal msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(LookupTransformActionGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(LookupTransformActionGoal msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(LookupTransformActionGoal msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(LookupTransformActionGoal msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(LookupTransformActionGoal msg) => msg.RosValidate();
         }
     
