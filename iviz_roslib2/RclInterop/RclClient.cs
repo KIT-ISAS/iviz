@@ -20,7 +20,7 @@ internal sealed class RclClient : IDisposable
         Rcl.Impl.SetLoggingLevel((int)severity);
     }
 
-    public static void SetRclWrapper(IRclWrapper wrapper)
+    public static void SetRclWrapper(RclWrapper wrapper)
     {
         Rcl.SetRclWrapper(wrapper);
     }

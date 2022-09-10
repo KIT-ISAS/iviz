@@ -16,17 +16,17 @@ public delegate int CdrGetSerializedSizeCallback(IntPtr contextHandle);
 
 internal static class Rcl
 {
-    static IRclWrapper? impl;
+    static RclWrapper? impl;
     static LoggingHandler? consoleLoggingHandlerDel;
     static CdrGetSerializedSizeCallback? cdrGetSerializedSizeCallbackDel;
     static CdrSerializeCallback? cdrSerializeCallbackDel;
     static CdrDeserializeCallback? cdrDeserializeCallbackDel;
     
-    static IRclWrapper ThrowMissingWrapper() => throw new NullReferenceException("Rcl wrapper has not been set!");
+    static RclWrapper ThrowMissingWrapper() => throw new NullReferenceException("Rcl wrapper has not been set!");
 
-    public static IRclWrapper Impl => impl ?? ThrowMissingWrapper();
+    public static RclWrapper Impl => impl ?? ThrowMissingWrapper();
 
-    public static void SetRclWrapper(IRclWrapper rclWrapper)
+    public static void SetRclWrapper(RclWrapper rclWrapper)
     {
         impl = rclWrapper;
     }

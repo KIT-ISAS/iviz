@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace Iviz.Roslib2.RclInterop.Wrappers;
 
-public sealed class RclAndroidWrapper : IRclWrapper
+public sealed class RclAndroidWrapper : RclWrapper
 {
     public override void SetMessageCallbacks(CdrDeserializeCallback? cdrDeserializeCallback,
         CdrSerializeCallback? cdrSerializeCallback, CdrGetSerializedSizeCallback? cdrGetSerializedSizeCallback) =>

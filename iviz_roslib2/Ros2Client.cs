@@ -47,7 +47,7 @@ public sealed class Ros2Client : IRosClient
     public Ros2ParameterClient ParameterClient { get; }
     public Ros2ParameterServer ParameterServer { get; }
 
-    public Ros2Client(string callerId, string? @namespace = null, int domainId = 0, IRclWrapper? wrapperType = null)
+    public Ros2Client(string callerId, string? @namespace = null, int domainId = 0, RclWrapper? wrapperType = null)
     {
         RclClient.SetRclWrapper(wrapperType ??
 #if NETSTANDARD2_1

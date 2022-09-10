@@ -1,6 +1,6 @@
 namespace Iviz.Roslib2.RclInterop.Wrappers;
 
-public abstract class IRclWrapper
+public abstract class RclWrapper
 {
     /// <summary>
     /// Sets the serialization and deserialization callbacks.
