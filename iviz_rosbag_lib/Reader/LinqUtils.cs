@@ -14,10 +14,10 @@ public static class LinqUtils
     /// </summary>
     /// <typeparam name="T">The message type</typeparam>
     public static IEnumerable<T> SelectMessage<T>(this IEnumerable<MessageData> enumerable)
-        where T : IMessage, IDeserializable<T>, new()
+        where T : IMessage, new()
     {
-        var generator = new T();
-        return enumerable.Select(messageData => messageData.GetMessage(generator));
+        var deserializer = new T().CreateDeserializer();
+        return enumerable.Select(messageData => messageData.GetMessage(deserializer));
     }
 
     /// <summary>
@@ -37,13 +37,15 @@ public static class LinqUtils
             throw new InvalidOperationException($"Failed to create message of type '{messageData.Type}'");
         }
 
-        var generator = DynamicMessage.CreateFromDependencyString(messageData.Type, messageData.MessageDefinition);
+        var deserializer = 
+            DynamicMessage.CreateFromDependencyString(messageData.Type, messageData.MessageDefinition)
+            .CreateDeserializer();
 
-        yield return messageData.GetMessage(generator);
+        yield return messageData.GetMessage(deserializer);
 
         while (enumerator.MoveNext())
         {
-            yield return enumerator.Current.GetMessage(generator);
+            yield return enumerator.Current.GetMessage(deserializer);
         }
     }
 }

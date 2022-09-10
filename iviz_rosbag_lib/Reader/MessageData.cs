@@ -16,7 +16,7 @@ namespace Iviz.Rosbag.Reader;
 [DataContract]
 public readonly struct MessageData
 {
-    static readonly Dictionary<string, IDeserializable<IMessage>> GeneratorsByMessageType = new();
+    static readonly Dictionary<string, Deserializer> GeneratorsByMessageType = new();
 
     readonly Stream reader;
     [DataMember] readonly long dataStart;
@@ -66,10 +66,8 @@ public readonly struct MessageData
     /// <summary>
     /// Retrieves the enclosed message of type T. Consider using <see cref="LinqUtils.SelectMessage{T}"/> instead of this.
     /// </summary>
-    /// <param name="generator">Any instance of T, such as new T(). If the generator is a <see cref="DynamicMessage"/>, it must be already defined.</param>
-    /// <typeparam name="T">The message type.</typeparam>
     /// <returns>The enclosed message.</returns>
-    public T GetMessage<T>(in T generator) where T : IMessage, IDeserializable<T>, new()
+    public T GetMessage<T>(Deserializer<T> deserializer) where T : IMessage, new()
     {
         var rent = Rent.Empty();
         Span<byte> span = dataSize < 256
@@ -80,7 +78,7 @@ public readonly struct MessageData
         {
             reader.Seek(dataStart, SeekOrigin.Begin);
             reader.ReadAll(span);
-            return ReadBuffer.Deserialize(generator, span);
+            return ReadBuffer.Deserialize(deserializer, span);
         }
     }
 
@@ -96,15 +94,15 @@ public readonly struct MessageData
             throw new InvalidOperationException("Connection record does not contain a type name");
         }
 
-        IDeserializable<IMessage>? generator;
-        if (GeneratorsByMessageType.TryGetValue(type, out var serializable))
+        Deserializer? deserializer;
+        if (GeneratorsByMessageType.TryGetValue(type, out var existingDeserializer))
         {
-            generator = serializable;
+            deserializer = existingDeserializer;
         }
         else if (MessageDefinition != null)
         {
-            generator = DynamicMessage.CreateFromDependencyString(type, MessageDefinition);
-            GeneratorsByMessageType[type] = generator;
+            deserializer = DynamicMessage.CreateFromDependencyString(type, MessageDefinition).CreateDeserializer();
+            GeneratorsByMessageType[type] = deserializer;
         }
         else
         {
@@ -120,7 +118,7 @@ public readonly struct MessageData
         {
             reader.Seek(dataStart, SeekOrigin.Begin);
             reader.ReadAll(span);
-            return ReadBuffer.Deserialize(generator, span);
+            return ReadBuffer.Deserialize(deserializer, span);
         }
     }
 
