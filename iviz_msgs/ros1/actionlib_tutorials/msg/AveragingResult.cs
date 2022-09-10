@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibTutorials
 {
     [DataContract]
-    public sealed class AveragingResult : IDeserializable<AveragingResult>, IHasSerializer<AveragingResult>, IMessage, IResult<AveragingActionResult>
+    public sealed class AveragingResult : IHasSerializer<AveragingResult>, IMessage, IResult<AveragingActionResult>
     {
         //result definition
         [DataMember (Name = "interior_angle")] public float InteriorAngle;

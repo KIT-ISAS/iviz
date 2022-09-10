@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class SceneLight : IDeserializable<SceneLight>, IHasSerializer<SceneLight>, IMessage
+    public sealed class SceneLight : IHasSerializer<SceneLight>, IMessage
     {
         public const byte POINT = 0;
         public const byte DIRECTIONAL = 1;
@@ -147,7 +147,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(SceneLight msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(SceneLight msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(SceneLight msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(SceneLight msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(SceneLight msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(SceneLight msg) => msg.RosValidate();
         }
     

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class LaserEcho : IDeserializable<LaserEcho>, IHasSerializer<LaserEcho>, IMessage
+    public sealed class LaserEcho : IHasSerializer<LaserEcho>, IMessage
     {
         // This message is a submessage of MultiEchoLaserScan and is not intended
         // to be used separately.
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(LaserEcho msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(LaserEcho msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(LaserEcho msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(LaserEcho msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(LaserEcho msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(LaserEcho msg) => msg.RosValidate();
         }
     

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PoseArray : IDeserializable<PoseArray>, IHasSerializer<PoseArray>, IMessage
+    public sealed class PoseArray : IHasSerializer<PoseArray>, IMessage
     {
         // An array of poses with a header for global reference.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -136,7 +136,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(PoseArray msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(PoseArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(PoseArray msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(PoseArray msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(PoseArray msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(PoseArray msg) => msg.RosValidate();
         }
     

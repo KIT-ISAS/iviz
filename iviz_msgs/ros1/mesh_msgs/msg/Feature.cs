@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class Feature : IDeserializable<Feature>, IHasSerializer<Feature>, IMessage
+    public sealed class Feature : IHasSerializer<Feature>, IMessage
     {
         [DataMember (Name = "location")] public GeometryMsgs.Point Location;
         [DataMember (Name = "descriptor")] public StdMsgs.Float32[] Descriptor;
@@ -136,7 +136,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(Feature msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Feature msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Feature msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Feature msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Feature msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Feature msg) => msg.RosValidate();
         }
     

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class TimeReference : IDeserializable<TimeReference>, IHasSerializer<TimeReference>, IMessage
+    public sealed class TimeReference : IHasSerializer<TimeReference>, IMessage
     {
         // Measurement from an external time source not actively synchronized with the system clock.
         /// <summary> Stamp is system time for which measurement was valid </summary>
@@ -121,7 +121,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(TimeReference msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(TimeReference msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TimeReference msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(TimeReference msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(TimeReference msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(TimeReference msg) => msg.RosValidate();
         }
     

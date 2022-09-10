@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class RobotConfiguration : IDeserializable<RobotConfiguration>, IHasSerializer<RobotConfiguration>, IMessage
+    public sealed class RobotConfiguration : IHasSerializer<RobotConfiguration>, IMessage
     {
         [DataMember (Name = "source_parameter")] public string SourceParameter;
         [DataMember (Name = "saved_robot_name")] public string SavedRobotName;
@@ -171,7 +171,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(RobotConfiguration msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(RobotConfiguration msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(RobotConfiguration msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(RobotConfiguration msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(RobotConfiguration msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(RobotConfiguration msg) => msg.RosValidate();
         }
     

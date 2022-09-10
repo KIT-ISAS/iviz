@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class FacialActionUnits : IDeserializable<FacialActionUnits>, IHasSerializer<FacialActionUnits>, IMessage
+    public sealed class FacialActionUnits : IHasSerializer<FacialActionUnits>, IMessage
     {
         // This message the intensity of each actions unit (AU), with their confidence, for a specific face.
         //
@@ -388,7 +388,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(FacialActionUnits msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(FacialActionUnits msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(FacialActionUnits msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(FacialActionUnits msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(FacialActionUnits msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(FacialActionUnits msg) => msg.RosValidate();
         }
     

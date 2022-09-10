@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ActionlibMsgs
 {
     [DataContract]
-    public sealed class GoalStatusArray : IDeserializable<GoalStatusArray>, IHasSerializer<GoalStatusArray>, IMessage
+    public sealed class GoalStatusArray : IHasSerializer<GoalStatusArray>, IMessage
     {
         // Stores the statuses for goals that are currently being tracked
         // by an action server
@@ -154,7 +154,7 @@ namespace Iviz.Msgs.ActionlibMsgs
             public override void RosSerialize(GoalStatusArray msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(GoalStatusArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(GoalStatusArray msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(GoalStatusArray msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(GoalStatusArray msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(GoalStatusArray msg) => msg.RosValidate();
         }
     

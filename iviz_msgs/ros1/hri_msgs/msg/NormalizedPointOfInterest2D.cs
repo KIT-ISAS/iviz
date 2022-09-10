@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class NormalizedPointOfInterest2D : IDeserializable<NormalizedPointOfInterest2D>, IHasSerializer<NormalizedPointOfInterest2D>, IMessage
+    public sealed class NormalizedPointOfInterest2D : IHasSerializer<NormalizedPointOfInterest2D>, IMessage
     {
         // This contains the position of a point of interest (typically in an image)
         // the coordinates are always normalized and must belong to [0.,1.].

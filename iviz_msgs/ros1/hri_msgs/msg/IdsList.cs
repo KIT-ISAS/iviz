@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class IdsList : IDeserializable<IdsList>, IHasSerializer<IdsList>, IMessage
+    public sealed class IdsList : IHasSerializer<IdsList>, IMessage
     {
         // This message encodes a list of ROS4HRI IDs (eg face ids, body ids, person
         // ids...).
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(IdsList msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(IdsList msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(IdsList msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(IdsList msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(IdsList msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(IdsList msg) => msg.RosValidate();
         }
     

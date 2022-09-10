@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformResult : IDeserializable<LookupTransformResult>, IHasSerializer<LookupTransformResult>, IMessage, IResult<LookupTransformActionResult>
+    public sealed class LookupTransformResult : IHasSerializer<LookupTransformResult>, IMessage, IResult<LookupTransformActionResult>
     {
         [DataMember (Name = "transform")] public GeometryMsgs.TransformStamped Transform;
         [DataMember (Name = "error")] public Tf2Msgs.TF2Error Error;
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.Tf2Msgs
             public override void RosSerialize(LookupTransformResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(LookupTransformResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(LookupTransformResult msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(LookupTransformResult msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(LookupTransformResult msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(LookupTransformResult msg) => msg.RosValidate();
         }
     

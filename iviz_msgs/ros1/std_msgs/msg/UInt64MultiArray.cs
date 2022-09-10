@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class UInt64MultiArray : IDeserializable<UInt64MultiArray>, IHasSerializer<UInt64MultiArray>, IMessage
+    public sealed class UInt64MultiArray : IHasSerializer<UInt64MultiArray>, IMessage
     {
         // Please look at the MultiArrayLayout message definition for
         // documentation on all multiarrays.
@@ -143,7 +143,7 @@ namespace Iviz.Msgs.StdMsgs
             public override void RosSerialize(UInt64MultiArray msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(UInt64MultiArray msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(UInt64MultiArray msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(UInt64MultiArray msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(UInt64MultiArray msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(UInt64MultiArray msg) => msg.RosValidate();
         }
     

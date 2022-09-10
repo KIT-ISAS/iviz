@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarkerInit : IDeserializable<InteractiveMarkerInit>, IHasSerializer<InteractiveMarkerInit>, IMessage
+    public sealed class InteractiveMarkerInit : IHasSerializer<InteractiveMarkerInit>, IMessage
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
@@ -214,7 +214,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override void RosSerialize(InteractiveMarkerInit msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(InteractiveMarkerInit msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(InteractiveMarkerInit msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(InteractiveMarkerInit msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(InteractiveMarkerInit msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(InteractiveMarkerInit msg) => msg.RosValidate();
         }
     

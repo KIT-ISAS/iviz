@@ -23,6 +23,10 @@ public unsafe partial struct WriteBuffer2
         remaining = length;
     }
 
+    public WriteBuffer2(IntPtr ptr, int length) : this((byte*)ptr, length)
+    {
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     void Advance(int value)
     {
@@ -75,7 +79,7 @@ public unsafe partial struct WriteBuffer2
     public static int Align8(int c) => (c + 7) & ~7;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int AddLength(int c, ISerializable[] array) // used by tests
+    public static int AddLength(int c, IMessage[] array) // used by tests
     {
         int d = Align4(c) + sizeof(int);
         foreach (var message in array)
@@ -257,7 +261,7 @@ public unsafe partial struct WriteBuffer2
             Advance(1);
             return;
         }
-        
+
         fixed (char* valPtr = val)
         {
             if (BuiltIns.CanWriteStringSimple(valPtr, length))
@@ -663,6 +667,15 @@ public unsafe partial struct WriteBuffer2
         {
             var b = new WriteBuffer2(bufferPtr, buffer.Length);
             message.RosSerialize(ref b);
+        }
+    }
+    
+    public static void Serialize(Serializer serializer, IMessage message, Span<byte> buffer)
+    {
+        fixed (byte* bufferPtr = buffer)
+        {
+            var b = new WriteBuffer2(bufferPtr, buffer.Length);
+            serializer.RosSerialize(message, ref b);
         }
     }
 }

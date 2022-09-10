@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class Group : IDeserializable<Group>, IHasSerializer<Group>, IMessage
+    public sealed class Group : IHasSerializer<Group>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "group_id")] public string GroupId;
@@ -124,7 +124,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(Group msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Group msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Group msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Group msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Group msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Group msg) => msg.RosValidate();
         }
     

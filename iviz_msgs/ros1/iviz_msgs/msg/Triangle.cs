@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Triangle : IMessage, IDeserializable<Triangle>, IHasSerializer<Triangle>
+    public struct Triangle : IMessage, IHasSerializer<Triangle>
     {
         [DataMember (Name = "a")] public uint A;
         [DataMember (Name = "b")] public uint B;

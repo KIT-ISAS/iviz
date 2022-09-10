@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestRequestResult : IDeserializable<TestRequestResult>, IHasSerializer<TestRequestResult>, IMessage, IResult<TestRequestActionResult>
+    public sealed class TestRequestResult : IHasSerializer<TestRequestResult>, IMessage, IResult<TestRequestActionResult>
     {
         [DataMember (Name = "the_result")] public int TheResult;
         [DataMember (Name = "is_simple_server")] public bool IsSimpleServer;

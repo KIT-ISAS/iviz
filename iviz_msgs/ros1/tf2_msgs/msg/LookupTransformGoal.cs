@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformGoal : IDeserializable<LookupTransformGoal>, IHasSerializer<LookupTransformGoal>, IMessage, IGoal<LookupTransformActionGoal>
+    public sealed class LookupTransformGoal : IHasSerializer<LookupTransformGoal>, IMessage, IGoal<LookupTransformActionGoal>
     {
         //Simple API
         [DataMember (Name = "target_frame")] public string TargetFrame;
@@ -138,7 +138,7 @@ namespace Iviz.Msgs.Tf2Msgs
             public override void RosSerialize(LookupTransformGoal msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(LookupTransformGoal msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(LookupTransformGoal msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(LookupTransformGoal msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(LookupTransformGoal msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(LookupTransformGoal msg) => msg.RosValidate();
         }
     

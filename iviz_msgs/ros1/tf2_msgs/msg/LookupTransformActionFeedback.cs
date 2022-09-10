@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class LookupTransformActionFeedback : IDeserializable<LookupTransformActionFeedback>, IHasSerializer<LookupTransformActionFeedback>, IMessage, IActionFeedback<LookupTransformFeedback>
+    public sealed class LookupTransformActionFeedback : IHasSerializer<LookupTransformActionFeedback>, IMessage, IActionFeedback<LookupTransformFeedback>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.Tf2Msgs
             public override void RosSerialize(LookupTransformActionFeedback msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(LookupTransformActionFeedback msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(LookupTransformActionFeedback msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(LookupTransformActionFeedback msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(LookupTransformActionFeedback msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(LookupTransformActionFeedback msg) => msg.RosValidate();
         }
     

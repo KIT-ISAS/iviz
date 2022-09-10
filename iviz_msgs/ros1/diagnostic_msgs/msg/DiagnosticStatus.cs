@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.DiagnosticMsgs
 {
     [DataContract]
-    public sealed class DiagnosticStatus : IDeserializable<DiagnosticStatus>, IHasSerializer<DiagnosticStatus>, IMessage
+    public sealed class DiagnosticStatus : IHasSerializer<DiagnosticStatus>, IMessage
     {
         // This message holds the status of an individual component of the robot.
         // 
@@ -178,7 +178,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             public override void RosSerialize(DiagnosticStatus msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(DiagnosticStatus msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(DiagnosticStatus msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(DiagnosticStatus msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(DiagnosticStatus msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(DiagnosticStatus msg) => msg.RosValidate();
         }
     

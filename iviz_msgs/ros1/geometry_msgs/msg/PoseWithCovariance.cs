@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PoseWithCovariance : IDeserializable<PoseWithCovariance>, IHasSerializer<PoseWithCovariance>, IMessage
+    public sealed class PoseWithCovariance : IHasSerializer<PoseWithCovariance>, IMessage
     {
         // This represents a pose in free space with uncertainty.
         [DataMember (Name = "pose")] public Pose Pose;

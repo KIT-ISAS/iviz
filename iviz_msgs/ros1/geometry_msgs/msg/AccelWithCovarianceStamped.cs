@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class AccelWithCovarianceStamped : IDeserializable<AccelWithCovarianceStamped>, IHasSerializer<AccelWithCovarianceStamped>, IMessage
+    public sealed class AccelWithCovarianceStamped : IHasSerializer<AccelWithCovarianceStamped>, IMessage
     {
         // This represents an estimated accel with reference coordinate frame and timestamp.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -114,7 +114,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(AccelWithCovarianceStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(AccelWithCovarianceStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(AccelWithCovarianceStamped msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(AccelWithCovarianceStamped msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(AccelWithCovarianceStamped msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(AccelWithCovarianceStamped msg) => msg.RosValidate();
         }
     

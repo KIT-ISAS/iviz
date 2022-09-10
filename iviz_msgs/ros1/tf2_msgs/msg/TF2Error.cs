@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class TF2Error : IDeserializable<TF2Error>, IHasSerializer<TF2Error>, IMessage
+    public sealed class TF2Error : IHasSerializer<TF2Error>, IMessage
     {
         public const byte NO_ERROR = 0;
         public const byte LOOKUP_ERROR = 1;
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.Tf2Msgs
             public override void RosSerialize(TF2Error msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(TF2Error msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TF2Error msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(TF2Error msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(TF2Error msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(TF2Error msg) => msg.RosValidate();
         }
     

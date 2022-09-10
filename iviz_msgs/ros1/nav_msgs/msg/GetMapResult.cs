@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMapResult : IDeserializable<GetMapResult>, IHasSerializer<GetMapResult>, IMessage, IResult<GetMapActionResult>
+    public sealed class GetMapResult : IHasSerializer<GetMapResult>, IMessage, IResult<GetMapActionResult>
     {
         [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map;
     
@@ -106,7 +106,7 @@ namespace Iviz.Msgs.NavMsgs
             public override void RosSerialize(GetMapResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(GetMapResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(GetMapResult msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(GetMapResult msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(GetMapResult msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(GetMapResult msg) => msg.RosValidate();
         }
     

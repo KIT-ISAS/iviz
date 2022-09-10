@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Matrix4 : IDeserializable<Matrix4>, IHasSerializer<Matrix4>, IMessage
+    public sealed class Matrix4 : IHasSerializer<Matrix4>, IMessage
     {
         /// <summary> Row major </summary>
         [DataMember (Name = "m")] public float[/*16*/] M;

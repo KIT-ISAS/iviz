@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class Skeleton2D : IDeserializable<Skeleton2D>, IHasSerializer<Skeleton2D>, IMessage
+    public sealed class Skeleton2D : IHasSerializer<Skeleton2D>, IMessage
     {
         // This message contains a list of skeletal keypoints 
         // (0, 0) is at top-left corner of image
@@ -173,7 +173,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(Skeleton2D msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Skeleton2D msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Skeleton2D msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Skeleton2D msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Skeleton2D msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Skeleton2D msg) => msg.RosValidate();
         }
     

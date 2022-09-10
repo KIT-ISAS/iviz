@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class ParameterType : IDeserializable<ParameterType>, IHasSerializer<ParameterType>, IMessage
+    public sealed class ParameterType : IHasSerializer<ParameterType>, IMessage
     {
         // These types correspond to the value that is set in the ParameterValue message.
         // Default value, which implies this is not a valid parameter.

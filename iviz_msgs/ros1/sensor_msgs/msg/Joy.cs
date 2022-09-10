@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Joy : IDeserializable<Joy>, IHasSerializer<Joy>, IMessage
+    public sealed class Joy : IHasSerializer<Joy>, IMessage
     {
         // Reports the state of a joysticks axes and buttons.
         /// <summary> Timestamp in the header is the time the data is received from the joystick </summary>
@@ -168,7 +168,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(Joy msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Joy msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Joy msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Joy msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Joy msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Joy msg) => msg.RosValidate();
         }
     

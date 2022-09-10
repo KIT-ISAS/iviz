@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshMaterial : IDeserializable<MeshMaterial>, IHasSerializer<MeshMaterial>, IMessage
+    public sealed class MeshMaterial : IHasSerializer<MeshMaterial>, IMessage
     {
         [DataMember (Name = "texture_index")] public uint TextureIndex;
         [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color;

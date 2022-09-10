@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class TransformStamped : IDeserializable<TransformStamped>, IHasSerializer<TransformStamped>, IMessage
+    public sealed class TransformStamped : IHasSerializer<TransformStamped>, IMessage
     {
         // This expresses a transform from coordinate frame header.frame_id
         // to the coordinate frame child_frame_id
@@ -130,7 +130,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(TransformStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(TransformStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TransformStamped msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(TransformStamped msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(TransformStamped msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(TransformStamped msg) => msg.RosValidate();
         }
     

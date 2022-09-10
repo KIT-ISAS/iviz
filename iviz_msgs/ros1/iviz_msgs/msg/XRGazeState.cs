@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class XRGazeState : IDeserializable<XRGazeState>, IHasSerializer<XRGazeState>, IMessage
+    public sealed class XRGazeState : IHasSerializer<XRGazeState>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "transform")] public GeometryMsgs.Transform Transform;
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(XRGazeState msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(XRGazeState msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(XRGazeState msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(XRGazeState msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(XRGazeState msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(XRGazeState msg) => msg.RosValidate();
         }
     

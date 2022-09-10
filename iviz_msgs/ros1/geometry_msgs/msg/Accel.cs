@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Accel : IDeserializable<Accel>, IHasSerializer<Accel>, IMessage
+    public sealed class Accel : IHasSerializer<Accel>, IMessage
     {
         // This expresses acceleration in free space broken into its linear and angular parts.
         [DataMember (Name = "linear")] public Vector3 Linear;

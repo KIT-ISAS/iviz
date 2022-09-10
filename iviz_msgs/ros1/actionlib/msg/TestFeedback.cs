@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestFeedback : IDeserializable<TestFeedback>, IHasSerializer<TestFeedback>, IMessage, IFeedback<TestActionFeedback>
+    public sealed class TestFeedback : IHasSerializer<TestFeedback>, IMessage, IFeedback<TestActionFeedback>
     {
         [DataMember (Name = "feedback")] public int Feedback;
     

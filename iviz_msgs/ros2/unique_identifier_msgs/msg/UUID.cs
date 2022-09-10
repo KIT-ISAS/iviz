@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.UniqueIdentifierMsgs
 {
     [DataContract]
-    public sealed class UUID : IDeserializable<UUID>, IHasSerializer<UUID>, IMessage
+    public sealed class UUID : IHasSerializer<UUID>, IMessage
     {
         // A universally unique identifier (UUID).
         //

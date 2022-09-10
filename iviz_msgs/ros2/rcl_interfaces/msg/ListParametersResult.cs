@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class ListParametersResult : IDeserializable<ListParametersResult>, IHasSerializer<ListParametersResult>, IMessage
+    public sealed class ListParametersResult : IHasSerializer<ListParametersResult>, IMessage
     {
         // The resulting parameters under the given prefixes.
         [DataMember (Name = "names")] public string[] Names;
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.RclInterfaces
             public override void RosSerialize(ListParametersResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(ListParametersResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ListParametersResult msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(ListParametersResult msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(ListParametersResult msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(ListParametersResult msg) => msg.RosValidate();
         }
     

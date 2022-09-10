@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class TFMessage : IDeserializable<TFMessage>, IHasSerializer<TFMessage>, IMessage
+    public sealed class TFMessage : IHasSerializer<TFMessage>, IMessage
     {
         [DataMember (Name = "transforms")] public GeometryMsgs.TransformStamped[] Transforms;
     
@@ -140,7 +140,7 @@ namespace Iviz.Msgs.Tf2Msgs
             public override void RosSerialize(TFMessage msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(TFMessage msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TFMessage msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(TFMessage msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(TFMessage msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(TFMessage msg) => msg.RosValidate();
         }
     

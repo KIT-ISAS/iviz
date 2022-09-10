@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshFaceCluster : IDeserializable<MeshFaceCluster>, IHasSerializer<MeshFaceCluster>, IMessage
+    public sealed class MeshFaceCluster : IHasSerializer<MeshFaceCluster>, IMessage
     {
         //Cluster
         [DataMember (Name = "face_indices")] public uint[] FaceIndices;
@@ -129,7 +129,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(MeshFaceCluster msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MeshFaceCluster msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MeshFaceCluster msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MeshFaceCluster msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(MeshFaceCluster msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(MeshFaceCluster msg) => msg.RosValidate();
         }
     

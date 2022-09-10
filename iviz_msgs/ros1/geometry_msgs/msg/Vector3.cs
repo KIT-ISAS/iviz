@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3 : IMessage, IDeserializable<Vector3>, IHasSerializer<Vector3>
+    public struct Vector3 : IMessage, IHasSerializer<Vector3>
     {
         // This represents a vector in free space. 
         // It is only meant to represent a direction. Therefore, it does not

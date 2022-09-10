@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GridCells : IDeserializable<GridCells>, IHasSerializer<GridCells>, IMessage
+    public sealed class GridCells : IHasSerializer<GridCells>, IMessage
     {
         //an array of cells in a 2D grid
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -148,7 +148,7 @@ namespace Iviz.Msgs.NavMsgs
             public override void RosSerialize(GridCells msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(GridCells msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(GridCells msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(GridCells msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(GridCells msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(GridCells msg) => msg.RosValidate();
         }
     

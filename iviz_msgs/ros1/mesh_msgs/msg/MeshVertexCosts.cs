@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshVertexCosts : IDeserializable<MeshVertexCosts>, IHasSerializer<MeshVertexCosts>, IMessage
+    public sealed class MeshVertexCosts : IHasSerializer<MeshVertexCosts>, IMessage
     {
         // Mesh Attribute Message
         [DataMember (Name = "costs")] public float[] Costs;
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(MeshVertexCosts msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MeshVertexCosts msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MeshVertexCosts msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MeshVertexCosts msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(MeshVertexCosts msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(MeshVertexCosts msg) => msg.RosValidate();
         }
     

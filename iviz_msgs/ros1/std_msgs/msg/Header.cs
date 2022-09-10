@@ -8,7 +8,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Header : IMessage, IDeserializable<Header>, IHasSerializer<Header>
+    public struct Header : IMessage, IHasSerializer<Header>
     {
         // Standard metadata for higher-level stamped data types.
         // This is generally used to communicate timestamped data 
@@ -136,7 +136,7 @@ namespace Iviz.Msgs.StdMsgs
             public override void RosSerialize(Header msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Header msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Header msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Header msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Header msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Header msg) => msg.RosValidate();
         }
     

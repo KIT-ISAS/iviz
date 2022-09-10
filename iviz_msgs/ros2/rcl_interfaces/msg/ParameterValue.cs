@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class ParameterValue : IDeserializable<ParameterValue>, IHasSerializer<ParameterValue>, IMessage
+    public sealed class ParameterValue : IHasSerializer<ParameterValue>, IMessage
     {
         // Used to determine which of the next *_value fields are set.
         // ParameterType.PARAMETER_NOT_SET indicates that the parameter was not set
@@ -289,7 +289,7 @@ namespace Iviz.Msgs.RclInterfaces
             public override void RosSerialize(ParameterValue msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(ParameterValue msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ParameterValue msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(ParameterValue msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(ParameterValue msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(ParameterValue msg) => msg.RosValidate();
         }
     

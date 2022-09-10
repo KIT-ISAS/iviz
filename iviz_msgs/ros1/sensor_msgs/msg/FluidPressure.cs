@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class FluidPressure : IDeserializable<FluidPressure>, IHasSerializer<FluidPressure>, IMessage
+    public sealed class FluidPressure : IHasSerializer<FluidPressure>, IMessage
     {
         // Single pressure reading.  This message is appropriate for measuring the
         // pressure inside of a fluid (air, water, etc).  This also includes
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(FluidPressure msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(FluidPressure msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(FluidPressure msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(FluidPressure msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(FluidPressure msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(FluidPressure msg) => msg.RosValidate();
         }
     

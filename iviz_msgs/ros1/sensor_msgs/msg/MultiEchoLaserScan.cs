@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class MultiEchoLaserScan : IDeserializable<MultiEchoLaserScan>, IHasSerializer<MultiEchoLaserScan>, IMessage
+    public sealed class MultiEchoLaserScan : IHasSerializer<MultiEchoLaserScan>, IMessage
     {
         // Single scan from a multi-echo planar laser range-finder
         //
@@ -260,7 +260,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(MultiEchoLaserScan msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MultiEchoLaserScan msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MultiEchoLaserScan msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MultiEchoLaserScan msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(MultiEchoLaserScan msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(MultiEchoLaserScan msg) => msg.RosValidate();
         }
     

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class PolygonStamped : IDeserializable<PolygonStamped>, IHasSerializer<PolygonStamped>, IMessage
+    public sealed class PolygonStamped : IHasSerializer<PolygonStamped>, IMessage
     {
         // This represents a Polygon with reference coordinate frame and timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(PolygonStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(PolygonStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(PolygonStamped msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(PolygonStamped msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(PolygonStamped msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(PolygonStamped msg) => msg.RosValidate();
         }
     

@@ -436,6 +436,11 @@ namespace Iviz.Msgs
             return t.ToJsonString();
         }
 
+        public static string ToString(IMessage t)
+        {
+            return t.ToJsonString();
+        }
+
         public static string ToString(IService t)
         {
             return t.ToJsonString();

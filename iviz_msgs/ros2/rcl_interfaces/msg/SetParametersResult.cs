@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class SetParametersResult : IDeserializable<SetParametersResult>, IHasSerializer<SetParametersResult>, IMessage
+    public sealed class SetParametersResult : IHasSerializer<SetParametersResult>, IMessage
     {
         // A true value of the same index indicates that the parameter was set
         // successfully. A false value indicates the change was rejected.
@@ -107,7 +107,7 @@ namespace Iviz.Msgs.RclInterfaces
             public override void RosSerialize(SetParametersResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(SetParametersResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(SetParametersResult msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(SetParametersResult msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(SetParametersResult msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(SetParametersResult msg) => msg.RosValidate();
         }
     

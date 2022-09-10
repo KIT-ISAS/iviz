@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class SoftBiometrics : IDeserializable<SoftBiometrics>, IHasSerializer<SoftBiometrics>, IMessage
+    public sealed class SoftBiometrics : IHasSerializer<SoftBiometrics>, IMessage
     {
         // This message describes soft biometrics (age and gender)
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -126,7 +126,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(SoftBiometrics msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(SoftBiometrics msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(SoftBiometrics msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(SoftBiometrics msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(SoftBiometrics msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(SoftBiometrics msg) => msg.RosValidate();
         }
     

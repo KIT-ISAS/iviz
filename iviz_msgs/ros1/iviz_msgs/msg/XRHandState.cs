@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class XRHandState : IDeserializable<XRHandState>, IHasSerializer<XRHandState>, IMessage
+    public sealed class XRHandState : IHasSerializer<XRHandState>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "palm")] public GeometryMsgs.Transform Palm;
@@ -279,7 +279,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(XRHandState msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(XRHandState msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(XRHandState msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(XRHandState msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(XRHandState msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(XRHandState msg) => msg.RosValidate();
         }
     

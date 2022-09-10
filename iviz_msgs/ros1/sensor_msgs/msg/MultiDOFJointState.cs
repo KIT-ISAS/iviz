@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class MultiDOFJointState : IDeserializable<MultiDOFJointState>, IHasSerializer<MultiDOFJointState>, IMessage
+    public sealed class MultiDOFJointState : IHasSerializer<MultiDOFJointState>, IMessage
     {
         // Representation of state for joints with multiple degrees of freedom, 
         // following the structure of JointState.
@@ -263,7 +263,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(MultiDOFJointState msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MultiDOFJointState msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MultiDOFJointState msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MultiDOFJointState msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(MultiDOFJointState msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(MultiDOFJointState msg) => msg.RosValidate();
         }
     

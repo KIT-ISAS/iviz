@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class NavSatFix : IDeserializable<NavSatFix>, IHasSerializer<NavSatFix>, IMessage
+    public sealed class NavSatFix : IHasSerializer<NavSatFix>, IMessage
     {
         // Navigation Satellite fix for any Global Navigation Satellite System
         //
@@ -189,7 +189,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(NavSatFix msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(NavSatFix msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(NavSatFix msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(NavSatFix msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(NavSatFix msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(NavSatFix msg) => msg.RosValidate();
         }
     

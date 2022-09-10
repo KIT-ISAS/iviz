@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class MagneticField : IDeserializable<MagneticField>, IHasSerializer<MagneticField>, IMessage
+    public sealed class MagneticField : IHasSerializer<MagneticField>, IMessage
     {
         // Measurement of the Magnetic Field vector at a specific location.
         // If the covariance of the measurement is known, it should be filled in
@@ -151,7 +151,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(MagneticField msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MagneticField msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MagneticField msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MagneticField msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(MagneticField msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(MagneticField msg) => msg.RosValidate();
         }
     

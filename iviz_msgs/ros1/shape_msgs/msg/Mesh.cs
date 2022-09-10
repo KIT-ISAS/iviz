@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.ShapeMsgs
 {
     [DataContract]
-    public sealed class Mesh : IDeserializable<Mesh>, IHasSerializer<Mesh>, IMessage
+    public sealed class Mesh : IHasSerializer<Mesh>, IMessage
     {
         // Definition of a mesh
         // list of triangles; the index values refer to positions in vertices[]
@@ -170,7 +170,7 @@ namespace Iviz.Msgs.ShapeMsgs
             public override void RosSerialize(Mesh msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Mesh msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Mesh msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Mesh msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Mesh msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Mesh msg) => msg.RosValidate();
         }
     

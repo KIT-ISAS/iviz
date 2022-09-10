@@ -384,6 +384,27 @@ public unsafe struct ReadBuffer
             return generator.RosDeserialize(ref b);
         }
     }
+    
+    public static T Deserialize<T>(Deserializer<T> generator, ReadOnlySpan<byte> buffer)
+        where T : IMessage
+    {
+        fixed (byte* bufferPtr = buffer)
+        {
+            var b = new ReadBuffer(bufferPtr, buffer.Length);
+            generator.RosDeserialize(ref b, out var msg);
+            return msg;
+        }
+    }
+
+    public static IMessage Deserialize(Deserializer generator, ReadOnlySpan<byte> buffer)
+    {
+        fixed (byte* bufferPtr = buffer)
+        {
+            var b = new ReadBuffer(bufferPtr, buffer.Length);
+            generator.RosDeserialize(ref b, out var msg);
+            return msg;
+        }
+    }
 
     #region extras
 

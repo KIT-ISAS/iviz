@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Actionlib
 {
     [DataContract]
-    public sealed class TestActionResult : IDeserializable<TestActionResult>, IHasSerializer<TestActionResult>, IMessage, IActionResult<TestResult>
+    public sealed class TestActionResult : IHasSerializer<TestActionResult>, IMessage, IActionResult<TestResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -128,7 +128,7 @@ namespace Iviz.Msgs.Actionlib
             public override void RosSerialize(TestActionResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(TestActionResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TestActionResult msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(TestActionResult msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(TestActionResult msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(TestActionResult msg) => msg.RosValidate();
         }
     

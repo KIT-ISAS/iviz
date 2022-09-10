@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosgraphMsgs
 {
     [DataContract]
-    public sealed class TopicStatistics : IDeserializable<TopicStatistics>, IHasSerializer<TopicStatistics>, IMessage
+    public sealed class TopicStatistics : IHasSerializer<TopicStatistics>, IMessage
     {
         // name of the topic
         [DataMember (Name = "topic")] public string Topic;
@@ -194,7 +194,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             public override void RosSerialize(TopicStatistics msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(TopicStatistics msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(TopicStatistics msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(TopicStatistics msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(TopicStatistics msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(TopicStatistics msg) => msg.RosValidate();
         }
     

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class Bool : IDeserializable<Bool>, IHasSerializer<Bool>, IMessage
+    public sealed class Bool : IHasSerializer<Bool>, IMessage
     {
         [DataMember (Name = "data")] public bool Data;
     

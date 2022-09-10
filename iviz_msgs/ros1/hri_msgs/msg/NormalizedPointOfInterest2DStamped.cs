@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class NormalizedPointOfInterest2DStamped : IDeserializable<NormalizedPointOfInterest2DStamped>, IHasSerializer<NormalizedPointOfInterest2DStamped>, IMessage
+    public sealed class NormalizedPointOfInterest2DStamped : IHasSerializer<NormalizedPointOfInterest2DStamped>, IMessage
     {
         // This contains the position of a point of interest (typically in an image)
         // the coordinates are always normalized and must belong to [0.,1.].
@@ -124,7 +124,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(NormalizedPointOfInterest2DStamped msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(NormalizedPointOfInterest2DStamped msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(NormalizedPointOfInterest2DStamped msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(NormalizedPointOfInterest2DStamped msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(NormalizedPointOfInterest2DStamped msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(NormalizedPointOfInterest2DStamped msg) => msg.RosValidate();
         }
     

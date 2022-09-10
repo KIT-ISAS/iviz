@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Widget : IDeserializable<Widget>, IHasSerializer<Widget>, IMessage
+    public sealed class Widget : IHasSerializer<Widget>, IMessage
     {
         public const byte ACTION_ADD = 0;
         public const byte ACTION_REMOVE = 1;
@@ -185,7 +185,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(Widget msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Widget msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Widget msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Widget msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Widget msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Widget msg) => msg.RosValidate();
         }
     

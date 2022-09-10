@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class Time : IDeserializable<Time>, IHasSerializer<Time>, IMessage
+    public sealed class Time : IHasSerializer<Time>, IMessage
     {
         [DataMember (Name = "data")] public time Data;
     

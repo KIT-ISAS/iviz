@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Polygon : IDeserializable<Polygon>, IHasSerializer<Polygon>, IMessage
+    public sealed class Polygon : IHasSerializer<Polygon>, IMessage
     {
         //A specification of a polygon where the first and last points are assumed to be connected
         [DataMember (Name = "points")] public Point32[] Points;
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.GeometryMsgs
             public override void RosSerialize(Polygon msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Polygon msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Polygon msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Polygon msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Polygon msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Polygon msg) => msg.RosValidate();
         }
     

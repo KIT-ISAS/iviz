@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class ParameterDescriptor : IDeserializable<ParameterDescriptor>, IHasSerializer<ParameterDescriptor>, IMessage
+    public sealed class ParameterDescriptor : IHasSerializer<ParameterDescriptor>, IMessage
     {
         // This is the message to communicate a parameter's descriptor.
         // The name of the parameter.
@@ -247,7 +247,7 @@ namespace Iviz.Msgs.RclInterfaces
             public override void RosSerialize(ParameterDescriptor msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(ParameterDescriptor msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ParameterDescriptor msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(ParameterDescriptor msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(ParameterDescriptor msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(ParameterDescriptor msg) => msg.RosValidate();
         }
     

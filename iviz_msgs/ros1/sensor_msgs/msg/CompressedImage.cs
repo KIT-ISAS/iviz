@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class CompressedImage : IDeserializable<CompressedImage>, IHasSerializer<CompressedImage>, IMessage
+    public sealed class CompressedImage : IHasSerializer<CompressedImage>, IMessage
     {
         // This message contains a compressed image
         /// <summary> Header timestamp should be acquisition time of image </summary>
@@ -156,7 +156,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(CompressedImage msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(CompressedImage msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(CompressedImage msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(CompressedImage msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(CompressedImage msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(CompressedImage msg) => msg.RosValidate();
         }
     

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.HriMsgs
 {
     [DataContract]
-    public sealed class NormalizedRegionOfInterest2D : IDeserializable<NormalizedRegionOfInterest2D>, IHasSerializer<NormalizedRegionOfInterest2D>, IMessage
+    public sealed class NormalizedRegionOfInterest2D : IHasSerializer<NormalizedRegionOfInterest2D>, IMessage
     {
         // This contains the top-leftmost and bottom-rightmost coordinates of a region of interest (typically in an image)
         // the coordinates are always normalized and must belong to [0.,1.].
@@ -132,7 +132,7 @@ namespace Iviz.Msgs.HriMsgs
             public override void RosSerialize(NormalizedRegionOfInterest2D msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(NormalizedRegionOfInterest2D msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(NormalizedRegionOfInterest2D msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(NormalizedRegionOfInterest2D msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(NormalizedRegionOfInterest2D msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(NormalizedRegionOfInterest2D msg) => msg.RosValidate();
         }
     

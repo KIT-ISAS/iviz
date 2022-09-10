@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class ModelCoefficients : IDeserializable<ModelCoefficients>, IHasSerializer<ModelCoefficients>, IMessage
+    public sealed class ModelCoefficients : IHasSerializer<ModelCoefficients>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "values")] public float[] Values;
@@ -130,7 +130,7 @@ namespace Iviz.Msgs.PclMsgs
             public override void RosSerialize(ModelCoefficients msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(ModelCoefficients msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ModelCoefficients msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(ModelCoefficients msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(ModelCoefficients msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(ModelCoefficients msg) => msg.RosValidate();
         }
     

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class SceneInclude : IDeserializable<SceneInclude>, IHasSerializer<SceneInclude>, IMessage
+    public sealed class SceneInclude : IHasSerializer<SceneInclude>, IMessage
     {
         // Reference to an external asset
         /// <summary> Uri of the asset </summary>
@@ -142,7 +142,7 @@ namespace Iviz.Msgs.IvizMsgs
             public override void RosSerialize(SceneInclude msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(SceneInclude msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(SceneInclude msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(SceneInclude msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(SceneInclude msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(SceneInclude msg) => msg.RosValidate();
         }
     

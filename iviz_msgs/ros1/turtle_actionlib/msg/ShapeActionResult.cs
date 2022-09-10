@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.TurtleActionlib
 {
     [DataContract]
-    public sealed class ShapeActionResult : IDeserializable<ShapeActionResult>, IHasSerializer<ShapeActionResult>, IMessage, IActionResult<ShapeResult>
+    public sealed class ShapeActionResult : IHasSerializer<ShapeActionResult>, IMessage, IActionResult<ShapeResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
@@ -129,7 +129,7 @@ namespace Iviz.Msgs.TurtleActionlib
             public override void RosSerialize(ShapeActionResult msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(ShapeActionResult msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(ShapeActionResult msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(ShapeActionResult msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(ShapeActionResult msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(ShapeActionResult msg) => msg.RosValidate();
         }
     

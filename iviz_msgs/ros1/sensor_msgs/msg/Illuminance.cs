@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class Illuminance : IDeserializable<Illuminance>, IHasSerializer<Illuminance>, IMessage
+    public sealed class Illuminance : IHasSerializer<Illuminance>, IMessage
     {
         // Single photometric illuminance measurement.  Light should be assumed to be
         // measured along the sensor's x-axis (the area of detection is the y-z plane).
@@ -134,7 +134,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(Illuminance msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(Illuminance msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(Illuminance msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(Illuminance msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(Illuminance msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(Illuminance msg) => msg.RosValidate();
         }
     

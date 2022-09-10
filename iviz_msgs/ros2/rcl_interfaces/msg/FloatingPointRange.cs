@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class FloatingPointRange : IDeserializable<FloatingPointRange>, IHasSerializer<FloatingPointRange>, IMessage
+    public sealed class FloatingPointRange : IHasSerializer<FloatingPointRange>, IMessage
     {
         // Represents bounds and a step value for a floating point typed parameter.
         // Start value for valid values, inclusive.

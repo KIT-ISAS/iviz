@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.VisualizationMsgs
 {
     [DataContract]
-    public sealed class InteractiveMarker : IDeserializable<InteractiveMarker>, IHasSerializer<InteractiveMarker>, IMessage
+    public sealed class InteractiveMarker : IHasSerializer<InteractiveMarker>, IMessage
     {
         // Time/frame info.
         // If header.time is set to 0, the marker will be retransformed into
@@ -277,7 +277,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             public override void RosSerialize(InteractiveMarker msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(InteractiveMarker msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(InteractiveMarker msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(InteractiveMarker msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(InteractiveMarker msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(InteractiveMarker msg) => msg.RosValidate();
         }
     

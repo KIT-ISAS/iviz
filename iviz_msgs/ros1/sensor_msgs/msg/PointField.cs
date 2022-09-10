@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class PointField : IDeserializable<PointField>, IHasSerializer<PointField>, IMessage
+    public sealed class PointField : IHasSerializer<PointField>, IMessage
     {
         // This message holds the description of one point entry in the
         // PointCloud2 message format.
@@ -136,7 +136,7 @@ namespace Iviz.Msgs.SensorMsgs
             public override void RosSerialize(PointField msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(PointField msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(PointField msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(PointField msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(PointField msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(PointField msg) => msg.RosValidate();
         }
     

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    public sealed class Pose2D : IDeserializable<Pose2D>, IHasSerializer<Pose2D>, IMessage
+    public sealed class Pose2D : IHasSerializer<Pose2D>, IMessage
     {
         // Deprecated
         // Please use the full 3D pose.

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class Vector2i : IDeserializable<Vector2i>, IHasSerializer<Vector2i>, IMessage
+    public sealed class Vector2i : IHasSerializer<Vector2i>, IMessage
     {
         [DataMember (Name = "x")] public int X;
         [DataMember (Name = "y")] public int Y;

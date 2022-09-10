@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class MeshVertexColors : IDeserializable<MeshVertexColors>, IHasSerializer<MeshVertexColors>, IMessage
+    public sealed class MeshVertexColors : IHasSerializer<MeshVertexColors>, IMessage
     {
         // Mesh Attribute Message
         [DataMember (Name = "vertex_colors")] public StdMsgs.ColorRGBA[] VertexColors;
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.MeshMsgs
             public override void RosSerialize(MeshVertexColors msg, ref WriteBuffer b) => msg.RosSerialize(ref b);
             public override void RosSerialize(MeshVertexColors msg, ref WriteBuffer2 b) => msg.RosSerialize(ref b);
             public override int RosMessageLength(MeshVertexColors msg) => msg.RosMessageLength;
-            public override int Ros2MessageLength(MeshVertexColors msg) => msg.Ros2MessageLength;
+            public override int Ros2MessageLength(MeshVertexColors msg) => msg.AddRos2MessageLength(0);
             public override void RosValidate(MeshVertexColors msg) => msg.RosValidate();
         }
     

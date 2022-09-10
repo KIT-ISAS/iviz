@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdMsgs
 {
     [DataContract]
-    public sealed class Empty : IDeserializable<Empty>, IHasSerializer<Empty>, IMessage
+    public sealed class Empty : IHasSerializer<Empty>, IMessage
     {
         public Empty()
         {
