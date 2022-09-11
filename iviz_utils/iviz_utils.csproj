@@ -15,10 +15,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\iviz_model_service_lib\iviz_model_service_lib.csproj" />
         <ProjectReference Include="..\iviz_msgs_gen_lib\iviz_msgs_gen_lib.csproj" />
         <ProjectReference Include="..\iviz_ntp_lib\iviz_ntp_lib.csproj" />
-        <ProjectReference Include="..\iviz_octree_helper\iviz_octree_helper.csproj" />
         <ProjectReference Include="..\iviz_rosbag_lib\iviz_rosbag_lib.csproj" />
         <ProjectReference Include="..\iviz_roslib2\iviz_roslib2.csproj" />
         <ProjectReference Include="..\iviz_roslib\iviz_roslib.csproj" />
