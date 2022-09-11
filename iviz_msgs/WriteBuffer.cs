@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Tools;
 
@@ -112,36 +110,6 @@ public unsafe struct WriteBuffer
         }
     }
 
-    public void SerializeStructArray(byte[] val)
-    {
-        const int sizeOfT = sizeof(byte);
-        int size = val.Length * sizeOfT;
-        ThrowIfOutOfRange(4 + size);
-
-        WriteInt(val.Length);
-        fixed (byte* valPtr = val)
-        {
-            Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
-        }
-
-        Advance(size);
-    }
-
-    public void SerializeStructArray(Point32[] val)
-    {
-        const int sizeOfT = Point32.RosFixedMessageLength;
-        int size = val.Length * sizeOfT;
-        ThrowIfOutOfRange(4 + size);
-
-        WriteInt(val.Length);
-        fixed (Point32* valPtr = val)
-        {
-            Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
-        }
-
-        Advance(size);
-    }
-
     public void SerializeStructArray<T>(T[] val) where T : unmanaged
     {
         int sizeOfT = Unsafe.SizeOf<T>();
@@ -185,44 +153,6 @@ public unsafe struct WriteBuffer
 
         Advance(size);
     }
-
-    /*
-    public void SerializeArray(IMessage[] val)
-    {
-        WriteInt(val.Length);
-        for (int i = 0; i < val.Length; i++)
-        {
-            val[i].RosSerialize(ref this);
-        }
-    }
-
-    public void SerializeArray(IMessage[] val, int count)
-    {
-        ThrowIfWrongSize(val, count);
-        for (int i = 0; i < count; i++)
-        {
-            val[i].RosSerialize(ref this);
-        }
-    }
-
-    public void SerializeArrayGeneric<T>(T[] val) where T : IMessage
-    {
-        WriteInt(val.Length);
-        for (int i = 0; i < val.Length; i++)
-        {
-            val[i].RosSerialize(ref this);
-        }
-    }
-
-    public void SerializeArrayGeneric<T>(T[] val, int count) where T : IMessage
-    {
-        ThrowIfWrongSize(val, count);
-        for (int i = 0; i < count; i++)
-        {
-            val[i].RosSerialize(ref this);
-        }
-    }
-    */
 
     /// Returns the size in bytes of a string array when serialized in ROS
     public static int GetArraySize(string[]? array)

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Iviz.Msgs;
+﻿namespace Iviz.Msgs;
 
 public interface IMessageRos1
 {
