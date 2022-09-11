@@ -1,2 +1,2 @@
-iviz_msgs/Dialog[] dialogs
+Dialog[] dialogs
 
