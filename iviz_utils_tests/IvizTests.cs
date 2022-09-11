@@ -4,7 +4,6 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.GridMapMsgs;
@@ -19,7 +18,6 @@ using Iviz.Roslib;
 using Iviz.Roslib.MarkerHelper;
 using Iviz.Tools;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace Iviz.UtilsTests;
