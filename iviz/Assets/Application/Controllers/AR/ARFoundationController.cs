@@ -46,6 +46,8 @@ namespace Iviz.Controllers
 
         ARAnchorResource? worldAnchor;
 
+        public static event Action<bool>? SetupModeChanged;
+        
         public ARMeshManager? MeshManager { get; private set; }
         public ARAnchorManager AnchorManager => arContents.AnchorManager;
 
@@ -163,6 +165,8 @@ namespace Iviz.Controllers
 
                     markerDetector.DelayBetweenCapturesInMs = 3000;
                 }
+
+                SetupModeChanged?.Invoke(value);
             }
         }
 

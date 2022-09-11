@@ -21,6 +21,8 @@ namespace Iviz.Displays
             { GridOrientation.YZ, Quaternion.Euler(0, 90, 0) }
         };
 
+        public new Transform Transform => base.Transform;
+        
         readonly List<MeshMarkerDisplay> horizontals = new();
         readonly List<MeshMarkerDisplay> verticals = new();
 
@@ -34,7 +36,6 @@ namespace Iviz.Displays
         Color gridColor;
         Color interiorColor;
         int numberOfGridCells = 90;
-        int lastX, lastZ;
         float gridCellSize = 1;
         float gridLineWidth;
 
@@ -49,14 +50,13 @@ namespace Iviz.Displays
             ? interiorObject
             : interiorObject = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, Transform);
 
-
         public GridOrientation Orientation
         {
             get => orientation;
             set
             {
                 orientation = value;
-                transform.localRotation = RotationByOrientation[value];
+                Transform.localRotation = RotationByOrientation[value];
             }
         }
 
@@ -168,20 +168,27 @@ namespace Iviz.Displays
             }
 
             (float camX, _, float camZ) = TfModule.RelativeToOrigin(Settings.MainCameraPose.position);
+            /*
             switch (Orientation)
             {
                 case GridOrientation.XY:
-                    int x = (int)(camX + 0.5f);
-                    int z = (int)(camZ + 0.5f);
-                    float offsetY = transform.localPosition.y;
-                    if (x != lastX || z != lastZ)
-                    {
-                        UpdatePosition(x, z, offsetY);
-                    }
 
                     break;
                 // TODO: others
             }
+            */
+            int x = (int)(camX + 0.5f);
+            int z = (int)(camZ + 0.5f);
+            var (offsetX, offsetY, offsetZ) = Transform.localPosition;
+
+            int lastX = (int)(offsetX + 0.5f);
+            int lastZ = (int)(offsetZ + 0.5f);
+
+            if (x != lastX || z != lastZ)
+            {
+                UpdatePosition(x, z, offsetY);
+            }
+            
         }
 
         void UpdatePosition(int x, int z, float offsetY)
@@ -192,21 +199,18 @@ namespace Iviz.Displays
             Transform.localPosition = new Vector3(x, offsetY, z);
 
             int baseHoriz = Mathf.FloorToInt((z + 5) / 10f) * 10;
-            foreach (int i in ..horizontals.Count)
+            for (int i = 0; i < horizontals.Count; i++)
             {
                 float za = (i - (horizontals.Count - 1f) / 2) * 10;
                 horizontals[i].Transform.localPosition = new Vector3(0, baseHoriz + za - z, -zPosForX);
             }
 
             int baseVert = Mathf.FloorToInt((x + 5) / 10f) * 10;
-            foreach (int i in ..verticals.Count)
+            for (int i = 0; i < verticals.Count; i++)
             {
                 float xa = (i - (verticals.Count - 1f) / 2) * 10;
                 verticals[i].Transform.localPosition = new Vector3(baseVert + xa - x, 0, -zPosForY);
             }
-
-            lastX = x;
-            lastZ = z;
         }
 
         void UpdateMesh()
@@ -266,8 +270,6 @@ namespace Iviz.Displays
             }
 
             InteriorColor = InteriorColor;
-            lastX = int.MaxValue;
-            lastZ = int.MaxValue;
         }
 
         public void SplitForRecycle()

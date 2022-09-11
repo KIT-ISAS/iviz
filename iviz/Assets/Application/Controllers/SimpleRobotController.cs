@@ -301,15 +301,15 @@ namespace Iviz.Controllers
                     config.SourceParameter = "";
                 }
                 
-                _ = TryLoadSavedRobotAsync(savedRobotName);
+                _ = TryLoadSavedRobotAsync(savedRobotName).AwaitNoThrow(this);
             }
             else if (!string.IsNullOrWhiteSpace(sourceParameter))
             {
-                _ = TryLoadFromSourceParameterAsync(sourceParameter);
+                _ = TryLoadFromSourceParameterAsync(sourceParameter).AwaitNoThrow(this);
             }
             else
             {
-                _ = TryLoadFromSourceParameterAsync(null);
+                _ = TryLoadFromSourceParameterAsync(null).AwaitNoThrow(this);
             }
         }
 
@@ -428,7 +428,7 @@ namespace Iviz.Controllers
                 UpdateStartTaskStatus();
             }
 
-            _ = LoadRobotAsync();
+            _ = LoadRobotAsync().AwaitNoThrow(this);
             UpdateStartTaskStatus();
             return true;
         }
@@ -592,12 +592,12 @@ namespace Iviz.Controllers
                     config.SourceParameter = "";
                 }
 
-                _ = TryLoadSavedRobotAsync(SavedRobotName);
+                _ = TryLoadSavedRobotAsync(SavedRobotName).AwaitNoThrow(this);
             }
 
             if (!string.IsNullOrWhiteSpace(SourceParameter))
             {
-                _ = TryLoadFromSourceParameterAsync(SourceParameter);
+                _ = TryLoadFromSourceParameterAsync(SourceParameter).AwaitNoThrow(this);
             }
             
             if (AttachedToTf)

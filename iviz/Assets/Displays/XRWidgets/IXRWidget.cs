@@ -7,11 +7,11 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public interface IWidget : IDisplay, IIsInteractable
+    public interface IXRWidget : IDisplay, IIsInteractable
     {
     }
 
-    public interface IWidgetWithColor : IWidget
+    public interface IWidgetWithColor : IXRWidget
     {
         Color Color { set; }
 
@@ -21,7 +21,7 @@ namespace Iviz.Displays.XR
         }
     }
 
-    public interface IWidgetWithCaption : IWidget
+    public interface IWidgetWithCaption : IXRWidget
     {
         string Caption { set; }
 
@@ -31,7 +31,7 @@ namespace Iviz.Displays.XR
         }
     }
 
-    public interface IWidgetWithScale : IWidget
+    public interface IWidgetWithScale : IXRWidget
     {
         float Scale { set; }
 
@@ -41,27 +41,27 @@ namespace Iviz.Displays.XR
         }
     }
 
-    public interface IWidgetCanBeMoved : IWidget
+    public interface IWidgetCanBeMoved : IXRWidget
     {
         event Action<Vector3>? Moved;
     }
 
-    public interface IWidgetCanBeRotated : IWidget
+    public interface IWidgetCanBeRotated : IXRWidget
     {
         public event Action<float>? Moved;
     }
 
-    public interface IWidgetCanBeResized : IWidget
+    public interface IWidgetCanBeResized : IXRWidget
     {
         public event Action<Bounds>? Resized;
     }
 
-    public interface IWidgetCanBeClicked : IWidget
+    public interface IWidgetCanBeClicked : IXRWidget
     {
         public event Action<int>? Clicked;
     }
 
-    public interface IWidgetProvidesTrajectory : IWidget
+    public interface IWidgetProvidesTrajectory : IXRWidget
     {
         public event Action<List<Vector3>, float>? ProvidedTrajectory;
     }

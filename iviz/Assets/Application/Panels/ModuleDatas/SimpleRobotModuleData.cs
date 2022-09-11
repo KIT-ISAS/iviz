@@ -11,6 +11,7 @@ using Iviz.Core;
 using Iviz.Core.Configurations;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Tools;
 using Newtonsoft.Json;
 
 namespace Iviz.App
@@ -53,7 +54,7 @@ namespace Iviz.App
 
             if (!string.IsNullOrWhiteSpace(RobotController.SourceParameter))
             {
-                _ = RobotController.TryLoadFromSourceParameterAsync(RobotController.SourceParameter);
+                _ = RobotController.TryLoadFromSourceParameterAsync(RobotController.SourceParameter).AwaitNoThrow(this);
             }
 
             panel.HelpText.Text = RobotController.HelpText;
@@ -137,7 +138,7 @@ namespace Iviz.App
             };
             panel.SourceParameter.Submit += f =>
             {
-                _ = RobotController.TryLoadFromSourceParameterAsync(f);
+                _ = RobotController.TryLoadFromSourceParameterAsync(f).AwaitNoThrow(this);
                 panel.SavedRobotName.Index = 0;
                 panel.Save.Value = IsRobotSaved;
 
@@ -166,11 +167,11 @@ namespace Iviz.App
                         panel.SavedRobotName.Options = GetSavedRobots();
                     }
                     
-                    _ = AddRobotResourceAsync();
+                    _ = AddRobotResourceAsync().AwaitNoThrow(this);
                 }
                 else
                 {
-                    _ = Resource.External.RemoveRobotResourceAsync(robot.Name);
+                    _ = Resource.External.RemoveRobotResourceAsync(robot.Name).AwaitNoThrow(this);
                 }
             };
 

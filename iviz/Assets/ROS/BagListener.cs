@@ -2,18 +2,18 @@
 
 using System;
 using System.IO;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Rosbag.Writer;
 using Iviz.Tools;
-using Nito.AsyncEx;
 
 namespace Iviz.Ros
 {
     public sealed class BagListener
     {
-        readonly AsyncCollection<(IMessage, IRosConnection, time)> messageQueue = new();
+        readonly Channel<(IMessage, IRosConnection, time)> messageChannel;
 
         readonly Task task;
         readonly string path;
@@ -34,6 +34,9 @@ namespace Iviz.Ros
                 RosLogger.Info($"{this}: Writing rosbag to path {path}");
             }
 
+            var options = new UnboundedChannelOptions { SingleReader = true };
+            messageChannel = Channel.CreateUnbounded<(IMessage, IRosConnection, time)>(options);
+
             task = TaskUtils.Run(() => WriteMessagesAsync().AsTask());
         }
 
@@ -46,7 +49,8 @@ namespace Iviz.Ros
             }
 
             disposed = true;
-            messageQueue.CompleteAdding();
+            messageChannel.Writer.Complete();
+            //messageQueue.CompleteAdding();
             await task.AwaitNoThrow(this); // shouldn't throw
             if (Settings.IsMobile)
             {
@@ -63,9 +67,10 @@ namespace Iviz.Ros
         {
             try
             {
-                messageQueue.Add((msg, connection, time.Now()));
+                //messageQueue.Add((msg, connection, time.Now()));
+                messageChannel.Writer.TryWrite((msg, connection, time.Now()));
             }
-            catch (InvalidOperationException)
+            catch (ChannelClosedException)
             {
                 // bag is closing! ignore 
             }
@@ -79,6 +84,7 @@ namespace Iviz.Ros
         {
             // keep the writer within this function!
             RosbagFileWriter? writer = null;
+            var reader = messageChannel.Reader;
 
             try
             {
@@ -86,13 +92,14 @@ namespace Iviz.Ros
                 {
                     while (true)
                     {
-                        var (message, connection, time) = await messageQueue.TakeAsync();
+                        //var (message, connection, time) = await messageQueue.TakeAsync();
+                        var (message, connection, time) = await reader.ReadAsync();
                         await writer.WriteAsync(message, connection, time);
                         Length = writer.Length;
                     }
                 }
             }
-            catch (InvalidOperationException)
+            catch (ChannelClosedException)
             {
                 // bag is closing! ignore 
             }

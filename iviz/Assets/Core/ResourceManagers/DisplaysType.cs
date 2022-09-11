@@ -64,9 +64,9 @@ namespace Iviz.Resources
         public ResourceKey<GameObject> CanvasHolder { get; }
         public ResourceKey<GameObject> PalmCompass { get; }
 
-        public ResourceKey<GameObject> Boundary { get; }
-        public ResourceKey<GameObject> BoundaryCheck { get; }
-        public ResourceKey<GameObject> BoundaryLink { get; }
+        public ResourceKey<GameObject> SimpleBoundary { get; }
+        public ResourceKey<GameObject> ColliderBoundary { get; }
+        public ResourceKey<GameObject> CollidableBoundary { get; }
 
         public DisplaysType()
         {
@@ -128,13 +128,13 @@ namespace Iviz.Resources
             CanvasHolder = Create(appAssetHolder.CanvasHolder, nameof(appAssetHolder.CanvasHolder));
             PalmCompass = Create(appAssetHolder.PalmCompass, nameof(appAssetHolder.PalmCompass));
 
-            Boundary = Create(appAssetHolder.Boundary, nameof(appAssetHolder.Boundary));
-            BoundaryCheck = Create(appAssetHolder.BoundaryCheck, nameof(appAssetHolder.BoundaryCheck));
-            BoundaryLink = Create(appAssetHolder.BoundaryLink, nameof(appAssetHolder.BoundaryLink));
+            SimpleBoundary = Create(appAssetHolder.Boundary, nameof(appAssetHolder.Boundary));
+            ColliderBoundary = Create(appAssetHolder.ColliderBoundary, nameof(appAssetHolder.ColliderBoundary));
+            CollidableBoundary = Create(appAssetHolder.CollidableBoundary, nameof(appAssetHolder.CollidableBoundary));
 
             resourceByType = CreateTypeDictionary(this);
 
-            static ResourceKey<GameObject> Create(GameObject obj, string? msg = null) => new(obj, msg);
+            static ResourceKey<GameObject> Create(GameObject obj, string msg) => new(obj, msg);
         }
 
         static Dictionary<Type, ResourceKey<GameObject>?> CreateTypeDictionary(DisplaysType o)

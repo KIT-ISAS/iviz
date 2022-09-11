@@ -5,12 +5,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
-using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.XR;
@@ -22,9 +21,7 @@ using MarcusW.VncClient;
 using MarcusW.VncClient.Protocol;
 using MarcusW.VncClient.Protocol.SecurityTypes;
 using Newtonsoft.Json;
-using Nito.AsyncEx;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using Color = UnityEngine.Color;
 
 namespace VNC
@@ -94,7 +91,7 @@ namespace VNC
 
         void Start()
         {
-            _ = RunAsync();
+            _ = RunAsync().AwaitNoThrow(this);
         }
 
         async Task RunAsync()
@@ -189,21 +186,24 @@ namespace VNC
         async IAsyncEnumerable<ConnectionState> ProcessConnectionChanges(
             [EnumeratorCancellation] CancellationToken token)
         {
-            var queue = new AsyncProducerConsumerQueue<ConnectionState>();
+            //var queue = new AsyncProducerConsumerQueue<ConnectionState>();
+            var options = new UnboundedChannelOptions { SingleReader = true };
+            var queue = Channel.CreateUnbounded<ConnectionState>(options);
 
             void OnConnectionStateChanged(ConnectionState connectionState)
             {
-                queue.Enqueue(connectionState, default);
+                queue.Writer.TryWrite(connectionState);
             }
 
             Client.ConnectionStateChanged += OnConnectionStateChanged;
 
-            while (!token.IsCancellationRequested)
+            while (true)
             {
                 ConnectionState newState;
                 try
                 {
-                    newState = await queue.DequeueAsync(token);
+                    //newState = await queue.DequeueAsync(token);
+                    newState = await queue.Reader.ReadAsync(token);
                 }
                 catch (OperationCanceledException)
                 {

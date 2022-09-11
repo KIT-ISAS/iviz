@@ -329,6 +329,7 @@ namespace Iviz.App
                     panel.MyUri.Value = newCallerUri.ToString();
                 }
 
+                MasterUri = uri;
                 MyUri = newCallerUri;
             };
             panel.MyId.Submit += SetMyId;
@@ -354,8 +355,8 @@ namespace Iviz.App
             panel.ServerMode.Clicked += () =>
             {
                 _ = !RosManager.Server.IsActive
-                    ? TryCreateMasterAsync()
-                    : TryDisposeMasterAsync();
+                    ? TryCreateMasterAsync().AwaitNoThrow(this)
+                    : TryDisposeMasterAsync().AwaitNoThrow(this);
             };
 
             panel.DomainId.ValueChanged += (i, _) => DomainId = i;
@@ -452,12 +453,19 @@ namespace Iviz.App
 
             const string ownMasterId = "iviz_master";
 
-            if (!await RosManager.Server.StartAsync(ownMasterUri, ownMasterId))
+            try
             {
-                RosLogger.Internal("<b>Error:</b> Failed to initialize ROS master. " +
-                                   "Make sure that <b>My Caller URI</b> is a reachable address and that " +
-                                   "you are in the right network.");
-                return;
+                if (!await RosManager.Server.StartAsync(ownMasterUri, ownMasterId))
+                {
+                    RosLogger.Internal("<b>Error:</b> Failed to initialize ROS master. " +
+                                       "Make sure that <b>My Caller URI</b> is a reachable address and that " +
+                                       "you are in the right network.");
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                RosLogger.Internal("<b>Error</b>: Failed to initialize ROS master!", e);
             }
 
             if (MasterUri != ownMasterUri)
@@ -488,13 +496,13 @@ namespace Iviz.App
                     return;
                 }
 
-                RosLogger.Internal(
-                    MyUri.Host == "localhost"
+                bool ownHost = MyUri.Host == MasterUri.Host;
+                RosLogger.Internal(ownHost
                         ? "Trying to connect to local ROS server."
                         : "Trying to connect to previous ROS server.");
-                if ((Settings.IsMacOS || Settings.IsMobile) && MyUri.Host == MasterUri.Host)
+                if ((Settings.IsMacOS || Settings.IsMobile) && ownHost)
                 {
-                    _ = TryCreateMasterAsync(); // create master and connect
+                    _ = TryCreateMasterAsync().AwaitNoThrow(this); // create master and connect
                     return;
                 }
             }

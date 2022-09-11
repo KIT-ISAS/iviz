@@ -145,7 +145,7 @@ namespace Iviz.App
                 .Where(info => info.Type == expectedType)
                 .Select(info => info.Topic);
 
-            static TopicNameType[] GetTopicTypes() => RosManager.Connection.GetSystemTopicTypes();
+            static IEnumerable<TopicNameType> GetTopicTypes() => RosManager.Connection.GetSystemTopicTypes();
         }
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)

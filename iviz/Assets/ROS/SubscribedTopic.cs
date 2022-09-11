@@ -12,7 +12,7 @@ using Iviz.Tools;
 namespace Iviz.Ros
 {
     internal sealed class SubscribedTopic<T> : RosCallback<T>, ISubscribedTopic
-        where T : IMessage, IDeserializable<T>, new()
+        where T : IMessage, new()
     {
         const int NumRetries = 3;
         const int WaitBetweenRetriesInMs = 500;

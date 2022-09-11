@@ -1,25 +1,24 @@
 #nullable enable
 
-using System;
-using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using UnityEngine;
 
-/*
 namespace Iviz.Displays.XR
 {
-    public sealed class BoundaryWidget : MonoBehaviour, IWidgetWithCaption, IWidgetWithColor, 
-        IWidgetWithBoundary, IWidgetWithSecondScale, IRecyclable
+    public class SimpleBoundary : MonoBehaviour, IBoundary, IRecyclable
     {
         SelectionFrame? frame;
         Tooltip? tooltip;
         Transform? mTransform;
+        MeshMarkerDisplay? cube;
         Bounds bounds;
 
         SelectionFrame Frame => ResourcePool.RentChecked(ref frame, Transform);
         Transform Transform => this.EnsureHasTransform(ref mTransform);
+
+        public string Id { get; set; } = "";
 
         public bool Interactable
         {
@@ -39,10 +38,7 @@ namespace Iviz.Displays.XR
                 {
                     if (tooltip == null)
                     {
-                        tooltip = ResourcePool.RentDisplay<Tooltip>(Transform);
-                        tooltip.CaptionColor = Color.white;
-                        tooltip.Color = Resource.Colors.TooltipBackground;
-                        tooltip.Scale = 0.25f;
+                        tooltip = CreateTooltip(Transform);
                         Update();
                     }
 
@@ -51,14 +47,44 @@ namespace Iviz.Displays.XR
             }
         }
 
-        public Color Color
+        static Tooltip CreateTooltip(Transform transform)
         {
-            set => Frame.Color = value;
+            var tooltip = ResourcePool.RentDisplay<Tooltip>(transform);
+            tooltip.CaptionColor = Color.white;
+            tooltip.Color = Resource.Colors.TooltipBackground;
+            tooltip.Scale = 0.25f;
+            return tooltip;
         }
 
-        public Color SecondaryColor
+        public Color Color
         {
-            set => Frame.EmissiveColor = value;
+            set
+            {
+                Frame.Color = value;
+                Frame.EmissiveColor = value;
+            }
+        }
+
+        public Color SecondColor
+        {
+            set
+            {
+                if (value.a != 0)
+                {
+                    if (cube == null)
+                    {
+                        cube = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, Transform);
+                    }
+
+                    cube.Visible = true;
+                    cube.Color = value;
+                    cube.EmissiveColor = value;
+                }
+                else if (cube != null)
+                {
+                    cube.Visible = false;
+                }
+            }
         }
 
         public float SecondaryScale
@@ -66,13 +92,11 @@ namespace Iviz.Displays.XR
             set => Frame.ColumnWidth = value;
         }
 
-        public BoundingBox Boundary
+        public Vector3 Scale
         {
             set
             {
-                Transform.SetLocalPose(value.Center.Ros2Unity());
-                
-                var size = value.Size.Ros2Unity().Abs();
+                var size = value.Ros2Unity().Abs();
                 Frame.Size = size;
                 bounds.size = size;
             }
@@ -90,18 +114,21 @@ namespace Iviz.Displays.XR
             tooltip.Scale = labelSize;
             tooltip.Transform.position = worldBounds.center +
                                          2f * (worldBounds.size.y * 0.3f + labelSize) * Vector3.up;
-        }        
-        
-        public void Suspend()
+        }
+
+        public virtual void Suspend()
         {
             Caption = "";
+            
+            cube.ReturnToPool(Resource.Displays.Cube);
+            cube = null;
         }
 
         public void SplitForRecycle()
         {
             frame.ReturnToPool();
             tooltip.ReturnToPool();
+            cube.ReturnToPool(Resource.Displays.Cube);
         }
     }
 }
-*/

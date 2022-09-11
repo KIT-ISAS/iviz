@@ -27,13 +27,21 @@ namespace Iviz.Ros
         static event Action<bool>? ConnectionWarningStateChanged;
 
         IRosClient Client { get; }
+        
         string? MyId { get; set; }
+        
         Uri? MasterUri { get; set; }
+        
         Uri? MyUri { get; set; }
+        
         bool KeepReconnecting { set; }
+        
         BagListener? BagListener { get; set; }
+        
         RosVersion RosVersion { get; set; }
+        
         int DomainId { set; }
+        
         Endpoint? DiscoveryServer { set; }
 
         void SetHostAliases(IEnumerable<(string hostname, string address)> newHostAliases);

@@ -6,7 +6,6 @@ using Iviz.Core;
 using Iviz.Core.Configurations;
 using Iviz.Displays;
 using Iviz.Msgs.OctomapMsgs;
-using Iviz.Octree;
 using Iviz.Resources;
 using Iviz.Ros;
 using JetBrains.Annotations;
@@ -15,6 +14,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
+    /*
     public sealed class OctomapListener : ListenerController
     {
         static readonly Vector2 WhiteBounds = new Vector2(-10, 1);
@@ -176,4 +176,5 @@ namespace Iviz.Controllers
             node.Dispose();
         }
     }
+    */
 }

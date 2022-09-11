@@ -102,6 +102,7 @@ namespace Iviz.App
         void Awake()
         {
             ARController.ARStateChanged += OnArEnabledChanged;
+            ARFoundationController.SetupModeChanged += OnSetupModeChanged;
 
             toggle.onClick.AddListener(() =>
             {
@@ -154,12 +155,18 @@ namespace Iviz.App
         void OnDestroy()
         {
             ARController.ARStateChanged -= OnArEnabledChanged;
+            ARFoundationController.SetupModeChanged -= OnSetupModeChanged;
             tokenSource?.Cancel();
         }
 
         void OnArEnabledChanged(bool _)
         {
             Visible = Visible;
+        }
+        
+        void OnSetupModeChanged(bool value)
+        {
+            move.Interactable = !value;
         }
 
         void OnDividerClicked()

@@ -3,6 +3,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading;
+using System.Threading.Channels;
 using Iviz.Core;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Ros;
@@ -47,7 +49,10 @@ namespace Iviz.App
         };
 
         readonly ConsoleDialogPanel dialog;
+        
         readonly ConcurrentQueue<LogMessage> messageQueue = new();
+        int messageQueueCount;
+            
         readonly ConcurrentSet<string> ids = new();
 
         bool isPaused;
@@ -159,12 +164,14 @@ namespace Iviz.App
                 return;
             }
 
-            if (messageQueue.Count >= MaxMessages)
+            if (messageQueueCount >= MaxMessages)
             {
                 messageQueue.TryDequeue(out _);
+                Interlocked.Decrement(ref messageQueueCount);
             }
 
             messageQueue.Enqueue(log);
+            Interlocked.Increment(ref messageQueueCount);
 
             queueIsDirty = true;
         }
@@ -179,7 +186,7 @@ namespace Iviz.App
                 _ => DefaultColor
             };
 
-        public static int IndexFromLevel(LogLevel level) =>
+        static int IndexFromLevel(LogLevel level) =>
             level switch
             {
                 LogLevel.Debug => 0,
@@ -190,7 +197,7 @@ namespace Iviz.App
                 _ => throw new ArgumentException("Invalid level", nameof(level))
             };
 
-        public static LogLevel LevelFromIndex(int index) =>
+        static LogLevel LevelFromIndex(int index) =>
             index switch
             {
                 0 => LogLevel.Debug,
@@ -226,13 +233,13 @@ namespace Iviz.App
 
             Span<int> indices = stackalloc int[MaxMessagesToPrint];
             using var description = BuilderPool.Rent();
-            using (var messages = new RentAndClear<LogMessage>(messageQueue.Count))
+            using (var messages = new RentAndClear<LogMessage>(messageQueueCount))
             {
                 int indexStart = 0;
                 int numIndices = 0;
 
                 messageQueue.CopyTo(messages.Array, 0);
-                foreach (int i in ..messages.Length)
+                for (int i = 0; i < messages.Length; i++)
                 {
                     var message = messages[i];
                     var messageLevel = message.Level;
@@ -259,7 +266,7 @@ namespace Iviz.App
                     }
                 }
 
-                foreach (int i in ..numIndices)
+                for (int i = 0; i < numIndices; i++)
                 {
                     int index = indices[(indexStart + i) % MaxMessagesToPrint];
                     var message = messages[index];
@@ -314,6 +321,8 @@ namespace Iviz.App
         void Reset()
         {
             messageQueue.Clear();
+            Interlocked.Exchange(ref messageQueueCount, 0);
+            
             dialog.Text.text = "";
             queueIsDirty = false;
         }

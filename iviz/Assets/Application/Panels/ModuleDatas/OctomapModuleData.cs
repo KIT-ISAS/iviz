@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 
 namespace Iviz.App
 {
+    /*
     /// <summary>
     /// <see cref="OctomapModulePanel"/> 
     /// </summary>
@@ -94,4 +95,5 @@ namespace Iviz.App
             config.Octomaps.Add(listener.Config);
         }
     }
+    */
 }

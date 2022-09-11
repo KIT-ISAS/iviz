@@ -5,8 +5,8 @@ namespace Iviz.Displays
 {
     public sealed class AppAssetHolder : MonoBehaviour
     {
-        public Texture2D AtlasLarge;
-        public Texture2D AtlasLargeFlip;
+        //public Texture2D AtlasLarge;
+        //public Texture2D AtlasLargeFlip;
         
         public GameObject ARPrefab;
         public GameObject AngleAxis;
@@ -18,7 +18,7 @@ namespace Iviz.Displays
         public GameObject Grid;
         public GameObject GridMap;
         public GameObject Image;
-        public GameObject InteractiveControl;
+        //public GameObject InteractiveControl;
         public GameObject LineConnector;
         public GameObject OccupancyGrid;
         public GameObject OccupancyGridTexture;
@@ -51,14 +51,14 @@ namespace Iviz.Displays
         public GameObject TooltipWidget;
 
         public GameObject Boundary;
-        public GameObject BoundaryLink;
-        public GameObject BoundaryCheck;
+        public GameObject ColliderBoundary;
+        public GameObject CollidableBoundary;
 
         public GameObject PositionDisc;
         public GameObject PositionDisc3D;
         
-        public Material LineConnectorMaterial;
-        public Material TextMaterial;
+        //public Material LineConnectorMaterial;
+        //public Material TextMaterial;
 
         public Material ImagePreview;
         public Material GridInterior;

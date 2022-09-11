@@ -10,7 +10,6 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Urdf;
-using Nito.AsyncEx;
 using UnityEngine;
 using Color = UnityEngine.Color;
 using Joint = Iviz.Urdf.Joint;
@@ -231,7 +230,7 @@ namespace Iviz.Displays
 
             try
             {
-                await modelLoadingTasks.WhenAll();
+                await Task.WhenAll(modelLoadingTasks);
             }
             catch (OperationCanceledException)
             {

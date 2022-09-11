@@ -16,7 +16,6 @@ using Iviz.Resources;
 using Iviz.Roslib;
 using Iviz.Tools;
 using Newtonsoft.Json;
-using Nito.AsyncEx;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -515,7 +514,7 @@ namespace Iviz.Displays
                 return null;
             }
 
-            return RosUtils.DeserializeMessage<Model>(buffer[Md5SumLength..]);
+            return new Model().DeserializeRos1(buffer[Md5SumLength..]);
         }
 
         async ValueTask<ResourceKey<GameObject>?> LoadLocalModelAsync(string uriString, string localPath,
@@ -587,7 +586,7 @@ namespace Iviz.Displays
                         return null;
                     }
 
-                    msg = RosUtils.DeserializeMessage<Scene>(buffer[Md5SumLength..]);
+                    msg = new Scene().DeserializeRos1(buffer[Md5SumLength..]);
                 }
 
                 obj = await CreateSceneNodeAsync(msg, provider, token);

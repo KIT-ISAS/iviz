@@ -12,7 +12,7 @@ namespace Iviz.Ros
     /// <typeparam name="T">The ROS message type</typeparam>
     public sealed class Sender<T> : ISender where T : IMessage, new()
     {
-        static RoslibConnection Connection => RosManager.RosConnection;
+        static RosConnection Connection => RosManager.RosConnection;
 
         readonly Serializer<T> serializer;
         int lastMsgBytes;

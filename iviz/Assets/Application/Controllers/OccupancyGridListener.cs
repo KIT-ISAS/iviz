@@ -14,7 +14,6 @@ using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
-using Nito.AsyncEx;
 using UnityEngine;
 
 namespace Iviz.Controllers
@@ -306,7 +305,7 @@ namespace Iviz.Controllers
 
             async void AwaitAndReset()
             {
-                await tasks.WhenAll().AwaitNoThrow(this);
+                await Task.WhenAll(tasks).AwaitNoThrow(this);
                 IsProcessing = false;
             }
         }

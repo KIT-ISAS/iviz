@@ -250,8 +250,8 @@ namespace Iviz.Controllers
                 _ => Ros.Listener.ThrowUnsupportedMessageType(Config.Type)
             };
 
-            Listener<T> CreateListener<T>(Action<T> a) where T : IMessage, IDeserializable<T>, new() =>
-                new(Config.Topic, a, transportHint);
+            Listener<T> CreateListener<T>(Action<T> a) where T : IMessage, new() =>
+                new(Config.Topic, a, transportHint: transportHint);
 
             switch (Config.Type)
             {

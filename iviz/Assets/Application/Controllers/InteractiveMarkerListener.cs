@@ -237,7 +237,7 @@ namespace Iviz.Controllers
                 Id = topic
             };
 
-            Listener = new Listener<InteractiveMarkerUpdate>(Config.Topic, HandleUpdate) { MaxQueueSize = 50 };
+            Listener = new Listener<InteractiveMarkerUpdate>(Config.Topic, HandleUpdate, 50);
 
             string root;
             if (Config.Topic.HasSuffix("/update"))

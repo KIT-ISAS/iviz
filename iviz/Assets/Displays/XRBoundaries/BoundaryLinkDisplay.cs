@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
+    /*
     public sealed class BoundaryLinkDisplay : MonoBehaviour, IDisplay, ISupportsColor, IRecyclable
     {
         [SerializeField] BoxCollider? startCollider;
@@ -121,4 +122,5 @@ namespace Iviz.Displays.XR
             return Vector3.Distance(start, end);
         }
     }
+    */
 }
