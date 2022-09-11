@@ -128,9 +128,9 @@ public static class XmlRpcService
             structValue.Add((entryName, entryValue));
         }
 
-        return new RosValue(structValue.ToArray());                
+        return new RosValue(structValue.ToArray());
     }
-        
+
     internal static Rent CreateRequest(string method, XmlRpcArg[] args)
     {
         using var str = BuilderPool.Rent();
@@ -216,8 +216,7 @@ public static class XmlRpcService
     /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>
     /// <exception cref="RpcConnectionException">An error happened during the connection.</exception>
     public static async ValueTask<RosValue> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
-        XmlRpcArg[] args,
-        CancellationToken token = default)
+        XmlRpcArg[] args, CancellationToken token = default)
     {
         if (remoteUri is null) BaseUtils.ThrowArgumentNull(nameof(remoteUri));
         if (callerUri is null) BaseUtils.ThrowArgumentNull(nameof(callerUri));
@@ -393,7 +392,7 @@ public static class XmlRpcService
                 case "fault":
                     if (child.FirstChild == null)
                     {
-                        throw new ParseException("Expected a child under 'fault', received none. ");
+                        throw new ParseException("Expected a child under 'fault', received none");
                     }
 
                     throw new FaultException(child.FirstChild.InnerXml);
@@ -401,8 +400,7 @@ public static class XmlRpcService
                     methodName = child.InnerText;
                     break;
                 default:
-                    throw new ParseException(
-                        $"Expected 'params', 'fault', or 'methodName', got '{child.Name}'");
+                    throw new ParseException($"Expected 'params', 'fault', or 'methodName', got '{child.Name}'");
             }
         } while ((child = child.NextSibling) != null);
 

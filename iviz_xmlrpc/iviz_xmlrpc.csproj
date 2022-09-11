@@ -14,10 +14,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.2" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\iviz_tools\iviz_tools.csproj" />
     </ItemGroup>
 

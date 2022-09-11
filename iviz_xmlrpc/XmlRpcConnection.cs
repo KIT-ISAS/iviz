@@ -5,7 +5,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Tools;
-using Nito.AsyncEx;
 
 namespace Iviz.XmlRpc;
 
@@ -179,11 +178,7 @@ public sealed class XmlRpcConnection : IDisposable, IComparable<XmlRpcConnection
 
     public void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
         request?.Dispose();
     }
