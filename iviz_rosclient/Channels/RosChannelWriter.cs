@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -210,11 +209,7 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
 
     public void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
 
         if (publisher == null)
@@ -234,11 +229,7 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
 
     public async ValueTask DisposeAsync()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
 
         if (publisher == null)

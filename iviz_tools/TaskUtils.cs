@@ -57,35 +57,7 @@ public static class TaskUtils
     /// <param name="caller">The name of the caller to use in the error message</param>
     public static void WaitNoThrow(this Task? t, object caller)
     {
-        if (t == null || t.IsCompletedSuccessfully || t.IsCanceled)
-        {
-            return;
-        }
-
-        try
-        {
-            t.GetAwaiter().GetResult();
-        }
-        catch (Exception e)
-        {
-            if (e is not OperationCanceledException)
-            {
-                Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Waits for the task and suppresses all exceptions, prints an error message instead.
-    /// </summary>
-    /// <param name="t">The task to await</param>
-    /// <param name="caller">The name of the caller to use in the error message</param>
-    public static void WaitNoThrow(this ValueTask t, object caller)
-    {
-        if (t.IsCompletedSuccessfully || t.IsCanceled)
-        {
-            return;
-        }
+        if (t == null || t.IsCompletedSuccessfully || t.IsCanceled) return;
 
         try
         {
@@ -108,10 +80,7 @@ public static class TaskUtils
     /// <param name="caller">The name of the caller to use in the error message</param>
     public static void WaitNoThrow(this Task? t, int timeoutInMs, object caller)
     {
-        if (t == null || t.IsCompletedSuccessfully || t.IsCanceled)
-        {
-            return;
-        }
+        if (t == null || t.IsCompletedSuccessfully || t.IsCanceled) return;
 
         try
         {
@@ -136,12 +105,9 @@ public static class TaskUtils
     /// Waits for the task to finish. If an exception happens, unwraps the aggregated exception and rethrows it.
     /// </summary>
     /// <param name="t">The task to await.</param>
-    public static void WaitAndRethrow(this Task? t)
+    static void WaitAndRethrow(this Task? t)
     {
-        if (t == null || t.IsCompletedSuccessfully)
-        {
-            return;
-        }
+        if (t == null || t.IsCompletedSuccessfully) return;
 
         try
         {
@@ -158,12 +124,9 @@ public static class TaskUtils
     /// </summary>
     /// <param name="t">The task to await.</param>
     [return: NotNullIfNotNull("t")]
-    public static T? WaitAndRethrow<T>(this Task<T>? t)
+    static T? WaitAndRethrow<T>(this Task<T>? t)
     {
-        if (t == null)
-        {
-            return default;
-        }
+        if (t == null) return default;
 
         try
         {
@@ -183,29 +146,23 @@ public static class TaskUtils
     /// <param name="caller">The name of the caller to use in the error message</param>
     public static Task AwaitNoThrow(this Task? t, object caller)
     {
-        if (t == null || t.IsCompletedSuccessfully || t.IsCanceled)
+        if (t == null || t.IsCompletedSuccessfully || t.IsCanceled) return Task.CompletedTask;
+
+        if (!t.IsFaulted) return AwaitNoThrowCore(t, caller);
+
+        if (t.Exception?.InnerException is { } e and not TimeoutException)
         {
-            return Task.CompletedTask;
+            Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
         }
 
-        if (t.IsFaulted)
-        {
-            if (t.Exception?.InnerException is { } e and not TimeoutException)
-            {
-                Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
-            }
-
-            return Task.CompletedTask;
-        }
-
-        return AwaitNoThrowCore(t, caller);
+        return Task.CompletedTask;
     }
 
     static async Task AwaitNoThrowCore(Task t, object caller)
     {
         try
         {
-            await t;
+            await t.ConfigureAwait(false);
         }
         catch (Exception e)
         {
@@ -223,16 +180,24 @@ public static class TaskUtils
     /// <param name="caller">The name of the caller to use in the error message</param>
     public static Task AwaitNoThrow<T>(this ValueTask<T> t, object caller)
     {
-        return t.IsCompletedSuccessfully || t.IsCanceled
-            ? Task.CompletedTask
-            : AwaitNoThrowCore(t, caller);
+        if (t.IsCompletedSuccessfully || t.IsCanceled) return Task.CompletedTask;
+
+        if (!t.IsFaulted) return AwaitNoThrowCore(t, caller);
+
+        var task = t.AsTask();
+        if (task.Exception?.InnerException is { } e and not TimeoutException)
+        {
+            Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
+        }
+
+        return Task.CompletedTask;
     }
 
     static async Task AwaitNoThrowCore<T>(ValueTask<T> t, object caller)
     {
         try
         {
-            await t;
+            await t.ConfigureAwait(false);
         }
         catch (Exception e)
         {
@@ -250,16 +215,24 @@ public static class TaskUtils
     /// <param name="caller">The name of the caller to use in the error message</param>
     public static Task AwaitNoThrow(this ValueTask t, object caller)
     {
-        return t.IsCompletedSuccessfully || t.IsCanceled
-            ? Task.CompletedTask
-            : AwaitNoThrowCore(t, caller);
+        if (t.IsCompletedSuccessfully || t.IsCanceled) return Task.CompletedTask;
+
+        if (!t.IsFaulted) return AwaitNoThrowCore(t, caller);
+
+        var task = t.AsTask();
+        if (task.Exception?.InnerException is { } e and not TimeoutException)
+        {
+            Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
+        }
+
+        return Task.CompletedTask;
     }
 
     static async Task AwaitNoThrowCore(ValueTask t, object caller)
     {
         try
         {
-            await t;
+            await t.ConfigureAwait(false);
         }
         catch (Exception e)
         {
@@ -280,22 +253,16 @@ public static class TaskUtils
     /// <param name="token">An optional cancellation token</param>
     public static Task AwaitNoThrow(this Task? t, int timeoutInMs, object caller, CancellationToken token = default)
     {
-        if (t == null || t.IsCompletedSuccessfully || t.IsCanceled)
+        if (t == null || t.IsCompletedSuccessfully || t.IsCanceled) return Task.CompletedTask;
+
+        if (!t.IsFaulted) return AwaitNoThrowCore(t, timeoutInMs, caller, token);
+
+        if (t.Exception?.InnerException is { } e and not TimeoutException)
         {
-            return Task.CompletedTask;
+            Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
         }
 
-        if (t.IsFaulted)
-        {
-            if (t.Exception?.InnerException is { } e and not TimeoutException)
-            {
-                Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
-            }
-
-            return Task.CompletedTask;
-        }
-
-        return AwaitNoThrowCore(t, timeoutInMs, caller, token);
+        return Task.CompletedTask;
     }
 
     static async Task AwaitNoThrowCore(Task task, int timeoutInMs, object caller, CancellationToken token)
@@ -311,7 +278,7 @@ public static class TaskUtils
         // ReSharper disable once UseAwaitUsing
         using (tokenSource.Token.Register(CallbackHelpers.SetResult, timeout))
         {
-            Task result = await (task, timeoutTask).WhenAny();
+            var result = await (task, timeoutTask).WhenAny();
             if (result != task)
             {
                 if (!token.IsCancellationRequested)
@@ -322,16 +289,13 @@ public static class TaskUtils
                 return;
             }
 
-            await task.AwaitNoThrow(caller);
+            await task.AwaitNoThrow(caller).ConfigureAwait(false);
         }
     }
 
     public static Task WhenAll<TA, TB>(this SelectEnumerable<TB, TA, Task> ts) where TB : IReadOnlyList<TA>
     {
-        if (ts.Count == 0)
-        {
-            return Task.CompletedTask;
-        }
+        if (ts.Count == 0) return Task.CompletedTask;
 
         ICollection<Task> boxedTs = ts;
         return Task.WhenAll(boxedTs);

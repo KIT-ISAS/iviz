@@ -637,11 +637,7 @@ public sealed class RosbagFileWriter : IDisposable
     /// </summary>
     public void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
 
         try
@@ -690,11 +686,7 @@ public sealed class RosbagFileWriter : IDisposable
     /// </summary>
     public async ValueTask DisposeAsync()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
 
         try

@@ -1,6 +1,6 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
@@ -59,10 +59,7 @@ public sealed class RosChannelReader<T> : BaseRosChannelReader<T> where T : IMes
 
     public override void Start(IRosClient client, string topic)
     {
-        if (client == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(client));
-        }
+        if (client == null) BuiltIns.ThrowArgumentNull(nameof(client));
 
         subscriberId = client.Subscribe(topic, this, out subscriber);
         subscriberToken = subscriber.CancellationToken.Register(OnSubscriberDisposed);
@@ -70,16 +67,13 @@ public sealed class RosChannelReader<T> : BaseRosChannelReader<T> where T : IMes
 
     public override void Handle(T t, IRosConnection _)
     {
-        if (disposed)
-        {
-            return;
-        }
+        if (disposed) return;
 
         try
         {
-            messageQueue.Add(t);
+            writer.TryWrite(t);
         }
-        catch (InvalidOperationException)
+        catch (ChannelClosedException)
         {
             // ignore, reader was disposed but some messages were still in queue
         }
@@ -190,9 +184,9 @@ public static class RosChannelReaderUtils
         CancellationToken token = default)
         where T : IMessage, new()
     {
-        var writer = new RosChannelReader<T>();
-        await writer.StartAsync(client, topic, token);
-        return writer;
+        var reader = new RosChannelReader<T>();
+        await reader.StartAsync(client, topic, token);
+        return reader;
     }
 
     /*

@@ -1,5 +1,4 @@
-﻿using System;
-using Iviz.Msgs;
+﻿using Iviz.Msgs;
 using Iviz.MsgsGen.Dynamic;
 
 namespace Iviz.Roslib;

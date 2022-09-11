@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
-using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -73,7 +70,7 @@ public static class StreamUtils
             return await ReadChunkAsync(client, buffer.Array, remaining, token);
         }
     }
-    
+
     public static ValueTask<int> ReadChunkAsync(this UdpClient udpClient, Rent buffer, CancellationToken token)
     {
         return ReadSubChunkAsync(udpClient.Client, buffer.Array, 0, buffer.Length, token);
@@ -263,19 +260,20 @@ public static class StreamUtils
             Logger.LogDebugFormat("{0}: Listener threw while disposing", caller);
         }
     }
-    
+
     /// <summary>
     /// Enqueues a connection to the given port.
-    /// Used in DisposeAsync() functions to force a listener to get out of waiting, as simply
-    /// closing it doesn't work in Mono. 
+    /// Used in multiple DisposeAsync() functions to force a listener to get out of waiting, as simply
+    /// closing it doesn't work in Mono/mobile. 
     /// </summary>
-    public static async Task EnqueueConnectionAsync(int port, object caller, CancellationToken token = default, int timeoutInMs = -1)
+    public static async Task EnqueueLocalConnectionAsync(int port, object caller, CancellationToken token = default,
+        int timeoutInMs = -1)
     {
         try
         {
             using var client = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } };
             await client.TryConnectAsync("127.0.0.1", port, token, timeoutInMs);
-            //await client.ConnectAsync(IPAddress.Loopback, port);
+            await Task.Delay(50, token); // wait a bit
         }
         catch (OperationCanceledException)
         {

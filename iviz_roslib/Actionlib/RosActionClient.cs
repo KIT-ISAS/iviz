@@ -7,7 +7,6 @@ using Iviz.Msgs;
 using Iviz.Msgs.ActionlibMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Tools;
-using String = System.String;
 
 namespace Iviz.Roslib.Actionlib;
 

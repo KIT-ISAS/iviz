@@ -15,7 +15,6 @@ using Iviz.MsgsGen.Dynamic;
 using Iviz.Roslib.Utils;
 using Iviz.Roslib.XmlRpc;
 using Iviz.Tools;
-using Nito.AsyncEx;
 
 namespace Iviz.Roslib;
 
@@ -244,7 +243,7 @@ public sealed class RosClient : IRosClient
 
         var myAddress = RosUtils.TryGetAccessibleAddress(masterAddress);
 
-        return myAddress == null ? null : new Uri($"http://{myAddress}:{usingPort.ToString()}/");
+        return myAddress == null ? null : new Uri($"http://{myAddress.ToUriString()}:{usingPort.ToString()}/");
     }
 
     /// <summary>
@@ -624,7 +623,7 @@ public sealed class RosClient : IRosClient
 
         try
         {
-            await tasks.WhenAll();
+            await Task.WhenAll(tasks);
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
@@ -1703,7 +1702,7 @@ public sealed class RosClient : IRosClient
         if (disposed) return;
         disposed = true;
         
-        const int timeoutInMs = 4000;
+        const int timeoutInMs = 2000;
         ShutdownAction = null;
         ParamUpdateAction = null;
 
@@ -1727,9 +1726,7 @@ public sealed class RosClient : IRosClient
 
     async ValueTask CloseConnectionsAsync()
     {
-        const int timeoutInMs = 4000;
-        using var tokenSource = new CancellationTokenSource(timeoutInMs);
-        var token = tokenSource.Token;
+        CancellationToken token = default; // do not expire
 
         var tasks = new List<Task>();
 

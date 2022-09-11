@@ -173,7 +173,8 @@ internal static class RosUtils
     internal static Uri? GetUriFromInterface(NetworkInterfaceType type, string portStr)
     {
         var ipInfo = GetInterfaceCandidates(type).FirstOrDefault();
-        return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{portStr}/");
+
+        return ipInfo == null ? null : new Uri($"http://{ipInfo.Address.ToUriString()}:{portStr}/");
     }
 
     internal static IPAddress? TryGetAddress(string hostname)
@@ -252,7 +253,7 @@ internal static class RosUtils
                 .Where(@interface => @interface.OperationalStatus == OperationalStatus.Up)
                 .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
                 .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
-                .Select(info => info.Address.ToString());
+                .Select(info => info.Address.ToUriString());
         }
         catch
         {
@@ -316,6 +317,13 @@ internal static class RosUtils
     public static IResponse DeserializeFrom(this IResponse generator, ReadOnlySpan<byte> bytes)
     {
         return ReadBuffer.Deserialize((IDeserializable<IResponse>)generator, bytes);
+    }
+
+    public static string ToUriString(this IPAddress address)
+    {
+        return address.AddressFamily == AddressFamily.InterNetworkV6
+            ? "[" + address.ToString() + "]"
+            : address.ToString();        
     }
 }
 

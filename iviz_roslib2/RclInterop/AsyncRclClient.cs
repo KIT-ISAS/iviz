@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Iviz.Roslib;
 using Iviz.Tools;
 
