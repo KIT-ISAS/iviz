@@ -38,8 +38,9 @@ namespace Iviz.Displays.XR
                     return backgroundObject;
                 }
 
-                background!.SetActive(false);
-                var backgroundScale3 = background.transform.localScale;
+                var validatedBackground = background.AssertNotNull(nameof(background));
+                validatedBackground.SetActive(false);
+                var backgroundScale3 = validatedBackground.transform.localScale;
                 var backgroundSize = new Vector2(backgroundScale3.x, backgroundScale3.y);
 
                 var display = ResourcePool.RentDisplay<RoundedPlaneDisplay>(Transform);
@@ -255,7 +256,9 @@ namespace Iviz.Displays.XR
             currentPosition = null;
             resetOrientation = true;
 
+            Connector.Reset();
             Connector.Visible = false;
+            
             Expired?.Invoke();
             Expired = null;
 
