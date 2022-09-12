@@ -27,8 +27,19 @@ namespace Iviz.App
             set => dropdown = value.CheckedNull() ?? throw new NullReferenceException("Cannot set dropdown to null!");
         }
 
+        /// <summary>
+        /// Called when Enter is pressed or a value is selected from the dropdown.
+        /// </summary>
         public event Action<string>? Submit;
+
+        /// <summary>
+        /// Called when Enter is pressed, focus is lost, or a value is selected from the dropdown.
+        /// </summary>
         public event Action<string>? EndEdit;
+
+        /// <summary>
+        /// Called when a value is selected from the dropdown.
+        /// </summary>
         public event Action<int>? ValueChanged;
 
         public string Title
@@ -139,7 +150,7 @@ namespace Iviz.App
         }
 
         void OnSubmit(string f) => Submit?.Invoke(f);
-        
+
         void OnEndEdit(string f) => EndEdit?.Invoke(f);
 
         public void ClearSubscribers()

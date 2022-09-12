@@ -78,7 +78,7 @@ namespace Iviz.Controllers.TF
 
         void OnEverySecond()
         {
-            if (secondsCounter++ != PublishTimeInSec)
+            if (secondsCounter++ < PublishTimeInSec)
             {
                 return;
             }

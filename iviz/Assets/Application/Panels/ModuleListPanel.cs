@@ -87,9 +87,9 @@ namespace Iviz.App
         readonly List<ModuleData> moduleDatas = new();
         readonly HashSet<string> topicsWithModule = new();
         readonly HashSet<ImageDialogData> imageDatas = new();
-        readonly TfPublisher tfPublisher = new();
 
         RosManager? connectionManager;
+        TfPublisher? tfPublisher;
         TfModule? tfModule;
 
         int frameCounter;
@@ -115,7 +115,6 @@ namespace Iviz.App
         DialogManager Dialogs => dialogs ??= new DialogManager();
         TfModuleData TfData => (TfModuleData)moduleDatas[0];
         Canvas RootCanvas => rootCanvas.AssertNotNull(nameof(rootCanvas));
-        SafeAreaPanel SafeAreaPanel => safeAreaPanel.AssertNotNull(nameof(safeAreaPanel));
 
         ModuleListButtons Buttons =>
             buttons ??= new ModuleListButtons(contentObject.AssertNotNull(nameof(contentObject)));
@@ -148,8 +147,11 @@ namespace Iviz.App
                 DataPanelCanvas.SetActive(value);
                 DialogPanelManager.Active = value;
                 ARToolbarPanel.Visible = !value;
-                SafeAreaPanel.LeftBlack.gameObject.SetActive(value);
-                SafeAreaPanel.RightBlack.gameObject.SetActive(value);
+                if (safeAreaPanel != null)
+                {
+                    safeAreaPanel.LeftBlack.gameObject.SetActive(value);
+                    safeAreaPanel.RightBlack.gameObject.SetActive(value);
+                }
             }
         }
 
@@ -189,6 +191,7 @@ namespace Iviz.App
                 XRUtils.SetupForHololens();
             }
 
+            tfPublisher = new TfPublisher();
             connectionManager = new RosManager();
             tfModule = new TfModule(id => new TfFrameDisplay(id));
 
@@ -250,7 +253,7 @@ namespace Iviz.App
                 imageData.Dispose();
             }
 
-            tfPublisher.Dispose();
+            tfPublisher?.Dispose();
             cameraPanelData?.Dispose();
 
             VizWidgetListener.DisposeDefaultHandler();
@@ -519,7 +522,7 @@ namespace Iviz.App
                 moduleData.AddToState(config);
             }
 
-            config.TfPublisher = tfPublisher.Configuration;
+            config.TfPublisher = TfPublisher.Configuration;
             config.Camera = CameraModuleData.Configuration;
 
             try
@@ -582,7 +585,7 @@ namespace Iviz.App
             // TF cannot be destroyed, resetting AR and XR loses world info
 
             TfData.UpdateConfiguration(stateConfig.Tf);
-            tfPublisher.UpdateConfiguration(stateConfig.TfPublisher);
+            TfPublisher.UpdateConfiguration(stateConfig.TfPublisher);
             CameraModuleData.UpdateConfiguration(stateConfig.Camera);
 
             if (Settings.IsMobile && stateConfig.AR != null)

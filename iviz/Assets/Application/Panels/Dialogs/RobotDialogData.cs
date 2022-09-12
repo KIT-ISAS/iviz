@@ -35,24 +35,46 @@ namespace Iviz.App
         public override void UpdatePanel()
         {
             var robotModel = robotModuleData?.RobotController.Robot;
-            if (robotModel == null)
+            if (robotModuleData == null)
             {
-                panel.Label.Text = "No Robot Loaded";
                 panel.Text.text = "Nothing to show.";
-                textHash = null;
                 return;
             }
 
-            const int maxLabelWidth = 300;
-
             using var description = BuilderPool.Rent();
-            Resource.Font.Split(description, robotModel.Name, maxLabelWidth);
-            panel.Label.SetText(description);
 
-            description.Length = 0;
+            var controller = robotModuleData.RobotController;
+            bool hasSourceParameter = !string.IsNullOrWhiteSpace(controller.SourceParameter);
+            bool hasSavedRobotName = !string.IsNullOrWhiteSpace(controller.SavedRobotName);
 
-            robotModel.GenerateLog(description);
-            
+            if (hasSourceParameter)
+            {
+                description.Append("<b>Source:</b> Parameter '")
+                    .Append(controller.SourceParameter).Append("'").AppendLine();
+            }
+            else if (hasSavedRobotName)
+            {
+                description.Append("<b>Source:</b> Saved Robot '")
+                    .Append(controller.SavedRobotName).Append("'").AppendLine();
+            }
+
+            if (robotModel == null)
+            {
+                if (!string.IsNullOrWhiteSpace(controller.HelpText))
+                {
+                    description.Append("<b>Status: </b>").Append(controller.HelpText).AppendLine();
+                }
+
+                description.AppendLine();
+                description.Append("Nothing to show.").AppendLine();
+            }
+            else
+            {
+                description.Append("<b>Robot: </b>").Append(robotModel.Name).AppendLine();
+                description.AppendLine();
+                robotModel.GenerateLog(description);
+            }
+
             uint newHash = HashCalculator.Compute(description);
             if (newHash == textHash)
             {
@@ -61,6 +83,18 @@ namespace Iviz.App
 
             textHash = newHash;
             panel.Text.SetTextRent(description);
+
+            if (robotModel == null)
+            {
+                panel.Label.Text = "No Robot Loaded";
+            }
+            else
+            {
+                const int maxLabelWidth = 300;
+                description.Length = 0;
+                Resource.Font.Split(description, robotModel.Name, maxLabelWidth);
+                panel.Label.SetText(description);
+            }
         }
 
         public void Show(SimpleRobotModuleData moduleData)

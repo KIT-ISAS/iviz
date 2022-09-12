@@ -151,7 +151,7 @@ namespace Iviz.App
                 RobotController.AttachedToTf = f;
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
-            panel.Save.ValueChanged += f =>
+            panel.Save.ValueChanged += save =>
             {
                 var robot = RobotController.Robot;
                 if (robot?.Name is null or "" || robot.Description is null or "")
@@ -159,7 +159,7 @@ namespace Iviz.App
                     return;
                 }
 
-                if (f)
+                if (save)
                 {
                     async ValueTask AddRobotResourceAsync()
                     {

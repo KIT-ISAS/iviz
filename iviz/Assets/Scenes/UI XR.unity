@@ -569,6 +569,7 @@ MonoBehaviour:
   handType: 0
   cameraTransform: {fileID: 141168998}
   shoulderToCamera: {x: -0.1, y: -0.3, z: -0.05}
+  indexController: {fileID: 0}
 --- !u!114 &19567956
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9448,7 +9449,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 12969403}
   m_HandleRect: {fileID: 12969402}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 4
   m_OnValueChanged:
@@ -9680,6 +9681,7 @@ MonoBehaviour:
   dialogPanelManager: {fileID: 805433978}
   arJoystick: {fileID: 1736594131}
   twistJoystick: {fileID: 1467695185}
+  safeAreaPanel: {fileID: 0}
   contentObject: {fileID: 211500402}
   rootCanvas: {fileID: 399959118}
   xrController: {fileID: 1617122645}
@@ -10205,6 +10207,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scalerWidget: {fileID: 0}
   close: {fileID: 20904450}
+  reset: {fileID: 0}
   tfLog: {fileID: 0}
   showOnlyUsed: {fileID: 894647123}
   createFrame: {fileID: 0}
@@ -19084,8 +19087,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1729554119}
-  m_LocalRotation: {x: -0, y: 0.013609633, z: -0, w: 0.99990743}
-  m_LocalPosition: {x: -0.491, y: -1.32, z: -0.572}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -19093,7 +19096,7 @@ Transform:
   - {fileID: 1438579879}
   m_Father: {fileID: 0}
   m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 1.56, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1736507805
 GameObject:
   m_ObjectHideFlags: 0
@@ -19259,6 +19262,7 @@ MonoBehaviour:
   joystickA: {fileID: 2117318191}
   joystickS: {fileID: 0}
   resetScale: {fileID: 0}
+  globalButtonText: {fileID: 0}
 --- !u!114 &1736594132
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24330,6 +24334,7 @@ MonoBehaviour:
   handType: 1
   cameraTransform: {fileID: 141168998}
   shoulderToCamera: {x: 0.1, y: -0.3, z: -0.05}
+  indexController: {fileID: 0}
 --- !u!224 &2095836244 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2929252283123773938, guid: aaa2c939c0359ac4dbce3f49e8b90252,

@@ -287,7 +287,7 @@ namespace Iviz.App
             }
 
             panel.Close.Clicked += Close;
-            panel.MyUri.Submit += text =>
+            panel.MyUri.EndEdit += text =>
             {
                 string trimmed = text.Trim();
                 if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri))
@@ -306,7 +306,7 @@ namespace Iviz.App
 
                 MyUri = uri;
             };
-            panel.MasterUri.Submit += text =>
+            panel.MasterUri.EndEdit += text =>
             {
                 string trimmed = text.Trim();
                 if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri))

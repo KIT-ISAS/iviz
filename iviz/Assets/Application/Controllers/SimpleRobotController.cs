@@ -315,7 +315,7 @@ namespace Iviz.Controllers
 
         public async ValueTask TryLoadFromSourceParameterAsync(string? value)
         {
-            config.SourceParameter = "";
+            config.SourceParameter = value ?? "";
             Robot = null;
 
             if (value is null or "")
@@ -335,20 +335,20 @@ namespace Iviz.Controllers
             }
             catch (OperationCanceledException)
             {
-                HelpText = "<b>Error:</b> Task cancelled";
+                HelpText = "Error: Task cancelled";
                 RosLogger.Debug($"{ToString()}: Error while loading parameter '{value}': Task cancelled or timed out");
                 return;
             }
             catch (Exception e)
             {
                 RosLogger.Debug($"{ToString()}: Error while loading parameter '{value}'", e);
-                HelpText = "<b>Error:</b> Failed to retrieve parameter";
+                HelpText = "Error: Failed to retrieve parameter";
                 return;
             }
 
             if (errorMsg != null)
             {
-                HelpText = $"<b>Error:</b> {errorMsg}";
+                HelpText = $"Error: {errorMsg}";
                 RosLogger.Debug($"{ToString()}: Error while loading parameter '{value}': {errorMsg}");
                 return;
             }
@@ -356,7 +356,7 @@ namespace Iviz.Controllers
             if (!parameterValue.TryGet(out string robotDescription))
             {
                 RosLogger.Debug($"{ToString()}: Parameter '{value}' was not string!");
-                HelpText = "<b>Error:</b> Expected string parameter";
+                HelpText = "Error: Parameter contains no string";
                 return;
             }
 
@@ -366,7 +366,6 @@ namespace Iviz.Controllers
             }
 
             config.SavedRobotName = "";
-            config.SourceParameter = value;
         }
 
         public async ValueTask TryLoadSavedRobotAsync(string? robotName)
