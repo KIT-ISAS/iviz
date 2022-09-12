@@ -40,8 +40,8 @@ namespace Iviz.Core
             PublishExternal(t, LogLevel.Error, e);
         }
 
-        [Obsolete]
-        public static void Error(Exception _)
+        [Obsolete("Use Error(object, Exception) instead!", true)]
+        public static void Error(Exception _) 
         {
         }
 

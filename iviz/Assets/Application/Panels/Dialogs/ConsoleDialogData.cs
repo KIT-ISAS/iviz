@@ -226,13 +226,14 @@ namespace Iviz.App
 
             Span<int> indices = stackalloc int[MaxMessagesToPrint];
             using var description = BuilderPool.Rent();
-            using (var messages = new RentAndClear<LogMessage>(messageQueue.Count))
+            int messageCount = messageQueue.Count;
+            using (var messages = new RentAndClear<LogMessage>(messageCount))
             {
                 int indexStart = 0;
                 int numIndices = 0;
 
                 messageQueue.CopyTo(messages.Array, 0);
-                foreach (int i in ..messages.Length)
+                for (int i = 0; i < messageCount; i++)
                 {
                     var message = messages[i];
                     var messageLevel = message.Level;
@@ -259,7 +260,7 @@ namespace Iviz.App
                     }
                 }
 
-                foreach (int i in ..numIndices)
+                for (int i = 0; i < numIndices; i++)
                 {
                     int index = indices[(indexStart + i) % MaxMessagesToPrint];
                     var message = messages[index];
@@ -292,15 +293,16 @@ namespace Iviz.App
 
                     description.Append(messageLevel == LogLevel.Fatal ? " [F]: </color></b>" : ": </color></b>");
 
-                    if (message.SourceId == null || message.Message.Length < MaxMessageLength)
+                    string innerMessage = message.Message;
+                    if (message.SourceId == null || innerMessage.Length < MaxMessageLength)
                     {
-                        description.Append(message.Message).AppendLine();
+                        description.Append(innerMessage).AppendLine();
                     }
                     else
                     {
-                        description.Append(message.Message, 0, MaxMessageLength)
+                        description.Append(innerMessage, 0, MaxMessageLength)
                             .Append("<i>... +")
-                            .Append(message.Message.Length - MaxMessageLength)
+                            .Append(innerMessage.Length - MaxMessageLength)
                             .Append(" chars</i>")
                             .AppendLine();
                     }

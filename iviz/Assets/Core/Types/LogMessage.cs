@@ -21,7 +21,7 @@ namespace Iviz.Core
             Message = message;
         }
 
-        public LogMessage(in Msgs.RosgraphMsgs.Log msg)
+        public LogMessage(Msgs.RosgraphMsgs.Log msg)
         {
             SourceId = msg.Name;
             Stamp = msg.Header.Stamp.ToDateTime();
@@ -29,7 +29,7 @@ namespace Iviz.Core
             Message = msg.Msg ?? "";
         }
         
-        public LogMessage(in Msgs.RclInterfaces.Log msg)
+        public LogMessage(Msgs.RclInterfaces.Log msg)
         {
             SourceId = msg.Name;
             Stamp = msg.Stamp.ToDateTime();
