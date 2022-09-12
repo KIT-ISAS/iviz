@@ -28,7 +28,7 @@ namespace Iviz.Ros
             (Sender, Listener) = CreateSenderAndListener(RosManager.Connection.RosVersion);
             currentVersion = RosManager.Connection.RosVersion;
             
-            RoslibConnection.RosVersionChanged += UpdateRosVersion;
+            RosConnection.RosVersionChanged += UpdateRosVersion;
             RosLogger.LogExternal += Publish;
         }
 
@@ -104,7 +104,7 @@ namespace Iviz.Ros
 
             MessageArrived = null;
             RosLogger.LogExternal -= Publish;
-            RoslibConnection.RosVersionChanged -= UpdateRosVersion;
+            RosConnection.RosVersionChanged -= UpdateRosVersion;
         }
     }
 }

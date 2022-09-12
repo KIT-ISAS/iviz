@@ -1,5 +1,4 @@
 #nullable enable
-using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Displays.XR;
 using Iviz.Msgs.IvizMsgs;
@@ -8,15 +7,6 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public interface IWidgetFeedback
-    {
-        void OnWidgetRotated(string id, string frameId, float angleInRad);
-        void OnWidgetMoved(string id, string frameId, in Vector3 direction);
-        void OnWidgetProvidedTrajectory(string id, string frameId, List<Vector3> points, float periodInSec);
-        void OnWidgetResized(string id, string frameId, in Bounds bounds);
-        void OnWidgetClicked(string id, string frameId, int entryId);
-    }
-
     public sealed class WidgetHandler : VizHandler
     {
         readonly IWidgetFeedback feedback;
@@ -154,7 +144,7 @@ namespace Iviz.Controllers
                 Type = (WidgetType)msg.Type;
 
                 // ReSharper disable once ConvertIfStatementToSwitchStatement
-                if (display is not IWidget)
+                if (display is not IXRWidget)
                 {
                     ThrowHelper.ThrowMissingAssetField("Viz object does not have a widget!");
                 }

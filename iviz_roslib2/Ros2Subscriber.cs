@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Iviz.Msgs;
 using Iviz.Roslib;
 using Iviz.Roslib2.RclInterop;

@@ -156,12 +156,9 @@ internal class ReceiverConnector
 
     public async ValueTask DisposeAsync(CancellationToken token)
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
+        
         tokenSource.Cancel();
         await task.AwaitNoThrow(DisposeTimeoutInMs, this, token);
         Logger.LogDebugFormat("{0}: Disposing!", this);

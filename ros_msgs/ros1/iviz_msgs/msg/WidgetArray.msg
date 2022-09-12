@@ -1,2 +1,2 @@
-iviz_msgs/Widget[] widgets
+Widget[] widgets
 

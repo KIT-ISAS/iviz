@@ -835,11 +835,7 @@ public sealed class ModelServer : IDisposable
 
     public void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
         importer.Dispose();
     }

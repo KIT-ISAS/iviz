@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Tools;
 #if !NETSTANDARD2_0
-using Nito.AsyncEx;
 using System.Runtime.CompilerServices;
 #endif
 
@@ -106,7 +106,7 @@ namespace Iviz.Roslib
 
             while (true)
             {
-                Task<bool> readyTask = await tasks.WhenAny(token);
+                var readyTask = await Task.WhenAny(tasks);
                 for (int i = 0; i < tasks.Length; i++)
                 {
                     if (tasks[i] != readyTask)

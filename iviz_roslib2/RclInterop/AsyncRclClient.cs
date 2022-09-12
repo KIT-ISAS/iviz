@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Iviz.Roslib;
 using Iviz.Tools;
 
@@ -64,7 +63,7 @@ internal sealed class AsyncRclClient : TaskExecutor
 
         if ((nint)triggeredGuards[1] != 0)
         {
-            GraphChangedTicks = DateTime.Now.Ticks;
+            GraphChangedTicks = NowTicks();
         }
 
         for (int i = 0; i < subscriberHandles.Length; i++)
@@ -91,6 +90,8 @@ internal sealed class AsyncRclClient : TaskExecutor
             }
         }
     }
+
+    static long NowTicks() => DateTime.Now.Ticks;
 
     void RebuildSubscribers()
     {

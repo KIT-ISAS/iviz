@@ -26,7 +26,6 @@ public sealed class HttpListener
     bool disposed;
 
     readonly CancellationTokenSource runningTs = new();
-    bool KeepRunning => !runningTs.IsCancellationRequested;
 
     /// <summary>
     /// The port on which the listener is listening
@@ -59,25 +58,22 @@ public sealed class HttpListener
     /// </param>
     /// <returns>An awaitable task.</returns>
     /// <exception cref="ArgumentNullException">Thrown if handler is null</exception>
-    public async ValueTask StartAsync(Func<HttpListenerContext, 
+    public async ValueTask StartAsync(Func<HttpListenerContext,
             CancellationToken, ValueTask> handler,
         bool runInBackground)
     {
-        if (handler is null)
-        {
-            BaseUtils.ThrowArgumentNull(nameof(handler));
-        }
+        if (handler is null) BaseUtils.ThrowArgumentNull(nameof(handler));
 
         var token = runningTs.Token;
 
         started = true;
-        while (KeepRunning)
+        while (!token.IsCancellationRequested)
             try
             {
                 var client = await listener.AcceptTcpClientAsync();
                 client.NoDelay = true;
 
-                if (!KeepRunning)
+                if (token.IsCancellationRequested)
                 {
                     client.Dispose();
                     break;
@@ -146,12 +142,9 @@ public sealed class HttpListener
 
     public async ValueTask DisposeAsync()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
+
         runningTs.Cancel();
 
         if (!started)
@@ -162,8 +155,11 @@ public sealed class HttpListener
 
         Logger.LogDebugFormat("{0}: Disposing listener...", this);
 
-        await StreamUtils.EnqueueConnectionAsync(LocalPort, this, timeoutInMs: 2000);
+        // note: listener.Stop() does not guarantee that AcceptTcpClientAsync() will return in il2cpp!
+        // so we enqueue a connection to make it return
+        await StreamUtils.EnqueueLocalConnectionAsync(LocalPort, this, timeoutInMs: 2000);
 
+        // now we stop it!
         listener.Stop();
         Logger.LogDebugFormat("{0}: Listener dispose out", this);
     }

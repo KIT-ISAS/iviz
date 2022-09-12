@@ -16,7 +16,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &586438443107256637
 Transform:
   m_ObjectHideFlags: 0
@@ -680,9 +680,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32898c3f9b86414fb93dc98d8144aa3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _transform: {fileID: 9024825353754890542}
-  backgroundSize: {x: 0.88, y: 1.15}
-  socketPosition: {x: 0, y: -0.626, z: 0}
   backgroundColor: {r: 0, g: 0.2, b: 0.5, a: 1}
   connector: {fileID: 586438443107256636}
   background: {fileID: 0}

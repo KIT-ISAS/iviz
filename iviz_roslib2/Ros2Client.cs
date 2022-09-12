@@ -5,7 +5,6 @@ using Iviz.Roslib;
 using Iviz.Roslib2.RclInterop;
 using Iviz.Roslib2.RclInterop.Wrappers;
 using Iviz.Tools;
-using Nito.AsyncEx;
 
 namespace Iviz.Roslib2;
 
@@ -47,7 +46,7 @@ public sealed class Ros2Client : IRosClient
     public Ros2ParameterClient ParameterClient { get; }
     public Ros2ParameterServer ParameterServer { get; }
 
-    public Ros2Client(string callerId, string? @namespace = null, int domainId = 0, IRclWrapper? wrapperType = null)
+    public Ros2Client(string callerId, string? @namespace = null, int domainId = 0, RclWrapper? wrapperType = null)
     {
         RclClient.SetRclWrapper(wrapperType ??
 #if NETSTANDARD2_1
@@ -544,34 +543,52 @@ public sealed class Ros2Client : IRosClient
         if (disposed) return;
         disposed = true;
 
+        const int timeoutInMs = 2000;
+
+        var closeConnectionsTask = CloseConnectionsAsync().AsTask();
+        if (token.IsCancellationRequested)
+        {
+            Logger.LogFormat("{0}: Pre-cancelled token passed to " + nameof(DisposeAsync), this);
+            return; // closeConnectionsTask will keep running in the background
+        }
+
+        // the token determines when we stop awaiting. the connections will still keep closing in the background  
+        await closeConnectionsTask.AwaitNoThrow(timeoutInMs, this, token);
+
+    }
+
+    async ValueTask CloseConnectionsAsync()
+    {
+        CancellationToken token = default; // do not expire
+
         var tasks = new List<Task>();
         var publishers = publishersByTopic.Values.ToArray();
         foreach (var publisher in publishers)
         {
-            tasks.Add(publisher.DisposeAsync(default).AwaitNoThrow(this));
+            tasks.Add(publisher.DisposeAsync(token).AwaitNoThrow(this));
         }
 
         var subscribers = subscribersByTopic.Values.ToArray();
         foreach (var subscriber in subscribers)
         {
-            tasks.Add(subscriber.DisposeAsync(default).AwaitNoThrow(this));
+            tasks.Add(subscriber.DisposeAsync(token).AwaitNoThrow(this));
         }
 
         var callers = callersByService.Values.ToArray();
         foreach (var caller in callers)
         {
-            tasks.Add(caller.DisposeAsync(default).AwaitNoThrow(this));
+            tasks.Add(caller.DisposeAsync(token).AwaitNoThrow(this));
         }
 
         var listeners = listenersByService.Values.ToArray();
         foreach (var listener in listeners)
         {
-            tasks.Add(listener.DisposeAsync(default).AwaitNoThrow(this));
+            tasks.Add(listener.DisposeAsync(token).AwaitNoThrow(this));
         }
 
-        await tasks.WhenAll();
+        await Task.WhenAll(tasks);
 
-        await Rcl.DisposeAsync(default);
+        await Rcl.DisposeAsync(token);
     }
 
     [DoesNotReturn]

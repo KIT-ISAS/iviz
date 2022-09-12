@@ -121,6 +121,18 @@ namespace Iviz.Displays.XR
             Lines.Set(lineSegments, true);
         }
 
+        public void Reset()
+        {
+            if (spheres != null)
+            {
+                spheres[0].Transform.localPosition = Vector3.zero;
+                spheres[1].Transform.localPosition = Vector3.zero;
+                spheres[2].Transform.localPosition = Vector3.zero;
+            }
+            
+            Lines.Reset();
+        }
+
         void OnDestroy()
         {
             node?.Dispose();

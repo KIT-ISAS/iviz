@@ -16,7 +16,6 @@ using MarcusW.VncClient.Protocol.Implementation.MessageTypes.Outgoing;
 using MarcusW.VncClient.Protocol.Implementation.Services.Transports;
 using MarcusW.VncClient.Rendering;
 using Microsoft.Extensions.Logging.Abstractions;
-using Nito.AsyncEx;
 using VNC.Extensions;
 
 namespace VNC

@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using Iviz.Tools;
 
 namespace Iviz.Roslib2.RclInterop;
@@ -35,17 +34,14 @@ internal sealed class RclWaitSet : IDisposable
         out Span<IntPtr> triggeredClients, out Span<IntPtr> triggeredServers,
         int timeoutInMs)
     {
-        if (disposed)
-        {
-            throw new ObjectDisposedException(ToString());
-        }
+        if (disposed) ThrowObjectDisposed();
 
         if (subscriptions.Length > maxSubscriptions
             || guards.Length > maxGuardConditions
             || clients.Length > maxClients
             || servers.Length > maxServers)
         {
-            throw new IndexOutOfRangeException("Handle sizes are larger than allocated!");
+            ThrowHandlesOutOfRange();
         }
 
         IntPtr dummy = default;
@@ -86,6 +82,9 @@ internal sealed class RclWaitSet : IDisposable
         }
     }
 
+    static void ThrowHandlesOutOfRange() => throw new IndexOutOfRangeException("Handle sizes are larger than allocated!");
+    static void ThrowObjectDisposed() => throw new ObjectDisposedException(nameof(RclWaitSet));
+    
     void Check(int result) => Rcl.Check(contextHandle, result);
 
     public void Dispose()

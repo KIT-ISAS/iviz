@@ -10,10 +10,10 @@ using Iviz.Tools;
 namespace Iviz.Ros
 {
     /// <summary>
-    /// Partial implementation of a ROS connection. The rest is in <see cref="RoslibConnection"/>.
+    /// Partial implementation of a ROS connection. The rest is in <see cref="RosConnection"/>.
     /// Here we only handle initializing connections and task queues.
     /// </summary>
-    internal class RosConnection
+    internal sealed partial class RosConnection : IRosProvider
     {
         const int TaskWaitTimeInMs = 2000;
         const int ConnectionRetryTimeInMs = TaskWaitTimeInMs;
@@ -34,12 +34,12 @@ namespace Iviz.Ros
         public bool IsConnected => connectionState == ConnectionState.Connected;
         public bool KeepReconnecting { get; set; }
 
-        protected RosConnection()
+        public RosConnection()
         {
             task = TaskUtils.Run(() => Run().AwaitNoThrow(this));
         }
 
-        internal virtual void Dispose()
+        void DisposeBase()
         {
             connectionTs.Cancel();
             Signal();
@@ -60,7 +60,7 @@ namespace Iviz.Ros
             GameThread.Post(() => IRosProvider.RaiseConnectionStateChanged(newState));
         }
 
-        protected static void SetConnectionWarningState(bool value)
+        static void SetConnectionWarningState(bool value)
         {
             GameThread.Post(() => IRosProvider.RaiseConnectionWarningStateChanged(value));
         }
@@ -68,7 +68,7 @@ namespace Iviz.Ros
         /// <summary>
         /// Runs the task in the connection thread. 
         /// </summary>
-        protected void Post(Func<ValueTask> a)
+        void Post(Func<ValueTask> a)
         {
             if (disposed)
             {
@@ -82,7 +82,7 @@ namespace Iviz.Ros
         /// <summary>
         /// Notifies the connection thread that it has a new task. 
         /// </summary>
-        protected void Signal()
+        void Signal()
         {
             signal.Release();
         }
@@ -132,8 +132,7 @@ namespace Iviz.Ros
             try
             {
                 lastConnectionTry = now;
-                connectionResult =
-                    await ((RoslibConnection)this).ConnectAsync(); // hack! but faster than virtual dispatch
+                connectionResult = await ConnectAsync(); 
             }
             catch (Exception e)
             {
@@ -175,12 +174,12 @@ namespace Iviz.Ros
             Signal();
         }
 
-        public virtual void Disconnect()
+        void DisconnectBase()
         {
             SetConnectionState(ConnectionState.Disconnected);
             lastConnectionTry = DateTime.MinValue;
         }
 
-        public sealed override string ToString() => $"[{nameof(RosConnection)}]";
+        public override string ToString() => $"[{nameof(RosConnection)}]";
     }
 }

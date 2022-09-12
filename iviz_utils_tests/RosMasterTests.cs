@@ -7,7 +7,6 @@ using Iviz.Msgs.StdMsgs;
 using Iviz.Roslib;
 using Iviz.Roslib.XmlRpc;
 using Iviz.RosMaster;
-using Iviz.Tools;
 using Iviz.XmlRpc;
 using NUnit.Framework;
 using String = Iviz.Msgs.StdMsgs.String;

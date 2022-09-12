@@ -1,15 +1,14 @@
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Tools;
-using Nito.AsyncEx;
 
 namespace Iviz.Roslib;
 
@@ -20,8 +19,11 @@ namespace Iviz.Roslib;
 public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, IRosChannelReader, IAsyncEnumerable<T>
     where T : IMessage
 {
-    readonly ConcurrentQueue<T> backQueue = new();
-    protected readonly AsyncCollection<T> messageQueue;
+    readonly ChannelReader<T> reader;
+    protected readonly ChannelWriter<T> writer;
+
+    //readonly ConcurrentQueue<T> backQueue = new();
+    //protected readonly AsyncCollection<T> messageQueue;
     protected bool disposed;
     protected string? subscriberId;
     protected IRosSubscriber<T>? subscriber;
@@ -31,7 +33,7 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     /// Tentative number of elements. This number may become outdated right after calling this property.
     /// Use this only as an estimate for the number of elements.
     /// </summary>
-    public int Count => backQueue.Count;
+    public int Count => reader.Count;
 
     public IRosSubscriber<T> Subscriber =>
         subscriber ?? throw new InvalidOperationException("Channel has not been started!");
@@ -42,7 +44,11 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
 
     public BaseRosChannelReader()
     {
-        messageQueue = new AsyncCollection<T>(backQueue);
+        var options = new UnboundedChannelOptions { SingleWriter = true };
+        var channel = Channel.CreateUnbounded<T>(options);
+        reader = channel.Reader;
+        writer = channel.Writer;
+        //messageQueue = new AsyncCollection<T>(backQueue);
     }
 
     /// <summary>
@@ -62,13 +68,11 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
 
     public async ValueTask DisposeAsync()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
-        messageQueue.CompleteAdding();
+
+        //messageQueue.CompleteAdding();
+        writer.TryComplete();
 
         if (subscriber == null)
         {
@@ -76,38 +80,13 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
         }
 
 
-#if !NETSTANDARD2_0
         await subscriberToken.DisposeAsync();
-#else
-            subscriberToken.Dispose();
-#endif
         await subscriber.UnsubscribeAsync(subscriberId!).AwaitNoThrow(this);
     }
 
     public void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
-        disposed = true;
-        messageQueue.CompleteAdding();
-
-        if (subscriber == null)
-        {
-            return; // not started
-        }
-
-        try
-        {
-            subscriberToken.Dispose();
-            subscriber.Unsubscribe(subscriberId!);
-        }
-        catch (Exception e)
-        {
-            Logger.LogErrorFormat("{0}: Error in " + nameof(Dispose) + ": {1}", this, e);
-        }
+        TaskUtils.RunSync(DisposeAsync);
     }
 
     /// <summary>
@@ -127,7 +106,8 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
 
     protected void OnSubscriberDisposed()
     {
-        messageQueue.CompleteAdding();
+        writer.TryComplete();
+        //messageQueue.CompleteAdding();
     }
 
     /// <summary>
@@ -154,7 +134,8 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     /// <returns>False if the channel has been disposed</returns>
     public bool WaitToRead(CancellationToken token = default)
     {
-        return messageQueue.OutputAvailable(token);
+        return TaskUtils.RunSync(WaitToReadAsync, token);
+        //return messageQueue.OutputAvailable(token);
     }
 
     /// <summary>
@@ -166,7 +147,8 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
         using var ts = new CancellationTokenSource(timeoutInMs);
         try
         {
-            return await WaitToReadAsync(ts.Token);
+            //return await WaitToReadAsync(ts.Token);
+            return await reader.WaitToReadAsync(ts.Token);
         }
         catch (OperationCanceledException)
         {
@@ -180,7 +162,8 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     /// <param name="token">A cancellation token that makes the function stop blocking when cancelled. If not provided, waits indefinitely.</param>
     /// <returns>False if the channel has been disposed</returns>
     public ValueTask<bool> WaitToReadAsync(CancellationToken token = default) =>
-        new(messageQueue.OutputAvailableAsync(token));
+        //new(messageQueue.OutputAvailableAsync(token));
+        reader.WaitToReadAsync(token);
 
 
     /// <summary>
@@ -217,7 +200,8 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     public T Read(CancellationToken token = default)
     {
         ThrowIfNotStarted();
-        return messageQueue.Take(token);
+        //return messageQueue.Take(token);
+        return TaskUtils.RunSync(ReadAsync, token);
     }
 
     /// <summary>
@@ -246,7 +230,8 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     public ValueTask<T> ReadAsync(CancellationToken token = default)
     {
         ThrowIfNotStarted();
-        return messageQueue.TakeAsync(token).AsValueTask();
+        //return messageQueue.TakeAsync(token).AsValueTask();
+        return reader.ReadAsync(token);
     }
 
 
@@ -259,7 +244,9 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     public bool TryRead([NotNullWhen(true)] out T? t)
     {
         ThrowIfNotStarted();
+        return reader.TryRead(out t);
 
+        /*
         if (backQueue.Count == 0)
         {
             t = default;
@@ -279,6 +266,7 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
             t = default!;
             return false;
         }
+        */
     }
 
     public void Clear()
@@ -297,9 +285,11 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     /// <returns>An enumerator that can be used in a foreach</returns>
     public IEnumerable<T> ReadAll(CancellationToken token = default)
     {
+        Func<CancellationToken,ValueTask<T>> readAsync = ReadAsync;
+
         while (true)
         {
-            yield return Read(token);
+            yield return TaskUtils.RunSync(readAsync, token);
         }
     }
 
@@ -309,8 +299,25 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     /// <returns>An enumerator that can be used in a foreach</returns>
     public IEnumerable<T> TryReadAll()
     {
+        return reader.Count == 0
+            ? Enumerable.Empty<T>() // most likely case, does not allocate
+            : TryReadAllCore();
+    }
+    
+    IEnumerable<T> TryReadAllCore()
+    {
         while (true)
         {
+            if (TryRead(out T? t))
+            {
+                yield return t;
+            }
+            else
+            {
+                yield break;
+            }
+
+            /*
             if (backQueue.Count == 0)
             {
                 yield break;
@@ -330,8 +337,9 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
             }
 
             yield return element!;
+            */
         }
-    }
+    }    
 
     /// <summary>
     /// Enumerates through the available messages, and 'awaits' while waiting for the next.
@@ -339,14 +347,16 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     /// </summary>
     /// <param name="token">A cancellation token that makes the function stop blocking when cancelled.</param>
     /// <returns>An enumerator that can be used in a foreach</returns>
-    public async IAsyncEnumerable<T> ReadAllAsync(
-        [EnumeratorCancellation] CancellationToken token = default)
+    public IAsyncEnumerable<T> ReadAllAsync(CancellationToken token = default)
     {
         ThrowIfNotStarted();
+        /*
         while (true)
         {
             yield return await messageQueue.TakeAsync(token);
         }
+        */
+        return reader.ReadAllAsync(token);
     }
 
     public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken token = default)
@@ -379,7 +389,7 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
         ThrowIfNotStarted();
         while (true)
         {
-            yield return await messageQueue.TakeAsync(token);
+            yield return await reader.ReadAsync(token);
         }
     }
 

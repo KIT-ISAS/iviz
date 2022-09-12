@@ -9,7 +9,6 @@ using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Roslib;
 using Iviz.XmlRpc;
 using Iviz.Tools;
-using Nito.AsyncEx;
 using HttpListenerContext = Iviz.XmlRpc.HttpListenerContext;
 using Logger = Iviz.Tools.Logger;
 
@@ -93,11 +92,7 @@ public sealed class RosMasterServer : IDisposable
 
     public void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
         runningTs.Cancel();
         backgroundTask?.WaitNoThrow(2000, this);
@@ -105,12 +100,9 @@ public sealed class RosMasterServer : IDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
+
         runningTs.Cancel();
         if (backgroundTask != null)
         {
@@ -213,8 +205,12 @@ public sealed class RosMasterServer : IDisposable
         catch (RosConnectionException e)
         {
             signal?.TrySetException(e);
-            Logger.LogErrorFormat("{0}: Failed to start the rosout_agg node. " +
-                                  "Our own uri is not reachable! {1}", this, e);
+            Logger.LogErrorFormat("{0}: Failed to start the rosout_agg node. Own uri is not reachable! {1}", this, e);
+        }
+        catch (Exception e)
+        {
+            signal?.TrySetException(e);
+            throw;
         }
     }
 
@@ -484,7 +480,7 @@ public sealed class RosMasterServer : IDisposable
             .Concat(subscribersLookup)
             .FirstOrDefault(tuple => tuple.Key == node)
             .Value;
-        
+
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         return uri == null
             ? ErrorResponse($"No node with id '{node}'")
@@ -674,7 +670,7 @@ public sealed class RosMasterServer : IDisposable
 
     XmlRpcArg GetParam(RosValue[] args)
     {
-        using var myLock = rosLock.Lock();
+        using var myLock = rosLock.Lock(Token);
 
         if (args.Length != 2 ||
             !args[1].TryGet(out string key))
@@ -737,7 +733,7 @@ public sealed class RosMasterServer : IDisposable
 
     XmlRpcArg SubscribeParam(RosValue[] args)
     {
-        using var myLock = rosLock.Lock();
+        using var myLock = rosLock.Lock(Token);
 
         if (args.Length != 3 ||
             !args[1].TryGet(out string key) ||

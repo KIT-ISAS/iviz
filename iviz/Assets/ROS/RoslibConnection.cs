@@ -14,14 +14,13 @@ using Iviz.Roslib.XmlRpc;
 using Iviz.Roslib2;
 using Iviz.Roslib2.RclInterop.Wrappers;
 using Iviz.XmlRpc;
-using Nito.AsyncEx;
 using Iviz.Tools;
 using UnityEngine;
 using Random = System.Random;
 
 namespace Iviz.Ros
 {
-    internal sealed class RoslibConnection : RosConnection, IRosProvider
+    internal sealed partial class RosConnection
     {
         static TopicNameType[] EmptyTopics => Array.Empty<TopicNameType>();
         static string[] EmptyParameters => Array.Empty<string>();
@@ -75,7 +74,7 @@ namespace Iviz.Ros
 
                 if (version == RosVersion.ROS2 && !IsRos2VersionSupported)
                 {
-                    throw new InvalidOperationException("ROS version not supported!");
+                    ThrowHelper.ThrowInvalidOperation("ROS version not supported!");
                 }
 
                 RosLogger.Internal(
@@ -293,37 +292,29 @@ namespace Iviz.Ros
                         }
                         catch
                         {
-                            RosLogger.Debug($"[{nameof(RosConnection)}]: Failed to retrieve /iviz/hosts");
+                            RosLogger.Debug($"[{nameof(RosConnection)}]: Server does not have parameter /iviz/hosts.");
                         }
                     }
 
                     AddConfigHostAliases();
 
-                    //RosLogger.Debug("--- Advertising services...");
                     token.ThrowIfCancellationRequested();
-                    await servicesByTopic.Values
-                        .Select(topic => ReAdvertiseService(currentClient, topic, token).AwaitNoThrow(this))
-                        .WhenAll();
-                    //RosLogger.Debug("+++ Done advertising services");
+                    var serviceTasks = servicesByTopic.Values
+                        .Select(service => ReAdvertiseService(currentClient, service, token).AwaitNoThrow(this));
+                    await Task.WhenAll(serviceTasks);
 
-                    //RosLogger.Debug("--- Readvertising...");
                     token.ThrowIfCancellationRequested();
-                    await publishersByTopic.Values
-                        .Select(topic => ReAdvertise(currentClient, topic, token).AwaitNoThrow(this))
-                        .WhenAll();
-                    //RosLogger.Debug("+++ Done readvertising");
+                    var publisherTasks = publishersByTopic.Values
+                        .Select(topic => ReAdvertise(currentClient, topic, token).AwaitNoThrow(this));
+                    await Task.WhenAll(publisherTasks);
 
-                    //RosLogger.Debug("--- Resubscribing...");
                     token.ThrowIfCancellationRequested();
-                    await subscribersByTopic.Values
-                        .Select(topic => ReSubscribe(currentClient, topic, token).AwaitNoThrow(this))
-                        .WhenAll();
-                    //RosLogger.Debug("+++ Done resubscribing");
+                    var subscriberTasks = subscribersByTopic.Values
+                        .Select(topic => ReSubscribe(currentClient, topic, token).AwaitNoThrow(this));
+                    await Task.WhenAll(subscriberTasks);
 
-                    //RosLogger.Debug("--- Requesting topics...");
                     token.ThrowIfCancellationRequested();
                     cachedPublishedTopics = await currentClient.GetSystemPublishedTopicsAsync(token);
-                    //RosLogger.Debug("+++ Done requesting topics");
 
                     cachedSystemState = null;
                     cachedTopics = EmptyTopics;
@@ -342,7 +333,7 @@ namespace Iviz.Ros
 
                 if (currentVersion == RosVersion.ROS1)
                 {
-                    _ = LogConnectionCheckAsync(token);
+                    _ = LogConnectionCheckAsync(token).AwaitNoThrow(this);
                 }
 
                 return true;
@@ -647,7 +638,7 @@ namespace Iviz.Ros
             await service.AdvertiseAsync(newClient, token);
         }
 
-        public override void Disconnect()
+        public void Disconnect()
         {
             runningTs.Cancel();
 
@@ -682,13 +673,13 @@ namespace Iviz.Ros
             RosLogger.Internal("Disconnecting...");
             await DisposeClientAsync();
             RosLogger.Internal("<b>Disconnected.</b>");
-            
+
             await watchdogTask.AwaitNoThrow(this);
             watchdogTask = null;
             await ntpTask.AwaitNoThrow(this);
             ntpTask = null;
 
-            base.Disconnect();
+            DisconnectBase();
         }
 
         internal void Advertise<T>(Sender<T> advertiser) where T : IMessage, new()
@@ -801,7 +792,7 @@ namespace Iviz.Ros
         public async ValueTask<bool> CallModelServiceAsync<T>(string service, T srv, int timeoutInMs,
             CancellationToken token) where T : class, IService, new()
         {
-            using var myLock = await modelServiceLock.LockAsync();
+            using var myLock = await modelServiceLock.LockAsync(token);
 
             float currentTime = GameThread.GameTime;
             if (modelServiceBlacklistTime is { } blacklistTime && currentTime < blacklistTime)
@@ -883,7 +874,7 @@ namespace Iviz.Ros
             }
         }
 
-        internal void Subscribe<T>(Listener<T> listener) where T : IMessage, IDeserializable<T>, new()
+        internal void Subscribe<T>(Listener<T> listener) where T : IMessage, new()
         {
             ThrowHelper.ThrowIfNull(listener, nameof(listener));
 
@@ -906,7 +897,7 @@ namespace Iviz.Ros
         }
 
         async ValueTask SubscribeCore<T>(IListener listener, CancellationToken token)
-            where T : IMessage, IDeserializable<T>, new()
+            where T : IMessage, new()
         {
             if (subscribersByTopic.TryGetValue(listener.Topic, out var subscribedTopic))
             {
@@ -1230,11 +1221,11 @@ namespace Iviz.Ros
                 : 0;
         }
 
-        internal override void Dispose()
+        internal void Dispose()
         {
             Disconnect();
             Post(RosManager.Server.DisposeAsync);
-            base.Dispose();
+            DisposeBase();
         }
     }
 }

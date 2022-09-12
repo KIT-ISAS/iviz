@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace Iviz.Roslib2.RclInterop.Wrappers;
 
-public sealed class RclMacosWrapper : IRclWrapper
+public sealed class RclMacosWrapper : RclWrapper
 {
     public override void SetMessageCallbacks(CdrDeserializeCallback? cdrDeserializeCallback,
         CdrSerializeCallback? cdrSerializeCallback, CdrGetSerializedSizeCallback? cdrGetSerializedSizeCallback) =>

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading;
+using System.Threading.Channels;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Roslib;
@@ -18,18 +19,16 @@ namespace Iviz.Ros
 {
     /// <inheritdoc cref="IListener"/>
     /// <typeparam name="T">The ROS message type</typeparam>
-    public sealed class Listener<T> : IListener where T : IMessage, IDeserializable<T>, new()
+    public sealed class Listener<T> : IListener where T : IMessage, new()
     {
-        static RoslibConnection Connection => RosManager.RosConnection;
+        static RosConnection Connection => RosManager.RosConnection;
 
-        readonly ConcurrentQueue<T> messageQueue = new();
-        int messageQueueCount;
-        
+        readonly ChannelWriter<T>? messageWriter;
+        readonly ChannelReader<T>? messageReader;
+
         readonly Action<T>? handlerOnGameThread;
         readonly Func<T, IRosConnection, bool>? directHandler;
         readonly Serializer<T> serializer;
-
-        T?[] messageHelper = new T[32];
 
         int droppedMsgCounter;
         int lastMsgBytes;
@@ -43,9 +42,7 @@ namespace Iviz.Ros
         public string Topic { get; }
         public string Type { get; }
         public RosListenerStats Stats { get; private set; }
-        
-        public int MaxQueueSize = 1;
-        
+
         // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
         public bool Subscribed => subscribed;
 
@@ -83,8 +80,9 @@ namespace Iviz.Ros
         /// </summary>
         /// <param name="topic">The topic to subscribe to</param>
         /// <param name="handler">The callback to execute in the game thread if a message is available</param>
+        /// <param name="maxQueueSize">Max size of the bounded queue</param>
         /// <param name="transportHint">Tells the subscriber which protocol is preferred</param>
-        public Listener(string topic, Action<T> handler,
+        public Listener(string topic, Action<T> handler, int maxQueueSize = 1,
             RosTransportHint transportHint = RosTransportHint.PreferTcp) : this(topic, transportHint)
         {
             ThrowHelper.ThrowIfNull(handler, nameof(handler));
@@ -92,6 +90,13 @@ namespace Iviz.Ros
             GameThread.ListenersEveryFrame += CallHandlerOnGameThread;
             Connection.Subscribe(this);
             subscribed = true;
+
+            var options = new BoundedChannelOptions(maxQueueSize)
+                { SingleReader = true, FullMode = BoundedChannelFullMode.DropOldest };
+            
+            var messageQueue = Channel.CreateBounded<T>(options);
+            messageReader = messageQueue.Reader;
+            messageWriter = messageQueue.Writer;
         }
 
         /// <summary>
@@ -202,54 +207,38 @@ namespace Iviz.Ros
                 return;
             }
 
-            if (handlerOnGameThread == null)
+            if (messageWriter == null)
             {
                 CallHandlerDirect(msg, receiver);
                 return;
             }
 
-            if (messageQueueCount >= MaxQueueSize)
+            if (!messageWriter.TryWrite(msg))
             {
-                messageQueue.TryDequeue(out _);
                 droppedMsgCounter++;
-                Interlocked.Decrement(ref messageQueueCount);
             }
-
-            messageQueue.Enqueue(msg);
-            Interlocked.Increment(ref messageQueueCount);
         }
 
         void CallHandlerOnGameThread()
         {
-            if (!subscribed || handlerOnGameThread == null)
+            if (!subscribed || handlerOnGameThread == null || messageReader == null)
             {
                 return;
             }
 
-            int messageCount = messageQueueCount;
+            int messageCount = messageReader.Count;
             if (messageCount == 0)
             {
                 return;
             }
 
-            if (messageHelper.Length < messageCount)
+            for (int i = 0; i < messageCount; i++)
             {
-                messageHelper = new T[Mathf.NextPowerOfTwo(messageCount)];
-            }
+                if (!messageReader.TryRead(out var msg))
+                {
+                    break; // shouldn't happen, single reader
+                }
 
-            for (int i = 0; i < messageCount; i++) // copy a fixed amount, in case messages are still being added
-            {
-                messageQueue.TryDequeue(out messageHelper[i]);
-            }
-
-            Interlocked.Add(ref messageQueueCount, -messageCount);
-
-            int start = Mathf.Max(0, messageCount - MaxQueueSize); // should be 0 unless MaxQueueSize changed
-            for (int i = start; i < messageCount; i++)
-            {
-                var msg = messageHelper[i]!;
-                messageHelper[i] = default; // early mark for collect gc
-                
                 try
                 {
                     lastMsgBytes += serializer.RosMessageLength(msg);
@@ -261,7 +250,6 @@ namespace Iviz.Ros
                 }
             }
 
-            droppedMsgCounter += start;
             totalMsgCounter += messageCount;
             recentMsgCounter += messageCount;
         }
@@ -306,7 +294,7 @@ namespace Iviz.Ros
                 totalMsgCounter,
                 recentMsgCounter,
                 lastMsgBytes,
-                messageQueueCount,
+                messageReader?.Count ?? 0,
                 droppedMsgCounter
             );
 
@@ -345,7 +333,7 @@ namespace Iviz.Ros
             return (IListener)Activator.CreateInstance(listenerType,
                 topicName, handler, RosTransportHint.PreferTcp);
         }
-        
+
         [DoesNotReturn]
         public static IListener ThrowUnsupportedMessageType(string message) =>
             throw new InvalidOperationException($"Type {message} is not supported!");

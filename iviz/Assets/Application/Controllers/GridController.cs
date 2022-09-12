@@ -92,7 +92,7 @@ namespace Iviz.Controllers
             {
                 config.GridColor = value.ToRos();
                 grid.GridColor = value;
-                UpdateMesh();
+                UpdateProbe();
             }
         }
 
@@ -103,7 +103,7 @@ namespace Iviz.Controllers
             {
                 config.InteriorColor = value.ToRos();
                 grid.InteriorColor = value;
-                UpdateMesh();
+                UpdateProbe();
             }
         }
 
@@ -114,7 +114,7 @@ namespace Iviz.Controllers
             {
                 config.InteriorVisible = value;
                 grid.ShowInterior = value;
-                UpdateMesh();
+                UpdateProbe();
             }
         }
 
@@ -155,22 +155,21 @@ namespace Iviz.Controllers
             {
                 config.Offset = value.ToRos();
                 node.Transform.localPosition = value.Ros2Unity();
-                UpdateMesh();
+                UpdateProbe();
             }
         }
 
         public GridController(GridConfiguration? config)
         {
-            grid = ResourcePool.RentDisplay<GridDisplay>();
+            node = new FrameNode("GridNode");
+            
+            grid = ResourcePool.RentDisplay<GridDisplay>(node.Transform);
             grid.name = "Grid";
             grid.Layer = LayerType.Collider;
 
-            node = new FrameNode("GridNode");
-            grid.Transform.SetParentLocal(node.Transform);
-
             reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();
             reflectionProbe.gameObject.name = "Grid Reflection Probe";
-            reflectionProbe.transform.SetParentLocal(grid.transform);
+            reflectionProbe.transform.SetParentLocal(grid.Transform);
             reflectionProbe.transform.localPosition = new Vector3(0, 2.0f, 0);
             reflectionProbe.nearClipPlane = 0.5f;
             reflectionProbe.farClipPlane = 100f;
@@ -188,12 +187,12 @@ namespace Iviz.Controllers
                 reflectionProbe.clearFlags = ReflectionProbeClearFlags.SolidColor;
             }
 
-            UpdateMesh();
+            UpdateProbe();
 
             Config = config ?? new GridConfiguration();
         }
 
-        void UpdateMesh()
+        void UpdateProbe()
         {
             const int numberOfGridCells = 90;
             const float gridCellSize = 1;

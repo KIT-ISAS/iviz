@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Tools;
-using Nito.AsyncEx;
 
 namespace Iviz.Roslib;
 
@@ -92,28 +91,25 @@ internal sealed class RosServiceListener
             await request.StopAsync(token);
             requests.Remove(request);
         }).ToArray();
-        await tasks.WhenAll().AwaitNoThrow(this);
+        await Task.WhenAll(tasks).AwaitNoThrow(this);
     }
 
     public async ValueTask DisposeAsync(CancellationToken token)
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
 
         tokenSource.Cancel();
 
         // try to make the listener come out
-        await StreamUtils.EnqueueConnectionAsync(Uri.Port, this, token);
+        await StreamUtils.EnqueueLocalConnectionAsync(Uri.Port, this, token);
 
         listener.Stop();
         
         await task.AwaitNoThrow(2000, this, token);
-        
-        await requests.Select(request => request.StopAsync(token).AsTask()).WhenAll().AwaitNoThrow(this);
+
+        var tasks = requests.Select(request => request.StopAsync(token).AsTask());
+        await Task.WhenAll(tasks).AwaitNoThrow(this);
         requests.Clear();
     }
 

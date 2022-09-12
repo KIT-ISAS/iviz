@@ -599,34 +599,6 @@ public unsafe partial struct WriteBuffer2
     #endregion
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    void SerializeStructArrayCore(byte[] val)
-    {
-        int size = val.Length * sizeof(byte);
-        ThrowIfOutOfRange(size);
-
-        fixed (byte* valPtr = val)
-        {
-            Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
-        }
-
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    void SerializeStructArrayCore(Point32[] val)
-    {
-        int size = val.Length * Point32.Ros2FixedMessageLength;
-        ThrowIfOutOfRange(size);
-
-        fixed (Point32* valPtr = val)
-        {
-            Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
-        }
-
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     void SerializeStructArrayCore<T>(T[] val) where T : unmanaged
     {
         int size = val.Length * sizeof(T);

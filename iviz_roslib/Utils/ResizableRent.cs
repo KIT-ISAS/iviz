@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Buffers;
-using Iviz.Tools;
 
 namespace Iviz.Roslib.Utils;
 
@@ -43,11 +42,7 @@ internal sealed class ResizableRent : IDisposable
 
     public void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
         Pool.Return(Array);
     }

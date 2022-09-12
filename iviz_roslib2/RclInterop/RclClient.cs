@@ -1,6 +1,5 @@
 using Iviz.Roslib;
 using Iviz.Roslib2.RclInterop.Wrappers;
-using Iviz.Tools;
 
 namespace Iviz.Roslib2.RclInterop;
 
@@ -20,7 +19,7 @@ internal sealed class RclClient : IDisposable
         Rcl.Impl.SetLoggingLevel((int)severity);
     }
 
-    public static void SetRclWrapper(IRclWrapper wrapper)
+    public static void SetRclWrapper(RclWrapper wrapper)
     {
         Rcl.SetRclWrapper(wrapper);
     }

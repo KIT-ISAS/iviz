@@ -44,8 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31e8a65d20b0455ab15da27a6cdc9ce7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AtlasLarge: {fileID: 2800000, guid: 35ecb0d50786d49268687f6e935cbdf7, type: 3}
-  AtlasLargeFlip: {fileID: 2800000, guid: ea3d2e3990a0e40d088ee931e8e1c3a1, type: 3}
   ARPrefab: {fileID: 906031459955196090, guid: 61bf8a72e8b0c41088677503199f213c, type: 3}
   AngleAxis: {fileID: 3519643506196918197, guid: 01c562bee98e94e3d93cde8f28a2103d,
     type: 3}
@@ -61,8 +59,6 @@ MonoBehaviour:
   Grid: {fileID: 1346616014813264747, guid: dfae3b16dfd594373a9da5633568c46f, type: 3}
   GridMap: {fileID: 8890165288296654493, guid: 75d5771e81f6c4120bc5d608f22bf2d2, type: 3}
   Image: {fileID: 7979687756811785169, guid: 7f66efcb8d7da5847ba5d219349a5914, type: 3}
-  InteractiveControl: {fileID: 2129656827226268980, guid: 6a7f6fab10a204aa69d9eb743d5d3f52,
-    type: 3}
   LineConnector: {fileID: 538164998166567882, guid: 798f93d90dd2148bab7eb8f0978493a2,
     type: 3}
   OccupancyGrid: {fileID: 7604648359057699655, guid: 9f870dd485f0447a193faf9543d52c8a,
@@ -112,17 +108,14 @@ MonoBehaviour:
     type: 3}
   Boundary: {fileID: 8214874507214888100, guid: b6ea9643ec70d44bdb2e83278435d719,
     type: 3}
-  BoundaryLink: {fileID: 6996529739439326712, guid: 359c642ac24754957b8e39579cd74264,
+  ColliderBoundary: {fileID: 3448876418950614814, guid: c212c4b410e094b9fb0edb700a5c9c7b,
     type: 3}
-  BoundaryCheck: {fileID: 6361059073634900896, guid: 1f606e05537014fb39caf297a0709d1e,
+  CollidableBoundary: {fileID: 2294909789619560204, guid: e9063c7234a5b49a0a6e63560ad3e2f0,
     type: 3}
   PositionDisc: {fileID: 327149289443996903, guid: fce2f5c41831445c09eb0349955089a1,
     type: 3}
   PositionDisc3D: {fileID: 5853665389834264231, guid: 50044df9508cc436a9ac5f9574c3df21,
     type: 3}
-  LineConnectorMaterial: {fileID: 2100000, guid: cfb813fa6b5bb4474a07ff282fdc74d6,
-    type: 2}
-  TextMaterial: {fileID: 2100000, guid: 2d12233ced84548dabc51813d2d11354, type: 2}
   ImagePreview: {fileID: 2100000, guid: bdca2e3222097a249b26542375318451, type: 2}
   GridInterior: {fileID: 2100000, guid: 64f66be0487d84820abb42b120f807d5, type: 2}
   GridInteriorSimple: {fileID: 2100000, guid: f3449decfce2b4320b10491c7a2a911a, type: 2}

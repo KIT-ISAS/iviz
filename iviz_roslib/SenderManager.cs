@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib.XmlRpc;
 using Iviz.Tools;
-using Nito.AsyncEx;
 
 namespace Iviz.Roslib;
 
@@ -173,7 +172,7 @@ internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage
             await deadSender.DisposeAsync(token).AwaitNoThrow(this);
         }).ToArray();
 
-        await tasks.WhenAll().AwaitNoThrow(this);
+        await Task.WhenAll(tasks).AwaitNoThrow(this);
 
         foreach (var deadSender in sendersToDelete)
         {
@@ -242,7 +241,7 @@ internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage
                     tasks[i] = localSenders[i].PublishAndWaitAsync(msg, token).AsTask();
                 }
 
-                return tasks.WhenAll().AsValueTask();
+                return Task.WhenAll(tasks).AsValueTask();
         }
     }
 
@@ -253,22 +252,20 @@ internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage
 
     public async ValueTask DisposeAsync(CancellationToken token)
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
+        
         tokenSource.Cancel();
 
         // try to make the listener come out
-        await StreamUtils.EnqueueConnectionAsync(Endpoint.Port, this, token);
-
+        await StreamUtils.EnqueueLocalConnectionAsync(Endpoint.Port, this, token);
         listener.Stop();
         
         await task.AwaitNoThrow(2000, this, token);
 
-        await senders.Select(sender => sender.DisposeAsync(token).AsTask()).WhenAll().AwaitNoThrow(this);
+        var tasks = senders.Select(sender => sender.DisposeAsync(token).AsTask());
+        await Task.WhenAll(tasks).AwaitNoThrow(this);
+        
         senders.Clear();
 
         cachedSenders = Array.Empty<IProtocolSender<TMessage>>();

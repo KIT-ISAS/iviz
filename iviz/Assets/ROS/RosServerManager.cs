@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
+using Iviz.Roslib;
 using Iviz.RosMaster;
 using Iviz.Tools;
 using Iviz.XmlRpc;
@@ -63,8 +64,13 @@ namespace Iviz.Ros
             {
                 await initCompletedSignal.Task;
             }
-            catch
+            catch (Exception e)
             {
+                if (e is not RosConnectionException)
+                {
+                    RosLogger.Error($"{ToString()}: Unexpected exception in {nameof(TryStartAsync)}", e);
+                }
+
                 await DisposeAsync();
                 return false;
             }

@@ -463,7 +463,7 @@ namespace Iviz.App
                         UpperCanvas.TopPanel.color = Resource.Colors.ConnectionPanelConnected;
                     }
 
-                    _ = SaveSimpleConfigurationAsync();
+                    _ = SaveSimpleConfigurationAsync().AwaitNoThrow(this);
                     break;
                 case ConnectionState.Disconnected:
                     GameThread.EveryTenthOfASecond -= RotateSprite;
@@ -544,7 +544,7 @@ namespace Iviz.App
             string fullPath = $"{Settings.SavedFolder}/{defaultConfigPrefix}{LoadConfigDialogData.Suffix}";
             if (File.Exists(fullPath))
             {
-                _ = LoadStateConfigurationAsync($"{defaultConfigPrefix}{LoadConfigDialogData.Suffix}");
+                _ = LoadStateConfigurationAsync($"{defaultConfigPrefix}{LoadConfigDialogData.Suffix}").AwaitNoThrow(this);
             }
         }
 
@@ -1148,7 +1148,7 @@ namespace Iviz.App
             }
 
             // try to recover!
-            _ =  Dialogs.ConnectionData.TryResetConnectionsAsync();
+            _ =  Dialogs.ConnectionData.TryResetConnectionsAsync().AwaitNoThrow(this);
         }
 
         public override string ToString() => $"[{nameof(ModuleListPanel)}]";

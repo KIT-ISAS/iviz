@@ -935,7 +935,7 @@ namespace Iviz.App
                         hits[0].highlightable.Highlight(hits[0].hitPoint);
                         return;
                     case > 1:
-                        _ = HighlightAllAsync(hits);
+                        _ = HighlightAllAsync(hits).AwaitNoThrow(nameof(GuiInputModule));
                         return;
                 }
             }

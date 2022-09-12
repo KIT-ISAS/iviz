@@ -59,15 +59,17 @@ namespace Iviz.Controllers.TF
             get => base.Parent;
             set
             {
-                if (!TrySetParent(value))
+                if (TrySetParent(value))
                 {
-                    string errorMsg = ToString() + (
-                        value == null
-                            ? ": Failed to reset parent"
-                            : $": Failed to set parent '{value.Id}'"
-                    );
-                    RosLogger.Error(errorMsg);
+                    return;
                 }
+
+                string errorMsg = ToString() + (
+                    value == null
+                        ? ": Failed to reset parent"
+                        : $": Failed to set parent '{value.Id}'"
+                );
+                RosLogger.Error(errorMsg);
             }
         }
 
@@ -144,7 +146,7 @@ namespace Iviz.Controllers.TF
         {
             if (!IsAlive)
             {
-                return false;
+                return parent == null;
             }
 
             if (parent == Parent)

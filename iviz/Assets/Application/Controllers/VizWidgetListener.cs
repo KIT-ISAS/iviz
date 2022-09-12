@@ -21,7 +21,7 @@ using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
 namespace Iviz.Controllers
 {
-    public sealed class VizWidgetListener : ListenerController, IMarkerDialogListener, IWidgetFeedback, IDialogFeedback
+    public sealed class VizWidgetListener : ListenerController, IMarkerDialogListener, IWidgetFeedback, IDialogFeedback, IBoundaryFeedback
     {
         static VizWidgetListener? defaultHandler;
         public static void DisposeDefaultHandler() => defaultHandler?.Dispose();
@@ -88,35 +88,49 @@ namespace Iviz.Controllers
                 {
                     var handler = new WidgetHandler(this);
                     vizHandler = handler;
-                    Listener = new Listener<Widget>(configTopic, handler.Handler) { MaxQueueSize = 50 };
+                    Listener = new Listener<Widget>(configTopic, handler.Handler,50);
                     break;
                 }
                 case WidgetArray.MessageType:
                 {
                     var handler = new WidgetHandler(this);
                     vizHandler = handler;
-                    Listener = new Listener<WidgetArray>(configTopic, handler.Handler) { MaxQueueSize = 50 };
+                    Listener = new Listener<WidgetArray>(configTopic, handler.Handler,50);
                     break;
                 }
                 case Dialog.MessageType:
                 {
                     var handler = new DialogHandler(this);
                     vizHandler = handler;
-                    Listener = new Listener<Dialog>(configTopic, handler.Handler) { MaxQueueSize = 50 };
+                    Listener = new Listener<Dialog>(configTopic, handler.Handler,50);
                     break;
                 }
                 case DialogArray.MessageType:
                 {
                     var handler = new DialogHandler(this);
                     vizHandler = handler;
-                    Listener = new Listener<DialogArray>(configTopic, handler.Handler) { MaxQueueSize = 50 };
+                    Listener = new Listener<DialogArray>(configTopic, handler.Handler,50);
                     break;
                 }
                 case RobotPreview.MessageType:
                 {
                     var handler = new RobotPreviewHandler();
                     vizHandler = handler;
-                    Listener = new Listener<RobotPreview>(configTopic, handler.Handler) { MaxQueueSize = 50 };
+                    Listener = new Listener<RobotPreview>(configTopic, handler.Handler,50);
+                    break;
+                }
+                case Boundary.MessageType:
+                {
+                    var handler = new BoundaryHandler(this);
+                    vizHandler = handler;
+                    Listener = new Listener<Boundary>(configTopic, handler.Handler,50);
+                    break;
+                }
+                case BoundaryArray.MessageType:
+                {
+                    var handler = new BoundaryHandler(this);
+                    vizHandler = handler;
+                    Listener = new Listener<BoundaryArray>(configTopic, handler.Handler,50);
                     break;
                 }
                 default:
@@ -269,6 +283,28 @@ namespace Iviz.Controllers
             });
         }
 
+        public void OnBoundaryColliderEntered(string id, string otherId)
+        {
+            FeedbackSender?.Publish(new Feedback
+            {
+                Header = CreateHeader(""),
+                VizId = RosManager.MyId ?? "",
+                Id = id,
+                Type = (byte)FeedbackType.ColliderEntered,
+            });
+        }
+
+        public void OnBoundaryColliderExited(string id, string otherId)
+        {
+            FeedbackSender?.Publish(new Feedback
+            {
+                Header = CreateHeader(""),
+                VizId = RosManager.MyId ?? "",
+                Id = id,
+                Type = (byte)FeedbackType.ColliderExited,
+            });
+        }
+
         Header CreateHeader(string frameId) => new(feedbackSeq++, time.Now(), frameId);
 
         public void GenerateLog(StringBuilder description, int minIndex, int numEntries)
@@ -299,38 +335,5 @@ namespace Iviz.Controllers
         {
             defaultHandler = null;
         }
-    }
-
-    public enum ActionType : byte
-    {
-        Add = Widget.ACTION_ADD,
-        Remove = Widget.ACTION_REMOVE,
-        RemoveAll = Widget.ACTION_REMOVEALL
-    }
-
-    public enum WidgetType : byte
-    {
-        RotationDisc = Widget.TYPE_ROTATIONDISC,
-        SpringDisc = Widget.TYPE_SPRINGDISC,
-        SpringDisc3D = Widget.TYPE_SPRINGDISC3D,
-        TrajectoryDisc = Widget.TYPE_TRAJECTORYDISC,
-        TrajectoryDisc3D = Widget.TYPE_TRAJECTORYDISC3D,
-        Tooltip = Widget.TYPE_TOOLTIP,
-        TargetArea = Widget.TYPE_TARGETAREA,
-        PositionDisc = Widget.TYPE_POSITIONDISC,
-        PositionDisc3D = Widget.TYPE_POSITIONDISC3D,
-        //Boundary = Widget.TYPE_BOUNDARY,
-        //BoundaryCheck = Widget.TYPE_BOUNDARYCHECK,
-    }
-
-    public enum FeedbackType : byte
-    {
-        Expired = Feedback.TYPE_EXPIRED,
-        ButtonClick = Feedback.TYPE_BUTTON_CLICK,
-        MenuEntryClick = Feedback.TYPE_MENUENTRY_CLICK,
-        PositionChanged = Feedback.TYPE_POSITION_CHANGED,
-        OrientationChanged = Feedback.TYPE_ORIENTATION_CHANGED,
-        ScaleChanged = Feedback.TYPE_SCALE_CHANGED,
-        TrajectoryChanged = Feedback.TYPE_TRAJECTORY_CHANGED,
     }
 }

@@ -116,6 +116,8 @@ namespace Iviz.Resources
                 { Dialog.MessageType, ModuleType.VizWidget },
                 { DialogArray.MessageType, ModuleType.VizWidget },
                 { RobotPreview.MessageType, ModuleType.VizWidget },
+                { Boundary.MessageType, ModuleType.VizWidget },
+                { BoundaryArray.MessageType, ModuleType.VizWidget },
 
                 // these are already implemented, but need refinement
                 //{ JointState.MessageType, ModuleType.JointState },

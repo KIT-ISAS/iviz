@@ -2,6 +2,7 @@
 
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Channels;
 using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -21,11 +22,9 @@ namespace Iviz.Controllers
         const int MaxQueueSize = 10000;
 
         readonly TfConfiguration config = new();
-        
-        readonly ConcurrentQueue<(TransformStamped[] frame, bool isStatic)> incomingMessages = new();
-        int incomingMessagesCount;
-        
-        readonly ConcurrentQueue<TransformStamped> outgoingMessages = new();
+
+        readonly Channel<(TransformStamped[] frame, bool isStatic)> incomingMessages;
+        readonly Channel<TransformStamped> outgoingMessages;
         uint tfSeq;
 
         static TfListener? instance;
@@ -161,44 +160,34 @@ namespace Iviz.Controllers
             };
 
             GameThread.LateEveryFrame += LateUpdate;
+
+            var incomingOptions = new BoundedChannelOptions(MaxQueueSize)
+                { SingleReader = true, FullMode = BoundedChannelFullMode.DropOldest };
+            incomingMessages = Channel.CreateBounded<(TransformStamped[], bool)>(incomingOptions);
+            outgoingMessages = Channel.CreateBounded<TransformStamped>(incomingOptions);
         }
 
         void ProcessMessages()
         {
-            while (incomingMessages.TryDequeue(out var value))
+            var reader = incomingMessages.Reader;
+            while (reader.TryRead(out var value))
             {
                 var (transforms, isStatic) = value;
                 foreach (var transform in transforms)
                 {
                     Tf.Process(transform, isStatic);
                 }
-
-                Interlocked.Decrement(ref incomingMessagesCount);
             }
         }
 
         bool HandleNonStatic(TFMessage msg, IRosConnection? _)
         {
-            if (incomingMessagesCount > MaxQueueSize)
-            {
-                return false;
-            }
-
-            incomingMessages.Enqueue((msg.Transforms, false));
-            Interlocked.Increment(ref incomingMessagesCount);
-            return true;
+            return incomingMessages.Writer.TryWrite((msg.Transforms, false));
         }
 
         bool HandleStatic(TFMessage msg, IRosConnection? _)
         {
-            if (incomingMessagesCount > MaxQueueSize)
-            {
-                return false;
-            }
-
-            incomingMessages.Enqueue((msg.Transforms, true));
-            Interlocked.Increment(ref incomingMessagesCount);
-            return true;
+            return incomingMessages.Writer.TryWrite((msg.Transforms, true));
         }
 
 
@@ -249,21 +238,24 @@ namespace Iviz.Controllers
             t.Header.FrameId = parentFrameId;
             t.ChildFrameId = TfModule.ResolveFrameId(childFrameId);
             localPose.Unity2Ros(out t.Transform);
-            outgoingMessages.Enqueue(t);
+            outgoingMessages.Writer.TryWrite(t);
         }
 
         void DoPublish()
         {
-            if (outgoingMessages.IsEmpty)
+            var reader = outgoingMessages.Reader;
+            int count = reader.Count;
+            if (count == 0)
             {
                 return;
             }
 
-            int count = outgoingMessages.Count;
             var transforms = new TransformStamped[count];
             for (int i = 0; i < count; i++)
             {
-                outgoingMessages.TryDequeue(out transforms[i]);
+                transforms[i] = reader.TryRead(out var transform)
+                    ? transform
+                    : new TransformStamped(); // shouldn't happen, single reader!
             }
 
             if (RosManager.IsConnected)
@@ -272,8 +264,7 @@ namespace Iviz.Controllers
             }
             else
             {
-                incomingMessages.Enqueue((transforms, false));
-                Interlocked.Increment(ref incomingMessagesCount);
+                incomingMessages.Writer.TryWrite((transforms, false));
             }
         }
 

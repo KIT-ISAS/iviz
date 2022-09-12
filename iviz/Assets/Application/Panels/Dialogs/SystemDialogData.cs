@@ -175,8 +175,8 @@ namespace Iviz.App
                 return;
             }
 
-            string[] parameters = RosManager.Connection.GetSystemParameterList();
-            Array.Sort(parameters);
+            var parameters = RosManager.Connection.GetSystemParameterList().ToList();
+            parameters.Sort();
 
             using var description = BuilderPool.Rent();
 
@@ -319,7 +319,7 @@ namespace Iviz.App
             {
                 tokenSource?.Cancel();
                 tokenSource = new CancellationTokenSource(5000);
-                _ = GetServiceInfoAsync(link, tokenSource.Token);
+                _ = GetServiceInfoAsync(link, tokenSource.Token).AwaitNoThrow(this);
             }
 
             description.Append("<color=#008000ff><b>Provider:</b></color>").AppendLine();
@@ -401,7 +401,7 @@ namespace Iviz.App
             {
                 tokenSource?.Cancel();
                 tokenSource = new CancellationTokenSource(5000);
-                _ = GetParamValueAsync(link, tokenSource.Token);
+                _ = GetParamValueAsync(link, tokenSource.Token).AwaitNoThrow(this);
             }
 
             panel.TextBottom.SetTextRent(description);
@@ -447,7 +447,7 @@ namespace Iviz.App
             {
                 tokenSource?.Cancel();
                 tokenSource = new CancellationTokenSource(5000);
-                _ = GetNodeInfoAsync(link, tokenSource.Token);
+                _ = GetNodeInfoAsync(link, tokenSource.Token).AwaitNoThrow(this);
             }
 
             description.Append("<color=#800000ff><b>Advertises:</b></color>").AppendLine();

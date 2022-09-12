@@ -135,24 +135,15 @@ namespace Iviz.Displays.XR
 
             var currentPosition = Disc.Transform.localPosition;
             positions.Add(currentPosition);
-            lineBuffer.Add(new LineWithColor(positions[^2], currentPosition));
+            
+            LineUtils.AddLineStipple(lineBuffer, positions[^2], currentPosition, stippleLength: 0.25f);
             Lines.Set(lineBuffer.AsReadOnlySpan(), false);
 
-            CreateCorner(currentPosition);
+            ResetCorners();
             
             Segments.Reset();
 
             ProvidedTrajectory?.Invoke(positions, period);
-        }
-
-        void CreateCorner(Vector3 position)
-        {
-            var newCorner = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, Transform);
-            newCorner.Color = SecondColor;
-            newCorner.EmissiveColor = SecondColor;
-            newCorner.Transform.localPosition = position;
-            newCorner.Transform.localScale = Vector3.one * (0.1f * 3);
-            corners.Add(newCorner);
         }
 
         void SendTrajectory()
@@ -160,7 +151,7 @@ namespace Iviz.Displays.XR
             positions.Clear();
             lineBuffer.Clear();
             Lines.Reset();
-            ClearCorners();
+            ResetCorners();
 
             Disc.Transform.localPosition = Vector3.zero;
             Holder.SetActive(false);
@@ -173,23 +164,52 @@ namespace Iviz.Displays.XR
             positions.Clear();
             lineBuffer.Clear();
             Lines.Reset();
-            ClearCorners();
+            ResetCorners();
 
             Disc.Transform.localPosition = Vector3.zero;
             Holder.SetActive(false);
             ProvidedTrajectory?.Invoke(positions, period);
         }
 
-        void ClearCorners()
+        void ResetCorners()
         {
-            foreach (var corner in corners)
+            int cornersCount = corners.Count;
+            int positionsCount = positions.Count;
+            int min = Mathf.Min(cornersCount, positionsCount);
+            for (int i = 0; i < min; i++)
             {
-                corner.ReturnToPool(Resource.Displays.Cube);
+                corners[i].Transform.localPosition = positions[i];
             }
-
-            corners.Clear();
+            
+            if (cornersCount < positionsCount)
+            {
+                for (int i = cornersCount; i < positionsCount; i++)
+                {
+                    corners.Add(CreateCorner(positions[i], Transform, SecondColor));
+                }
+            }
+            else
+            {
+                for (int i = positionsCount; i < cornersCount; i++)
+                {
+                    corners[i].ReturnToPool(Resource.Displays.Cube);
+                }
+                
+                corners.RemoveRange(positionsCount, cornersCount - positionsCount);
+            }
         }
-
+        
+        static MeshMarkerDisplay CreateCorner(Vector3 position, Transform transform, Color color)
+        {
+            var newCorner = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, transform);
+            newCorner.Color = color;
+            newCorner.EmissiveColor = color;
+            newCorner.Transform.localPosition = position;
+            newCorner.Transform.localScale = Vector3.one * (0.1f * 3);
+            newCorner.EnableShadows = false;
+            return newCorner;
+        }
+        
         void UndoTrajectory()
         {
             if (positions.Count == 0)
@@ -198,10 +218,16 @@ namespace Iviz.Displays.XR
             }
 
             positions.RemoveAt(positions.Count - 1);
-            lineBuffer.RemoveAt(lineBuffer.Count - 1);
+
+            lineBuffer.Clear();
+            for (int i = 0; i < positions.Count - 1; i++)
+            {
+                LineUtils.AddLineStipple(lineBuffer, positions[i], positions[i + 1], stippleLength: 0.25f);
+            }
+
             Lines.Set(lineBuffer.AsReadOnlySpan(), false);
             Segments.Reset();
-            ClearCorners();
+            ResetCorners();
 
             Disc.Transform.localPosition = positions[^1];
             ProvidedTrajectory?.Invoke(positions, period);
@@ -222,7 +248,7 @@ namespace Iviz.Displays.XR
             ProvidedTrajectory = null;
             Lines.Reset();
             Segments.Reset();
-            ClearCorners();
+            ResetCorners();
             lineBuffer.Clear();
             //startTime = null;
             Send.Transform.parent = Transform;

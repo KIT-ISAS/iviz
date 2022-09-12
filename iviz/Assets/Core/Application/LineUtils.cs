@@ -3,38 +3,39 @@
 using System;
 using System.Collections.Generic;
 using Iviz.Core;
+using UnityEditor.Graphs;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
     public static class LineUtils
     {
-        public static void AddLineStipple(List<LineWithColor> lines, in Vector3 a, in Vector3 b, Color color,
+        public static void AddLineStipple(List<LineWithColor> lines, in Vector3 a, in Vector3 b, Color32? color = null,
             float stippleLength = 0.1f)
         {
             ThrowHelper.ThrowIfNull(lines, nameof(lines));
 
             float remainingLength = (b - a).Magnitude();
-            Vector3 direction = (b - a) / remainingLength;
-            Vector3 advance = direction * stippleLength;
-            Vector3 position = a;
+            var direction = (b - a) / remainingLength;
+            var advance = direction * stippleLength;
+            var position = a;
 
-            while (true)
+            var advanceTwice = 2 * advance;
+            float stippleLengthTwice = 2 * stippleLength;
+
+            var validatedColor = color ?? Color.white;
+            
+            while (remainingLength >= 0)
             {
-                if (remainingLength < 0)
-                {
-                    break;
-                }
-
                 if (remainingLength < stippleLength)
                 {
-                    lines.Add(new LineWithColor(position, b, color));
+                    lines.Add(new LineWithColor(position, b, validatedColor));
                     break;
                 }
 
-                lines.Add(new LineWithColor(position, position + advance, color));
-                position += 2 * advance;
-                remainingLength -= 2 * stippleLength;
+                lines.Add(new LineWithColor(position, position + advance, validatedColor));
+                position += advanceTwice;
+                remainingLength -= stippleLengthTwice;
             }
         }
 

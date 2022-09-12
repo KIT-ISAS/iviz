@@ -15,55 +15,65 @@ namespace Iviz.App
         [SerializeField] Image? frame;
         [SerializeField] TMP_Text? text;
 
-        bool? viewEnabled;
+        bool? isEnabled;
+        bool interactable = true;
 
         public event Action? Clicked;
 
         public bool Visible
         {
-            get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
         
         public bool Enabled
         {
-            get => viewEnabled ?? false;
+            get => isEnabled ?? false;
             set
             {
-                if (viewEnabled == value)
-                {
-                    return;
-                }
-
-                viewEnabled = value;
-
-                if (image != null)
-                {
-                    image.color = value
-                        ? Resource.Colors.EnabledSideFont
-                        : Resource.Colors.DisabledSideFont;
-                }
-
-                if (text != null)
-                {
-                    text.color = value
-                        ? Resource.Colors.EnabledSideFont
-                        : Resource.Colors.DisabledSideFont;
-                }
-
-                if (frame != null)
-                {
-                    frame.color = value
-                        ? Resource.Colors.EnabledSideFrame
-                        : Resource.Colors.DisabledSideFrame;
-                }
+                isEnabled = value;
+                UpdateGraphics();
             }
+        }
+
+        public bool Interactable
+        {
+            get => interactable;
+            set
+            {
+                interactable = value;
+                UpdateGraphics();
+            }
+        }
+
+        void UpdateGraphics()
+        {
+            if (image != null)
+            {
+                image.color = Interactable
+                    ? Resource.Colors.EnabledSideFont
+                    : Resource.Colors.DisabledSideFont;
+            }
+
+            if (text != null)
+            {
+                text.color = Interactable
+                    ? Resource.Colors.EnabledSideFont
+                    : Resource.Colors.DisabledSideFont;
+            }
+
+            if (frame != null)
+            {
+                frame.color = Enabled && Interactable
+                    ? Resource.Colors.EnabledSideFrame
+                    : Resource.Colors.DisabledSideFrame;
+            }
+            
         }
 
         void Awake()
         {
             GetComponent<Button>().onClick.AddListener(OnClick);
-            Enabled = viewEnabled ?? true;
+            Enabled = isEnabled ?? true;
         }
 
         void OnClick()

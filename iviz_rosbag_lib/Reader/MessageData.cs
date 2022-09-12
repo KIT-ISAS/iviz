@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Tools;
-using ISerializable = Iviz.Msgs.ISerializable;
 
 namespace Iviz.Rosbag.Reader;
 

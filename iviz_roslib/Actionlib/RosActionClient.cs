@@ -7,7 +7,6 @@ using Iviz.Msgs;
 using Iviz.Msgs.ActionlibMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Tools;
-using String = System.String;
 
 namespace Iviz.Roslib.Actionlib;
 
@@ -62,11 +61,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable,
 
     public void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
 
         if (goalPublisher == null)
@@ -83,11 +78,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable,
 
     public async ValueTask DisposeAsync()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
 
         if (goalPublisher == null)

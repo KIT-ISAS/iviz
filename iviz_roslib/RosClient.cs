@@ -15,7 +15,6 @@ using Iviz.MsgsGen.Dynamic;
 using Iviz.Roslib.Utils;
 using Iviz.Roslib.XmlRpc;
 using Iviz.Tools;
-using Nito.AsyncEx;
 
 namespace Iviz.Roslib;
 
@@ -44,6 +43,7 @@ public sealed class RosClient : IRosClient
     RosNodeServer? listener;
     TimeSpan tcpRosTimeout = TimeSpan.FromSeconds(3);
     TimeSpan rpcNodeTimeout = TimeSpan.FromSeconds(3);
+    bool disposed;
 
     public delegate void ShutdownActionCall(string callerId, string reason);
 
@@ -243,7 +243,7 @@ public sealed class RosClient : IRosClient
 
         var myAddress = RosUtils.TryGetAccessibleAddress(masterAddress);
 
-        return myAddress == null ? null : new Uri($"http://{myAddress}:{usingPort.ToString()}/");
+        return myAddress == null ? null : new Uri($"http://{myAddress.ToUriString()}:{usingPort.ToString()}/");
     }
 
     /// <summary>
@@ -623,7 +623,7 @@ public sealed class RosClient : IRosClient
 
         try
         {
-            await tasks.WhenAll();
+            await Task.WhenAll(tasks);
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
@@ -1699,29 +1699,44 @@ public sealed class RosClient : IRosClient
     /// </summary>
     public async ValueTask CloseAsync(CancellationToken token = default)
     {
-        const int timeoutInMs = 4000;
-        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
-        tokenSource.CancelAfter(timeoutInMs);
-        var innerToken = tokenSource.Token;
-
+        if (disposed) return;
+        disposed = true;
+        
+        const int timeoutInMs = 2000;
         ShutdownAction = null;
         ParamUpdateAction = null;
 
-        var tasks = new List<Task>();
-
         if (listener != null)
         {
-            var listenerDispose = listener.DisposeAsync().AsTask();
-            tasks.Add(listenerDispose);
+            // force await on this irrespective of token
+            // failure to dispose the listener can cause a lot of nasty issues with port already taken
+            await listener.DisposeAsync().AwaitNoThrow(this);
         }
+
+        var closeConnectionsTask = CloseConnectionsAsync().AsTask();
+        if (token.IsCancellationRequested)
+        {
+            Logger.LogFormat("{0}: Pre-cancelled token passed to " + nameof(CloseAsync), this);
+            return; // closeConnectionsTask will keep running in the background
+        }
+
+        // the token determines when we stop awaiting. the connections will still keep closing in the background  
+        await closeConnectionsTask.AwaitNoThrow(timeoutInMs, this, token);
+    }
+
+    async ValueTask CloseConnectionsAsync()
+    {
+        CancellationToken token = default; // do not expire
+
+        var tasks = new List<Task>();
 
         var publishers = publishersByTopic.Values.ToArray();
         publishersByTopic.Clear();
 
         foreach (var publisher in publishers)
         {
-            tasks.Add(publisher.DisposeAsync(innerToken).AwaitNoThrow(this));
-            tasks.Add(RosMasterClient.UnregisterPublisherAsync(publisher.Topic, innerToken).AwaitNoThrow(this));
+            tasks.Add(publisher.DisposeAsync(token).AwaitNoThrow(this));
+            tasks.Add(RosMasterClient.UnregisterPublisherAsync(publisher.Topic, token).AwaitNoThrow(this));
         }
 
         var subscribers = subscribersByTopic.Values.ToArray();
@@ -1729,38 +1744,45 @@ public sealed class RosClient : IRosClient
 
         foreach (var subscriber in subscribers)
         {
-            tasks.Add(subscriber.DisposeAsync(innerToken).AwaitNoThrow(this));
-            tasks.Add(RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, innerToken).AwaitNoThrow(this));
+            tasks.Add(subscriber.DisposeAsync(token).AwaitNoThrow(this));
+            tasks.Add(RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, token).AwaitNoThrow(this));
         }
-
-        var receivers = callersByService.Values.ToArray();
-        callersByService.Clear();
-
-        foreach (var receiver in receivers)
-        {
-            receiver.Dispose();
-        }
-
+        
         var serviceManagers = listenersByService.Values.ToArray();
         listenersByService.Clear();
 
         foreach (var serviceManager in serviceManagers)
         {
-            tasks.Add(serviceManager.DisposeAsync(innerToken).AwaitNoThrow(this));
-            tasks.Add(RosMasterClient.UnregisterServiceAsync(serviceManager.Service, serviceManager.Uri, innerToken)
+            tasks.Add(serviceManager.DisposeAsync(token).AwaitNoThrow(this));
+            tasks.Add(RosMasterClient.UnregisterServiceAsync(serviceManager.Service, serviceManager.Uri, token)
                 .AwaitNoThrow(this));
         }
+        
+        var receivers = callersByService.Values.ToArray();
+        callersByService.Clear();
 
-        var timeoutTask = Task.Delay(timeoutInMs, innerToken);
-        var finalTask = await (tasks.WhenAll(), timeoutTask).WhenAny();
-        if (finalTask == timeoutTask)
+        foreach (var receiver in receivers)
         {
-            Logger.LogErrorFormat("EE {0}: " + nameof(CloseAsync) + "() tasks timed out.", this);
+            try
+            {
+                receiver.Dispose();
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: " + nameof(RosServiceCaller) + ".Dispose() threw! {1}", this, e);
+            }
+        }        
+
+        await Task.WhenAll(tasks).AwaitNoThrow(this);
+
+        try
+        {
+            RosMasterClient.Dispose();
         }
-
-        await finalTask.AwaitNoThrow(this);
-
-        RosMasterClient.Dispose();
+        catch (Exception e)
+        {
+            Logger.LogErrorFormat("{0}: " + nameof(RosMasterClient) + ".Dispose() threw! {1}", this, e);
+        }
     }
 
     public void Dispose()

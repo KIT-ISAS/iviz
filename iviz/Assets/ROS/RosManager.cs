@@ -20,9 +20,9 @@ namespace Iviz.Ros
         public static IRosProvider Connection => RosConnection;
         public static RosOutLogger Logger => instance?.logger ?? throw NewDisposeException();
         public static RosServerManager Server => instance?.server ?? throw NewDisposeException();
-        internal static RoslibConnection RosConnection => instance?.connection ?? throw NewDisposeException();
+        internal static RosConnection RosConnection => instance?.connection ?? throw NewDisposeException();
 
-        readonly RoslibConnection connection;
+        readonly RosConnection connection;
         readonly RosOutLogger logger;
         readonly RosServerManager server;
 
@@ -32,7 +32,7 @@ namespace Iviz.Ros
         public RosManager()
         {
             instance = this;
-            connection = new RoslibConnection();
+            connection = new RosConnection();
             logger = new RosOutLogger();
             server = new RosServerManager();
         }

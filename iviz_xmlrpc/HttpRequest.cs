@@ -288,11 +288,7 @@ public sealed class HttpRequest : IDisposable
 
     public void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         disposed = true;
         client.Close();
     }

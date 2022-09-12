@@ -91,11 +91,7 @@ public sealed class HttpListenerContext : IDisposable
     
     public void Dispose()
     {
-        if (disposed)
-        {
-            return;
-        }
-
+        if (disposed) return;
         client.Close();
         disposed = true;
     }
