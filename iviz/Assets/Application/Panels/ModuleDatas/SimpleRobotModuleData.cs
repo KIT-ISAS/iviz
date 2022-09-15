@@ -100,6 +100,7 @@ namespace Iviz.App
             panel.AttachToTf.Value = RobotController.AttachedToTf;
             panel.HideButton.State = RobotController.Visible;
 
+            panel.KeepMeshMaterials.Value = RobotController.KeepMeshMaterials;
             panel.OcclusionOnlyMode.Value = RobotController.RenderAsOcclusionOnly;
             panel.EnableColliders.Value = RobotController.Interactable;
             panel.Tint.Value = RobotController.Tint;
@@ -122,6 +123,11 @@ namespace Iviz.App
             panel.Metallic.ValueChanged += f => RobotController.Metallic = f;
             panel.Smoothness.ValueChanged += f => RobotController.Smoothness = f;
             panel.OcclusionOnlyMode.ValueChanged += f => RobotController.RenderAsOcclusionOnly = f;
+            panel.KeepMeshMaterials.ValueChanged += f =>
+            {
+                RobotController.KeepMeshMaterials = f;
+                ResetController();
+            };
             panel.EnableColliders.ValueChanged += f => RobotController.Interactable = f;
             panel.SavedRobotName.ValueChanged += (i, name) =>
             {

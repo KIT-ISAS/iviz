@@ -21,7 +21,7 @@ namespace Iviz.Core
 #elif UNITY_WSA || UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
         public static bool IsMobile => IsHololens;
 #else
-        public const bool IsMobile = false;
+        public static bool IsMobile => false; // not a constant!
 #endif
 
 

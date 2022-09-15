@@ -14125,7 +14125,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isXREnabled: 1
-  isHololens: 1
+  isHololens: 0
 --- !u!114 &1360200846
 MonoBehaviour:
   m_ObjectHideFlags: 0

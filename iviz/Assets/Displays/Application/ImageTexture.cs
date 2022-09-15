@@ -289,7 +289,7 @@ namespace Iviz.Displays
 
                 if (encoding == null)
                 {
-                    RosLogger.Error($"{ToString()}: Ignoring PNG with unsupported encoding '{info.Colorspace}'");
+                    RosLogger.Error($"{ToString()}: Ignoring JPG with unsupported encoding '{info.Colorspace}'");
                     GameThread.PostInListenerQueue(onFinished);
                     return;
                 }

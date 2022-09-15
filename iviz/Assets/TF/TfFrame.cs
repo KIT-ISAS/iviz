@@ -54,7 +54,7 @@ namespace Iviz.Controllers.TF
         /// </summary>
         public Pose AbsoluteUnityPose => Transform.AsPose();
 
-        public new TfFrame? Parent
+        public sealed override TfFrame? Parent
         {
             get => base.Parent;
             set

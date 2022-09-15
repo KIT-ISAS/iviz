@@ -1,9 +1,7 @@
 #nullable enable
 
-using System;
 using System.Collections.Generic;
 using Iviz.Core;
-using UnityEditor.Graphs;
 using UnityEngine;
 
 namespace Iviz.Displays

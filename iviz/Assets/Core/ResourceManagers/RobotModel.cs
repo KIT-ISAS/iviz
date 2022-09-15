@@ -350,7 +350,7 @@ namespace Iviz.Displays
 
             foreach (var collision in link.Collisions)
             {
-                tasks.Add(ProcessCollisionAsync(collision, linkObject, provider, token).AsTask());
+                //tasks.Add(ProcessCollisionAsync(collision, linkObject, provider, token).AsTask());
             }
 
             return tasks;
@@ -512,7 +512,6 @@ namespace Iviz.Displays
                 var resolvedMaterial = GetMaterialForVisual(material, keepMeshMaterials ? null : rootMaterials);
                 var color = resolvedMaterial?.Color?.ToColor() ?? Color.white;
 
-                //var renderers = resourceObject.GetComponentsInChildren<MeshRenderer>();
                 var meshMarkerDisplays = resourceObject.GetAllChildren().WithComponent<MeshMarkerDisplay>();
                 foreach (var display in meshMarkerDisplays)
                 {
@@ -524,7 +523,7 @@ namespace Iviz.Displays
             }
             else
             {
-                var resource = resourceObject.AddComponent<MeshMarkerDisplay>();
+                var resource = resourceObject.TryAddComponent<MeshMarkerDisplay>();
                 displays.Add(resource);
 
                 var resolvedMaterial = GetMaterialForVisual(material, rootMaterials);
