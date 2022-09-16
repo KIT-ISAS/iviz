@@ -5,6 +5,8 @@ uint8 TYPE_POSITION_CHANGED = 3
 uint8 TYPE_ORIENTATION_CHANGED = 4
 uint8 TYPE_SCALE_CHANGED = 5
 uint8 TYPE_TRAJECTORY_CHANGED = 6
+uint8 TYPE_COLLIDER_ENTERED = 7
+uint8 TYPE_COLLIDER_EXITED = 8
 
 std_msgs/Header header
 string viz_id
@@ -15,5 +17,6 @@ float64 angle
 geometry_msgs/Point position
 geometry_msgs/Quaternion orientation
 geometry_msgs/Vector3 scale
-iviz_msgs/Trajectory trajectory
+Trajectory trajectory
+string collider_id
 

@@ -15,6 +15,8 @@ namespace Iviz.Msgs.IvizMsgs
         public const byte TYPE_ORIENTATION_CHANGED = 4;
         public const byte TYPE_SCALE_CHANGED = 5;
         public const byte TYPE_TRAJECTORY_CHANGED = 6;
+        public const byte TYPE_COLLIDER_ENTERED = 7;
+        public const byte TYPE_COLLIDER_EXITED = 8;
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "viz_id")] public string VizId;
         [DataMember (Name = "id")] public string Id;
@@ -24,13 +26,15 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "position")] public GeometryMsgs.Point Position;
         [DataMember (Name = "orientation")] public GeometryMsgs.Quaternion Orientation;
         [DataMember (Name = "scale")] public GeometryMsgs.Vector3 Scale;
-        [DataMember (Name = "trajectory")] public IvizMsgs.Trajectory Trajectory;
+        [DataMember (Name = "trajectory")] public Trajectory Trajectory;
+        [DataMember (Name = "collider_id")] public string ColliderId;
     
         public Feedback()
         {
             VizId = "";
             Id = "";
-            Trajectory = new IvizMsgs.Trajectory();
+            Trajectory = new Trajectory();
+            ColliderId = "";
         }
         
         public Feedback(ref ReadBuffer b)
@@ -44,7 +48,8 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Position);
             b.Deserialize(out Orientation);
             b.Deserialize(out Scale);
-            Trajectory = new IvizMsgs.Trajectory(ref b);
+            Trajectory = new Trajectory(ref b);
+            b.DeserializeString(out ColliderId);
         }
         
         public Feedback(ref ReadBuffer2 b)
@@ -62,7 +67,9 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Position);
             b.Deserialize(out Orientation);
             b.Deserialize(out Scale);
-            Trajectory = new IvizMsgs.Trajectory(ref b);
+            Trajectory = new Trajectory(ref b);
+            b.Align4();
+            b.DeserializeString(out ColliderId);
         }
         
         public Feedback RosDeserialize(ref ReadBuffer b) => new Feedback(ref b);
@@ -81,6 +88,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(in Orientation);
             b.Serialize(in Scale);
             Trajectory.RosSerialize(ref b);
+            b.Serialize(ColliderId);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
@@ -95,6 +103,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(in Orientation);
             b.Serialize(in Scale);
             Trajectory.RosSerialize(ref b);
+            b.Serialize(ColliderId);
         }
         
         public void RosValidate()
@@ -103,17 +112,19 @@ namespace Iviz.Msgs.IvizMsgs
             if (Id is null) BuiltIns.ThrowNullReference();
             if (Trajectory is null) BuiltIns.ThrowNullReference();
             Trajectory.RosValidate();
+            if (ColliderId is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength
         {
             get
             {
-                int size = 101;
+                int size = 105;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(VizId);
                 size += WriteBuffer.GetStringSize(Id);
                 size += Trajectory.RosMessageLength;
+                size += WriteBuffer.GetStringSize(ColliderId);
                 return size;
             }
         }
@@ -137,6 +148,8 @@ namespace Iviz.Msgs.IvizMsgs
             size += 32; // Orientation
             size += 24; // Scale
             size = Trajectory.AddRos2MessageLength(size);
+            size = WriteBuffer2.Align4(size);
+            size = WriteBuffer2.AddLength(size, ColliderId);
             return size;
         }
     
@@ -145,27 +158,28 @@ namespace Iviz.Msgs.IvizMsgs
         public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
-        public const string Md5Sum = "beec894d41c35d3624bcb12f27355c75";
+        public const string Md5Sum = "96a1314c47cca615e02cf92c54cca017";
     
         public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE71VXW/TSBR996+4Uh9oV2l2aQGhSjxk2yx4gTakBoEQiqb2jT279ow7M04wv54z48RJ" +
-                "ShA8UCJLmZl775n7eaaRyj2l5MNkPBu/n8TT8QU9o7+iZnP899skubqcnb+Kz19C9nBb9np8+XZ8mUw/" +
-                "9OKTbfHk6jpOYm/8YnT5PECfbsuvpjGsR3dUHm2rXJ+PXo23hI+3hcl09O/4PLny9/caT6LIumxW2dz+" +
-                "+YJFxoaK8IdjI1VOC/llJrP1DqsO0bU1R1idnhArZ1qvMy+1cE8ekVB5yVHOumIvCdgTDWWqtZVOanVH" +
-                "+KYRjo2CgLSRwBN7lN5x6rQ5JZsKoEvvVzhPjPgviFpy/TKKome/+Be9vn5+RneSFR3QtRMqEyYj+Coy" +
-                "4QTNNZIo84LNcckLLmEkqpozClKfOTuEYVJIS/hyVmxEWbbUWCg5TamuqkbJFFkhJyvesYelVCSoFsbJ" +
-                "tCmFgb42mVRefW5ExR4dn+XbhlXKFF+cQUdZThsn4VALhNSwsL6k8QWFmqKSMKAD+jjV9uGn6CBZ6mOc" +
-                "c46e6L0gVwjnvebPtWHrHRb2DJf90UU5xCXIEuO6zNJhOJtha48It8EXrnVa0CFCmLSuQMVdwbQQRoqb" +
-                "kj0wylsC9YE3enC0hawCtBJKr+E7xM0dPwOrelwf03GB4pU+DbbJkUko1kYvZAbVmzaApKXvSCrljRFo" +
-                "LG/VXRkd/OOTDSVYhdLgX1irU4lKZLSUrljPTSiLn5F7ass9w7buMKTKCalsCGY9gKTnvoXCUCJnc8MI" +
-                "qhYp90P8uV+1/erL73F/QwfrGAz7ZkMZkOAdjth13u9uN1yCOayG0Q8iWq+Wvye2FYvtC4wWQbYb0tAP" +
-                "chwmTisMbsUCJQNH9JYwzKSBKUIeApUNI3AekHSUabaktO+FSvwPSEb7e2tR1wATnjGVLbtU4hgmhzzM" +
-                "hwNaFqw6Ld++gXUCT8mUjMxl1ln6DPfGglbBDcjNT9D+Zdn53F2G9gOI0V3hjoYUz6nVDS19QFiYFT1q" +
-                "uuHerzC9TuuB58YVxL6HBexkRe4bwDoQ8w+rfj+l3vcoffMOWv74yc8h28Al2PTkau/t2frWCSRytGki" +
-                "sSYF79huBw78c+SPs5W8IxDw5vYgok/vPPHfedSjr7JR/4RECQAA";
+                "H4sIAAAAAAAAE71V34/TOBB+z18x0j6we+oW2OUArcRD6fYg3LLtdQMCIVR5k2niu8QOttNS/vr77LRp" +
+                "u/TEPbBUkWp7Zj7Pj2/GjVTuOSUfJ6PZ6MMkno4u6QU9iprt8ct3STK+ng2v4uGfkD3elb0dXb8bXSfT" +
+                "j534bFc8Gd/ESeyNXw+uXwXo8135eBrDenBH5cmuys1wcDXaEf6+K0ymgzejYTL293caT3c1huOrq/hy" +
+                "NJ3hnlEb3LPD8g9xEsTPo8i6bFbZ3D58zSJjQ0X4w7GRKqeF/DaT2WaHVQvnVjVHWJ2fEStnVl5nXmrh" +
+                "nj4hofKSo5x1xV4SsCcaylRrK53U6o7wr0Y4NgoC0kYCTxxQes+p0+acbCqAnhjxdzhYkeuWGy9TXZYS" +
+                "MXinoujFT/5Fb29eXdCdrEVHdOOEyoTJCE6LTDhBc41syrxgc1rygksYiarmjILUp9D2YZgU0hK+nBUb" +
+                "UZYraiyUnEYgVdUomSI95GTFe/awlIoE1cI4mTalMNDXJpPKq8+NqNij47P8pWGVMsWXF9BRltPGSTi0" +
+                "AkJqWFiftfiSQnFRUhjQEX2aavv4c3SULPUpzjkHOTovyBXCea/5a23YeoeFvcBlv7VR9nEJssS4LrN0" +
+                "HM5m2NoTwm3whWudFnSMECYrV6D0rmBaCCPFbckeGHUugfrAGz042UFWAVoJpTfwLeL2jv8DqzpcH9Np" +
+                "geKVPg22yZFJKNZGL8CijG5XASQtPTWplLdGgGveqr0yOvrDJxtKsAqlwb+wVqcSlchoKV2xoWYoS+Dl" +
+                "/dDyQNdtGIZUOSGVDcFsOpH03FModCdyNjeMoGqRctfNX7vVqlt9+zXub+fCJgbDnmwoAxK8Nyz2nfe7" +
+                "L9uhgj6s+tEPItqslr8mtvU4OxQYLYJsP6S+b+Q4dJxWaNyKBUqGGdFZwjCTBqYIuQ9UNozAuUfSUabZ" +
+                "ktKeC5X4B5AM+ntrUdcAE36IKlu2qcQxTI65n/d7tCxYtVqevmHqhDklUzIyl1lr6TPcGQtaB9cjNz8D" +
+                "/cuy9bm9DPQDiNFt4U76FM9ppRta+oCwMOvxqOmWO79C9zqte342riEOvTCYTlbkngDWYTD/sOr3U2rp" +
+                "X83g1fad+u5BtPzps+9DtmGWYNMNV3tvz9b3TiCRgy2JxGYoeMf2Gdjzz5E/ztbydoBgbu42Inh6563/" +
+                "j9c9+hepgP3rjAkAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     
