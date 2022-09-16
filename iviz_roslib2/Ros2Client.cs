@@ -92,14 +92,6 @@ public sealed class Ros2Client : IRosClient
         return id;
     }
     
-    public string Subscribe<T>(string topic, RosCallback<T> callback, out IRosSubscriber<T> subscriber,
-        RosTransportHint transportHint = RosTransportHint.PreferTcp)
-        where T : IMessage, new()
-    {
-        (string id, subscriber) = TaskUtils.RunSync(() => SubscribeAsync(topic, callback, transportHint));
-        return id;
-    }
-
     public string Subscribe<T>(string topic, Action<T> callback, out Ros2Subscriber<T> subscriber,
         RosTransportHint transportHint = RosTransportHint.PreferTcp)
         where T : IMessage, new()
@@ -164,15 +156,6 @@ public sealed class Ros2Client : IRosClient
         return (newSubscriber.Subscribe(callback), newSubscriber);
     }
 
-    string IRosClient.Subscribe<T>(string topic, Action<T> callback,
-        out IRosSubscriber<T> subscriber,
-        RosTransportHint transportHint)
-    {
-        string id = Subscribe(topic, callback, out var newSubscriber, transportHint);
-        subscriber = newSubscriber;
-        return id;
-    }
-
     public bool TryGetPublisher(string topic, [NotNullWhen(true)] out IRos2Publisher? publisher)
     {
         string resolvedTopic = ResolveResourceName(topic);
@@ -223,13 +206,6 @@ public sealed class Ros2Client : IRosClient
         return (validatedPublisher.Advertise(), validatedPublisher);
     }
 
-    string IRosClient.Advertise<T>(string topic, out IRosPublisher<T> publisher, bool latchingEnabled)
-    {
-        string id = Advertise<T>(topic, out var newPublisher);
-        publisher = newPublisher;
-        return id;
-    }
-
     async ValueTask<(string id, IRosPublisher<T> publisher)> IRosClient.AdvertiseAsync<T>(string topic,
         bool latchingEnabled, CancellationToken token)
     {
@@ -256,14 +232,6 @@ public sealed class Ros2Client : IRosClient
     internal void RemovePublisher(IRosPublisher subscriber)
     {
         publishersByTopic.TryRemove(subscriber.Topic, out _);
-    }
-
-    public void CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
-        where T : IService, new()
-    {
-        using var timeoutTs = new CancellationTokenSource(timeoutInMs);
-        var token = timeoutTs.Token;
-        TaskUtils.RunSync(() => CallServiceAsync(serviceName, service, persistent, token: token), token);
     }
 
     ValueTask IRosClient.CallServiceAsync<T>(string serviceName, T service, bool persistent, CancellationToken token)
@@ -345,18 +313,6 @@ public sealed class Ros2Client : IRosClient
         listenersByService.TryRemove(server.Service, out _);
     }
 
-    public bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
-        where T : IService, new()
-    {
-        ValueTask Callback(T service)
-        {
-            callback(service);
-            return default;
-        }
-
-        return TaskUtils.RunSync(() => AdvertiseServiceAsync<T>(serviceName, Callback, token), token);
-    }
-
     public ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, ValueTask> callback,
         CancellationToken token = default) where T : IService, new()
     {
@@ -403,12 +359,7 @@ public sealed class Ros2Client : IRosClient
             $"Existing connection of {resolvedServiceName} with service type {existingListener.ServiceType} " +
             "does not match the new given type.");
     }
-
-    public void UnadvertiseService(string name, CancellationToken token = default)
-    {
-        TaskUtils.RunSync(() => UnadvertiseServiceAsync(name, token), token);
-    }
-
+    
     public ValueTask UnadvertiseServiceAsync(string name, CancellationToken token = default)
     {
         string resolvedServiceName = ResolveResourceName(name);
@@ -416,12 +367,10 @@ public sealed class Ros2Client : IRosClient
             ? advertisedService.DisposeAsync(token)
             : default;
     }
+    
+    public IReadOnlyList<SubscriberState> GetSubscriberStatistics() => TaskUtils.RunSync(GetSubscriberStatisticsAsync);
 
-    public IReadOnlyList<SubscriberState> GetSubscriberStatistics() =>
-        TaskUtils.RunSync(GetSubscriberStatisticsAsync);
-
-    public IReadOnlyList<PublisherState> GetPublisherStatistics() =>
-        TaskUtils.RunSync(GetPublisherStatisticsAsync);
+    public IReadOnlyList<PublisherState> GetPublisherStatistics() => TaskUtils.RunSync(GetPublisherStatisticsAsync);
 
     public ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsAsync(CancellationToken token = default)
     {
@@ -453,23 +402,14 @@ public sealed class Ros2Client : IRosClient
         return cachedPublisherStats.cache;
     }
 
-    public bool IsServiceAvailable(string service)
-    {
-        return TaskUtils.RunSync(() => IsServiceAvailableAsync(service));
-    }
-
     public async ValueTask<bool> IsServiceAvailableAsync(string service, CancellationToken token = default)
     {
         var services = await Rcl.GetServiceNamesAndTypesAsync(token);
         return services.Any(type => type.Topic == service);
     }
 
-    public TopicNameType[] GetSystemPublishedTopics() => TaskUtils.RunSync(GetSystemPublishedTopicsAsync);
-
     public ValueTask<TopicNameType[]> GetSystemPublishedTopicsAsync(CancellationToken token = default) =>
         Rcl.GetPublishedTopicNamesAndTypesAsync(token).AsValueTask();
-
-    public TopicNameType[] GetSystemTopics() => TaskUtils.RunSync(GetSystemTopicsAsync);
 
     public ValueTask<TopicNameType[]> GetSystemTopicsAsync(CancellationToken token = default) =>
         Rcl.GetTopicNamesAndTypesAsync(token).AsValueTask();
@@ -530,13 +470,6 @@ public sealed class Ros2Client : IRosClient
         cachedSystemState.cache = await Rcl.GetSystemStateAsync(token);
         return cachedSystemState.cache;
     }
-
-    public void Dispose()
-    {
-        TaskUtils.RunSync(DisposeAsync);
-    }
-
-    ValueTask IAsyncDisposable.DisposeAsync() => DisposeAsync();
 
     public async ValueTask DisposeAsync(CancellationToken token = default)
     {

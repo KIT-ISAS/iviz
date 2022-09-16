@@ -36,7 +36,7 @@ public class IvizTests
     const string IvizId = "/iviz_osxeditor";
     //const string IvizId = "/iviz_iphoneplayer";
 
-    RosClient client;
+    IRosClient client;
 
 
     [SetUp]

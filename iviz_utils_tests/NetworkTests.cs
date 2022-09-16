@@ -76,21 +76,24 @@ public class NetworkTests
     [Test]
     public void TestRosClientConnection()
     {
-        using var _ = new RosClient(MasterUri, CallerId, CallerUri);
+        using var client = new RosClient(MasterUri, CallerId, CallerUri);
         var rosNodeClient = new RosNodeClient(CallerId, OtherCallerUri, CallerUri);
         Uri testMasterUri = TaskUtils.RunSync(rosNodeClient.GetMasterUriAsync).Uri;
         Assert.True(testMasterUri == MasterUri);
-        Assert.Catch<RosUriBindingException>(() => new RosClient(MasterUri, CallerId, CallerUri));
+        Assert.Catch<RosUriBindingException>(() => _ = new RosClient(MasterUri, CallerId, CallerUri));
     }
-
+    
+    
     [Test]
-    public void TestRosClientGetTopics()
+    public async Task TestRosClientGetTopicsAsync()
     {
-        using var client = new RosClient(MasterUri, CallerId, CallerUri);
-        var topics = client.GetSystemTopics();
+        await using var client = new RosClient(MasterUri, CallerId, CallerUri);
+        var topics = await client.GetSystemTopicsAsync();
         Assert.IsNotEmpty(topics);
     }
+    
 
+    /*
     [Test]
     public void TestRosClientAdvertisement()
     {
@@ -108,6 +111,7 @@ public class NetworkTests
         Assert.False(newSystemState.Publishers.Any(tuple =>
             tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
     }
+    */
 
     [Test]
     public async Task TestRosClientAdvertisementAsync()
@@ -126,11 +130,12 @@ public class NetworkTests
             tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
     }
 
+    /*
     [Test]
     public void TestChannels()
     {
         const string topicName = "/my_test_topic_xyz";
-        using var client = new RosClient(MasterUri, CallerId, CallerUri);
+        using IRosClient client = new RosClient(MasterUri, CallerId, CallerUri);
         using var publisher = new RosChannelWriter<String>(client, topicName, true);
 
         var systemState = client.GetSystemState();
@@ -152,6 +157,7 @@ public class NetworkTests
             }
         }
     }
+    */
 
     [Test]
     public async Task TestChannelsAsync()
@@ -240,7 +246,7 @@ public class NetworkTests
 
         using var source = new CancellationTokenSource(5000);
 
-        await foreach (var msg in subscriber.ReadAllAsync(source.Token))
+        await foreach (var _ in subscriber.ReadAllAsync(source.Token))
         {
             break;
         }

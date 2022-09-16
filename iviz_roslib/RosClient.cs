@@ -756,14 +756,6 @@ public sealed class RosClient : IRosClient
         return id;
     }
 
-    string IRosClient.Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
-        RosTransportHint transportHint)
-    {
-        string id = Subscribe(topic, callback, out var newSubscriber, transportHint: transportHint);
-        subscriber = newSubscriber;
-        return id;
-    }
-
     /// <summary>
     /// Subscribes to the given topic. The subscriber will try to reconstruct the message based on information
     /// transmitted during handshake. The message type will be <see cref="DynamicMessage"/> if the message type is not known. 
@@ -788,14 +780,6 @@ public sealed class RosClient : IRosClient
     {
         (string id, subscriber) =
             TaskUtils.RunSync(() => SubscribeAsync(topic, callback, requestNoDelay, transportHint));
-        return id;
-    }
-
-    string IRosClient.Subscribe<T>(string topic, RosCallback<T> callback, out IRosSubscriber<T> subscriber,
-        RosTransportHint transportHint)
-    {
-        string id = Subscribe(topic, callback, out var newSubscriber, transportHint: transportHint);
-        subscriber = newSubscriber;
         return id;
     }
 
@@ -1028,15 +1012,6 @@ public sealed class RosClient : IRosClient
         return id;
     }
 
-    /// <inheritdoc cref="IRosClient.Advertise{T}"/>
-    string IRosClient.Advertise<T>(string topic, out IRosPublisher<T> publisher, bool latchingEnabled)
-    {
-        var (id, newPublisher) = TaskUtils.RunSync(() => AdvertiseAsync<T>(topic));
-        newPublisher.LatchingEnabled = latchingEnabled;
-        publisher = newPublisher;
-        return id;
-    }
-
     /// <summary>
     /// Advertises the given topic with the given dynamic message.
     /// The dynamic message must have been initialized beforehand.
@@ -1204,16 +1179,6 @@ public sealed class RosClient : IRosClient
     /// Corresponds to the function 'getPublishedTopics' in the ROS Master API.
     /// </summary>
     /// <returns>List of topic names and message types.</returns>
-    public TopicNameType[] GetSystemPublishedTopics()
-    {
-        return TaskUtils.RunSync(GetSystemPublishedTopicsAsync);
-    }
-
-    /// <summary>
-    /// Asks the master for all the published topics in the system with at least one publisher.
-    /// Corresponds to the function 'getPublishedTopics' in the ROS Master API.
-    /// </summary>
-    /// <returns>List of topic names and message types.</returns>
     public async ValueTask<TopicNameType[]> GetSystemPublishedTopicsAsync(
         CancellationToken token = default)
     {
@@ -1233,16 +1198,6 @@ public sealed class RosClient : IRosClient
     /// Corresponds to the function 'getTopicTypes' in the ROS Master API.
     /// </summary>
     /// <returns>List of topic names and message types.</returns>
-    public TopicNameType[] GetSystemTopics()
-    {
-        return TaskUtils.RunSync(GetSystemTopicsAsync);
-    }
-
-    /// <summary>
-    /// Asks the master for all the topics in the system.
-    /// Corresponds to the function 'getTopicTypes' in the ROS Master API.
-    /// </summary>
-    /// <returns>List of topic names and message types.</returns>
     public async ValueTask<TopicNameType[]> GetSystemTopicsAsync(CancellationToken token = default)
     {
         var response = await RosMasterClient.GetTopicTypesAsync(token: token);
@@ -1255,17 +1210,7 @@ public sealed class RosClient : IRosClient
             .Select(tuple => new TopicNameType(tuple.name, tuple.type))
             .ToArray();
     }
-
-    /// <summary>
-    /// Asks the master for the nodes and topics in the system.
-    /// Corresponds to the function 'getSystemState' in the ROS Master API.
-    /// </summary>
-    /// <returns>List of advertised topics, subscribed topics, and offered services, together with the involved nodes.</returns>
-    public SystemState GetSystemState()
-    {
-        return TaskUtils.RunSync(GetSystemStateAsync);
-    }
-
+    
     /// <summary>
     /// Asks the master for the nodes and topics in the system.
     /// Corresponds to the function 'getSystemState' in the ROS Master API.
@@ -1390,23 +1335,6 @@ public sealed class RosClient : IRosClient
 
     #region service
 
-    /// <inheritdoc cref="IRosClient.CallService{T}"/>
-    public void CallService<T>(string serviceName, T service, bool persistent, int timeoutInMs)
-        where T : IService, new()
-    {
-        using var timeoutTs = new CancellationTokenSource(timeoutInMs);
-        CallService(serviceName, service, persistent, timeoutTs.Token);
-    }
-
-    public TU CallService<TT, TU>(string serviceName, IRequest<TT, TU> request,
-        bool persistent = false, CancellationToken token = default)
-        where TT : IService, new() where TU : IResponse
-    {
-        var service = new TT { Request = request };
-        CallService(serviceName, service, persistent, token);
-        return (TU)service.Response;
-    }
-
     /// <summary>
     /// Calls the given ROS service.
     /// </summary>
@@ -1424,41 +1352,7 @@ public sealed class RosClient : IRosClient
     {
         TaskUtils.RunSync(() => CallServiceAsync(serviceName, service, persistent, token), token);
     }
-
-    /// <summary>
-    /// Calls the given ROS service.
-    /// </summary>
-    /// <param name="serviceName">Name of the ROS service</param>
-    /// <param name="service">Service message. The response will be written in the response field.</param>
-    /// <param name="persistent">Whether a persistent connection with the provider should be maintained.</param>
-    /// <param name="timeoutInMs">Maximal time to wait.</param>
-    /// <typeparam name="T">Service type.</typeparam>
-    /// <exception cref="TaskCanceledException">Thrown if the timeout expired.</exception>
-    /// <exception cref="RosServiceCallFailed">Thrown if the server could not process the call.</exception>
-    public async ValueTask CallServiceAsync<T>(string serviceName, T service, bool persistent,
-        int timeoutInMs) where T : IService, new()
-    {
-        using var timeoutTs = new CancellationTokenSource(timeoutInMs);
-        try
-        {
-            await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            throw new TimeoutException($"Call to '{serviceName}' timed out");
-        }
-    }
-
-    public async ValueTask<TU> CallServiceAsync<TT, TU>(string serviceName, IRequest<TT, TU> request,
-        bool persistent = false, CancellationToken token = default)
-        where TT : IService, new() where TU : IResponse
-    {
-        TT service = new() { Request = request };
-        await CallServiceAsync(serviceName, service, persistent, token);
-        return (TU)service.Response;
-    }
-
-
+    
     /// <inheritdoc cref="IRosClient.CallServiceAsync{T}"/>
     public async ValueTask CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
         CancellationToken token = default)
@@ -1568,21 +1462,7 @@ public sealed class RosClient : IRosClient
 
         return true;
     }
-
-    /// <summary>
-    /// Advertises the given service.
-    /// </summary>
-    /// <param name="serviceName">Name of the ROS service.</param>
-    /// <param name="callback">Function to be called when a service request arrives. The response should be written in the response field.</param>
-    /// <param name="token">An optional cancellation token.</param>
-    /// <returns>Whether the advertisement was new. If false, the service already existed, but can still be used.</returns>
-    /// <typeparam name="T">Service type.</typeparam>
-    public bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
-        where T : IService, new()
-    {
-        return TaskUtils.RunSync(() => AdvertiseServiceAsync(serviceName, callback, token), token);
-    }
-
+    
     /// <summary>
     /// Advertises the given service.
     /// </summary>
@@ -1636,12 +1516,6 @@ public sealed class RosClient : IRosClient
         return true;
     }
 
-    /// <inheritdoc cref="IRosClient.UnadvertiseService"/>
-    public void UnadvertiseService(string name, CancellationToken token = default)
-    {
-        TaskUtils.RunSync(() => UnadvertiseServiceAsync(name, token), token);
-    }
-
     /// <inheritdoc cref="IRosClient.UnadvertiseServiceAsync"/>        
     public async ValueTask UnadvertiseServiceAsync(string name, CancellationToken token = default)
     {
@@ -1656,11 +1530,6 @@ public sealed class RosClient : IRosClient
 
         await advertisedService.DisposeAsync(token);
         await RosMasterClient.UnregisterServiceAsync(resolvedServiceName, advertisedService.Uri, token);
-    }
-
-    public bool IsServiceAvailable(string service)
-    {
-        return TaskUtils.RunSync(() => IsServiceAvailableAsync(service));
     }
 
     public async ValueTask<bool> IsServiceAvailableAsync(string service, CancellationToken token = default)
@@ -1701,7 +1570,7 @@ public sealed class RosClient : IRosClient
     {
         if (disposed) return;
         disposed = true;
-        
+
         const int timeoutInMs = 2000;
         ShutdownAction = null;
         ParamUpdateAction = null;
@@ -1747,7 +1616,7 @@ public sealed class RosClient : IRosClient
             tasks.Add(subscriber.DisposeAsync(token).AwaitNoThrow(this));
             tasks.Add(RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, token).AwaitNoThrow(this));
         }
-        
+
         var serviceManagers = listenersByService.Values.ToArray();
         listenersByService.Clear();
 
@@ -1757,7 +1626,7 @@ public sealed class RosClient : IRosClient
             tasks.Add(RosMasterClient.UnregisterServiceAsync(serviceManager.Service, serviceManager.Uri, token)
                 .AwaitNoThrow(this));
         }
-        
+
         var receivers = callersByService.Values.ToArray();
         callersByService.Clear();
 
@@ -1771,7 +1640,7 @@ public sealed class RosClient : IRosClient
             {
                 Logger.LogErrorFormat("{0}: " + nameof(RosServiceCaller) + ".Dispose() threw! {1}", this, e);
             }
-        }        
+        }
 
         await Task.WhenAll(tasks).AwaitNoThrow(this);
 
@@ -1784,13 +1653,6 @@ public sealed class RosClient : IRosClient
             Logger.LogErrorFormat("{0}: " + nameof(RosMasterClient) + ".Dispose() threw! {1}", this, e);
         }
     }
-
-    public void Dispose()
-    {
-        Close();
-    }
-
-    ValueTask IAsyncDisposable.DisposeAsync() => CloseAsync();
 
     public ValueTask DisposeAsync(CancellationToken token) => CloseAsync(token);
 
