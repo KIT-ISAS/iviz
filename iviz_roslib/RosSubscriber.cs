@@ -213,7 +213,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
         {
             var disposeTask = DisposeAsync(token).AwaitNoThrow(this);
             var unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
-            await (disposeTask, unsubscribeTask).WhenAll();
+            await Task.WhenAll(disposeTask, unsubscribeTask);
         }
 
         return removed;

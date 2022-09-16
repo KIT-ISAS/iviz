@@ -76,7 +76,12 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
     {
         set => manager.LatchedMessage = value;
     }
-
+    
+    /// <summary>
+    ///     Called when the number of subscribers has changed.
+    /// </summary>
+    public event Action<RosPublisher<TMessage>>? NumSubscribersChanged;
+    
     internal RosPublisher(RosClient client, TopicInfo topicInfo)
     {
         this.client = client;
@@ -84,36 +89,91 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
         manager = new SenderManager<TMessage>(this, topicInfo) { ForceTcpNoDelay = true };
     }
 
-    public PublisherState GetState()
+    void AssertIsAlive()
     {
-        AssertIsAlive();
-        return new PublisherState(Topic, TopicType, ids, manager.GetStates());
+        if (!IsAlive)
+        {
+            throw new ObjectDisposedException("this", "This is not a valid publisher");
+        }
     }
 
-    public ValueTask<PublisherState> GetStateAsync(CancellationToken token = default) => new(GetState());
-
-    void IRosPublisher.Publish(IMessage message)
+    string GenerateId()
     {
-        if (message is TMessage tMessage)
+        int currentCount = Interlocked.Increment(ref totalPublishers);
+        int lastId = currentCount - 1;
+        return lastId == 0 ? Topic : $"{Topic}-{lastId.ToString()}";
+    }
+
+    bool RemoveId(string topicId)
+    {
+        return ids.Remove(topicId);
+    }
+    
+    public bool ContainsId(string id)
+    {
+        if (id is null) BuiltIns.ThrowArgumentNull(nameof(id));
+        return ids.Contains(id);
+    }
+
+    /// <summary>
+    /// Checks whether the given type matches the publisher message type <see cref="TMessage"/>  
+    /// </summary>
+    public bool MessageTypeMatches(Type type)
+    {
+        return type == typeof(TMessage);
+    }
+    
+    TopicRequestRpcResult IRos1Publisher.RequestTopicRpc(bool requestsTcp, RpcUdpTopicRequest? requestsUdp,
+        out Endpoint? tcpResponse, out RpcUdpTopicResponse? udpResponse)
+    {
+        if (disposed)
         {
-            Publish(tMessage);
+            tcpResponse = null;
+            udpResponse = null;
+            return TopicRequestRpcResult.Disposing;
+        }
+
+        if (requestsTcp)
+        {
+            tcpResponse = new Endpoint(client.CallerUri.Host, manager.Endpoint.Port);
+            udpResponse = null;
+            return TopicRequestRpcResult.Success;
+        }
+
+        if (requestsUdp == null)
+        {
+            throw new InvalidOperationException("Either UDP or TCP needs to be requested");
+        }
+
+        tcpResponse = null;
+        udpResponse = manager.CreateUdpConnection(requestsUdp, client.CallerUri.Host);
+        return TopicRequestRpcResult.Success;
+    }
+    
+    internal void RaiseNumSubscribersChanged()
+    {
+        if (NumSubscribersChanged == null)
+        {
             return;
         }
 
-        RosInvalidMessageTypeException.Throw();
-    }
-
-    ValueTask IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
-    {
-        if (message is TMessage tMessage)
+        Task.Run(() =>
         {
-            return PublishAsync(tMessage, policy, token);
-        }
-        
-        RosInvalidMessageTypeException.Throw();
-        return default;
+            try
+            {
+                NumSubscribersChanged?.Invoke(this);
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Exception from NumSubscribersChanged : {1}", this, e);
+            }
+        }, default);
     }
 
+    internal bool TryGetLoopbackReceiver(in Endpoint endpoint, out LoopbackReceiver<TMessage>? receiver)
+    {
+        return client.TryGetLoopbackReceiver(Topic, endpoint, out receiver);
+    }
 
     /// <summary>
     ///     Publishes the given message into the topic.
@@ -145,63 +205,30 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
                 return default;
         }
     }
-
-    TopicRequestRpcResult IRos1Publisher.RequestTopicRpc(bool requestsTcp, RpcUdpTopicRequest? requestsUdp,
-        out Endpoint? tcpResponse, out RpcUdpTopicResponse? udpResponse)
-    {
-        if (disposed)
-        {
-            tcpResponse = null;
-            udpResponse = null;
-            return TopicRequestRpcResult.Disposing;
-        }
-
-        if (requestsTcp)
-        {
-            tcpResponse = new Endpoint(client.CallerUri.Host, manager.Endpoint.Port);
-            udpResponse = null;
-            return TopicRequestRpcResult.Success;
-        }
-
-        if (requestsUdp == null)
-        {
-            throw new InvalidOperationException("Either UDP or TCP needs to be requested");
-        }
-
-        tcpResponse = null;
-        udpResponse = manager.CreateUdpConnection(requestsUdp, client.CallerUri.Host);
-        return TopicRequestRpcResult.Success;
-    }
-
-    void IDisposable.Dispose()
-    {
-        Dispose();
-    }
-
-    public async ValueTask DisposeAsync(CancellationToken token)
-    {
-        if (disposed) return;
-        disposed = true;
+    
         
-        runningTs.Cancel();
-        ids.Clear();
-
-        await manager.DisposeAsync(token).AwaitNoThrow(this);
-
-        NumSubscribersChanged = null;
-    }
-
-    void Dispose()
+    void IRosPublisher.Publish(IMessage message)
     {
-        if (disposed) return;
-        disposed = true;
-        
-        runningTs.Cancel();
-        ids.Clear();
-        manager.Dispose();
-        NumSubscribersChanged = null;
+        if (message is TMessage tMessage)
+        {
+            Publish(tMessage);
+            return;
+        }
+
+        RosInvalidMessageTypeException.Throw();
     }
 
+    ValueTask IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
+    {
+        if (message is TMessage tMessage)
+        {
+            return PublishAsync(tMessage, policy, token);
+        }
+        
+        RosInvalidMessageTypeException.Throw();
+        return default;
+    }
+    
     public string Advertise()
     {
         AssertIsAlive();
@@ -243,77 +270,46 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
     {
         var disposeTask = DisposeAsync(token).AwaitNoThrow(this);
         var unadvertiseTask = client.RemovePublisherAsync(this, token).AwaitNoThrow(this);
-        return (disposeTask, unadvertiseTask).WhenAll();
-    }
-
-    public bool ContainsId(string id)
-    {
-        if (id is null) BuiltIns.ThrowArgumentNull(nameof(id));
-        return ids.Contains(id);
-    }
-
-    /// <summary>
-    /// Checks whether the given type matches the publisher message type <see cref="TMessage"/>  
-    /// </summary>
-    public bool MessageTypeMatches(Type type)
-    {
-        return type == typeof(TMessage);
-    }
-
-    /// <summary>
-    ///     Called when the number of subscribers has changed.
-    /// </summary>
-    public event Action<RosPublisher<TMessage>>? NumSubscribersChanged;
-
-    internal void RaiseNumSubscribersChanged()
-    {
-        if (NumSubscribersChanged == null)
-        {
-            return;
-        }
-
-        Task.Run(() =>
-        {
-            try
-            {
-                NumSubscribersChanged?.Invoke(this);
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("{0}: Exception from NumSubscribersChanged : {1}", this, e);
-            }
-        }, default);
-    }
-
-    void AssertIsAlive()
-    {
-        if (!IsAlive)
-        {
-            throw new ObjectDisposedException("this", "This is not a valid publisher");
-        }
-    }
-
-    string GenerateId()
-    {
-        int currentCount = Interlocked.Increment(ref totalPublishers);
-        int lastId = currentCount - 1;
-        return lastId == 0 ? Topic : $"{Topic}-{lastId.ToString()}";
-    }
-
-    bool RemoveId(string topicId)
-    {
-        return ids.Remove(topicId);
-    }
-
-    internal bool TryGetLoopbackReceiver(in Endpoint endpoint, out LoopbackReceiver<TMessage>? receiver)
-    {
-        return client.TryGetLoopbackReceiver(Topic, endpoint, out receiver);
+        return Task.WhenAll(disposeTask, unadvertiseTask);
     }
 
     public void UnsetLatch()
     {
         manager.UnsetLatch();
     }
+    
+    public PublisherState GetState()
+    {
+        AssertIsAlive();
+        return new PublisherState(Topic, TopicType, ids, manager.GetStates());
+    }
+
+    public ValueTask<PublisherState> GetStateAsync(CancellationToken token = default) => new(GetState());
+    
+    public async ValueTask DisposeAsync(CancellationToken token)
+    {
+        if (disposed) return;
+        disposed = true;
+        
+        runningTs.Cancel();
+        ids.Clear();
+
+        await manager.DisposeAsync(token).AwaitNoThrow(this);
+
+        NumSubscribersChanged = null;
+    }
+
+    public void Dispose()
+    {
+        if (disposed) return;
+        disposed = true;
+        
+        runningTs.Cancel();
+        ids.Clear();
+        manager.Dispose();
+        NumSubscribersChanged = null;
+    }
+    
 
     public override string ToString()
     {
