@@ -7,16 +7,23 @@ internal sealed class AsyncRclClient : TaskExecutor
 {
     readonly RclClient client;
     readonly RclWaitSet waitSet;
-    readonly RclGuardCondition guard;
+    readonly RclGuardCondition wakeUpGuard;
 
     readonly List<(IHasHandle handler, Signalizable signalizable)> subscribers = new();
     readonly List<(IHasHandle handler, Signalizable signalizable)> serviceClients = new();
     readonly List<(IHasHandle handler, Signalizable signalizable)> serviceServers = new();
 
+    const int WakeUpGuard = 0;
+    const int GraphChangedGuard = 1;
     readonly IntPtr[] guardHandles;
+
     IntPtr[] subscriberHandles = Array.Empty<IntPtr>();
     IntPtr[] serviceClientHandles = Array.Empty<IntPtr>();
     IntPtr[] serviceServerHandles = Array.Empty<IntPtr>();
+
+    Signalizable[] cachedSubscribers = Array.Empty<Signalizable>();
+    Signalizable[] cachedClients = Array.Empty<Signalizable>();
+    Signalizable[] cachedServers = Array.Empty<Signalizable>();
 
     bool disposed;
 
@@ -32,18 +39,20 @@ internal sealed class AsyncRclClient : TaskExecutor
     {
         client = new RclClient(name, @namespace, domainId);
         waitSet = client.CreateWaitSet(32, 2, 32, 32);
-        guard = client.CreateGuardCondition();
+        wakeUpGuard = client.CreateGuardCondition();
 
         var graphGuardHandle = client.GetGraphGuardCondition();
 
-        guardHandles = new[] { guard.Handle, graphGuardHandle };
+        guardHandles = new IntPtr[2];
+        guardHandles[WakeUpGuard] = wakeUpGuard.Handle;
+        guardHandles[GraphChangedGuard] = graphGuardHandle;
 
         Start();
     }
 
     protected override void Signal()
     {
-        guard.Trigger();
+        wakeUpGuard.Trigger();
     }
 
     public void Wait()
@@ -61,32 +70,32 @@ internal sealed class AsyncRclClient : TaskExecutor
             return; // timeout, nothing triggered
         }
 
-        if ((nint)triggeredGuards[1] != 0)
+        if ((nint)triggeredGuards[GraphChangedGuard] != 0)
         {
             GraphChangedTicks = NowTicks();
         }
 
-        for (int i = 0; i < subscriberHandles.Length; i++)
+        for (int i = 0; i < cachedSubscribers.Length; i++)
         {
             if ((nint)triggeredSubscriptions[i] != 0)
             {
-                subscribers[i].signalizable.Signal();
+                cachedSubscribers[i].Signal();
             }
         }
 
-        for (int i = 0; i < serviceClientHandles.Length; i++)
+        for (int i = 0; i < cachedClients.Length; i++)
         {
             if ((nint)triggeredClients[i] != 0)
             {
-                serviceClients[i].signalizable.Signal();
+                cachedClients[i].Signal();
             }
         }
 
-        for (int i = 0; i < serviceServerHandles.Length; i++)
-        {
+        for (int i = 0; i < cachedServers.Length; i++)
+        { 
             if ((nint)triggeredServers[i] != 0)
             {
-                serviceServers[i].signalizable.Signal();
+                cachedServers[i].Signal();
             }
         }
     }
@@ -96,6 +105,7 @@ internal sealed class AsyncRclClient : TaskExecutor
     void RebuildSubscribers()
     {
         subscriberHandles = subscribers.Select(tuple => tuple.handler.Handle).ToArray();
+        cachedSubscribers = subscribers.Select(tuple => tuple.signalizable).ToArray();
     }
 
     public Task<RclSubscriber> SubscribeAsync(string topic, string type, Signalizable signalizable, QosProfile profile,
@@ -139,6 +149,7 @@ internal sealed class AsyncRclClient : TaskExecutor
     void RebuildServiceClients()
     {
         serviceClientHandles = serviceClients.Select(tuple => tuple.handler.Handle).ToArray();
+        cachedClients = serviceClients.Select(tuple => tuple.signalizable).ToArray();
     }
 
     public Task<RclServiceClient> CreateServiceClientAsync(string topic, string type, Signalizable signalizable,
@@ -173,6 +184,7 @@ internal sealed class AsyncRclClient : TaskExecutor
     void RebuildServiceServers()
     {
         serviceServerHandles = serviceServers.Select(tuple => tuple.handler.Handle).ToArray();
+        cachedServers = serviceServers.Select(tuple => tuple.signalizable).ToArray();
     }
 
     public Task<RclServiceServer> AdvertiseServiceAsync(string topic, string type, Signalizable signalizable,
@@ -240,80 +252,84 @@ internal sealed class AsyncRclClient : TaskExecutor
 
     public Task<SystemState> GetSystemStateAsync(CancellationToken token)
     {
-        return Post(() =>
+        return Post(GetSystemStateCore, token);
+    }
+
+    SystemState GetSystemStateCore()
+    {
+        // we're inside Post! no wrappers needed here
+        var topics = client.GetTopicNamesAndTypes();
+        if (topics.Length == 0)
         {
-            var topics = client.GetTopicNamesAndTypes();
-            if (topics.Length == 0)
+            var emptyTuple = Array.Empty<TopicTuple>();
+            return new SystemState(emptyTuple, emptyTuple, emptyTuple);
+        }
+
+        var topicSubscribers =
+            topics.Length == 0
+                ? Array.Empty<TopicTuple>()
+                : topics
+                    .Select(topic => new TopicTuple(topic.Topic, GetSubscribers(topic.Topic)))
+                    .Where(static tuple => tuple.Members.Length != 0)
+                    .ToArray();
+
+        var topicPublishers =
+            topics.Length == 0
+                ? Array.Empty<TopicTuple>()
+                : topics
+                    .Select(topic => new TopicTuple(topic.Topic, GetPublishers(topic.Topic)))
+                    .Where(static tuple => tuple.Members.Length != 0)
+                    .ToArray();
+
+        var serviceProviders = GetProviders(client);
+
+        return new SystemState(topicPublishers, topicSubscribers, serviceProviders);
+
+        static string NodeToString(EndpointInfo info) => info.NodeName.ToString();
+
+        string[] GetSubscribers(string topic) =>
+            client.GetSubscriberInfo(topic).Select(NodeToString).ToArray();
+
+        string[] GetPublishers(string topic) =>
+            client.GetPublisherInfo(topic).Select(NodeToString).ToArray();
+
+        static TopicTuple[] GetProviders(RclClient client)
+        {
+            var nodeNames = client.GetNodeNames();
+            if (nodeNames.Length == 0)
             {
-                var emptyTuple = Array.Empty<TopicTuple>();
-                return new SystemState(emptyTuple, emptyTuple, emptyTuple);
+                return Array.Empty<TopicTuple>();
             }
 
-            var topicSubscribers =
-                topics.Length == 0
-                    ? Array.Empty<TopicTuple>()
-                    : topics
-                        .Select(topic => new TopicTuple(topic.Topic, GetSubscribers(topic.Topic)))
-                        .Where(static tuple => tuple.Members.Length != 0)
-                        .ToArray();
+            var nodeServices = nodeNames.Select(node =>
+                (provider: node, services: client.GetServiceNamesAndTypesByNode(node.Name, node.Namespace)));
 
-            var topicPublishers =
-                topics.Length == 0
-                    ? Array.Empty<TopicTuple>()
-                    : topics
-                        .Select(topic => new TopicTuple(topic.Topic, GetPublishers(topic.Topic)))
-                        .Where(static tuple => tuple.Members.Length != 0)
-                        .ToArray();
-
-            var serviceProviders = GetProviders(client);
-
-            return new SystemState(topicPublishers, topicSubscribers, serviceProviders);
-
-            static string NodeToString(EndpointInfo info) => info.NodeName.ToString();
-
-            string[] GetSubscribers(string topic) =>
-                client.GetSubscriberInfo(topic).Select(NodeToString).ToArray();
-
-            string[] GetPublishers(string topic) =>
-                client.GetPublisherInfo(topic).Select(NodeToString).ToArray();
-
-            static TopicTuple[] GetProviders(RclClient client)
+            var serviceDict = new Dictionary<string, List<string>>();
+            foreach (var tuple in nodeServices)
             {
-                var nodeServices = client.GetNodeNames().Select(node =>
-                    (provider: node, services: client.GetServiceNamesAndTypesByNode(node.Name, node.Namespace)));
-
-                if (nodeServices.Count == 0)
+                foreach (var service in tuple.services)
                 {
-                    return Array.Empty<TopicTuple>();
-                }
-
-                var serviceDict = new Dictionary<string, List<string>>();
-                foreach (var tuple in nodeServices)
-                {
-                    foreach (var service in tuple.services)
+                    string provider = tuple.provider.ToString();
+                    if (serviceDict.TryGetValue(service.Topic, out var serviceNames))
                     {
-                        string provider = tuple.provider.ToString();
-                        if (serviceDict.TryGetValue(service.Topic, out var serviceNames))
-                        {
-                            serviceNames.Add(provider);
-                        }
-                        else
-                        {
-                            serviceDict[service.Topic] = new List<string>(1) { provider };
-                        }
+                        serviceNames.Add(provider);
+                    }
+                    else
+                    {
+                        serviceDict[service.Topic] = new List<string>(1) { provider };
                     }
                 }
-
-                if (serviceDict.Count == 0)
-                {
-                    return Array.Empty<TopicTuple>();
-                }
-
-                return serviceDict
-                    .Select(pair => new TopicTuple(pair.Key, pair.Value.ToArray()))
-                    .ToArray();
             }
-        }, token);
+
+            if (serviceDict.Count == 0)
+            {
+                return Array.Empty<TopicTuple>();
+            }
+
+            return serviceDict
+                .Select(pair => new TopicTuple(pair.Key, pair.Value.ToArray()))
+                .ToArray();
+        }
     }
 
     public override async ValueTask DisposeAsync(CancellationToken token)
@@ -324,7 +340,7 @@ internal sealed class AsyncRclClient : TaskExecutor
         await Post(() =>
         {
             waitSet.Dispose();
-            guard.Dispose();
+            wakeUpGuard.Dispose();
             client.Dispose();
             Stop();
         }, token);
