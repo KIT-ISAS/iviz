@@ -271,7 +271,7 @@ public sealed class ModelServer : IDisposable
         {
             LogError($"Failed to access uri '{uri}'. Reason: XML error while reading '{modelPath}'. {e.Message}");
             msg.Response.Success = false;
-            msg.Response.Message = "Failed to load model. Reason: XML error.";
+            msg.Response.Message = "Failed to load model. Reason: XML error. " + e.Message;
             return;
         }
         catch (AssimpException e)
@@ -279,7 +279,7 @@ public sealed class ModelServer : IDisposable
             LogError($"Failed to access uri '{uri}'. Reason: Failed to read path '{modelPath}'. {e.Message}");
 
             msg.Response.Success = false;
-            msg.Response.Message = "Failed to load model. Reason: Assimp error.";
+            msg.Response.Message = "Failed to load model. Reason: Assimp error. " + e.Message;
             return;
         }
 

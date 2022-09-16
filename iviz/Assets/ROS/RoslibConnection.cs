@@ -257,7 +257,13 @@ namespace Iviz.Ros
                         break;
 
                     case RosVersion.ROS2:
-                        if (!IsRos2VersionSupported) ThrowHelper.ThrowInvalidOperation("ROS2 not supported!");
+                        if (!IsRos2VersionSupported)
+                        {
+                            // do not replace with throw helper!
+                            // we need the remaining lines to be clearly unreachable so they get stripped
+                            // otherwise standalone will fail because the ros2 lib cannot be found
+                            throw new InvalidOperationException("ROS2 not supported!");
+                        }
 
                         SetEnvironmentVariable("FASTRTPS_DEFAULT_PROFILES_FILE", Settings.Ros2Folder + "/profiles.xml");
                         SetEnvironmentVariable("ROS_DISCOVERY_SERVER", DiscoveryServer?.Description());

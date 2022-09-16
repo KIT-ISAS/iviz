@@ -6,11 +6,11 @@
 	<dict>
 		<key>Headers/JpegTurbo.hpp</key>
 		<data>
-		tL9SpbEmXO+L64liLu8jYNWvvIY=
+		pZCvOGfXKIbl7y0pmCOT271zitY=
 		</data>
 		<key>Info.plist</key>
 		<data>
-		IIyxjDqdoYPqGshesle3IdIux0E=
+		HajDagpbXNu/Ki+1u8z82WxcNXg=
 		</data>
 		<key>PrivateHeaders/turbojpeg.h</key>
 		<data>
@@ -21,21 +21,13 @@
 	<dict>
 		<key>Headers/JpegTurbo.hpp</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			tL9SpbEmXO+L64liLu8jYNWvvIY=
-			</data>
 			<key>hash2</key>
 			<data>
-			C64V1na3FtgLZLKjDsQuRwJ0xu0LHT3u5G2WpWGqrhc=
+			9lTJRwyLQU1LxySjQwvXsVKvIjEdT2IkUIIfWE0QPZc=
 			</data>
 		</dict>
 		<key>PrivateHeaders/turbojpeg.h</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			tdQZQhXAqalapvsWsMF0z/lZ8Yw=
-			</data>
 			<key>hash2</key>
 			<data>
 			3V3hEiWaJ+2fcoMLfdoZ9DXOBpRjL5TH+HrPjmgVbtA=

@@ -466,6 +466,11 @@ namespace Iviz.Controllers
         static int GeneratePointBuffer(float4[] pointBuffer, PointCloud2 msg, int xOffset, int yOffset,
             int zOffset, int iOffset, int iType, bool rgbaHint)
         {
+            if (msg.Width == 0 || msg.Height == 0)
+            {
+                return 0;
+            }
+
             bool xyzAligned = xOffset == 0 && yOffset == 4 && zOffset == 8;
             return xyzAligned
                 ? GeneratePointBufferXYZ(pointBuffer, msg, iOffset, rgbaHint ? PointField.FLOAT32 : iType)

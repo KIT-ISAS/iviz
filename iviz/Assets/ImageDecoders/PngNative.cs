@@ -51,8 +51,8 @@ namespace Iviz.ImageDecoders
         /// The image uses a grayscale and has an alpha channel.
         /// </summary>
         GrayAlpha = (Alpha),
-    }    
-    
+    }
+
     /// <summary>
     /// Specifies options for adding a filler byte to a pixel.
     /// </summary>
@@ -67,8 +67,8 @@ namespace Iviz.ImageDecoders
         /// Adds the filler at the end of the pixel array.
         /// </summary>
         After = 1
-    }    
-    
+    }
+
     /// <summary>
     /// Provides access to native methods for interacting with libpng.
     /// </summary>
@@ -78,9 +78,11 @@ namespace Iviz.ImageDecoders
         /// The name of the libpng library, excluding any platform-dependent prefixes (such as <c>lib</c>) and suffixes (such as <c>.so</c>).
         /// </summary>
         const string Library =
-            Settings.IsMobile
-                ? "__Internal"
-                : "png16";
+#if UNITY_IOS || UNITY_ANDROID
+            "__Internal";
+#else
+            "png16";
+#endif
 
         /// <summary>
         /// Gets the library version string.
@@ -113,7 +115,8 @@ namespace Iviz.ImageDecoders
         /// Returns the pointer to png_struct structure. Returns <see cref="IntPtr.Zero"/> if it fails to create the structure.
         /// </returns>
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr png_create_read_struct(IntPtr user_png_ver, IntPtr error_ptr, png_error error_fn, png_error warn_fn);
+        public static extern IntPtr png_create_read_struct(IntPtr user_png_ver, IntPtr error_ptr, png_error error_fn,
+            png_error warn_fn);
 
         /// <summary>
         /// Allocate and initialize a png_info structure
@@ -143,7 +146,8 @@ namespace Iviz.ImageDecoders
         /// The input function should invoke png_error() to handle any fatal errors and png_warning() to handle non-fatal errors.
         /// </param>
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void png_set_read_fn(IntPtr png_ptr, IntPtr io_ptr, [MarshalAs(UnmanagedType.FunctionPtr)]png_rw read_data_fn);
+        public static extern void png_set_read_fn(IntPtr png_ptr, IntPtr io_ptr,
+            [MarshalAs(UnmanagedType.FunctionPtr)] png_rw read_data_fn);
 
         /// <summary>
         /// Reads the information before the actual image data from the PNG file. The function allows reading a file that already has the PNG signature bytes read from the stream.
@@ -263,7 +267,8 @@ namespace Iviz.ImageDecoders
         /// <param name="info_ptr_ptr"></param>
         /// <param name="end_info_ptr_ptr"></param>
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void png_destroy_read_struct(ref IntPtr png_ptr_ptr, ref IntPtr info_ptr_ptr, ref IntPtr end_info_ptr_ptr);
+        public static extern void png_destroy_read_struct(ref IntPtr png_ptr_ptr, ref IntPtr info_ptr_ptr,
+            ref IntPtr end_info_ptr_ptr);
 
         /// <summary>
         /// Frees the memory pointed to by <paramref name="png_ptr"/> previously allocated by png_malloc().
@@ -319,13 +324,13 @@ namespace Iviz.ImageDecoders
         public delegate void png_rw(IntPtr png_ptr, IntPtr outBytes, uint byteCountToRead);
 
         public delegate void png_error(IntPtr png_structp, IntPtr png_const_charp);
-        
+
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
         public static extern int png_sig_cmp(IntPtr png_ptr, int start, int num_to_check);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
         public static extern void png_set_sig_bytes(IntPtr png_ptr, int num_bytes);
-        
+
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr png_get_io_ptr(IntPtr png_ptr);
     }

@@ -354,6 +354,7 @@ namespace Iviz.App
 
             if (Settings.IsXR)
             {
+                GameThread.AfterFramesUpdated += UpdateSettingsCameraPose;
                 return;
             }
 
