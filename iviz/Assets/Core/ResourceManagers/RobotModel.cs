@@ -184,7 +184,7 @@ namespace Iviz.Displays
             bool keepMeshMaterials = false,
             bool loadColliders = true)
         {
-            if (robot.Links.Count == 0 || robot.Joints.Count == 0)
+            if (robot.Links.Length == 0 || robot.Joints.Length == 0)
             {
                 RosLogger.Info($"Finished constructing empty robot '{Name}' with no links and no joints.");
                 return;
@@ -292,7 +292,7 @@ namespace Iviz.Displays
                     }
 
                     var link = links[linkName];
-                    if (link.Collisions.Count == 0 && link.Visuals.Count == 0)
+                    if (link.Collisions.Length == 0 && link.Visuals.Length == 0)
                     {
                         toHide.Add(linkName);
                         hasChanges = true;
@@ -326,7 +326,7 @@ namespace Iviz.Displays
             bool loadColliders,
             CancellationToken token)
         {
-            if (link.Visuals.Count == 0 && link.Collisions.Count == 0)
+            if (link.Visuals.Length == 0 && link.Collisions.Length == 0)
             {
                 return Enumerable.Empty<Task>();
             }
@@ -335,7 +335,7 @@ namespace Iviz.Displays
 
             var linkObject = linkObjects[link.Name ?? ""];
 
-            var tasks = new List<Task>(link.Collisions.Count + link.Visuals.Count);
+            var tasks = new List<Task>(link.Collisions.Length + link.Visuals.Length);
             foreach (var visual in link.Visuals)
             {
                 var task =
@@ -350,7 +350,7 @@ namespace Iviz.Displays
 
             foreach (var collision in link.Collisions)
             {
-                //tasks.Add(ProcessCollisionAsync(collision, linkObject, provider, token).AsTask());
+                tasks.Add(ProcessCollisionAsync(collision, linkObject, provider, token).AsTask());
             }
 
             return tasks;
@@ -822,7 +822,7 @@ namespace Iviz.Displays
                 .Append("</color>")
                 .AppendLine();
 
-            if (link.Visuals.Count == 0 && link.Collisions.Count == 0)
+            if (link.Visuals.Length == 0 && link.Collisions.Length == 0)
             {
                 builder.Append(' ', level).Append("(No visuals or colliders)").AppendLine();
                 return;

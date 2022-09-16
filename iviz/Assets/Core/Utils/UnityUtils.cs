@@ -11,8 +11,10 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Resources;
 using Iviz.Tools;
 using Iviz.Urdf;
 using JetBrains.Annotations;
@@ -782,6 +784,11 @@ namespace Iviz.Core
         public static string FormatFloat(double x) => x.IsInvalid() || Math.Abs(x) >= 1e4
             ? x.ToString("G", Culture)
             : x.ToString("#,0.###", Culture);
+
+        public static void MakeHalfLitAlwaysVisible(this MeshMarkerDisplay display)
+        {
+            display.OverrideMaterial(Resource.Materials.LitHalfVisible.Object);
+        }
     }
 
     public struct WithIndexEnumerable<T>

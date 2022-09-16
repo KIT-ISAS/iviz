@@ -79,8 +79,7 @@ namespace Iviz.Displays.XR
                 }
             }
         }
-
-
+        
         void Awake()
         {
             Disc.StartDragging += StartWriting;
@@ -96,6 +95,8 @@ namespace Iviz.Displays.XR
             Segments.ElementScale = 0.08f;
             Segments.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
 
+            Sphere.MakeHalfLitAlwaysVisible();
+            
             Send.Icon = XRIcon.Ok;
             Caption = "Send";
 
@@ -110,15 +111,13 @@ namespace Iviz.Displays.XR
         }
 
         void StartWriting()
-        {
-            //startTime = Time.time;
+        { 
             Holder.SetActive(false);
             Glow.Visible = true;
             Sphere.EmissiveColor = Color;
 
             GameThread.EveryFrame += UpdateSegment;
 
-            //positions.Clear();
             if (positions.Count == 0)
             {
                 positions.Add(Disc.Transform.localPosition);
@@ -207,6 +206,7 @@ namespace Iviz.Displays.XR
             newCorner.Transform.localPosition = position;
             newCorner.Transform.localScale = Vector3.one * (0.1f * 3);
             newCorner.EnableShadows = false;
+            newCorner.MakeHalfLitAlwaysVisible();
             return newCorner;
         }
         

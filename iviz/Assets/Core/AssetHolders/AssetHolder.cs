@@ -21,9 +21,11 @@ namespace Iviz.Displays
         public Material TransparentLit;
         public Material TexturedLit;
         public Material TransparentTexturedLit;
-        public Material TransparentLitAlwaysVisible;
         public Material BumpLit;
         public Material TransparentBumpLit;
+
+        public Material LitHalfVisible;
+        public Material TransparentLitAlwaysVisible;
 
         public Material SimpleLit;
         public Material SimpleTransparentLit;

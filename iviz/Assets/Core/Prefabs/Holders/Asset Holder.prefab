@@ -66,10 +66,11 @@ MonoBehaviour:
   TexturedLit: {fileID: 2100000, guid: f53a5de9d2f22f9498a56c363fe3adb5, type: 2}
   TransparentTexturedLit: {fileID: 2100000, guid: 05f42792aba3d440e9fe1a51161b5d26,
     type: 2}
-  TransparentLitAlwaysVisible: {fileID: 2100000, guid: b05f66c343f174ebfb60543eb7a9fa26,
-    type: 2}
   BumpLit: {fileID: 2100000, guid: 0bce27334cfee4a669387e1b34632fe4, type: 2}
   TransparentBumpLit: {fileID: 2100000, guid: 0c593f5d1e1c247d6b030d4c98ebb0f8, type: 2}
+  LitHalfVisible: {fileID: 2100000, guid: 53f9a92a691fd445a8f8a746fd0e22fb, type: 2}
+  TransparentLitAlwaysVisible: {fileID: 2100000, guid: b05f66c343f174ebfb60543eb7a9fa26,
+    type: 2}
   SimpleLit: {fileID: 2100000, guid: 527db0c06d78fb84ca6b862ea600cd3d, type: 2}
   SimpleTransparentLit: {fileID: 2100000, guid: a808344647bed4964bed12934ecc5f23,
     type: 2}

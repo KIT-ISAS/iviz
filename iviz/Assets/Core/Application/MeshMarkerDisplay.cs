@@ -183,6 +183,7 @@ namespace Iviz.Displays
             EnableCollider = true;
             OcclusionOnly = false;
             EnableShadows = true;
+            OverrideMaterial(null);
         }
 
         void SetEffectiveColor()

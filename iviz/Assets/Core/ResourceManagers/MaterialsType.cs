@@ -23,6 +23,7 @@ namespace Iviz.Resources
         public ResourceKey<Material> SimpleTexturedLit { get; }
         public ResourceKey<Material> SimpleTransparentTexturedLit { get; }
 
+        public ResourceKey<Material> LitHalfVisible { get; }
         public ResourceKey<Material> TransparentLitAlwaysVisible { get; }
         public ResourceKey<Material> ImagePreview { get; }
         public ResourceKey<Material> PointCloud { get; }
@@ -74,9 +75,11 @@ namespace Iviz.Resources
             TexturedLit = Create(assetHolder.TexturedLit, nameof(assetHolder.TexturedLit));
             TransparentLit = Create(assetHolder.TransparentLit, nameof(assetHolder.TransparentLit));
             TransparentTexturedLit = Create(assetHolder.TransparentTexturedLit, nameof(assetHolder.TransparentTexturedLit));
-            TransparentLitAlwaysVisible = Create(assetHolder.TransparentLitAlwaysVisible, nameof(assetHolder.TransparentLitAlwaysVisible));
             BumpLit = Create(assetHolder.BumpLit, nameof(assetHolder.BumpLit));
             TransparentBumpLit = Create(assetHolder.TransparentBumpLit, nameof(assetHolder.TransparentBumpLit));
+
+            LitHalfVisible = Create(assetHolder.LitHalfVisible, nameof(assetHolder.LitHalfVisible));
+            TransparentLitAlwaysVisible = Create(assetHolder.TransparentLitAlwaysVisible, nameof(assetHolder.TransparentLitAlwaysVisible));
 
             SimpleLit = Create(assetHolder.SimpleLit, nameof(assetHolder.SimpleLit));
             SimpleTransparentLit = Create(assetHolder.SimpleTransparentLit, nameof(assetHolder.SimpleTransparentLit));
