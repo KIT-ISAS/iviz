@@ -278,7 +278,7 @@ public static class TaskUtils
         // ReSharper disable once UseAwaitUsing
         using (tokenSource.Token.Register(CallbackHelpers.SetResult, timeout))
         {
-            var result = await (task, timeoutTask).WhenAny();
+            var result = await Task.WhenAny(task, timeoutTask);
             if (result != task)
             {
                 if (!token.IsCancellationRequested)
@@ -299,22 +299,6 @@ public static class TaskUtils
 
         ICollection<Task> boxedTs = ts;
         return Task.WhenAll(boxedTs);
-    }
-
-    public static Task WhenAll(this (Task, Task) ts)
-    {
-        var (task1, task2) = ts;
-        return task1.IsCompletedSuccessfully && task2.IsCompletedSuccessfully
-            ? Task.CompletedTask
-            : Task.WhenAll(task1, task2);
-    }
-
-    public static ValueTask<Task> WhenAny(this (Task t1, Task t2) ts)
-    {
-        var (t1, t2) = ts;
-        return t1.IsCompleted ? t1.AsTaskResult() :
-            t2.IsCompleted ? t2.AsTaskResult() :
-            Task.WhenAny(t1, t2).AsValueTask();
     }
 
     public static async ValueTask<TB[]> WhenAll<TA, TB, TC>(this SelectEnumerable<TC, TA, ValueTask<TB>> ts)

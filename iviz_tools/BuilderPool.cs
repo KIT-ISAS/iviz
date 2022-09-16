@@ -270,7 +270,7 @@ public static class BuilderPool
             class OpenStringBuilder
             {
                 [UsedImplicitly]
-                public readonly char[]? chunkChars;
+                public readonly char[]? chunkChars = null;
             }
 
             [FieldOffset(0)] public StringBuilder builder;

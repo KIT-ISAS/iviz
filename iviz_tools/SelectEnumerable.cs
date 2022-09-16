@@ -39,63 +39,29 @@ public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB>, ICollec
 
     public TB[] ToArray()
     {
-        if (a.Count == 0)
+        int count = a.Count;
+        if (count == 0)
         {
             return Array.Empty<TB>();
         }
 
-        TB[] array = new TB[a.Count];
-        CopyTo(array);
+        TB[] array = new TB[count];
+        for (int i = 0; i < count; i++)
+        {
+            array[i] = f(a[i]);
+        }
         return array;
     }
-
-    public List<TB> ToList()
+    
+    public void CopyTo(TB[] array, int arrayIndex)
     {
-        List<TB> array = new(a.Count);
-        foreach (int i in ..a.Count)
+        int count = a.Count;
+        for (int i = 0; i < count; i++)
         {
-            array.Add(f(a[i]));
-        }
-
-        return array;
-    }
-
-    public bool All(Func<TB, bool> predicate)
-    {
-        foreach (int i in ..a.Count)
-        {
-            if (!predicate(f(a[i])))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public bool Any(Func<TB, bool> predicate)
-    {
-        foreach (int i in ..a.Count)
-        {
-            if (predicate(f(a[i])))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public void CopyTo(Span<TB> span)
-    {
-        foreach (int i in ..a.Count)
-        {
-            span[i] = f(a[i]);
+            array[i + arrayIndex] = f(a[i]);
         }
     }
 
-
-    void ICollection<TB>.CopyTo(TB[] array, int arrayIndex) => CopyTo(array.AsSpan()[arrayIndex..]);
     void ICollection<TB>.Add(TB item) => throw new NotSupportedException();
     void ICollection<TB>.Clear() => throw new NotSupportedException();
     bool ICollection<TB>.Contains(TB item) => throw new NotSupportedException();

@@ -14,10 +14,10 @@ namespace Iviz.Tools;
 /// </typeparam>
 public readonly struct RentAndClear<T> : IDisposable
 {
-    static readonly ArrayPool<T?> Pool = ArrayPool<T?>.Shared;
+    static ArrayPool<T?> Pool => ArrayPool<T?>.Shared;
 
-    public readonly int Length;
     public readonly T?[] Array;
+    public readonly int Length;
         
     public Span<T?> AsSpan() => new(Array, 0, Length);
     public ReadOnlySpan<T?> AsReadOnlySpan() => new(Array, 0, Length);
@@ -58,7 +58,8 @@ public readonly struct RentAndClear<T> : IDisposable
 
     public override string ToString()
     {
-        return $"[RentAndClear Type={typeof(T).Name} Length={Length} RealSize={(Array != null ? Array.Length : 0)}]";
+        return $"[{nameof(RentAndClear<T>)} Type={typeof(T).Name} Length={Length.ToString()} " +
+               $"RealSize={(Array != null ? Array.Length : 0).ToString()}]";
     }
 
     public RentEnumerator<T?> GetEnumerator() => new(Array, Length);
