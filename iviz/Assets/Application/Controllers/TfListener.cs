@@ -13,6 +13,7 @@ using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Ros;
 using Iviz.Roslib;
+using UnityEngine;
 using Pose = UnityEngine.Pose;
 
 namespace Iviz.Controllers
@@ -218,6 +219,7 @@ namespace Iviz.Controllers
 
             if (parent == null || parent == TfModule.OriginFrame)
             {
+                Debug.Log("Publishing orphan frame " + frame.Id);
                 parentFrameId = "";
                 localPose = TfModule.RelativeToFixedFrame(frame.Transform);
             }

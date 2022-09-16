@@ -37,7 +37,7 @@ namespace Iviz.Ros
         RosTransportHint transportHint;
         bool subscribed;
 
-        int NumPublishers => Connection.GetNumPublishers(Topic);
+        int? NumPublishers => Connection.GetNumPublishers(Topic);
 
         public string Topic { get; }
         public string Type { get; }
@@ -93,7 +93,7 @@ namespace Iviz.Ros
 
             var options = new BoundedChannelOptions(maxQueueSize)
                 { SingleReader = true, FullMode = BoundedChannelFullMode.DropOldest };
-            
+
             var messageQueue = Channel.CreateBounded<T>(options);
             messageReader = messageQueue.Reader;
             messageWriter = messageQueue.Writer;
@@ -307,8 +307,7 @@ namespace Iviz.Ros
 
         public void WriteDescriptionTo(StringBuilder description)
         {
-            int numPublishers = NumPublishers;
-            if (numPublishers == -1)
+            if (NumPublishers is not { } numPublishers)
             {
                 description.Append("Off");
             }

@@ -13,12 +13,11 @@ namespace Iviz.Ros
         const string RosOutAggTopic = "/rosout_agg";
 
         static uint logSeq;
-        RosVersion currentVersion;
 
         public delegate void LogDelegate(in LogMessage log);
 
         public static event LogDelegate? MessageArrived;
-        
+
         public LogLevel MinLogLevel { get; set; } = LogLevel.Info;
         public IListener Listener { get; private set; }
         public ISender Sender { get; private set; }
@@ -26,8 +25,7 @@ namespace Iviz.Ros
         public RosOutLogger()
         {
             (Sender, Listener) = CreateSenderAndListener(RosManager.Connection.RosVersion);
-            currentVersion = RosManager.Connection.RosVersion;
-            
+
             RosConnection.RosVersionChanged += UpdateRosVersion;
             RosLogger.LogExternal += Publish;
         }
@@ -37,7 +35,6 @@ namespace Iviz.Ros
             Sender.Dispose();
             Listener.Dispose();
             (Sender, Listener) = CreateSenderAndListener(RosManager.Connection.RosVersion);
-            currentVersion = version;
         }
 
         static (ISender, IListener) CreateSenderAndListener(RosVersion version)
@@ -71,13 +68,14 @@ namespace Iviz.Ros
                 return;
             }
 
-            if (currentVersion == RosVersion.ROS1)
+            switch (Sender)
             {
-                ((Sender<Msgs.RosgraphMsgs.Log>)Sender).Publish(ToRos1(msg));
-            }
-            else
-            {
-                ((Sender<Msgs.RclInterfaces.Log>)Sender).Publish(ToRos2(msg));
+                case Sender<Msgs.RosgraphMsgs.Log> sender1:
+                    sender1.Publish(ToRos1(msg));
+                    break;
+                case Sender<Msgs.RclInterfaces.Log> sender2:
+                    sender2.Publish(ToRos2(msg));
+                    break;
             }
         }
 

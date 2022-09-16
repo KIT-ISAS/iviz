@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Iviz.Msgs;
 using Unity.Collections;
 using UnityEngine;
 using JetBrains.Annotations;
@@ -97,6 +98,12 @@ namespace Iviz.Core
         public static Span<T> Cast<T>(this Span<byte> src) where T : unmanaged =>  MemoryMarshal.Cast<byte, T>(src);
 
         public static T Read<T>(this ReadOnlySpan<byte> span) where T : unmanaged => MemoryMarshal.Read<T>(span);
+
+        public static float ReadFloat(this ReadOnlySpan<byte> span)
+        {
+            if (span.Length < sizeof(float)) ThrowHelper.ThrowArgumentOutOfRange();
+            fixed (byte* spanPtr = &span[0]) return *(float*)spanPtr;
+        }
 
         
         [StructLayout(LayoutKind.Explicit)]

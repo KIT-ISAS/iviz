@@ -8,10 +8,10 @@ namespace Iviz.Core
     [DataContract]
     public readonly struct LogMessage
     {
-        [DataMember] public string? SourceId { get; }
-        [DataMember] public DateTime Stamp { get; }
-        [DataMember] public LogLevel Level { get; }
-        [DataMember] public string Message { get; }
+        [DataMember] public readonly string? SourceId;
+        [DataMember] public readonly string Message;
+        [DataMember] public readonly DateTime Stamp;
+        [DataMember] public readonly LogLevel Level;
 
         public LogMessage(LogLevel level, string message)
         {

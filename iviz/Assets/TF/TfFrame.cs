@@ -25,9 +25,6 @@ namespace Iviz.Controllers.TF
         List<FrameNode>? listeners;
         Pose localPose;
 
-        bool HasNoListeners => listeners == null || listeners.Count == 0;
-        bool IsChildless => children is null || children.Count == 0;
-
         public string Id { get; }
         public virtual bool LabelVisible { get; set; }
         public abstract bool ConnectorVisible { get; set; }
@@ -54,7 +51,7 @@ namespace Iviz.Controllers.TF
         /// </summary>
         public Pose AbsoluteUnityPose => Transform.AsPose();
 
-        public new TfFrame? Parent
+        public sealed override TfFrame? Parent
         {
             get => base.Parent;
             set
@@ -104,29 +101,38 @@ namespace Iviz.Controllers.TF
         {
             ThrowHelper.ThrowIfNull(frame, nameof(frame));
 
-            if (HasNoListeners)
+            if (listeners is not { Count: not 0 })
             {
                 return;
             }
 
-            listeners?.Remove(frame);
+            listeners.Remove(frame);
             CheckIfDead();
         }
 
-        void AddChild(TfFrame frame)
+        bool AddChild(TfFrame frame)
         {
             children ??= new SortedDictionary<string, TfFrame>();
-            children.Add(frame.Id, frame);
+
+            try
+            {
+                children.Add(frame.Id, frame);
+                return true;
+            }
+            catch (ArgumentException)
+            {
+                RosLogger.Error($"{ToString()}: Failed to set '{frame.Id}' as a child of '{Id}'. " +
+                                "Reason. Frame is already a child! Something went wrong.");
+                return false;
+            }
         }
 
         void RemoveChild(TfFrame frame)
         {
-            if (children is null || children.Count == 0)
+            if (children is { Count: not 0 })
             {
-                return;
+                children.Remove(frame.Id);
             }
-
-            children.Remove(frame.Id);
         }
 
         void CheckIfDead()
@@ -136,7 +142,9 @@ namespace Iviz.Controllers.TF
                 Debug.LogWarning($"{ToString()}: Frame has a listener that was previously destroyed.");
             }
 
-            if (HasNoListeners && IsChildless)
+            bool noListeners = listeners is not { Count: not 0 };
+            bool noChildren = children is not { Count: not 0 };
+            if (noListeners && noChildren)
             {
                 TfModule.Instance.MarkAsDead(this);
             }
@@ -169,9 +177,8 @@ namespace Iviz.Controllers.TF
 
             Parent?.RemoveChild(this);
             base.Parent = parent;
-            parent.AddChild(this);
 
-            return true;
+            return parent.AddChild(this);
         }
 
         public void SetLocalPose(in Pose newPose)
@@ -194,13 +201,14 @@ namespace Iviz.Controllers.TF
                 return false;
             }
 
-            Transform.SetLocalPose(localPose = newPose);
+            localPose = newPose;
+            Transform.SetLocalPose(newPose);
             return true;
         }
 
         protected override void Stop()
         {
-            if (children is null || children.Count == 0)
+            if (children is not { Count: not 0 })
             {
                 base.Stop();
                 return;

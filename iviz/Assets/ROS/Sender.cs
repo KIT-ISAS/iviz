@@ -60,7 +60,7 @@ namespace Iviz.Ros
 
         public void Publish(T msg)
         {
-            Connection.Publish(this, msg);
+            Connection.Publish(Id, msg);
 
             recentMsgs++;
             lastMsgBytes += serializer.RosMessageLength(msg);
@@ -77,7 +77,7 @@ namespace Iviz.Ros
             if (recentMsgs == 0)
             {
                 Stats = default;
-                NumSubscribers = Connection.GetNumSubscribers(this);
+                NumSubscribers = Connection.GetNumSubscribers(Id);
                 return;
             }
 
@@ -88,7 +88,7 @@ namespace Iviz.Ros
             recentMsgs = 0;
             lastMsgBytes = 0;
 
-            NumSubscribers = Connection.GetNumSubscribers(this);
+            NumSubscribers = Connection.GetNumSubscribers(Id);
         }
 
         public void WriteDescriptionTo(StringBuilder description)

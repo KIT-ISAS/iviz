@@ -839,9 +839,9 @@ namespace Iviz.Ros
             }
         }
 
-        internal void Publish<T>(Sender<T> advertiser, T msg) where T : IMessage, new()
+        internal void Publish<T>(int? advertiserId, T msg) where T : IMessage, new()
         {
-            if (advertiser.Id is not { } id || runningTs.IsCancellationRequested)
+            if (advertiserId is not { } id || runningTs.IsCancellationRequested)
             {
                 return;
             }
@@ -852,17 +852,20 @@ namespace Iviz.Ros
                 return;
             }
 
-            if (basePublisher is not IRosPublisher<T> publisher)
-            {
-                RosLogger.Error(
-                    $"[{nameof(RosConnection)}]: Publisher type does not match! Message is {msg.RosMessageType}, " +
-                    $"publisher is {basePublisher.TopicType}");
-                return;
-            }
-
             try
             {
-                publisher.Publish(msg);
+                switch (basePublisher)
+                {
+                    case RosPublisher<T> publisher1:
+                        publisher1.Publish(msg);
+                        break;
+                    case Ros2Publisher<T> publisher2:
+                        publisher2.Publish(msg);
+                        break;
+                    default:
+                        LogPublisherWrongType(basePublisher, msg);
+                        break;
+                }
             }
             catch (OperationCanceledException)
             {
@@ -872,6 +875,13 @@ namespace Iviz.Ros
             {
                 RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(Publish)}", e);
             }
+        }
+
+        static void LogPublisherWrongType(IRosPublisher basePublisher, IMessage msg)
+        {
+            RosLogger.Error(
+                $"[{nameof(RosConnection)}]: Publisher type does not match! Message is {msg.RosMessageType}, " +
+                $"publisher is {basePublisher.TopicType}");
         }
 
         internal void Subscribe<T>(Listener<T> listener) where T : IMessage, new()
@@ -896,8 +906,7 @@ namespace Iviz.Ros
             });
         }
 
-        async ValueTask SubscribeCore<T>(IListener listener, CancellationToken token)
-            where T : IMessage, new()
+        async ValueTask SubscribeCore<T>(IListener listener, CancellationToken token) where T : IMessage, new()
         {
             if (subscribersByTopic.TryGetValue(listener.Topic, out var subscribedTopic))
             {
@@ -1079,7 +1088,8 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemTopicTypesAsync)}", e);
+                RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemTopicTypesAsync)}",
+                    e);
             }
         }
 
@@ -1111,7 +1121,8 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemParameterList)}", e);
+                    RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemParameterList)}",
+                        e);
                 }
             }, token);
 
@@ -1143,7 +1154,8 @@ namespace Iviz.Ros
                 var param = Client switch
                 {
                     RosClient ros1Client => await ros1Client.GetParameterAsync(parameter, tokenSource.Token),
-                    Ros2Client ros2Client => await ros2Client.GetParameterAsync(parameter, nodeName, tokenSource.Token),
+                    Ros2Client ros2Client => await ros2Client.GetParameterAsync(parameter, nodeName,
+                        tokenSource.Token),
                     _ => throw new ArgumentOutOfRangeException()
                 };
 
@@ -1205,17 +1217,17 @@ namespace Iviz.Ros
             }
         }
 
-        public int GetNumPublishers(string topic)
+        public int? GetNumPublishers(string topic)
         {
             ThrowHelper.ThrowIfNull(topic, nameof(topic));
 
             subscribersByTopic.TryGetValue(topic, out var subscribedTopic);
-            return subscribedTopic?.Subscriber?.NumPublishers ?? -1;
+            return subscribedTopic?.Subscriber?.NumPublishers;
         }
 
-        internal int GetNumSubscribers(ISender sender)
+        internal int GetNumSubscribers(int? senderId)
         {
-            return sender.Id is { } id
+            return senderId is { } id
                    && publishers[id] is { } basePublisher
                 ? basePublisher.NumSubscribers
                 : 0;

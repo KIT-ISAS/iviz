@@ -462,7 +462,7 @@ namespace Iviz.Controllers
             });
         }
 
-        
+
         static int GeneratePointBuffer(float4[] pointBuffer, PointCloud2 msg, int xOffset, int yOffset,
             int zOffset, int iOffset, int iType, bool rgbaHint)
         {
@@ -471,151 +471,101 @@ namespace Iviz.Controllers
                 ? GeneratePointBufferXYZ(pointBuffer, msg, iOffset, rgbaHint ? PointField.FLOAT32 : iType)
                 : GeneratePointBufferSlow(pointBuffer, msg, xOffset, yOffset, zOffset, iOffset, iType, rgbaHint);
         }
-
-        delegate float IntensityFnDelegate(ReadOnlySpan<byte> span);
-
-        static int GeneratePointBufferSlow(float4[] pointBuffer, PointCloud2 msg, int xOffset, int yOffset,
+        
+        static unsafe int GeneratePointBufferSlow(float4[] pointBuffer, PointCloud2 msg, int xOffset, int yOffset,
             int zOffset, int iOffset, int iType, bool rgbaHint)
         {
+            static float ReadFloat(byte* ptr) => *(float*)ptr;
+
             int height = (int)msg.Height;
             int width = (int)msg.Width;
             int rowStep = (int)msg.RowStep;
             int pointStep = (int)msg.PointStep;
 
-            IntensityFnDelegate intensityFn;
+            if (rowStep > width * pointStep)
+            {
+                throw new IndexOutOfRangeException();
+            }
+
             if (rgbaHint)
             {
-                intensityFn = m => m.Read<float>();
-            }
-            else
-            {
-                intensityFn = iType switch
-                {
-                    PointField.FLOAT32 => m => m.Read<float>(),
-                    PointField.FLOAT64 => m => (float)m.Read<double>(),
-                    PointField.INT8 => m => (sbyte)m[0],
-                    PointField.UINT8 => m => m[0],
-                    PointField.INT16 => m => m.Read<short>(),
-                    PointField.UINT16 => m => m.Read<ushort>(),
-                    PointField.INT32 => m => m.Read<int>(),
-                    PointField.UINT32 => m => m.Read<uint>(),
-                    _ => _ => 0
-                };
+                return Process(new IFloatReader.FloatReader());
             }
 
-            ReadOnlySpan<byte> dataSrc = msg.Data.AsSpan();
-
-            int heightOff = 0;
-            int dstOff = 0;
-            for (int j = 0; j < height; j++)
+            return iType switch
             {
-                var dataOff = dataSrc[heightOff..];
-                heightOff += rowStep;
+                PointField.FLOAT32 => Process(new IFloatReader.FloatReader()),
+                PointField.FLOAT64 => Process(new IFloatReader.DoubleReader()),
+                PointField.INT8 => Process(new IFloatReader.SbyteReader()),
+                PointField.UINT8 => Process(new IFloatReader.ByteReader()),
+                PointField.INT16 => Process(new IFloatReader.ShortReader()),
+                PointField.UINT16 => Process(new IFloatReader.UshortReader()),
+                PointField.INT32 => Process(new IFloatReader.IntReader()),
+                PointField.UINT32 => Process(new IFloatReader.UintReader()),
+                _ => Process(new IFloatReader.NullReader()),
+            };
 
-                for (int u = 0; u < width; u++)
+            int Process<T>(T t) where T : struct, IFloatReader
+            {
+                int dstOff = 0;
+                fixed (byte* dataPtr = msg.Data.Array)
                 {
-                    float x = dataOff[xOffset..].Read<float>();
-                    float y = dataOff[yOffset..].Read<float>();
-                    float z = dataOff[zOffset..].Read<float>();
-
-                    if (IsInvalid(x) || IsInvalid(y) || IsInvalid(z))
+                    byte* rowPtr = dataPtr;
+                    for (int v = 0; v < height; v++)
                     {
-                        dataOff = dataOff[pointStep..]; 
-                        continue;
+                        byte* pointPtr = rowPtr;
+
+                        for (int u = 0; u < width; u++, pointPtr += pointStep)
+                        {
+                            float x = ReadFloat(pointPtr + xOffset);
+                            float y = ReadFloat(pointPtr + yOffset);
+                            float z = ReadFloat(pointPtr + zOffset);
+
+                            ref var f = ref pointBuffer[dstOff];
+                            f.x = -y;
+                            f.y = z;
+                            f.z = x;
+                            f.w = t.Read(pointPtr + iOffset);
+
+                            if (!IsPointInvalid(f)) dstOff++;
+                        }
+
+                        rowPtr += rowStep;
                     }
-                    
-                    ref var f = ref pointBuffer[dstOff++];
-                    (f.x, f.y, f.z, f.w) = (-y, z, x, intensityFn(dataOff[iOffset..]));
-                    dataOff = dataOff[pointStep..]; 
+
+                    return dstOff;
                 }
             }
-
-            return dstOff;
         }
 
-        static unsafe int GeneratePointBufferXYZ(float4[] pointBuffer, PointCloud2 msg, int iOffset, int iType)
+        static unsafe int GeneratePointBufferXYZ(float4[] dstBuffer, PointCloud2 msg, int iOffset, int iType)
         {
             int rowStep = (int)msg.RowStep;
             int pointStep = (int)msg.PointStep;
             int height = (int)msg.Height;
             int width = (int)msg.Width;
 
-            float4[] dstBuffer = pointBuffer;
-            int dstOff = 0;
-
-            switch (iType)
+            return iType switch
             {
-                case PointField.FLOAT32 when iOffset == 8 && pointStep == 12: // xyz
-                    ParseFloatAligned3();
-                    break;
-                case PointField.FLOAT32 when iOffset == 12 && pointStep == 16: // xyzw
-                    ParseFloatAligned();
-                    break;
-                case PointField.FLOAT32 when iOffset == 8 && pointStep == 16: // xyzz
-                    ParseFloatAlignedZ();
-                    break;
-                case PointField.FLOAT32:
-                    ParseFloat();
-                    break;
-                case PointField.FLOAT64:
-                    ParseDouble();
-                    break;
-                case PointField.INT8:
-                    ParseInt8();
-                    break;
-                case PointField.UINT8:
-                    ParseUint8();
-                    break;
-                case PointField.INT16:
-                    ParseInt16();
-                    break;
-                case PointField.UINT16:
-                    ParseUint16();
-                    break;
-                case PointField.INT32:
-                    ParseInt32();
-                    break;
-                case PointField.UINT32:
-                    ParseUint32();
-                    break;
-            }
-
-            return dstOff;
+                PointField.FLOAT32 when iOffset == 8 && pointStep == 12 => ParseXyz(), // xyz
+                PointField.FLOAT32 when iOffset == 12 && pointStep == 16 => ParseXyzw(), // xyzw
+                PointField.FLOAT32 when iOffset == 8 && pointStep == 16 => ParseXyzz(), // xyzz
+                PointField.FLOAT32 => Parse(new IFloatReader.FloatReader()),
+                PointField.FLOAT64 => Parse(new IFloatReader.DoubleReader()),
+                PointField.INT8 => Parse(new IFloatReader.SbyteReader()),
+                PointField.UINT8 => Parse(new IFloatReader.ByteReader()),
+                PointField.INT16 => Parse(new IFloatReader.ShortReader()),
+                PointField.UINT16 => Parse(new IFloatReader.UshortReader()),
+                PointField.INT32 => Parse(new IFloatReader.IntReader()),
+                PointField.UINT32 => Parse(new IFloatReader.UintReader()),
+                _ => throw new IndexOutOfRangeException()
+            };
 
             // ----------       
 
-            void ParseFloatAligned()
+            int ParseXyz() // xyz
             {
-                var dataRow = msg.Data.AsSpan();
-                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
-                {
-                    var src = dataRow.Cast<float4>()[..width];
-                    var dst = dstBuffer.AsSpan(dstOff, width);
-                    fixed (float4* srcPtr = &src[0])
-                    fixed (float4* dstPtr = &dst[0])
-                    {
-                        dstOff += BurstUtils.ParseFloat4(srcPtr, dstPtr, width);
-                    }
-                }
-            }
-            
-            void ParseFloatAlignedZ()
-            {
-                var dataRow = msg.Data.AsSpan();
-                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
-                {
-                    var src = dataRow.Cast<float4>()[..width];
-                    var dst = dstBuffer.AsSpan(dstOff, width);
-                    fixed (float4* srcPtr = &src[0])
-                    fixed (float4* dstPtr = &dst[0])
-                    {
-                        dstOff += BurstUtils.ParseFloat4Z(srcPtr, dstPtr, width);
-                    }
-                }
-            }
-            
-            void ParseFloatAligned3()
-            {
+                int dstOff = 0;
                 var dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
@@ -627,172 +577,76 @@ namespace Iviz.Controllers
                         dstOff += BurstUtils.ParseFloat3(srcPtr, dstPtr, width);
                     }
                 }
+
+                return dstOff;
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            void TryAdd(byte* dataPtr, float w)
+            int ParseXyzw() // xyzw
             {
-                ref readonly var point = ref *(float3*)dataPtr;
-                if (IsPointInvalid3(point)) return;
-                ref float4 f = ref dstBuffer[dstOff];
-                f.z = point.x;
-                f.x = -point.y;
-                f.y = point.z;
-                f.w = w;
-                dstOff++;
-            }
-
-            void ParseFloat()
-            {
+                int dstOff = 0;
                 var dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = &dataOff[0])
+                    var src = dataRow.Cast<float4>()[..width];
+                    var dst = dstBuffer.AsSpan(dstOff, width);
+                    fixed (float4* srcPtr = &src[0])
+                    fixed (float4* dstPtr = &dst[0])
                     {
-                        byte* dataPtr = dataPtr0;
-                        for (int u = width; u > 0; u--)
-                        {
-                            float value = *(float*)(dataPtr + iOffset);
-                            TryAdd(dataPtr, value);
-                            dataPtr += pointStep;
-                        }
+                        dstOff += BurstUtils.ParseFloat4(srcPtr, dstPtr, width);
                     }
                 }
+
+                return dstOff;
             }
 
-            void ParseDouble()
+            int ParseXyzz() // xyzz
             {
+                int dstOff = 0;
                 var dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = &dataOff[0])
+                    var src = dataRow.Cast<float4>()[..width];
+                    var dst = dstBuffer.AsSpan(dstOff, width);
+                    fixed (float4* srcPtr = &src[0])
+                    fixed (float4* dstPtr = &dst[0])
                     {
-                        byte* dataPtr = dataPtr0;
-                        for (int u = width; u > 0; u--)
-                        {
-                            double value = *(double*)(dataPtr + iOffset);
-                            TryAdd(dataPtr, (float)value);
-                            dataPtr += pointStep;
-                        }
+                        dstOff += BurstUtils.ParseFloat4Z(srcPtr, dstPtr, width);
                     }
                 }
+
+                return dstOff;
             }
 
-            void ParseInt8()
+            int Parse<T>(T t) where T : struct, IFloatReader
             {
-                var dataRow = msg.Data.AsSpan();
-                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
+                int dstOff = 0;
+                fixed (byte* dataPtr = msg.Data.Array)
                 {
-                    var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = &dataOff[0])
+                    byte* rowPtr = dataPtr;
+                    for (int v = 0; v < height; v++)
                     {
-                        byte* dataPtr = dataPtr0;
-                        for (int u = width; u > 0; u--)
-                        {
-                            sbyte value = *(sbyte*)(dataPtr + iOffset);
-                            TryAdd(dataPtr, value);
-                            dataPtr += pointStep;
-                        }
-                    }
-                }
-            }
+                        byte* pointPtr = rowPtr;
 
-            void ParseUint8()
-            {
-                var dataRow = msg.Data.AsSpan();
-                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
-                {
-                    var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = &dataOff[0])
-                    {
-                        byte* dataPtr = dataPtr0;
-                        for (int u = width; u > 0; u--)
+                        for (int u = 0; u < width; u++, pointPtr += pointStep)
                         {
-                            byte value = *(dataPtr + iOffset);
-                            TryAdd(dataPtr, value);
-                            dataPtr += pointStep;
-                        }
-                    }
-                }
-            }
+                            ref var point = ref *(float3*)pointPtr;
+                            ref float4 f = ref dstBuffer[dstOff];
+                            f.z = point.x;
+                            f.x = -point.y;
+                            f.y = point.z;
+                            f.w = t.Read(pointPtr + iOffset);
 
-            void ParseInt16()
-            {
-                var dataRow = msg.Data.AsSpan();
-                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
-                {
-                    var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = &dataOff[0])
-                    {
-                        byte* dataPtr = dataPtr0;
-                        for (int u = width; u > 0; u--)
-                        {
-                            short value = *(short*)(dataPtr + iOffset);
-                            TryAdd(dataPtr, value);
-                            dataPtr += pointStep;
+                            if (!IsPointInvalid(point)) dstOff++;
                         }
-                    }
-                }
-            }
 
-            void ParseUint16()
-            {
-                var dataRow = msg.Data.AsSpan();
-                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
-                {
-                    var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = &dataOff[0])
-                    {
-                        byte* dataPtr = dataPtr0;
-                        for (int u = width; u > 0; u--)
-                        {
-                            short value = *(short*)(dataPtr + iOffset);
-                            TryAdd(dataPtr, value);
-                            dataPtr += pointStep;
-                        }
+                        rowPtr += rowStep;
                     }
                 }
-            }
 
-            void ParseInt32()
-            {
-                var dataRow = msg.Data.AsSpan();
-                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
-                {
-                    var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = &dataOff[0])
-                    {
-                        byte* dataPtr = dataPtr0;
-                        for (int u = width; u > 0; u--)
-                        {
-                            int value = *(int*)(dataPtr + iOffset);
-                            TryAdd(dataPtr, value);
-                            dataPtr += pointStep;
-                        }
-                    }
-                }
+                return dstOff;
             }
-
-            void ParseUint32()
-            {
-                var dataRow = msg.Data.AsSpan();
-                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
-                {
-                    var dataOff = dataRow[..(pointStep * width)];
-                    fixed (byte* dataPtr0 = &dataOff[0])
-                    {
-                        byte* dataPtr = dataPtr0;
-                        for (int u = width; u > 0; u--)
-                        {
-                            uint value = *(uint*)(dataPtr + iOffset);
-                            TryAdd(dataPtr, value);
-                            dataPtr += pointStep;
-                        }
-                    }
-                }
-            }
+            
+            // ----------       
         }
 
         public override void Dispose()
@@ -809,18 +663,72 @@ namespace Iviz.Controllers
         const float MaxPositionMagnitude = PointListDisplay.MaxPositionMagnitude;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe int4 AsInt4(float4 point) => *(int4*)&point;
+        static bool IsPointInvalid(in float3 point) => IsInvalid(point.x) || IsInvalid(point.y) || IsInvalid(point.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsPointInvalid4(in float4 point) =>
-            math.any(math.abs(point).xyz > MaxPositionMagnitude) || math.any((AsInt4(point).xyz & 0x7FFFFFFF) == 0x7F800000);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsPointInvalid3(in float3 point) =>
-            IsInvalid(point.x) || IsInvalid(point.y) || IsInvalid(point.z);
+        static bool IsPointInvalid(in float4 point) => IsInvalid(point.x) || IsInvalid(point.y) || IsInvalid(point.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool IsInvalid(float f) => f.IsInvalid() || Mathf.Abs(f) > MaxPositionMagnitude;
+
+        unsafe interface IFloatReader
+        {
+            float Read(byte* b);
+
+            struct FloatReader : IFloatReader
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                public float Read(byte* b) => *(float*)b;
+            }
+
+            struct DoubleReader : IFloatReader
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                public float Read(byte* b) => (float)*(double*)b;
+            }
+
+            struct SbyteReader : IFloatReader
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                public float Read(byte* b) => *(sbyte*)b;
+            }
+
+            struct ByteReader : IFloatReader
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                public float Read(byte* b) => *b;
+            }
+
+            struct IntReader : IFloatReader
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                public float Read(byte* b) => *(int*)b;
+            }
+
+            struct UintReader : IFloatReader
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                public float Read(byte* b) => *(uint*)b;
+            }
+
+            struct ShortReader : IFloatReader
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                public float Read(byte* b) => *(short*)b;
+            }
+
+            struct UshortReader : IFloatReader
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                public float Read(byte* b) => *(ushort*)b;
+            }
+
+            struct NullReader : IFloatReader
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                public float Read(byte* b) => 0;
+            }
+        }
 
         [BurstCompile]
         static unsafe class BurstUtils
@@ -831,23 +739,23 @@ namespace Iviz.Controllers
                 int o = 0;
                 for (int i = 0; i < inputLength; i++)
                 {
-                    float4 point;
-                    point.x = input[i].x;
-                    point.y = input[i].y;
-                    point.z = input[i].z;
-                    point.w = input[i].z;
+                    float3 point3 = input[i];
 
-                    if (Hint.Unlikely(IsPointInvalid4(point)))
-                    {
-                        continue;
-                    }
+                    float4 point;
+                    point.x = point3.x;
+                    point.y = point3.y;
+                    point.z = point3.z;
+                    point.w = point3.z;
 
                     float4 f;
                     f.z = point.x;
                     f.x = -point.y;
                     f.y = point.z;
                     f.w = point.w;
-                    output[o++] = f;
+
+                    output[o] = f;
+
+                    if (Hint.Likely(!IsPointInvalid4(f))) o++;
                 }
 
                 return o;
@@ -861,22 +769,20 @@ namespace Iviz.Controllers
                 {
                     float4 point = input[i];
 
-                    if (Hint.Unlikely(IsPointInvalid4(point)))
-                    {
-                        continue;
-                    }
-
                     float4 f;
                     f.z = point.x;
                     f.x = -point.y;
                     f.y = point.z;
                     f.w = point.w;
-                    output[o++] = f;
+
+                    output[o] = f;
+
+                    if (Hint.Likely(!IsPointInvalid3(point))) o++;
                 }
 
                 return o;
             }
-            
+
             [BurstCompile(CompileSynchronously = true)]
             public static int ParseFloat4Z([NoAlias] float4* input, [NoAlias] float4* output, int inputLength)
             {
@@ -885,20 +791,37 @@ namespace Iviz.Controllers
                 {
                     float4 point = input[i];
 
-                    if (Hint.Unlikely(IsPointInvalid4(point)))
-                    {
-                        continue;
-                    }
-
                     float4 f;
                     f.z = point.x;
                     f.x = -point.y;
                     f.y = point.z;
                     f.w = point.z;
-                    output[o++] = f;
+
+                    output[o] = f;
+
+                    if (Hint.Likely(!IsPointInvalid4(point))) o++;
                 }
 
                 return o;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static bool IsPointInvalid3(in float4 point)
+            {
+                float4 p;
+                p.x = point.x;
+                p.y = point.y;
+                p.z = point.z;
+                p.w = point.z;
+                return IsPointInvalid4(p);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static bool IsPointInvalid4(in float4 point)
+            {
+                return math.any(math.abs(point) > MaxPositionMagnitude) ||
+                       //math.any((AsInt4(point) & 0x7FFFFFFF) == 0x7F800000);
+                       math.any(!math.isfinite(point));
             }
         }
     }

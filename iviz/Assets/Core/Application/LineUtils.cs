@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using Iviz.Core;
-using UnityEditor.Graphs;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -15,8 +14,9 @@ namespace Iviz.Displays
         {
             ThrowHelper.ThrowIfNull(lines, nameof(lines));
 
-            float remainingLength = (b - a).Magnitude();
-            var direction = (b - a) / remainingLength;
+            var ab = b - a;
+            float remainingLength = ab.Magnitude();
+            var direction = ab / remainingLength;
             var advance = direction * stippleLength;
             var position = a;
 
