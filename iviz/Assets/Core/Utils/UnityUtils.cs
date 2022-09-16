@@ -785,7 +785,7 @@ namespace Iviz.Core
             ? x.ToString("G", Culture)
             : x.ToString("#,0.###", Culture);
 
-        public static void MakeHalfLitAlwaysVisible(this MeshMarkerDisplay display)
+        public static void MakeHalfLitAlwaysVisible(this ISupportsOverrideMaterial display)
         {
             display.OverrideMaterial(Resource.Materials.LitHalfVisible.Object);
         }

@@ -46,6 +46,7 @@ namespace Iviz.Displays.XR
                 var display = ResourcePool.RentDisplay<RoundedPlaneDisplay>(Transform);
                 display.Size = backgroundSize;
                 display.Radius = 0.05f;
+                display.MakeHalfLitAlwaysVisible();
                 backgroundObject = display;
                 return backgroundObject;
             }
