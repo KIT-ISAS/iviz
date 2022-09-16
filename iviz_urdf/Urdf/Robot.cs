@@ -10,9 +10,9 @@ namespace Iviz.Urdf
     public sealed class Robot
     {
         [DataMember] public string Name { get; }
-        [DataMember] public ReadOnlyCollection<Link> Links { get; }
-        [DataMember] public ReadOnlyCollection<Joint> Joints { get; }
-        [DataMember] public ReadOnlyCollection<Material> Materials { get; }
+        [DataMember] public Link[] Links { get; }
+        [DataMember] public Joint[] Joints { get; }
+        [DataMember] public Material[] Materials { get; }
 
         Robot(XmlNode node)
         {
@@ -38,9 +38,9 @@ namespace Iviz.Urdf
                 }
             }
 
-            Links = links.AsReadOnly();
-            Joints = joints.AsReadOnly();
-            Materials = materials.AsReadOnly();
+            Links = links.ToArray();
+            Joints = joints.ToArray();
+            Materials = materials.ToArray();
         }
 
         internal static Robot Create(XmlDocument document)

@@ -20,11 +20,11 @@ namespace Iviz.Urdf
 
         /// The visual properties of the link. This element specifies the shape of the object (box, cylinder, etc.) for visualization purposes
         [DataMember]
-        public ReadOnlyCollection<Visual> Visuals { get; }
+        public Visual[] Visuals { get; }
 
         /// The collision properties of a link
         [DataMember]
-        public ReadOnlyCollection<Collision> Collisions { get; }
+        public Collision[] Collisions { get; }
 
         internal Link(XmlNode node)
         {
@@ -51,12 +51,12 @@ namespace Iviz.Urdf
             }
 
             Inertial = inertial ?? Inertial.Empty;
-            Visuals = new ReadOnlyCollection<Visual>(visuals);
-            Collisions = new ReadOnlyCollection<Collision>(collisions);
+            Visuals = visuals.ToArray();
+            Collisions = collisions.ToArray();
         }
 
-        public void Deconstruct(out string? name, out Inertial inertial, out ReadOnlyCollection<Visual> visuals,
-            out ReadOnlyCollection<Collision> collisions) =>
+        public void Deconstruct(out string? name, out Inertial inertial, out Visual[] visuals,
+            out Collision[] collisions) =>
             (name, inertial, visuals, collisions) = (Name, Inertial, Visuals, Collisions);
 
         public override string ToString() => BuiltIns.ToJsonString(this);
