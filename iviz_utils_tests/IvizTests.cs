@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.GridMapMsgs;
@@ -19,6 +21,8 @@ using Iviz.Roslib.MarkerHelper;
 using Iviz.Tools;
 using JetBrains.Annotations;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
+using Point = Iviz.Msgs.GeometryMsgs.Point;
 
 namespace Iviz.UtilsTests;
 
@@ -27,6 +31,9 @@ public class IvizTests
 {
     static readonly Uri CallerUri = new Uri("http://localhost:7616");
     static readonly Uri MasterUri = new Uri("http://localhost:11311");
+
+    //static readonly Uri CallerUri = new Uri("http://192.168.0.157:7616");
+    //static readonly Uri MasterUri = new Uri("http://192.168.0.220:11311");
 
     //static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
     //static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
@@ -1070,7 +1077,7 @@ public class IvizTests
         var ivizController = new IvizController(client, IvizId);
         ivizController.AddModuleFromTopic("/previews");
 
-        var header = new Header(0, time.Now(), "dialogs");
+        var header = new Header(0, time.Now(), "previews");
 
         var preview = new RobotPreview
         {
@@ -1078,10 +1085,85 @@ public class IvizTests
             Id = "0",
             SavedRobotName = "[Franka Emika] Panda",
         };
-        
+
         writer.Write(preview);
 
         Thread.Sleep(2000);
+    }
+
+    [Test]
+    public void TestBoundaries()
+    {
+        using var writer = client.CreateWriter<Boundary>("/boundaries", latchingEnabled: true);
+        using var reader = client.CreateReader<Feedback>("/boundaries/feedback");
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.AddModuleFromTopic("/boundaries");
+
+        var header = new Header(0, time.Now(), "boundaries");
+
+        var boundary = new Boundary
+        {
+            Header = header,
+            Id = "0",
+            Type = Boundary.TYPE_COLLIDER,
+            Color = ColorRGBA.White,
+            SecondColor = ColorRGBA.Red.WithAlpha(0.5f),
+            Scale = Vector3.One
+        };
+
+        writer.Write(boundary);
+        Thread.Sleep(500);
+
+        var collidable = new Boundary
+        {
+            Header = header,
+            Id = "1",
+            Type = Boundary.TYPE_COLLIDABLE,
+            Color = ColorRGBA.White,
+            SecondColor = ColorRGBA.Blue.WithAlpha(0.5f),
+            Scale = Vector3.One,
+            Pose = new Pose().WithPosition(-2, 0, 0)
+        };
+
+        writer.Write(collidable);
+        Thread.Sleep(500);
+
+        var ts = new CancellationTokenSource();
+        var task = Task.Run(() => ReadFeedback(reader, ts.Token), ts.Token);
+
+        for (int i = 0; i < 100; i++)
+        {
+            float x = ((i / 100f) - 0.5f) * 4;
+            var updatedCollidable = new Boundary
+            {
+                Header = header,
+                Id = "1",
+                Type = Boundary.TYPE_COLLIDABLE,
+                Color = ColorRGBA.White,
+                SecondColor = ColorRGBA.Blue.WithAlpha(0.5f),
+                Scale = Vector3.One,
+                Pose = new Pose().WithPosition(x, 0, 0)
+            };
+            writer.Write(updatedCollidable);
+            Thread.Sleep(50);
+        }
+
+        Thread.Sleep(2000);
+        
+        ts.Cancel();
+
+        Assert.IsTrue(task.IsCompletedSuccessfully);
+        
+        task.Wait();
+    }
+
+    async ValueTask ReadFeedback(RosChannelReader<Feedback> reader, CancellationToken token)
+    {
+        await foreach (var msg in reader.ReadAllAsync(token))
+        {
+            //Console.WriteLine(msg);
+            if (msg.Type == 8) return;
+        }
     }
 
 
