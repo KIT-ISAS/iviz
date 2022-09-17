@@ -50,7 +50,6 @@ namespace Iviz.Controllers
                 ? pointCloud.MeasuredIntensityBounds
                 : meshCloud.MeasuredIntensityBounds;
 
-        public int NumPoints { get; private set; }
         public int NumValidPoints { get; private set; }
 
         public override TfFrame? Frame => node.Parent;
@@ -196,14 +195,12 @@ namespace Iviz.Controllers
 
         public bool IsIntensityUsed => pointCloud.UseColormap;
 
-        public ReadOnlyCollection<string> FieldNames { get; }
+        public IEnumerable<string> FieldNames => fieldNames;
 
         public override IListener Listener { get; }
 
         public PointCloudListener(PointCloudConfiguration? config, string topic)
         {
-            FieldNames = fieldNames.AsReadOnly();
-
             node = new FrameNode("PointCloudListener");
             pointCloud = ResourcePool.RentDisplay<PointListDisplay>(node.Transform);
             meshCloud = ResourcePool.RentDisplay<MeshListDisplay>(node.Transform);
@@ -434,7 +431,6 @@ namespace Iviz.Controllers
 
                     node.AttachTo(header);
 
-                    NumPoints = numPoints;
                     NumValidPoints = pointBufferToUse.Length;
 
                     if (pointBufferToUse.Length == 0)
@@ -487,15 +483,9 @@ namespace Iviz.Controllers
             int rowStep = (int)msg.RowStep;
             int pointStep = (int)msg.PointStep;
 
-            if (rowStep > width * pointStep)
-            {
-                throw new IndexOutOfRangeException();
-            }
+            if (rowStep > width * pointStep) ThrowHelper.ThrowArgumentOutOfRange();
 
-            if (rgbaHint)
-            {
-                return Process(new IFloatReader.FloatReader());
-            }
+            if (rgbaHint) Process(new IFloatReader.FloatReader());
 
             return iType switch
             {
@@ -635,12 +625,14 @@ namespace Iviz.Controllers
                         for (int u = 0; u < width; u++, pointPtr += pointStep)
                         {
                             ref var point = ref *(float3*)pointPtr;
-                            ref float4 f = ref dstBuffer[dstOff];
+                            
+                            float4 f;
                             f.z = point.x;
                             f.x = -point.y;
                             f.y = point.z;
                             f.w = t.Read(pointPtr + iOffset);
 
+                            dstBuffer[dstOff] = f;
                             if (!IsPointInvalid(point)) dstOff++;
                         }
 

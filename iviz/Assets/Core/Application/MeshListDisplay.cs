@@ -49,7 +49,7 @@ namespace Iviz.Displays
         /// <summary>
         /// The resource to be multiplied.
         /// </summary>
-        public ResourceKey<GameObject>? MeshResource
+        public ResourceKey<GameObject> MeshResource
         {
             set
             {

@@ -99,4 +99,9 @@ namespace Iviz.Displays
         /// </summary>
         bool EnableShadows { set; }
     }
+    
+    public interface ISupportsOverrideMaterial
+    {
+        void OverrideMaterial(Material? material);
+    }
 }

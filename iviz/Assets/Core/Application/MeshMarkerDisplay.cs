@@ -14,7 +14,7 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
     public class MeshMarkerDisplay : MarkerDisplay,
-        ISupportsColor, ISupportsTint, ISupportsAROcclusion, ISupportsPbr, ISupportsShadows
+        ISupportsColor, ISupportsTint, ISupportsAROcclusion, ISupportsPbr, ISupportsShadows, ISupportsOverrideMaterial
     {
         [SerializeField] Texture2D? diffuseTexture;
         [SerializeField] Texture2D? bumpTexture;

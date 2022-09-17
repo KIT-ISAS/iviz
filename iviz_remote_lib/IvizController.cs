@@ -23,7 +23,7 @@ namespace Iviz.RemoteLib;
 /// </summary>
 public sealed class IvizController
 {
-    readonly RosClient client;
+    readonly IRosClient client;
     readonly string ivizId;
     readonly StringBuilder configStr = new(256);
 
@@ -35,7 +35,7 @@ public sealed class IvizController
     /// The id of the iviz instance, as found in the 'My ROS ID' field. For example: iviz_wineditor.
     /// The starting '/' should be removed.
     /// </param>
-    public IvizController(RosClient client, string ivizId)
+    public IvizController(IRosClient client, string ivizId)
     {
         RosNameUtils.ValidateResourceName(ivizId);
         this.client = client;
@@ -168,7 +168,7 @@ public sealed class IvizController
     {
         return client.CallService($"{ivizId}/get_modules", GetModulesRequest.Singleton).Configs;
     }
-    
+
     public void ResetModule(string id)
     {
         if (string.IsNullOrEmpty(id))
@@ -183,7 +183,6 @@ public sealed class IvizController
             throw new RemoteException(response.Message);
         }
     }
-    
 }
 
 public interface IConfiguration

@@ -11,7 +11,7 @@ namespace Iviz.Displays
 {
     [RequireComponent(typeof(BoxCollider))]
     public class MeshMarkerHolderDisplay : MonoBehaviour, IDisplay, ISupportsColor, ISupportsAROcclusion,
-        ISupportsTint, ISupportsPbr, ISupportsDynamicBounds, ISupportsShadows
+        ISupportsTint, ISupportsPbr, ISupportsDynamicBounds, ISupportsShadows, ISupportsOverrideMaterial
     {
         [SerializeField] protected MeshMarkerDisplay[] children = Array.Empty<MeshMarkerDisplay>();
         [SerializeField] BoxCollider? boxCollider;
@@ -155,6 +155,14 @@ namespace Iviz.Displays
                 BoundsUtils.TransformBoundsUntil(resource.Bounds, resource.Transform, Transform));
             Collider.SetLocalBounds(markerChildren.CombineBounds() ?? default);
             BoundsChanged?.Invoke();
+        }
+
+        public void OverrideMaterial(Material? material)
+        {
+            foreach (var display in children)
+            {
+                display.OverrideMaterial(material);
+            }
         }
 
         public virtual void Suspend()
