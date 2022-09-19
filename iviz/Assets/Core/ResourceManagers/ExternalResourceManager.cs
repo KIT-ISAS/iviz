@@ -515,6 +515,8 @@ namespace Iviz.Displays
             return default; // completed, null
         }
 
+        Deserializer<Model>? modelDeserializer;
+
         async ValueTask<Model?> ReadModelFromFileAsync(string uriString, string localPath, CancellationToken token)
         {
             using var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token);
@@ -525,7 +527,8 @@ namespace Iviz.Displays
                 return null;
             }
 
-            return new Model().DeserializeRos1(buffer[Md5SumLength..]);
+            modelDeserializer ??= new Model().CreateDeserializer();
+            return ReadBuffer.Deserialize(modelDeserializer, buffer[Md5SumLength..]);
         }
 
         async ValueTask<ResourceKey<GameObject>?> LoadLocalModelAsync(string uriString, string localPath,

@@ -253,7 +253,11 @@ namespace Iviz.Displays.XR
             ProvidedTrajectory = null;
             Lines.Reset();
             Segments.Reset();
+
+            positions.Clear();
+            positions.Add(Vector3.zero);
             ResetCorners();
+            
             lineBuffer.Clear();
             //startTime = null;
             Send.Transform.parent = Transform;

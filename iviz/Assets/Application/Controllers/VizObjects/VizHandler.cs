@@ -54,6 +54,7 @@ namespace Iviz.Controllers
         {
             if (!vizObjects.TryGetValue(id, out var vizObject))
             {
+                RosLogger.Debug($"{ToString()}: No object with id '{id}' was found!");
                 return;
             }
 
