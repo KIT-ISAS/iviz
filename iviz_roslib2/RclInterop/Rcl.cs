@@ -20,7 +20,7 @@ internal static class Rcl
     static CdrGetSerializedSizeCallback? cdrGetSerializedSizeCallbackDel;
     static CdrSerializeCallback? cdrSerializeCallbackDel;
     static CdrDeserializeCallback? cdrDeserializeCallbackDel;
-    
+
     static RclWrapper ThrowMissingWrapper() => throw new NullReferenceException("Rcl wrapper has not been set!");
 
     public static RclWrapper Impl => impl ?? ThrowMissingWrapper();
@@ -29,7 +29,7 @@ internal static class Rcl
     {
         impl = rclWrapper;
     }
-    
+
     public static void SetLoggingHandler()
     {
         consoleLoggingHandlerDel = ConsoleLoggingHandler;
@@ -41,7 +41,7 @@ internal static class Rcl
         cdrDeserializeCallbackDel = CdrDeserializeCallback;
         cdrSerializeCallbackDel = CdrSerializeCallback;
         cdrGetSerializedSizeCallbackDel = CdrGetSerializedSizeCallback;
-        
+
         Impl.SetMessageCallbacks(cdrDeserializeCallbackDel, cdrSerializeCallbackDel, cdrGetSerializedSizeCallbackDel);
     }
 
@@ -105,48 +105,66 @@ internal static class Rcl
 
         throw new RosRclException("Rcl operation failed", result);
     }
-    
+
     [MonoPInvokeCallback(typeof(CdrDeserializeCallback))]
     static void CdrDeserializeCallback(IntPtr messageContextHandle, IntPtr ptr, int length)
     {
         var gcHandle = (GCHandle)messageContextHandle;
-        var handler = (RclDeserializeHandler?)gcHandle.Target;
+
+        if (gcHandle.Target is not RclDeserializeHandler handler)
+        {
+            Logger.LogErrorFormat(nameof(Rcl) + ": Handler in " + nameof(CdrDeserializeCallback) +
+                                  " has not been set!");
+            return;
+        }
 
         try
         {
-            handler!.DeserializeFrom(ptr, length);
+            handler.DeserializeFrom(ptr, length);
         }
         catch (Exception e)
         {
             Logger.LogErrorFormat(nameof(Rcl) + ": Exception in " + nameof(CdrDeserializeCallback) + " {0}", e);
         }
     }
-    
+
     [MonoPInvokeCallback(typeof(CdrSerializeCallback))]
     static void CdrSerializeCallback(IntPtr messageContextHandle, IntPtr ptr, int length)
     {
         var gcHandle = (GCHandle)messageContextHandle;
-        var handler = (RclSerializeHandler?)gcHandle.Target;
+
+        if (gcHandle.Target is not RclSerializeHandler handler)
+        {
+            Logger.LogErrorFormat(nameof(Rcl) + ": Handler in " + nameof(CdrSerializeCallback) + 
+                                  " has not been set!");
+            return;
+        }
 
         try
         {
-            handler!.SerializeInto(ptr, length);
+            handler.SerializeInto(ptr, length);
         }
         catch (Exception e)
         {
             Logger.LogErrorFormat(nameof(Rcl) + ": Exception in " + nameof(CdrSerializeCallback) + " {0}", e);
         }
     }
-    
+
     [MonoPInvokeCallback(typeof(CdrGetSerializedSizeCallback))]
     static int CdrGetSerializedSizeCallback(IntPtr messageContextHandle)
     {
         var gcHandle = (GCHandle)messageContextHandle;
-        var handler = (RclSerializeHandler?)gcHandle.Target;
+
+        if (gcHandle.Target is not RclSerializeHandler handler)
+        {
+            Logger.LogErrorFormat(nameof(Rcl) + ": Handler in " + nameof(CdrGetSerializedSizeCallback) +
+                                  " has not been set!");
+            return 0;
+        }
 
         try
         {
-            return handler!.GetSerializedSize();
+            return handler.GetSerializedSize();
         }
         catch (Exception e)
         {

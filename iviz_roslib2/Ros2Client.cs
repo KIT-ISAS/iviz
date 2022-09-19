@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using Iviz.Msgs;
 using Iviz.Roslib;
 using Iviz.Roslib2.RclInterop;
@@ -46,20 +47,44 @@ public sealed class Ros2Client : IRosClient
     public Ros2ParameterClient ParameterClient { get; }
     public Ros2ParameterServer ParameterServer { get; }
 
-    public Ros2Client(string callerId, string? @namespace = null, int domainId = 0, RclWrapper? wrapperType = null)
+    public Ros2Client(string? ownId = null, string? @namespace = null, int domainId = 0, RclWrapper? wrapperType = null)
     {
+        if (string.IsNullOrWhiteSpace(ownId))
+        {
+            ownId = RosNameUtils.CreateCallerId();
+        }
+
         RclClient.SetRclWrapper(wrapperType ??
 #if NETSTANDARD2_1
                                 throw new ArgumentNullException(nameof(wrapperType)));
 #else
-                                new RclInternalWrapper());
+                                new RclGenericWrapper());
 #endif
 
         namespacePrefix = @namespace == null ? "/" : $"/{@namespace}/";
-        Rcl = new AsyncRclClient(callerId, @namespace ?? "", domainId);
+        Rcl = new AsyncRclClient(ownId, @namespace ?? "", domainId);
         ParameterClient = new Ros2ParameterClient(this);
         ParameterServer = new Ros2ParameterServer(this);
     }
+
+#if NET5_0_OR_GREATER
+    public static void RemapRclWrapperLibrary(string rclLibraryPath)
+    {
+        IntPtr MapAndLoad(string libraryName, System.Reflection.Assembly assembly,
+            DllImportSearchPath? dllImportSearchPath)
+        {
+            return NativeLibrary.Load(
+                libraryName != "iviz_ros2_rcl"
+                    ? libraryName
+                    : rclLibraryPath,
+                assembly, dllImportSearchPath);
+        }
+
+        if (string.IsNullOrWhiteSpace(rclLibraryPath)) BuiltIns.ThrowArgumentNull(nameof(rclLibraryPath));
+
+        NativeLibrary.SetDllImportResolver(typeof(Ros2Client).Assembly, MapAndLoad);
+    }
+#endif
 
     public static void SetLoggingLevel(RclLogSeverity severity) => RclClient.SetLoggingLevel(severity);
 
@@ -91,7 +116,7 @@ public sealed class Ros2Client : IRosClient
         (string id, subscriber) = TaskUtils.RunSync(() => SubscribeAsync(topic, callback, transportHint));
         return id;
     }
-    
+
     public string Subscribe<T>(string topic, Action<T> callback, out Ros2Subscriber<T> subscriber,
         RosTransportHint transportHint = RosTransportHint.PreferTcp)
         where T : IMessage, new()
@@ -117,7 +142,7 @@ public sealed class Ros2Client : IRosClient
         var profile = transportHint switch
         {
             RosTransportHint.OnlyUdp or RosTransportHint.PreferUdp => QosProfile.SensorData,
-            RosTransportHint.OnlyTcp or RosTransportHint.PreferTcp => QosProfile.Default,
+            RosTransportHint.OnlyTcp or RosTransportHint.PreferTcp => QosProfile.SubscriberDefault,
             _ => throw new IndexOutOfRangeException()
         };
 
@@ -173,7 +198,7 @@ public sealed class Ros2Client : IRosClient
     {
         return AdvertiseAsync<T>(topic, latchingEnabled
                 ? QosProfile.PublisherLatchingProfile
-                : QosProfile.Default,
+                : QosProfile.PublisherDefault,
             token);
     }
 
@@ -359,7 +384,7 @@ public sealed class Ros2Client : IRosClient
             $"Existing connection of {resolvedServiceName} with service type {existingListener.ServiceType} " +
             "does not match the new given type.");
     }
-    
+
     public ValueTask UnadvertiseServiceAsync(string name, CancellationToken token = default)
     {
         string resolvedServiceName = ResolveResourceName(name);
@@ -367,7 +392,7 @@ public sealed class Ros2Client : IRosClient
             ? advertisedService.DisposeAsync(token)
             : default;
     }
-    
+
     public IReadOnlyList<SubscriberState> GetSubscriberStatistics() => TaskUtils.RunSync(GetSubscriberStatisticsAsync);
 
     public IReadOnlyList<PublisherState> GetPublisherStatistics() => TaskUtils.RunSync(GetPublisherStatisticsAsync);
@@ -487,7 +512,6 @@ public sealed class Ros2Client : IRosClient
 
         // the token determines when we stop awaiting. the connections will still keep closing in the background  
         await closeConnectionsTask.AwaitNoThrow(timeoutInMs, this, token);
-
     }
 
     async ValueTask CloseConnectionsAsync()

@@ -1,10 +1,30 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
 public static class RosNameUtils
 {
+    /// <summary>
+    /// Retrieves the environment variable ROS_HOSTNAME as a uri.
+    /// If this fails, retrieves ROS_IP.
+    /// </summary>
+    public static string? EnvironmentCallerHostname =>
+        Environment.GetEnvironmentVariable("ROS_HOSTNAME") ??
+        Environment.GetEnvironmentVariable("ROS_IP");
+    
+    /// <summary>
+    /// Creates a unique id based on the project and computer name
+    /// </summary>
+    /// <returns>A more or less unique id</returns>
+    public static string CreateCallerId()
+    {
+        string seed = EnvironmentCallerHostname + Assembly.GetCallingAssembly().GetName().Name;
+        return $"iviz_{seed.GetDeterministicHashCode().ToString("x8")}";
+    }
+    
     /// <summary>
     /// Checks if the given name is a valid ROS resource name
     /// </summary>  

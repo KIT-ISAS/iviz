@@ -23,6 +23,7 @@ public sealed class Ros2ParameterServer
     public async ValueTask RegisterServicesAsync(CancellationToken token = default)
     {
         string node = backend.CallerId;
+        
         await backend.AdvertiseServiceAsync<DescribeParameters>(ServiceNameForDescribeParameters(node), Handle, token);
         await backend.AdvertiseServiceAsync<GetParameterTypes>(ServiceNameForGetParameterTypes(node), Handle, token);
         await backend.AdvertiseServiceAsync<GetParameters>(ServiceNameForGetParameters(node), Handle, token);

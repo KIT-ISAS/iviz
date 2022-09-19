@@ -42,7 +42,8 @@ public sealed class QosProfile : JsonToString, IEquatable<QosProfile>
     static QosProfile? sensorProfile;
     static QosProfile? parametersProfile;
     static QosProfile? publisherLatchingProfile;
-    static QosProfile? defaultProfile;
+    static QosProfile? subscriberProfile;
+    static QosProfile? publisherProfile;
     static QosProfile? servicesProfile;
     static QosProfile? systemProfile;
 
@@ -60,7 +61,15 @@ public sealed class QosProfile : JsonToString, IEquatable<QosProfile>
         DurabilityPolicy.Volatile
     );
 
-    public static QosProfile Default => defaultProfile ??= new QosProfile(
+    public static QosProfile SubscriberDefault => subscriberProfile ??= new QosProfile(
+        HistoryPolicy.KeepLast,
+        10,
+        ReliabilityPolicy.Reliable,
+        //DurabilityPolicy.TransientLocal // should be Volatile, but latching won't work (foxy bug?)
+        DurabilityPolicy.Volatile
+    );
+    
+    public static QosProfile PublisherDefault => publisherProfile ??= new QosProfile(
         HistoryPolicy.KeepLast,
         10,
         ReliabilityPolicy.Reliable,

@@ -31,7 +31,7 @@ namespace Iviz.Roslib
 
             if (sources.Length == 0)
             {
-                throw new ArgumentException("Value cannot be an empty collection.", nameof(sources));
+                BuiltIns.ThrowArgument(nameof(sources), "Value cannot be an empty collection.");
             }
 
             this.sources = sources;
@@ -54,7 +54,7 @@ namespace Iviz.Roslib
 
         public IEnumerable<IMessage> ReadAll(CancellationToken token = default)
         {
-            Task[] tasks = new Task[sources.Length];
+            var tasks = new Task[sources.Length];
 
             for (int i = 0; i < sources.Length; i++)
             {

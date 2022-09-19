@@ -63,7 +63,6 @@ public interface IRosChannelReader : IDisposable, IAsyncDisposable
     /// <returns>An enumerator that can be used in a foreach</returns>
     public IEnumerable<IMessage> TryReadAll();
 
-#if !NETSTANDARD2_0
     /// <summary>
     /// Enumerates through the available messages, and 'awaits' while waiting for the next.
     /// It will only return either when the token has been canceled, or the channel has been disposed.
@@ -71,5 +70,4 @@ public interface IRosChannelReader : IDisposable, IAsyncDisposable
     /// <param name="token">A cancellation token that makes the function stop blocking when cancelled.</param>
     /// <returns>An enumerator that can be used in a foreach</returns>        
     public IAsyncEnumerable<IMessage> ReadAllAsync(CancellationToken token = default);
-#endif
 }
