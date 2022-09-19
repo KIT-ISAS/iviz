@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace Iviz.Tools;
 
-public class SharedRent : IDisposable 
+public sealed class SharedRent : IDisposable 
 {
     static SharedRent? empty;
     public static SharedRent Empty => empty ??= new SharedRent(0);
@@ -62,13 +62,14 @@ public class SharedRent : IDisposable
         }
     }
 
+    public override string ToString() => $"[{nameof(SharedRent)} Type=byte Length={Length.ToString()}]";
+
     public Span<byte> AsSpan() => new(Array, 0, Length);
     public ReadOnlySpan<byte> AsReadOnlySpan() => new(Array, 0, Length);
     public Memory<byte> AsMemory() => new(Array, 0, Length);
     public ArraySegment<byte> AsArraySegment() => new(Array, 0, Length);
     public Span<byte> Slice(int start, int count) => new(Array, start, count);
     public RentEnumerator<byte> GetEnumerator() => new(Array, Length);
-    public override string ToString() => $"[{nameof(SharedRent)} Length={Length.ToString()}]";
     public Span<byte> this[Range range] => AsSpan()[range];
     public static implicit operator Span<byte>(SharedRent rent) => rent.AsSpan();
     public static implicit operator ReadOnlySpan<byte>(SharedRent rent) => rent.AsReadOnlySpan();

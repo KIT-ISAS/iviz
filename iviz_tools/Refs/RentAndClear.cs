@@ -58,8 +58,7 @@ public readonly struct RentAndClear<T> : IDisposable
 
     public override string ToString()
     {
-        return $"[{nameof(RentAndClear<T>)} Type={typeof(T).Name} Length={Length.ToString()} " +
-               $"RealSize={(Array != null ? Array.Length : 0).ToString()}]";
+        return $"[{nameof(RentAndClear<T>)} Type={typeof(T).Name} Length={Length.ToString()}]";
     }
 
     public RentEnumerator<T?> GetEnumerator() => new(Array, Length);

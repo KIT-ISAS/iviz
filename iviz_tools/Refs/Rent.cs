@@ -54,8 +54,7 @@ public readonly struct Rent<T> : IDisposable where T : unmanaged
 
     public override string ToString()
     {
-        return $"[{nameof(Rent<T>)} Type={typeof(T).Name} Length={Length.ToString()} " +
-               $"RealSize={(Array != null ? Array.Length : 0).ToString()}]";
+        return $"[{nameof(Rent<T>)} Type={typeof(T).Name} Length={Length.ToString()}]";
     }
 
     public ref T this[int index] => ref Array[index];
@@ -113,8 +112,7 @@ public readonly struct Rent : IDisposable
 
     public override string ToString()
     {
-        return $"[{nameof(Rent)} Type=byte Length={Length.ToString()} " +
-               $"RealSize={(Array != null ? Array.Length : 0).ToString()}]";
+        return $"[{nameof(Rent)} Type=byte Length={Length.ToString()}]";
     }
     
     public byte this[int index] => Array[index];

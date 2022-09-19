@@ -12,7 +12,7 @@ namespace Iviz.Tools;
 /// </summary>
 public static class TaskUtils
 {
-    const string GenericExceptionFormat = "{0}: Exception thrown.{1}";
+    const string GenericExceptionFormat = "{0}: Exception thrown. {1}";
 
     /// <summary>
     /// Same as <see cref="Task.Run(Func{Task})"/>, but prevents the use of <see cref="ValueTask"/>
@@ -281,10 +281,12 @@ public static class TaskUtils
             var result = await Task.WhenAny(task, timeoutTask);
             if (result != task)
             {
+                /*
                 if (!token.IsCancellationRequested)
                 {
                     Logger.LogErrorFormat(GenericExceptionFormat, caller, new TimeoutException());
                 }
+                */
 
                 return;
             }
