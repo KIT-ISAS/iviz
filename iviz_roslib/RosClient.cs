@@ -162,33 +162,17 @@ public sealed class RosClient : IRosClient
             return null;
         }
 
-        if (!Uri.TryCreate(uri, UriKind.Absolute, out Uri? validatedUri))
+        if (Uri.TryCreate(uri, UriKind.Absolute, out var validatedUri))
         {
-            throw new ArgumentException("Argument '" + uri + "' cannot be parsed as an URI. " + (isMaster
-                ? "Try something like http://localhost:11311"
-                : "Try something like http://your_ip:1024, or http://your_ip:0 to use as a random port."));
+            return validatedUri;
         }
 
-        return validatedUri;
+        BuiltIns.ThrowArgument(nameof(uri),
+            "Argument '" + uri + "' cannot be parsed as an URI. " + (isMaster
+                ? "Try something like http://localhost:11311"
+                : "Try something like http://your_ip:1024, or http://your_ip:0 to use as a random port."));
+        return null; // unreachable
     }
-
-    /// <summary>
-    /// Creates a unique id based on the project and computer name
-    /// </summary>
-    /// <returns>A more or less unique id</returns>
-    public static string CreateCallerId()
-    {
-        string seed = EnvironmentCallerHostname + Assembly.GetCallingAssembly().GetName().Name;
-        return $"iviz_{seed.GetDeterministicHashCode().ToString("x8")}";
-    }
-
-    /// <summary>
-    /// Retrieves the environment variable ROS_HOSTNAME as a uri.
-    /// If this fails, retrieves ROS_IP.
-    /// </summary>
-    public static string? EnvironmentCallerHostname =>
-        Environment.GetEnvironmentVariable("ROS_HOSTNAME") ??
-        Environment.GetEnvironmentVariable("ROS_IP");
 
     /// <summary>
     /// Retrieves a valid caller uri for this node, by checking the local addresses
@@ -200,7 +184,7 @@ public sealed class RosClient : IRosClient
     /// <returns>A caller uri</returns>
     public static Uri TryGetCallerUri(int usingPort = AnyPort)
     {
-        string? envHostname = EnvironmentCallerHostname;
+        string? envHostname = RosNameUtils.EnvironmentCallerHostname;
         if (envHostname != null)
         {
             return new Uri($"http://{envHostname}:{usingPort.ToString()}/");
@@ -229,7 +213,7 @@ public sealed class RosClient : IRosClient
             BuiltIns.ThrowArgumentNull(nameof(masterUri));
         }
 
-        string? envHostname = EnvironmentCallerHostname;
+        string? envHostname = RosNameUtils.EnvironmentCallerHostname;
         if (envHostname != null)
         {
             return new Uri($"http://{envHostname}:{usingPort.ToString()}/");
@@ -256,7 +240,7 @@ public sealed class RosClient : IRosClient
     public static Uri[] GetCallerUriCandidates(int usingPort = AnyPort)
     {
         var candidates = new List<Uri>();
-        string? envHostname = EnvironmentCallerHostname;
+        string? envHostname = RosNameUtils.EnvironmentCallerHostname;
         string portStr = usingPort.ToString();
 
         if (envHostname != null)
@@ -343,25 +327,25 @@ public sealed class RosClient : IRosClient
 
         if (masterUri is null)
         {
-            throw new ArgumentException("No valid master uri provided, and ROS_MASTER_URI is not set",
-                nameof(masterUri));
+            BuiltIns.ThrowArgument(nameof(masterUri),
+                "No valid master uri provided, and ROS_MASTER_URI is not set");
         }
 
         if (masterUri.Scheme != "http")
         {
-            throw new ArgumentException("URI scheme must be http", nameof(masterUri));
+            BuiltIns.ThrowArgument(nameof(masterUri), "URI scheme must be http");
         }
 
         ownUri ??= TryGetCallerUriFor(masterUri) ?? TryGetCallerUri();
 
         if (ownUri.Scheme != "http")
         {
-            throw new ArgumentException("URI scheme must be http", nameof(ownUri));
+            BuiltIns.ThrowArgument(nameof(ownUri), "URI scheme must be http");
         }
 
         if (string.IsNullOrWhiteSpace(ownId))
         {
-            ownId = CreateCallerId();
+            ownId = RosNameUtils.CreateCallerId();
         }
 
         string? ns = namespaceOverride ?? EnvironmentRosNamespace;
@@ -490,7 +474,7 @@ public sealed class RosClient : IRosClient
         Uri? ownUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null,
         CancellationToken token = default)
     {
-        RosClient client = new(masterUri, ownId, ownUri, namespaceOverride);
+        var client = new RosClient(masterUri, ownId, ownUri, namespaceOverride);
 
         try
         {
@@ -591,8 +575,10 @@ public sealed class RosClient : IRosClient
         string? ownUri = null,
         bool ensureCleanSlate = true,
         string? namespaceOverride = null) :
-        this(TryToCreateUri(masterUri, true), ownId, TryToCreateUri(ownUri, false), ensureCleanSlate,
-            namespaceOverride)
+        this(TryToCreateUri(masterUri, true),
+            ownId,
+            TryToCreateUri(ownUri, false),
+            ensureCleanSlate, namespaceOverride)
     {
     }
 
@@ -1210,7 +1196,7 @@ public sealed class RosClient : IRosClient
             .Select(tuple => new TopicNameType(tuple.name, tuple.type))
             .ToArray();
     }
-    
+
     /// <summary>
     /// Asks the master for the nodes and topics in the system.
     /// Corresponds to the function 'getSystemState' in the ROS Master API.
@@ -1352,7 +1338,7 @@ public sealed class RosClient : IRosClient
     {
         TaskUtils.RunSync(() => CallServiceAsync(serviceName, service, persistent, token), token);
     }
-    
+
     /// <inheritdoc cref="IRosClient.CallServiceAsync{T}"/>
     public async ValueTask CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
         CancellationToken token = default)
@@ -1462,7 +1448,7 @@ public sealed class RosClient : IRosClient
 
         return true;
     }
-    
+
     /// <summary>
     /// Advertises the given service.
     /// </summary>
