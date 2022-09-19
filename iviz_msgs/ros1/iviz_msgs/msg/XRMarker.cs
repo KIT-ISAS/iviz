@@ -39,16 +39,14 @@ namespace Iviz.Msgs.IvizMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Type);
             b.DeserializeString(out Code);
-            unsafe
             {
                 var array = new GeometryMsgs.Vector3[4];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 4 * 24);
+                b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Vector3, byte>(ref array[0]), 4 * 24);
                 Corners = array;
             }
-            unsafe
             {
                 var array = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
                 CameraIntrinsic = array;
             }
             b.Deserialize(out CameraPose);
@@ -63,17 +61,15 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Type);
             b.Align4();
             b.DeserializeString(out Code);
-            unsafe
             {
                 b.Align8();
                 var array = new GeometryMsgs.Vector3[4];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 4 * 24);
+                b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Vector3, byte>(ref array[0]), 4 * 24);
                 Corners = array;
             }
-            unsafe
             {
                 var array = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
                 CameraIntrinsic = array;
             }
             b.Deserialize(out CameraPose);

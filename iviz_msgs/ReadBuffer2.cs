@@ -257,10 +257,10 @@ public unsafe struct ReadBuffer2
     #region arrays
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(void* value, int count)
+    public void DeserializeStructArray(ref byte value, int count)
     {
         ThrowIfOutOfRange(count);
-        Unsafe.CopyBlock(value, cursor, (uint)count);
+        Unsafe.CopyBlock(ref value, ref *cursor, (uint)count);
         Advance(count);
     }
 
@@ -442,5 +442,14 @@ public unsafe struct ReadBuffer2
         Advance(size);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref byte DeserializeStruct(int size)
+    {
+        ThrowIfOutOfRange(size);
+        ref byte t = ref *cursor;
+        Advance(size);
+        return ref t;
+    }
+    
     #endregion
 }

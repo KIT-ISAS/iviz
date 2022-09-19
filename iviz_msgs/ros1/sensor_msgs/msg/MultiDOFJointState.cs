@@ -45,7 +45,6 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.DeserializeStringArray(out JointNames);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -53,7 +52,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 56);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Transform, byte>(ref array[0]), n * 56);
                 }
                 Transforms = array;
             }
@@ -86,7 +85,6 @@ namespace Iviz.Msgs.SensorMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
             b.DeserializeStringArray(out JointNames);
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -96,7 +94,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 56);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Transform, byte>(ref array[0]), n * 56);
                 }
                 Transforms = array;
             }

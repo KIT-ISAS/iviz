@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class Feedback : IHasSerializer<Feedback>, IMessage
     {
-        public const byte TYPE_EXPIRED = 0;
+        public const byte TYPE_DIALOG_EXPIRED = 0;
         public const byte TYPE_BUTTON_CLICK = 1;
         public const byte TYPE_MENUENTRY_CLICK = 2;
         public const byte TYPE_POSITION_CHANGED = 3;
@@ -20,20 +20,21 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "viz_id")] public string VizId;
         [DataMember (Name = "id")] public string Id;
+        [DataMember (Name = "preview_only")] public bool PreviewOnly;
         [DataMember (Name = "type")] public byte Type;
         [DataMember (Name = "entry_id")] public int EntryId;
         [DataMember (Name = "angle")] public double Angle;
         [DataMember (Name = "position")] public GeometryMsgs.Point Position;
         [DataMember (Name = "orientation")] public GeometryMsgs.Quaternion Orientation;
         [DataMember (Name = "scale")] public GeometryMsgs.Vector3 Scale;
-        [DataMember (Name = "trajectory")] public Trajectory Trajectory;
+        [DataMember (Name = "trajectory")] public GeometryMsgs.Pose[] Trajectory;
         [DataMember (Name = "collider_id")] public string ColliderId;
     
         public Feedback()
         {
             VizId = "";
             Id = "";
-            Trajectory = new Trajectory();
+            Trajectory = EmptyArray<GeometryMsgs.Pose>.Value;
             ColliderId = "";
         }
         
@@ -42,13 +43,24 @@ namespace Iviz.Msgs.IvizMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.DeserializeString(out VizId);
             b.DeserializeString(out Id);
+            b.Deserialize(out PreviewOnly);
             b.Deserialize(out Type);
             b.Deserialize(out EntryId);
             b.Deserialize(out Angle);
             b.Deserialize(out Position);
             b.Deserialize(out Orientation);
             b.Deserialize(out Scale);
-            Trajectory = new Trajectory(ref b);
+            {
+                int n = b.DeserializeArrayLength();
+                var array = n == 0
+                    ? EmptyArray<GeometryMsgs.Pose>.Value
+                    : new GeometryMsgs.Pose[n];
+                if (n != 0)
+                {
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Pose, byte>(ref array[0]), n * 56);
+                }
+                Trajectory = array;
+            }
             b.DeserializeString(out ColliderId);
         }
         
@@ -59,6 +71,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out VizId);
             b.Align4();
             b.DeserializeString(out Id);
+            b.Deserialize(out PreviewOnly);
             b.Deserialize(out Type);
             b.Align4();
             b.Deserialize(out EntryId);
@@ -67,8 +80,18 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Position);
             b.Deserialize(out Orientation);
             b.Deserialize(out Scale);
-            Trajectory = new Trajectory(ref b);
-            b.Align4();
+            {
+                int n = b.DeserializeArrayLength();
+                var array = n == 0
+                    ? EmptyArray<GeometryMsgs.Pose>.Value
+                    : new GeometryMsgs.Pose[n];
+                if (n != 0)
+                {
+                    b.Align8();
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Pose, byte>(ref array[0]), n * 56);
+                }
+                Trajectory = array;
+            }
             b.DeserializeString(out ColliderId);
         }
         
@@ -81,13 +104,14 @@ namespace Iviz.Msgs.IvizMsgs
             Header.RosSerialize(ref b);
             b.Serialize(VizId);
             b.Serialize(Id);
+            b.Serialize(PreviewOnly);
             b.Serialize(Type);
             b.Serialize(EntryId);
             b.Serialize(Angle);
             b.Serialize(in Position);
             b.Serialize(in Orientation);
             b.Serialize(in Scale);
-            Trajectory.RosSerialize(ref b);
+            b.SerializeStructArray(Trajectory);
             b.Serialize(ColliderId);
         }
         
@@ -96,13 +120,14 @@ namespace Iviz.Msgs.IvizMsgs
             Header.RosSerialize(ref b);
             b.Serialize(VizId);
             b.Serialize(Id);
+            b.Serialize(PreviewOnly);
             b.Serialize(Type);
             b.Serialize(EntryId);
             b.Serialize(Angle);
             b.Serialize(in Position);
             b.Serialize(in Orientation);
             b.Serialize(in Scale);
-            Trajectory.RosSerialize(ref b);
+            b.SerializeStructArray(Trajectory);
             b.Serialize(ColliderId);
         }
         
@@ -111,7 +136,6 @@ namespace Iviz.Msgs.IvizMsgs
             if (VizId is null) BuiltIns.ThrowNullReference();
             if (Id is null) BuiltIns.ThrowNullReference();
             if (Trajectory is null) BuiltIns.ThrowNullReference();
-            Trajectory.RosValidate();
             if (ColliderId is null) BuiltIns.ThrowNullReference();
         }
     
@@ -119,11 +143,11 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get
             {
-                int size = 105;
+                int size = 110;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(VizId);
                 size += WriteBuffer.GetStringSize(Id);
-                size += Trajectory.RosMessageLength;
+                size += 56 * Trajectory.Length;
                 size += WriteBuffer.GetStringSize(ColliderId);
                 return size;
             }
@@ -139,6 +163,7 @@ namespace Iviz.Msgs.IvizMsgs
             size = WriteBuffer2.AddLength(size, VizId);
             size = WriteBuffer2.Align4(size);
             size = WriteBuffer2.AddLength(size, Id);
+            size += 1; // PreviewOnly
             size += 1; // Type
             size = WriteBuffer2.Align4(size);
             size += 4; // EntryId
@@ -147,8 +172,9 @@ namespace Iviz.Msgs.IvizMsgs
             size += 24; // Position
             size += 32; // Orientation
             size += 24; // Scale
-            size = Trajectory.AddRos2MessageLength(size);
-            size = WriteBuffer2.Align4(size);
+            size += 4; // Trajectory.Length
+            size = WriteBuffer2.Align8(size);
+            size += 56 * Trajectory.Length;
             size = WriteBuffer2.AddLength(size, ColliderId);
             return size;
         }
@@ -158,28 +184,28 @@ namespace Iviz.Msgs.IvizMsgs
         public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
-        public const string Md5Sum = "96a1314c47cca615e02cf92c54cca017";
+        public const string Md5Sum = "26063628ff00b77f3c9b8ee24a254ccc";
     
         public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE71V34/TOBB+z18x0j6we+oW2OUArcRD6fYg3LLtdQMCIVR5k2niu8QOttNS/vr77LRp" +
-                "u/TEPbBUkWp7Zj7Pj2/GjVTuOSUfJ6PZ6MMkno4u6QU9iprt8ct3STK+ng2v4uGfkD3elb0dXb8bXSfT" +
-                "j534bFc8Gd/ESeyNXw+uXwXo8135eBrDenBH5cmuys1wcDXaEf6+K0ymgzejYTL293caT3c1huOrq/hy" +
-                "NJ3hnlEb3LPD8g9xEsTPo8i6bFbZ3D58zSJjQ0X4w7GRKqeF/DaT2WaHVQvnVjVHWJ2fEStnVl5nXmrh" +
-                "nj4hofKSo5x1xV4SsCcaylRrK53U6o7wr0Y4NgoC0kYCTxxQes+p0+acbCqAnhjxdzhYkeuWGy9TXZYS" +
-                "MXinoujFT/5Fb29eXdCdrEVHdOOEyoTJCE6LTDhBc41syrxgc1rygksYiarmjILUp9D2YZgU0hK+nBUb" +
-                "UZYraiyUnEYgVdUomSI95GTFe/awlIoE1cI4mTalMNDXJpPKq8+NqNij47P8pWGVMsWXF9BRltPGSTi0" +
-                "AkJqWFiftfiSQnFRUhjQEX2aavv4c3SULPUpzjkHOTovyBXCea/5a23YeoeFvcBlv7VR9nEJssS4LrN0" +
-                "HM5m2NoTwm3whWudFnSMECYrV6D0rmBaCCPFbckeGHUugfrAGz042UFWAVoJpTfwLeL2jv8DqzpcH9Np" +
-                "geKVPg22yZFJKNZGL8CijG5XASQtPTWplLdGgGveqr0yOvrDJxtKsAqlwb+wVqcSlchoKV2xoWYoS+Dl" +
-                "/dDyQNdtGIZUOSGVDcFsOpH03FModCdyNjeMoGqRctfNX7vVqlt9+zXub+fCJgbDnmwoAxK8Nyz2nfe7" +
-                "L9uhgj6s+tEPItqslr8mtvU4OxQYLYJsP6S+b+Q4dJxWaNyKBUqGGdFZwjCTBqYIuQ9UNozAuUfSUabZ" +
-                "ktKeC5X4B5AM+ntrUdcAE36IKlu2qcQxTI65n/d7tCxYtVqevmHqhDklUzIyl1lr6TPcGQtaB9cjNz8D" +
-                "/cuy9bm9DPQDiNFt4U76FM9ppRta+oCwMOvxqOmWO79C9zqte342riEOvTCYTlbkngDWYTD/sOr3U2rp" +
-                "X83g1fad+u5BtPzps+9DtmGWYNMNV3tvz9b3TiCRgy2JxGYoeMf2Gdjzz5E/ztbydoBgbu42Inh6563/" +
-                "j9c9+hepgP3rjAkAAA==";
+                "H4sIAAAAAAAAE71V32/bNhB+119xQB6aDI63Jl1XBOiD53ipNjf2HHVoURQGLZ0lbjKpkpRd9a/fR8qW" +
+                "7cBD97DFEGCKd/fdr+9OtVTuFSUfpqP5bTwYT+7mo/fTeDa6pdf0Q1TvpT+/S5LJ/Xw4joe/Qfb8UPZ2" +
+                "dP9udJ/MPnTiq0PxdPIQJ7E3fjO4vwvQ14fyySyG9eCRyotDlYfhYDw6EP54KExmg19Hw2Ti/XcaLw81" +
+                "hpPxOL4dzebwM2qT++m0/H2cBPGrKLIum69sbr9/wyJjQ0X4w7WRKqe1/DqX2e4Np4XWJVWG15I3c63K" +
+                "ZuvANRVHOF1fEStnGm+1LLVwL1+QUHnJUc56xV4SvE01lKnSVjqp1SPh77VwbBQEpI0Enjih9AenTptr" +
+                "sqk4gW754ydyRvwZtJpdBqkuS4n8fHhR9Po//kVvH+5u6FFFozN6cEJlwmSEEEUmnKClRqVlXrC5LHnN" +
+                "JYzEquKMgtQX0/ZhmBTSEp6cFRtRlg3VFkpOI5HVqlYyRaHIyRUf2cNSKhJUCeNkWpfCQF+bTCqvvjRi" +
+                "xR4dj+XPNauUKb69gY6ynNZOIqAGCKlhYX3V4lsKbUZzYUBn9HGm7fNP0Vmy0Ze45xzE6aIgVwjno+Yv" +
+                "IIr1AQt7A2fftVn24QRVYrjLLJ2Huzle7QXBG2LhSqcFnSOFaeMKkMAVTGthpFiU7IHR8RKoz7zRs4sD" +
+                "ZBWglVB6B98i7n38G1jV4fqcLgs0r/RlsHWOSkKxMnoNFmW0aAJIWnqSUikXRoBr3qp1GZ394osNJViF" +
+                "1uBfWKtTiU5ktJGu2FEztCXw8v+h5Yn52zEMpXJCKhuS2c0k6aWnUJhT1GxpGElVIuVurr90p6Y7fX2a" +
+                "8PcbYpeDYU82tAEFPlobx8H7t8/79YI5XPWjb2S0O22eJrftYjuVGK2D7Dilvh/kOEycX8hYMgItw47o" +
+                "LGGYSQNTpNwHKhtG4twj6SjTbElpz4WV+AuQDPp7a1FVABN+iSpbtqXENUzOuZ/3e7QpWLVanr5h64Q9" +
+                "JVMyMpdZa+kr3BkL2ibXI7e8Av3Lso25dQb6AcTotnEXfYqX1OiaNj4hHMx2PWpacBdXmF6ndc/vxi3E" +
+                "qW8NtpMVuSeAdVjM3+z6U7Taf6cQ7mDfKrEbPYwhH/e555e+v8628nZMsZ0O6Q42PPq2/sPXNPobAZjU" +
+                "+hUJAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     

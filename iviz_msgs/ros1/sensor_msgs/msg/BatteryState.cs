@@ -92,7 +92,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out PowerSupplyHealth);
             b.Deserialize(out PowerSupplyTechnology);
             b.Deserialize(out Present);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -100,11 +99,10 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
                 }
                 CellVoltage = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -112,7 +110,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
                 }
                 CellTemperature = array;
             }
@@ -135,7 +133,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out PowerSupplyHealth);
             b.Deserialize(out PowerSupplyTechnology);
             b.Deserialize(out Present);
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -144,11 +141,10 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
                 }
                 CellVoltage = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -156,7 +152,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
                 }
                 CellTemperature = array;
             }

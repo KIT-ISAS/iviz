@@ -222,6 +222,11 @@ namespace Iviz.Msgs
         {
             return new ColorRGBA(c.R, c.G, c.B, alpha);
         }
+        
+        public static ColorRGBA WithScale(this in ColorRGBA c, float scale)
+        {
+            return new ColorRGBA(c.R * scale, c.G * scale, c.B * scale, c.A);
+        }
 
         public static ColorRGBA Interpolate(this in ColorRGBA c, in ColorRGBA v, float f)
         {

@@ -43,7 +43,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Action);
             b.DeserializeString(out Id);
             b.DeserializeStringArray(out JointNames);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -51,7 +50,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
                 }
                 JointValues = array;
             }
@@ -74,7 +73,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Id);
             b.Align4();
             b.DeserializeStringArray(out JointNames);
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -83,7 +81,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
                 }
                 JointValues = array;
             }

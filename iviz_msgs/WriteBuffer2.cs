@@ -531,6 +531,15 @@ public unsafe partial struct WriteBuffer2
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SerializeStructArray(duration[] val)
+    {
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
+        SerializeStructArrayCore(val);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray(Transform[] val)
     {
         int length = val.Length;

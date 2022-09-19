@@ -60,7 +60,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out Filled);
             b.Deserialize(out FillColor);
             b.Deserialize(out Lifetime);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -68,11 +67,10 @@ namespace Iviz.Msgs.VisualizationMsgs
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
                 }
                 Points = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -80,7 +78,7 @@ namespace Iviz.Msgs.VisualizationMsgs
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 16);
+                    b.DeserializeStructArray(ref Unsafe.As<StdMsgs.ColorRGBA, byte>(ref array[0]), n * 16);
                 }
                 OutlineColors = array;
             }
@@ -103,7 +101,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Align4();
             b.Deserialize(out FillColor);
             b.Deserialize(out Lifetime);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -112,11 +109,10 @@ namespace Iviz.Msgs.VisualizationMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
                 }
                 Points = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -124,7 +120,7 @@ namespace Iviz.Msgs.VisualizationMsgs
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 16);
+                    b.DeserializeStructArray(ref Unsafe.As<StdMsgs.ColorRGBA, byte>(ref array[0]), n * 16);
                 }
                 OutlineColors = array;
             }

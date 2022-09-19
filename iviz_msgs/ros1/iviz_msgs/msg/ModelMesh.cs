@@ -33,7 +33,6 @@ namespace Iviz.Msgs.IvizMsgs
         public ModelMesh(ref ReadBuffer b)
         {
             b.DeserializeString(out Name);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -41,11 +40,10 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
                 }
                 Vertices = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -53,11 +51,10 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
                 }
                 Normals = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -65,11 +62,10 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
                 }
                 Tangents = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -77,7 +73,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
                 }
                 BiTangents = array;
             }
@@ -103,7 +99,6 @@ namespace Iviz.Msgs.IvizMsgs
                 }
                 ColorChannels = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -111,7 +106,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new Triangle[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
+                    b.DeserializeStructArray(ref Unsafe.As<Triangle, byte>(ref array[0]), n * 12);
                 }
                 Faces = array;
             }
@@ -122,7 +117,6 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Align4();
             b.DeserializeString(out Name);
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -131,11 +125,10 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
                 }
                 Vertices = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -143,11 +136,10 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
                 }
                 Normals = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -155,11 +147,10 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
                 }
                 Tangents = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -167,7 +158,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
                 }
                 BiTangents = array;
             }
@@ -194,7 +185,6 @@ namespace Iviz.Msgs.IvizMsgs
                 }
                 ColorChannels = array;
             }
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -203,7 +193,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new Triangle[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
+                    b.DeserializeStructArray(ref Unsafe.As<Triangle, byte>(ref array[0]), n * 12);
                 }
                 Faces = array;
             }

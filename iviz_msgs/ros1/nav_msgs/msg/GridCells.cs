@@ -32,7 +32,6 @@ namespace Iviz.Msgs.NavMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out CellWidth);
             b.Deserialize(out CellHeight);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -40,7 +39,7 @@ namespace Iviz.Msgs.NavMsgs
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
                 }
                 Cells = array;
             }
@@ -52,7 +51,6 @@ namespace Iviz.Msgs.NavMsgs
             b.Align4();
             b.Deserialize(out CellWidth);
             b.Deserialize(out CellHeight);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -61,7 +59,7 @@ namespace Iviz.Msgs.NavMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
                 }
                 Cells = array;
             }

@@ -59,7 +59,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out ScanTime);
             b.Deserialize(out RangeMin);
             b.Deserialize(out RangeMax);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -67,11 +66,10 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
                 }
                 Ranges = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -79,7 +77,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
                 }
                 Intensities = array;
             }
@@ -96,7 +94,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out ScanTime);
             b.Deserialize(out RangeMin);
             b.Deserialize(out RangeMax);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -104,11 +101,10 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
                 }
                 Ranges = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -116,7 +112,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
                 }
                 Intensities = array;
             }

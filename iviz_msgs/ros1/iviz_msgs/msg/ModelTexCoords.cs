@@ -22,7 +22,6 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ModelTexCoords(ref ReadBuffer b)
         {
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -30,7 +29,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
                 }
                 Coords = array;
             }
@@ -38,7 +37,6 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ModelTexCoords(ref ReadBuffer2 b)
         {
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -47,7 +45,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
                 }
                 Coords = array;
             }

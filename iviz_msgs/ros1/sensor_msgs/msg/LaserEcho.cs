@@ -26,7 +26,6 @@ namespace Iviz.Msgs.SensorMsgs
         
         public LaserEcho(ref ReadBuffer b)
         {
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -34,7 +33,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
                 }
                 Echoes = array;
             }
@@ -42,7 +41,6 @@ namespace Iviz.Msgs.SensorMsgs
         
         public LaserEcho(ref ReadBuffer2 b)
         {
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -51,7 +49,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
                 }
                 Echoes = array;
             }

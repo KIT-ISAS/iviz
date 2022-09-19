@@ -53,7 +53,6 @@ namespace Iviz.Msgs.RclInterfaces
             b.Deserialize(out IntegerValue);
             b.Deserialize(out DoubleValue);
             b.DeserializeString(out StringValue);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -61,11 +60,10 @@ namespace Iviz.Msgs.RclInterfaces
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
+                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
                 }
                 ByteArrayValue = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -73,11 +71,10 @@ namespace Iviz.Msgs.RclInterfaces
                     : new bool[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
+                    b.DeserializeStructArray(ref Unsafe.As<bool, byte>(ref array[0]), n * 1);
                 }
                 BoolArrayValue = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -85,11 +82,10 @@ namespace Iviz.Msgs.RclInterfaces
                     : new long[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
+                    b.DeserializeStructArray(ref Unsafe.As<long, byte>(ref array[0]), n * 8);
                 }
                 IntegerArrayValue = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -97,7 +93,7 @@ namespace Iviz.Msgs.RclInterfaces
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
+                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
                 }
                 DoubleArrayValue = array;
             }
@@ -112,7 +108,6 @@ namespace Iviz.Msgs.RclInterfaces
             b.Deserialize(out IntegerValue);
             b.Deserialize(out DoubleValue);
             b.DeserializeString(out StringValue);
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -121,11 +116,10 @@ namespace Iviz.Msgs.RclInterfaces
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
+                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
                 }
                 ByteArrayValue = array;
             }
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -134,11 +128,10 @@ namespace Iviz.Msgs.RclInterfaces
                     : new bool[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
+                    b.DeserializeStructArray(ref Unsafe.As<bool, byte>(ref array[0]), n * 1);
                 }
                 BoolArrayValue = array;
             }
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -148,11 +141,10 @@ namespace Iviz.Msgs.RclInterfaces
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
+                    b.DeserializeStructArray(ref Unsafe.As<long, byte>(ref array[0]), n * 8);
                 }
                 IntegerArrayValue = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -161,7 +153,7 @@ namespace Iviz.Msgs.RclInterfaces
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
+                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
                 }
                 DoubleArrayValue = array;
             }

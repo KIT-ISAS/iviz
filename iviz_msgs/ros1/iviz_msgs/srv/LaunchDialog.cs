@@ -42,7 +42,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public string RosServiceType => ServiceType;
         
-        public string RosMd5Sum => "42cb70568528ce6945775ca5320e6701";
+        public string RosMd5Sum => "77df1f255ef8305a4f2d1cdc89b0b224";
         
         public override string ToString() => Extensions.ToString(this);
     }

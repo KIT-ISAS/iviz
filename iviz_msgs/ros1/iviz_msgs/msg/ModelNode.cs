@@ -33,7 +33,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.DeserializeString(out Name);
             b.Deserialize(out Parent);
             Transform = new Matrix4(ref b);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -41,7 +40,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new int[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<int, byte>(ref array[0]), n * 4);
                 }
                 Meshes = array;
             }
@@ -54,7 +53,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Align4();
             b.Deserialize(out Parent);
             Transform = new Matrix4(ref b);
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -63,7 +61,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new int[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<int, byte>(ref array[0]), n * 4);
                 }
                 Meshes = array;
             }

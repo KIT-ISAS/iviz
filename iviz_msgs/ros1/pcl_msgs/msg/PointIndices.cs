@@ -25,7 +25,6 @@ namespace Iviz.Msgs.PclMsgs
         public PointIndices(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -33,7 +32,7 @@ namespace Iviz.Msgs.PclMsgs
                     : new int[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<int, byte>(ref array[0]), n * 4);
                 }
                 Indices = array;
             }
@@ -42,7 +41,6 @@ namespace Iviz.Msgs.PclMsgs
         public PointIndices(ref ReadBuffer2 b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -51,7 +49,7 @@ namespace Iviz.Msgs.PclMsgs
                     : new int[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<int, byte>(ref array[0]), n * 4);
                 }
                 Indices = array;
             }

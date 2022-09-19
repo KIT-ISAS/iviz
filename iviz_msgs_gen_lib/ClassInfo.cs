@@ -943,7 +943,6 @@ public sealed class ClassInfo
                             else
                             {
                                 //lines.Add($"    b.DeserializeStructArray(out {prefix}{variable.CsFieldName});");
-                                lines.Add($"    unsafe");
                                 lines.Add($"    {{");
                                 AddAlign(4, "    ");
                                 lines.Add($"        int n = b.DeserializeArrayLength();");
@@ -959,7 +958,7 @@ public sealed class ClassInfo
                                 }
 
                                 lines.Add(
-                                    $"            b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * {BuiltInsSizes[variable.RosClassType]});");
+                                    $"            b.DeserializeStructArray(ref Unsafe.As<{variable.CsClassType}, byte>(ref array[0]), n * {BuiltInsSizes[variable.RosClassType]});");
                                 lines.Add($"        }}");
                                 lines.Add($"        {prefix}{variable.CsFieldName} = array;");
                                 lines.Add($"    }}");
@@ -981,7 +980,6 @@ public sealed class ClassInfo
                             int fixedSize = BuiltInsSizes[variable.RosClassType];
                             int arraySize = variable.ArraySize;
 
-                            lines.Add($"    unsafe");
                             lines.Add($"    {{");
                             if (isRos2)
                             {
@@ -992,7 +990,7 @@ public sealed class ClassInfo
                             lines.Add(
                                 $"        var array = new {variable.CsClassType}[{arraySize}];");
                             lines.Add(
-                                $"        b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), {arraySize} * {fixedSize});");
+                                $"        b.DeserializeStructArray(ref Unsafe.As<{variable.CsClassType}, byte>(ref array[0]), {arraySize} * {fixedSize});");
                             lines.Add($"        {prefix}{variable.CsFieldName} = array;");
                             lines.Add($"    }}");
                             break;
@@ -1034,7 +1032,6 @@ public sealed class ClassInfo
                         case VariableElement.DynamicSizeArray when variable.ClassIsBlittable:
                             //lines.Add($"    b.DeserializeStructArray(out {prefix}{variable.CsFieldName});");
 
-                            lines.Add($"    unsafe");
                             lines.Add($"    {{");
                             AddAlign(4, "    ");
                             lines.Add($"        int n = b.DeserializeArrayLength();");
@@ -1050,7 +1047,7 @@ public sealed class ClassInfo
                             }
 
                             lines.Add(
-                                $"            b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * {variable.ClassInfo!.Ros1FixedSize});");
+                                $"            b.DeserializeStructArray(ref Unsafe.As<{variable.CsClassType}, byte>(ref array[0]), n * {variable.ClassInfo!.Ros1FixedSize});");
                             lines.Add($"        }}");
                             lines.Add($"        {prefix}{variable.CsFieldName} = array;");
                             lines.Add($"    }}");
@@ -1089,7 +1086,6 @@ public sealed class ClassInfo
                                 int fixedSize = variable.ClassInfo?.Ros1FixedSize ?? 0;
                                 int arraySize = variable.ArraySize;
 
-                                lines.Add($"    unsafe");
                                 lines.Add($"    {{");
                                 if (isRos2)
                                 {
@@ -1100,15 +1096,14 @@ public sealed class ClassInfo
                                 lines.Add(
                                     $"        var array = new {variable.CsClassType}[{arraySize}];");
                                 lines.Add(
-                                    $"        b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), {arraySize} * {fixedSize});");
+                                    $"        b.DeserializeStructArray(ref Unsafe.As<{variable.CsClassType}, byte>(ref array[0]), {arraySize} * {fixedSize});");
                                 lines.Add($"        {prefix}{variable.CsFieldName} = array;");
                                 lines.Add($"    }}");
                                 break;
                             }
 
                             lines.Add($"    {{");
-                            lines.Add(
-                                $"    var array = b.DeserializeArray<{variable.CsClassType}>({variable.ArraySize});");
+                            lines.Add($"        var array = new {variable.CsClassType}[{variable.ArraySize}];");
                             lines.Add($"    for (int i = 0; i < {variable.ArraySize}; i++)");
                             lines.Add("    {");
                             lines.Add(variable.ClassIsStruct && !isAction
@@ -1641,7 +1636,8 @@ public sealed class ClassInfo
                 }
                 else
                 {
-                    lines.Add($"        public override int Ros2MessageLength({Name} msg) => msg.AddRos2MessageLength(0);");
+                    lines.Add(
+                        $"        public override int Ros2MessageLength({Name} msg) => msg.AddRos2MessageLength(0);");
                 }
             }
 

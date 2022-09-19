@@ -143,7 +143,6 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetFramePoseResponse(ref ReadBuffer b)
         {
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -151,11 +150,10 @@ namespace Iviz.Msgs.IvizMsgs
                     : new bool[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
+                    b.DeserializeStructArray(ref Unsafe.As<bool, byte>(ref array[0]), n * 1);
                 }
                 IsValid = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -163,7 +161,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Pose[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 56);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Pose, byte>(ref array[0]), n * 56);
                 }
                 Poses = array;
             }
@@ -171,7 +169,6 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetFramePoseResponse(ref ReadBuffer2 b)
         {
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -180,11 +177,10 @@ namespace Iviz.Msgs.IvizMsgs
                     : new bool[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
+                    b.DeserializeStructArray(ref Unsafe.As<bool, byte>(ref array[0]), n * 1);
                 }
                 IsValid = array;
             }
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -194,7 +190,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 56);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Pose, byte>(ref array[0]), n * 56);
                 }
                 Poses = array;
             }

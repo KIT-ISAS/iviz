@@ -27,21 +27,19 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public Plane(ref ReadBuffer b)
         {
-            unsafe
             {
                 var array = new double[4];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 4 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 4 * 8);
                 Coef = array;
             }
         }
         
         public Plane(ref ReadBuffer2 b)
         {
-            unsafe
             {
                 b.Align8();
                 var array = new double[4];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 4 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 4 * 8);
                 Coef = array;
             }
         }

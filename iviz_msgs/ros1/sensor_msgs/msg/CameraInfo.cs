@@ -146,7 +146,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Height);
             b.Deserialize(out Width);
             b.DeserializeString(out DistortionModel);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -154,26 +153,23 @@ namespace Iviz.Msgs.SensorMsgs
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
+                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
                 }
                 D = array;
             }
-            unsafe
             {
                 var array = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
                 K = array;
             }
-            unsafe
             {
                 var array = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
                 R = array;
             }
-            unsafe
             {
                 var array = new double[12];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 12 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 12 * 8);
                 P = array;
             }
             b.Deserialize(out BinningX);
@@ -188,7 +184,6 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Height);
             b.Deserialize(out Width);
             b.DeserializeString(out DistortionModel);
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -198,26 +193,23 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
+                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
                 }
                 D = array;
             }
-            unsafe
             {
                 var array = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
                 K = array;
             }
-            unsafe
             {
                 var array = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
                 R = array;
             }
-            unsafe
             {
                 var array = new double[12];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 12 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 12 * 8);
                 P = array;
             }
             b.Deserialize(out BinningX);

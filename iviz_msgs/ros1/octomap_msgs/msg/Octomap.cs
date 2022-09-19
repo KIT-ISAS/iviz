@@ -31,7 +31,6 @@ namespace Iviz.Msgs.OctomapMsgs
             b.Deserialize(out Binary);
             b.DeserializeString(out Id);
             b.Deserialize(out Resolution);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -39,7 +38,7 @@ namespace Iviz.Msgs.OctomapMsgs
                     : new sbyte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
+                    b.DeserializeStructArray(ref Unsafe.As<sbyte, byte>(ref array[0]), n * 1);
                 }
                 Data = array;
             }
@@ -53,7 +52,6 @@ namespace Iviz.Msgs.OctomapMsgs
             b.DeserializeString(out Id);
             b.Align8();
             b.Deserialize(out Resolution);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -61,7 +59,7 @@ namespace Iviz.Msgs.OctomapMsgs
                     : new sbyte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
+                    b.DeserializeStructArray(ref Unsafe.As<sbyte, byte>(ref array[0]), n * 1);
                 }
                 Data = array;
             }

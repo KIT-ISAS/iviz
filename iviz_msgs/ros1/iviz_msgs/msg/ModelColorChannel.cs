@@ -22,7 +22,6 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ModelColorChannel(ref ReadBuffer b)
         {
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -30,7 +29,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new Color32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<Color32, byte>(ref array[0]), n * 4);
                 }
                 Colors = array;
             }
@@ -38,7 +37,6 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ModelColorChannel(ref ReadBuffer2 b)
         {
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -47,7 +45,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new Color32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<Color32, byte>(ref array[0]), n * 4);
                 }
                 Colors = array;
             }

@@ -39,7 +39,6 @@ namespace Iviz.Msgs.ShapeMsgs
                 }
                 Triangles = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -47,7 +46,7 @@ namespace Iviz.Msgs.ShapeMsgs
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
                 }
                 Vertices = array;
             }
@@ -67,7 +66,6 @@ namespace Iviz.Msgs.ShapeMsgs
                 }
                 Triangles = array;
             }
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -77,7 +75,7 @@ namespace Iviz.Msgs.ShapeMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 24);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
                 }
                 Vertices = array;
             }

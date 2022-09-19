@@ -40,7 +40,6 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.DeserializeString(out Format);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -48,7 +47,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
+                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
                 }
                 Data = array;
             }
@@ -59,7 +58,6 @@ namespace Iviz.Msgs.SensorMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align4();
             b.DeserializeString(out Format);
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -68,7 +66,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
+                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
                 }
                 Data = array;
             }

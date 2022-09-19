@@ -23,7 +23,6 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public Polygon(ref ReadBuffer b)
         {
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -31,7 +30,7 @@ namespace Iviz.Msgs.GeometryMsgs
                     : new Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
+                    b.DeserializeStructArray(ref Unsafe.As<Point32, byte>(ref array[0]), n * 12);
                 }
                 Points = array;
             }
@@ -39,7 +38,6 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public Polygon(ref ReadBuffer2 b)
         {
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -48,7 +46,7 @@ namespace Iviz.Msgs.GeometryMsgs
                     : new Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 12);
+                    b.DeserializeStructArray(ref Unsafe.As<Point32, byte>(ref array[0]), n * 12);
                 }
                 Points = array;
             }

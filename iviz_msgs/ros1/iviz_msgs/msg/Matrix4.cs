@@ -23,21 +23,19 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Matrix4(ref ReadBuffer b)
         {
-            unsafe
             {
                 var array = new float[16];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 16 * 4);
+                b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), 16 * 4);
                 M = array;
             }
         }
         
         public Matrix4(ref ReadBuffer2 b)
         {
-            unsafe
             {
                 b.Align4();
                 var array = new float[16];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 16 * 4);
+                b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), 16 * 4);
                 M = array;
             }
         }

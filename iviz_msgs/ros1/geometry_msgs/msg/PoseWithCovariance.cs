@@ -30,10 +30,9 @@ namespace Iviz.Msgs.GeometryMsgs
         public PoseWithCovariance(ref ReadBuffer b)
         {
             b.Deserialize(out Pose);
-            unsafe
             {
                 var array = new double[36];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 36 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 36 * 8);
                 Covariance = array;
             }
         }
@@ -42,10 +41,9 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             b.Align8();
             b.Deserialize(out Pose);
-            unsafe
             {
                 var array = new double[36];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 36 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 36 * 8);
                 Covariance = array;
             }
         }

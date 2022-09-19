@@ -30,7 +30,6 @@ namespace Iviz.Msgs.StdMsgs
         public Int8MultiArray(ref ReadBuffer b)
         {
             Layout = new MultiArrayLayout(ref b);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -38,7 +37,7 @@ namespace Iviz.Msgs.StdMsgs
                     : new sbyte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
+                    b.DeserializeStructArray(ref Unsafe.As<sbyte, byte>(ref array[0]), n * 1);
                 }
                 Data = array;
             }
@@ -47,7 +46,6 @@ namespace Iviz.Msgs.StdMsgs
         public Int8MultiArray(ref ReadBuffer2 b)
         {
             Layout = new MultiArrayLayout(ref b);
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -56,7 +54,7 @@ namespace Iviz.Msgs.StdMsgs
                     : new sbyte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
+                    b.DeserializeStructArray(ref Unsafe.As<sbyte, byte>(ref array[0]), n * 1);
                 }
                 Data = array;
             }

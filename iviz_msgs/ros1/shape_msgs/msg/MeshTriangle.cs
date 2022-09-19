@@ -23,21 +23,19 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public MeshTriangle(ref ReadBuffer b)
         {
-            unsafe
             {
                 var array = new uint[3];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 3 * 4);
+                b.DeserializeStructArray(ref Unsafe.As<uint, byte>(ref array[0]), 3 * 4);
                 VertexIndices = array;
             }
         }
         
         public MeshTriangle(ref ReadBuffer2 b)
         {
-            unsafe
             {
                 b.Align4();
                 var array = new uint[3];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 3 * 4);
+                b.DeserializeStructArray(ref Unsafe.As<uint, byte>(ref array[0]), 3 * 4);
                 VertexIndices = array;
             }
         }

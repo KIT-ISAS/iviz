@@ -45,10 +45,9 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out MagneticField_);
-            unsafe
             {
                 var array = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
                 MagneticFieldCovariance = array;
             }
         }
@@ -58,10 +57,9 @@ namespace Iviz.Msgs.SensorMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Align8();
             b.Deserialize(out MagneticField_);
-            unsafe
             {
                 var array = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
                 MagneticFieldCovariance = array;
             }
         }

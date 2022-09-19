@@ -9,15 +9,15 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class Trajectory : IHasSerializer<Trajectory>, IMessage
     {
         [DataMember (Name = "poses")] public GeometryMsgs.Pose[] Poses;
-        [DataMember (Name = "timestamps")] public time[] Timestamps;
+        [DataMember (Name = "timestamps")] public duration[] Timestamps;
     
         public Trajectory()
         {
             Poses = EmptyArray<GeometryMsgs.Pose>.Value;
-            Timestamps = EmptyArray<time>.Value;
+            Timestamps = EmptyArray<duration>.Value;
         }
         
-        public Trajectory(GeometryMsgs.Pose[] Poses, time[] Timestamps)
+        public Trajectory(GeometryMsgs.Pose[] Poses, duration[] Timestamps)
         {
             this.Poses = Poses;
             this.Timestamps = Timestamps;
@@ -25,7 +25,6 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Trajectory(ref ReadBuffer b)
         {
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -33,19 +32,18 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Pose[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 56);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Pose, byte>(ref array[0]), n * 56);
                 }
                 Poses = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
-                    ? EmptyArray<time>.Value
-                    : new time[n];
+                    ? EmptyArray<duration>.Value
+                    : new duration[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
+                    b.DeserializeStructArray(ref Unsafe.As<duration, byte>(ref array[0]), n * 8);
                 }
                 Timestamps = array;
             }
@@ -53,7 +51,6 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Trajectory(ref ReadBuffer2 b)
         {
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -63,19 +60,18 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 56);
+                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Pose, byte>(ref array[0]), n * 56);
                 }
                 Poses = array;
             }
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
-                    ? EmptyArray<time>.Value
-                    : new time[n];
+                    ? EmptyArray<duration>.Value
+                    : new duration[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 8);
+                    b.DeserializeStructArray(ref Unsafe.As<duration, byte>(ref array[0]), n * 8);
                 }
                 Timestamps = array;
             }
@@ -133,16 +129,16 @@ namespace Iviz.Msgs.IvizMsgs
         public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
-        public const string Md5Sum = "106d0bcefed39b91bf6dcd161d3c7864";
+        public const string Md5Sum = "f435db5957a1950f948a0591eb95bfa2";
     
         public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE72RPwvCMBDF9/sUB65SF3EQHJycBEU3EQl6rQGT1NyJfz69l2Jbi4OLmCX3kkvyey8F" +
-                "BUcS7zvHBQ8WgWmzxVInBrEuiTSxGFcyAEx+PGC+mo2x+ICAHk4xUhmJyYsRGzyGvAJD6zGPRMil2VMf" +
-                "98Gl5cNr31a9xquOtj6bISyC9dI0wPJihKKv7m37/mVQUdTh+mhZ8fVt6xnlSC2/ejGqEnLHLuSnYGQ0" +
-                "xFtT3Zvq8R/8NrraQ/NRrMG/59mFT+rc5p6H6DL44qiurgBPjHOw/qsCAAA=";
+                "H4sIAAAAAAAAE72RwQrCMAyG73mKgFfRi3gQPHjyJCh6E5Gi2Vaw7WwydD692XCb4sGLrJcmadJ+/9+U" +
+                "giOJ5dFxyuN1YNofMNeN4VxEIzZ4LYh1xGJczgAw//OC1XY5w/QLBAa4wEh5JCYvNQqGpIZD6zGJRMi5" +
+                "OdEQT8FV5fPr3Na9xmsebTM7QlgH66VtgE1hhKKv7+36+hKoKKpwl1lWfH3bekbJqONXLUazCvlDLiSX" +
+                "YGQ6wXsblW306Ae/s67R0H4Uq/Hvfn7CV9m18z0J0Y3gh6ImugE8AXzpGQKvAgAA";
                 
         public override string ToString() => Extensions.ToString(this);
     

@@ -23,7 +23,6 @@ namespace Iviz.Msgs.PclMsgs
         
         public Vertices(ref ReadBuffer b)
         {
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -31,7 +30,7 @@ namespace Iviz.Msgs.PclMsgs
                     : new uint[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<uint, byte>(ref array[0]), n * 4);
                 }
                 Vertices_ = array;
             }
@@ -39,7 +38,6 @@ namespace Iviz.Msgs.PclMsgs
         
         public Vertices(ref ReadBuffer2 b)
         {
-            unsafe
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -48,7 +46,7 @@ namespace Iviz.Msgs.PclMsgs
                     : new uint[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<uint, byte>(ref array[0]), n * 4);
                 }
                 Vertices_ = array;
             }

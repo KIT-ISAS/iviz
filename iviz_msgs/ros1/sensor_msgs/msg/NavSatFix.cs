@@ -58,10 +58,9 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Latitude);
             b.Deserialize(out Longitude);
             b.Deserialize(out Altitude);
-            unsafe
             {
                 var array = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
                 PositionCovariance = array;
             }
             b.Deserialize(out PositionCovarianceType);
@@ -75,10 +74,9 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Latitude);
             b.Deserialize(out Longitude);
             b.Deserialize(out Altitude);
-            unsafe
             {
                 var array = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
                 PositionCovariance = array;
             }
             b.Deserialize(out PositionCovarianceType);

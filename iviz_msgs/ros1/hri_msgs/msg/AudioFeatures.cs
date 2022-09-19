@@ -37,7 +37,6 @@ namespace Iviz.Msgs.HriMsgs
             b.Deserialize(out RMS);
             b.Deserialize(out Pitch);
             b.Deserialize(out HNR);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -45,7 +44,7 @@ namespace Iviz.Msgs.HriMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
                 }
                 MFCC = array;
             }
@@ -58,7 +57,6 @@ namespace Iviz.Msgs.HriMsgs
             b.Deserialize(out RMS);
             b.Deserialize(out Pitch);
             b.Deserialize(out HNR);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -66,7 +64,7 @@ namespace Iviz.Msgs.HriMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 4);
+                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
                 }
                 MFCC = array;
             }

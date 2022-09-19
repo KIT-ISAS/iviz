@@ -26,20 +26,18 @@ namespace Iviz.Msgs.UniqueIdentifierMsgs
         
         public UUID(ref ReadBuffer b)
         {
-            unsafe
             {
                 var array = new byte[16];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 16 * 1);
+                b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), 16 * 1);
                 Uuid = array;
             }
         }
         
         public UUID(ref ReadBuffer2 b)
         {
-            unsafe
             {
                 var array = new byte[16];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 16 * 1);
+                b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), 16 * 1);
                 Uuid = array;
             }
         }

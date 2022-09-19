@@ -239,12 +239,12 @@ public unsafe struct ReadBuffer
     #endregion
 
     #region arrays
-
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(void* value, int count)
+    public void DeserializeStructArray(ref byte value, int count)
     {
         ThrowIfOutOfRange(count);
-        Unsafe.CopyBlock(value, cursor, (uint)count);
+        Unsafe.CopyBlock(ref value, ref *cursor, (uint)count);
         Advance(count);
     }
 
@@ -384,7 +384,7 @@ public unsafe struct ReadBuffer
             return generator.RosDeserialize(ref b);
         }
     }
-    
+
     public static T Deserialize<T>(Deserializer<T> generator, ReadOnlySpan<byte> buffer)
         where T : IMessage
     {

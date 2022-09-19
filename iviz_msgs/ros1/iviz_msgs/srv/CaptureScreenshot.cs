@@ -135,14 +135,12 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Width);
             b.Deserialize(out Height);
             b.Deserialize(out Bpp);
-            unsafe
             {
                 var array = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
                 Intrinsics = array;
             }
             b.Deserialize(out Pose);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -150,7 +148,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
+                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
                 }
                 Data = array;
             }
@@ -166,15 +164,13 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Width);
             b.Deserialize(out Height);
             b.Deserialize(out Bpp);
-            unsafe
             {
                 b.Align8();
                 var array = new double[9];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
                 Intrinsics = array;
             }
             b.Deserialize(out Pose);
-            unsafe
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -182,7 +178,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), n * 1);
+                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
                 }
                 Data = array;
             }

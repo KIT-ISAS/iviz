@@ -31,10 +31,9 @@ namespace Iviz.Msgs.GeometryMsgs
         public TwistWithCovariance(ref ReadBuffer b)
         {
             Twist = new Twist(ref b);
-            unsafe
             {
                 var array = new double[36];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 36 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 36 * 8);
                 Covariance = array;
             }
         }
@@ -42,11 +41,10 @@ namespace Iviz.Msgs.GeometryMsgs
         public TwistWithCovariance(ref ReadBuffer2 b)
         {
             Twist = new Twist(ref b);
-            unsafe
             {
                 b.Align8();
                 var array = new double[36];
-                b.DeserializeStructArray(Unsafe.AsPointer(ref array[0]), 36 * 8);
+                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 36 * 8);
                 Covariance = array;
             }
         }
