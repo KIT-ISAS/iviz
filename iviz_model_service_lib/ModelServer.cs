@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using Assimp;
+using Assimp.Configs;
+using Assimp.Unmanaged;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
@@ -175,7 +177,7 @@ public sealed class ModelServer : IDisposable
         foreach (string packagePath in paths)
         {
             string path = packagePath + "/" + subPath;
-            
+
             if (!File.Exists(path))
             {
                 LogError($"Failed to resolve uri '{uri}'. Reason: File '{path}' does not exist.");
@@ -218,7 +220,7 @@ public sealed class ModelServer : IDisposable
             LogError($"Failed to resolve uri '{msg.Request.Uri}'. Reason: Invalid uri.");
             return;
         }
-        
+
         LogUp(uri);
 
         string? modelPath;
@@ -294,7 +296,7 @@ public sealed class ModelServer : IDisposable
         {
             BuiltIns.ThrowArgumentNull(nameof(msg));
         }
-        
+
         // TODO: force conversion to either png or jpg
 
         if (!Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out var uri))
@@ -383,9 +385,20 @@ public sealed class ModelServer : IDisposable
                 orientationHint = node.InnerText ?? "";
             }
         }
+        
+        importer.SetConfig(new IntegerPropertyConfig(
+            AiConfigs.AI_CONFIG_PP_RVC_FLAGS,
+            (int)ExcludeComponent.Normals
+        ));
+        
+        importer.SetConfig(new NormalSmoothingAngleConfig(60));
 
         var scene = importer.ImportFile(fileName,
-            PostProcessPreset.TargetRealTimeMaximumQuality | PostProcessPreset.ConvertToLeftHanded);
+            PostProcessSteps.RemoveComponent |
+            PostProcessPreset.TargetRealTimeMaximumQuality |
+            PostProcessPreset.ConvertToLeftHanded |
+            PostProcessSteps.PreTransformVertices);
+        
         var msg = new Model
         {
             Meshes = new ModelMesh[scene.Meshes.Count],
