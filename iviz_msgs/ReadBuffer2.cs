@@ -276,12 +276,10 @@ public unsafe struct ReadBuffer2
 
         ThrowIfOutOfRange(count);
 
-        val = new SharedRent(count);
-        fixed (byte* valPtr = val.Array)
-        {
-            Unsafe.CopyBlock(valPtr, cursor, (uint)count);
-        }
+        var array = new SharedRent(count);
+        Unsafe.CopyBlock(ref array.Array[0], ref *cursor, (uint)count);
 
+        val = array;
         Advance(count);
     }
 

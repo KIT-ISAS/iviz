@@ -270,11 +270,8 @@ public unsafe struct ReadBuffer
         ThrowIfOutOfRange(size);
 
         var array = new T[count];
-        fixed (T* valPtr = array)
-        {
-            Unsafe.CopyBlock(valPtr, cursor, (uint)size);
-        }
-
+        Unsafe.CopyBlock(ref Unsafe.As<T, byte>(ref array[0]), ref *cursor, (uint)size);
+        
         val = array;
         Advance(size);
     }
@@ -304,11 +301,7 @@ public unsafe struct ReadBuffer
         ThrowIfOutOfRange(count);
 
         var array = new SharedRent(count);
-
-        fixed (byte* valPtr = array.Array)
-        {
-            Unsafe.CopyBlock(valPtr, cursor, (uint)count);
-        }
+        Unsafe.CopyBlock(ref array.Array[0], ref *cursor, (uint)count);
 
         val = array;
         Advance(count);
@@ -487,6 +480,15 @@ public unsafe struct ReadBuffer
         ThrowIfOutOfRange(size);
         t = *(Triangle*)cursor;
         Advance(size);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref byte DeserializeStruct(int size)
+    {
+        ThrowIfOutOfRange(size);
+        ref byte t = ref *cursor;
+        Advance(size);
+        return ref t;
     }
 
     #endregion
