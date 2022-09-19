@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Resources;
@@ -21,16 +22,16 @@ namespace Iviz.Displays.XR
         [SerializeField] XRScreenDraggable? disc;
         [SerializeField] MeshMarkerDisplay? sphere;
         [SerializeField] MeshMarkerDisplay? glow;
-        [SerializeField] float period = 0.1f;
         [SerializeField] Transform? mTransform;
 
-        readonly List<Vector3> positions = new(8);
+        readonly List<Vector3> positions = new(8) { Vector3.zero };
         readonly List<LineWithColor> lineBuffer = new(8);
 
         Color secondColor;
         LineDisplay? lines;
         LineDisplay? segment;
         readonly List<MeshMarkerDisplay> corners = new();
+        CancellationTokenSource? tokenSource;
 
         LineDisplay Lines => ResourcePool.RentChecked(ref lines, Transform);
         LineDisplay Segments => ResourcePool.RentChecked(ref segment, Transform);
@@ -43,7 +44,7 @@ namespace Iviz.Displays.XR
         MeshMarkerDisplay Sphere => sphere.AssertNotNull(nameof(sphere));
         MeshMarkerDisplay Glow => glow.AssertNotNull(nameof(glow));
 
-        public event Action<List<Vector3>, float>? ProvidedTrajectory;
+        public event Action<List<Vector3>>? ProvidedTrajectory;
         public event Action<int>? Clicked;
 
         public bool Interactable
@@ -79,7 +80,7 @@ namespace Iviz.Displays.XR
                 }
             }
         }
-        
+
         void Awake()
         {
             Disc.StartDragging += StartWriting;
@@ -96,7 +97,7 @@ namespace Iviz.Displays.XR
             Segments.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
 
             Sphere.MakeHalfLitAlwaysVisible();
-            
+
             Send.Icon = XRIcon.Ok;
             Caption = "Send";
 
@@ -111,17 +112,14 @@ namespace Iviz.Displays.XR
         }
 
         void StartWriting()
-        { 
+        {
+            tokenSource?.Cancel();
+
             Holder.SetActive(false);
             Glow.Visible = true;
             Sphere.EmissiveColor = Color;
 
             GameThread.EveryFrame += UpdateSegment;
-
-            if (positions.Count == 0)
-            {
-                positions.Add(Disc.Transform.localPosition);
-            }
         }
 
         void StopWriting()
@@ -134,20 +132,22 @@ namespace Iviz.Displays.XR
 
             var currentPosition = Disc.Transform.localPosition;
             positions.Add(currentPosition);
-            
+
             LineUtils.AddLineStipple(lineBuffer, positions[^2], currentPosition, stippleLength: 0.25f);
             Lines.Set(lineBuffer.AsReadOnlySpan(), false);
 
             ResetCorners();
-            
+
             Segments.Reset();
 
-            ProvidedTrajectory?.Invoke(positions, period);
+            ProvidedTrajectory?.Invoke(positions);
         }
 
         void SendTrajectory()
         {
             positions.Clear();
+            positions.Add(Vector3.zero);
+            
             lineBuffer.Clear();
             Lines.Reset();
             ResetCorners();
@@ -161,13 +161,15 @@ namespace Iviz.Displays.XR
         void ResetTrajectory()
         {
             positions.Clear();
+            positions.Add(Vector3.zero);
+            
             lineBuffer.Clear();
             Lines.Reset();
             ResetCorners();
 
-            Disc.Transform.localPosition = Vector3.zero;
+            JumpTo(Vector3.zero);
             Holder.SetActive(false);
-            ProvidedTrajectory?.Invoke(positions, period);
+            ProvidedTrajectory?.Invoke(positions);
         }
 
         void ResetCorners()
@@ -179,7 +181,7 @@ namespace Iviz.Displays.XR
             {
                 corners[i].Transform.localPosition = positions[i];
             }
-            
+
             if (cornersCount < positionsCount)
             {
                 for (int i = cornersCount; i < positionsCount; i++)
@@ -193,11 +195,11 @@ namespace Iviz.Displays.XR
                 {
                     corners[i].ReturnToPool(Resource.Displays.Cube);
                 }
-                
+
                 corners.RemoveRange(positionsCount, cornersCount - positionsCount);
             }
         }
-        
+
         static MeshMarkerDisplay CreateCorner(Vector3 position, Transform transform, Color color)
         {
             var newCorner = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, transform);
@@ -209,10 +211,10 @@ namespace Iviz.Displays.XR
             newCorner.MakeHalfLitAlwaysVisible();
             return newCorner;
         }
-        
+
         void UndoTrajectory()
         {
-            if (positions.Count == 0)
+            if (positions.Count == 1)
             {
                 return;
             }
@@ -229,8 +231,10 @@ namespace Iviz.Displays.XR
             Segments.Reset();
             ResetCorners();
 
-            Disc.Transform.localPosition = positions[^1];
-            ProvidedTrajectory?.Invoke(positions, period);
+            Holder.SetActive(positions.Count > 1);
+
+            JumpTo(positions[^1]);
+            ProvidedTrajectory?.Invoke(positions);
         }
 
         void UpdateSegment()
@@ -245,6 +249,7 @@ namespace Iviz.Displays.XR
 
         public void Suspend()
         {
+            tokenSource?.Cancel();
             ProvidedTrajectory = null;
             Lines.Reset();
             Segments.Reset();
@@ -263,6 +268,18 @@ namespace Iviz.Displays.XR
         public void SplitForRecycle()
         {
             lines.ReturnToPool();
+        }
+
+        void JumpTo(Vector3 targetPosition)
+        {
+            tokenSource?.Cancel();
+            tokenSource = new CancellationTokenSource();
+            var startPosition = Disc.Transform.localPosition;
+            FAnimator.Spawn(tokenSource.Token, 0.1f, t =>
+            {
+                var currentPosition = Vector3.Lerp(startPosition, targetPosition, Mathf.Sqrt(t));
+                Disc.Transform.localPosition = currentPosition;
+            });
         }
 
         public override string ToString() => $"[{nameof(TrajectoryDisc)}]";

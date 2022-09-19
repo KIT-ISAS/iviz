@@ -21,7 +21,8 @@ using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
 namespace Iviz.Controllers
 {
-    public sealed class VizWidgetListener : ListenerController, IMarkerDialogListener, IWidgetFeedback, IDialogFeedback, IBoundaryFeedback
+    public sealed class VizWidgetListener : ListenerController, IMarkerDialogListener, IWidgetFeedback, IDialogFeedback,
+        IBoundaryFeedback
     {
         static VizWidgetListener? defaultHandler;
         public static void DisposeDefaultHandler() => defaultHandler?.Dispose();
@@ -79,7 +80,7 @@ namespace Iviz.Controllers
 
         public VizWidgetListener(VizWidgetConfiguration? configuration, string topic, string type)
         {
-            string configTopic = configuration?.Topic ?? topic; 
+            string configTopic = configuration?.Topic ?? topic;
             string configType = configuration?.Type ?? type;
 
             switch (configType)
@@ -88,49 +89,49 @@ namespace Iviz.Controllers
                 {
                     var handler = new WidgetHandler(this);
                     vizHandler = handler;
-                    Listener = new Listener<Widget>(configTopic, handler.Handler,50);
+                    Listener = new Listener<Widget>(configTopic, handler.Handler, 50);
                     break;
                 }
                 case WidgetArray.MessageType:
                 {
                     var handler = new WidgetHandler(this);
                     vizHandler = handler;
-                    Listener = new Listener<WidgetArray>(configTopic, handler.Handler,50);
+                    Listener = new Listener<WidgetArray>(configTopic, handler.Handler, 50);
                     break;
                 }
                 case Dialog.MessageType:
                 {
                     var handler = new DialogHandler(this);
                     vizHandler = handler;
-                    Listener = new Listener<Dialog>(configTopic, handler.Handler,50);
+                    Listener = new Listener<Dialog>(configTopic, handler.Handler, 50);
                     break;
                 }
                 case DialogArray.MessageType:
                 {
                     var handler = new DialogHandler(this);
                     vizHandler = handler;
-                    Listener = new Listener<DialogArray>(configTopic, handler.Handler,50);
+                    Listener = new Listener<DialogArray>(configTopic, handler.Handler, 50);
                     break;
                 }
                 case RobotPreview.MessageType:
                 {
                     var handler = new RobotPreviewHandler();
                     vizHandler = handler;
-                    Listener = new Listener<RobotPreview>(configTopic, handler.Handler,50);
+                    Listener = new Listener<RobotPreview>(configTopic, handler.Handler, 50);
                     break;
                 }
                 case Boundary.MessageType:
                 {
                     var handler = new BoundaryHandler(this);
                     vizHandler = handler;
-                    Listener = new Listener<Boundary>(configTopic, handler.Handler,50);
+                    Listener = new Listener<Boundary>(configTopic, handler.Handler, 50);
                     break;
                 }
                 case BoundaryArray.MessageType:
                 {
                     var handler = new BoundaryHandler(this);
                     vizHandler = handler;
-                    Listener = new Listener<BoundaryArray>(configTopic, handler.Handler,50);
+                    Listener = new Listener<BoundaryArray>(configTopic, handler.Handler, 50);
                     break;
                 }
                 default:
@@ -237,24 +238,18 @@ namespace Iviz.Controllers
             });
         }
 
-        public void OnWidgetProvidedTrajectory(string id, string frameId, List<Vector3> points, float periodInSec)
+        public void OnWidgetProvidedTrajectory(string id, string frameId, List<Vector3> points)
         {
-            Debug.Log($"{ToString()}: Sending trajectory");
+            //Debug.Log($"{ToString()}: Sending trajectory");
             FeedbackSender?.Publish(new Feedback
             {
                 Header = CreateHeader(frameId),
                 VizId = RosManager.MyId ?? "",
                 Id = id,
                 Type = (byte)FeedbackType.TrajectoryChanged,
-                Trajectory = new Trajectory
-                {
-                    Poses = points
-                        .Select(point => Pose.Identity.WithPosition(point.Unity2RosVector3()))
-                        .ToArray(),
-                    Timestamps = Enumerable.Range(0, points.Count)
-                        .Select(i => SecsToTime(i * periodInSec))
-                        .ToArray()
-                }
+                Trajectory = points
+                    .Select(point => Pose.Identity.WithPosition(point.Unity2RosPoint()))
+                    .ToArray(),
             });
         }
 
@@ -290,6 +285,7 @@ namespace Iviz.Controllers
                 Header = CreateHeader(""),
                 VizId = RosManager.MyId ?? "",
                 Id = id,
+                ColliderId = otherId,
                 Type = (byte)FeedbackType.ColliderEntered,
             });
         }
@@ -301,6 +297,7 @@ namespace Iviz.Controllers
                 Header = CreateHeader(""),
                 VizId = RosManager.MyId ?? "",
                 Id = id,
+                ColliderId = otherId,
                 Type = (byte)FeedbackType.ColliderExited,
             });
         }
@@ -316,13 +313,6 @@ namespace Iviz.Controllers
         {
             bounds = null;
             return false;
-        }
-
-        static time SecsToTime(float time)
-        {
-            int numSecs = (int)time;
-            int numNSecs = (int)((time - numSecs) * 10_000_000);
-            return new time(numSecs, numNSecs);
         }
 
         public override void Dispose()

@@ -32,14 +32,14 @@ namespace Iviz.Controllers
 
     public enum FeedbackType : byte
     {
-        Expired = Feedback.TYPE_EXPIRED,
+        Expired = Feedback.TYPE_DIALOG_EXPIRED,
         ButtonClick = Feedback.TYPE_BUTTON_CLICK,
         MenuEntryClick = Feedback.TYPE_MENUENTRY_CLICK,
         PositionChanged = Feedback.TYPE_POSITION_CHANGED,
         OrientationChanged = Feedback.TYPE_ORIENTATION_CHANGED,
         ScaleChanged = Feedback.TYPE_SCALE_CHANGED,
         TrajectoryChanged = Feedback.TYPE_TRAJECTORY_CHANGED,
-        ColliderEntered = 7,
-        ColliderExited = 8,
+        ColliderEntered = Feedback.TYPE_COLLIDER_ENTERED,
+        ColliderExited = Feedback.TYPE_COLLIDER_EXITED,
     }    
 }

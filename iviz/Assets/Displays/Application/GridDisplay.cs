@@ -10,7 +10,7 @@ using Iviz.Tools;
 
 namespace Iviz.Displays
 {
-    public sealed class GridDisplay : MarkerDisplay, IRecyclable
+    public sealed class GridDisplay : MarkerDisplay, IRecyclable, ISupportsColor, ISupportsShadows, ISupportsPbr, ISupportsAROcclusion
     {
         public static readonly List<string> OrientationNames = new() { "XY", "YZ", "XZ" };
 
@@ -69,9 +69,8 @@ namespace Iviz.Displays
                 MeshRenderer.SetPropertyColor(value);
             }
         }
-
-
-        public Color InteriorColor
+        
+        public Color Color
         {
             get => interiorColor;
             set
@@ -92,6 +91,11 @@ namespace Iviz.Displays
                     display.Color = horizontalColor;
                 }
             }
+        }
+        
+        public Color EmissiveColor
+        {
+            set => InteriorObject.EmissiveColor = value;
         }
 
         float GridLineWidth
@@ -136,6 +140,26 @@ namespace Iviz.Displays
             set => InteriorObject.DiffuseTexture = value ? darkTexture : lightTexture;
         }
 
+        public bool EnableShadows
+        {
+            set => InteriorObject.EnableShadows = value;
+        }
+        
+        public float Metallic
+        {
+            set => InteriorObject.Metallic = value;
+        }
+        
+        public float Smoothness
+        {
+            set => InteriorObject.Smoothness = value;
+        }
+
+        public bool OcclusionOnly
+        {
+            set => InteriorObject.OcclusionOnly = value;
+        }
+
         void Awake()
         {
             InteriorObject.name = "Grid Interior";
@@ -151,7 +175,7 @@ namespace Iviz.Displays
 
             Orientation = GridOrientation.XY;
             GridColor = Color.white.WithAlpha(0.25f);
-            InteriorColor = Color.white * 0.5f;
+            Color = Color.white * 0.5f;
             GridLineWidth = 0.025f;
             GridCellSize = 1;
             NumberOfGridCells = 90;
@@ -269,7 +293,7 @@ namespace Iviz.Displays
                 resource.Transform.localScale = new Vector3(2 * GridLineWidth, 1, totalSize);
             }
 
-            InteriorColor = InteriorColor;
+            Color = Color;
         }
 
         public void SplitForRecycle()

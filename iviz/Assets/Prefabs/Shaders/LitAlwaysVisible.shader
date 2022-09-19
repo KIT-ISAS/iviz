@@ -9,7 +9,7 @@
         ZWrite On
 
         CGPROGRAM
-        #pragma surface surf Standard
+        #pragma surface surf Standard fullforwardshadows addshadow
         #pragma target 3.0
 
         struct Input

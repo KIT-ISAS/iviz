@@ -147,32 +147,10 @@ namespace Iviz.Displays
             {
                 if (FlipWinding)
                 {
-                    /*
-                    var triangles = MemoryMarshal.Cast<int, int3>(indices.AsSpan());
-                    int trianglesLength = triangles.Length;
-
-                    int j = 0;
-                    for (int i = 0; i < trianglesLength; i++)
-                    {
-                        int3 triangle;
-                        triangle.x = j;
-                        triangle.y = j + 2;
-                        triangle.z = j + 1;
-                        triangles[i] = triangle;
-                        j += 3;
-                    }
-                    */
                     IndicesUtils.FillIndicesFlipped(indices);
                 }
                 else
                 {
-                    /*
-                    int[] array = indices.Array; 
-                    for (int i = 0; i < pointsLength; i++)
-                    {
-                        array[i] = i;
-                    }
-                    */
                     IndicesUtils.FillIndices(indices);
                 }
 
@@ -250,10 +228,6 @@ namespace Iviz.Displays
             if (tangents.Length != 0)
             {
                 ownMesh.SetTangents(tangents);
-            }
-            else
-            {
-                ownMesh.RecalculateTangents();
             }
 
             Collider.SetLocalBounds(ownMesh.bounds);

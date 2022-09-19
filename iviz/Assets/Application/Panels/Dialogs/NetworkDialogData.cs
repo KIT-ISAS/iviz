@@ -396,7 +396,7 @@ namespace Iviz.App
                 {
                     DurabilityPolicy.SystemDefault => " | DurabilityPolicy: Default",
                     DurabilityPolicy.Volatile => " | Volatile",
-                    DurabilityPolicy.TransientLocal => " | TransientLocal",
+                    DurabilityPolicy.TransientLocal => $" | TransientLocal({profile.Depth.ToString()})",
                     DurabilityPolicy.Unknown => "",
                     _ => " | DurabilityPolicy: Unknown (" + (int)profile.Durability + ")"
                 });

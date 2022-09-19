@@ -34,6 +34,9 @@ namespace Iviz.Controllers
                 Offset = value.Offset.ToUnity();
                 Interactable = value.Interactable;
                 DarkMode = value.DarkMode;
+                Smoothness = value.Smoothness;
+                Metallic = value.Metallic;
+                RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
             }
         }
 
@@ -102,7 +105,7 @@ namespace Iviz.Controllers
             set
             {
                 config.InteriorColor = value.ToRos();
-                grid.InteriorColor = value;
+                grid.Color = value;
                 UpdateProbe();
             }
         }
@@ -159,6 +162,36 @@ namespace Iviz.Controllers
             }
         }
 
+        public float Metallic
+        {
+            get => config.Metallic;
+            set
+            {
+                config.Metallic = value;
+                grid.Metallic = value;
+            }
+        }
+        
+        public float Smoothness
+        {
+            get => config.Smoothness;
+            set
+            {
+                config.Smoothness = value;
+                grid.Smoothness = value;
+            }
+        }
+        
+        public bool RenderAsOcclusionOnly
+        {
+            get => config.RenderAsOcclusionOnly;
+            set
+            {
+                config.RenderAsOcclusionOnly = value;
+                grid.OcclusionOnly = value;
+            }
+        }
+        
         public GridController(GridConfiguration? config)
         {
             node = new FrameNode("GridNode");

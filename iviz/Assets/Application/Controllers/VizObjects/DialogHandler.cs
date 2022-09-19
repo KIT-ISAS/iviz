@@ -26,9 +26,9 @@ namespace Iviz.Controllers
             {
                 string vizObjectsStr = vizObjects.Count switch
                 {
-                    0 => "<b>No widgets</b>",
-                    1 => "<b>1 widget</b>",
-                    _ => $"<b>{vizObjects.Count.ToString()} widgets</b>"
+                    0 => "<b>No dialogs</b>",
+                    1 => "<b>1 dialog</b>",
+                    _ => $"<b>{vizObjects.Count.ToString()} dialogs</b>"
                 };
 
                 const string errorStr = "No errors";
@@ -66,8 +66,8 @@ namespace Iviz.Controllers
                     HandleAdd(msg);
                     break;
                 default:
-                    RosLogger.Error($"{this}: Object '{msg.Id}' requested unknown " +
-                                    $"action {((int)msg.Action).ToString()}");
+                    RosLogger.Error(
+                        $"{ToString()}: Object '{msg.Id}' requested unknown action {msg.Action.ToString()}");
                     break;
             }
         }

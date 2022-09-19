@@ -69,22 +69,35 @@ namespace Iviz.Displays.XR
         {
             set
             {
-                if (value.a != 0)
+                if (value.a == 0)
                 {
-                    if (cube == null)
+                    if (cube != null)
                     {
-                        cube = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, Transform);
+                        cube.Visible = false;
                     }
 
-                    cube.Visible = true;
-                    cube.Color = value;
-                    cube.EmissiveColor = value;
+                    return;
                 }
-                else if (cube != null)
+
+                if (cube == null)
                 {
-                    cube.Visible = false;
+                    cube = CreateCube(Transform, bounds.size);
                 }
+
+                cube.Visible = true;
+                cube.Color = value;
+                cube.EmissiveColor = value;
             }
+        }
+
+        static MeshMarkerDisplay CreateCube(Transform transform, in Vector3 scale)
+        {
+            var cube = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, transform);
+            cube.Smoothness = 0;
+            cube.Metallic = 0;
+            cube.EnableShadows = true;
+            cube.Transform.localScale = scale;
+            return cube;
         }
 
         public float SecondaryScale
@@ -96,9 +109,12 @@ namespace Iviz.Displays.XR
         {
             set
             {
-                var size = value.Ros2Unity().Abs();
-                Frame.Size = size;
-                bounds.size = size;
+                Frame.Size = value;
+                bounds.size = value;
+                if (cube != null)
+                {
+                    cube.Transform.localScale = value;
+                }
             }
         }
 

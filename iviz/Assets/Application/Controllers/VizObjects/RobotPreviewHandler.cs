@@ -15,7 +15,7 @@ namespace Iviz.Controllers
     public sealed class RobotPreviewHandler : VizHandler
     {
         readonly Dictionary<string, RobotModel> cachedRobots = new();
-        
+
         public override string BriefDescription
         {
             get
@@ -47,8 +47,8 @@ namespace Iviz.Controllers
                     _ = HandleAddAsync(msg);
                     break;
                 default:
-                    RosLogger.Error($"{ToString()}: Object '{msg.Id}' requested unknown " +
-                                    $"action {((int)msg.Action).ToString()}");
+                    RosLogger.Error(
+                        $"{ToString()}: Object '{msg.Id}' requested unknown action {msg.Action.ToString()}");
                     break;
             }
         }
@@ -93,7 +93,7 @@ namespace Iviz.Controllers
                         $"Reason: Parameter not a string.");
                     return;
                 }
-                
+
                 robot = new RobotModel(robotDescription);
             }
             else if (msg.SavedRobotName.Length != 0)
@@ -104,7 +104,6 @@ namespace Iviz.Controllers
                 }
                 else
                 {
-
                     var (result, robotDescription) = await Resource.TryGetRobotAsync(msg.SavedRobotName);
                     if (!result)
                     {
@@ -168,12 +167,12 @@ namespace Iviz.Controllers
                     robot.Tint = msg.Tint.ToUnity();
                 }
 
-                if (msg.Metallic != 0 && Mathf.Approximately(msg.Metallic, robot.Metallic))
+                if (!Mathf.Approximately(msg.Metallic, robot.Metallic))
                 {
                     robot.Metallic = msg.Metallic;
                 }
 
-                if (msg.Smoothness != 0 && Mathf.Approximately(msg.Smoothness, robot.Smoothness))
+                if (!Mathf.Approximately(msg.Smoothness, robot.Smoothness))
                 {
                     robot.Smoothness = msg.Smoothness;
                 }

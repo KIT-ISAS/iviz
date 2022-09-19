@@ -937,7 +937,7 @@ namespace Iviz.Controllers
             {
                 await GameThread.PostAsync(() =>
                 {
-                    RosLogger.Info($"{nameof(ControllerService)}: Creating dialog");
+                    RosLogger.Debug($"{nameof(ControllerService)}: Creating dialog");
 
                     bool overrideExpired = false;
                     string dialogId = srv.Request.Dialog.Id;

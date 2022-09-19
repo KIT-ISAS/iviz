@@ -4,6 +4,7 @@ using Iviz.Displays.XR;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using UnityEngine;
+using Vector3 = Iviz.Msgs.GeometryMsgs.Vector3;
 
 namespace Iviz.Controllers
 {
@@ -61,8 +62,8 @@ namespace Iviz.Controllers
                     HandleAdd(msg);
                     break;
                 default:
-                    RosLogger.Error($"{ToString()}: Object '{msg.Id}' requested unknown " +
-                                    $"action {((int)msg.Action).ToString()}");
+                    RosLogger.Error(
+                        $"{ToString()}: Object '{msg.Id}' requested unknown action {msg.Action.ToString()}");
                     break;
             }
         }
@@ -71,7 +72,7 @@ namespace Iviz.Controllers
         {
             if (string.IsNullOrWhiteSpace(msg.Id))
             {
-                RosLogger.Info($"{ToString()}: Cannot add dialog with empty id");
+                RosLogger.Info($"{ToString()}: Cannot add boundary with empty id");
                 return;
             }
 
@@ -93,6 +94,12 @@ namespace Iviz.Controllers
                 return;
             }
 
+            if (msg.Scale == Vector3.Zero)
+            {
+                RosLogger.Info($"{ToString()}: Scale of boundary '{msg.Id}' has not been set");
+                return;
+            }
+
             var boundaryType = (BoundaryType)msg.Type;
             if (vizObjects.TryGetValue(msg.Id, out var existingObject))
             {
@@ -103,8 +110,8 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                RosLogger.Info($"{ToString()}: Widget '{msg.Id}' of type {boundaryObject.Type} " +
-                               $"is being replaced with type {boundaryType}");
+                RosLogger.Info($"{ToString()}: Widget '{msg.Id}' of type {boundaryObject.Type.ToString()} " +
+                               $"is being replaced with type {boundaryType.ToString()}");
                 boundaryObject.Dispose();
                 // pass through
             }
@@ -172,11 +179,7 @@ namespace Iviz.Controllers
                 boundary.Color = msg.Color.ToUnity();
                 boundary.SecondColor = msg.SecondColor.ToUnity();
                 boundary.Caption = msg.Caption;
-                
-                if (!msg.Scale.ApproximatelyZero())
-                {
-                    boundary.Scale = msg.Scale.Abs().Ros2Unity();
-                }
+                boundary.Scale = msg.Scale.Ros2Unity().Abs();
                 
                 var transform = node.Transform;
                 transform.SetLocalPose(msg.Pose.Ros2Unity());

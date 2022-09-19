@@ -106,19 +106,30 @@ namespace Iviz.Displays
             runningTs.Cancel();
             runningTs = new CancellationTokenSource();
 
+            RosLogger.Debug($"{ToString()}: Removing all files in {Settings.SavedRobotsPath}");
+            foreach (string path in resourceFiles.RobotDescriptions.Values)
+            {
+                try
+                {
+                    File.Delete($"{Settings.SavedRobotsPath}/{path}");
+                }
+                catch (Exception e)
+                {
+                    RosLogger.Error($"{ToString()}: Failed to delete file '{path}' :", e);
+                }
+            }
+
+            RosLogger.Debug($"{ToString()}: Removing all files in {Settings.ResourcesPath}");
+
             var allFiles = resourceFiles.Models.Values
                 .Concat(resourceFiles.Scenes.Values)
-                .Concat(resourceFiles.Textures.Values)
-                .Concat(resourceFiles.RobotDescriptions.Values);
-
-            RosLogger.Debug($"{ToString()}: Removing all files in {Settings.SavedRobotsPath}");
-            RosLogger.Debug($"{ToString()}: Removing all files in {Settings.ResourcesPath}");
+                .Concat(resourceFiles.Textures.Values);
 
             foreach (string path in allFiles)
             {
                 try
                 {
-                    File.Delete(path);
+                    File.Delete($"{Settings.ResourcesPath}/{path}");
                 }
                 catch (Exception e)
                 {

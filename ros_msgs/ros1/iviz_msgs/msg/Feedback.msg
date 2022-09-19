@@ -1,4 +1,4 @@
-uint8 TYPE_EXPIRED = 0
+uint8 TYPE_DIALOG_EXPIRED = 0
 uint8 TYPE_BUTTON_CLICK = 1
 uint8 TYPE_MENUENTRY_CLICK = 2
 uint8 TYPE_POSITION_CHANGED = 3
@@ -11,12 +11,13 @@ uint8 TYPE_COLLIDER_EXITED = 8
 std_msgs/Header header
 string viz_id
 string id
+bool preview_only
 uint8 type
 int32 entry_id
 float64 angle
 geometry_msgs/Point position
 geometry_msgs/Quaternion orientation
 geometry_msgs/Vector3 scale
-Trajectory trajectory
+geometry_msgs/Pose[] trajectory
 string collider_id
 

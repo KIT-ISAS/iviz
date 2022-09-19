@@ -94,14 +94,6 @@ namespace Iviz.Displays
             Collider.size = (newFrameAxisLength + newFrameAxisWidth / 2) * Vector3.one;
         }
 
-        public void OverrideMaterial(Material? material)
-        {
-            foreach (var frame in Frames)
-            {
-                frame.OverrideMaterial(material);
-            }
-        }
-
         public void SplitForRecycle()
         {
             foreach (var child in children)

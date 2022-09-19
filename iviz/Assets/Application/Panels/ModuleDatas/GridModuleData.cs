@@ -60,6 +60,10 @@ namespace Iviz.App
             panel.HideInARMode.Value = GridController.HideInARMode;
             panel.Interactable.Value = GridController.Interactable;
             panel.DarkMode.Value = GridController.DarkMode;
+            
+            panel.Metallic.Value = GridController.Metallic;
+            panel.Smoothness.Value = GridController.Smoothness;
+            panel.OcclusionOnlyMode.Value = GridController.RenderAsOcclusionOnly;
 
             panel.ColorPicker.ValueChanged += _ => UpdateColor();
             panel.ShowInterior.ValueChanged += f =>
@@ -74,6 +78,9 @@ namespace Iviz.App
             panel.HideInARMode.ValueChanged += f => GridController.HideInARMode = f;
             panel.Interactable.ValueChanged += f => GridController.Interactable = f;
             panel.DarkMode.ValueChanged += f => GridController.DarkMode = f;
+            panel.Metallic.ValueChanged += f => GridController.Metallic = f;
+            panel.Smoothness.ValueChanged += f => GridController.Smoothness = f;
+            panel.OcclusionOnlyMode.ValueChanged += f => GridController.RenderAsOcclusionOnly = f;
         }
 
         void UpdateColor()

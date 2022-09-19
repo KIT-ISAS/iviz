@@ -183,11 +183,6 @@ namespace Iviz.Displays
             }
         }
 
-        public void OverrideMaterial(Material? material)
-        {
-            
-        }
-
         public override void Suspend()
         {
             base.Suspend();

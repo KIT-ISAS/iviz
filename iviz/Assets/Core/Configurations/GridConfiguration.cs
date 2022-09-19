@@ -32,5 +32,8 @@ namespace Iviz.Core.Configurations
         [DataMember] public bool Interactable { get; set; } = true;
         [DataMember] public bool DarkMode { get; set; } = true;
         [DataMember] public Vector3 Offset { get; set; } = Vector3.Zero;
+        [DataMember] public float Smoothness { get; set; } = 0.5f;
+        [DataMember] public float Metallic { get; set; } = 0.5f;
+        [DataMember] public bool RenderAsOcclusionOnly { get; set; }
     }
 }

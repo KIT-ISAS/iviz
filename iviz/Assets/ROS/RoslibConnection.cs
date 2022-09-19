@@ -270,9 +270,7 @@ namespace Iviz.Ros
 
                         var newRos2Client = new Ros2Client(MyId,
                             domainId: DomainId,
-                            wrapperType: Settings.IsAndroid
-                                ? new RclAndroidWrapper()
-                                : new RclInternalWrapper());
+                            wrapperType: new UnityRclWrapper());
                         await newRos2Client.InitializeParameterServerAsync(token);
                         client = newRos2Client;
                         break;
@@ -1121,12 +1119,13 @@ namespace Iviz.Ros
                         _ => throw new ArgumentOutOfRangeException()
                     };
                 }
-                catch (OperationCanceledException)
-                {
-                    // ignore
-                }
                 catch (Exception e)
                 {
+                    if (e is OperationCanceledException or TimeoutException)
+                    {
+                        // ignore
+                    }
+
                     RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemParameterList)}",
                         e);
                 }
@@ -1142,7 +1141,8 @@ namespace Iviz.Ros
         {
             ThrowHelper.ThrowIfNull(parameter, nameof(parameter));
 
-            if (token.IsCancellationRequested || runningTs.Token.IsCancellationRequested)
+            var connectionToken = runningTs.Token;
+            if (token.IsCancellationRequested || connectionToken.IsCancellationRequested)
             {
                 return (default, "Cancellation requested");
             }
@@ -1154,7 +1154,7 @@ namespace Iviz.Ros
 
             try
             {
-                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionToken);
                 tokenSource.CancelAfter(timeoutInMs);
 
                 var param = Client switch
@@ -1167,24 +1167,26 @@ namespace Iviz.Ros
 
                 return (param, null);
             }
-            catch (OperationCanceledException)
-            {
-                return token.IsCancellationRequested || runningTs.IsCancellationRequested
-                    ? (default, "Operation cancelled")
-                    : (default, "Operation timed out");
-            }
-            catch (RosParameterNotFoundException)
-            {
-                return (default, "Parameter not found");
-            }
-            catch (XmlRpcException)
-            {
-                return (default, "Failed to read parameter");
-            }
             catch (Exception e)
             {
-                RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetParameterAsync)}", e);
-                return (default, "Unknown error");
+                string errorMsg = e switch
+                {
+                    OperationCanceledException when token.IsCancellationRequested ||
+                                                    connectionToken.IsCancellationRequested => "Operation cancelled",
+                    OperationCanceledException => "Operation timed out",
+                    RosParameterNotFoundException => "Parameter not found",
+                    XmlRpcException => "Failed to read parameter",
+                    TimeoutException => "Operation timed out",
+                    _ => GetErrorMessageFor(e)
+                };
+
+                return (default, errorMsg);
+
+                static string GetErrorMessageFor(Exception e)
+                {
+                    RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetParameterAsync)}", e);
+                    return "Unknown error";
+                }
             }
         }
 

@@ -12,32 +12,27 @@ using UnityEngine;
 
 namespace VNC
 {
-    internal sealed class DeferredFrameBuffer : IFramebufferReference
+    internal sealed class DeferredFrameBuffer : FramebufferReference
     {
         const int MaxFramesInQueue = 500;
 
         readonly VncScreen screen;
         readonly Queue<QueueEntry> frames = new();
         readonly int width;
-        readonly int height;
 
-        public Size Size => new(width, height);
-        public PixelFormat Format => TurboJpegDecoder.RgbaCompatiblePixelFormat;
-
-        public DeferredFrameBuffer(VncScreen screen, Size size)
+        public DeferredFrameBuffer(VncScreen screen, Size size) : base(size, TurboJpegDecoder.RgbaCompatiblePixelFormat)
         {
             this.screen = screen;
             width = size.Width;
-            height = size.Height;
         }
 
-        public void SetPixels(in Rectangle rectangle, ReadOnlySpan<byte> pixelData, in PixelFormat pixelFormat)
+        public override void SetPixels(in Rectangle rectangle, ReadOnlySpan<byte> pixelData, in PixelFormat pixelFormat)
         {
             if (pixelData.Length == 0)
             {
                 return;
             }
-            
+
             try
             {
                 var frame = new FrameRectangle(rectangle.Size);
@@ -52,7 +47,8 @@ namespace VNC
             }
         }
 
-        public void FillPixels(in Rectangle rectangle, ReadOnlySpan<byte> singlePixel, in PixelFormat pixelFormat)
+        public override void FillPixels(in Rectangle rectangle, ReadOnlySpan<byte> singlePixel,
+            in PixelFormat pixelFormat)
         {
             try
             {
@@ -85,14 +81,15 @@ namespace VNC
             }
         }
 
-        public void SetPixelsPalette(in Rectangle rectangle, ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette,
+        public override void SetPixelsPalette(in Rectangle rectangle, ReadOnlySpan<byte> indices,
+            ReadOnlySpan<byte> palette,
             in PixelFormat pixelFormat)
         {
             if (indices.Length == 0)
             {
                 return;
             }
-            
+
             try
             {
                 var frame = new FrameRectangle(rectangle.Size);
@@ -107,7 +104,7 @@ namespace VNC
             }
         }
 
-        public void CopyFrom(in Rectangle rectangle, in Rectangle srcRectangle)
+        public override void CopyFrom(in Rectangle rectangle, in Rectangle srcRectangle)
         {
             Enqueue(new QueueEntry(rectangle, srcRectangle));
         }
@@ -124,7 +121,7 @@ namespace VNC
             }
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             int count = frames.Count;
             if (count == 0)

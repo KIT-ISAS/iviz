@@ -175,9 +175,9 @@ namespace VNC
                 this.screen = screen;
             }
 
-            public IFramebufferReference GrabFramebufferReference(Size size, IImmutableSet<Screen> _)
+            public FramebufferReference GrabFramebufferReference(Size size, IImmutableSet<Screen> _)
             {
-                if (cachedFrameBuffer != null && cachedFrameBuffer.Size == size)
+                if (cachedFrameBuffer?.Size == size)
                 {
                     return cachedFrameBuffer;
                 }

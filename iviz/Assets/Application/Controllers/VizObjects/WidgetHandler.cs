@@ -55,8 +55,8 @@ namespace Iviz.Controllers
                     HandleAdd(msg);
                     break;
                 default:
-                    RosLogger.Error($"{this}: Object '{msg.Id}' requested unknown " +
-                                    $"action {((int)msg.Action).ToString()}");
+                    RosLogger.Error(
+                        $"{ToString()}: Object '{msg.Id}' requested unknown action {msg.Action.ToString()}");
                     break;
             }
         }
@@ -65,7 +65,7 @@ namespace Iviz.Controllers
         {
             if (string.IsNullOrWhiteSpace(msg.Id))
             {
-                RosLogger.Info($"{this}: Cannot add dialog with empty id");
+                RosLogger.Info($"{this}: Cannot add widget with empty id");
                 return;
             }
 
@@ -113,8 +113,6 @@ namespace Iviz.Controllers
                 WidgetType.TargetArea => Resource.Displays.TargetArea,
                 WidgetType.PositionDisc3D => Resource.Displays.PositionDisc3D,
                 WidgetType.PositionDisc => Resource.Displays.PositionDisc,
-                //WidgetType.Boundary => Resource.Displays.Boundary,
-                //WidgetType.BoundaryCheck => Resource.Displays.BoundaryCheck,
                 WidgetType.Tooltip => Resource.Displays.TooltipWidget,
                 _ => null
             };
@@ -176,8 +174,8 @@ namespace Iviz.Controllers
 
                 if (display is IWidgetProvidesTrajectory providesTrajectory)
                 {
-                    providesTrajectory.ProvidedTrajectory += (points, period) =>
-                        feedback.OnWidgetProvidedTrajectory(id, FrameId, points, period);
+                    providesTrajectory.ProvidedTrajectory += points =>
+                        feedback.OnWidgetProvidedTrajectory(id, FrameId, points);
                 }
 
                 Update(msg);

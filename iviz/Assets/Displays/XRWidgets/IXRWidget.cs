@@ -63,6 +63,6 @@ namespace Iviz.Displays.XR
 
     public interface IWidgetProvidesTrajectory : IXRWidget
     {
-        public event Action<List<Vector3>, float>? ProvidedTrajectory;
+        public event Action<List<Vector3>>? ProvidedTrajectory;
     }
 }
