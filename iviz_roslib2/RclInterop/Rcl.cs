@@ -21,8 +21,8 @@ internal static class Rcl
     static CdrSerializeCallback? cdrSerializeCallbackDel;
     static CdrDeserializeCallback? cdrDeserializeCallbackDel;
 
-    static RclWrapper ThrowMissingWrapper() => throw new NullReferenceException("Rcl wrapper has not been set!");
-
+    static RclWrapper ThrowMissingWrapper() => throw new RosMissingRclWrapperException();
+ 
     public static RclWrapper Impl => impl ?? ThrowMissingWrapper();
 
     public static void SetRclWrapper(RclWrapper rclWrapper)
@@ -193,7 +193,7 @@ internal static class Rcl
                 }
 
                 break;
-            case <= (int)RclLogSeverity.Fatal:
+            default:
                 if (Logger.LogErrorCallback != null)
                 {
                     Logger.LogErrorFormat("[{0}]: {1}", ToString(name), ToString(message));

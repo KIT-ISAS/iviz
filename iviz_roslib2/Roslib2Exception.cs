@@ -31,3 +31,10 @@ public sealed class RosRclException : Roslib2Exception
     {
     }
 }
+
+public sealed class RosMissingRclWrapperException : Roslib2Exception
+{
+    public RosMissingRclWrapperException() : base("Rcl wrapper has not been set!")
+    {
+    }
+}
