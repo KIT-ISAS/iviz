@@ -60,6 +60,13 @@ namespace Iviz.Displays.XR
         {
             set
             {
+                if (value.a == 0)
+                {
+                    Frame.Visible = false;
+                    return;
+                }
+                
+                Frame.Visible = true;
                 Frame.Color = value;
                 Frame.EmissiveColor = value;
             }

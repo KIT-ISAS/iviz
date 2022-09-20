@@ -160,7 +160,7 @@ namespace Iviz.Controllers
                 if (boundary is IBoundaryCanCollide canCollide)
                 {
                     canCollide.EnteredCollision += otherId => feedback.OnBoundaryColliderEntered(id, otherId);
-                    canCollide.ExitedCollision += otherId => feedback.OnBoundaryColliderEntered(id, otherId);
+                    canCollide.ExitedCollision += otherId => feedback.OnBoundaryColliderExited(id, otherId);
                 }
 
                 Update(msg);

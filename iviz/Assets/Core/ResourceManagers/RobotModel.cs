@@ -685,10 +685,10 @@ namespace Iviz.Displays
                 var (lower, upper, _) = joint.Limit;
                 if (value < lower || value > upper)
                 {
-                    RosLogger.Error($"{ToString()}: Failed to set value for joint {jointName}. " +
-                                    "Reason: Joint value is outside the range " +
+                    RosLogger.Warn($"{ToString()}: " +
+                                    $"Joint value for {jointName} is outside the range " +
                                     $"[{lower.ToString(BuiltIns.Culture)}..{upper.ToString(BuiltIns.Culture)}].");
-                    return false;
+                    //return false;
                 }
             }
 
