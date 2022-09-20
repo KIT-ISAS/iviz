@@ -215,7 +215,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
             return;
         }
 
-        RosInvalidMessageTypeException.Throw();
+        RosExceptionUtils.ThrowInvalidMessageType();
     }
 
     ValueTask IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
@@ -225,7 +225,7 @@ public sealed class RosPublisher<TMessage> : IRos1Publisher, IRosPublisher<TMess
             return PublishAsync(tMessage, policy, token);
         }
         
-        RosInvalidMessageTypeException.Throw();
+        RosExceptionUtils.ThrowInvalidMessageType();
         return default;
     }
     
