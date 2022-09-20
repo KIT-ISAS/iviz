@@ -78,6 +78,18 @@ public sealed class RosChannelReader<T> : BaseRosChannelReader<T> where T : IMes
             // ignore, reader was disposed but some messages were still in queue
         }
     }
+
+    public override string ToString()
+    {
+        if (subscriber == null)
+        {
+            return $"[{nameof(RosChannelReader<T>)} (uninitialized)]";
+        }
+
+        return disposed
+            ? $"[{nameof(RosChannelReader<T>)} (disposed)]"
+            : $"[{nameof(RosChannelReader<T>)} {subscriber.Topic} [{subscriber.TopicType}]]";
+    }
 }
 
 /// <summary>
@@ -88,7 +100,6 @@ public sealed class RosChannelReader<T> : BaseRosChannelReader<T> where T : IMes
 /// This variant reconstructs the message type from the publisher handshake and should only
 /// be used if the message definition is unknown beforehand.
 /// </summary>
-
 /*
 public sealed class RosChannelReader : BaseRosChannelReader<IMessage>
 {
@@ -150,23 +161,22 @@ public sealed class RosChannelReader : BaseRosChannelReader<IMessage>
     }
 }
 */
-
 public static class RosChannelReaderUtils
 {
+    /*
     /// <summary>
     /// Creates a channel reader for the given topic. Returns whatever message type is published there.
     /// </summary>
     /// <param name="client">The ROS client</param>
     /// <param name="topic">The topic name</param>
     /// <returns>The channel reader</returns>
-    
-    /*
+
     public static RosChannelReader CreateReader(this IRosClient client, string topic)
     {
         return new RosChannelReader(client, topic);
     }
     */
-        
+
     /// <summary>
     /// Creates a channel reader for the given topic and message type. 
     /// </summary>
@@ -174,11 +184,11 @@ public static class RosChannelReaderUtils
     /// <param name="topic">The topic name</param>
     /// <typeparam name="T">The message type</typeparam>
     /// <returns>The channel reader</returns>
-    public static RosChannelReader<T> CreateReader<T>(this IRosClient client, string topic) 
+    public static RosChannelReader<T> CreateReader<T>(this IRosClient client, string topic)
         where T : IMessage, new()
     {
         return new RosChannelReader<T>(client, topic);
-    }        
+    }
 
     public static async ValueTask<RosChannelReader<T>> CreateReaderAsync<T>(this IRosClient client, string topic,
         CancellationToken token = default)
@@ -207,6 +217,6 @@ public static class RosChannelReaderUtils
         }
 
         Type readerType = typeof(RosChannelReader<>).MakeGenericType(msgType);
-        return (IRosChannelReader) Activator.CreateInstance(readerType)!;
+        return (IRosChannelReader)Activator.CreateInstance(readerType)!;
     }
 }

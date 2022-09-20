@@ -22,8 +22,6 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     readonly ChannelReader<T> reader;
     protected readonly ChannelWriter<T> writer;
 
-    //readonly ConcurrentQueue<T> backQueue = new();
-    //protected readonly AsyncCollection<T> messageQueue;
     protected bool disposed;
     protected string? subscriberId;
     protected IRosSubscriber<T>? subscriber;
@@ -107,7 +105,6 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     protected void OnSubscriberDisposed()
     {
         writer.TryComplete();
-        //messageQueue.CompleteAdding();
     }
 
     /// <summary>
@@ -135,7 +132,6 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     public bool WaitToRead(CancellationToken token = default)
     {
         return TaskUtils.RunSync(WaitToReadAsync, token);
-        //return messageQueue.OutputAvailable(token);
     }
 
     /// <summary>
@@ -147,7 +143,6 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
         using var ts = new CancellationTokenSource(timeoutInMs);
         try
         {
-            //return await WaitToReadAsync(ts.Token);
             return await reader.WaitToReadAsync(ts.Token);
         }
         catch (OperationCanceledException)
@@ -162,7 +157,6 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     /// <param name="token">A cancellation token that makes the function stop blocking when cancelled. If not provided, waits indefinitely.</param>
     /// <returns>False if the channel has been disposed</returns>
     public ValueTask<bool> WaitToReadAsync(CancellationToken token = default) =>
-        //new(messageQueue.OutputAvailableAsync(token));
         reader.WaitToReadAsync(token);
 
 
@@ -200,7 +194,6 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     public T Read(CancellationToken token = default)
     {
         ThrowIfNotStarted();
-        //return messageQueue.Take(token);
         return TaskUtils.RunSync(ReadAsync, token);
     }
 
@@ -230,7 +223,6 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     public ValueTask<T> ReadAsync(CancellationToken token = default)
     {
         ThrowIfNotStarted();
-        //return messageQueue.TakeAsync(token).AsValueTask();
         return reader.ReadAsync(token);
     }
 
@@ -245,28 +237,6 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     {
         ThrowIfNotStarted();
         return reader.TryRead(out t);
-
-        /*
-        if (backQueue.Count == 0)
-        {
-            t = default;
-            return false;
-        }
-
-        var cancelledToken = new CancellationToken(true);
-
-        try
-        {
-            t = messageQueue.Take(cancelledToken);
-            return true;
-        }
-        catch (OperationCanceledException)
-        {
-            // this shouldn't happen unless multiple reads get called at the same time
-            t = default!;
-            return false;
-        }
-        */
     }
 
     public void Clear()
@@ -316,28 +286,6 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
             {
                 yield break;
             }
-
-            /*
-            if (backQueue.Count == 0)
-            {
-                yield break;
-            }
-
-            var cancelledToken = new CancellationToken(true);
-
-            T element;
-            try
-            {
-                element = messageQueue.Take(cancelledToken);
-            }
-            catch (OperationCanceledException)
-            {
-                // this shouldn't happen unless multiple reads get called at the same time
-                yield break;
-            }
-
-            yield return element!;
-            */
         }
     }    
 
@@ -350,12 +298,6 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
     public IAsyncEnumerable<T> ReadAllAsync(CancellationToken token = default)
     {
         ThrowIfNotStarted();
-        /*
-        while (true)
-        {
-            yield return await messageQueue.TakeAsync(token);
-        }
-        */
         return reader.ReadAllAsync(token);
     }
 
@@ -391,17 +333,5 @@ public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, 
         {
             yield return await reader.ReadAsync(token);
         }
-    }
-
-    public override string ToString()
-    {
-        if (subscriber == null)
-        {
-            return "[RosChannelReader (uninitialized)]";
-        }
-
-        return disposed
-            ? "[RosChannelReader (disposed)]"
-            : $"[RosChannelReader {subscriber.Topic} [{subscriber.TopicType}]]";
     }
 }

@@ -2,6 +2,9 @@ using System;
 
 namespace Iviz.Roslib;
 
+/// <summary>
+/// A tuple containing a topic and the node ids associated with it.
+/// </summary>
 public readonly struct TopicTuple : IComparable<TopicTuple>
 {
     public string Topic { get; }

@@ -14,7 +14,7 @@ public static class RosNameUtils
     public static string? EnvironmentCallerHostname =>
         Environment.GetEnvironmentVariable("ROS_HOSTNAME") ??
         Environment.GetEnvironmentVariable("ROS_IP");
-    
+
     /// <summary>
     /// Creates a unique id based on the project and computer name
     /// </summary>
@@ -24,7 +24,7 @@ public static class RosNameUtils
         string seed = EnvironmentCallerHostname + Assembly.GetCallingAssembly().GetName().Name;
         return $"iviz_{seed.GetDeterministicHashCode().ToString("x8")}";
     }
-    
+
     /// <summary>
     /// Checks if the given name is a valid ROS resource name
     /// </summary>  
@@ -40,7 +40,7 @@ public static class RosNameUtils
         {
             return false;
         }
-        
+
         foreach (int i in 1..name.Length)
         {
             char c = name[i];
@@ -82,4 +82,11 @@ public static class RosNameUtils
             }
         }
     }
+}
+
+public static class RosExceptionUtils
+{
+    [DoesNotReturn]
+    public static void ThrowInvalidMessageType() =>
+        throw new RosInvalidMessageTypeException("Message does not match the expected type");
 }
