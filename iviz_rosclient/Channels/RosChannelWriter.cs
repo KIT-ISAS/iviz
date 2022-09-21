@@ -165,7 +165,6 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
         }
     }
 
-#if !NETSTANDARD2_0
     public async ValueTask WriteAllAsync(IAsyncEnumerable<TMessage> messages, RosPublishPolicy policy =
         RosPublishPolicy.DoNotWait, CancellationToken token = default)
     {
@@ -193,7 +192,6 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
             await Publisher.PublishAsync(msg, policy, token);
         }
     }
-#endif
 
     public override string ToString()
     {
