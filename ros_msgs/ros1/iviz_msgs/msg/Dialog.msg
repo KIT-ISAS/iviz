@@ -30,17 +30,6 @@ uint8 ICON_ERROR    = 10
 uint8 ICON_DIALOGS  = 11
 uint8 ICON_QUESTION = 12
 
-uint16 ALIGNMENT_DEFAULT        = 0
-uint16 ALIGNMENT_LEFT           = 1
-uint16 ALIGNMENT_CENTER         = 2
-uint16 ALIGNMENT_RIGHT          = 4
-uint16 ALIGNMENT_JUSTIFIED      = 8
-uint16 ALIGNMENT_FLUSH          = 16
-uint16 ALIGNMENT_GEOMETRYCENTER = 32
-uint16 ALIGNMENT_TOP            = 256
-uint16 ALIGNMENT_MID            = 512
-uint16 ALIGNMENT_BOTTOM         = 1024
-
 std_msgs/Header header
 byte action
 string id
@@ -52,7 +41,6 @@ byte icon
 std_msgs/ColorRGBA background_color
 string title
 string caption
-uint16 caption_alignment
 string[] menu_entries
 byte binding_type
 geometry_msgs/Vector3 tf_offset
