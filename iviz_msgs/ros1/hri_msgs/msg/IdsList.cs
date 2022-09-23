@@ -28,15 +28,15 @@ namespace Iviz.Msgs.HriMsgs
         
         public IdsList(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeStringArray(out Ids);
+            Header = new StdMsgs.Header(ref b);
+            Ids = b.DeserializeStringArray();
         }
         
         public IdsList(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeStringArray(out Ids);
+            Ids = b.DeserializeStringArray();
         }
         
         public IdsList RosDeserialize(ref ReadBuffer b) => new IdsList(ref b);

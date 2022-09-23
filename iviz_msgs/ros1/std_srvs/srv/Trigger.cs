@@ -117,14 +117,14 @@ namespace Iviz.Msgs.StdSrvs
         public TriggerResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public TriggerResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
             b.Align4();
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public TriggerResponse RosDeserialize(ref ReadBuffer b) => new TriggerResponse(ref b);

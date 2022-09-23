@@ -23,13 +23,11 @@ namespace Iviz.Msgs.StdMsgs
             this.A = A;
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ColorRGBA(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ColorRGBA(ref ReadBuffer2 b)
         {
             b.Deserialize(out this);

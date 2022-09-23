@@ -31,36 +31,36 @@ namespace Iviz.Msgs.IvizMsgs
         
         public RobotConfiguration(ref ReadBuffer b)
         {
-            b.DeserializeString(out SourceParameter);
-            b.DeserializeString(out SavedRobotName);
-            b.DeserializeString(out FramePrefix);
-            b.DeserializeString(out FrameSuffix);
+            SourceParameter = b.DeserializeString();
+            SavedRobotName = b.DeserializeString();
+            FramePrefix = b.DeserializeString();
+            FrameSuffix = b.DeserializeString();
             b.Deserialize(out AttachedToTf);
             b.Deserialize(out RenderAsOcclusionOnly);
             b.Deserialize(out Tint);
             b.Deserialize(out Metallic);
             b.Deserialize(out Smoothness);
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
             b.Deserialize(out Visible);
         }
         
         public RobotConfiguration(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out SourceParameter);
+            SourceParameter = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out SavedRobotName);
+            SavedRobotName = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out FramePrefix);
+            FramePrefix = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out FrameSuffix);
+            FrameSuffix = b.DeserializeString();
             b.Deserialize(out AttachedToTf);
             b.Deserialize(out RenderAsOcclusionOnly);
             b.Align4();
             b.Deserialize(out Tint);
             b.Deserialize(out Metallic);
             b.Deserialize(out Smoothness);
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
             b.Deserialize(out Visible);
         }
         

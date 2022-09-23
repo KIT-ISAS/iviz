@@ -70,16 +70,16 @@ namespace Iviz.Msgs.IvizMsgs
         
         public AddModuleFromTopicRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out Topic);
-            b.DeserializeString(out Id);
+            Topic = b.DeserializeString();
+            Id = b.DeserializeString();
         }
         
         public AddModuleFromTopicRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Topic);
+            Topic = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
         }
         
         public AddModuleFromTopicRequest RosDeserialize(ref ReadBuffer b) => new AddModuleFromTopicRequest(ref b);
@@ -156,17 +156,17 @@ namespace Iviz.Msgs.IvizMsgs
         public AddModuleFromTopicResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            b.DeserializeString(out Message);
-            b.DeserializeString(out Id);
+            Message = b.DeserializeString();
+            Id = b.DeserializeString();
         }
         
         public AddModuleFromTopicResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
             b.Align4();
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
         }
         
         public AddModuleFromTopicResponse RosDeserialize(ref ReadBuffer b) => new AddModuleFromTopicResponse(ref b);

@@ -44,10 +44,10 @@ namespace Iviz.Msgs.RclInterfaces
         
         public ParameterDescriptor(ref ReadBuffer b)
         {
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Deserialize(out Type);
-            b.DeserializeString(out Description);
-            b.DeserializeString(out AdditionalConstraints);
+            Description = b.DeserializeString();
+            AdditionalConstraints = b.DeserializeString();
             b.Deserialize(out ReadOnly);
             {
                 int n = b.DeserializeArrayLength();
@@ -76,12 +76,12 @@ namespace Iviz.Msgs.RclInterfaces
         public ParameterDescriptor(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Deserialize(out Type);
             b.Align4();
-            b.DeserializeString(out Description);
+            Description = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out AdditionalConstraints);
+            AdditionalConstraints = b.DeserializeString();
             b.Deserialize(out ReadOnly);
             {
                 b.Align4();

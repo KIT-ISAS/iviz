@@ -52,7 +52,7 @@ namespace Iviz.Msgs.RclInterfaces
             b.Deserialize(out BoolValue);
             b.Deserialize(out IntegerValue);
             b.Deserialize(out DoubleValue);
-            b.DeserializeString(out StringValue);
+            StringValue = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -60,7 +60,7 @@ namespace Iviz.Msgs.RclInterfaces
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 ByteArrayValue = array;
             }
@@ -71,7 +71,7 @@ namespace Iviz.Msgs.RclInterfaces
                     : new bool[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<bool, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 BoolArrayValue = array;
             }
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.RclInterfaces
                     : new long[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<long, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 IntegerArrayValue = array;
             }
@@ -93,11 +93,11 @@ namespace Iviz.Msgs.RclInterfaces
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 DoubleArrayValue = array;
             }
-            b.DeserializeStringArray(out StringArrayValue);
+            StringArrayValue = b.DeserializeStringArray();
         }
         
         public ParameterValue(ref ReadBuffer2 b)
@@ -107,7 +107,7 @@ namespace Iviz.Msgs.RclInterfaces
             b.Align8();
             b.Deserialize(out IntegerValue);
             b.Deserialize(out DoubleValue);
-            b.DeserializeString(out StringValue);
+            StringValue = b.DeserializeString();
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.RclInterfaces
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 ByteArrayValue = array;
             }
@@ -128,7 +128,7 @@ namespace Iviz.Msgs.RclInterfaces
                     : new bool[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<bool, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 BoolArrayValue = array;
             }
@@ -141,7 +141,7 @@ namespace Iviz.Msgs.RclInterfaces
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<long, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 IntegerArrayValue = array;
             }
@@ -153,11 +153,11 @@ namespace Iviz.Msgs.RclInterfaces
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 DoubleArrayValue = array;
             }
-            b.DeserializeStringArray(out StringArrayValue);
+            StringArrayValue = b.DeserializeStringArray();
         }
         
         public ParameterValue RosDeserialize(ref ReadBuffer b) => new ParameterValue(ref b);

@@ -57,7 +57,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         {
             GoalId = new GoalID(ref b);
             b.Deserialize(out Status);
-            b.DeserializeString(out Text);
+            Text = b.DeserializeString();
         }
         
         public GoalStatus(ref ReadBuffer2 b)
@@ -65,7 +65,7 @@ namespace Iviz.Msgs.ActionlibMsgs
             GoalId = new GoalID(ref b);
             b.Deserialize(out Status);
             b.Align4();
-            b.DeserializeString(out Text);
+            Text = b.DeserializeString();
         }
         
         public GoalStatus RosDeserialize(ref ReadBuffer b) => new GoalStatus(ref b);

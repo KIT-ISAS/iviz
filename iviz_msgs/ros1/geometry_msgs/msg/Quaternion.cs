@@ -24,13 +24,11 @@ namespace Iviz.Msgs.GeometryMsgs
             this.W = W;
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Quaternion(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Quaternion(ref ReadBuffer2 b)
         {
             b.Deserialize(out this);

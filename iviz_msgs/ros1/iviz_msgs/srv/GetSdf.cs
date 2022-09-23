@@ -66,13 +66,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetSdfRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out Uri);
+            Uri = b.DeserializeString();
         }
         
         public GetSdfRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Uri);
+            Uri = b.DeserializeString();
         }
         
         public GetSdfRequest RosDeserialize(ref ReadBuffer b) => new GetSdfRequest(ref b);
@@ -144,7 +144,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Deserialize(out Success);
             Scene = new Scene(ref b);
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public GetSdfResponse(ref ReadBuffer2 b)
@@ -152,7 +152,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Success);
             Scene = new Scene(ref b);
             b.Align4();
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public GetSdfResponse RosDeserialize(ref ReadBuffer b) => new GetSdfResponse(ref b);

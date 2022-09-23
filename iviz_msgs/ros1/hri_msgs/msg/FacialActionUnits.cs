@@ -193,7 +193,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public FacialActionUnits(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -201,7 +201,7 @@ namespace Iviz.Msgs.HriMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 FAU = array;
             }
@@ -212,7 +212,7 @@ namespace Iviz.Msgs.HriMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Intensity = array;
             }
@@ -223,7 +223,7 @@ namespace Iviz.Msgs.HriMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Confidence = array;
             }
@@ -231,7 +231,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public FacialActionUnits(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -240,7 +240,7 @@ namespace Iviz.Msgs.HriMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 FAU = array;
             }
@@ -251,7 +251,7 @@ namespace Iviz.Msgs.HriMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Intensity = array;
             }
@@ -262,7 +262,7 @@ namespace Iviz.Msgs.HriMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Confidence = array;
             }

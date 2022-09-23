@@ -25,13 +25,13 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public AccelWithCovarianceStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Accel = new AccelWithCovariance(ref b);
         }
         
         public AccelWithCovarianceStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Accel = new AccelWithCovariance(ref b);
         }
         

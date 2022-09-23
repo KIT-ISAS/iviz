@@ -43,23 +43,23 @@ namespace Iviz.Msgs.SensorMsgs
         
         public MagneticField(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out MagneticField_);
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 MagneticFieldCovariance = array;
             }
         }
         
         public MagneticField(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align8();
             b.Deserialize(out MagneticField_);
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 MagneticFieldCovariance = array;
             }
         }

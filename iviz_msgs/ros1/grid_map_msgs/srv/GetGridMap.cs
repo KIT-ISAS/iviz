@@ -71,24 +71,24 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public GetGridMapRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out FrameId);
+            FrameId = b.DeserializeString();
             b.Deserialize(out PositionX);
             b.Deserialize(out PositionY);
             b.Deserialize(out LengthX);
             b.Deserialize(out LengthY);
-            b.DeserializeStringArray(out Layers);
+            Layers = b.DeserializeStringArray();
         }
         
         public GetGridMapRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out FrameId);
+            FrameId = b.DeserializeString();
             b.Align8();
             b.Deserialize(out PositionX);
             b.Deserialize(out PositionY);
             b.Deserialize(out LengthX);
             b.Deserialize(out LengthY);
-            b.DeserializeStringArray(out Layers);
+            Layers = b.DeserializeStringArray();
         }
         
         public GetGridMapRequest RosDeserialize(ref ReadBuffer b) => new GetGridMapRequest(ref b);

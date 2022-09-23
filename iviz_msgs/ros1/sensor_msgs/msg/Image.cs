@@ -46,26 +46,26 @@ namespace Iviz.Msgs.SensorMsgs
         
         public Image(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Height);
             b.Deserialize(out Width);
-            b.DeserializeString(out Encoding);
+            Encoding = b.DeserializeString();
             b.Deserialize(out IsBigendian);
             b.Deserialize(out Step);
-            b.DeserializeStructRent(out Data);
+            Data = b.DeserializeStructRent();
         }
         
         public Image(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
             b.Deserialize(out Height);
             b.Deserialize(out Width);
-            b.DeserializeString(out Encoding);
+            Encoding = b.DeserializeString();
             b.Deserialize(out IsBigendian);
             b.Align4();
             b.Deserialize(out Step);
-            b.DeserializeStructRent(out Data);
+            Data = b.DeserializeStructRent();
         }
         
         public Image RosDeserialize(ref ReadBuffer b) => new Image(ref b);

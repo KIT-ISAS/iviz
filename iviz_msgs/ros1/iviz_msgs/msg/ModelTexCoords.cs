@@ -29,7 +29,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 Coords = array;
             }
@@ -45,7 +45,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 Coords = array;
             }

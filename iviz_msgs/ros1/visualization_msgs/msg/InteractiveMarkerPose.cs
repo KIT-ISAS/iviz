@@ -30,17 +30,17 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public InteractiveMarkerPose(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Pose);
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
         }
         
         public InteractiveMarkerPose(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align8();
             b.Deserialize(out Pose);
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
         }
         
         public InteractiveMarkerPose RosDeserialize(ref ReadBuffer b) => new InteractiveMarkerPose(ref b);

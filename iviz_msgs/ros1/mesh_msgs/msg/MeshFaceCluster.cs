@@ -34,11 +34,11 @@ namespace Iviz.Msgs.MeshMsgs
                     : new uint[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<uint, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 FaceIndices = array;
             }
-            b.DeserializeString(out Label);
+            Label = b.DeserializeString();
         }
         
         public MeshFaceCluster(ref ReadBuffer2 b)
@@ -51,11 +51,11 @@ namespace Iviz.Msgs.MeshMsgs
                     : new uint[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<uint, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 FaceIndices = array;
             }
-            b.DeserializeString(out Label);
+            Label = b.DeserializeString();
         }
         
         public MeshFaceCluster RosDeserialize(ref ReadBuffer b) => new MeshFaceCluster(ref b);

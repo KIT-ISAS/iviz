@@ -24,13 +24,13 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public PoseStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Pose);
         }
         
         public PoseStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align8();
             b.Deserialize(out Pose);
         }

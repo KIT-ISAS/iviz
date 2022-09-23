@@ -48,7 +48,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public Skeleton2D(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -64,7 +64,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public Skeleton2D(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();

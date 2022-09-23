@@ -35,19 +35,19 @@ namespace Iviz.Msgs.HriMsgs
         
         public LiveSpeech(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeString(out Incremental);
-            b.DeserializeString(out Final);
+            Header = new StdMsgs.Header(ref b);
+            Incremental = b.DeserializeString();
+            Final = b.DeserializeString();
             b.Deserialize(out Confidence);
         }
         
         public LiveSpeech(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeString(out Incremental);
+            Incremental = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Final);
+            Final = b.DeserializeString();
             b.Align8();
             b.Deserialize(out Confidence);
         }

@@ -115,14 +115,14 @@ namespace Iviz.Msgs.IvizMsgs
         public StopCaptureResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public StopCaptureResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
             b.Align4();
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public StopCaptureResponse RosDeserialize(ref ReadBuffer b) => new StopCaptureResponse(ref b);

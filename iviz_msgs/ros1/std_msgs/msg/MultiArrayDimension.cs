@@ -29,7 +29,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public MultiArrayDimension(ref ReadBuffer b)
         {
-            b.DeserializeString(out Label);
+            Label = b.DeserializeString();
             b.Deserialize(out Size);
             b.Deserialize(out Stride);
         }
@@ -37,7 +37,7 @@ namespace Iviz.Msgs.StdMsgs
         public MultiArrayDimension(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Label);
+            Label = b.DeserializeString();
             b.Align4();
             b.Deserialize(out Size);
             b.Deserialize(out Stride);

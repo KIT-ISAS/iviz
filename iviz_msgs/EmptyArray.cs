@@ -7,10 +7,8 @@ namespace Iviz.Msgs;
 public static class EmptyArray
 {
 #if NETSTANDARD2_1 // remove indirection for il2cpp
-    public static readonly string String = "";
     public static readonly string[] StringArray = Array.Empty<string>();
 #else
-    public const string String = "";
     public static string[] StringArray => Array.Empty<string>();
 #endif
 }

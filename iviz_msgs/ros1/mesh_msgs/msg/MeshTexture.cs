@@ -28,7 +28,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshTexture(ref ReadBuffer b)
         {
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
             b.Deserialize(out TextureIndex);
             Image = new SensorMsgs.Image(ref b);
         }
@@ -36,7 +36,7 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshTexture(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
             b.Align4();
             b.Deserialize(out TextureIndex);
             Image = new SensorMsgs.Image(ref b);

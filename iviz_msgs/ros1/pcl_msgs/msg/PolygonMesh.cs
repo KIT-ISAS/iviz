@@ -30,7 +30,7 @@ namespace Iviz.Msgs.PclMsgs
         
         public PolygonMesh(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Cloud = new SensorMsgs.PointCloud2(ref b);
             {
                 int n = b.DeserializeArrayLength();
@@ -47,7 +47,7 @@ namespace Iviz.Msgs.PclMsgs
         
         public PolygonMesh(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Cloud = new SensorMsgs.PointCloud2(ref b);
             {
                 b.Align4();

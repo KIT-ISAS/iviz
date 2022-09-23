@@ -67,16 +67,16 @@ namespace Iviz.Msgs.Roscpp
         
         public SetLoggerLevelRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out Logger);
-            b.DeserializeString(out Level);
+            Logger = b.DeserializeString();
+            Level = b.DeserializeString();
         }
         
         public SetLoggerLevelRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Logger);
+            Logger = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Level);
+            Level = b.DeserializeString();
         }
         
         public SetLoggerLevelRequest RosDeserialize(ref ReadBuffer b) => new SetLoggerLevelRequest(ref b);

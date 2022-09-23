@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public PoseArray(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -33,7 +33,7 @@ namespace Iviz.Msgs.GeometryMsgs
                     : new Pose[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<Pose, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Poses = array;
             }
@@ -41,7 +41,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public PoseArray(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.GeometryMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<Pose, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Poses = array;
             }

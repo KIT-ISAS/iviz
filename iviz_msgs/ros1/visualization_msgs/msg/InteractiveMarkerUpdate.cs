@@ -43,7 +43,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public InteractiveMarkerUpdate(ref ReadBuffer b)
         {
-            b.DeserializeString(out ServerId);
+            ServerId = b.DeserializeString();
             b.Deserialize(out SeqNum);
             b.Deserialize(out Type);
             {
@@ -68,13 +68,13 @@ namespace Iviz.Msgs.VisualizationMsgs
                 }
                 Poses = array;
             }
-            b.DeserializeStringArray(out Erases);
+            Erases = b.DeserializeStringArray();
         }
         
         public InteractiveMarkerUpdate(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out ServerId);
+            ServerId = b.DeserializeString();
             b.Align8();
             b.Deserialize(out SeqNum);
             b.Deserialize(out Type);
@@ -103,7 +103,7 @@ namespace Iviz.Msgs.VisualizationMsgs
                 Poses = array;
             }
             b.Align4();
-            b.DeserializeStringArray(out Erases);
+            Erases = b.DeserializeStringArray();
         }
         
         public InteractiveMarkerUpdate RosDeserialize(ref ReadBuffer b) => new InteractiveMarkerUpdate(ref b);

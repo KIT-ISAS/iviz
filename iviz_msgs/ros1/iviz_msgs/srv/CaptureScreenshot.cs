@@ -130,14 +130,14 @@ namespace Iviz.Msgs.IvizMsgs
         public CaptureScreenshotResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            b.DeserializeString(out Message);
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Message = b.DeserializeString();
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Width);
             b.Deserialize(out Height);
             b.Deserialize(out Bpp);
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 Intrinsics = array;
             }
             b.Deserialize(out Pose);
@@ -148,7 +148,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 Data = array;
             }
@@ -158,8 +158,8 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Deserialize(out Success);
             b.Align4();
-            b.DeserializeString(out Message);
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Message = b.DeserializeString();
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
             b.Deserialize(out Width);
             b.Deserialize(out Height);
@@ -167,7 +167,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align8();
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 Intrinsics = array;
             }
             b.Deserialize(out Pose);
@@ -178,7 +178,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 Data = array;
             }

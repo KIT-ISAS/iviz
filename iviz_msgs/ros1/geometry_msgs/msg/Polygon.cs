@@ -30,7 +30,7 @@ namespace Iviz.Msgs.GeometryMsgs
                     : new Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<Point32, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 Points = array;
             }
@@ -46,7 +46,7 @@ namespace Iviz.Msgs.GeometryMsgs
                     : new Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<Point32, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 Points = array;
             }

@@ -25,16 +25,16 @@ namespace Iviz.Msgs.Roscpp
         
         public Logger(ref ReadBuffer b)
         {
-            b.DeserializeString(out Name);
-            b.DeserializeString(out Level);
+            Name = b.DeserializeString();
+            Level = b.DeserializeString();
         }
         
         public Logger(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Level);
+            Level = b.DeserializeString();
         }
         
         public Logger RosDeserialize(ref ReadBuffer b) => new Logger(ref b);

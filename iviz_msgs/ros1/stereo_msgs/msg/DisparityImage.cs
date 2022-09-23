@@ -43,7 +43,7 @@ namespace Iviz.Msgs.StereoMsgs
         
         public DisparityImage(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Image = new SensorMsgs.Image(ref b);
             b.Deserialize(out F);
             b.Deserialize(out T);
@@ -55,7 +55,7 @@ namespace Iviz.Msgs.StereoMsgs
         
         public DisparityImage(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Image = new SensorMsgs.Image(ref b);
             b.Align4();
             b.Deserialize(out F);

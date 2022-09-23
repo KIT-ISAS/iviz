@@ -43,7 +43,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public PointCloud2(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Height);
             b.Deserialize(out Width);
             {
@@ -60,13 +60,13 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out IsBigendian);
             b.Deserialize(out PointStep);
             b.Deserialize(out RowStep);
-            b.DeserializeStructRent(out Data);
+            Data = b.DeserializeStructRent();
             b.Deserialize(out IsDense);
         }
         
         public PointCloud2(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
             b.Deserialize(out Height);
             b.Deserialize(out Width);
@@ -85,7 +85,7 @@ namespace Iviz.Msgs.SensorMsgs
             b.Align4();
             b.Deserialize(out PointStep);
             b.Deserialize(out RowStep);
-            b.DeserializeStructRent(out Data);
+            Data = b.DeserializeStructRent();
             b.Deserialize(out IsDense);
         }
         

@@ -64,13 +64,13 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetLabeledClustersRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
         }
         
         public GetLabeledClustersRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
         }
         
         public GetLabeledClustersRequest RosDeserialize(ref ReadBuffer b) => new GetLabeledClustersRequest(ref b);

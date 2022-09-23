@@ -40,9 +40,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Feedback(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeString(out VizId);
-            b.DeserializeString(out Id);
+            Header = new StdMsgs.Header(ref b);
+            VizId = b.DeserializeString();
+            Id = b.DeserializeString();
             b.Deserialize(out PreviewOnly);
             b.Deserialize(out Type);
             b.Deserialize(out EntryId);
@@ -57,20 +57,20 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Pose[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Pose, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Trajectory = array;
             }
-            b.DeserializeString(out ColliderId);
+            ColliderId = b.DeserializeString();
         }
         
         public Feedback(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeString(out VizId);
+            VizId = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
             b.Deserialize(out PreviewOnly);
             b.Deserialize(out Type);
             b.Align4();
@@ -88,11 +88,11 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Pose, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Trajectory = array;
             }
-            b.DeserializeString(out ColliderId);
+            ColliderId = b.DeserializeString();
         }
         
         public Feedback RosDeserialize(ref ReadBuffer b) => new Feedback(ref b);

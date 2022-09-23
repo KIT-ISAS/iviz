@@ -32,18 +32,18 @@ namespace Iviz.Msgs.HriMsgs
         
         public Gaze(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeString(out Sender);
-            b.DeserializeString(out Receiver);
+            Header = new StdMsgs.Header(ref b);
+            Sender = b.DeserializeString();
+            Receiver = b.DeserializeString();
         }
         
         public Gaze(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeString(out Sender);
+            Sender = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Receiver);
+            Receiver = b.DeserializeString();
         }
         
         public Gaze RosDeserialize(ref ReadBuffer b) => new Gaze(ref b);

@@ -29,7 +29,7 @@ namespace Iviz.Msgs.ShapeMsgs
         {
             {
                 var array = new double[4];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 4 * 8);
+                b.DeserializeStructArray(array);
                 Coef = array;
             }
         }
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.ShapeMsgs
             {
                 b.Align8();
                 var array = new double[4];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 4 * 8);
+                b.DeserializeStructArray(array);
                 Coef = array;
             }
         }

@@ -28,7 +28,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public XRHandState(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Palm);
             {
                 int n = b.DeserializeArrayLength();
@@ -37,7 +37,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Transform, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Thumb = array;
             }
@@ -48,7 +48,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Transform, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Index = array;
             }
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Transform, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Middle = array;
             }
@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Transform, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Ring = array;
             }
@@ -81,7 +81,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Transform, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Little = array;
             }
@@ -90,7 +90,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public XRHandState(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align8();
             b.Deserialize(out Palm);
             {
@@ -101,7 +101,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Transform, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Thumb = array;
             }
@@ -113,7 +113,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Transform, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Index = array;
             }
@@ -125,7 +125,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Transform, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Middle = array;
             }
@@ -137,7 +137,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Transform, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Ring = array;
             }
@@ -149,7 +149,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Transform, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Little = array;
             }

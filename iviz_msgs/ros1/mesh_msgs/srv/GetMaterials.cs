@@ -64,13 +64,13 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetMaterialsRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
         }
         
         public GetMaterialsRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
         }
         
         public GetMaterialsRequest RosDeserialize(ref ReadBuffer b) => new GetMaterialsRequest(ref b);

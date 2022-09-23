@@ -25,13 +25,13 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public AccelStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Accel = new Accel(ref b);
         }
         
         public AccelStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Accel = new Accel(ref b);
         }
         

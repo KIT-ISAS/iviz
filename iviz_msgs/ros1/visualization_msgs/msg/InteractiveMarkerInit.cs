@@ -36,7 +36,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public InteractiveMarkerInit(ref ReadBuffer b)
         {
-            b.DeserializeString(out ServerId);
+            ServerId = b.DeserializeString();
             b.Deserialize(out SeqNum);
             {
                 int n = b.DeserializeArrayLength();
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         public InteractiveMarkerInit(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out ServerId);
+            ServerId = b.DeserializeString();
             b.Align8();
             b.Deserialize(out SeqNum);
             {

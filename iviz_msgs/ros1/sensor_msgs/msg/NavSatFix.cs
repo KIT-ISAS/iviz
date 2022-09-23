@@ -53,14 +53,14 @@ namespace Iviz.Msgs.SensorMsgs
         
         public NavSatFix(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Status = new NavSatStatus(ref b);
             b.Deserialize(out Latitude);
             b.Deserialize(out Longitude);
             b.Deserialize(out Altitude);
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 PositionCovariance = array;
             }
             b.Deserialize(out PositionCovarianceType);
@@ -68,7 +68,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public NavSatFix(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Status = new NavSatStatus(ref b);
             b.Align8();
             b.Deserialize(out Latitude);
@@ -76,7 +76,7 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Altitude);
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 PositionCovariance = array;
             }
             b.Deserialize(out PositionCovarianceType);

@@ -24,13 +24,13 @@ namespace Iviz.Msgs.MeshMsgs
         
         public VectorFieldStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             VectorField = new MeshMsgs.VectorField(ref b);
         }
         
         public VectorFieldStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             VectorField = new MeshMsgs.VectorField(ref b);
         }
         

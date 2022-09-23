@@ -46,7 +46,7 @@ namespace Iviz.Msgs.ShapeMsgs
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
+                    b.DeserializeStructArray(array);
                 }
                 Vertices = array;
             }
@@ -75,7 +75,7 @@ namespace Iviz.Msgs.ShapeMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
+                    b.DeserializeStructArray(array);
                 }
                 Vertices = array;
             }

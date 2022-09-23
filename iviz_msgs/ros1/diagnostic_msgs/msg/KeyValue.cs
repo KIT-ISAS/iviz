@@ -27,16 +27,16 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public KeyValue(ref ReadBuffer b)
         {
-            b.DeserializeString(out Key);
-            b.DeserializeString(out Value);
+            Key = b.DeserializeString();
+            Value = b.DeserializeString();
         }
         
         public KeyValue(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Key);
+            Key = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Value);
+            Value = b.DeserializeString();
         }
         
         public KeyValue RosDeserialize(ref ReadBuffer b) => new KeyValue(ref b);

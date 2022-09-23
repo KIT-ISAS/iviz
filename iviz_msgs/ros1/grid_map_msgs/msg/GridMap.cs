@@ -34,8 +34,8 @@ namespace Iviz.Msgs.GridMapMsgs
         public GridMap(ref ReadBuffer b)
         {
             Info = new GridMapInfo(ref b);
-            b.DeserializeStringArray(out Layers);
-            b.DeserializeStringArray(out BasicLayers);
+            Layers = b.DeserializeStringArray();
+            BasicLayers = b.DeserializeStringArray();
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -55,9 +55,9 @@ namespace Iviz.Msgs.GridMapMsgs
         {
             Info = new GridMapInfo(ref b);
             b.Align4();
-            b.DeserializeStringArray(out Layers);
+            Layers = b.DeserializeStringArray();
             b.Align4();
-            b.DeserializeStringArray(out BasicLayers);
+            BasicLayers = b.DeserializeStringArray();
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();

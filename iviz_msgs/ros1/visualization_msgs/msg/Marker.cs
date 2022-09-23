@@ -68,8 +68,8 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public Marker(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeString(out Ns);
+            Header = new StdMsgs.Header(ref b);
+            Ns = b.DeserializeString();
             b.Deserialize(out Id);
             b.Deserialize(out Type);
             b.Deserialize(out Action);
@@ -85,7 +85,7 @@ namespace Iviz.Msgs.VisualizationMsgs
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
+                    b.DeserializeStructArray(array);
                 }
                 Points = array;
             }
@@ -96,20 +96,20 @@ namespace Iviz.Msgs.VisualizationMsgs
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<StdMsgs.ColorRGBA, byte>(ref array[0]), n * 16);
+                    b.DeserializeStructArray(array);
                 }
                 Colors = array;
             }
-            b.DeserializeString(out Text);
-            b.DeserializeString(out MeshResource);
+            Text = b.DeserializeString();
+            MeshResource = b.DeserializeString();
             b.Deserialize(out MeshUseEmbeddedMaterials);
         }
         
         public Marker(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeString(out Ns);
+            Ns = b.DeserializeString();
             b.Align4();
             b.Deserialize(out Id);
             b.Deserialize(out Type);
@@ -129,7 +129,7 @@ namespace Iviz.Msgs.VisualizationMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
+                    b.DeserializeStructArray(array);
                 }
                 Points = array;
             }
@@ -140,13 +140,13 @@ namespace Iviz.Msgs.VisualizationMsgs
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<StdMsgs.ColorRGBA, byte>(ref array[0]), n * 16);
+                    b.DeserializeStructArray(array);
                 }
                 Colors = array;
             }
-            b.DeserializeString(out Text);
+            Text = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out MeshResource);
+            MeshResource = b.DeserializeString();
             b.Deserialize(out MeshUseEmbeddedMaterials);
         }
         

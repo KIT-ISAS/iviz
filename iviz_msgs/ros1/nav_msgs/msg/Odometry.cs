@@ -33,17 +33,17 @@ namespace Iviz.Msgs.NavMsgs
         
         public Odometry(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeString(out ChildFrameId);
+            Header = new StdMsgs.Header(ref b);
+            ChildFrameId = b.DeserializeString();
             Pose = new GeometryMsgs.PoseWithCovariance(ref b);
             Twist = new GeometryMsgs.TwistWithCovariance(ref b);
         }
         
         public Odometry(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeString(out ChildFrameId);
+            ChildFrameId = b.DeserializeString();
             Pose = new GeometryMsgs.PoseWithCovariance(ref b);
             Twist = new GeometryMsgs.TwistWithCovariance(ref b);
         }

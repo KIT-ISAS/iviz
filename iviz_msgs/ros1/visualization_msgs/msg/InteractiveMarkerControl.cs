@@ -79,7 +79,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public InteractiveMarkerControl(ref ReadBuffer b)
         {
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Deserialize(out Orientation);
             b.Deserialize(out OrientationMode);
             b.Deserialize(out InteractionMode);
@@ -96,13 +96,13 @@ namespace Iviz.Msgs.VisualizationMsgs
                 Markers = array;
             }
             b.Deserialize(out IndependentMarkerOrientation);
-            b.DeserializeString(out Description);
+            Description = b.DeserializeString();
         }
         
         public InteractiveMarkerControl(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Align8();
             b.Deserialize(out Orientation);
             b.Deserialize(out OrientationMode);
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
             b.Deserialize(out IndependentMarkerOrientation);
             b.Align4();
-            b.DeserializeString(out Description);
+            Description = b.DeserializeString();
         }
         
         public InteractiveMarkerControl RosDeserialize(ref ReadBuffer b) => new InteractiveMarkerControl(ref b);

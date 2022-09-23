@@ -31,14 +31,14 @@ namespace Iviz.Msgs.ActionlibMsgs
         public GoalID(ref ReadBuffer b)
         {
             b.Deserialize(out Stamp);
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
         }
         
         public GoalID(ref ReadBuffer2 b)
         {
             b.Align4();
             b.Deserialize(out Stamp);
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
         }
         
         public GoalID RosDeserialize(ref ReadBuffer b) => new GoalID(ref b);

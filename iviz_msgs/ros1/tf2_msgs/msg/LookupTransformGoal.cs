@@ -28,26 +28,26 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public LookupTransformGoal(ref ReadBuffer b)
         {
-            b.DeserializeString(out TargetFrame);
-            b.DeserializeString(out SourceFrame);
+            TargetFrame = b.DeserializeString();
+            SourceFrame = b.DeserializeString();
             b.Deserialize(out SourceTime);
             b.Deserialize(out Timeout);
             b.Deserialize(out TargetTime);
-            b.DeserializeString(out FixedFrame);
+            FixedFrame = b.DeserializeString();
             b.Deserialize(out Advanced);
         }
         
         public LookupTransformGoal(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out TargetFrame);
+            TargetFrame = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out SourceFrame);
+            SourceFrame = b.DeserializeString();
             b.Align4();
             b.Deserialize(out SourceTime);
             b.Deserialize(out Timeout);
             b.Deserialize(out TargetTime);
-            b.DeserializeString(out FixedFrame);
+            FixedFrame = b.DeserializeString();
             b.Deserialize(out Advanced);
         }
         

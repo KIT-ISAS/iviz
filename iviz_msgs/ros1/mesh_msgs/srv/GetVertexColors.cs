@@ -64,13 +64,13 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetVertexColorsRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
         }
         
         public GetVertexColorsRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
         }
         
         public GetVertexColorsRequest RosDeserialize(ref ReadBuffer b) => new GetVertexColorsRequest(ref b);

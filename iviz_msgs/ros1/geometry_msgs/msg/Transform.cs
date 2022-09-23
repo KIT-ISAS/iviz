@@ -20,13 +20,11 @@ namespace Iviz.Msgs.GeometryMsgs
             this.Rotation = Rotation;
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Transform(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Transform(ref ReadBuffer2 b)
         {
             b.Deserialize(out this);

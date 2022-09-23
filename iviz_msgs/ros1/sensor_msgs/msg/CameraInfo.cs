@@ -142,10 +142,10 @@ namespace Iviz.Msgs.SensorMsgs
         
         public CameraInfo(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Height);
             b.Deserialize(out Width);
-            b.DeserializeString(out DistortionModel);
+            DistortionModel = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -153,23 +153,23 @@ namespace Iviz.Msgs.SensorMsgs
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 D = array;
             }
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 K = array;
             }
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 R = array;
             }
             {
                 var array = new double[12];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 12 * 8);
+                b.DeserializeStructArray(array);
                 P = array;
             }
             b.Deserialize(out BinningX);
@@ -179,11 +179,11 @@ namespace Iviz.Msgs.SensorMsgs
         
         public CameraInfo(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
             b.Deserialize(out Height);
             b.Deserialize(out Width);
-            b.DeserializeString(out DistortionModel);
+            DistortionModel = b.DeserializeString();
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -193,23 +193,23 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 D = array;
             }
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 K = array;
             }
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 R = array;
             }
             {
                 var array = new double[12];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 12 * 8);
+                b.DeserializeStructArray(array);
                 P = array;
             }
             b.Deserialize(out BinningX);

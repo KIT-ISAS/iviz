@@ -38,8 +38,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public CompressedImage(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeString(out Format);
+            Header = new StdMsgs.Header(ref b);
+            Format = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -47,7 +47,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 Data = array;
             }
@@ -55,9 +55,9 @@ namespace Iviz.Msgs.SensorMsgs
         
         public CompressedImage(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeString(out Format);
+            Format = b.DeserializeString();
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -66,7 +66,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 Data = array;
             }

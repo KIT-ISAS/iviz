@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MeshMsgs
         {
             {
                 var array = new uint[3];
-                b.DeserializeStructArray(ref Unsafe.As<uint, byte>(ref array[0]), 3 * 4);
+                b.DeserializeStructArray(array);
                 VertexIndices = array;
             }
         }
@@ -35,7 +35,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 var array = new uint[3];
-                b.DeserializeStructArray(ref Unsafe.As<uint, byte>(ref array[0]), 3 * 4);
+                b.DeserializeStructArray(array);
                 VertexIndices = array;
             }
         }

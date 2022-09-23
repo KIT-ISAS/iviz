@@ -42,7 +42,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public string RosServiceType => ServiceType;
         
-        public string RosMd5Sum => "77df1f255ef8305a4f2d1cdc89b0b224";
+        public string RosMd5Sum => "3e28f33adf4bc180b0c552d7317b5aa7";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -137,7 +137,7 @@ namespace Iviz.Msgs.IvizMsgs
         public LaunchDialogResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
             Feedback = new IvizMsgs.Feedback(ref b);
         }
         
@@ -145,7 +145,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Deserialize(out Success);
             b.Align4();
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
             Feedback = new IvizMsgs.Feedback(ref b);
         }
         

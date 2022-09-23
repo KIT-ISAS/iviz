@@ -24,13 +24,13 @@ namespace Iviz.Msgs.MeshMsgs
         
         public TriangleMeshStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Mesh = new MeshMsgs.TriangleMesh(ref b);
         }
         
         public TriangleMeshStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Mesh = new MeshMsgs.TriangleMesh(ref b);
         }
         

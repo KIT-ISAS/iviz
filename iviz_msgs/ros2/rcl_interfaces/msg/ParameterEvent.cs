@@ -33,7 +33,7 @@ namespace Iviz.Msgs.RclInterfaces
         public ParameterEvent(ref ReadBuffer b)
         {
             b.Deserialize(out Stamp);
-            b.DeserializeString(out Node);
+            Node = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -73,7 +73,7 @@ namespace Iviz.Msgs.RclInterfaces
         {
             b.Align4();
             b.Deserialize(out Stamp);
-            b.DeserializeString(out Node);
+            Node = b.DeserializeString();
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();

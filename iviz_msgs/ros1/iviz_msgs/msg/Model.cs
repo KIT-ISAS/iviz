@@ -27,9 +27,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Model(ref ReadBuffer b)
         {
-            b.DeserializeString(out Name);
-            b.DeserializeString(out Filename);
-            b.DeserializeString(out OrientationHint);
+            Name = b.DeserializeString();
+            Filename = b.DeserializeString();
+            OrientationHint = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -68,11 +68,11 @@ namespace Iviz.Msgs.IvizMsgs
         public Model(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Filename);
+            Filename = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out OrientationHint);
+            OrientationHint = b.DeserializeString();
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();

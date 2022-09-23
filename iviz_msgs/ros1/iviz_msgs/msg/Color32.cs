@@ -23,13 +23,11 @@ namespace Iviz.Msgs.IvizMsgs
             this.A = A;
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Color32(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Color32(ref ReadBuffer2 b)
         {
             b.Deserialize(out this);

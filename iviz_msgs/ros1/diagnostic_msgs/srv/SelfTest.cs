@@ -117,7 +117,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public SelfTestResponse(ref ReadBuffer b)
         {
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
             b.Deserialize(out Passed);
             {
                 int n = b.DeserializeArrayLength();
@@ -135,7 +135,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public SelfTestResponse(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
             b.Deserialize(out Passed);
             {
                 b.Align4();

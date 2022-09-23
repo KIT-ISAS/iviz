@@ -55,7 +55,7 @@ namespace Iviz.Msgs.MeshMsgs
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
+                    b.DeserializeStructArray(array);
                 }
                 Vertices = array;
             }
@@ -66,7 +66,7 @@ namespace Iviz.Msgs.MeshMsgs
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
+                    b.DeserializeStructArray(array);
                 }
                 VertexNormals = array;
             }
@@ -77,7 +77,7 @@ namespace Iviz.Msgs.MeshMsgs
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<StdMsgs.ColorRGBA, byte>(ref array[0]), n * 16);
+                    b.DeserializeStructArray(array);
                 }
                 VertexColors = array;
             }
@@ -88,7 +88,7 @@ namespace Iviz.Msgs.MeshMsgs
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<StdMsgs.ColorRGBA, byte>(ref array[0]), n * 16);
+                    b.DeserializeStructArray(array);
                 }
                 TriangleColors = array;
             }
@@ -99,7 +99,7 @@ namespace Iviz.Msgs.MeshMsgs
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
+                    b.DeserializeStructArray(array);
                 }
                 VertexTextureCoords = array;
             }
@@ -161,7 +161,7 @@ namespace Iviz.Msgs.MeshMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
+                    b.DeserializeStructArray(array);
                 }
                 Vertices = array;
             }
@@ -173,7 +173,7 @@ namespace Iviz.Msgs.MeshMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
+                    b.DeserializeStructArray(array);
                 }
                 VertexNormals = array;
             }
@@ -184,7 +184,7 @@ namespace Iviz.Msgs.MeshMsgs
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<StdMsgs.ColorRGBA, byte>(ref array[0]), n * 16);
+                    b.DeserializeStructArray(array);
                 }
                 VertexColors = array;
             }
@@ -195,7 +195,7 @@ namespace Iviz.Msgs.MeshMsgs
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<StdMsgs.ColorRGBA, byte>(ref array[0]), n * 16);
+                    b.DeserializeStructArray(array);
                 }
                 TriangleColors = array;
             }
@@ -207,7 +207,7 @@ namespace Iviz.Msgs.MeshMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
+                    b.DeserializeStructArray(array);
                 }
                 VertexTextureCoords = array;
             }

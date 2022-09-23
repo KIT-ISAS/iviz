@@ -64,13 +64,13 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetVertexCostsRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
         }
         
         public GetVertexCostsRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
         }
         
         public GetVertexCostsRequest RosDeserialize(ref ReadBuffer b) => new GetVertexCostsRequest(ref b);

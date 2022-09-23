@@ -51,10 +51,10 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public InteractiveMarkerFeedback(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeString(out ClientId);
-            b.DeserializeString(out MarkerName);
-            b.DeserializeString(out ControlName);
+            Header = new StdMsgs.Header(ref b);
+            ClientId = b.DeserializeString();
+            MarkerName = b.DeserializeString();
+            ControlName = b.DeserializeString();
             b.Deserialize(out EventType);
             b.Deserialize(out Pose);
             b.Deserialize(out MenuEntryId);
@@ -64,13 +64,13 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public InteractiveMarkerFeedback(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeString(out ClientId);
+            ClientId = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out MarkerName);
+            MarkerName = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out ControlName);
+            ControlName = b.DeserializeString();
             b.Deserialize(out EventType);
             b.Align8();
             b.Deserialize(out Pose);

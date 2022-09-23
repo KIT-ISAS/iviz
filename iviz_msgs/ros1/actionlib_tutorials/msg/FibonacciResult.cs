@@ -30,7 +30,7 @@ namespace Iviz.Msgs.ActionlibTutorials
                     : new int[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<int, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Sequence = array;
             }
@@ -46,7 +46,7 @@ namespace Iviz.Msgs.ActionlibTutorials
                     : new int[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<int, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Sequence = array;
             }

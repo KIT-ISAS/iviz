@@ -33,17 +33,17 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshFaceClusterStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeString(out Uuid);
+            Header = new StdMsgs.Header(ref b);
+            Uuid = b.DeserializeString();
             Cluster = new MeshFaceCluster(ref b);
             b.Deserialize(out @override);
         }
         
         public MeshFaceClusterStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
             Cluster = new MeshFaceCluster(ref b);
             b.Deserialize(out @override);
         }

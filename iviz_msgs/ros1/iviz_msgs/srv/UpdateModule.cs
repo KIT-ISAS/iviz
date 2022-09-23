@@ -74,19 +74,19 @@ namespace Iviz.Msgs.IvizMsgs
         
         public UpdateModuleRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out Id);
-            b.DeserializeStringArray(out Fields);
-            b.DeserializeString(out Config);
+            Id = b.DeserializeString();
+            Fields = b.DeserializeStringArray();
+            Config = b.DeserializeString();
         }
         
         public UpdateModuleRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
             b.Align4();
-            b.DeserializeStringArray(out Fields);
+            Fields = b.DeserializeStringArray();
             b.Align4();
-            b.DeserializeString(out Config);
+            Config = b.DeserializeString();
         }
         
         public UpdateModuleRequest RosDeserialize(ref ReadBuffer b) => new UpdateModuleRequest(ref b);
@@ -169,14 +169,14 @@ namespace Iviz.Msgs.IvizMsgs
         public UpdateModuleResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public UpdateModuleResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
             b.Align4();
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public UpdateModuleResponse RosDeserialize(ref ReadBuffer b) => new UpdateModuleResponse(ref b);

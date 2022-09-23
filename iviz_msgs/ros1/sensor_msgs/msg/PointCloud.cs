@@ -35,7 +35,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public PointCloud(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -43,7 +43,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 Points = array;
             }
@@ -62,7 +62,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public PointCloud(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -71,7 +71,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 Points = array;
             }

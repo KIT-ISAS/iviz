@@ -28,16 +28,16 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshGeometryStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeString(out Uuid);
+            Header = new StdMsgs.Header(ref b);
+            Uuid = b.DeserializeString();
             MeshGeometry = new MeshMsgs.MeshGeometry(ref b);
         }
         
         public MeshGeometryStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
             MeshGeometry = new MeshMsgs.MeshGeometry(ref b);
         }
         

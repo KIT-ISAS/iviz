@@ -30,7 +30,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ModelNode(ref ReadBuffer b)
         {
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Deserialize(out Parent);
             Transform = new Matrix4(ref b);
             {
@@ -40,7 +40,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new int[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<int, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Meshes = array;
             }
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.IvizMsgs
         public ModelNode(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Align4();
             b.Deserialize(out Parent);
             Transform = new Matrix4(ref b);
@@ -61,7 +61,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new int[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<int, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Meshes = array;
             }

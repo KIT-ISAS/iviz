@@ -25,13 +25,13 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public WrenchStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Wrench = new Wrench(ref b);
         }
         
         public WrenchStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Wrench = new Wrench(ref b);
         }
         

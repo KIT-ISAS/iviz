@@ -40,7 +40,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                     : new GeometryMsgs.Transform[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Transform, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Transforms = array;
             }
@@ -80,7 +80,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Transform, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Transforms = array;
             }

@@ -29,14 +29,14 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public OctomapWithPose(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Origin);
             Octomap = new OctomapMsgs.Octomap(ref b);
         }
         
         public OctomapWithPose(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align8();
             b.Deserialize(out Origin);
             Octomap = new OctomapMsgs.Octomap(ref b);

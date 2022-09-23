@@ -30,7 +30,7 @@ namespace Iviz.Msgs.MeshMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Costs = array;
             }
@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Costs = array;
             }

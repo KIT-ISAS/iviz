@@ -60,7 +60,7 @@ namespace Iviz.Msgs.ShapeMsgs
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Dimensions = array;
             }
@@ -78,7 +78,7 @@ namespace Iviz.Msgs.ShapeMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Dimensions = array;
             }

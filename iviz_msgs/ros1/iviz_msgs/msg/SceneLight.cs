@@ -28,7 +28,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public SceneLight(ref ReadBuffer b)
         {
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Deserialize(out Type);
             b.Deserialize(out CastShadows);
             b.Deserialize(out Diffuse);
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.IvizMsgs
         public SceneLight(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Deserialize(out Type);
             b.Deserialize(out CastShadows);
             b.Deserialize(out Diffuse);

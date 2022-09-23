@@ -31,7 +31,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public NormalizedPointOfInterest2DStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out X);
             b.Deserialize(out Y);
             b.Deserialize(out C);
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public NormalizedPointOfInterest2DStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
             b.Deserialize(out X);
             b.Deserialize(out Y);

@@ -114,13 +114,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetModulesResponse(ref ReadBuffer b)
         {
-            b.DeserializeStringArray(out Configs);
+            Configs = b.DeserializeStringArray();
         }
         
         public GetModulesResponse(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStringArray(out Configs);
+            Configs = b.DeserializeStringArray();
         }
         
         public GetModulesResponse RosDeserialize(ref ReadBuffer b) => new GetModulesResponse(ref b);

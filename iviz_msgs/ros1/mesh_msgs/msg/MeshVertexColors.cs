@@ -30,7 +30,7 @@ namespace Iviz.Msgs.MeshMsgs
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<StdMsgs.ColorRGBA, byte>(ref array[0]), n * 16);
+                    b.DeserializeStructArray(array);
                 }
                 VertexColors = array;
             }
@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
                     : new StdMsgs.ColorRGBA[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<StdMsgs.ColorRGBA, byte>(ref array[0]), n * 16);
+                    b.DeserializeStructArray(array);
                 }
                 VertexColors = array;
             }

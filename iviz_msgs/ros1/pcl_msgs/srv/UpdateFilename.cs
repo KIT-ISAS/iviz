@@ -64,13 +64,13 @@ namespace Iviz.Msgs.PclMsgs
         
         public UpdateFilenameRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out Filename);
+            Filename = b.DeserializeString();
         }
         
         public UpdateFilenameRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Filename);
+            Filename = b.DeserializeString();
         }
         
         public UpdateFilenameRequest RosDeserialize(ref ReadBuffer b) => new UpdateFilenameRequest(ref b);

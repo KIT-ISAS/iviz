@@ -28,16 +28,16 @@ namespace Iviz.Msgs.RclInterfaces
         
         public ListParametersResult(ref ReadBuffer b)
         {
-            b.DeserializeStringArray(out Names);
-            b.DeserializeStringArray(out Prefixes);
+            Names = b.DeserializeStringArray();
+            Prefixes = b.DeserializeStringArray();
         }
         
         public ListParametersResult(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStringArray(out Names);
+            Names = b.DeserializeStringArray();
             b.Align4();
-            b.DeserializeStringArray(out Prefixes);
+            Prefixes = b.DeserializeStringArray();
         }
         
         public ListParametersResult RosDeserialize(ref ReadBuffer b) => new ListParametersResult(ref b);

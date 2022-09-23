@@ -65,13 +65,13 @@ namespace Iviz.Msgs.RclInterfaces
         
         public DescribeParametersRequest(ref ReadBuffer b)
         {
-            b.DeserializeStringArray(out Names);
+            Names = b.DeserializeStringArray();
         }
         
         public DescribeParametersRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStringArray(out Names);
+            Names = b.DeserializeStringArray();
         }
         
         public DescribeParametersRequest RosDeserialize(ref ReadBuffer b) => new DescribeParametersRequest(ref b);

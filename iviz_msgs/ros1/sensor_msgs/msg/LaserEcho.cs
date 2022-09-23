@@ -33,7 +33,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Echoes = array;
             }
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Echoes = array;
             }

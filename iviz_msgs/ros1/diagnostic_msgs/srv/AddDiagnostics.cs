@@ -79,13 +79,13 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public AddDiagnosticsRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out LoadNamespace);
+            LoadNamespace = b.DeserializeString();
         }
         
         public AddDiagnosticsRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out LoadNamespace);
+            LoadNamespace = b.DeserializeString();
         }
         
         public AddDiagnosticsRequest RosDeserialize(ref ReadBuffer b) => new AddDiagnosticsRequest(ref b);
@@ -155,14 +155,14 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public AddDiagnosticsResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public AddDiagnosticsResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
             b.Align4();
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public AddDiagnosticsResponse RosDeserialize(ref ReadBuffer b) => new AddDiagnosticsResponse(ref b);

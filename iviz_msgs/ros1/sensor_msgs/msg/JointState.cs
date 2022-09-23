@@ -42,8 +42,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public JointState(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeStringArray(out Name);
+            Header = new StdMsgs.Header(ref b);
+            Name = b.DeserializeStringArray();
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Position = array;
             }
@@ -62,7 +62,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Velocity = array;
             }
@@ -73,7 +73,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Effort = array;
             }
@@ -81,9 +81,9 @@ namespace Iviz.Msgs.SensorMsgs
         
         public JointState(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeStringArray(out Name);
+            Name = b.DeserializeStringArray();
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -93,7 +93,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Position = array;
             }
@@ -105,7 +105,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Velocity = array;
             }
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Effort = array;
             }

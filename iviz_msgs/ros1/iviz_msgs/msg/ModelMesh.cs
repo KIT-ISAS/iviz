@@ -32,7 +32,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ModelMesh(ref ReadBuffer b)
         {
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -40,7 +40,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 Vertices = array;
             }
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 Normals = array;
             }
@@ -62,7 +62,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 Tangents = array;
             }
@@ -73,7 +73,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 BiTangents = array;
             }
@@ -106,7 +106,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new Triangle[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<Triangle, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 Faces = array;
             }
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.IvizMsgs
         public ModelMesh(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -125,7 +125,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 Vertices = array;
             }
@@ -136,7 +136,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 Normals = array;
             }
@@ -147,7 +147,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 Tangents = array;
             }
@@ -158,7 +158,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Point32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point32, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 BiTangents = array;
             }
@@ -193,7 +193,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new Triangle[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<Triangle, byte>(ref array[0]), n * 12);
+                    b.DeserializeStructArray(array);
                 }
                 Faces = array;
             }

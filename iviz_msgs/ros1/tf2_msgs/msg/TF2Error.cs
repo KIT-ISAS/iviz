@@ -32,14 +32,14 @@ namespace Iviz.Msgs.Tf2Msgs
         public TF2Error(ref ReadBuffer b)
         {
             b.Deserialize(out Error);
-            b.DeserializeString(out ErrorString);
+            ErrorString = b.DeserializeString();
         }
         
         public TF2Error(ref ReadBuffer2 b)
         {
             b.Deserialize(out Error);
             b.Align4();
-            b.DeserializeString(out ErrorString);
+            ErrorString = b.DeserializeString();
         }
         
         public TF2Error RosDeserialize(ref ReadBuffer b) => new TF2Error(ref b);

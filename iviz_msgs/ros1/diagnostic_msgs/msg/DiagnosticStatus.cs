@@ -37,9 +37,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public DiagnosticStatus(ref ReadBuffer b)
         {
             b.Deserialize(out Level);
-            b.DeserializeString(out Name);
-            b.DeserializeString(out Message);
-            b.DeserializeString(out HardwareId);
+            Name = b.DeserializeString();
+            Message = b.DeserializeString();
+            HardwareId = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -57,11 +57,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
             b.Deserialize(out Level);
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out HardwareId);
+            HardwareId = b.DeserializeString();
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();

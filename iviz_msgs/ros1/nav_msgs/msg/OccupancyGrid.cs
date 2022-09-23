@@ -32,7 +32,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public OccupancyGrid(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Info = new MapMetaData(ref b);
             {
                 int n = b.DeserializeArrayLength();
@@ -41,7 +41,7 @@ namespace Iviz.Msgs.NavMsgs
                     : new sbyte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<sbyte, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 Data = array;
             }
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public OccupancyGrid(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Info = new MapMetaData(ref b);
             {
                 b.Align4();
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.NavMsgs
                     : new sbyte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<sbyte, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 Data = array;
             }

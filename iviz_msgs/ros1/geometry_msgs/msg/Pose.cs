@@ -20,13 +20,11 @@ namespace Iviz.Msgs.GeometryMsgs
             this.Orientation = Orientation;
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Pose(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Pose(ref ReadBuffer2 b)
         {
             b.Deserialize(out this);

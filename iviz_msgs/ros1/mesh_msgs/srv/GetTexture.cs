@@ -66,14 +66,14 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetTextureRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
             b.Deserialize(out TextureIndex);
         }
         
         public GetTextureRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
             b.Align4();
             b.Deserialize(out TextureIndex);
         }

@@ -25,13 +25,13 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public TwistStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Twist = new Twist(ref b);
         }
         
         public TwistStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Twist = new Twist(ref b);
         }
         

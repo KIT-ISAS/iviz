@@ -32,33 +32,19 @@ namespace Iviz.Msgs.StdMsgs
             this.FrameId = FrameId;
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Header(ref ReadBuffer b)
         {
-            Deserialize(ref b, out this);
+            b.Deserialize(out Seq);
+            b.Deserialize(out Stamp);
+            FrameId = b.DeserializeString();
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deserialize(ref ReadBuffer b, out Header h)
-        {
-            b.Deserialize(out h.Seq);
-            b.Deserialize(out h.Stamp);
-            b.DeserializeString(out h.FrameId);
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Header(ref ReadBuffer2 b)
         {
-            Deserialize(ref b, out this);
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deserialize(ref ReadBuffer2 b, out Header h)
-        {
-            h.Seq = default;
+            Seq = default;
             b.Align4();
-            b.Deserialize(out h.Stamp);
-            b.DeserializeString(out h.FrameId);
+            b.Deserialize(out Stamp);
+            FrameId = b.DeserializeString();
         }
         
         public readonly Header RosDeserialize(ref ReadBuffer b) => new Header(ref b);

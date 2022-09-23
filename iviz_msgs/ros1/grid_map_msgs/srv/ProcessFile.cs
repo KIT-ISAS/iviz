@@ -69,16 +69,16 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public ProcessFileRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out FilePath);
-            b.DeserializeString(out TopicName);
+            FilePath = b.DeserializeString();
+            TopicName = b.DeserializeString();
         }
         
         public ProcessFileRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out FilePath);
+            FilePath = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out TopicName);
+            TopicName = b.DeserializeString();
         }
         
         public ProcessFileRequest RosDeserialize(ref ReadBuffer b) => new ProcessFileRequest(ref b);

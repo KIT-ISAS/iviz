@@ -66,13 +66,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetFramePoseRequest(ref ReadBuffer b)
         {
-            b.DeserializeStringArray(out Frames);
+            Frames = b.DeserializeStringArray();
         }
         
         public GetFramePoseRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStringArray(out Frames);
+            Frames = b.DeserializeStringArray();
         }
         
         public GetFramePoseRequest RosDeserialize(ref ReadBuffer b) => new GetFramePoseRequest(ref b);
@@ -150,7 +150,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new bool[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<bool, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 IsValid = array;
             }
@@ -161,7 +161,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Pose[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Pose, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Poses = array;
             }
@@ -177,7 +177,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new bool[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<bool, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 IsValid = array;
             }
@@ -190,7 +190,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Pose, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Poses = array;
             }

@@ -54,7 +54,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public Range(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out RadiationType);
             b.Deserialize(out FieldOfView);
             b.Deserialize(out MinRange);
@@ -64,7 +64,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public Range(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out RadiationType);
             b.Align4();
             b.Deserialize(out FieldOfView);

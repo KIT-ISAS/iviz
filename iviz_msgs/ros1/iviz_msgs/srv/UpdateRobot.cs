@@ -73,19 +73,19 @@ namespace Iviz.Msgs.IvizMsgs
         public UpdateRobotRequest(ref ReadBuffer b)
         {
             b.Deserialize(out Operation);
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
             Configuration = new IvizMsgs.RobotConfiguration(ref b);
-            b.DeserializeStringArray(out ValidFields);
+            ValidFields = b.DeserializeStringArray();
         }
         
         public UpdateRobotRequest(ref ReadBuffer2 b)
         {
             b.Align4();
             b.Deserialize(out Operation);
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
             Configuration = new IvizMsgs.RobotConfiguration(ref b);
             b.Align4();
-            b.DeserializeStringArray(out ValidFields);
+            ValidFields = b.DeserializeStringArray();
         }
         
         public UpdateRobotRequest RosDeserialize(ref ReadBuffer b) => new UpdateRobotRequest(ref b);
@@ -169,14 +169,14 @@ namespace Iviz.Msgs.IvizMsgs
         public UpdateRobotResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public UpdateRobotResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
             b.Align4();
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public UpdateRobotResponse RosDeserialize(ref ReadBuffer b) => new UpdateRobotResponse(ref b);

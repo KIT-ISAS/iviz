@@ -39,10 +39,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public RobotPreview(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Action);
-            b.DeserializeString(out Id);
-            b.DeserializeStringArray(out JointNames);
+            Id = b.DeserializeString();
+            JointNames = b.DeserializeStringArray();
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -50,14 +50,14 @@ namespace Iviz.Msgs.IvizMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 JointValues = array;
             }
-            b.DeserializeString(out RobotDescription);
-            b.DeserializeString(out SourceNode);
-            b.DeserializeString(out SourceParameter);
-            b.DeserializeString(out SavedRobotName);
+            RobotDescription = b.DeserializeString();
+            SourceNode = b.DeserializeString();
+            SourceParameter = b.DeserializeString();
+            SavedRobotName = b.DeserializeString();
             b.Deserialize(out Tint);
             b.Deserialize(out Metallic);
             b.Deserialize(out Smoothness);
@@ -67,12 +67,12 @@ namespace Iviz.Msgs.IvizMsgs
         
         public RobotPreview(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Action);
             b.Align4();
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
             b.Align4();
-            b.DeserializeStringArray(out JointNames);
+            JointNames = b.DeserializeStringArray();
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -81,17 +81,17 @@ namespace Iviz.Msgs.IvizMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 JointValues = array;
             }
-            b.DeserializeString(out RobotDescription);
+            RobotDescription = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out SourceNode);
+            SourceNode = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out SourceParameter);
+            SourceParameter = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out SavedRobotName);
+            SavedRobotName = b.DeserializeString();
             b.Align4();
             b.Deserialize(out Tint);
             b.Deserialize(out Metallic);

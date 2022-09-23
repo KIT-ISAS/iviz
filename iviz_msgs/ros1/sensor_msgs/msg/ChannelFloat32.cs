@@ -44,7 +44,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public ChannelFloat32(ref ReadBuffer b)
         {
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -52,7 +52,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Values = array;
             }
@@ -61,7 +61,7 @@ namespace Iviz.Msgs.SensorMsgs
         public ChannelFloat32(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -70,7 +70,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Values = array;
             }

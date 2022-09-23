@@ -24,13 +24,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public BoundingBoxStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Boundary = new BoundingBox(ref b);
         }
         
         public BoundingBoxStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Boundary = new BoundingBox(ref b);
         }
         

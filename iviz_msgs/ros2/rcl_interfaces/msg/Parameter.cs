@@ -30,14 +30,14 @@ namespace Iviz.Msgs.RclInterfaces
         
         public Parameter(ref ReadBuffer b)
         {
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             Value = new ParameterValue(ref b);
         }
         
         public Parameter(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             Value = new ParameterValue(ref b);
         }
         

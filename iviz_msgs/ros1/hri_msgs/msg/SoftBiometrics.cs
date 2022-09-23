@@ -26,7 +26,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public SoftBiometrics(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Age);
             b.Deserialize(out AgeConfidence);
             b.Deserialize(out Gender);
@@ -35,7 +35,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public SoftBiometrics(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Age);
             b.Align4();
             b.Deserialize(out AgeConfidence);

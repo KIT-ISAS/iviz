@@ -34,14 +34,14 @@ namespace Iviz.Msgs.SensorMsgs
         
         public RelativeHumidity(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out RelativeHumidity_);
             b.Deserialize(out Variance);
         }
         
         public RelativeHumidity(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align8();
             b.Deserialize(out RelativeHumidity_);
             b.Deserialize(out Variance);

@@ -28,18 +28,18 @@ namespace Iviz.Msgs.HriMsgs
         
         public Group(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeString(out GroupId);
-            b.DeserializeStringArray(out Members);
+            Header = new StdMsgs.Header(ref b);
+            GroupId = b.DeserializeString();
+            Members = b.DeserializeStringArray();
         }
         
         public Group(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeString(out GroupId);
+            GroupId = b.DeserializeString();
             b.Align4();
-            b.DeserializeStringArray(out Members);
+            Members = b.DeserializeStringArray();
         }
         
         public Group RosDeserialize(ref ReadBuffer b) => new Group(ref b);

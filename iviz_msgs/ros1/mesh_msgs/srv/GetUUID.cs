@@ -112,13 +112,13 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetUUIDResponse(ref ReadBuffer b)
         {
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
         }
         
         public GetUUIDResponse(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
         }
         
         public GetUUIDResponse RosDeserialize(ref ReadBuffer b) => new GetUUIDResponse(ref b);

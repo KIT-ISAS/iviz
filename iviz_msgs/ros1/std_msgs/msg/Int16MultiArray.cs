@@ -37,7 +37,7 @@ namespace Iviz.Msgs.StdMsgs
                     : new short[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<short, byte>(ref array[0]), n * 2);
+                    b.DeserializeStructArray(array);
                 }
                 Data = array;
             }
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.StdMsgs
                     : new short[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<short, byte>(ref array[0]), n * 2);
+                    b.DeserializeStructArray(array);
                 }
                 Data = array;
             }

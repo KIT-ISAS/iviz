@@ -31,19 +31,19 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshVertexCostsStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeString(out Uuid);
-            b.DeserializeString(out Type);
+            Header = new StdMsgs.Header(ref b);
+            Uuid = b.DeserializeString();
+            Type = b.DeserializeString();
             MeshVertexCosts = new MeshMsgs.MeshVertexCosts(ref b);
         }
         
         public MeshVertexCostsStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Type);
+            Type = b.DeserializeString();
             MeshVertexCosts = new MeshMsgs.MeshVertexCosts(ref b);
         }
         

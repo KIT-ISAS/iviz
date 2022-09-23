@@ -34,7 +34,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Positions = array;
             }
@@ -45,7 +45,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Velocities = array;
             }
@@ -56,7 +56,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Accelerations = array;
             }
@@ -67,7 +67,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                     : new double[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Effort = array;
             }
@@ -85,7 +85,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Positions = array;
             }
@@ -97,7 +97,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Velocities = array;
             }
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Accelerations = array;
             }
@@ -121,7 +121,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Effort = array;
             }

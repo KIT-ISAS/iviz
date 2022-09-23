@@ -32,7 +32,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new GeometryMsgs.Pose[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Pose, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Poses = array;
             }
@@ -43,7 +43,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new duration[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<duration, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Timestamps = array;
             }
@@ -60,7 +60,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Pose, byte>(ref array[0]), n * 56);
+                    b.DeserializeStructArray(array);
                 }
                 Poses = array;
             }
@@ -71,7 +71,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new duration[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<duration, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Timestamps = array;
             }

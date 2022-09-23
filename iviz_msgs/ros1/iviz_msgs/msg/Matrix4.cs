@@ -25,7 +25,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             {
                 var array = new float[16];
-                b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), 16 * 4);
+                b.DeserializeStructArray(array);
                 M = array;
             }
         }
@@ -35,7 +35,7 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 var array = new float[16];
-                b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), 16 * 4);
+                b.DeserializeStructArray(array);
                 M = array;
             }
         }

@@ -22,13 +22,11 @@ namespace Iviz.Msgs.GeometryMsgs
             this.Z = Z;
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Point(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Point(ref ReadBuffer2 b)
         {
             b.Deserialize(out this);

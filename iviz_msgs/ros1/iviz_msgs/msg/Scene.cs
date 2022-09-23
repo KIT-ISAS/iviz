@@ -36,8 +36,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Scene(ref ReadBuffer b)
         {
-            b.DeserializeString(out Name);
-            b.DeserializeString(out Filename);
+            Name = b.DeserializeString();
+            Filename = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -65,9 +65,9 @@ namespace Iviz.Msgs.IvizMsgs
         public Scene(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Filename);
+            Filename = b.DeserializeString();
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();

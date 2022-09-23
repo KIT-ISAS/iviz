@@ -39,10 +39,10 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public InteractiveMarker(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Pose);
-            b.DeserializeString(out Name);
-            b.DeserializeString(out Description);
+            Name = b.DeserializeString();
+            Description = b.DeserializeString();
             b.Deserialize(out Scale);
             {
                 int n = b.DeserializeArrayLength();
@@ -70,12 +70,12 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public InteractiveMarker(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align8();
             b.Deserialize(out Pose);
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Description);
+            Description = b.DeserializeString();
             b.Align4();
             b.Deserialize(out Scale);
             {

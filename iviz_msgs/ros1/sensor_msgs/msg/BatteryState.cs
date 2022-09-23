@@ -80,7 +80,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public BatteryState(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Voltage);
             b.Deserialize(out Temperature);
             b.Deserialize(out Current);
@@ -99,7 +99,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 CellVoltage = array;
             }
@@ -110,17 +110,17 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 CellTemperature = array;
             }
-            b.DeserializeString(out Location);
-            b.DeserializeString(out SerialNumber);
+            Location = b.DeserializeString();
+            SerialNumber = b.DeserializeString();
         }
         
         public BatteryState(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
             b.Deserialize(out Voltage);
             b.Deserialize(out Temperature);
@@ -141,7 +141,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 CellVoltage = array;
             }
@@ -152,13 +152,13 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 CellTemperature = array;
             }
-            b.DeserializeString(out Location);
+            Location = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out SerialNumber);
+            SerialNumber = b.DeserializeString();
         }
         
         public BatteryState RosDeserialize(ref ReadBuffer b) => new BatteryState(ref b);

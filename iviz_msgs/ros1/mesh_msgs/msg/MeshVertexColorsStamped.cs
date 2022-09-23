@@ -28,16 +28,16 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshVertexColorsStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeString(out Uuid);
+            Header = new StdMsgs.Header(ref b);
+            Uuid = b.DeserializeString();
             MeshVertexColors = new MeshMsgs.MeshVertexColors(ref b);
         }
         
         public MeshVertexColorsStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeString(out Uuid);
+            Uuid = b.DeserializeString();
             MeshVertexColors = new MeshMsgs.MeshVertexColors(ref b);
         }
         

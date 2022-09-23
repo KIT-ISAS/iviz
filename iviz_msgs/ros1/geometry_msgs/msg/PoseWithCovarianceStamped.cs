@@ -25,13 +25,13 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public PoseWithCovarianceStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Pose = new PoseWithCovariance(ref b);
         }
         
         public PoseWithCovarianceStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Pose = new PoseWithCovariance(ref b);
         }
         

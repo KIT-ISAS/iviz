@@ -41,47 +41,47 @@ namespace Iviz.Msgs.SensorMsgs
         
         public Imu(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Orientation);
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 OrientationCovariance = array;
             }
             b.Deserialize(out AngularVelocity);
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 AngularVelocityCovariance = array;
             }
             b.Deserialize(out LinearAcceleration);
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 LinearAccelerationCovariance = array;
             }
         }
         
         public Imu(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align8();
             b.Deserialize(out Orientation);
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 OrientationCovariance = array;
             }
             b.Deserialize(out AngularVelocity);
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 AngularVelocityCovariance = array;
             }
             b.Deserialize(out LinearAcceleration);
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 LinearAccelerationCovariance = array;
             }
         }

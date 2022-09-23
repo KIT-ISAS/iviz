@@ -37,7 +37,7 @@ namespace Iviz.Msgs.StdMsgs
                     : new ulong[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<ulong, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Data = array;
             }
@@ -55,7 +55,7 @@ namespace Iviz.Msgs.StdMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<ulong, byte>(ref array[0]), n * 8);
+                    b.DeserializeStructArray(array);
                 }
                 Data = array;
             }

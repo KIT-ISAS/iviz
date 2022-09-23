@@ -54,7 +54,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ModelTexture(ref ReadBuffer b)
         {
-            b.DeserializeString(out Path);
+            Path = b.DeserializeString();
             b.Deserialize(out Index);
             b.Deserialize(out Type);
             b.Deserialize(out Mapping);
@@ -68,7 +68,7 @@ namespace Iviz.Msgs.IvizMsgs
         public ModelTexture(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Path);
+            Path = b.DeserializeString();
             b.Align4();
             b.Deserialize(out Index);
             b.Deserialize(out Type);

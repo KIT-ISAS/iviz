@@ -35,20 +35,20 @@ namespace Iviz.Msgs.IvizMsgs
         
         public SceneInclude(ref ReadBuffer b)
         {
-            b.DeserializeString(out Uri);
+            Uri = b.DeserializeString();
             Pose = new Matrix4(ref b);
             Material = new ModelMaterial(ref b);
-            b.DeserializeString(out Package);
+            Package = b.DeserializeString();
         }
         
         public SceneInclude(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Uri);
+            Uri = b.DeserializeString();
             Pose = new Matrix4(ref b);
             Material = new ModelMaterial(ref b);
             b.Align4();
-            b.DeserializeString(out Package);
+            Package = b.DeserializeString();
         }
         
         public SceneInclude RosDeserialize(ref ReadBuffer b) => new SceneInclude(ref b);

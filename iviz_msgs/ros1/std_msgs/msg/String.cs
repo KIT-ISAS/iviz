@@ -22,13 +22,13 @@ namespace Iviz.Msgs.StdMsgs
         
         public String(ref ReadBuffer b)
         {
-            b.DeserializeString(out Data);
+            Data = b.DeserializeString();
         }
         
         public String(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Data);
+            Data = b.DeserializeString();
         }
         
         public String RosDeserialize(ref ReadBuffer b) => new String(ref b);

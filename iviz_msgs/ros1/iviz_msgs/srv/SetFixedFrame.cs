@@ -66,13 +66,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public SetFixedFrameRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
         }
         
         public SetFixedFrameRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
         }
         
         public SetFixedFrameRequest RosDeserialize(ref ReadBuffer b) => new SetFixedFrameRequest(ref b);
@@ -139,14 +139,14 @@ namespace Iviz.Msgs.IvizMsgs
         public SetFixedFrameResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public SetFixedFrameResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
             b.Align4();
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public SetFixedFrameResponse RosDeserialize(ref ReadBuffer b) => new SetFixedFrameResponse(ref b);

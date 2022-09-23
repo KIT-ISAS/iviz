@@ -24,13 +24,13 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public QuaternionStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Quaternion);
         }
         
         public QuaternionStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align8();
             b.Deserialize(out Quaternion);
         }

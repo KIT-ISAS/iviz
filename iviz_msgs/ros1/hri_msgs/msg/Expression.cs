@@ -58,8 +58,8 @@ namespace Iviz.Msgs.HriMsgs
         
         public Expression(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
-            b.DeserializeString(out Expression_);
+            Header = new StdMsgs.Header(ref b);
+            Expression_ = b.DeserializeString();
             b.Deserialize(out Valence);
             b.Deserialize(out Arousal);
             b.Deserialize(out Confidence);
@@ -67,9 +67,9 @@ namespace Iviz.Msgs.HriMsgs
         
         public Expression(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
-            b.DeserializeString(out Expression_);
+            Expression_ = b.DeserializeString();
             b.Align4();
             b.Deserialize(out Valence);
             b.Deserialize(out Arousal);

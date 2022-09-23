@@ -27,9 +27,9 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public Octomap(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Binary);
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
             b.Deserialize(out Resolution);
             {
                 int n = b.DeserializeArrayLength();
@@ -38,7 +38,7 @@ namespace Iviz.Msgs.OctomapMsgs
                     : new sbyte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<sbyte, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 Data = array;
             }
@@ -46,10 +46,10 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public Octomap(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Binary);
             b.Align4();
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
             b.Align8();
             b.Deserialize(out Resolution);
             {
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.OctomapMsgs
                     : new sbyte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<sbyte, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 Data = array;
             }

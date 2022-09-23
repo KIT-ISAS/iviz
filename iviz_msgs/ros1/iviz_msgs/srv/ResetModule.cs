@@ -66,13 +66,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ResetModuleRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
         }
         
         public ResetModuleRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
         }
         
         public ResetModuleRequest RosDeserialize(ref ReadBuffer b) => new ResetModuleRequest(ref b);
@@ -139,14 +139,14 @@ namespace Iviz.Msgs.IvizMsgs
         public ResetModuleResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public ResetModuleResponse(ref ReadBuffer2 b)
         {
             b.Deserialize(out Success);
             b.Align4();
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public ResetModuleResponse RosDeserialize(ref ReadBuffer b) => new ResetModuleResponse(ref b);

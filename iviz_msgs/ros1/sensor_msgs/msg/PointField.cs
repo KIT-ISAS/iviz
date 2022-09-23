@@ -42,7 +42,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public PointField(ref ReadBuffer b)
         {
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Deserialize(out Offset);
             b.Deserialize(out Datatype);
             b.Deserialize(out Count);
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.SensorMsgs
         public PointField(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Align4();
             b.Deserialize(out Offset);
             b.Deserialize(out Datatype);

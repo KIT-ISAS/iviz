@@ -25,14 +25,14 @@ namespace Iviz.Msgs.IvizMsgs
         
         public XRGazeState(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Transform);
             b.Deserialize(out IsValid);
         }
         
         public XRGazeState(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align8();
             b.Deserialize(out Transform);
             b.Deserialize(out IsValid);

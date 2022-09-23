@@ -36,17 +36,17 @@ namespace Iviz.Msgs.IvizMsgs
         
         public XRMarker(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Type);
-            b.DeserializeString(out Code);
+            Code = b.DeserializeString();
             {
                 var array = new GeometryMsgs.Vector3[4];
-                b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Vector3, byte>(ref array[0]), 4 * 24);
+                b.DeserializeStructArray(array);
                 Corners = array;
             }
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 CameraIntrinsic = array;
             }
             b.Deserialize(out CameraPose);
@@ -57,19 +57,19 @@ namespace Iviz.Msgs.IvizMsgs
         
         public XRMarker(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Type);
             b.Align4();
-            b.DeserializeString(out Code);
+            Code = b.DeserializeString();
             {
                 b.Align8();
                 var array = new GeometryMsgs.Vector3[4];
-                b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Vector3, byte>(ref array[0]), 4 * 24);
+                b.DeserializeStructArray(array);
                 Corners = array;
             }
             {
                 var array = new double[9];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 9 * 8);
+                b.DeserializeStructArray(array);
                 CameraIntrinsic = array;
             }
             b.Deserialize(out CameraPose);

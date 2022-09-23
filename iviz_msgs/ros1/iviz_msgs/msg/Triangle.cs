@@ -21,13 +21,11 @@ namespace Iviz.Msgs.IvizMsgs
             this.C = C;
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Triangle(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Triangle(ref ReadBuffer2 b)
         {
             b.Deserialize(out this);

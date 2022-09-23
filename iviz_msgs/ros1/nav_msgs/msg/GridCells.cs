@@ -29,7 +29,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public GridCells(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out CellWidth);
             b.Deserialize(out CellHeight);
             {
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.NavMsgs
                     : new GeometryMsgs.Point[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
+                    b.DeserializeStructArray(array);
                 }
                 Cells = array;
             }
@@ -47,7 +47,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public GridCells(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
             b.Deserialize(out CellWidth);
             b.Deserialize(out CellHeight);
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.NavMsgs
                 if (n != 0)
                 {
                     b.Align8();
-                    b.DeserializeStructArray(ref Unsafe.As<GeometryMsgs.Point, byte>(ref array[0]), n * 24);
+                    b.DeserializeStructArray(array);
                 }
                 Cells = array;
             }

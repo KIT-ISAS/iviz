@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public MeshFeatures(ref ReadBuffer b)
         {
-            b.DeserializeString(out MapUuid);
+            MapUuid = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshFeatures(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out MapUuid);
+            MapUuid = b.DeserializeString();
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();

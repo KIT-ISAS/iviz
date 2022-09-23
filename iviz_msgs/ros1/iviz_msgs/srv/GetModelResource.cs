@@ -66,13 +66,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetModelResourceRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out Uri);
+            Uri = b.DeserializeString();
         }
         
         public GetModelResourceRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Uri);
+            Uri = b.DeserializeString();
         }
         
         public GetModelResourceRequest RosDeserialize(ref ReadBuffer b) => new GetModelResourceRequest(ref b);
@@ -144,7 +144,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Deserialize(out Success);
             Model = new Model(ref b);
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public GetModelResourceResponse(ref ReadBuffer2 b)
@@ -152,7 +152,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Success);
             Model = new Model(ref b);
             b.Align4();
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public GetModelResourceResponse RosDeserialize(ref ReadBuffer b) => new GetModelResourceResponse(ref b);

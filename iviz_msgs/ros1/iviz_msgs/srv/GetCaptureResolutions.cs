@@ -118,7 +118,7 @@ namespace Iviz.Msgs.IvizMsgs
         public GetCaptureResolutionsResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -136,7 +136,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Deserialize(out Success);
             b.Align4();
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();

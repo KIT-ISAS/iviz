@@ -66,13 +66,13 @@ namespace Iviz.Msgs.RclInterfaces
         
         public GetParameterTypesRequest(ref ReadBuffer b)
         {
-            b.DeserializeStringArray(out Names);
+            Names = b.DeserializeStringArray();
         }
         
         public GetParameterTypesRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeStringArray(out Names);
+            Names = b.DeserializeStringArray();
         }
         
         public GetParameterTypesRequest RosDeserialize(ref ReadBuffer b) => new GetParameterTypesRequest(ref b);
@@ -149,7 +149,7 @@ namespace Iviz.Msgs.RclInterfaces
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 Types = array;
             }
@@ -165,7 +165,7 @@ namespace Iviz.Msgs.RclInterfaces
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 Types = array;
             }

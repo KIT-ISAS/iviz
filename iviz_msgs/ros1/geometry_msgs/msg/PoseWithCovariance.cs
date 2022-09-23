@@ -32,7 +32,7 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out Pose);
             {
                 var array = new double[36];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 36 * 8);
+                b.DeserializeStructArray(array);
                 Covariance = array;
             }
         }
@@ -43,7 +43,7 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Deserialize(out Pose);
             {
                 var array = new double[36];
-                b.DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]), 36 * 8);
+                b.DeserializeStructArray(array);
                 Covariance = array;
             }
         }

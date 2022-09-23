@@ -29,7 +29,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new Color32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<Color32, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Colors = array;
             }
@@ -45,7 +45,7 @@ namespace Iviz.Msgs.IvizMsgs
                     : new Color32[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<Color32, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Colors = array;
             }

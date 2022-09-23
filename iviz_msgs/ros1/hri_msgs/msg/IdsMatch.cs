@@ -67,9 +67,9 @@ namespace Iviz.Msgs.HriMsgs
         
         public IdsMatch(ref ReadBuffer b)
         {
-            b.DeserializeString(out Id1);
+            Id1 = b.DeserializeString();
             b.Deserialize(out Id1Type);
-            b.DeserializeString(out Id2);
+            Id2 = b.DeserializeString();
             b.Deserialize(out Id2Type);
             b.Deserialize(out Confidence);
         }
@@ -77,10 +77,10 @@ namespace Iviz.Msgs.HriMsgs
         public IdsMatch(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Id1);
+            Id1 = b.DeserializeString();
             b.Deserialize(out Id1Type);
             b.Align4();
-            b.DeserializeString(out Id2);
+            Id2 = b.DeserializeString();
             b.Deserialize(out Id2Type);
             b.Align4();
             b.Deserialize(out Confidence);

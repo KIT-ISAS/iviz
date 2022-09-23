@@ -31,7 +31,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public Joy(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Axes = array;
             }
@@ -50,7 +50,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new int[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<int, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Buttons = array;
             }
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public Joy(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
@@ -67,7 +67,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new float[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Axes = array;
             }
@@ -78,7 +78,7 @@ namespace Iviz.Msgs.SensorMsgs
                     : new int[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<int, byte>(ref array[0]), n * 4);
+                    b.DeserializeStructArray(array);
                 }
                 Buttons = array;
             }

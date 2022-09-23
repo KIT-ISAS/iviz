@@ -30,7 +30,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ModelMaterial(ref ReadBuffer b)
         {
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Deserialize(out Ambient);
             b.Deserialize(out Diffuse);
             b.Deserialize(out Emissive);
@@ -56,7 +56,7 @@ namespace Iviz.Msgs.IvizMsgs
         public ModelMaterial(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Deserialize(out Ambient);
             b.Deserialize(out Diffuse);
             b.Deserialize(out Emissive);

@@ -66,13 +66,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetFileRequest(ref ReadBuffer b)
         {
-            b.DeserializeString(out Uri);
+            Uri = b.DeserializeString();
         }
         
         public GetFileRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            b.DeserializeString(out Uri);
+            Uri = b.DeserializeString();
         }
         
         public GetFileRequest RosDeserialize(ref ReadBuffer b) => new GetFileRequest(ref b);
@@ -150,11 +150,11 @@ namespace Iviz.Msgs.IvizMsgs
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 Bytes = array;
             }
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public GetFileResponse(ref ReadBuffer2 b)
@@ -168,12 +168,12 @@ namespace Iviz.Msgs.IvizMsgs
                     : new byte[n];
                 if (n != 0)
                 {
-                    b.DeserializeStructArray(ref Unsafe.As<byte, byte>(ref array[0]), n * 1);
+                    b.DeserializeStructArray(array);
                 }
                 Bytes = array;
             }
             b.Align4();
-            b.DeserializeString(out Message);
+            Message = b.DeserializeString();
         }
         
         public GetFileResponse RosDeserialize(ref ReadBuffer b) => new GetFileResponse(ref b);

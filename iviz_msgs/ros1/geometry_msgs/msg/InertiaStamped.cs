@@ -24,13 +24,13 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public InertiaStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Inertia = new Inertia(ref b);
         }
         
         public InertiaStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Inertia = new Inertia(ref b);
         }
         

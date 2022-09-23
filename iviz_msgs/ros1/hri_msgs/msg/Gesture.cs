@@ -35,13 +35,13 @@ namespace Iviz.Msgs.HriMsgs
         
         public Gesture(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Gesture_);
         }
         
         public Gesture(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Gesture_);
         }
         

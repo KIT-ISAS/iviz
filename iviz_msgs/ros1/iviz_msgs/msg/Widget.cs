@@ -41,25 +41,25 @@ namespace Iviz.Msgs.IvizMsgs
         
         public Widget(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Action);
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
             b.Deserialize(out Type);
             b.Deserialize(out Pose);
             b.Deserialize(out Color);
             b.Deserialize(out SecondColor);
             b.Deserialize(out Scale);
             b.Deserialize(out SecondScale);
-            b.DeserializeString(out Caption);
-            b.DeserializeString(out SecondCaption);
+            Caption = b.DeserializeString();
+            SecondCaption = b.DeserializeString();
         }
         
         public Widget(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Action);
             b.Align4();
-            b.DeserializeString(out Id);
+            Id = b.DeserializeString();
             b.Deserialize(out Type);
             b.Align8();
             b.Deserialize(out Pose);
@@ -68,9 +68,9 @@ namespace Iviz.Msgs.IvizMsgs
             b.Align8();
             b.Deserialize(out Scale);
             b.Deserialize(out SecondScale);
-            b.DeserializeString(out Caption);
+            Caption = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out SecondCaption);
+            SecondCaption = b.DeserializeString();
         }
         
         public Widget RosDeserialize(ref ReadBuffer b) => new Widget(ref b);

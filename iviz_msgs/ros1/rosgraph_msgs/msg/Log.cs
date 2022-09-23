@@ -51,31 +51,31 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public Log(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Level);
-            b.DeserializeString(out Name);
-            b.DeserializeString(out Msg);
-            b.SkipString(out File);
-            b.SkipString(out Function);
+            Name = b.DeserializeString();
+            Msg = b.DeserializeString();
+            File = b.SkipString();
+            Function = b.SkipString();
             b.Deserialize(out Line);
-            b.SkipStringArray(out Topics);
+            Topics = b.SkipStringArray();
         }
         
         public Log(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Level);
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Msg);
+            Msg = b.DeserializeString();
             b.Align4();
-            b.SkipString(out File);
+            File = b.SkipString();
             b.Align4();
-            b.SkipString(out Function);
+            Function = b.SkipString();
             b.Align4();
             b.Deserialize(out Line);
-            b.SkipStringArray(out Topics);
+            Topics = b.SkipStringArray();
         }
         
         public Log RosDeserialize(ref ReadBuffer b) => new Log(ref b);

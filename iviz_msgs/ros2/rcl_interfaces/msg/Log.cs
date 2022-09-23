@@ -62,10 +62,10 @@ namespace Iviz.Msgs.RclInterfaces
         {
             b.Deserialize(out Stamp);
             b.Deserialize(out Level);
-            b.DeserializeString(out Name);
-            b.DeserializeString(out Msg);
-            b.DeserializeString(out File);
-            b.DeserializeString(out Function);
+            Name = b.DeserializeString();
+            Msg = b.DeserializeString();
+            File = b.DeserializeString();
+            Function = b.DeserializeString();
             b.Deserialize(out Line);
         }
         
@@ -75,13 +75,13 @@ namespace Iviz.Msgs.RclInterfaces
             b.Deserialize(out Stamp);
             b.Deserialize(out Level);
             b.Align4();
-            b.DeserializeString(out Name);
+            Name = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Msg);
+            Msg = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out File);
+            File = b.DeserializeString();
             b.Align4();
-            b.DeserializeString(out Function);
+            Function = b.DeserializeString();
             b.Align4();
             b.Deserialize(out Line);
         }

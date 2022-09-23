@@ -31,17 +31,17 @@ namespace Iviz.Msgs.SensorMsgs
         
         public TimeReference(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out TimeRef);
-            b.DeserializeString(out Source);
+            Source = b.DeserializeString();
         }
         
         public TimeReference(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
             b.Deserialize(out TimeRef);
-            b.DeserializeString(out Source);
+            Source = b.DeserializeString();
         }
         
         public TimeReference RosDeserialize(ref ReadBuffer b) => new TimeReference(ref b);

@@ -27,7 +27,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public NormalizedRegionOfInterest2D(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Deserialize(out Xmin);
             b.Deserialize(out Ymin);
             b.Deserialize(out Xmax);
@@ -37,7 +37,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public NormalizedRegionOfInterest2D(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             b.Align4();
             b.Deserialize(out Xmin);
             b.Deserialize(out Ymin);

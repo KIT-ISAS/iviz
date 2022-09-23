@@ -25,13 +25,13 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public TwistWithCovarianceStamped(ref ReadBuffer b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Twist = new TwistWithCovariance(ref b);
         }
         
         public TwistWithCovarianceStamped(ref ReadBuffer2 b)
         {
-            StdMsgs.Header.Deserialize(ref b, out Header);
+            Header = new StdMsgs.Header(ref b);
             Twist = new TwistWithCovariance(ref b);
         }
         

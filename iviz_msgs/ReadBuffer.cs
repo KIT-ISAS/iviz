@@ -22,10 +22,7 @@ public unsafe struct ReadBuffer
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    void Advance(int value)
-    {
-        cursor += value;
-    }
+    void Advance(int value) => cursor += value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     readonly void ThrowIfOutOfRange(int off)
@@ -46,57 +43,52 @@ public unsafe struct ReadBuffer
     #region strings
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeString(out string val)
+    public string DeserializeString()
     {
         int count = ReadInt();
         if (count == 0)
         {
-            val = EmptyString;
-            return;
+            return EmptyString;
         }
 
         ThrowIfOutOfRange(count);
-        val = BuiltIns.GetString(cursor, count);
+        string val = BuiltIns.GetString(cursor, count);
 
         Advance(count);
+        return val;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SkipString(out string val)
+    public string SkipString()
     {
         int count = ReadInt();
         ThrowIfOutOfRange(count);
         Advance(count);
-        val = EmptyString;
+        return EmptyString;
     }
 
-    public void DeserializeStringArray(out string[] val)
+    public string[] DeserializeStringArray()
     {
         int count = ReadInt();
-        if (count == 0)
-        {
-            val = EmptyStringArray;
-        }
-        else
-        {
-            DeserializeStringArray(count, out val);
-        }
+        return count == 0
+            ? EmptyStringArray
+            : DeserializeStringArray(count);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), SkipLocalsInit]
-    public void DeserializeStringArray(int count, out string[] val)
+    public string[] DeserializeStringArray(int count)
     {
         ThrowIfOutOfRange(4 * count);
-        var array = new string[count];
+        string[] array = new string[count];
         for (int i = 0; i < count; i++)
         {
-            DeserializeString(out array[i]);
+            array[i] = DeserializeString();
         }
 
-        val = array;
+        return array;
     }
 
-    public void SkipStringArray(out string[] val)
+    public string[] SkipStringArray()
     {
         int count = ReadInt();
         for (int i = 0; i < count; i++)
@@ -106,7 +98,7 @@ public unsafe struct ReadBuffer
             Advance(innerCount);
         }
 
-        val = EmptyStringArray;
+        return EmptyStringArray;
     }
 
     #endregion
@@ -239,9 +231,9 @@ public unsafe struct ReadBuffer
     #endregion
 
     #region arrays
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructArray(ref byte value, int count)
+    void DeserializeStructArray(ref byte value, int count)
     {
         ThrowIfOutOfRange(count);
         Unsafe.CopyBlock(ref value, ref *cursor, (uint)count);
@@ -252,28 +244,19 @@ public unsafe struct ReadBuffer
     public void DeserializeStructArray<T>(out T[] val) where T : unmanaged
     {
         int count = ReadInt();
-        if (count == 0)
-        {
-            val = Array.Empty<T>();
-        }
-        else
-        {
-            DeserializeStructArray(count, out val);
-        }
+        DeserializeStructArray(count, out val);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray<T>(int count, out T[] val) where T : unmanaged
     {
-        int sizeOfT = sizeof(T);
-        int size = count * sizeOfT;
-        ThrowIfOutOfRange(size);
-
-        var array = new T[count];
-        Unsafe.CopyBlock(ref Unsafe.As<T, byte>(ref array[0]), ref *cursor, (uint)size);
-        
-        val = array;
-        Advance(size);
+        if (count == 0) val = EmptyArray<T>.Value;
+        else
+        {
+            var array = new T[count];
+            DeserializeStructArray(ref Unsafe.As<T, byte>(ref array[0]), count * sizeof(T));
+            val = array;
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -289,13 +272,12 @@ public unsafe struct ReadBuffer
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void DeserializeStructRent(out SharedRent val)
+    public SharedRent DeserializeStructRent()
     {
         int count = ReadInt();
         if (count == 0)
         {
-            val = SharedRent.Empty;
-            return;
+            return SharedRent.Empty;
         }
 
         ThrowIfOutOfRange(count);
@@ -303,8 +285,8 @@ public unsafe struct ReadBuffer
         var array = new SharedRent(count);
         Unsafe.CopyBlock(ref array.Array[0], ref *cursor, (uint)count);
 
-        val = array;
         Advance(count);
+        return array;
     }
 
     public T[] SkipStructArray<T>() where T : unmanaged
@@ -341,11 +323,7 @@ public unsafe struct ReadBuffer
 
     #region Empties
 
-    static string EmptyString
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => EmptyArray.String;
-    }
+    static string EmptyString => "";
 
     static string[] EmptyStringArray
     {
@@ -481,15 +459,165 @@ public unsafe struct ReadBuffer
         t = *(Triangle*)cursor;
         Advance(size);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ref byte DeserializeStruct(int size)
+    public void DeserializeStructArray<T>(T[] array) where T : unmanaged
     {
-        ThrowIfOutOfRange(size);
-        ref byte t = ref *cursor;
-        Advance(size);
-        return ref t;
+        DeserializeStructArray(ref Unsafe.As<T, byte>(ref array[0]), array.Length * sizeof(T));
+    }
+    
+    /*
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(bool[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<bool, byte>(ref array[0]), array.Length);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(byte[] array)
+    {
+        DeserializeStructArray(ref array[0], array.Length);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(sbyte[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<sbyte, byte>(ref array[0]),
+            array.Length * sizeof(sbyte));
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(short[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<short, byte>(ref array[0]),
+            array.Length * sizeof(short));
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(ushort[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<ushort, byte>(ref array[0]),
+            array.Length * sizeof(ushort));
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(int[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<int, byte>(ref array[0]),
+            array.Length * sizeof(int));
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(uint[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<uint, byte>(ref array[0]),
+            array.Length * sizeof(uint));
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(long[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<long, byte>(ref array[0]),
+            array.Length * sizeof(long));
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(ulong[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<ulong, byte>(ref array[0]),
+            array.Length * sizeof(ulong));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(float[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<float, byte>(ref array[0]),
+            array.Length * sizeof(float));
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(double[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<double, byte>(ref array[0]),
+            array.Length * sizeof(double));
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(time[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<time, byte>(ref array[0]),
+            array.Length * (2*sizeof(int)));
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(duration[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<duration, byte>(ref array[0]),
+            array.Length * (2*sizeof(int)));
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(Point[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<Point, byte>(ref array[0]),
+            array.Length * Point.RosFixedMessageLength);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(Vector3[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<Vector3, byte>(ref array[0]),
+            array.Length * Vector3.RosFixedMessageLength);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(Point32[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<Point32, byte>(ref array[0]),
+            array.Length * Point32.RosFixedMessageLength);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(Quaternion[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<Quaternion, byte>(ref array[0]),
+            array.Length * Quaternion.RosFixedMessageLength);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(ColorRGBA[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<ColorRGBA, byte>(ref array[0]),
+            array.Length * ColorRGBA.RosFixedMessageLength);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(Color32[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<Color32, byte>(ref array[0]),
+            array.Length * Color32.RosFixedMessageLength);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(Triangle[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<Triangle, byte>(ref array[0]),
+            array.Length * Triangle.RosFixedMessageLength);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(Transform[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<Transform, byte>(ref array[0]),
+            array.Length * Transform.RosFixedMessageLength);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeserializeStructArray(Pose[] array)
+    {
+        DeserializeStructArray(ref Unsafe.As<Pose, byte>(ref array[0]),
+            array.Length * Pose.RosFixedMessageLength);
+    }
+    */
     #endregion
 }
