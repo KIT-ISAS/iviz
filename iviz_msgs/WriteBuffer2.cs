@@ -242,6 +242,14 @@ public unsafe partial struct WriteBuffer2
         *(ulong*)(ptr + offset) = val;
         Advance(size);
     }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Serialize<T>(in T val) where T : unmanaged
+    {
+        ThrowIfOutOfRange(sizeof(T));
+        *(T*)(ptr + offset) = val;
+        Advance(sizeof(T));
+    }
 
     #endregion
 

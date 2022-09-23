@@ -427,6 +427,15 @@ public unsafe struct ReadBuffer2
         t = *(ColorRGBA*)cursor;
         Advance(size);
     }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize<T>(out T t) where T : unmanaged
+    {
+        int size = sizeof(T);
+        ThrowIfOutOfRange(size);
+        t = *(T*)cursor;
+        Advance(size);
+    }    
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray<T>(T[] array) where T : unmanaged
