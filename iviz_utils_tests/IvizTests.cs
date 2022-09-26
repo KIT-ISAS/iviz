@@ -18,10 +18,12 @@ using Iviz.Msgs.VisualizationMsgs;
 using Iviz.RemoteLib;
 using Iviz.Roslib;
 using Iviz.Roslib.MarkerHelper;
+using Iviz.Roslib2;
 using Iviz.Tools;
 using JetBrains.Annotations;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
+using Path = Iviz.Msgs.NavMsgs.Path;
 using Point = Iviz.Msgs.GeometryMsgs.Point;
 
 namespace Iviz.UtilsTests;
@@ -38,9 +40,9 @@ public class IvizTests
     //static readonly Uri CallerUri = new Uri("http://141.3.59.19:7616");
     //static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
 
-    const string CallerId = "/iviz_util_tests";
+    const string CallerId = "iviz_util_tests";
 
-    const string IvizId = "/iviz_osxeditor";
+    const string IvizId = "iviz_osxeditor";
     //const string IvizId = "/iviz_iphoneplayer";
 
     IRosClient client;
@@ -49,7 +51,13 @@ public class IvizTests
     [SetUp]
     public void Setup()
     {
-        client ??= new RosClient(MasterUri, CallerId, CallerUri);
+        //client ??= new RosClient(MasterUri, CallerId, CallerUri);
+        
+        const string ivizRootPath = "../../../../";
+        const string ros2LibPath = ivizRootPath +
+                                   "iviz_ros2_rcl/lib/iviz_ros2_rcl_macos.bundle/Contents/MacOS/iviz_ros2_rcl_macos";
+        Ros2Client.RemapRclWrapperLibrary(ros2LibPath);
+        client ??= new Ros2Client(CallerId);
     }
 
     [Test]
@@ -1105,7 +1113,8 @@ public class IvizTests
         {
             Header = header,
             Id = "0",
-            Type = Boundary.TYPE_COLLIDER,
+            Type = Boundary.TYPE_CIRCLE_HIGHLIGHT,
+            Behavior = Boundary.BEHAVIOR_COLLIDER,
             Color = ColorRGBA.White,
             SecondColor = ColorRGBA.Red.WithAlpha(0.5f),
             Scale = Vector3.One
@@ -1118,7 +1127,7 @@ public class IvizTests
         {
             Header = header,
             Id = "1",
-            Type = Boundary.TYPE_COLLIDABLE,
+            Behavior = Boundary.BEHAVIOR_NOTIFY_COLLISION,
             Color = ColorRGBA.White,
             SecondColor = ColorRGBA.Blue.WithAlpha(0.5f),
             Scale = Vector3.One,
@@ -1138,7 +1147,7 @@ public class IvizTests
             {
                 Header = header,
                 Id = "1",
-                Type = Boundary.TYPE_COLLIDABLE,
+                Behavior = Boundary.BEHAVIOR_NOTIFY_COLLISION,
                 Color = ColorRGBA.White,
                 SecondColor = ColorRGBA.Blue.WithAlpha(0.5f),
                 Scale = Vector3.One,
@@ -1149,11 +1158,11 @@ public class IvizTests
         }
 
         Thread.Sleep(2000);
-        
+
         ts.Cancel();
 
         Assert.IsTrue(task.IsCompletedSuccessfully);
-        
+
         task.Wait();
     }
 
@@ -1162,8 +1171,10 @@ public class IvizTests
         await foreach (var msg in reader.ReadAllAsync(token))
         {
             //Console.WriteLine(msg);
-            if (msg.Type == 8) return;
+            if (msg.Type == Feedback.TYPE_COLLIDER_ENTERED) return;
         }
+
+        throw new Exception("No collision detected!");
     }
 
 
