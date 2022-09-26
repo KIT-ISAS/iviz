@@ -55,13 +55,13 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
                 span = Rcl.CreateReadOnlyByteSpan(ptr + headerSize, length - 4);
                 requestId = serviceInfo.requestId;
                 return true;
-            case RclRet.SubscriptionTakeFailed:
+            case RclRet.ServiceTakeFailed:
                 span = default;
                 requestId = default;
                 return false;
             default:
                 Logger.LogErrorFormat("{0}: " + nameof(Rcl.Impl.TakeResponse) + " failed!", this);
-                goto case RclRet.SubscriptionTakeFailed;
+                goto case RclRet.ServiceTakeFailed;
         }
     }
 

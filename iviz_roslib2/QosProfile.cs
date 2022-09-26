@@ -62,7 +62,7 @@ public sealed class QosProfile : JsonToString, IEquatable<QosProfile>
     );
 
     public static QosProfile SubscriberDefault => subscriberProfile ??= new QosProfile(
-        HistoryPolicy.KeepLast,
+        HistoryPolicy.KeepAll,
         10,
         ReliabilityPolicy.Reliable,
         // bug? Volatile won't let us get latched messages (otherwise ok), TransientLocal does but won't listen to non-latching publishers
@@ -78,7 +78,7 @@ public sealed class QosProfile : JsonToString, IEquatable<QosProfile>
 
     public static QosProfile PublisherLatchingProfile => publisherLatchingProfile ??= new QosProfile(
         HistoryPolicy.KeepLast,
-        1,
+        10,
         ReliabilityPolicy.Reliable,
         DurabilityPolicy.TransientLocal
     );

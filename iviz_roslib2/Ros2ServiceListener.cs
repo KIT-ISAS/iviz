@@ -17,13 +17,13 @@ internal sealed class Ros2ServiceListener : Signalizable
 
     public string Service => ServiceServer.Service;
     public string ServiceType => ServiceServer.ServiceType;
-    
+
     public RclServiceServer ServiceServer
     {
         private get => serviceServer ?? throw new NullReferenceException("Service server has not been initialized!");
         set => serviceServer = value;
     }
-    
+
     public Ros2ServiceListener(Ros2Client client, Func<IService> generator, Func<IService, ValueTask> callback)
     {
         this.client = client;
@@ -50,14 +50,16 @@ internal sealed class Ros2ServiceListener : Signalizable
 
     void ProcessRequests(SerializedMessage serializedBuffer)
     {
-        while (ServiceServer.TryTakeRequest(serializedBuffer, out var span, out var requestId))
+        if (!ServiceServer.TryTakeRequest(serializedBuffer, out var span, out var requestId))
         {
-            var service = generator();
-            var request = (IDeserializable<IRequest>)service.Request;
-            service.Request = ReadBuffer2.Deserialize(request, span);
-
-            _ = TaskUtils.Run(() => ProcessRequest(service, requestId));
+            return;
         }
+
+        var service = generator();
+        var request = (IDeserializable<IRequest>)service.Request;
+        service.Request = ReadBuffer2.Deserialize(request, span);
+
+        _ = TaskUtils.Run(() => ProcessRequest(service, requestId));
     }
 
     async Task ProcessRequest(IService service, RmwRequestId requestId)
@@ -88,10 +90,10 @@ internal sealed class Ros2ServiceListener : Signalizable
         }
         catch (Exception e)
         {
-            Logger.LogErrorFormat("{0}: Exception in {1}: {2}", this, nameof(ServiceServer.SendResponse), e);
+            Logger.LogErrorFormat("{0}: Exception in " + nameof(ServiceServer.SendResponse) + ": {1}", this, e);
         }
     }
-    
+
     public async ValueTask DisposeAsync(CancellationToken token)
     {
         if (disposed) return;
@@ -108,5 +110,5 @@ internal sealed class Ros2ServiceListener : Signalizable
     public override string ToString()
     {
         return $"[{nameof(Ros2ServiceListener)} {Service} [{ServiceType}] ]";
-    }    
+    }
 }

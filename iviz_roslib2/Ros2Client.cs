@@ -323,7 +323,7 @@ public sealed class Ros2Client : IRosClient
         {
             if (!persistent)
             {
-                await serviceCaller.DisposeAsync(token);
+                await serviceCaller.DisposeAsync(default);
             }
         }
     }

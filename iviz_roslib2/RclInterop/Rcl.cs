@@ -22,7 +22,7 @@ internal static class Rcl
     static CdrDeserializeCallback? cdrDeserializeCallbackDel;
 
     static RclWrapper ThrowMissingWrapper() => throw new RosMissingRclWrapperException();
- 
+
     public static RclWrapper Impl => impl ?? ThrowMissingWrapper();
 
     public static void SetRclWrapper(RclWrapper rclWrapper)
@@ -106,6 +106,13 @@ internal static class Rcl
         throw new RosRclException("Rcl operation failed", result);
     }
 
+    public static void PrintErrorMessage(IntPtr context)
+    {
+        string msg = ToString(Impl.GetErrorString(context));
+        if (!string.IsNullOrEmpty(msg))
+            Logger.LogError("[Rcl]: " + msg);
+    }
+
     [MonoPInvokeCallback(typeof(CdrDeserializeCallback))]
     static void CdrDeserializeCallback(IntPtr messageContextHandle, IntPtr ptr, int length)
     {
@@ -135,7 +142,7 @@ internal static class Rcl
 
         if (gcHandle.Target is not RclSerializeHandler handler)
         {
-            Logger.LogErrorFormat(nameof(Rcl) + ": Handler in " + nameof(CdrSerializeCallback) + 
+            Logger.LogErrorFormat(nameof(Rcl) + ": Handler in " + nameof(CdrSerializeCallback) +
                                   " has not been set!");
             return;
         }

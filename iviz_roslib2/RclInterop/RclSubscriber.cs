@@ -49,7 +49,18 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
     
     public bool Take(IntPtr callbackContextHandle, out Guid guid)
     {
-        int ret = Rcl.Impl.Take(subscriptionHandle, callbackContextHandle, out guid, out _);
+        int ret;
+        try
+        {
+            ret = Rcl.Impl.Take(subscriptionHandle, callbackContextHandle, out guid, out _);
+        }
+        catch(Exception e)
+        {
+            Logger.LogErrorFormat("{0}: Uncaught internal exception in " + nameof(Rcl.Impl.Take) + "! {1}", this, e);
+            guid = default;
+            return false;
+        }
+
         switch ((RclRet)ret)
         {
             case RclRet.Ok:
@@ -57,7 +68,7 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
             case RclRet.SubscriptionTakeFailed:
                 return false;
             default:
-                Logger.LogErrorFormat("{0}: + " + nameof(Rcl.Impl.TakeSerializedMessage) + " failed!", this);
+                Logger.LogErrorFormat("{0}: " + nameof(Rcl.Impl.Take) + " failed!", this);
                 return false;
         }
     }

@@ -56,14 +56,16 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
         while (true)
         {
             await signal.WaitAsync(token);
-            while (queue.TryDequeue(out var message))
+            if (!queue.TryDequeue(out var message))
             {
-                handler.message = message;
-                publisher.Publish(handle.ptr);
-
-                numSent++;
-                bytesSent += handler.messageLength;
+                continue;
             }
+
+            handler.message = message;
+            publisher.Publish(handle.ptr);
+
+            numSent++;
+            bytesSent += handler.messageLength;
         }
     }
 
