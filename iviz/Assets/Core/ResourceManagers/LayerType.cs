@@ -27,9 +27,14 @@ namespace Iviz.Resources
         public const int ARSetupMode = 14;
         
         /// <summary>
-        /// Miscellaneous non-interactable colliders that can responds to events such as highlights 
+        /// Miscellaneous non-interactable colliders that can respond to events such as highlights 
         /// </summary>
         public const int Collider = 15;
+
+        /// <summary>
+        /// Colliders that interact with other colliders and can respond to events such as enter, exit 
+        /// </summary>
+        public const int InteractingCollider = 16;
 
         public const int RaycastLayerMask = (1 << Collider)
                                             | (1 << UI)

@@ -41,7 +41,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8497843833201729871}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
@@ -60,11 +60,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Transform: {fileID: 8497843833201729869}
   boxCollider: {fileID: 8497843833201729866}
-  colormap: 0
-  intensityBounds: {x: 0, y: 0}
-  flipMinMax: 0
-  tint: {r: 0, g: 0, b: 0, a: 0}
-  elementScale: 1
   elementScale3: {x: 0, y: 0, z: 0}
   preTranslation: {x: 0, y: 0, z: 0}
   mesh: {fileID: 0}

@@ -51,8 +51,7 @@ namespace Iviz.Displays
         public GameObject TooltipWidget;
 
         public GameObject Boundary;
-        public GameObject ColliderBoundary;
-        public GameObject CollidableBoundary;
+        public GameObject AreaHighlightBoundary;
 
         public GameObject PositionDisc;
         public GameObject PositionDisc3D;

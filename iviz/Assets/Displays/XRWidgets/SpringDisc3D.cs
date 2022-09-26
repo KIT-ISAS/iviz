@@ -33,7 +33,7 @@ namespace Iviz.Displays.XR
             set
             {
                 color = value;
-                Disc.Color = value.WithValue(0.5f);
+                Disc.Color = value.ScaledBy(0.5f);
                 Link.Color = value.WithAlpha(0.8f);
                 Link.EmissiveColor = value;
                 Glow.Color = value.WithAlpha(0.8f);

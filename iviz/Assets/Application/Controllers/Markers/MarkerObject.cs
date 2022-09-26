@@ -48,7 +48,7 @@ namespace Iviz.Controllers
         BoundsHighlighter? highlighter;
 
         Marker? lastMessage;
-        int? triangleMeshFailedIndex;
+        bool triangleMeshHasInvalidIndices;
 
         Pose localPose;
         Vector3 localScale;
@@ -317,11 +317,11 @@ namespace Iviz.Controllers
             if (pointsLength == 0)
             {
                 meshResource.Clear();
-                triangleMeshFailedIndex = null;
+                triangleMeshHasInvalidIndices = false;
                 return;
             }
 
-            triangleMeshFailedIndex = CopyPoints(msg.Points, msg.Colors, meshResource);
+            triangleMeshHasInvalidIndices = CopyPoints(msg.Points, msg.Colors, meshResource);
         }
 
         void CreatePoints(Marker msg)

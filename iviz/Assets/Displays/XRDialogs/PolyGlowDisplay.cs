@@ -7,6 +7,12 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
+    public enum PolyGlowModeType
+    {
+        Square,
+        Circle,
+    }
+    
     public sealed class PolyGlowDisplay : MeshMarkerDisplay
     {
         static Mesh? squareMesh;

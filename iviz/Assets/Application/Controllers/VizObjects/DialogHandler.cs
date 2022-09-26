@@ -131,6 +131,7 @@ namespace Iviz.Controllers
                 }
 
                 dialogObject.Dispose();
+                vizObjects.Remove(msg.Id);
             }
 
             var vizObject = new DialogObject(feedback, msg, resourceKey, "Dialog." + (DialogType)msg.Type)

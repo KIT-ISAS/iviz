@@ -100,6 +100,7 @@ namespace Iviz.Controllers
                 RosLogger.Info($"{this}: Widget '{msg.Id}' of type {widgetObject.Type} " +
                                $"is being replaced with type {widgetType}");
                 widgetObject.Dispose();
+                vizObjects.Remove(msg.Id);
                 // pass through
             }
 

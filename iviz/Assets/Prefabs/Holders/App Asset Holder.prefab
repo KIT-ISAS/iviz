@@ -108,9 +108,7 @@ MonoBehaviour:
     type: 3}
   Boundary: {fileID: 8214874507214888100, guid: b6ea9643ec70d44bdb2e83278435d719,
     type: 3}
-  ColliderBoundary: {fileID: 3448876418950614814, guid: c212c4b410e094b9fb0edb700a5c9c7b,
-    type: 3}
-  CollidableBoundary: {fileID: 2294909789619560204, guid: e9063c7234a5b49a0a6e63560ad3e2f0,
+  AreaHighlightBoundary: {fileID: 4611478807499244445, guid: c8ccad78e74454767858135c62e15795,
     type: 3}
   PositionDisc: {fileID: 327149289443996903, guid: fce2f5c41831445c09eb0349955089a1,
     type: 3}

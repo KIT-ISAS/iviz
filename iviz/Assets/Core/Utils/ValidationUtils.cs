@@ -14,7 +14,12 @@ namespace Iviz.Core
     public static class ValidationUtils
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInvalid(this float f) => (Unsafe.As<float, int>(ref f) & 0x7FFFFFFF) == 0x7F800000;
+        public static bool IsInvalid(this float f) => 
+            (Unsafe.As<float, int>(ref f) & 0x7FFFFFFF) == 0x7F800000;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsValid(this float f) => 
+            (Unsafe.As<float, int>(ref f) & 0x7FFFFFFF) != 0x7F800000;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this double f) =>

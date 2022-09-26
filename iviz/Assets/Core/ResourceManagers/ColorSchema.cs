@@ -15,8 +15,8 @@ namespace Iviz.Resources
 
         public Color GridGreenLine { get; } = new Color(0, 1f, 0).WithSaturation(0.75f);
         public Color GridRedLine { get; } = new Color(1f, 0, 0).WithSaturation(0.75f);
-        public Color GridInterior { get; } = Color.white.WithValue(0.6f);
-        public Color GridLine { get; } = Color.white.WithValue(0.25f * 0.6f);
+        public Color GridInterior { get; } = Color.white.ScaledBy(0.6f);
+        public Color GridLine { get; } = Color.white.ScaledBy(0.25f * 0.6f);
 
         public Color AxisX { get; } = Color.red.WithSaturation(0.7f);
         public Color AxisY { get; } = Color.green.WithSaturation(0.7f);

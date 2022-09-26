@@ -49,11 +49,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Transform: {fileID: 6975508339416741856}
   boxCollider: {fileID: 6975508339416741862}
-  colormap: 0
-  intensityBounds: {x: 0, y: 0}
-  flipMinMax: 0
-  tint: {r: 0, g: 0, b: 0, a: 0}
-  elementScale: 1
   meshRenderer: {fileID: 2394995132676005639}
   meshFilter: {fileID: 5921332118629342377}
 --- !u!65 &6975508339416741862
@@ -64,7 +59,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6975508339416741863}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.01, y: 0.01, z: 0.01}

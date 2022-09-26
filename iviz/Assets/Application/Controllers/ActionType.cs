@@ -3,14 +3,14 @@ using Iviz.Msgs.IvizMsgs;
 
 namespace Iviz.Controllers
 {
-    public enum ActionType : byte
+    public enum ActionType
     {
         Add = Widget.ACTION_ADD,
         Remove = Widget.ACTION_REMOVE,
         RemoveAll = Widget.ACTION_REMOVEALL
     }
-    
-    public enum WidgetType : byte
+
+    public enum WidgetType
     {
         RotationDisc = Widget.TYPE_ROTATIONDISC,
         SpringDisc = Widget.TYPE_SPRINGDISC,
@@ -22,15 +22,15 @@ namespace Iviz.Controllers
         PositionDisc = Widget.TYPE_POSITIONDISC,
         PositionDisc3D = Widget.TYPE_POSITIONDISC3D,
     }
-    
-    public enum BoundaryType : byte
+
+    public enum BoundaryType
     {
         Simple = Boundary.TYPE_SIMPLE,
-        Collider = Boundary.TYPE_COLLIDER,
-        Collidable = Boundary.TYPE_COLLIDABLE,
+        CircleHighlight = Boundary.TYPE_CIRCLE_HIGHLIGHT,
+        SquareHighlight = Boundary.TYPE_SQUARE_HIGHLIGHT,
     }
-
-    public enum FeedbackType : byte
+    
+    public enum FeedbackType
     {
         Expired = Feedback.TYPE_DIALOG_EXPIRED,
         ButtonClick = Feedback.TYPE_BUTTON_CLICK,
@@ -41,5 +41,5 @@ namespace Iviz.Controllers
         TrajectoryChanged = Feedback.TYPE_TRAJECTORY_CHANGED,
         ColliderEntered = Feedback.TYPE_COLLIDER_ENTERED,
         ColliderExited = Feedback.TYPE_COLLIDER_EXITED,
-    }    
+    }
 }

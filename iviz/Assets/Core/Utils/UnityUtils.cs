@@ -430,6 +430,16 @@ namespace Iviz.Core
             return Color.HSVToRGB(h, s, value).WithAlpha(c.a);
         }
 
+        public static Color ScaledBy(this in Color c, float value)
+        {
+            Color d;
+            d.r = c.r * value;
+            d.g = c.g * value;
+            d.b = c.b * value;
+            d.a = c.a;
+            return d;
+        }
+
         public static float GetValue(this in Color c)
         {
             Color.RGBToHSV(c, out _, out _, out float value);
@@ -780,7 +790,7 @@ namespace Iviz.Core
         public static string FormatFloat(float x) => x.IsInvalid() || Mathf.Abs(x) >= 1e4f
             ? x.ToString("G", Culture)
             : x.ToString("#,0.###", Culture);
-        
+
         public static string FormatFloat(double x) => x.IsInvalid() || Math.Abs(x) >= 1e4
             ? x.ToString("G", Culture)
             : x.ToString("#,0.###", Culture);
@@ -833,8 +843,8 @@ namespace Iviz.Core
     {
         public static T DeserializeObject<T>(string value)
         {
-            return JsonConvert.DeserializeObject<T>(value) ?? throw new JsonException("Object could not be deserialized");
+            return JsonConvert.DeserializeObject<T>(value) ??
+                   throw new JsonException("Object could not be deserialized");
         }
     }
 }
-

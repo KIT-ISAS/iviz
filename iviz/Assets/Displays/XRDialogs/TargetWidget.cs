@@ -14,12 +14,6 @@ namespace Iviz.Displays.XR
     public sealed class TargetWidget : MonoBehaviour, IWidgetCanBeResized, IWidgetCanBeClicked, IWidgetWithCaption,
         IWidgetWithColor, IRecyclable
     {
-        public enum ModeType
-        {
-            Square,
-            Circle,
-        }
-
         [SerializeField] MeshMarkerDisplay? outer;
         [SerializeField] MeshMarkerDisplay? inner;
         [SerializeField] MeshMarkerDisplay? glow;
@@ -34,7 +28,7 @@ namespace Iviz.Displays.XR
 
         Transform? mTransform;
         Vector2 targetScale;
-        ModeType mode;
+        PolyGlowModeType mode;
 
         Color color = new(0.6f, 0, 1f);
         Color secondaryColor = Color.white;
@@ -46,6 +40,7 @@ namespace Iviz.Displays.XR
         MeshMarkerDisplay Inner => inner.AssertNotNull(nameof(inner));
         MeshMarkerDisplay Glow => glow.AssertNotNull(nameof(glow));
         PolyGlowDisplay Poly => poly.AssertNotNull(nameof(poly));
+        
         ScreenDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
         ScreenDraggable Corner => corner.AssertNotNull(nameof(corner));
         LineDisplay Lines => ResourcePool.RentChecked(ref lines, PivotTransform);
@@ -66,14 +61,14 @@ namespace Iviz.Displays.XR
                 var scaleVector = new Vector3(value.x, 0.5f * value.x, value.y);
                 PivotTransform.localScale = Mode switch
                 {
-                    ModeType.Circle => 0.5f * scaleVector,
-                    ModeType.Square => 1.4142135f / 2 * scaleVector,
+                    PolyGlowModeType.Circle => 0.5f * scaleVector,
+                    PolyGlowModeType.Square => 1.4142135f / 2 * scaleVector,
                     _ => Vector3.one
                 };
             }
         }
 
-        public ModeType Mode
+        public PolyGlowModeType Mode
         {
             get => mode;
             set
@@ -81,14 +76,14 @@ namespace Iviz.Displays.XR
                 mode = value;
                 switch (value)
                 {
-                    case ModeType.Square:
+                    case PolyGlowModeType.Square:
                         SetLines(4);
                         Poly.SetToSquare();
                         var rotation = Quaternion.AngleAxis(45, Vector3.up);
                         Lines.Transform.localRotation = rotation;
                         Poly.Transform.localRotation = rotation;
                         break;
-                    case ModeType.Circle:
+                    case PolyGlowModeType.Circle:
                         SetLines(40);
                         Poly.SetToCircle();
                         Lines.Transform.localRotation = Quaternion.identity;
@@ -126,7 +121,7 @@ namespace Iviz.Displays.XR
             set
             {
                 color = value;
-                Outer.Color = value.WithValue(0.5f);
+                Outer.Color = value.ScaledBy(0.5f);
                 Poly.Color = value.WithAlpha(0.8f);
                 Poly.EmissiveColor = value;
                 Glow.Color = value.WithAlpha(0.8f);
@@ -154,7 +149,7 @@ namespace Iviz.Displays.XR
             SecondColor = SecondColor;
 
             TargetScale = Vector2.one;
-            Mode = ModeType.Square;
+            Mode = PolyGlowModeType.Square;
 
             Corner.Moved += OnMove;
             Corner.EndDragging += OnMove;

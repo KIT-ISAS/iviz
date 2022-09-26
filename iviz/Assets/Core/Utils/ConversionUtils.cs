@@ -429,6 +429,56 @@ namespace Iviz.Core
         }
     }
 
+    public static unsafe class MarkerObjectUtils
+    {
+        [BurstCompile]
+        static class Impl
+        {
+            [BurstCompile(CompileSynchronously = true)]
+            public static bool CopyPoints(int pointsLength, [NoAlias] double3* srcPtr, [NoAlias] float3* dstPtr)
+            {
+                bool allIndicesValid = true;
+                for (int i = 0; i < pointsLength; i++)
+                {
+                    double3 srcPtrI = srcPtr[i];
+
+                    float3 srcPtrF;
+                    srcPtrF.x = (float)srcPtrI.x;
+                    srcPtrF.y = (float)srcPtrI.y;
+                    srcPtrF.z = (float)srcPtrI.z;
+
+                    float3 dstPtrI;
+                    dstPtrI.x = -srcPtrF.y;
+                    dstPtrI.y = srcPtrF.z;
+                    dstPtrI.z = srcPtrF.x;
+
+                    dstPtr[i] = dstPtrI;
+
+                    allIndicesValid &= math.all(math.isfinite(srcPtrF));
+                }
+
+                return allIndicesValid;
+            }
+        }
+
+        public static bool CopyPoints(Msgs.GeometryMsgs.Point[] src, Vector3[] dst)
+        {
+            if (src.Length > dst.Length)
+            {
+                ThrowHelper.ThrowArgument("Sizes do not match!", nameof(src));
+            }
+            
+            var src3 = MemoryMarshal.Cast<Msgs.GeometryMsgs.Point, double3>(src);
+            var dst3 = MemoryMarshal.Cast<Vector3, float3>(dst);
+            
+            fixed (double3* srcPtr = src3)
+            fixed (float3* dstPtr = dst3)
+            {
+                return Impl.CopyPoints(src3.Length, srcPtr, dstPtr);
+            }
+        }
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct Rgba
     {

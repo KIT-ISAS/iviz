@@ -135,7 +135,7 @@ namespace VNC
             void SetCharas([NotNull] Transform row, string[] charsRow)
             {
                 int charOff = 0;
-                foreach (var child in row.GetChildren().ToArray())
+                foreach (var child in row.Cast<Transform>().ToArray())
                 {
                     if (charsRow[charOff++] is not { Length: > 0 } chars)
                     {

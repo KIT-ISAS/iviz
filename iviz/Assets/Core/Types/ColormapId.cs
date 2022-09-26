@@ -4,7 +4,7 @@ using Newtonsoft.Json.Converters;
 namespace Iviz.Common
 {
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum ColormapId : byte
+    public enum ColormapId
     {
         lines,
         pink,

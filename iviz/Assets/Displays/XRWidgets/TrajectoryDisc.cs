@@ -70,7 +70,7 @@ namespace Iviz.Displays.XR
             {
                 secondColor = value;
                 Lines.Tint = value;
-                Segments.Tint = value.WithValue(0.5f);
+                Segments.Tint = value.ScaledBy(0.5f);
                 Glow.Color = value.WithAlpha(0.8f);
                 Glow.EmissiveColor = value;
                 foreach (var corner in corners)

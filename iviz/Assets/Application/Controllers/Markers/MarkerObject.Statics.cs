@@ -387,9 +387,9 @@ namespace Iviz.Controllers
                         .Append(" needs to be a multiple of 3").AppendLine();
                 }
 
-                if (mObj.triangleMeshFailedIndex is { } failedIndex)
+                if (mObj.triangleMeshHasInvalidIndices)
                 {
-                    description.Append(ErrorStr).Append("Index ").Append(failedIndex).Append(" has invalid values!")
+                    description.Append(ErrorStr).Append("At least one index has invalid values!")
                         .AppendLine();
                 }
             }
@@ -476,37 +476,22 @@ namespace Iviz.Controllers
             };
         }
 
-        static int? CopyPoints(Point[] srcPoints, ColorRGBA[] srcColors, MeshTrianglesDisplay mesh)
+        static bool CopyPoints(Point[] srcPoints, ColorRGBA[] srcColors, MeshTrianglesDisplay mesh)
         {
             int pointsLength = srcPoints.Length;
             using var points = new Rent<Vector3>(pointsLength);
-            var dstPoints = points.Array;
 
-            int invalidIndex = -1;
-            ref Point srcPtr = ref srcPoints[0];
-            ref Vector3 dstPtr = ref dstPoints[0];
-
-            for (int i = 0; i < pointsLength; i++)
-            {
-                ref Point srcPtrI = ref Unsafe.Add(ref srcPtr, i);
-                ref Vector3 dstPtrI = ref Unsafe.Add(ref dstPtr, i);
-
-                srcPtrI.Ros2Unity(out dstPtrI);
-                if (dstPtrI.IsInvalid()) // unlikely but needed!
-                {
-                    invalidIndex = i;
-                }
-            }
-
-            if (invalidIndex != -1)
+            bool hasInvalidIndices = !MarkerObjectUtils.CopyPoints(srcPoints, points.Array);
+            
+            if (hasInvalidIndices)
             {
                 mesh.Clear();
-                return invalidIndex;
+                return true;
             }
 
             var colors = MemoryMarshal.Cast<ColorRGBA, Color>(srcColors);
             mesh.Set(points, colors);
-            return null;
+            return false;
         }
     }
     

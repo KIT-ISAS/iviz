@@ -145,7 +145,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Exception while disposing", e);
+                RosLogger.Error($"{ToString()}: Exception while disposing", e);
             }
         }
 

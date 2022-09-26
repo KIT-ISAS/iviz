@@ -100,6 +100,7 @@ namespace Iviz.Controllers
             protected readonly IDisplay? display;
             protected float scale = 1;
             public readonly string id;
+            bool disposed;
 
             protected string FrameId => node.Parent?.Id ?? TfModule.DefaultFrame.Id;
 
@@ -136,6 +137,9 @@ namespace Iviz.Controllers
 
             public virtual void Dispose()
             {
+                if (disposed) throw new ObjectDisposedException(ToString());
+                disposed = true;
+                
                 Interactable = true;
                 if (resourceKey != null)
                 {

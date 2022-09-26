@@ -107,7 +107,7 @@ namespace Iviz.Displays.XR
             Caption = Caption;
 
             IconObject.Color = Color.white;
-            IconObject.EmissiveColor = Color.white.WithValue(0.5f);
+            IconObject.EmissiveColor = Color.white.ScaledBy(0.5f);
 
             BoundsControl.PointerUp += OnClick;
 
@@ -119,7 +119,7 @@ namespace Iviz.Displays.XR
             BoundsControl.EndDragging += () =>
             {
                 Cylinder.EmissiveColor = Color.black;
-                IconObject.EmissiveColor = Color.white.WithValue(0.5f);
+                IconObject.EmissiveColor = Color.white.ScaledBy(0.5f);
             };
             BoundsControl.FrameColumnWidth = 0.0025f;
 

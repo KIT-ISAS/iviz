@@ -56,7 +56,7 @@ namespace Iviz.App.ARDialogs
             set
             {
                 color = value;
-                Disc.Color = value.WithValue(0.5f);
+                Disc.Color = value.ScaledBy(0.5f);
                 Glow.Color = value.WithAlpha(0.8f);
                 Glow.EmissiveColor = value;
             }

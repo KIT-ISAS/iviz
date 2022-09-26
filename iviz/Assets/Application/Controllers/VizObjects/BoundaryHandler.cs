@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using Iviz.Core;
 using Iviz.Displays.XR;
 using Iviz.Msgs.IvizMsgs;
@@ -13,7 +14,7 @@ namespace Iviz.Controllers
         void OnBoundaryColliderEntered(string id, string otherId);
         void OnBoundaryColliderExited(string id, string otherId);
     }
-    
+
     public sealed class BoundaryHandler : VizHandler
     {
         readonly IBoundaryFeedback feedback;
@@ -113,14 +114,14 @@ namespace Iviz.Controllers
                 RosLogger.Info($"{ToString()}: Widget '{msg.Id}' of type {boundaryObject.Type.ToString()} " +
                                $"is being replaced with type {boundaryType.ToString()}");
                 boundaryObject.Dispose();
+                vizObjects.Remove(msg.Id);
                 // pass through
             }
 
             var resourceKey = boundaryType switch
             {
                 BoundaryType.Simple => Resource.Displays.SimpleBoundary,
-                BoundaryType.Collider => Resource.Displays.ColliderBoundary,
-                BoundaryType.Collidable => Resource.Displays.CollidableBoundary,
+                BoundaryType.CircleHighlight or BoundaryType.SquareHighlight => Resource.Displays.AreaHighlightBoundary,
                 _ => null
             };
 
@@ -149,19 +150,15 @@ namespace Iviz.Controllers
                 Type = (BoundaryType)msg.Type;
 
                 // ReSharper disable once ConvertIfStatementToSwitchStatement
-                if (display is not IBoundary boundary)
+                if (display is not BaseBoundary boundary)
                 {
                     ThrowHelper.ThrowMissingAssetField("Viz object does not have a boundary!");
                     return; // unreachable
                 }
 
                 boundary.Id = msg.Id;
-
-                if (boundary is IBoundaryCanCollide canCollide)
-                {
-                    canCollide.EnteredCollision += otherId => feedback.OnBoundaryColliderEntered(id, otherId);
-                    canCollide.ExitedCollision += otherId => feedback.OnBoundaryColliderExited(id, otherId);
-                }
+                boundary.EnteredCollision += otherId => feedback.OnBoundaryColliderEntered(id, otherId);
+                boundary.ExitedCollision += otherId => feedback.OnBoundaryColliderExited(id, otherId);
 
                 Update(msg);
             }
@@ -170,17 +167,28 @@ namespace Iviz.Controllers
             {
                 node.AttachTo(msg.Header.FrameId);
 
-                if (display is not IBoundary boundary)
+                if (display is not BaseBoundary boundary)
                 {
                     ThrowHelper.ThrowInvalidOperation("Viz object is not a boundary!");
                     return;
                 }
-                
+
+                if (boundary is AreaHighlightBoundary areaHighlightBoundary)
+                {
+                    areaHighlightBoundary.Mode = ((BoundaryType)msg.Type) switch
+                    {
+                        BoundaryType.CircleHighlight => PolyGlowModeType.Circle,
+                        BoundaryType.SquareHighlight => PolyGlowModeType.Square,
+                        _ => throw new IndexOutOfRangeException()
+                    };
+                }
+
                 boundary.Color = msg.Color.ToUnity();
                 boundary.SecondColor = msg.SecondColor.ToUnity();
                 boundary.Caption = msg.Caption;
                 boundary.Scale = msg.Scale.Ros2Unity().Abs();
-                
+                boundary.Behavior = (BehaviorType)msg.Behavior;
+
                 var transform = node.Transform;
                 transform.SetLocalPose(msg.Pose.Ros2Unity());
             }

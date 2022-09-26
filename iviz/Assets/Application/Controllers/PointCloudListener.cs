@@ -522,7 +522,7 @@ namespace Iviz.Controllers
                             f.z = x;
                             f.w = t.Read(pointPtr + iOffset);
 
-                            if (!IsPointInvalid(f)) dstOff++;
+                            if (IsPointValid(f)) dstOff++;
                         }
 
                         rowPtr += rowStep;
@@ -633,7 +633,7 @@ namespace Iviz.Controllers
                             f.w = t.Read(pointPtr + iOffset);
 
                             dstBuffer[dstOff] = f;
-                            if (!IsPointInvalid(point)) dstOff++;
+                            if (IsPointValid(point)) dstOff++;
                         }
 
                         rowPtr += rowStep;
@@ -660,13 +660,13 @@ namespace Iviz.Controllers
         const float MaxPositionMagnitude = PointListDisplay.MaxPositionMagnitude;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsPointInvalid(in float3 point) => IsInvalid(point.x) || IsInvalid(point.y) || IsInvalid(point.z);
+        static bool IsPointValid(in float3 point) => IsValid(point.x) && IsValid(point.y) && IsValid(point.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsPointInvalid(in float4 point) => IsInvalid(point.x) || IsInvalid(point.y) || IsInvalid(point.z);
+        static bool IsPointValid(in float4 point) => IsValid(point.x) && IsValid(point.y) && IsValid(point.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsInvalid(float f) => f.IsInvalid() || Mathf.Abs(f) > MaxPositionMagnitude;
+        static bool IsValid(float f) => f.IsValid() && Mathf.Abs(f) < MaxPositionMagnitude;
 
         unsafe interface IFloatReader
         {
@@ -752,7 +752,7 @@ namespace Iviz.Controllers
 
                     output[o] = f;
 
-                    if (Hint.Likely(!IsPointInvalid4(f))) o++;
+                    if (Hint.Likely(IsPointValid4(f))) o++;
                 }
 
                 return o;
@@ -774,7 +774,7 @@ namespace Iviz.Controllers
 
                     output[o] = f;
 
-                    if (Hint.Likely(!IsPointInvalid3(point))) o++;
+                    if (Hint.Likely(IsPointValid3(point))) o++;
                 }
 
                 return o;
@@ -796,29 +796,28 @@ namespace Iviz.Controllers
 
                     output[o] = f;
 
-                    if (Hint.Likely(!IsPointInvalid4(point))) o++;
+                    if (Hint.Likely(IsPointValid4(f))) o++;
                 }
 
                 return o;
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static bool IsPointInvalid3(in float4 point)
+            static bool IsPointValid3(in float4 point)
             {
                 float4 p;
                 p.x = point.x;
                 p.y = point.y;
                 p.z = point.z;
                 p.w = point.z;
-                return IsPointInvalid4(p);
+                return IsPointValid4(p);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static bool IsPointInvalid4(in float4 point)
+            static bool IsPointValid4(in float4 point)
             {
-                return math.any(math.abs(point) > MaxPositionMagnitude) ||
-                       //math.any((AsInt4(point) & 0x7FFFFFFF) == 0x7F800000);
-                       math.any(!math.isfinite(point));
+                return math.all(math.abs(point) < MaxPositionMagnitude) 
+                       && math.all(math.isfinite(point));
             }
         }
     }

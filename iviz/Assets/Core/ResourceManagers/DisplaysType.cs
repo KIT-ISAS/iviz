@@ -65,8 +65,7 @@ namespace Iviz.Resources
         public ResourceKey<GameObject> PalmCompass { get; }
 
         public ResourceKey<GameObject> SimpleBoundary { get; }
-        public ResourceKey<GameObject> ColliderBoundary { get; }
-        public ResourceKey<GameObject> CollidableBoundary { get; }
+        public ResourceKey<GameObject> AreaHighlightBoundary { get; }
 
         public DisplaysType()
         {
@@ -129,8 +128,7 @@ namespace Iviz.Resources
             PalmCompass = Create(appAssetHolder.PalmCompass, nameof(appAssetHolder.PalmCompass));
 
             SimpleBoundary = Create(appAssetHolder.Boundary, nameof(appAssetHolder.Boundary));
-            ColliderBoundary = Create(appAssetHolder.ColliderBoundary, nameof(appAssetHolder.ColliderBoundary));
-            CollidableBoundary = Create(appAssetHolder.CollidableBoundary, nameof(appAssetHolder.CollidableBoundary));
+            AreaHighlightBoundary = Create(appAssetHolder.AreaHighlightBoundary, nameof(appAssetHolder.AreaHighlightBoundary));
 
             resourceByType = CreateTypeDictionary(this);
 
@@ -139,8 +137,8 @@ namespace Iviz.Resources
 
         static Dictionary<Type, ResourceKey<GameObject>?> CreateTypeDictionary(DisplaysType o)
         {
-            Dictionary<Type, ResourceKey<GameObject>?> resourceByType = new();
-            PropertyInfo[] properties = typeof(DisplaysType).GetProperties();
+            var resourceByType = new Dictionary<Type, ResourceKey<GameObject>?>();
+            var properties = typeof(DisplaysType).GetProperties();
             foreach (var property in properties)
             {
                 if (typeof(ResourceKey<GameObject>) != property.PropertyType)
@@ -157,8 +155,7 @@ namespace Iviz.Resources
 
                 var display = info.Object.GetComponent<IDisplay>();
                 var type = display?.GetType();
-                string? name = type?.FullName;
-                if (name is null || type is null)
+                if (type is null)
                 {
                     continue;
                 }
