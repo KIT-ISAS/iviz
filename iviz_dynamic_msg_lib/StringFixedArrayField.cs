@@ -64,8 +64,7 @@ public sealed class StringFixedArrayField : IField<string[]>
 
     public void RosDeserializeInPlace(ref ReadBuffer b)
     {
-        b.DeserializeStringArray(Count, out string[] val);
-        Value = val;
+        Value = b.DeserializeStringArray(Count);;
     }
 
     public IField Generate()

@@ -48,8 +48,7 @@ public sealed class StringArrayField : IField<string[]>
 
     public void RosDeserializeInPlace(ref ReadBuffer b)
     {
-        b.DeserializeStringArray(out string[] val);
-        Value = val;
+        Value = b.DeserializeStringArray();
     }
 
     public IField Generate()

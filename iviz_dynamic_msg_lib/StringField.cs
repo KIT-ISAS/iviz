@@ -28,8 +28,7 @@ public sealed class StringField : IField<string>
 
     public void RosDeserializeInPlace(ref ReadBuffer b)
     {
-        b.DeserializeString(out string val);
-        Value = val;
+        Value = b.DeserializeString();
     }
 
     public IField Generate()
