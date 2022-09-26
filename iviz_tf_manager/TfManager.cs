@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +19,7 @@ namespace Iviz.TfHelpers
         readonly ConcurrentDictionary<string, Frame> frames = new();
         readonly RosChannelReader<TFMessage>? reader;
         readonly RosChannelWriter<TFMessage>? writer;
+        CancellationTokenSource? tokenSource;
         uint seqId;
         bool disposed;
 
@@ -58,10 +57,7 @@ namespace Iviz.TfHelpers
 
         public void UpdateAll(CancellationToken token = default)
         {
-            if (reader == null)
-            {
-                BuiltIns.ThrowNullReference("Reader not set!");
-            }
+            if (reader == null) BuiltIns.ThrowNullReference("Manager is in write-only mode!");
 
             foreach (var tfMessage in reader.ReadAll(token))
             {
@@ -74,20 +70,14 @@ namespace Iviz.TfHelpers
 
         public void UpdateInBackground(CancellationToken token = default)
         {
-            if (reader == null)
-            {
-                throw new NullReferenceException("Reader not set!");
-            }
+            if (reader == null) BuiltIns.ThrowNullReference("Manager is in write-only mode!");
 
             TaskUtils.Run(() => UpdateAllAsync(token).AwaitNoThrow(this), token);
         }
 
         public async ValueTask UpdateAllAsync(CancellationToken token = default)
         {
-            if (reader == null)
-            {
-                BuiltIns.ThrowNullReference("Reader not set!");
-            }
+            if (reader == null) BuiltIns.ThrowNullReference("Manager is in write-only mode!");
 
             await foreach (var tfMessage in reader.ReadAllAsync(token))
             {
@@ -237,18 +227,29 @@ namespace Iviz.TfHelpers
 
             var msg = new TFMessage(transforms);
             writer.Write(msg);
-            ((RosPublisher<TFMessage>)writer.Publisher).LatchedMessage = msg;
+
+            if (writer.Publisher is RosPublisher<TFMessage> ros1Publisher)
+            {
+                ros1Publisher.LatchedMessage = msg;   
+            }
         }
 
         public void PublishInBackground(CancellationToken token = default)
         {
+            tokenSource?.Cancel();
+            tokenSource = new CancellationTokenSource();
+            var ownToken = tokenSource.Token; 
+
             TaskUtils.Run(async () =>
             {
+                using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(ownToken, token);
+                var linkedToken = linkedTokenSource.Token;
+                
                 try
                 {
-                    while (!token.IsCancellationRequested)
+                    while (true)
                     {
-                        await Task.Delay(3000, token);
+                        await Task.Delay(3000, linkedToken);
                         PublishOwn();
                     }
                 }
@@ -265,12 +266,9 @@ namespace Iviz.TfHelpers
 
         public void Dispose()
         {
-            if (disposed)
-            {
-                return;
-            }
-
+            if (disposed) return;
             disposed = true;
+            tokenSource?.Cancel();
             reader?.Dispose();
             writer?.Dispose();
         }
