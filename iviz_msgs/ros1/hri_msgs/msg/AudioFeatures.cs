@@ -39,11 +39,11 @@ namespace Iviz.Msgs.HriMsgs
             b.Deserialize(out HNR);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<float>.Value
-                    : new float[n];
-                if (n != 0)
+                float[] array;
+                if (n == 0) array = EmptyArray<float>.Value;
+                else
                 {
+                     array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 MFCC = array;
@@ -59,11 +59,11 @@ namespace Iviz.Msgs.HriMsgs
             b.Deserialize(out HNR);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<float>.Value
-                    : new float[n];
-                if (n != 0)
+                float[] array;
+                if (n == 0) array = EmptyArray<float>.Value;
+                else
                 {
+                     array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 MFCC = array;

@@ -62,22 +62,22 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out Lifetime);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point>.Value
-                    : new GeometryMsgs.Point[n];
-                if (n != 0)
+                GeometryMsgs.Point[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point[n];
                     b.DeserializeStructArray(array);
                 }
                 Points = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<StdMsgs.ColorRGBA>.Value
-                    : new StdMsgs.ColorRGBA[n];
-                if (n != 0)
+                StdMsgs.ColorRGBA[] array;
+                if (n == 0) array = EmptyArray<StdMsgs.ColorRGBA>.Value;
+                else
                 {
+                    array = new StdMsgs.ColorRGBA[n];
                     b.DeserializeStructArray(array);
                 }
                 OutlineColors = array;
@@ -103,11 +103,11 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out Lifetime);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point>.Value
-                    : new GeometryMsgs.Point[n];
-                if (n != 0)
+                GeometryMsgs.Point[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -115,11 +115,11 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<StdMsgs.ColorRGBA>.Value
-                    : new StdMsgs.ColorRGBA[n];
-                if (n != 0)
+                StdMsgs.ColorRGBA[] array;
+                if (n == 0) array = EmptyArray<StdMsgs.ColorRGBA>.Value;
+                else
                 {
+                    array = new StdMsgs.ColorRGBA[n];
                     b.DeserializeStructArray(array);
                 }
                 OutlineColors = array;

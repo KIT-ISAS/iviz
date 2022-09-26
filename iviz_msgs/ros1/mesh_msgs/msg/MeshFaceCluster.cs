@@ -29,11 +29,11 @@ namespace Iviz.Msgs.MeshMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<uint>.Value
-                    : new uint[n];
-                if (n != 0)
+                uint[] array;
+                if (n == 0) array = EmptyArray<uint>.Value;
+                else
                 {
+                     array = new uint[n];
                     b.DeserializeStructArray(array);
                 }
                 FaceIndices = array;
@@ -46,11 +46,11 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<uint>.Value
-                    : new uint[n];
-                if (n != 0)
+                uint[] array;
+                if (n == 0) array = EmptyArray<uint>.Value;
+                else
                 {
+                     array = new uint[n];
                     b.DeserializeStructArray(array);
                 }
                 FaceIndices = array;

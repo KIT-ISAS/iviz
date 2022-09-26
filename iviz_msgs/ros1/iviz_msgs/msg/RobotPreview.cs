@@ -45,11 +45,11 @@ namespace Iviz.Msgs.IvizMsgs
             JointNames = b.DeserializeStringArray();
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<float>.Value
-                    : new float[n];
-                if (n != 0)
+                float[] array;
+                if (n == 0) array = EmptyArray<float>.Value;
+                else
                 {
+                     array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 JointValues = array;
@@ -76,11 +76,11 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<float>.Value
-                    : new float[n];
-                if (n != 0)
+                float[] array;
+                if (n == 0) array = EmptyArray<float>.Value;
+                else
                 {
+                     array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 JointValues = array;

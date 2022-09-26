@@ -46,33 +46,33 @@ namespace Iviz.Msgs.SensorMsgs
             Name = b.DeserializeStringArray();
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<double>.Value
-                    : new double[n];
-                if (n != 0)
+                double[] array;
+                if (n == 0) array = EmptyArray<double>.Value;
+                else
                 {
+                     array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 Position = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<double>.Value
-                    : new double[n];
-                if (n != 0)
+                double[] array;
+                if (n == 0) array = EmptyArray<double>.Value;
+                else
                 {
+                     array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 Velocity = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<double>.Value
-                    : new double[n];
-                if (n != 0)
+                double[] array;
+                if (n == 0) array = EmptyArray<double>.Value;
+                else
                 {
+                     array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 Effort = array;
@@ -87,11 +87,11 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<double>.Value
-                    : new double[n];
-                if (n != 0)
+                double[] array;
+                if (n == 0) array = EmptyArray<double>.Value;
+                else
                 {
+                     array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -99,11 +99,11 @@ namespace Iviz.Msgs.SensorMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<double>.Value
-                    : new double[n];
-                if (n != 0)
+                double[] array;
+                if (n == 0) array = EmptyArray<double>.Value;
+                else
                 {
+                     array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -111,11 +111,11 @@ namespace Iviz.Msgs.SensorMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<double>.Value
-                    : new double[n];
-                if (n != 0)
+                double[] array;
+                if (n == 0) array = EmptyArray<double>.Value;
+                else
                 {
+                     array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }

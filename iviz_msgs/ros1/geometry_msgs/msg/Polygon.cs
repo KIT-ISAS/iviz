@@ -25,11 +25,11 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Point32>.Value
-                    : new Point32[n];
-                if (n != 0)
+                Point32[] array;
+                if (n == 0) array = EmptyArray<Point32>.Value;
+                else
                 {
+                    array = new Point32[n];
                     b.DeserializeStructArray(array);
                 }
                 Points = array;
@@ -41,11 +41,11 @@ namespace Iviz.Msgs.GeometryMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Point32>.Value
-                    : new Point32[n];
-                if (n != 0)
+                Point32[] array;
+                if (n == 0) array = EmptyArray<Point32>.Value;
+                else
                 {
+                    array = new Point32[n];
                     b.DeserializeStructArray(array);
                 }
                 Points = array;

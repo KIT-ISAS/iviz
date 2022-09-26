@@ -55,44 +55,44 @@ namespace Iviz.Msgs.RclInterfaces
             StringValue = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<byte>.Value
-                    : new byte[n];
-                if (n != 0)
+                byte[] array;
+                if (n == 0) array = EmptyArray<byte>.Value;
+                else
                 {
+                     array = new byte[n];
                     b.DeserializeStructArray(array);
                 }
                 ByteArrayValue = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<bool>.Value
-                    : new bool[n];
-                if (n != 0)
+                bool[] array;
+                if (n == 0) array = EmptyArray<bool>.Value;
+                else
                 {
+                     array = new bool[n];
                     b.DeserializeStructArray(array);
                 }
                 BoolArrayValue = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<long>.Value
-                    : new long[n];
-                if (n != 0)
+                long[] array;
+                if (n == 0) array = EmptyArray<long>.Value;
+                else
                 {
+                     array = new long[n];
                     b.DeserializeStructArray(array);
                 }
                 IntegerArrayValue = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<double>.Value
-                    : new double[n];
-                if (n != 0)
+                double[] array;
+                if (n == 0) array = EmptyArray<double>.Value;
+                else
                 {
+                     array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 DoubleArrayValue = array;
@@ -111,11 +111,11 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<byte>.Value
-                    : new byte[n];
-                if (n != 0)
+                byte[] array;
+                if (n == 0) array = EmptyArray<byte>.Value;
+                else
                 {
+                     array = new byte[n];
                     b.DeserializeStructArray(array);
                 }
                 ByteArrayValue = array;
@@ -123,11 +123,11 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<bool>.Value
-                    : new bool[n];
-                if (n != 0)
+                bool[] array;
+                if (n == 0) array = EmptyArray<bool>.Value;
+                else
                 {
+                     array = new bool[n];
                     b.DeserializeStructArray(array);
                 }
                 BoolArrayValue = array;
@@ -135,11 +135,11 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<long>.Value
-                    : new long[n];
-                if (n != 0)
+                long[] array;
+                if (n == 0) array = EmptyArray<long>.Value;
+                else
                 {
+                     array = new long[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -147,11 +147,11 @@ namespace Iviz.Msgs.RclInterfaces
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<double>.Value
-                    : new double[n];
-                if (n != 0)
+                double[] array;
+                if (n == 0) array = EmptyArray<double>.Value;
+                else
                 {
+                     array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }

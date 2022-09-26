@@ -145,22 +145,22 @@ namespace Iviz.Msgs.IvizMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<bool>.Value
-                    : new bool[n];
-                if (n != 0)
+                bool[] array;
+                if (n == 0) array = EmptyArray<bool>.Value;
+                else
                 {
+                     array = new bool[n];
                     b.DeserializeStructArray(array);
                 }
                 IsValid = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Pose>.Value
-                    : new GeometryMsgs.Pose[n];
-                if (n != 0)
+                GeometryMsgs.Pose[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Pose>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Pose[n];
                     b.DeserializeStructArray(array);
                 }
                 Poses = array;
@@ -172,11 +172,11 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<bool>.Value
-                    : new bool[n];
-                if (n != 0)
+                bool[] array;
+                if (n == 0) array = EmptyArray<bool>.Value;
+                else
                 {
+                     array = new bool[n];
                     b.DeserializeStructArray(array);
                 }
                 IsValid = array;
@@ -184,11 +184,11 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Pose>.Value
-                    : new GeometryMsgs.Pose[n];
-                if (n != 0)
+                GeometryMsgs.Pose[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Pose>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Pose[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }

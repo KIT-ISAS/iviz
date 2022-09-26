@@ -24,11 +24,11 @@ namespace Iviz.Msgs.IvizMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Color32>.Value
-                    : new Color32[n];
-                if (n != 0)
+                Color32[] array;
+                if (n == 0) array = EmptyArray<Color32>.Value;
+                else
                 {
+                    array = new Color32[n];
                     b.DeserializeStructArray(array);
                 }
                 Colors = array;
@@ -40,11 +40,11 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Color32>.Value
-                    : new Color32[n];
-                if (n != 0)
+                Color32[] array;
+                if (n == 0) array = EmptyArray<Color32>.Value;
+                else
                 {
+                    array = new Color32[n];
                     b.DeserializeStructArray(array);
                 }
                 Colors = array;

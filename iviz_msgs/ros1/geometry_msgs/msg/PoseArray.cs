@@ -28,11 +28,11 @@ namespace Iviz.Msgs.GeometryMsgs
             Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Pose>.Value
-                    : new Pose[n];
-                if (n != 0)
+                Pose[] array;
+                if (n == 0) array = EmptyArray<Pose>.Value;
+                else
                 {
+                    array = new Pose[n];
                     b.DeserializeStructArray(array);
                 }
                 Poses = array;
@@ -45,11 +45,11 @@ namespace Iviz.Msgs.GeometryMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Pose>.Value
-                    : new Pose[n];
-                if (n != 0)
+                Pose[] array;
+                if (n == 0) array = EmptyArray<Pose>.Value;
+                else
                 {
+                    array = new Pose[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }

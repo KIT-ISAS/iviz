@@ -27,11 +27,11 @@ namespace Iviz.Msgs.PclMsgs
             Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<float>.Value
-                    : new float[n];
-                if (n != 0)
+                float[] array;
+                if (n == 0) array = EmptyArray<float>.Value;
+                else
                 {
+                     array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Values = array;
@@ -44,11 +44,11 @@ namespace Iviz.Msgs.PclMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<float>.Value
-                    : new float[n];
-                if (n != 0)
+                float[] array;
+                if (n == 0) array = EmptyArray<float>.Value;
+                else
                 {
+                     array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Values = array;

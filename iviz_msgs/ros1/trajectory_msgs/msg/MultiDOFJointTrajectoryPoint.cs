@@ -35,11 +35,11 @@ namespace Iviz.Msgs.TrajectoryMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Transform>.Value
-                    : new GeometryMsgs.Transform[n];
-                if (n != 0)
+                GeometryMsgs.Transform[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Transform>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Transform[n];
                     b.DeserializeStructArray(array);
                 }
                 Transforms = array;
@@ -49,9 +49,9 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 var array = n == 0
                     ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
-                if (n != 0)
+                for (int i = 0; i < n; i++)
                 {
-                    b.DeserializeStructArray(array);
+                    array[i] = new GeometryMsgs.Twist(ref b);
                 }
                 Velocities = array;
             }
@@ -60,9 +60,9 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 var array = n == 0
                     ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
-                if (n != 0)
+                for (int i = 0; i < n; i++)
                 {
-                    b.DeserializeStructArray(array);
+                    array[i] = new GeometryMsgs.Twist(ref b);
                 }
                 Accelerations = array;
             }
@@ -74,11 +74,11 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Transform>.Value
-                    : new GeometryMsgs.Transform[n];
-                if (n != 0)
+                GeometryMsgs.Transform[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Transform>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Transform[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -89,25 +89,25 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 var array = n == 0
                     ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
-                if (n != 0)
+                for (int i = 0; i < n; i++)
                 {
-                    b.Align8();
-                    b.DeserializeStructArray(array);
+                    array[i] = new GeometryMsgs.Twist(ref b);
                 }
                 Velocities = array;
             }
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
                     ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
-                if (n != 0)
+                for (int i = 0; i < n; i++)
                 {
-                    b.Align8();
-                    b.DeserializeStructArray(array);
+                    array[i] = new GeometryMsgs.Twist(ref b);
                 }
                 Accelerations = array;
             }
+            b.Align4();
             b.Deserialize(out TimeFromStart);
         }
         
@@ -118,16 +118,32 @@ namespace Iviz.Msgs.TrajectoryMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeStructArray(Transforms);
-            b.SerializeStructArray(Velocities);
-            b.SerializeStructArray(Accelerations);
+            b.Serialize(Velocities.Length);
+            foreach (var t in Velocities)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Accelerations.Length);
+            foreach (var t in Accelerations)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(TimeFromStart);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.SerializeStructArray(Transforms);
-            b.SerializeStructArray(Velocities);
-            b.SerializeStructArray(Accelerations);
+            b.Serialize(Velocities.Length);
+            foreach (var t in Velocities)
+            {
+                t.RosSerialize(ref b);
+            }
+            b.Serialize(Accelerations.Length);
+            foreach (var t in Accelerations)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(TimeFromStart);
         }
         
@@ -135,7 +151,17 @@ namespace Iviz.Msgs.TrajectoryMsgs
         {
             if (Transforms is null) BuiltIns.ThrowNullReference();
             if (Velocities is null) BuiltIns.ThrowNullReference();
+            for (int i = 0; i < Velocities.Length; i++)
+            {
+                if (Velocities[i] is null) BuiltIns.ThrowNullReference(nameof(Velocities), i);
+                Velocities[i].RosValidate();
+            }
             if (Accelerations is null) BuiltIns.ThrowNullReference();
+            for (int i = 0; i < Accelerations.Length; i++)
+            {
+                if (Accelerations[i] is null) BuiltIns.ThrowNullReference(nameof(Accelerations), i);
+                Accelerations[i].RosValidate();
+            }
         }
     
         public int RosMessageLength

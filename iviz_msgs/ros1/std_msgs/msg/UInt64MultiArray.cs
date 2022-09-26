@@ -32,11 +32,11 @@ namespace Iviz.Msgs.StdMsgs
             Layout = new MultiArrayLayout(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ulong>.Value
-                    : new ulong[n];
-                if (n != 0)
+                ulong[] array;
+                if (n == 0) array = EmptyArray<ulong>.Value;
+                else
                 {
+                     array = new ulong[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -49,11 +49,11 @@ namespace Iviz.Msgs.StdMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ulong>.Value
-                    : new ulong[n];
-                if (n != 0)
+                ulong[] array;
+                if (n == 0) array = EmptyArray<ulong>.Value;
+                else
                 {
+                     array = new ulong[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }

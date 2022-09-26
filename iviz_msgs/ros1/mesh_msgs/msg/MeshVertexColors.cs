@@ -25,11 +25,11 @@ namespace Iviz.Msgs.MeshMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<StdMsgs.ColorRGBA>.Value
-                    : new StdMsgs.ColorRGBA[n];
-                if (n != 0)
+                StdMsgs.ColorRGBA[] array;
+                if (n == 0) array = EmptyArray<StdMsgs.ColorRGBA>.Value;
+                else
                 {
+                    array = new StdMsgs.ColorRGBA[n];
                     b.DeserializeStructArray(array);
                 }
                 VertexColors = array;
@@ -41,11 +41,11 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<StdMsgs.ColorRGBA>.Value
-                    : new StdMsgs.ColorRGBA[n];
-                if (n != 0)
+                StdMsgs.ColorRGBA[] array;
+                if (n == 0) array = EmptyArray<StdMsgs.ColorRGBA>.Value;
+                else
                 {
+                    array = new StdMsgs.ColorRGBA[n];
                     b.DeserializeStructArray(array);
                 }
                 VertexColors = array;

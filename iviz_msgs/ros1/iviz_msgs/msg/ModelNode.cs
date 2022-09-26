@@ -35,11 +35,11 @@ namespace Iviz.Msgs.IvizMsgs
             Transform = new Matrix4(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<int>.Value
-                    : new int[n];
-                if (n != 0)
+                int[] array;
+                if (n == 0) array = EmptyArray<int>.Value;
+                else
                 {
+                     array = new int[n];
                     b.DeserializeStructArray(array);
                 }
                 Meshes = array;
@@ -56,11 +56,11 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<int>.Value
-                    : new int[n];
-                if (n != 0)
+                int[] array;
+                if (n == 0) array = EmptyArray<int>.Value;
+                else
                 {
+                     array = new int[n];
                     b.DeserializeStructArray(array);
                 }
                 Meshes = array;

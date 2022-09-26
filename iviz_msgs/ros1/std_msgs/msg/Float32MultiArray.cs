@@ -32,11 +32,11 @@ namespace Iviz.Msgs.StdMsgs
             Layout = new MultiArrayLayout(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<float>.Value
-                    : new float[n];
-                if (n != 0)
+                float[] array;
+                if (n == 0) array = EmptyArray<float>.Value;
+                else
                 {
+                     array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -49,11 +49,11 @@ namespace Iviz.Msgs.StdMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<float>.Value
-                    : new float[n];
-                if (n != 0)
+                float[] array;
+                if (n == 0) array = EmptyArray<float>.Value;
+                else
                 {
+                     array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;

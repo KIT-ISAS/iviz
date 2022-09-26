@@ -25,11 +25,11 @@ namespace Iviz.Msgs.ActionlibTutorials
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<int>.Value
-                    : new int[n];
-                if (n != 0)
+                int[] array;
+                if (n == 0) array = EmptyArray<int>.Value;
+                else
                 {
+                     array = new int[n];
                     b.DeserializeStructArray(array);
                 }
                 Sequence = array;
@@ -41,11 +41,11 @@ namespace Iviz.Msgs.ActionlibTutorials
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<int>.Value
-                    : new int[n];
-                if (n != 0)
+                int[] array;
+                if (n == 0) array = EmptyArray<int>.Value;
+                else
                 {
+                     array = new int[n];
                     b.DeserializeStructArray(array);
                 }
                 Sequence = array;

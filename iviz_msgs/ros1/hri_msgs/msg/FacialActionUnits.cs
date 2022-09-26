@@ -196,33 +196,33 @@ namespace Iviz.Msgs.HriMsgs
             Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<float>.Value
-                    : new float[n];
-                if (n != 0)
+                float[] array;
+                if (n == 0) array = EmptyArray<float>.Value;
+                else
                 {
+                     array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 FAU = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<float>.Value
-                    : new float[n];
-                if (n != 0)
+                float[] array;
+                if (n == 0) array = EmptyArray<float>.Value;
+                else
                 {
+                     array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Intensity = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<float>.Value
-                    : new float[n];
-                if (n != 0)
+                float[] array;
+                if (n == 0) array = EmptyArray<float>.Value;
+                else
                 {
+                     array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Confidence = array;
@@ -235,33 +235,33 @@ namespace Iviz.Msgs.HriMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<float>.Value
-                    : new float[n];
-                if (n != 0)
+                float[] array;
+                if (n == 0) array = EmptyArray<float>.Value;
+                else
                 {
+                     array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 FAU = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<float>.Value
-                    : new float[n];
-                if (n != 0)
+                float[] array;
+                if (n == 0) array = EmptyArray<float>.Value;
+                else
                 {
+                     array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Intensity = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<float>.Value
-                    : new float[n];
-                if (n != 0)
+                float[] array;
+                if (n == 0) array = EmptyArray<float>.Value;
+                else
                 {
+                     array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Confidence = array;

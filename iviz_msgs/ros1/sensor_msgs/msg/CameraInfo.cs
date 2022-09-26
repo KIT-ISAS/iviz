@@ -148,11 +148,11 @@ namespace Iviz.Msgs.SensorMsgs
             DistortionModel = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<double>.Value
-                    : new double[n];
-                if (n != 0)
+                double[] array;
+                if (n == 0) array = EmptyArray<double>.Value;
+                else
                 {
+                     array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 D = array;
@@ -187,11 +187,11 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<double>.Value
-                    : new double[n];
-                if (n != 0)
+                double[] array;
+                if (n == 0) array = EmptyArray<double>.Value;
+                else
                 {
+                     array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }

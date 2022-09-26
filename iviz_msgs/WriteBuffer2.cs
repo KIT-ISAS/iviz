@@ -612,6 +612,15 @@ public unsafe partial struct WriteBuffer2
         if (length == 0) return;
         SerializeStructArrayCore(val);
     }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SerializeStructArray<T>(T[] val) where T : unmanaged
+    {
+        int length = val.Length;
+        WriteInt(length);
+        if (length == 0) return;
+        SerializeStructArrayCore(val);
+    }
 
     #endregion
 

@@ -38,11 +38,11 @@ namespace Iviz.Msgs.SensorMsgs
             Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point32>.Value
-                    : new GeometryMsgs.Point32[n];
-                if (n != 0)
+                GeometryMsgs.Point32[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point32>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point32[n];
                     b.DeserializeStructArray(array);
                 }
                 Points = array;
@@ -66,11 +66,11 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point32>.Value
-                    : new GeometryMsgs.Point32[n];
-                if (n != 0)
+                GeometryMsgs.Point32[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point32>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point32[n];
                     b.DeserializeStructArray(array);
                 }
                 Points = array;

@@ -18,10 +18,11 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public TwistWithCovariance()
         {
+            Twist = new Twist();
             Covariance = new double[36];
         }
         
-        public TwistWithCovariance(in Twist Twist, double[] Covariance)
+        public TwistWithCovariance(Twist Twist, double[] Covariance)
         {
             this.Twist = Twist;
             this.Covariance = Covariance;
@@ -29,7 +30,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public TwistWithCovariance(ref ReadBuffer b)
         {
-            b.Deserialize(out Twist);
+            Twist = new Twist(ref b);
             {
                 var array = new double[36];
                 b.DeserializeStructArray(array);
@@ -39,9 +40,9 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public TwistWithCovariance(ref ReadBuffer2 b)
         {
-            b.Align8();
-            b.Deserialize(out Twist);
+            Twist = new Twist(ref b);
             {
+                b.Align8();
                 var array = new double[36];
                 b.DeserializeStructArray(array);
                 Covariance = array;
@@ -54,18 +55,20 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(in Twist);
+            Twist.RosSerialize(ref b);
             b.SerializeStructArray(Covariance, 36);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
-            b.Serialize(in Twist);
+            Twist.RosSerialize(ref b);
             b.SerializeStructArray(Covariance, 36);
         }
         
         public void RosValidate()
         {
+            if (Twist is null) BuiltIns.ThrowNullReference();
+            Twist.RosValidate();
             if (Covariance is null) BuiltIns.ThrowNullReference();
             if (Covariance.Length != 36) BuiltIns.ThrowInvalidSizeForFixedArray(Covariance.Length, 36);
         }

@@ -32,55 +32,55 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Palm);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Transform>.Value
-                    : new GeometryMsgs.Transform[n];
-                if (n != 0)
+                GeometryMsgs.Transform[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Transform>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Transform[n];
                     b.DeserializeStructArray(array);
                 }
                 Thumb = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Transform>.Value
-                    : new GeometryMsgs.Transform[n];
-                if (n != 0)
+                GeometryMsgs.Transform[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Transform>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Transform[n];
                     b.DeserializeStructArray(array);
                 }
                 Index = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Transform>.Value
-                    : new GeometryMsgs.Transform[n];
-                if (n != 0)
+                GeometryMsgs.Transform[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Transform>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Transform[n];
                     b.DeserializeStructArray(array);
                 }
                 Middle = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Transform>.Value
-                    : new GeometryMsgs.Transform[n];
-                if (n != 0)
+                GeometryMsgs.Transform[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Transform>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Transform[n];
                     b.DeserializeStructArray(array);
                 }
                 Ring = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Transform>.Value
-                    : new GeometryMsgs.Transform[n];
-                if (n != 0)
+                GeometryMsgs.Transform[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Transform>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Transform[n];
                     b.DeserializeStructArray(array);
                 }
                 Little = array;
@@ -95,11 +95,11 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Palm);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Transform>.Value
-                    : new GeometryMsgs.Transform[n];
-                if (n != 0)
+                GeometryMsgs.Transform[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Transform>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Transform[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -107,11 +107,11 @@ namespace Iviz.Msgs.IvizMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Transform>.Value
-                    : new GeometryMsgs.Transform[n];
-                if (n != 0)
+                GeometryMsgs.Transform[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Transform>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Transform[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -119,11 +119,11 @@ namespace Iviz.Msgs.IvizMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Transform>.Value
-                    : new GeometryMsgs.Transform[n];
-                if (n != 0)
+                GeometryMsgs.Transform[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Transform>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Transform[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -131,11 +131,11 @@ namespace Iviz.Msgs.IvizMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Transform>.Value
-                    : new GeometryMsgs.Transform[n];
-                if (n != 0)
+                GeometryMsgs.Transform[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Transform>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Transform[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -143,11 +143,11 @@ namespace Iviz.Msgs.IvizMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Transform>.Value
-                    : new GeometryMsgs.Transform[n];
-                if (n != 0)
+                GeometryMsgs.Transform[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Transform>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Transform[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }

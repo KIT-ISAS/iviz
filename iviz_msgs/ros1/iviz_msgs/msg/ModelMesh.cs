@@ -35,44 +35,44 @@ namespace Iviz.Msgs.IvizMsgs
             Name = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point32>.Value
-                    : new GeometryMsgs.Point32[n];
-                if (n != 0)
+                GeometryMsgs.Point32[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point32>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point32[n];
                     b.DeserializeStructArray(array);
                 }
                 Vertices = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point32>.Value
-                    : new GeometryMsgs.Point32[n];
-                if (n != 0)
+                GeometryMsgs.Point32[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point32>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point32[n];
                     b.DeserializeStructArray(array);
                 }
                 Normals = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point32>.Value
-                    : new GeometryMsgs.Point32[n];
-                if (n != 0)
+                GeometryMsgs.Point32[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point32>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point32[n];
                     b.DeserializeStructArray(array);
                 }
                 Tangents = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point32>.Value
-                    : new GeometryMsgs.Point32[n];
-                if (n != 0)
+                GeometryMsgs.Point32[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point32>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point32[n];
                     b.DeserializeStructArray(array);
                 }
                 BiTangents = array;
@@ -101,11 +101,11 @@ namespace Iviz.Msgs.IvizMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Triangle>.Value
-                    : new Triangle[n];
-                if (n != 0)
+                Triangle[] array;
+                if (n == 0) array = EmptyArray<Triangle>.Value;
+                else
                 {
+                    array = new Triangle[n];
                     b.DeserializeStructArray(array);
                 }
                 Faces = array;
@@ -120,44 +120,44 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point32>.Value
-                    : new GeometryMsgs.Point32[n];
-                if (n != 0)
+                GeometryMsgs.Point32[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point32>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point32[n];
                     b.DeserializeStructArray(array);
                 }
                 Vertices = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point32>.Value
-                    : new GeometryMsgs.Point32[n];
-                if (n != 0)
+                GeometryMsgs.Point32[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point32>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point32[n];
                     b.DeserializeStructArray(array);
                 }
                 Normals = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point32>.Value
-                    : new GeometryMsgs.Point32[n];
-                if (n != 0)
+                GeometryMsgs.Point32[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point32>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point32[n];
                     b.DeserializeStructArray(array);
                 }
                 Tangents = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point32>.Value
-                    : new GeometryMsgs.Point32[n];
-                if (n != 0)
+                GeometryMsgs.Point32[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point32>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point32[n];
                     b.DeserializeStructArray(array);
                 }
                 BiTangents = array;
@@ -188,11 +188,11 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Triangle>.Value
-                    : new Triangle[n];
-                if (n != 0)
+                Triangle[] array;
+                if (n == 0) array = EmptyArray<Triangle>.Value;
+                else
                 {
+                    array = new Triangle[n];
                     b.DeserializeStructArray(array);
                 }
                 Faces = array;

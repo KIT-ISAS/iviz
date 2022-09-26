@@ -47,11 +47,11 @@ namespace Iviz.Msgs.SensorMsgs
             JointNames = b.DeserializeStringArray();
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Transform>.Value
-                    : new GeometryMsgs.Transform[n];
-                if (n != 0)
+                GeometryMsgs.Transform[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Transform>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Transform[n];
                     b.DeserializeStructArray(array);
                 }
                 Transforms = array;
@@ -61,9 +61,9 @@ namespace Iviz.Msgs.SensorMsgs
                 var array = n == 0
                     ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
-                if (n != 0)
+                for (int i = 0; i < n; i++)
                 {
-                    b.DeserializeStructArray(array);
+                    array[i] = new GeometryMsgs.Twist(ref b);
                 }
                 Twist = array;
             }
@@ -88,11 +88,11 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Transform>.Value
-                    : new GeometryMsgs.Transform[n];
-                if (n != 0)
+                GeometryMsgs.Transform[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Transform>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Transform[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -103,14 +103,14 @@ namespace Iviz.Msgs.SensorMsgs
                 var array = n == 0
                     ? EmptyArray<GeometryMsgs.Twist>.Value
                     : new GeometryMsgs.Twist[n];
-                if (n != 0)
+                for (int i = 0; i < n; i++)
                 {
-                    b.Align8();
-                    b.DeserializeStructArray(array);
+                    array[i] = new GeometryMsgs.Twist(ref b);
                 }
                 Twist = array;
             }
             {
+                b.Align4();
                 int n = b.DeserializeArrayLength();
                 var array = n == 0
                     ? EmptyArray<GeometryMsgs.Wrench>.Value
@@ -132,7 +132,11 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.SerializeArray(JointNames);
             b.SerializeStructArray(Transforms);
-            b.SerializeStructArray(Twist);
+            b.Serialize(Twist.Length);
+            foreach (var t in Twist)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(Wrench.Length);
             foreach (var t in Wrench)
             {
@@ -145,7 +149,11 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.SerializeArray(JointNames);
             b.SerializeStructArray(Transforms);
-            b.SerializeStructArray(Twist);
+            b.Serialize(Twist.Length);
+            foreach (var t in Twist)
+            {
+                t.RosSerialize(ref b);
+            }
             b.Serialize(Wrench.Length);
             foreach (var t in Wrench)
             {
@@ -162,6 +170,11 @@ namespace Iviz.Msgs.SensorMsgs
             }
             if (Transforms is null) BuiltIns.ThrowNullReference();
             if (Twist is null) BuiltIns.ThrowNullReference();
+            for (int i = 0; i < Twist.Length; i++)
+            {
+                if (Twist[i] is null) BuiltIns.ThrowNullReference(nameof(Twist), i);
+                Twist[i].RosValidate();
+            }
             if (Wrench is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Wrench.Length; i++)
             {

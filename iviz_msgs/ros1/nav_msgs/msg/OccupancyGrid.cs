@@ -36,11 +36,11 @@ namespace Iviz.Msgs.NavMsgs
             Info = new MapMetaData(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<sbyte>.Value
-                    : new sbyte[n];
-                if (n != 0)
+                sbyte[] array;
+                if (n == 0) array = EmptyArray<sbyte>.Value;
+                else
                 {
+                     array = new sbyte[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -54,11 +54,11 @@ namespace Iviz.Msgs.NavMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<sbyte>.Value
-                    : new sbyte[n];
-                if (n != 0)
+                sbyte[] array;
+                if (n == 0) array = EmptyArray<sbyte>.Value;
+                else
                 {
+                     array = new sbyte[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;

@@ -42,11 +42,11 @@ namespace Iviz.Msgs.SensorMsgs
             Format = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<byte>.Value
-                    : new byte[n];
-                if (n != 0)
+                byte[] array;
+                if (n == 0) array = EmptyArray<byte>.Value;
+                else
                 {
+                     array = new byte[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -61,11 +61,11 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<byte>.Value
-                    : new byte[n];
-                if (n != 0)
+                byte[] array;
+                if (n == 0) array = EmptyArray<byte>.Value;
+                else
                 {
+                     array = new byte[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;

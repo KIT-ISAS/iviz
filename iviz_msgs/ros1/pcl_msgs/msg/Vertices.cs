@@ -25,11 +25,11 @@ namespace Iviz.Msgs.PclMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<uint>.Value
-                    : new uint[n];
-                if (n != 0)
+                uint[] array;
+                if (n == 0) array = EmptyArray<uint>.Value;
+                else
                 {
+                     array = new uint[n];
                     b.DeserializeStructArray(array);
                 }
                 Vertices_ = array;
@@ -41,11 +41,11 @@ namespace Iviz.Msgs.PclMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<uint>.Value
-                    : new uint[n];
-                if (n != 0)
+                uint[] array;
+                if (n == 0) array = EmptyArray<uint>.Value;
+                else
                 {
+                     array = new uint[n];
                     b.DeserializeStructArray(array);
                 }
                 Vertices_ = array;

@@ -1,19 +1,21 @@
 /* This file was created automatically, do not edit! */
 
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract]
-    [StructLayout(LayoutKind.Sequential)]
-    public struct Twist : IMessage, IHasSerializer<Twist>
+    public sealed class Twist : IHasSerializer<Twist>, IMessage
     {
         // This expresses velocity in free space broken into its linear and angular parts.
         [DataMember (Name = "linear")] public Vector3 Linear;
         [DataMember (Name = "angular")] public Vector3 Angular;
     
+        public Twist()
+        {
+        }
+        
         public Twist(in Vector3 Linear, in Vector3 Angular)
         {
             this.Linear = Linear;
@@ -22,54 +24,59 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public Twist(ref ReadBuffer b)
         {
-            b.Deserialize(out this);
+            b.Deserialize(out Linear);
+            b.Deserialize(out Angular);
         }
         
         public Twist(ref ReadBuffer2 b)
         {
-            b.Deserialize(out this);
+            b.Align8();
+            b.Deserialize(out Linear);
+            b.Deserialize(out Angular);
         }
         
-        public readonly Twist RosDeserialize(ref ReadBuffer b) => new Twist(ref b);
+        public Twist RosDeserialize(ref ReadBuffer b) => new Twist(ref b);
         
-        public readonly Twist RosDeserialize(ref ReadBuffer2 b) => new Twist(ref b);
+        public Twist RosDeserialize(ref ReadBuffer2 b) => new Twist(ref b);
     
-        public readonly void RosSerialize(ref WriteBuffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(in this);
+            b.Serialize(in Linear);
+            b.Serialize(in Angular);
         }
         
-        public readonly void RosSerialize(ref WriteBuffer2 b)
+        public void RosSerialize(ref WriteBuffer2 b)
         {
-            b.Serialize(in this);
+            b.Serialize(in Linear);
+            b.Serialize(in Angular);
         }
         
-        public readonly void RosValidate()
+        public void RosValidate()
         {
         }
     
         public const int RosFixedMessageLength = 48;
         
-        public readonly int RosMessageLength => RosFixedMessageLength;
+        public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 48;
         
-        public readonly int Ros2MessageLength => Ros2FixedMessageLength;
+        public int Ros2MessageLength => Ros2FixedMessageLength;
         
-        public readonly int AddRos2MessageLength(int c) => WriteBuffer2.Align8(c) + Ros2FixedMessageLength;
+        public int AddRos2MessageLength(int c) => WriteBuffer2.Align8(c) + Ros2FixedMessageLength;
         
     
         public const string MessageType = "geometry_msgs/Twist";
     
-        public readonly string RosMessageType => MessageType;
+        public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "9f195f881246fdfa2798d1d3eebca84a";
     
-        public readonly string RosMd5Sum => Md5Sum;
+        public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
-        public readonly string RosDependenciesBase64 =>
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61RQUrEQBC8zysKvCiECCoeBM+yB0FQvEpv0skOO5kJPb3uxtfbkyyRvRsY6GSqqqsq" +
                 "V/jY+Qw+jcI5c8Y3h9R4neAjOmFGHqlhbCXtOdpHTfCaEXxkElBs7fSHYPNIorl2n9xoknucIX/vZ5xz" +
                 "z//8uNf3lyf0nAZWmb6G3Ofb81Z3teQTLvk4mnOyiOXuMmANg24Uhk0xTBiYosLCrkwjtl6M6lOsTZWF" +

@@ -31,22 +31,22 @@ namespace Iviz.Msgs.MeshMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point>.Value
-                    : new GeometryMsgs.Point[n];
-                if (n != 0)
+                GeometryMsgs.Point[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point[n];
                     b.DeserializeStructArray(array);
                 }
                 Vertices = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point>.Value
-                    : new GeometryMsgs.Point[n];
-                if (n != 0)
+                GeometryMsgs.Point[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point[n];
                     b.DeserializeStructArray(array);
                 }
                 VertexNormals = array;
@@ -69,11 +69,11 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point>.Value
-                    : new GeometryMsgs.Point[n];
-                if (n != 0)
+                GeometryMsgs.Point[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -81,11 +81,11 @@ namespace Iviz.Msgs.MeshMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Point>.Value
-                    : new GeometryMsgs.Point[n];
-                if (n != 0)
+                GeometryMsgs.Point[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Point>.Value;
+                else
                 {
+                    array = new GeometryMsgs.Point[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
