@@ -6,9 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Tools;
-#if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
-#endif
 
 namespace Iviz.Roslib;
 
@@ -81,11 +79,7 @@ public sealed class MergedChannelReader<TMessage> : IEnumerable<TMessage>, IAsyn
 
     public async IAsyncEnumerable<TMessage> ReadAllAsync([EnumeratorCancellation] CancellationToken token = default)
     {
-        Task<bool>[] tasks = new Task<bool>[sources.Length];
-        for (int i = 0; i < sources.Length; i++)
-        {
-            tasks[i] = sources[i].WaitToReadAsync(token).AsTask();
-        }
+        var tasks = sources.Select(reader => reader.WaitToReadAsync(token).AsTask()).ToArray();
 
         while (true)
         {
@@ -129,12 +123,7 @@ public sealed class MergedChannelReader : IEnumerable<IMessage>, IAsyncEnumerabl
 
     public IEnumerable<IMessage> ReadAll(CancellationToken token = default)
     {
-        var tasks = new Task[sources.Length];
-
-        for (int i = 0; i < sources.Length; i++)
-        {
-            tasks[i] = sources[i].WaitToReadAsync(token).AsTask();
-        }
+        var tasks = sources.Select(reader => (Task)reader.WaitToReadAsync(token).AsTask()).ToArray();
 
         while (true)
         {
