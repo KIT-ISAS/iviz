@@ -38,7 +38,7 @@ namespace Iviz.Core
         public static async ValueTask<Rent<byte>> ReadAllBytesAsync(string filePath, CancellationToken token)
         {
             await using var stream =
-                new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, 4096, true);
+                new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
             
             var rent = new Rent<byte>((int)stream.Length);
 

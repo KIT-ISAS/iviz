@@ -95,7 +95,9 @@ namespace Iviz.Displays
             get => visible;
             set
             {
+                if (visible == value) return;
                 visible = value;
+                baseLinkObject.SetActive(value);
                 foreach (var display in displays)
                 {
                     display.Visible = value;

@@ -123,7 +123,9 @@ namespace Iviz.Controllers
                 return;
             }
 
-            var vizObject = new PreviewObject(msg.Id, robot, $"{nameof(RobotPreview)} - {robot.Name}")
+            //robot.Visible = false;
+
+            var vizObject = new PreviewObject(msg, robot, $"{nameof(RobotPreview)} - {robot.Name}")
                 { Interactable = Interactable, Visible = Visible };
             vizObjects[vizObject.id] = vizObject;
 
@@ -135,6 +137,9 @@ namespace Iviz.Controllers
             {
                 RosLogger.Error($"{ToString()}: Preview '{msg.Id}' failed to initialize robot.", e);
             }
+
+
+            //robot.Visible = true;
         }
 
         // ----------------------------------------------
@@ -143,10 +148,11 @@ namespace Iviz.Controllers
         {
             readonly RobotModel robot;
 
-            public PreviewObject(string id, RobotModel robot, string typeDescription) : base(id, typeDescription)
+            public PreviewObject(RobotPreview msg, RobotModel robot, string typeDescription) : base(msg.Id, typeDescription)
             {
                 this.robot = robot;
                 robot.BaseLinkObject.transform.SetParentLocal(node.Transform);
+                Update(msg);
             }
 
             public void Update(RobotPreview msg)
@@ -162,6 +168,7 @@ namespace Iviz.Controllers
                     robot.OcclusionOnly = msg.RenderAsOcclusionOnly;
                 }
 
+                robot.Visible = !msg.HideRobot;
                 if (msg.Tint != default && msg.Tint.ToUnity() != robot.Tint)
                 {
                     robot.Tint = msg.Tint.ToUnity();
