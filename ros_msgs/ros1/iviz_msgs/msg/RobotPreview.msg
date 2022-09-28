@@ -18,3 +18,4 @@ float32 metallic
 float32 smoothness
 bool attached_to_tf
 bool render_as_occlusion_only
+bool hide_robot

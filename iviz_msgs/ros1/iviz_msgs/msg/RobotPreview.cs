@@ -25,6 +25,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "smoothness")] public float Smoothness;
         [DataMember (Name = "attached_to_tf")] public bool AttachedToTf;
         [DataMember (Name = "render_as_occlusion_only")] public bool RenderAsOcclusionOnly;
+        [DataMember (Name = "hide_robot")] public bool HideRobot;
     
         public RobotPreview()
         {
@@ -63,6 +64,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Smoothness);
             b.Deserialize(out AttachedToTf);
             b.Deserialize(out RenderAsOcclusionOnly);
+            b.Deserialize(out HideRobot);
         }
         
         public RobotPreview(ref ReadBuffer2 b)
@@ -98,6 +100,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Smoothness);
             b.Deserialize(out AttachedToTf);
             b.Deserialize(out RenderAsOcclusionOnly);
+            b.Deserialize(out HideRobot);
         }
         
         public RobotPreview RosDeserialize(ref ReadBuffer b) => new RobotPreview(ref b);
@@ -120,6 +123,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Smoothness);
             b.Serialize(AttachedToTf);
             b.Serialize(RenderAsOcclusionOnly);
+            b.Serialize(HideRobot);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
@@ -138,6 +142,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Smoothness);
             b.Serialize(AttachedToTf);
             b.Serialize(RenderAsOcclusionOnly);
+            b.Serialize(HideRobot);
         }
         
         public void RosValidate()
@@ -159,7 +164,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get
             {
-                int size = 55;
+                int size = 56;
                 size += Header.RosMessageLength;
                 size += WriteBuffer.GetStringSize(Id);
                 size += WriteBuffer.GetArraySize(JointNames);
@@ -199,6 +204,7 @@ namespace Iviz.Msgs.IvizMsgs
             size += 4; // Smoothness
             size += 1; // AttachedToTf
             size += 1; // RenderAsOcclusionOnly
+            size += 1; // HideRobot
             return size;
         }
     
@@ -207,22 +213,22 @@ namespace Iviz.Msgs.IvizMsgs
         public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
-        public const string Md5Sum = "ee7f5ef55ff746bca34ddf8e6ad97f9a";
+        public const string Md5Sum = "9e7dc3ba23162ce59180fc5747cce009";
     
         public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
         public string RosDependenciesBase64 =>
-                "H4sIAAAAAAAAE7VTwU7cMBC9+ytG2gNQCVropULisGUpRYJSAeoFVdHEnk1ceT3BnizN33ec7YYV6qGH" +
-                "NrIU52XmzZt5du+jfID5+cPV7ZdqvljAGbwz/S54d3Fz++1C8eM/4fPra/11YkwWV61yk99+JnSUoB1f" +
-                "ph6EAK14jhqSfGzAO/N7+/gdfrByVhFXlM0yMMr7kwldY+gV3uYlrlkqR9km3+0SZu6TpSqyo1dQh0mZ" +
-                "RXVscVyTqzZMpeiL7HMOnO4uP85BtPZWC2g2huDtBOQVs7SRcjY1cwAUQdsqqXAlyw2WKGrvFeaKrQ19" +
-                "Vq0VxzAYc/aPH3Nzf3kKr2ZvZnAvGB0mN+p3KAhLVk9801I6DLSmoEm46sjB+FeGjvKRJj60PoOuhiIl" +
-                "7XyAPmuQMFherfroLaqh4tWv3XzN9BEQdODibR8waTwn52MJXxYXCruuTE89RUtwtTjVmJjJ9uJV0KAM" +
-                "NhHm4tPVAsbTVgZOTzCDxzvOx9/N7OGZDxWnRo/YpAKkRSmq6WeX1BlVhflUi73ZdHmkRXRKpOVchv0R" +
-                "q/QzH4BWUy3UsW1hX1v4OkjLUQkJ1pg81oEKsdVRKOteSdo72GGOI3XEyFv6DeNLjb+hjRNv6emwVfPC" +
-                "eFz7RiepgV3itXcaWg8jiQ2eokDwdcI0mJK1KWlmn8qwNUizRmv0jTmz9eqEg2cv7fYyjLZU5Tr+52M5" +
-                "3a3pFqVp10y7etqhMb8AZAoIe5gEAAA=";
+                "H4sIAAAAAAAAE7VTwW7bMAy96ysI5NB2QLq1uwwBesiargvQrkMa7FIUBi0xtgZFdCU5nf9+lN24QbHD" +
+                "DpthwPIT+fjER7XWp08wv1wv774V88UCLuCDag/B1dXt3Y8rwc/+hM9vbmTrXKmYTLGNVXz/ldBQgLr/" +
+                "qLJLBKiTZS8hwfoKrFEvy4dH+MnCWXjcUlQbx5g+no/oDl0r8D4vcMmpMBR1sM0hYeQ2aCo8G3oDNRiE" +
+                "OYmOPY47MsXAlIu+yr5kx2F1/XkOSWrvtYBko3NWj0DcMqfaU4yqZHaAKaGuhTRxkTYDFsjL2QuMBWvt" +
+                "2ihaC/auG3Zra2iQoC7+8aNu769n8MYKNYH7hN5gMP1xDCaEDYtFtqopTB3tyEkSbhsy0O+mrqF4Konr" +
+                "2kaQtyJPQRrRQRslKDFo3m5bbzWKv8mKfYf5kmk9IEj/k9WtwyDxHIz1OXyTTcns8kZ6aslrguViJjE+" +
+                "km6TFUGdMOhAGLNtywX0w5f7T08wgYcVx7NHNVk/81RwqmTiRhWQakxZNf1qghglqjDOpNi74ZSnUkS6" +
+                "RFLORDjusUJ+4wlINdFCDesajuUI37tUsxdCgh0Gi6WjTKylFcJ6lJOOTg6YfU/t0fOefmB8rfE3tH7k" +
+                "zWea1mKe66e3raSTEtgE3skUGSi7nkQ7Sz6Bs2XA0KmcNZRUky+52RIkWb018sUYWVtxwsCzTfX+bvS2" +
+                "FPl2/uexHK/aeKnCuKrGVTmuUKnf2AtzAKcEAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     
