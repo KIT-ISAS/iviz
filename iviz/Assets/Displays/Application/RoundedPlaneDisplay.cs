@@ -53,9 +53,9 @@ namespace Iviz.Displays
 
         void Rebuild()
         {
-            if (children.Length == 0)
+            if (Children.Length == 0)
             {
-                children = CreateObjects();
+                Children = CreateObjects();
             }
 
 
@@ -63,6 +63,7 @@ namespace Iviz.Displays
 
             const float zScale = 0.001f;
 
+            var children = Children;
             children[0].Transform.localScale = new Vector3(size.x - 2 * vRadius, zScale, size.y);
             children[1].Transform.localPosition = new Vector3(-size.x / 2 + vRadius / 2, 0, 0);
             children[1].Transform.localScale = new Vector3(vRadius, zScale, size.y - 2 * vRadius);
@@ -177,7 +178,7 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            if (children.Length == 0)
+            if (Children.Length == 0)
             {
                 Rebuild();
             }

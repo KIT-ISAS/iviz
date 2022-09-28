@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using Iviz.Common;
 using Iviz.Core;
 using UnityEngine;
@@ -18,9 +19,9 @@ namespace Iviz.Displays
 
         float axisLength;
 
-        MeshMarkerDisplay[] Frames => children.Length != 0
-            ? children
-            : children = new[]
+        MeshMarkerDisplay[] Frames => Children.Length != 0
+            ? Children
+            : Children = new[]
             {
                 ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, Transform),
                 ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, Transform),
@@ -96,10 +97,12 @@ namespace Iviz.Displays
 
         public void SplitForRecycle()
         {
-            foreach (var child in children)
+            foreach (var child in Children)
             {
                 child.ReturnToPool(Resource.Displays.Cube);
             }
+
+            Children = Array.Empty<MeshMarkerDisplay>();
         }
 
         public override void Suspend()

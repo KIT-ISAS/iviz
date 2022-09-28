@@ -168,7 +168,12 @@ namespace Iviz.Controllers
                     robot.OcclusionOnly = msg.RenderAsOcclusionOnly;
                 }
 
-                robot.Visible = !msg.HideRobot;
+                bool newVisible = !msg.HideRobot;
+                if (newVisible != robot.Visible)
+                {
+                    robot.Visible = newVisible;
+                }
+                
                 if (msg.Tint != default && msg.Tint.ToUnity() != robot.Tint)
                 {
                     robot.Tint = msg.Tint.ToUnity();

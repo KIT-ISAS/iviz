@@ -57,11 +57,12 @@ namespace Iviz.Displays
 
         void RebuildSize()
         {
-            if (children.Length == 0)
+            if (Children.Length == 0)
             {
-                children = CreateObjects(Transform);
+                Children = CreateObjects(Transform);
             }
 
+            var children = Children;
             var (halfSizeX, halfSizeY, halfSizeZ) = size / 2;
             children[0].Transform.localPosition = new Vector3(halfSizeX, halfSizeY, 0);
             children[1].Transform.localPosition = new Vector3(halfSizeX, -halfSizeY, 0);
@@ -97,11 +98,12 @@ namespace Iviz.Displays
 
         void RebuildColumnWidth()
         {
-            if (children.Length == 0)
-            {
-                children = CreateObjects(Transform);
+            if (Children.Length == 0)
+            { 
+                Children = CreateObjects(Transform);
             }
 
+            var children = Children;
             float adjustedColumnWidth = AdjustedColumnWidth;
             foreach (var child in children.AsSpan(..4))
             {
@@ -123,7 +125,7 @@ namespace Iviz.Displays
         {
             Layer = LayerType.IgnoreRaycast;
             Collider.enabled = false;
-            if (children.Length == 0)
+            if (Children.Length == 0)
             {
                 RebuildSize();
             }
@@ -144,7 +146,7 @@ namespace Iviz.Displays
 
         public void SplitForRecycle()
         {
-            foreach (var resource in children)
+            foreach (var resource in Children)
             {
                 resource.ReturnToPool(Resource.Displays.Cube);
             }

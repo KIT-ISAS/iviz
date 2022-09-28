@@ -38,6 +38,7 @@ namespace Iviz.Displays.XR
         {
             base.Awake();
             Button.Clicked += () => Clicked?.Invoke(0);
+            Background.MakeHalfLitAlwaysVisible();
         }
 
         public override void Suspend()

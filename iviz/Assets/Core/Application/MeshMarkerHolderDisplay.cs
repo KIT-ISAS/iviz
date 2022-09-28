@@ -13,22 +13,24 @@ namespace Iviz.Displays
     public class MeshMarkerHolderDisplay : MonoBehaviour, IDisplay, ISupportsColor, ISupportsAROcclusion,
         ISupportsTint, ISupportsPbr, ISupportsDynamicBounds, ISupportsShadows, ISupportsOverrideMaterial
     {
-        [SerializeField] protected MeshMarkerDisplay[] children = Array.Empty<MeshMarkerDisplay>();
+        [SerializeField] MeshMarkerDisplay[] children = Array.Empty<MeshMarkerDisplay>();
         [SerializeField] BoxCollider? boxCollider;
         [SerializeField] Transform? m_Transform;
         [SerializeField] bool updateBoundariesOnAwake;
+        Material? overrideMaterial;
         
         public BoxCollider Collider => boxCollider != null
             ? boxCollider
             : boxCollider = gameObject.AssertHasComponent<BoxCollider>(nameof(boxCollider));
 
-        public IReadOnlyList<MeshMarkerDisplay> Children
+        public MeshMarkerDisplay[] Children
         {
             get => children;
             set
             {
                 children = (value ?? throw new ArgumentNullException(nameof(value))).ToArray();
                 Layer = Layer;
+                OverrideMaterial(overrideMaterial);
             }
         }
 
@@ -159,6 +161,7 @@ namespace Iviz.Displays
 
         public void OverrideMaterial(Material? material)
         {
+            overrideMaterial = material;
             foreach (var display in children)
             {
                 display.OverrideMaterial(material);
@@ -169,6 +172,7 @@ namespace Iviz.Displays
         {
             Visible = true;
             BoundsChanged = null;
+            OverrideMaterial(null);
         }
     }
 }
