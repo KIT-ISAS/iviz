@@ -167,11 +167,19 @@ namespace Iviz.Displays.XR
                 XRDialog.GetIconBounds(Cylinder),
                 XRDialog.GetCaptionBounds(Text),
             };
-            
+
             const float padding = 0.1f;
             var (center, size) = bounds.Combine(padding);
+            var newBounds = new Bounds(center, size.WithZ(0.1f));
 
-            BoxCollider.SetLocalBounds(new Bounds(center, new Vector3(size.x, size.y, 0.1f)));
+            if (Background.Visible)
+            {
+                var bgCenter = new Vector3(0, 0, -0.125f);
+                var bgSize = new Vector3(1, 1, 0.25f);
+                newBounds.Encapsulate(new Bounds(bgCenter, bgSize));
+            }
+
+            BoxCollider.SetLocalBounds(newBounds);
             BoundsChanged?.Invoke();
         }
     }

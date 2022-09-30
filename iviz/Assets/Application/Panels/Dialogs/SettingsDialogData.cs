@@ -14,15 +14,6 @@ namespace Iviz.App
         static readonly string[] TargetFpsOptions = {"Default", "60", "30", "15"};
         static readonly string[] NetworkProcessingOptions = {"Every Frame", "Every Second", "Every Fourth"};
 
-        enum ModelServerModes
-        {
-            Off,
-            On,
-            OnWithFile
-        }
-
-        static readonly string[] ModelServerModesNames = {"Off", "On", "On + File"};
-
         readonly SettingsDialogPanel panel;
         public override IDialogPanel Panel => panel;
 
@@ -48,11 +39,6 @@ namespace Iviz.App
 
             panel.TargetFps.Options = TargetFpsOptions;
             panel.NetworkProcessing.Options = NetworkProcessingOptions;
-            //panel.SunDirection.SetMinValue(-60).SetMaxValue(60).SetIntegerOnly(true);
-
-            //panel.BackgroundColor.Value = SettingsManager.BackgroundColor.WithAlpha(1);
-
-            //spanel.SunDirection.Value = SettingsManager.SunDirection;
 
             panel.TargetFps.Index = SettingsManager.TargetFps switch
             {
@@ -73,12 +59,6 @@ namespace Iviz.App
             panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.ResourceCount.ToString()} files";
             panel.SavedFilesLabel.text = $"<b>Saved Files:</b> {ModuleListPanel.NumSavedFiles.ToString()} files";
             panel.HostHistoryLabel.text = $"<b>Host History:</b> {ModuleListPanel.Instance.NumMastersInCache.ToString()} entries";
-
-            /*
-            panel.ModelService.Options = ModelServerModesNames;
-            panel.ModelService.Text = UpdateModelServiceLabel();
-            panel.ModelService.Interactable = !Settings.IsMobile;
-            */
 
             panel.QualityInView.ValueChanged += (f, _) =>
             {
@@ -141,49 +121,6 @@ namespace Iviz.App
                 ModuleListPanel.ClearSavedFiles();
                 panel.SavedFilesLabel.text = $"<b>Saved:</b> {ModuleListPanel.NumSavedFiles.ToString()} files";
             };
-
-            /*
-            panel.ModelService.ValueChanged += (i, s) =>
-            {
-                switch ((ModelServerModes) i)
-                {
-                    case ModelServerModes.Off:
-                        RosManager.ModelService.Dispose();
-                        break;
-                    case ModelServerModes.On:
-                        _ = RosManager.ModelService.RestartAsync(false);
-                        break;
-                    case ModelServerModes.OnWithFile:
-                        _ = RosManager.ModelService.RestartAsync(true);
-                        break;
-                }
-
-                panel.ModelService.Text = UpdateModelServiceLabel();
-            };
-            */
         }
-
-        /*
-        string UpdateModelServiceLabel()
-        {
-            if (Settings.IsMobile)
-            {
-                return "<b>Model Service:</b> Off (Mobile)";
-            }
-
-            if (!RosManager.ModelService.IsEnabled)
-            {
-                return "<b>Model Service:</b> Off";
-            }
-
-            if (RosManager.ModelService.IsFileSchemeEnabled)
-            {
-                return "<b>Model Service:</b> " + RosManager.ModelService.NumPackages +
-                       " packages\n<b>[File scheme enabled]</b>";
-            }
-
-            return "<b>Model Service:</b> " + RosManager.ModelService.NumPackages + " packages";
-        }
-        */
     }
 }

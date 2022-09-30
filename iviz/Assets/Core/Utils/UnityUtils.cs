@@ -418,6 +418,16 @@ namespace Iviz.Core
             return c;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 WithZ(this Vector2 c, float z)
+        {
+            Vector3 v;
+            v.x = c.x;
+            v.y = c.y;
+            v.z = z;
+            return v;
+        }
+
         public static Color WithSaturation(this in Color c, float saturation)
         {
             Color.RGBToHSV(c, out float h, out _, out float v);
