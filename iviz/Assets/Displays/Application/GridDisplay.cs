@@ -10,7 +10,8 @@ using Iviz.Tools;
 
 namespace Iviz.Displays
 {
-    public sealed class GridDisplay : MarkerDisplay, IRecyclable, ISupportsColor, ISupportsShadows, ISupportsPbr, ISupportsAROcclusion
+    public sealed class GridDisplay : MarkerDisplay, IRecyclable, ISupportsColor, ISupportsShadows, ISupportsPbr,
+        ISupportsAROcclusion
     {
         public static readonly List<string> OrientationNames = new() { "XY", "YZ", "XZ" };
 
@@ -22,7 +23,7 @@ namespace Iviz.Displays
         };
 
         public new Transform Transform => base.Transform;
-        
+
         readonly List<MeshMarkerDisplay> horizontals = new();
         readonly List<MeshMarkerDisplay> verticals = new();
 
@@ -38,6 +39,7 @@ namespace Iviz.Displays
         int numberOfGridCells = 90;
         float gridCellSize = 1;
         float gridLineWidth;
+        bool followCamera = true;
 
         MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
 
@@ -69,7 +71,7 @@ namespace Iviz.Displays
                 MeshRenderer.SetPropertyColor(value);
             }
         }
-        
+
         public Color Color
         {
             get => interiorColor;
@@ -92,7 +94,7 @@ namespace Iviz.Displays
                 }
             }
         }
-        
+
         public Color EmissiveColor
         {
             set => InteriorObject.EmissiveColor = value;
@@ -118,13 +120,14 @@ namespace Iviz.Displays
             }
         }
 
-        int NumberOfGridCells
+        public int NumberOfGridCells
         {
             get => numberOfGridCells;
             set
             {
                 numberOfGridCells = value;
                 UpdateMesh();
+                UpdatePosition(0, 0, Transform.localPosition.y);
             }
         }
 
@@ -133,7 +136,19 @@ namespace Iviz.Displays
             set => InteriorObject.Visible = value;
         }
 
-        public bool FollowCamera { get; set; } = true;
+        public bool FollowCamera
+        {
+            get => followCamera;
+            set
+            {
+                followCamera = value;
+                if (!value)
+                {
+                    UpdatePosition(0, 0, Transform.localPosition.y);
+                }
+            }
+        }
+
 
         public bool DarkMode
         {
@@ -144,12 +159,12 @@ namespace Iviz.Displays
         {
             set => InteriorObject.EnableShadows = value;
         }
-        
+
         public float Metallic
         {
             set => InteriorObject.Metallic = value;
         }
-        
+
         public float Smoothness
         {
             set => InteriorObject.Smoothness = value;
@@ -167,7 +182,7 @@ namespace Iviz.Displays
             InteriorObject.Layer = LayerType.IgnoreRaycast;
             InteriorObject.Metallic = 0.5f;
             InteriorObject.Smoothness = 0.5f;
-            
+
             DarkMode = true;
 
             InteriorRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -212,7 +227,6 @@ namespace Iviz.Displays
             {
                 UpdatePosition(x, z, offsetY);
             }
-            
         }
 
         void UpdatePosition(int x, int z, float offsetY)
@@ -246,7 +260,7 @@ namespace Iviz.Displays
 
             Resource.TexturedMaterials.GetFull(darkTexture).mainTextureScale = tilingScale;
             Resource.TexturedMaterials.GetSimple(darkTexture).mainTextureScale = tilingScale;
-            
+
             float totalSize = GridCellSize * NumberOfGridCells + GridLineWidth;
 
             const float interiorHeight = 1 / 512f;
@@ -307,7 +321,7 @@ namespace Iviz.Displays
             {
                 plane.ReturnToPool(Resource.Displays.Square);
             }
-            
+
             interiorObject.ReturnToPool(Resource.Displays.Square);
         }
     }

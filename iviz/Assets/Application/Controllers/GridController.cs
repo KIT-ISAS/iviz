@@ -192,6 +192,16 @@ namespace Iviz.Controllers
             }
         }
         
+        public int NumberOfGridCells
+        {
+            get => config.NumberOfGridCells;
+            set
+            {
+                config.NumberOfGridCells = value;
+                grid.NumberOfGridCells = value;
+            }
+        }
+
         public GridController(GridConfiguration? config)
         {
             node = new FrameNode("GridNode");

@@ -68,15 +68,17 @@ namespace Iviz.Displays.XR
             get => secondColor;
             set
             {
+                var halfValue = value.ScaledBy(0.5f);
+
                 secondColor = value;
                 Lines.Tint = value;
-                Segments.Tint = value.ScaledBy(0.5f);
+                Segments.Tint = halfValue;
                 Glow.Color = value.WithAlpha(0.8f);
                 Glow.EmissiveColor = value;
                 foreach (var corner in corners)
                 {
                     corner.Color = value;
-                    corner.EmissiveColor = value;
+                    corner.EmissiveColor = halfValue;
                 }
             }
         }
@@ -204,11 +206,11 @@ namespace Iviz.Displays.XR
         {
             var newCorner = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, transform);
             newCorner.Color = color;
-            newCorner.EmissiveColor = color;
+            newCorner.EmissiveColor = color.ScaledBy(0.5f);
             newCorner.Transform.localPosition = position;
             newCorner.Transform.localScale = Vector3.one * (0.1f * 3);
             newCorner.EnableShadows = false;
-            newCorner.MakeHalfLitAlwaysVisible();
+            //newCorner.MakeHalfLitAlwaysVisible();
             return newCorner;
         }
 

@@ -105,7 +105,14 @@ namespace Iviz.Core
             fixed (byte* spanPtr = &span[0]) return *(float*)spanPtr;
         }
 
+
+        [UsedImplicitly]
+        sealed class OpenList
+        {
+            public readonly Array? items;
+        }
         
+        /*
         [StructLayout(LayoutKind.Explicit)]
         struct ListConverter
         {
@@ -120,10 +127,12 @@ namespace Iviz.Core
 
             public Array? ExtractArray() => openList.items;
         }
+        */
 
         static Array? ExtractArray(IList list)
         {
-            return new ListConverter { list = list }.ExtractArray();
+            return Unsafe.As<IList, OpenList>(ref list).items;
+            //return new ListConverter { list = list }.ExtractArray();
         }
 
         /// <summary>
