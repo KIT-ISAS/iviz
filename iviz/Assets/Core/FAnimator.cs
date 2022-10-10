@@ -83,14 +83,9 @@ namespace Iviz.Core
 
         void TryCallDispose()
         {
-            if (dispose == null)
-            {
-                return;
-            }
-            
             try
             {
-                dispose();
+                dispose?.Invoke();
             }
             catch (Exception e)
             {

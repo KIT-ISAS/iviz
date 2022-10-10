@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using Iviz.Roslib.Utils;
 using Iviz.Tools;
 
 namespace Iviz.RosMaster
@@ -37,13 +38,21 @@ namespace Iviz.RosMaster
             Logger.LogCallback = Console.WriteLine;
             Logger.LogErrorCallback = Console.Error.WriteLine;
 
+            Console.WriteLine("** Starting Iviz.RosMaster...");
+            
             try
             {
                 masterUri ??= new Uri($"http://{Dns.GetHostName()}:{RosMasterServer.DefaultPort}/");
                 await using var rosMasterServer = new RosMasterServer(masterUri);
                 rosMasterServer.AddKey("/rosdistro", "noetic");
                 rosMasterServer.AddKey("/rosversion", "1.15.8");
-                await rosMasterServer.StartAsync();
+                
+                var masterTask = rosMasterServer.StartAsync();
+                
+                Console.WriteLine("** Iviz.RosMaster started. Standing by for requests...");
+                await RosEventHandler.WaitForCancelAsync();
+                await rosMasterServer.DisposeAsync();
+                await masterTask;
             }
             catch (Exception e)
             {

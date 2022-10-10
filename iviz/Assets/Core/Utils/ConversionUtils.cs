@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Iviz.Tools;
 using Iviz.Urdf;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
@@ -281,15 +282,15 @@ namespace Iviz.Core
             }
         }
 
-        public static void FillIndices(Span<int> input)
+        public static void FillIndices(Rent<int> input)
         {
-            fixed (int* inputPtr = input)
+            fixed (int* inputPtr = input.Array)
             {
                 Impl.FillIndices(inputPtr, input.Length);
             }
         }
 
-        public static void FillIndicesFlipped(Span<int> input)
+        public static void FillIndicesFlipped(Rent<int> input)
         {
             var input3 = MemoryMarshal.Cast<int, int3>(input);
             fixed (int3* input3Ptr = input3)
@@ -298,40 +299,40 @@ namespace Iviz.Core
             }
         }
 
-        public static void FillVector3(NativeArray<float4> input, Span<Vector3> output)
+        public static void FillVector3(NativeArray<float4> input, Rent<Vector3> output)
         {
             if (input.Length != output.Length)
             {
                 ThrowHelper.ThrowArgument("Size does not match!", nameof(input));
             }
 
-            fixed (Vector3* outputPtr = output)
+            fixed (Vector3* outputPtr = output.Array)
             {
                 Impl.ToVector3(input.GetUnsafePtr(), (float3*)outputPtr, input.Length);
             }
         }
 
-        public static void FillUV(NativeArray<float4> input, Span<Vector2> output)
+        public static void FillUV(NativeArray<float4> input, Rent<Vector2> output)
         {
             if (input.Length != output.Length)
             {
                 ThrowHelper.ThrowArgument("Size does not match!", nameof(input));
             }
 
-            fixed (Vector2* outputPtr = output)
+            fixed (Vector2* outputPtr = output.Array)
             {
                 Impl.ToUV(input.GetUnsafePtr(), (float2*)outputPtr, input.Length);
             }
         }
 
-        public static void FillColor(NativeArray<float4> input, Span<Color32> output)
+        public static void FillColor(NativeArray<float4> input, Rent<Color32> output)
         {
             if (input.Length != output.Length)
             {
                 ThrowHelper.ThrowArgument("Size does not match!", nameof(input));
             }
 
-            fixed (Color32* outputPtr = output)
+            fixed (Color32* outputPtr = output.Array)
             {
                 Impl.ToColor(input.GetUnsafePtr(), (float*)outputPtr, input.Length);
             }

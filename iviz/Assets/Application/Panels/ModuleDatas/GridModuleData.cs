@@ -60,6 +60,14 @@ namespace Iviz.App
             panel.HideInARMode.Value = GridController.HideInARMode;
             panel.Interactable.Value = GridController.Interactable;
             panel.DarkMode.Value = GridController.DarkMode;
+            panel.GridSize.Index = GridController.NumberOfGridCells switch
+            {
+                <= 10 => 0,
+                <= 30 => 1,
+                <= 50 => 2,
+                <= 70 => 3,
+                _ => 4
+            };
             
             panel.Metallic.Value = GridController.Metallic;
             panel.Smoothness.Value = GridController.Smoothness;
@@ -81,6 +89,14 @@ namespace Iviz.App
             panel.Metallic.ValueChanged += f => GridController.Metallic = f;
             panel.Smoothness.ValueChanged += f => GridController.Smoothness = f;
             panel.OcclusionOnlyMode.ValueChanged += f => GridController.RenderAsOcclusionOnly = f;
+            panel.GridSize.ValueChanged += (i, _) => GridController.NumberOfGridCells = i switch
+            {
+                0 => 10,
+                1 => 30,
+                2 => 50,
+                3 => 70,
+                _ => 90
+            };
         }
 
         void UpdateColor()

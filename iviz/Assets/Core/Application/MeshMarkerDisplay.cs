@@ -24,6 +24,8 @@ namespace Iviz.Displays
         [SerializeField] MeshFilter? meshFilter;
 
         Color tint = Color.white;
+        float smoothness = 0.5f;
+        float metallic = 0.5f;
         bool occlusionOnly;
         bool autoSelectMaterial = true;
 
@@ -94,12 +96,20 @@ namespace Iviz.Displays
 
         public float Smoothness
         {
-            set => MainRenderer.SetPropertySmoothness(value);
+            set
+            {
+                smoothness = value;
+                MainRenderer.SetPropertySmoothness(value);
+            }
         }
 
         public float Metallic
         {
-            set => MainRenderer.SetPropertyMetallic(value);
+            set
+            {
+                metallic = value;
+                MainRenderer.SetPropertyMetallic(value);
+            }
         }
 
         public bool EnableShadows
@@ -132,8 +142,8 @@ namespace Iviz.Displays
             EmissiveColor = emissiveColor;
             Tint = tint;
 
-            Metallic = 0.5f;
-            Smoothness = 0.5f;
+            Metallic = metallic;
+            Smoothness = smoothness;
 
             MainRenderer.ResetPropertyTextureScale();
         }

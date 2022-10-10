@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Threading;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Resources;
@@ -23,6 +24,7 @@ namespace Iviz.Displays.XR
         float scale = 1;
         BindingType bindingType = BindingType.None;
         RoundedPlaneDisplay? backgroundObject;
+        CancellationTokenSource? tokenSource;
 
         FrameNode Node => node ??= new FrameNode("Dialog Node");
         XRDialogConnector Connector => connector.AssertNotNull(nameof(connector));
@@ -74,7 +76,10 @@ namespace Iviz.Displays.XR
             set
             {
                 scale = value;
-                transform.localScale = scale * Vector3.one;
+                if (tokenSource is { IsCancellationRequested: false })
+                {
+                    Transform.localScale = scale * Vector3.one;
+                }
             }
         }
 
@@ -134,6 +139,13 @@ namespace Iviz.Displays.XR
 
         public void Initialize()
         {
+            var newTokenSource = new CancellationTokenSource();
+            tokenSource = new CancellationTokenSource();
+
+            FAnimator.Spawn(newTokenSource.Token, 0.1f,
+                t => Transform.localScale = scale * new Vector3(Mathf.Sqrt(t), 1, 1),
+                newTokenSource.Cancel);
+
             if (BindingType is BindingType.Tf or BindingType.None)
             {
                 Transform.SetParentLocal(TfModule.OriginTransform);
@@ -249,6 +261,9 @@ namespace Iviz.Displays.XR
 
         public virtual void Suspend()
         {
+            tokenSource?.Cancel();
+            tokenSource = null;
+
             DialogDisplacement = Vector3.zero;
             TfDisplacement = Vector3.zero;
             TfFrameOffset = Vector3.zero;
@@ -258,7 +273,7 @@ namespace Iviz.Displays.XR
 
             Connector.Reset();
             Connector.Visible = false;
-            
+
             Expired?.Invoke();
             Expired = null;
 

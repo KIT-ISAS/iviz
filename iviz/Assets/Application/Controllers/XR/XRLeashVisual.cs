@@ -103,7 +103,7 @@ namespace Iviz.Controllers.XR
 
                 if (isUIHitClosest && Controller.ButtonDown && Controller is HandController handController)
                 {
-                    handController.LockedPosition = hitPosition;
+                    handController.StickyPosition = hitPosition;
                 }
 
                 return;

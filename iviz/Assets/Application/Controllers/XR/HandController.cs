@@ -150,7 +150,7 @@ namespace Iviz.Controllers.XR
             controllerState.poseDataFlags = PoseDataFlags.Position | PoseDataFlags.Rotation;
             //controllerState.inputTrackingState = InputTrackingState.Position | InputTrackingState.Rotation; 
 
-            var controllerForward = EnableLocking && LockedPosition is { } lockedPosition
+            var controllerForward = EnableSticky && StickyPosition is { } lockedPosition
                 ? lockedPosition - controllerPosition
                 : controllerPosition - pivot;
 
@@ -168,7 +168,7 @@ namespace Iviz.Controllers.XR
 
             if (ButtonUp)
             {
-                LockedPosition = null;
+                StickyPosition = null;
             }
         }
 
@@ -240,7 +240,7 @@ namespace Iviz.Controllers.XR
 
                 controllerState.selectInteractionState.SetFrameState(false);
                 controllerState.uiPressInteractionState.SetFrameState(false);
-                LockedPosition = null;
+                StickyPosition = null;
                 return;
             }
 

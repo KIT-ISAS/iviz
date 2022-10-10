@@ -35,5 +35,6 @@ namespace Iviz.Core.Configurations
         [DataMember] public float Smoothness { get; set; } = 0.5f;
         [DataMember] public float Metallic { get; set; } = 0.5f;
         [DataMember] public bool RenderAsOcclusionOnly { get; set; }
+        [DataMember] public int NumberOfGridCells { get; set; } = 90;
     }
 }

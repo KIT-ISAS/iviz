@@ -44,7 +44,7 @@ namespace Iviz.Displays.XR
 
                 Cube.Visible = true;
                 Cube.Color = value;
-                Cube.EmissiveColor = value.ScaledBy(0.7f);
+                //Cube.EmissiveColor = value.ScaledBy(0.7f);
             }
         }
 

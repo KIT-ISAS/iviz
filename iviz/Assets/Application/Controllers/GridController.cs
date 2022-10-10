@@ -37,6 +37,7 @@ namespace Iviz.Controllers
                 Smoothness = value.Smoothness;
                 Metallic = value.Metallic;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
+                NumberOfGridCells = value.NumberOfGridCells;
             }
         }
 
@@ -192,6 +193,16 @@ namespace Iviz.Controllers
             }
         }
         
+        public int NumberOfGridCells
+        {
+            get => config.NumberOfGridCells;
+            set
+            {
+                config.NumberOfGridCells = value;
+                grid.NumberOfGridCells = value;
+            }
+        }
+
         public GridController(GridConfiguration? config)
         {
             node = new FrameNode("GridNode");

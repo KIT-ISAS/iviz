@@ -27,7 +27,7 @@ namespace Iviz.App
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             ShowInterior = p.AddToggle("Show Interior").SetValue(true);
-            GridSize = p.AddDropdown("Size").SetOptions(new[] { "10", "30", "90" });
+            GridSize = p.AddDropdown("Size").SetOptions(new[] { "10", "30", "50", "70", "90" });
             FollowCamera = p.AddToggle("Follow Camera").SetValue(true);
             Interactable = p.AddToggle("Interactable").SetValue(true);
             HideInARMode = p.AddToggle("Hide in AR Mode").SetValue(true);

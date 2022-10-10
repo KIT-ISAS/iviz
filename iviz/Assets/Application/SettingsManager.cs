@@ -40,7 +40,8 @@ namespace Iviz.App
             {
                 config.QualityInView = ValidateQuality(value);
 
-                var qualityToUse = Settings.IsHololens ? QualityType.VeryLow : config.QualityInView;
+                //var qualityToUse = Settings.IsHololens ? QualityType.VeryLow : config.QualityInView;
+                var qualityToUse = config.QualityInView;
 
                 if (ARController.IsActive)
                 {
