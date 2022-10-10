@@ -150,6 +150,7 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(AngleMin);
             b.Serialize(AngleMax);
             b.Serialize(AngleIncrement);
@@ -162,6 +163,7 @@ namespace Iviz.Msgs.SensorMsgs
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(Intensities.Length);
             foreach (var t in Intensities)
             {
@@ -171,13 +173,13 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Ranges is null) BuiltIns.ThrowNullReference();
+            if (Ranges is null) BuiltIns.ThrowNullReference(nameof(Ranges));
             for (int i = 0; i < Ranges.Length; i++)
             {
                 if (Ranges[i] is null) BuiltIns.ThrowNullReference(nameof(Ranges), i);
                 Ranges[i].RosValidate();
             }
-            if (Intensities is null) BuiltIns.ThrowNullReference();
+            if (Intensities is null) BuiltIns.ThrowNullReference(nameof(Intensities));
             for (int i = 0; i < Intensities.Length; i++)
             {
                 if (Intensities[i] is null) BuiltIns.ThrowNullReference(nameof(Intensities), i);

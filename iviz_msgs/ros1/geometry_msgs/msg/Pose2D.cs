@@ -56,6 +56,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align8();
             b.Serialize(X);
             b.Serialize(Y);
             b.Serialize(Theta);

@@ -134,16 +134,21 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Name);
             b.Serialize(Type);
+            b.Align4();
             b.Serialize(Description);
+            b.Align4();
             b.Serialize(AdditionalConstraints);
             b.Serialize(ReadOnly);
+            b.Align4();
             b.Serialize(FloatingPointRange.Length);
             foreach (var t in FloatingPointRange)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(IntegerRange.Length);
             foreach (var t in IntegerRange)
             {
@@ -153,16 +158,16 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
-            if (Description is null) BuiltIns.ThrowNullReference();
-            if (AdditionalConstraints is null) BuiltIns.ThrowNullReference();
-            if (FloatingPointRange is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Description is null) BuiltIns.ThrowNullReference(nameof(Description));
+            if (AdditionalConstraints is null) BuiltIns.ThrowNullReference(nameof(AdditionalConstraints));
+            if (FloatingPointRange is null) BuiltIns.ThrowNullReference(nameof(FloatingPointRange));
             for (int i = 0; i < FloatingPointRange.Length; i++)
             {
                 if (FloatingPointRange[i] is null) BuiltIns.ThrowNullReference(nameof(FloatingPointRange), i);
                 FloatingPointRange[i].RosValidate();
             }
-            if (IntegerRange is null) BuiltIns.ThrowNullReference();
+            if (IntegerRange is null) BuiltIns.ThrowNullReference(nameof(IntegerRange));
             for (int i = 0; i < IntegerRange.Length; i++)
             {
                 if (IntegerRange[i] is null) BuiltIns.ThrowNullReference(nameof(IntegerRange), i);

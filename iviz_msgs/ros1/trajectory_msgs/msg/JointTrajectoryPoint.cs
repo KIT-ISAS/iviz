@@ -134,28 +134,41 @@ namespace Iviz.Msgs.TrajectoryMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(Positions.Length);
             b.SerializeStructArray(Positions);
+            b.Serialize(Velocities.Length);
             b.SerializeStructArray(Velocities);
+            b.Serialize(Accelerations.Length);
             b.SerializeStructArray(Accelerations);
+            b.Serialize(Effort.Length);
             b.SerializeStructArray(Effort);
             b.Serialize(TimeFromStart);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(Positions.Length);
+            b.Align8();
             b.SerializeStructArray(Positions);
+            b.Serialize(Velocities.Length);
+            b.Align8();
             b.SerializeStructArray(Velocities);
+            b.Serialize(Accelerations.Length);
+            b.Align8();
             b.SerializeStructArray(Accelerations);
+            b.Serialize(Effort.Length);
+            b.Align8();
             b.SerializeStructArray(Effort);
             b.Serialize(TimeFromStart);
         }
         
         public void RosValidate()
         {
-            if (Positions is null) BuiltIns.ThrowNullReference();
-            if (Velocities is null) BuiltIns.ThrowNullReference();
-            if (Accelerations is null) BuiltIns.ThrowNullReference();
-            if (Effort is null) BuiltIns.ThrowNullReference();
+            if (Positions is null) BuiltIns.ThrowNullReference(nameof(Positions));
+            if (Velocities is null) BuiltIns.ThrowNullReference(nameof(Velocities));
+            if (Accelerations is null) BuiltIns.ThrowNullReference(nameof(Accelerations));
+            if (Effort is null) BuiltIns.ThrowNullReference(nameof(Effort));
         }
     
         public int RosMessageLength

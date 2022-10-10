@@ -80,24 +80,28 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(Encoding);
             b.Serialize(IsBigendian);
             b.Serialize(Step);
+            b.Serialize(Data.Length);
             b.SerializeStructArray(Data);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Height);
             b.Serialize(Width);
             b.Serialize(Encoding);
             b.Serialize(IsBigendian);
+            b.Align4();
             b.Serialize(Step);
+            b.Serialize(Data.Length);
             b.SerializeStructArray(Data);
         }
         
         public void RosValidate()
         {
-            if (Encoding is null) BuiltIns.ThrowNullReference();
-            if (Data is null) BuiltIns.ThrowNullReference();
+            if (Encoding is null) BuiltIns.ThrowNullReference(nameof(Encoding));
+            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
         }
     
         public int RosMessageLength

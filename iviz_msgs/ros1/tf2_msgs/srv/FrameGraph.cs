@@ -132,12 +132,13 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(FrameYaml);
         }
         
         public void RosValidate()
         {
-            if (FrameYaml is null) BuiltIns.ThrowNullReference();
+            if (FrameYaml is null) BuiltIns.ThrowNullReference(nameof(FrameYaml));
         }
     
         public int RosMessageLength

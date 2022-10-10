@@ -64,18 +64,22 @@ namespace Iviz.Msgs.GeometryMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
+            b.Serialize(Poses.Length);
             b.SerializeStructArray(Poses);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
+            b.Serialize(Poses.Length);
+            b.Align8();
             b.SerializeStructArray(Poses);
         }
         
         public void RosValidate()
         {
-            if (Poses is null) BuiltIns.ThrowNullReference();
+            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
         }
     
         public int RosMessageLength

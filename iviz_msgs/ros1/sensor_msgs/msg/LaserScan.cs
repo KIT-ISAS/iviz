@@ -132,13 +132,16 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(ScanTime);
             b.Serialize(RangeMin);
             b.Serialize(RangeMax);
+            b.Serialize(Ranges.Length);
             b.SerializeStructArray(Ranges);
+            b.Serialize(Intensities.Length);
             b.SerializeStructArray(Intensities);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(AngleMin);
             b.Serialize(AngleMax);
             b.Serialize(AngleIncrement);
@@ -146,14 +149,16 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(ScanTime);
             b.Serialize(RangeMin);
             b.Serialize(RangeMax);
+            b.Serialize(Ranges.Length);
             b.SerializeStructArray(Ranges);
+            b.Serialize(Intensities.Length);
             b.SerializeStructArray(Intensities);
         }
         
         public void RosValidate()
         {
-            if (Ranges is null) BuiltIns.ThrowNullReference();
-            if (Intensities is null) BuiltIns.ThrowNullReference();
+            if (Ranges is null) BuiltIns.ThrowNullReference(nameof(Ranges));
+            if (Intensities is null) BuiltIns.ThrowNullReference(nameof(Intensities));
         }
     
         public int RosMessageLength

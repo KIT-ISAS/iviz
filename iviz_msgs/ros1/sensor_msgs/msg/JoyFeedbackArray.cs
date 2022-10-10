@@ -67,6 +67,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Array.Length);
             foreach (var t in Array)
             {
@@ -76,7 +77,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Array is null) BuiltIns.ThrowNullReference();
+            if (Array is null) BuiltIns.ThrowNullReference(nameof(Array));
             for (int i = 0; i < Array.Length; i++)
             {
                 if (Array[i] is null) BuiltIns.ThrowNullReference(nameof(Array), i);

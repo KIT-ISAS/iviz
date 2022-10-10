@@ -82,6 +82,7 @@ namespace Iviz.Msgs.PclMsgs
         {
             Header.RosSerialize(ref b);
             Cloud.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Polygons.Length);
             foreach (var t in Polygons)
             {
@@ -91,9 +92,9 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            if (Cloud is null) BuiltIns.ThrowNullReference();
+            if (Cloud is null) BuiltIns.ThrowNullReference(nameof(Cloud));
             Cloud.RosValidate();
-            if (Polygons is null) BuiltIns.ThrowNullReference();
+            if (Polygons is null) BuiltIns.ThrowNullReference(nameof(Polygons));
             for (int i = 0; i < Polygons.Length; i++)
             {
                 if (Polygons[i] is null) BuiltIns.ThrowNullReference(nameof(Polygons), i);

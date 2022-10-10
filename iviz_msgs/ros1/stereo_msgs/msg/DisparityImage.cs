@@ -87,9 +87,11 @@ namespace Iviz.Msgs.StereoMsgs
         {
             Header.RosSerialize(ref b);
             Image.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(F);
             b.Serialize(T);
             ValidWindow.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(MinDisparity);
             b.Serialize(MaxDisparity);
             b.Serialize(DeltaD);
@@ -97,9 +99,9 @@ namespace Iviz.Msgs.StereoMsgs
         
         public void RosValidate()
         {
-            if (Image is null) BuiltIns.ThrowNullReference();
+            if (Image is null) BuiltIns.ThrowNullReference(nameof(Image));
             Image.RosValidate();
-            if (ValidWindow is null) BuiltIns.ThrowNullReference();
+            if (ValidWindow is null) BuiltIns.ThrowNullReference(nameof(ValidWindow));
             ValidWindow.RosValidate();
         }
     

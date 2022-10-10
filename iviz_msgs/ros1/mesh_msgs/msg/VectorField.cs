@@ -84,20 +84,27 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(Positions.Length);
             b.SerializeStructArray(Positions);
+            b.Serialize(Vectors.Length);
             b.SerializeStructArray(Vectors);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(Positions.Length);
+            b.Align8();
             b.SerializeStructArray(Positions);
+            b.Serialize(Vectors.Length);
+            b.Align8();
             b.SerializeStructArray(Vectors);
         }
         
         public void RosValidate()
         {
-            if (Positions is null) BuiltIns.ThrowNullReference();
-            if (Vectors is null) BuiltIns.ThrowNullReference();
+            if (Positions is null) BuiltIns.ThrowNullReference(nameof(Positions));
+            if (Vectors is null) BuiltIns.ThrowNullReference(nameof(Vectors));
         }
     
         public int RosMessageLength

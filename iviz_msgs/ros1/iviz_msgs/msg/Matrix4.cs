@@ -51,13 +51,14 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.SerializeStructArray(M, 16);
         }
         
         public void RosValidate()
         {
-            if (M is null) BuiltIns.ThrowNullReference();
-            if (M.Length != 16) BuiltIns.ThrowInvalidSizeForFixedArray(M.Length, 16);
+            if (M is null) BuiltIns.ThrowNullReference(nameof(M));
+            if (M.Length != 16) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(M), M.Length, 16);
         }
     
         public const int RosFixedMessageLength = 64;

@@ -63,6 +63,7 @@ namespace Iviz.Msgs.HriMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Xmin);
             b.Serialize(Ymin);
             b.Serialize(Xmax);

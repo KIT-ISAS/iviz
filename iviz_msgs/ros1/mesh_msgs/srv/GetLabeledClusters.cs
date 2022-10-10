@@ -84,12 +84,13 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Uuid);
         }
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference();
+            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
         }
     
         public int RosMessageLength
@@ -176,6 +177,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Clusters.Length);
             foreach (var t in Clusters)
             {
@@ -185,7 +187,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Clusters is null) BuiltIns.ThrowNullReference();
+            if (Clusters is null) BuiltIns.ThrowNullReference(nameof(Clusters));
             for (int i = 0; i < Clusters.Length; i++)
             {
                 if (Clusters[i] is null) BuiltIns.ThrowNullReference(nameof(Clusters), i);

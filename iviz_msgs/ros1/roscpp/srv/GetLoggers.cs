@@ -156,6 +156,7 @@ namespace Iviz.Msgs.Roscpp
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Loggers.Length);
             foreach (var t in Loggers)
             {
@@ -165,7 +166,7 @@ namespace Iviz.Msgs.Roscpp
         
         public void RosValidate()
         {
-            if (Loggers is null) BuiltIns.ThrowNullReference();
+            if (Loggers is null) BuiltIns.ThrowNullReference(nameof(Loggers));
             for (int i = 0; i < Loggers.Length; i++)
             {
                 if (Loggers[i] is null) BuiltIns.ThrowNullReference(nameof(Loggers), i);

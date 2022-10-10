@@ -90,13 +90,15 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Uuid);
+            b.Align4();
             b.Serialize(TextureIndex);
         }
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference();
+            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
         }
     
         public int RosMessageLength
@@ -165,7 +167,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Texture is null) BuiltIns.ThrowNullReference();
+            if (Texture is null) BuiltIns.ThrowNullReference(nameof(Texture));
             Texture.RosValidate();
         }
     

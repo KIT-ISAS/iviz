@@ -100,22 +100,25 @@ namespace Iviz.Msgs.IvizMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(Type);
+            b.Align4();
             b.Serialize(Code);
+            b.Align8();
             b.SerializeStructArray(Corners);
             b.SerializeStructArray(CameraIntrinsic, 9);
             b.Serialize(in CameraPose);
             b.Serialize(HasReliablePose);
+            b.Align8();
             b.Serialize(MarkerSizeInMm);
             b.Serialize(in PoseRelativeToCamera);
         }
         
         public void RosValidate()
         {
-            if (Code is null) BuiltIns.ThrowNullReference();
-            if (Corners is null) BuiltIns.ThrowNullReference();
-            if (Corners.Length != 4) BuiltIns.ThrowInvalidSizeForFixedArray(Corners.Length, 4);
-            if (CameraIntrinsic is null) BuiltIns.ThrowNullReference();
-            if (CameraIntrinsic.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(CameraIntrinsic.Length, 9);
+            if (Code is null) BuiltIns.ThrowNullReference(nameof(Code));
+            if (Corners is null) BuiltIns.ThrowNullReference(nameof(Corners));
+            if (Corners.Length != 4) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(Corners), Corners.Length, 4);
+            if (CameraIntrinsic is null) BuiltIns.ThrowNullReference(nameof(CameraIntrinsic));
+            if (CameraIntrinsic.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(CameraIntrinsic), CameraIntrinsic.Length, 9);
         }
     
         public int RosMessageLength

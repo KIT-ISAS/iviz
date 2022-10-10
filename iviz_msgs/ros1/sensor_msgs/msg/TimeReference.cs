@@ -58,13 +58,14 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(TimeRef);
             b.Serialize(Source);
         }
         
         public void RosValidate()
         {
-            if (Source is null) BuiltIns.ThrowNullReference();
+            if (Source is null) BuiltIns.ThrowNullReference(nameof(Source));
         }
     
         public int RosMessageLength

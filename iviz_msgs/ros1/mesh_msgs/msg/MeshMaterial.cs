@@ -51,6 +51,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(TextureIndex);
             b.Serialize(in Color);
             b.Serialize(HasTexture);

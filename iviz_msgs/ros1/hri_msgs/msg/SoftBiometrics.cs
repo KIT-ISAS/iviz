@@ -61,8 +61,10 @@ namespace Iviz.Msgs.HriMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(Age);
+            b.Align4();
             b.Serialize(AgeConfidence);
             b.Serialize(Gender);
+            b.Align4();
             b.Serialize(GenderConfidence);
         }
         

@@ -58,17 +58,20 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(VertexColors.Length);
             b.SerializeStructArray(VertexColors);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(VertexColors.Length);
             b.SerializeStructArray(VertexColors);
         }
         
         public void RosValidate()
         {
-            if (VertexColors is null) BuiltIns.ThrowNullReference();
+            if (VertexColors is null) BuiltIns.ThrowNullReference(nameof(VertexColors));
         }
     
         public int RosMessageLength

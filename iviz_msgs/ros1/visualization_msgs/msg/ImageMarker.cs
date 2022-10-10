@@ -143,32 +143,41 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(Filled);
             b.Serialize(in FillColor);
             b.Serialize(Lifetime);
+            b.Serialize(Points.Length);
             b.SerializeStructArray(Points);
+            b.Serialize(OutlineColors.Length);
             b.SerializeStructArray(OutlineColors);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Ns);
+            b.Align4();
             b.Serialize(Id);
             b.Serialize(Type);
             b.Serialize(Action);
+            b.Align8();
             b.Serialize(in Position);
             b.Serialize(Scale);
             b.Serialize(in OutlineColor);
             b.Serialize(Filled);
+            b.Align4();
             b.Serialize(in FillColor);
             b.Serialize(Lifetime);
+            b.Serialize(Points.Length);
+            b.Align8();
             b.SerializeStructArray(Points);
+            b.Serialize(OutlineColors.Length);
             b.SerializeStructArray(OutlineColors);
         }
         
         public void RosValidate()
         {
-            if (Ns is null) BuiltIns.ThrowNullReference();
-            if (Points is null) BuiltIns.ThrowNullReference();
-            if (OutlineColors is null) BuiltIns.ThrowNullReference();
+            if (Ns is null) BuiltIns.ThrowNullReference(nameof(Ns));
+            if (Points is null) BuiltIns.ThrowNullReference(nameof(Points));
+            if (OutlineColors is null) BuiltIns.ThrowNullReference(nameof(OutlineColors));
         }
     
         public int RosMessageLength

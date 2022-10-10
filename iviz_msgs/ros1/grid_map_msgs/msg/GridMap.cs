@@ -82,7 +82,9 @@ namespace Iviz.Msgs.GridMapMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Info.RosSerialize(ref b);
+            b.Serialize(Layers.Length);
             b.SerializeArray(Layers);
+            b.Serialize(BasicLayers.Length);
             b.SerializeArray(BasicLayers);
             b.Serialize(Data.Length);
             foreach (var t in Data)
@@ -96,32 +98,38 @@ namespace Iviz.Msgs.GridMapMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Info.RosSerialize(ref b);
+            b.Align4();
+            b.Serialize(Layers.Length);
             b.SerializeArray(Layers);
+            b.Align4();
+            b.Serialize(BasicLayers.Length);
             b.SerializeArray(BasicLayers);
+            b.Align4();
             b.Serialize(Data.Length);
             foreach (var t in Data)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align2();
             b.Serialize(OuterStartIndex);
             b.Serialize(InnerStartIndex);
         }
         
         public void RosValidate()
         {
-            if (Info is null) BuiltIns.ThrowNullReference();
+            if (Info is null) BuiltIns.ThrowNullReference(nameof(Info));
             Info.RosValidate();
-            if (Layers is null) BuiltIns.ThrowNullReference();
+            if (Layers is null) BuiltIns.ThrowNullReference(nameof(Layers));
             for (int i = 0; i < Layers.Length; i++)
             {
                 if (Layers[i] is null) BuiltIns.ThrowNullReference(nameof(Layers), i);
             }
-            if (BasicLayers is null) BuiltIns.ThrowNullReference();
+            if (BasicLayers is null) BuiltIns.ThrowNullReference(nameof(BasicLayers));
             for (int i = 0; i < BasicLayers.Length; i++)
             {
                 if (BasicLayers[i] is null) BuiltIns.ThrowNullReference(nameof(BasicLayers), i);
             }
-            if (Data is null) BuiltIns.ThrowNullReference();
+            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
             for (int i = 0; i < Data.Length; i++)
             {
                 if (Data[i] is null) BuiltIns.ThrowNullReference(nameof(Data), i);

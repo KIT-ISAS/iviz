@@ -68,6 +68,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(XOffset);
             b.Serialize(YOffset);
             b.Serialize(Height);

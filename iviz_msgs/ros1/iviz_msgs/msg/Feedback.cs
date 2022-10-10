@@ -111,6 +111,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(in Position);
             b.Serialize(in Orientation);
             b.Serialize(in Scale);
+            b.Serialize(Trajectory.Length);
             b.SerializeStructArray(Trajectory);
             b.Serialize(ColliderId);
         }
@@ -118,25 +119,31 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(VizId);
+            b.Align4();
             b.Serialize(Id);
             b.Serialize(PreviewOnly);
             b.Serialize(Type);
+            b.Align4();
             b.Serialize(EntryId);
+            b.Align8();
             b.Serialize(Angle);
             b.Serialize(in Position);
             b.Serialize(in Orientation);
             b.Serialize(in Scale);
+            b.Serialize(Trajectory.Length);
+            b.Align8();
             b.SerializeStructArray(Trajectory);
             b.Serialize(ColliderId);
         }
         
         public void RosValidate()
         {
-            if (VizId is null) BuiltIns.ThrowNullReference();
-            if (Id is null) BuiltIns.ThrowNullReference();
-            if (Trajectory is null) BuiltIns.ThrowNullReference();
-            if (ColliderId is null) BuiltIns.ThrowNullReference();
+            if (VizId is null) BuiltIns.ThrowNullReference(nameof(VizId));
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Trajectory is null) BuiltIns.ThrowNullReference(nameof(Trajectory));
+            if (ColliderId is null) BuiltIns.ThrowNullReference(nameof(ColliderId));
         }
     
         public int RosMessageLength

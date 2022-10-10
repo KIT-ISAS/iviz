@@ -90,19 +90,23 @@ namespace Iviz.Msgs.RclInterfaces
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(Prefixes.Length);
             b.SerializeArray(Prefixes);
             b.Serialize(Depth);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(Prefixes.Length);
             b.SerializeArray(Prefixes);
+            b.Align8();
             b.Serialize(Depth);
         }
         
         public void RosValidate()
         {
-            if (Prefixes is null) BuiltIns.ThrowNullReference();
+            if (Prefixes is null) BuiltIns.ThrowNullReference(nameof(Prefixes));
             for (int i = 0; i < Prefixes.Length; i++)
             {
                 if (Prefixes[i] is null) BuiltIns.ThrowNullReference(nameof(Prefixes), i);
@@ -176,7 +180,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Result is null) BuiltIns.ThrowNullReference();
+            if (Result is null) BuiltIns.ThrowNullReference(nameof(Result));
             Result.RosValidate();
         }
     

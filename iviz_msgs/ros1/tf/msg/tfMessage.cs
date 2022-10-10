@@ -66,6 +66,7 @@ namespace Iviz.Msgs.Tf
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Transforms.Length);
             foreach (var t in Transforms)
             {
@@ -75,7 +76,7 @@ namespace Iviz.Msgs.Tf
         
         public void RosValidate()
         {
-            if (Transforms is null) BuiltIns.ThrowNullReference();
+            if (Transforms is null) BuiltIns.ThrowNullReference(nameof(Transforms));
             for (int i = 0; i < Transforms.Length; i++)
             {
                 if (Transforms[i] is null) BuiltIns.ThrowNullReference(nameof(Transforms), i);

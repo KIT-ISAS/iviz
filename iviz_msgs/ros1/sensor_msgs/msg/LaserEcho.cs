@@ -61,17 +61,20 @@ namespace Iviz.Msgs.SensorMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(Echoes.Length);
             b.SerializeStructArray(Echoes);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(Echoes.Length);
             b.SerializeStructArray(Echoes);
         }
         
         public void RosValidate()
         {
-            if (Echoes is null) BuiltIns.ThrowNullReference();
+            if (Echoes is null) BuiltIns.ThrowNullReference(nameof(Echoes));
         }
     
         public int RosMessageLength

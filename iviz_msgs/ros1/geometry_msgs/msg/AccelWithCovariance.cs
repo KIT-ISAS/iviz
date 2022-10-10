@@ -62,15 +62,16 @@ namespace Iviz.Msgs.GeometryMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Accel.RosSerialize(ref b);
+            b.Align8();
             b.SerializeStructArray(Covariance, 36);
         }
         
         public void RosValidate()
         {
-            if (Accel is null) BuiltIns.ThrowNullReference();
+            if (Accel is null) BuiltIns.ThrowNullReference(nameof(Accel));
             Accel.RosValidate();
-            if (Covariance is null) BuiltIns.ThrowNullReference();
-            if (Covariance.Length != 36) BuiltIns.ThrowInvalidSizeForFixedArray(Covariance.Length, 36);
+            if (Covariance is null) BuiltIns.ThrowNullReference(nameof(Covariance));
+            if (Covariance.Length != 36) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(Covariance), Covariance.Length, 36);
         }
     
         public const int RosFixedMessageLength = 336;

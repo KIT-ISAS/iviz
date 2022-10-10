@@ -91,21 +91,26 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
+            b.Serialize(Axes.Length);
             b.SerializeStructArray(Axes);
+            b.Serialize(Buttons.Length);
             b.SerializeStructArray(Buttons);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
+            b.Serialize(Axes.Length);
             b.SerializeStructArray(Axes);
+            b.Serialize(Buttons.Length);
             b.SerializeStructArray(Buttons);
         }
         
         public void RosValidate()
         {
-            if (Axes is null) BuiltIns.ThrowNullReference();
-            if (Buttons is null) BuiltIns.ThrowNullReference();
+            if (Axes is null) BuiltIns.ThrowNullReference(nameof(Axes));
+            if (Buttons is null) BuiltIns.ThrowNullReference(nameof(Buttons));
         }
     
         public int RosMessageLength

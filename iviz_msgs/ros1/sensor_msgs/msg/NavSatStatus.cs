@@ -66,6 +66,7 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Status);
+            b.Align2();
             b.Serialize(Service);
         }
         

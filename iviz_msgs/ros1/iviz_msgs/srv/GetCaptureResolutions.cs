@@ -169,7 +169,9 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
+            b.Align4();
             b.Serialize(Message);
+            b.Align4();
             b.Serialize(Resolutions.Length);
             foreach (var t in Resolutions)
             {
@@ -179,8 +181,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference();
-            if (Resolutions is null) BuiltIns.ThrowNullReference();
+            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (Resolutions is null) BuiltIns.ThrowNullReference(nameof(Resolutions));
             for (int i = 0; i < Resolutions.Length; i++)
             {
                 if (Resolutions[i] is null) BuiltIns.ThrowNullReference(nameof(Resolutions), i);

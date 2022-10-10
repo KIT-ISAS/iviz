@@ -57,17 +57,20 @@ namespace Iviz.Msgs.IvizMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(Coords.Length);
             b.SerializeStructArray(Coords);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(Coords.Length);
             b.SerializeStructArray(Coords);
         }
         
         public void RosValidate()
         {
-            if (Coords is null) BuiltIns.ThrowNullReference();
+            if (Coords is null) BuiltIns.ThrowNullReference(nameof(Coords));
         }
     
         public int RosMessageLength

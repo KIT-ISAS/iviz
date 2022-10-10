@@ -61,6 +61,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
             b.Serialize(Type);
             b.Serialize(Id);
+            b.Align4();
             b.Serialize(Intensity);
         }
         

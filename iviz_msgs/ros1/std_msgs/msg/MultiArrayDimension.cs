@@ -56,14 +56,16 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Label);
+            b.Align4();
             b.Serialize(Size);
             b.Serialize(Stride);
         }
         
         public void RosValidate()
         {
-            if (Label is null) BuiltIns.ThrowNullReference();
+            if (Label is null) BuiltIns.ThrowNullReference(nameof(Label));
         }
     
         public int RosMessageLength

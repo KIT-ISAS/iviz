@@ -145,6 +145,7 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 t.RosSerialize(ref b);
             }
+            b.Serialize(ClusterMaterials.Length);
             b.SerializeStructArray(ClusterMaterials);
             b.Serialize(VertexTexCoords.Length);
             foreach (var t in VertexTexCoords)
@@ -155,16 +156,20 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Clusters.Length);
             foreach (var t in Clusters)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(Materials.Length);
             foreach (var t in Materials)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
+            b.Serialize(ClusterMaterials.Length);
             b.SerializeStructArray(ClusterMaterials);
             b.Serialize(VertexTexCoords.Length);
             foreach (var t in VertexTexCoords)
@@ -175,20 +180,20 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Clusters is null) BuiltIns.ThrowNullReference();
+            if (Clusters is null) BuiltIns.ThrowNullReference(nameof(Clusters));
             for (int i = 0; i < Clusters.Length; i++)
             {
                 if (Clusters[i] is null) BuiltIns.ThrowNullReference(nameof(Clusters), i);
                 Clusters[i].RosValidate();
             }
-            if (Materials is null) BuiltIns.ThrowNullReference();
+            if (Materials is null) BuiltIns.ThrowNullReference(nameof(Materials));
             for (int i = 0; i < Materials.Length; i++)
             {
                 if (Materials[i] is null) BuiltIns.ThrowNullReference(nameof(Materials), i);
                 Materials[i].RosValidate();
             }
-            if (ClusterMaterials is null) BuiltIns.ThrowNullReference();
-            if (VertexTexCoords is null) BuiltIns.ThrowNullReference();
+            if (ClusterMaterials is null) BuiltIns.ThrowNullReference(nameof(ClusterMaterials));
+            if (VertexTexCoords is null) BuiltIns.ThrowNullReference(nameof(VertexTexCoords));
             for (int i = 0; i < VertexTexCoords.Length; i++)
             {
                 if (VertexTexCoords[i] is null) BuiltIns.ThrowNullReference(nameof(VertexTexCoords), i);

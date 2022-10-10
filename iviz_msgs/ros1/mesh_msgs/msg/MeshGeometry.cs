@@ -110,7 +110,9 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(Vertices.Length);
             b.SerializeStructArray(Vertices);
+            b.Serialize(VertexNormals.Length);
             b.SerializeStructArray(VertexNormals);
             b.Serialize(Faces.Length);
             foreach (var t in Faces)
@@ -121,7 +123,12 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(Vertices.Length);
+            b.Align8();
             b.SerializeStructArray(Vertices);
+            b.Serialize(VertexNormals.Length);
+            b.Align8();
             b.SerializeStructArray(VertexNormals);
             b.Serialize(Faces.Length);
             foreach (var t in Faces)
@@ -132,9 +139,9 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Vertices is null) BuiltIns.ThrowNullReference();
-            if (VertexNormals is null) BuiltIns.ThrowNullReference();
-            if (Faces is null) BuiltIns.ThrowNullReference();
+            if (Vertices is null) BuiltIns.ThrowNullReference(nameof(Vertices));
+            if (VertexNormals is null) BuiltIns.ThrowNullReference(nameof(VertexNormals));
+            if (Faces is null) BuiltIns.ThrowNullReference(nameof(Faces));
             for (int i = 0; i < Faces.Length; i++)
             {
                 if (Faces[i] is null) BuiltIns.ThrowNullReference(nameof(Faces), i);

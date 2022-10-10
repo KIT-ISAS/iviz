@@ -53,14 +53,15 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Name);
             Value.RosSerialize(ref b);
         }
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
-            if (Value is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Value is null) BuiltIns.ThrowNullReference(nameof(Value));
             Value.RosValidate();
         }
     

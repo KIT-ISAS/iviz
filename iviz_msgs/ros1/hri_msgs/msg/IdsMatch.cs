@@ -101,17 +101,20 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Id1);
             b.Serialize(Id1Type);
+            b.Align4();
             b.Serialize(Id2);
             b.Serialize(Id2Type);
+            b.Align4();
             b.Serialize(Confidence);
         }
         
         public void RosValidate()
         {
-            if (Id1 is null) BuiltIns.ThrowNullReference();
-            if (Id2 is null) BuiltIns.ThrowNullReference();
+            if (Id1 is null) BuiltIns.ThrowNullReference(nameof(Id1));
+            if (Id2 is null) BuiltIns.ThrowNullReference(nameof(Id2));
         }
     
         public int RosMessageLength

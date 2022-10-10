@@ -86,12 +86,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Uri);
         }
         
         public void RosValidate()
         {
-            if (Uri is null) BuiltIns.ThrowNullReference();
+            if (Uri is null) BuiltIns.ThrowNullReference(nameof(Uri));
         }
     
         public int RosMessageLength
@@ -183,6 +184,7 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
+            b.Serialize(Bytes.Length);
             b.SerializeStructArray(Bytes);
             b.Serialize(Message);
         }
@@ -190,14 +192,17 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
+            b.Align4();
+            b.Serialize(Bytes.Length);
             b.SerializeStructArray(Bytes);
+            b.Align4();
             b.Serialize(Message);
         }
         
         public void RosValidate()
         {
-            if (Bytes is null) BuiltIns.ThrowNullReference();
-            if (Message is null) BuiltIns.ThrowNullReference();
+            if (Bytes is null) BuiltIns.ThrowNullReference(nameof(Bytes));
+            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
         }
     
         public int RosMessageLength

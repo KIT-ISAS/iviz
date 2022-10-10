@@ -52,12 +52,13 @@ namespace Iviz.Msgs.RclInterfaces
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Successful);
+            b.Align4();
             b.Serialize(Reason);
         }
         
         public void RosValidate()
         {
-            if (Reason is null) BuiltIns.ThrowNullReference();
+            if (Reason is null) BuiltIns.ThrowNullReference(nameof(Reason));
         }
     
         public int RosMessageLength

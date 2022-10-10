@@ -105,9 +105,13 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Topic);
+            b.Align4();
             b.Serialize(NodePub);
+            b.Align4();
             b.Serialize(NodeSub);
+            b.Align4();
             b.Serialize(WindowStart);
             b.Serialize(WindowStop);
             b.Serialize(DeliveredMsgs);
@@ -123,9 +127,9 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public void RosValidate()
         {
-            if (Topic is null) BuiltIns.ThrowNullReference();
-            if (NodePub is null) BuiltIns.ThrowNullReference();
-            if (NodeSub is null) BuiltIns.ThrowNullReference();
+            if (Topic is null) BuiltIns.ThrowNullReference(nameof(Topic));
+            if (NodePub is null) BuiltIns.ThrowNullReference(nameof(NodePub));
+            if (NodeSub is null) BuiltIns.ThrowNullReference(nameof(NodeSub));
         }
     
         public int RosMessageLength

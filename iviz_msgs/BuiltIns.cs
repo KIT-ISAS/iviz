@@ -281,11 +281,11 @@ public static class BuiltIns
     public static void ThrowArgumentNull(string arg, string message) => throw new ArgumentNullException(arg, message);
 
     [DoesNotReturn, AssertionMethod]
-    public static void ThrowNullReference(string name) => throw new NullReferenceException(name);
+    public static void ThrowNullReference(string arg) => throw new NullReferenceException(arg);
 
     [DoesNotReturn, AssertionMethod]
-    public static void ThrowNullReference(string name, int i) =>
-        throw new NullReferenceException($"{name}[{i.ToString()}] cannot be null");
+    public static void ThrowNullReference(string arg, int i) =>
+        throw new NullReferenceException($"{arg}[{i.ToString()}] cannot be null");
 
     [DoesNotReturn, AssertionMethod]
     public static void ThrowNullReference() => throw new NullReferenceException("Message fields cannot be null.");
@@ -311,4 +311,8 @@ public static class BuiltIns
     [DoesNotReturn, AssertionMethod]
     public static void ThrowInvalidSizeForFixedArray(int size, int expected) =>
         throw new RosInvalidSizeForFixedArrayException(size, expected);
+    
+    [DoesNotReturn, AssertionMethod]
+    public static void ThrowInvalidSizeForFixedArray(string arg, int size, int expected) =>
+        throw new RosInvalidSizeForFixedArrayException(arg, size, expected);
 }

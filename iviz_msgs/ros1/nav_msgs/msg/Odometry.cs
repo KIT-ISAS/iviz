@@ -63,6 +63,7 @@ namespace Iviz.Msgs.NavMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(ChildFrameId);
             Pose.RosSerialize(ref b);
             Twist.RosSerialize(ref b);
@@ -70,10 +71,10 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (ChildFrameId is null) BuiltIns.ThrowNullReference();
-            if (Pose is null) BuiltIns.ThrowNullReference();
+            if (ChildFrameId is null) BuiltIns.ThrowNullReference(nameof(ChildFrameId));
+            if (Pose is null) BuiltIns.ThrowNullReference(nameof(Pose));
             Pose.RosValidate();
-            if (Twist is null) BuiltIns.ThrowNullReference();
+            if (Twist is null) BuiltIns.ThrowNullReference(nameof(Twist));
             Twist.RosValidate();
         }
     

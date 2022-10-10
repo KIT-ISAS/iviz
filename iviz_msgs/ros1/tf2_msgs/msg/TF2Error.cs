@@ -55,12 +55,13 @@ namespace Iviz.Msgs.Tf2Msgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Error);
+            b.Align4();
             b.Serialize(ErrorString);
         }
         
         public void RosValidate()
         {
-            if (ErrorString is null) BuiltIns.ThrowNullReference();
+            if (ErrorString is null) BuiltIns.ThrowNullReference(nameof(ErrorString));
         }
     
         public int RosMessageLength

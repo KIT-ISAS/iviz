@@ -41,6 +41,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align2();
             b.Serialize(Data);
         }
         

@@ -91,6 +91,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.Serialize(File);
             b.Serialize(Function);
             b.Serialize(Line);
+            b.Serialize(Topics.Length);
             b.SerializeArray(Topics);
         }
         
@@ -98,21 +99,27 @@ namespace Iviz.Msgs.RosgraphMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(Level);
+            b.Align4();
             b.Serialize(Name);
+            b.Align4();
             b.Serialize(Msg);
+            b.Align4();
             b.Serialize(File);
+            b.Align4();
             b.Serialize(Function);
+            b.Align4();
             b.Serialize(Line);
+            b.Serialize(Topics.Length);
             b.SerializeArray(Topics);
         }
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
-            if (Msg is null) BuiltIns.ThrowNullReference();
-            if (File is null) BuiltIns.ThrowNullReference();
-            if (Function is null) BuiltIns.ThrowNullReference();
-            if (Topics is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Msg is null) BuiltIns.ThrowNullReference(nameof(Msg));
+            if (File is null) BuiltIns.ThrowNullReference(nameof(File));
+            if (Function is null) BuiltIns.ThrowNullReference(nameof(Function));
+            if (Topics is null) BuiltIns.ThrowNullReference(nameof(Topics));
             for (int i = 0; i < Topics.Length; i++)
             {
                 if (Topics[i] is null) BuiltIns.ThrowNullReference(nameof(Topics), i);

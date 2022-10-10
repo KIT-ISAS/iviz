@@ -58,6 +58,7 @@ namespace Iviz.Msgs.GridMapMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align8();
             b.Serialize(Resolution);
             b.Serialize(LengthX);
             b.Serialize(LengthY);

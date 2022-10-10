@@ -73,6 +73,7 @@ namespace Iviz.Msgs.NavMsgs
         {
             Header.RosSerialize(ref b);
             Info.RosSerialize(ref b);
+            b.Serialize(Data.Length);
             b.SerializeStructArray(Data);
         }
         
@@ -80,14 +81,16 @@ namespace Iviz.Msgs.NavMsgs
         {
             Header.RosSerialize(ref b);
             Info.RosSerialize(ref b);
+            b.Align4();
+            b.Serialize(Data.Length);
             b.SerializeStructArray(Data);
         }
         
         public void RosValidate()
         {
-            if (Info is null) BuiltIns.ThrowNullReference();
+            if (Info is null) BuiltIns.ThrowNullReference(nameof(Info));
             Info.RosValidate();
-            if (Data is null) BuiltIns.ThrowNullReference();
+            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
         }
     
         public int RosMessageLength

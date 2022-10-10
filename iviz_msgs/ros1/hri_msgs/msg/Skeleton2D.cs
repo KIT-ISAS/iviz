@@ -96,6 +96,7 @@ namespace Iviz.Msgs.HriMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Skeleton.Length);
             foreach (var t in Skeleton)
             {
@@ -105,7 +106,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            if (Skeleton is null) BuiltIns.ThrowNullReference();
+            if (Skeleton is null) BuiltIns.ThrowNullReference(nameof(Skeleton));
             for (int i = 0; i < Skeleton.Length; i++)
             {
                 if (Skeleton[i] is null) BuiltIns.ThrowNullReference(nameof(Skeleton), i);

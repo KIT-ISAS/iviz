@@ -164,10 +164,15 @@ namespace Iviz.Msgs.IvizMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(in Palm);
+            b.Serialize(Thumb.Length);
             b.SerializeStructArray(Thumb);
+            b.Serialize(Index.Length);
             b.SerializeStructArray(Index);
+            b.Serialize(Middle.Length);
             b.SerializeStructArray(Middle);
+            b.Serialize(Ring.Length);
             b.SerializeStructArray(Ring);
+            b.Serialize(Little.Length);
             b.SerializeStructArray(Little);
             b.Serialize(IsValid);
         }
@@ -175,22 +180,33 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align8();
             b.Serialize(in Palm);
+            b.Serialize(Thumb.Length);
+            b.Align8();
             b.SerializeStructArray(Thumb);
+            b.Serialize(Index.Length);
+            b.Align8();
             b.SerializeStructArray(Index);
+            b.Serialize(Middle.Length);
+            b.Align8();
             b.SerializeStructArray(Middle);
+            b.Serialize(Ring.Length);
+            b.Align8();
             b.SerializeStructArray(Ring);
+            b.Serialize(Little.Length);
+            b.Align8();
             b.SerializeStructArray(Little);
             b.Serialize(IsValid);
         }
         
         public void RosValidate()
         {
-            if (Thumb is null) BuiltIns.ThrowNullReference();
-            if (Index is null) BuiltIns.ThrowNullReference();
-            if (Middle is null) BuiltIns.ThrowNullReference();
-            if (Ring is null) BuiltIns.ThrowNullReference();
-            if (Little is null) BuiltIns.ThrowNullReference();
+            if (Thumb is null) BuiltIns.ThrowNullReference(nameof(Thumb));
+            if (Index is null) BuiltIns.ThrowNullReference(nameof(Index));
+            if (Middle is null) BuiltIns.ThrowNullReference(nameof(Middle));
+            if (Ring is null) BuiltIns.ThrowNullReference(nameof(Ring));
+            if (Little is null) BuiltIns.ThrowNullReference(nameof(Little));
         }
     
         public int RosMessageLength

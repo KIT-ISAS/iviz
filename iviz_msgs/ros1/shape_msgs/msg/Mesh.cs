@@ -92,28 +92,33 @@ namespace Iviz.Msgs.ShapeMsgs
             {
                 t.RosSerialize(ref b);
             }
+            b.Serialize(Vertices.Length);
             b.SerializeStructArray(Vertices);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Triangles.Length);
             foreach (var t in Triangles)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
+            b.Serialize(Vertices.Length);
+            b.Align8();
             b.SerializeStructArray(Vertices);
         }
         
         public void RosValidate()
         {
-            if (Triangles is null) BuiltIns.ThrowNullReference();
+            if (Triangles is null) BuiltIns.ThrowNullReference(nameof(Triangles));
             for (int i = 0; i < Triangles.Length; i++)
             {
                 if (Triangles[i] is null) BuiltIns.ThrowNullReference(nameof(Triangles), i);
                 Triangles[i].RosValidate();
             }
-            if (Vertices is null) BuiltIns.ThrowNullReference();
+            if (Vertices is null) BuiltIns.ThrowNullReference(nameof(Vertices));
         }
     
         public int RosMessageLength

@@ -61,11 +61,11 @@ namespace Iviz.Msgs.TurtleActionlib
         
         public void RosValidate()
         {
-            if (ActionGoal is null) BuiltIns.ThrowNullReference();
+            if (ActionGoal is null) BuiltIns.ThrowNullReference(nameof(ActionGoal));
             ActionGoal.RosValidate();
-            if (ActionResult is null) BuiltIns.ThrowNullReference();
+            if (ActionResult is null) BuiltIns.ThrowNullReference(nameof(ActionResult));
             ActionResult.RosValidate();
-            if (ActionFeedback is null) BuiltIns.ThrowNullReference();
+            if (ActionFeedback is null) BuiltIns.ThrowNullReference(nameof(ActionFeedback));
             ActionFeedback.RosValidate();
         }
     

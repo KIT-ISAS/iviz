@@ -129,17 +129,20 @@ namespace Iviz.Msgs.IvizMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(Configs.Length);
             b.SerializeArray(Configs);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(Configs.Length);
             b.SerializeArray(Configs);
         }
         
         public void RosValidate()
         {
-            if (Configs is null) BuiltIns.ThrowNullReference();
+            if (Configs is null) BuiltIns.ThrowNullReference(nameof(Configs));
             for (int i = 0; i < Configs.Length; i++)
             {
                 if (Configs[i] is null) BuiltIns.ThrowNullReference(nameof(Configs), i);

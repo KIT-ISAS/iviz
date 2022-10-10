@@ -57,13 +57,14 @@ namespace Iviz.Msgs.VisualizationMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align8();
             b.Serialize(in Pose);
             b.Serialize(Name);
         }
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
         }
     
         public int RosMessageLength

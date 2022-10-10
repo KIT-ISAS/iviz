@@ -139,18 +139,22 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Stamp);
             b.Serialize(Node);
+            b.Align4();
             b.Serialize(NewParameters.Length);
             foreach (var t in NewParameters)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(ChangedParameters.Length);
             foreach (var t in ChangedParameters)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(DeletedParameters.Length);
             foreach (var t in DeletedParameters)
             {
@@ -160,20 +164,20 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Node is null) BuiltIns.ThrowNullReference();
-            if (NewParameters is null) BuiltIns.ThrowNullReference();
+            if (Node is null) BuiltIns.ThrowNullReference(nameof(Node));
+            if (NewParameters is null) BuiltIns.ThrowNullReference(nameof(NewParameters));
             for (int i = 0; i < NewParameters.Length; i++)
             {
                 if (NewParameters[i] is null) BuiltIns.ThrowNullReference(nameof(NewParameters), i);
                 NewParameters[i].RosValidate();
             }
-            if (ChangedParameters is null) BuiltIns.ThrowNullReference();
+            if (ChangedParameters is null) BuiltIns.ThrowNullReference(nameof(ChangedParameters));
             for (int i = 0; i < ChangedParameters.Length; i++)
             {
                 if (ChangedParameters[i] is null) BuiltIns.ThrowNullReference(nameof(ChangedParameters), i);
                 ChangedParameters[i].RosValidate();
             }
-            if (DeletedParameters is null) BuiltIns.ThrowNullReference();
+            if (DeletedParameters is null) BuiltIns.ThrowNullReference(nameof(DeletedParameters));
             for (int i = 0; i < DeletedParameters.Length; i++)
             {
                 if (DeletedParameters[i] is null) BuiltIns.ThrowNullReference(nameof(DeletedParameters), i);

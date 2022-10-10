@@ -198,28 +198,33 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Bpp);
             b.SerializeStructArray(Intrinsics, 9);
             b.Serialize(in Pose);
+            b.Serialize(Data.Length);
             b.SerializeStructArray(Data);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
+            b.Align4();
             b.Serialize(Message);
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Width);
             b.Serialize(Height);
             b.Serialize(Bpp);
+            b.Align8();
             b.SerializeStructArray(Intrinsics, 9);
             b.Serialize(in Pose);
+            b.Serialize(Data.Length);
             b.SerializeStructArray(Data);
         }
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference();
-            if (Intrinsics is null) BuiltIns.ThrowNullReference();
-            if (Intrinsics.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(Intrinsics.Length, 9);
-            if (Data is null) BuiltIns.ThrowNullReference();
+            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (Intrinsics is null) BuiltIns.ThrowNullReference(nameof(Intrinsics));
+            if (Intrinsics.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(Intrinsics), Intrinsics.Length, 9);
+            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
         }
     
         public int RosMessageLength

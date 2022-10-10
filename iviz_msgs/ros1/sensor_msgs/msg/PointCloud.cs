@@ -95,6 +95,7 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
+            b.Serialize(Points.Length);
             b.SerializeStructArray(Points);
             b.Serialize(Channels.Length);
             foreach (var t in Channels)
@@ -106,6 +107,8 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
+            b.Serialize(Points.Length);
             b.SerializeStructArray(Points);
             b.Serialize(Channels.Length);
             foreach (var t in Channels)
@@ -116,8 +119,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Points is null) BuiltIns.ThrowNullReference();
-            if (Channels is null) BuiltIns.ThrowNullReference();
+            if (Points is null) BuiltIns.ThrowNullReference(nameof(Points));
+            if (Channels is null) BuiltIns.ThrowNullReference(nameof(Channels));
             for (int i = 0; i < Channels.Length; i++)
             {
                 if (Channels[i] is null) BuiltIns.ThrowNullReference(nameof(Channels), i);

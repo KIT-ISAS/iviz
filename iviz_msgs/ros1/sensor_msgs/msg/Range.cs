@@ -91,6 +91,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(RadiationType);
+            b.Align4();
             b.Serialize(FieldOfView);
             b.Serialize(MinRange);
             b.Serialize(MaxRange);

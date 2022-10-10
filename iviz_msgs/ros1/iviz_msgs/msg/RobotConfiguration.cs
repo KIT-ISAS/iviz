@@ -85,12 +85,17 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(SourceParameter);
+            b.Align4();
             b.Serialize(SavedRobotName);
+            b.Align4();
             b.Serialize(FramePrefix);
+            b.Align4();
             b.Serialize(FrameSuffix);
             b.Serialize(AttachedToTf);
             b.Serialize(RenderAsOcclusionOnly);
+            b.Align4();
             b.Serialize(in Tint);
             b.Serialize(Metallic);
             b.Serialize(Smoothness);
@@ -100,11 +105,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (SourceParameter is null) BuiltIns.ThrowNullReference();
-            if (SavedRobotName is null) BuiltIns.ThrowNullReference();
-            if (FramePrefix is null) BuiltIns.ThrowNullReference();
-            if (FrameSuffix is null) BuiltIns.ThrowNullReference();
-            if (Id is null) BuiltIns.ThrowNullReference();
+            if (SourceParameter is null) BuiltIns.ThrowNullReference(nameof(SourceParameter));
+            if (SavedRobotName is null) BuiltIns.ThrowNullReference(nameof(SavedRobotName));
+            if (FramePrefix is null) BuiltIns.ThrowNullReference(nameof(FramePrefix));
+            if (FrameSuffix is null) BuiltIns.ThrowNullReference(nameof(FrameSuffix));
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
         }
     
         public int RosMessageLength

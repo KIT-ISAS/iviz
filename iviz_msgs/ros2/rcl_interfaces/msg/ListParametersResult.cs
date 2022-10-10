@@ -46,24 +46,30 @@ namespace Iviz.Msgs.RclInterfaces
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(Names.Length);
             b.SerializeArray(Names);
+            b.Serialize(Prefixes.Length);
             b.SerializeArray(Prefixes);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(Names.Length);
             b.SerializeArray(Names);
+            b.Align4();
+            b.Serialize(Prefixes.Length);
             b.SerializeArray(Prefixes);
         }
         
         public void RosValidate()
         {
-            if (Names is null) BuiltIns.ThrowNullReference();
+            if (Names is null) BuiltIns.ThrowNullReference(nameof(Names));
             for (int i = 0; i < Names.Length; i++)
             {
                 if (Names[i] is null) BuiltIns.ThrowNullReference(nameof(Names), i);
             }
-            if (Prefixes is null) BuiltIns.ThrowNullReference();
+            if (Prefixes is null) BuiltIns.ThrowNullReference(nameof(Prefixes));
             for (int i = 0; i < Prefixes.Length; i++)
             {
                 if (Prefixes[i] is null) BuiltIns.ThrowNullReference(nameof(Prefixes), i);

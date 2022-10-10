@@ -53,7 +53,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Wrench is null) BuiltIns.ThrowNullReference();
+            if (Wrench is null) BuiltIns.ThrowNullReference(nameof(Wrench));
             Wrench.RosValidate();
         }
     

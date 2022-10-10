@@ -60,14 +60,16 @@ namespace Iviz.Msgs.HriMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Sender);
+            b.Align4();
             b.Serialize(Receiver);
         }
         
         public void RosValidate()
         {
-            if (Sender is null) BuiltIns.ThrowNullReference();
-            if (Receiver is null) BuiltIns.ThrowNullReference();
+            if (Sender is null) BuiltIns.ThrowNullReference(nameof(Sender));
+            if (Receiver is null) BuiltIns.ThrowNullReference(nameof(Receiver));
         }
     
         public int RosMessageLength

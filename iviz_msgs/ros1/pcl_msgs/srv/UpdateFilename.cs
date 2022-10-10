@@ -84,12 +84,13 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Filename);
         }
         
         public void RosValidate()
         {
-            if (Filename is null) BuiltIns.ThrowNullReference();
+            if (Filename is null) BuiltIns.ThrowNullReference(nameof(Filename));
         }
     
         public int RosMessageLength

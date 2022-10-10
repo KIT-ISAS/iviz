@@ -207,9 +207,13 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Name);
+            b.Serialize(Vertices.Length);
             b.SerializeStructArray(Vertices);
+            b.Serialize(Normals.Length);
             b.SerializeStructArray(Normals);
+            b.Serialize(Tangents.Length);
             b.SerializeStructArray(Tangents);
+            b.Serialize(BiTangents.Length);
             b.SerializeStructArray(BiTangents);
             b.Serialize(TexCoords.Length);
             foreach (var t in TexCoords)
@@ -221,51 +225,61 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 t.RosSerialize(ref b);
             }
+            b.Serialize(Faces.Length);
             b.SerializeStructArray(Faces);
             b.Serialize(MaterialIndex);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Name);
+            b.Align4();
+            b.Serialize(Vertices.Length);
             b.SerializeStructArray(Vertices);
+            b.Serialize(Normals.Length);
             b.SerializeStructArray(Normals);
+            b.Serialize(Tangents.Length);
             b.SerializeStructArray(Tangents);
+            b.Serialize(BiTangents.Length);
             b.SerializeStructArray(BiTangents);
             b.Serialize(TexCoords.Length);
             foreach (var t in TexCoords)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(ColorChannels.Length);
             foreach (var t in ColorChannels)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
+            b.Serialize(Faces.Length);
             b.SerializeStructArray(Faces);
             b.Serialize(MaterialIndex);
         }
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
-            if (Vertices is null) BuiltIns.ThrowNullReference();
-            if (Normals is null) BuiltIns.ThrowNullReference();
-            if (Tangents is null) BuiltIns.ThrowNullReference();
-            if (BiTangents is null) BuiltIns.ThrowNullReference();
-            if (TexCoords is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Vertices is null) BuiltIns.ThrowNullReference(nameof(Vertices));
+            if (Normals is null) BuiltIns.ThrowNullReference(nameof(Normals));
+            if (Tangents is null) BuiltIns.ThrowNullReference(nameof(Tangents));
+            if (BiTangents is null) BuiltIns.ThrowNullReference(nameof(BiTangents));
+            if (TexCoords is null) BuiltIns.ThrowNullReference(nameof(TexCoords));
             for (int i = 0; i < TexCoords.Length; i++)
             {
                 if (TexCoords[i] is null) BuiltIns.ThrowNullReference(nameof(TexCoords), i);
                 TexCoords[i].RosValidate();
             }
-            if (ColorChannels is null) BuiltIns.ThrowNullReference();
+            if (ColorChannels is null) BuiltIns.ThrowNullReference(nameof(ColorChannels));
             for (int i = 0; i < ColorChannels.Length; i++)
             {
                 if (ColorChannels[i] is null) BuiltIns.ThrowNullReference(nameof(ColorChannels), i);
                 ColorChannels[i].RosValidate();
             }
-            if (Faces is null) BuiltIns.ThrowNullReference();
+            if (Faces is null) BuiltIns.ThrowNullReference(nameof(Faces));
         }
     
         public int RosMessageLength

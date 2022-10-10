@@ -96,9 +96,13 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Level);
+            b.Align4();
             b.Serialize(Name);
+            b.Align4();
             b.Serialize(Message);
+            b.Align4();
             b.Serialize(HardwareId);
+            b.Align4();
             b.Serialize(Values.Length);
             foreach (var t in Values)
             {
@@ -108,10 +112,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
-            if (Message is null) BuiltIns.ThrowNullReference();
-            if (HardwareId is null) BuiltIns.ThrowNullReference();
-            if (Values is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (HardwareId is null) BuiltIns.ThrowNullReference(nameof(HardwareId));
+            if (Values is null) BuiltIns.ThrowNullReference(nameof(Values));
             for (int i = 0; i < Values.Length; i++)
             {
                 if (Values[i] is null) BuiltIns.ThrowNullReference(nameof(Values), i);

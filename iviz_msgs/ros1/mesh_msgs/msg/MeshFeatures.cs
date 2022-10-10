@@ -73,7 +73,9 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(MapUuid);
+            b.Align4();
             b.Serialize(Features.Length);
             foreach (var t in Features)
             {
@@ -83,8 +85,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (MapUuid is null) BuiltIns.ThrowNullReference();
-            if (Features is null) BuiltIns.ThrowNullReference();
+            if (MapUuid is null) BuiltIns.ThrowNullReference(nameof(MapUuid));
+            if (Features is null) BuiltIns.ThrowNullReference(nameof(Features));
             for (int i = 0; i < Features.Length; i++)
             {
                 if (Features[i] is null) BuiltIns.ThrowNullReference(nameof(Features), i);

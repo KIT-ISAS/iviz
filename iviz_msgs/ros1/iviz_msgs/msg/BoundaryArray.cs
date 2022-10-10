@@ -66,6 +66,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Boundaries.Length);
             foreach (var t in Boundaries)
             {
@@ -75,7 +76,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Boundaries is null) BuiltIns.ThrowNullReference();
+            if (Boundaries is null) BuiltIns.ThrowNullReference(nameof(Boundaries));
             for (int i = 0; i < Boundaries.Length; i++)
             {
                 if (Boundaries[i] is null) BuiltIns.ThrowNullReference(nameof(Boundaries), i);
