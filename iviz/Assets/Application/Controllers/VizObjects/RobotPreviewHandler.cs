@@ -33,6 +33,14 @@ namespace Iviz.Controllers
             }
         }
 
+        public void Handler(RobotPreviewArray msg)
+        {
+            foreach (var widget in msg.Previews)
+            {
+                Handler(widget);
+            }
+        }
+        
         public void Handler(RobotPreview msg)
         {
             switch ((ActionType)msg.Action)
@@ -125,20 +133,25 @@ namespace Iviz.Controllers
 
             //robot.Visible = false;
 
+
+            
             var vizObject = new PreviewObject(msg, robot, $"{nameof(RobotPreview)} - {robot.Name}")
                 { Interactable = Interactable, Visible = Visible };
             vizObjects[vizObject.id] = vizObject;
 
             try
             {
+                // setting between vizObject creation and update.
+                // reason before update: bug where joints not found in new PreviewObject
+                // reason after creation: bug where robot was parentless 
                 await robot.StartAsync(RosManager.Connection, true, false);
             }
             catch (Exception e)
             {
                 RosLogger.Error($"{ToString()}: Preview '{msg.Id}' failed to initialize robot.", e);
             }
-
-
+            
+            vizObject.Update(msg);
             //robot.Visible = true;
         }
 
@@ -152,7 +165,6 @@ namespace Iviz.Controllers
             {
                 this.robot = robot;
                 robot.BaseLinkObject.transform.SetParentLocal(node.Transform);
-                Update(msg);
             }
 
             public void Update(RobotPreview msg)

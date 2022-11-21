@@ -37,6 +37,7 @@ namespace Iviz.Controllers
                 Smoothness = value.Smoothness;
                 Metallic = value.Metallic;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
+                NumberOfGridCells = value.NumberOfGridCells;
             }
         }
 

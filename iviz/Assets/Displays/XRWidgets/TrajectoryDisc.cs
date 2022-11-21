@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -9,6 +10,7 @@ using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Displays.XR
 {
@@ -49,7 +51,13 @@ namespace Iviz.Displays.XR
 
         public bool Interactable
         {
-            set => Send.Interactable = value;
+            set
+            {
+                Send.Interactable = value;
+                Reset.Interactable = value;
+                Reset.Interactable = value;
+                Disc.Interactable = value;
+            } 
         }
 
         public string Caption
@@ -252,21 +260,18 @@ namespace Iviz.Displays.XR
         public void Suspend()
         {
             tokenSource?.Cancel();
+            
             ProvidedTrajectory = null;
-            Lines.Reset();
+            Clicked = null;
+            
             Segments.Reset();
 
-            positions.Clear();
-            positions.Add(Vector3.zero);
             ResetCorners();
-            
-            lineBuffer.Clear();
-            //startTime = null;
-            Send.Transform.parent = Transform;
-            Lines.Transform.parent = Transform;
+            ResetTrajectory();
+
             GameThread.EveryFrame -= UpdateSegment;
 
-            Holder.SetActive(false);
+            Disc.Transform.localPosition = Vector3.zero;
             Glow.Visible = false;
             Sphere.EmissiveColor = Color.black;
         }

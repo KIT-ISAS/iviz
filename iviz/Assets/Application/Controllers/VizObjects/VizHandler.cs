@@ -90,6 +90,8 @@ namespace Iviz.Controllers
             RemoveAll();
         }
 
+        public override string ToString() => $"[{nameof(VizObject)}]";
+
         // ----------------------------------------------
 
         protected class VizObject : IDisposable
