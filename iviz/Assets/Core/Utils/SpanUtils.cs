@@ -25,7 +25,7 @@ namespace Iviz.Core
         {
             return texture.GetRawTextureData<byte>().GetUnsafePtr();
         }
-        
+
         public static Span<T> AsSpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
             return new Span<T>(array.GetUnsafePtr(), array.Length);
@@ -53,86 +53,78 @@ namespace Iviz.Core
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this List<T> list) where T : unmanaged
         {
             int count = list.Count;
-            return count == 0 
-                ? default 
+            return count == 0
+                ? default
                 : new ReadOnlySpan<T>((T[]?)ExtractArray(list), 0, count);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyFrom<T>(this Texture2D dst, ReadOnlySpan<T> srcSpan) where T : unmanaged
+        public static void CopyFrom(this Texture2D dst, ReadOnlySpan<byte> src)
         {
-            var srcBytes = MemoryMarshal.AsBytes(srcSpan);
-            fixed (byte* srcBytesPtr = &srcBytes[0])
+            fixed (byte* srcPtr = src)
             {
-                Unsafe.CopyBlock(dst.GetUnsafePtr(), srcBytesPtr, (uint)srcBytes.Length);
+                Unsafe.CopyBlock(dst.GetUnsafePtr(), srcPtr, (uint)src.Length);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void CopyFrom(this Texture2D dst, ReadOnlySpan<float> src)
+        {
+            fixed (float* srcPtr = src)
+            {
+                Unsafe.CopyBlock(dst.GetUnsafePtr(), (byte*)srcPtr, (uint)(src.Length * sizeof(float)));
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BlockCopyTo(this ReadOnlySpan<byte> src, Span<byte> dst)
         {
-            fixed (byte* srcPtr = &src[0])
-            fixed (byte* dstPtr = &dst[0])
+            int length = src.Length;
+            if (length > dst.Length) ThrowHelper.ThrowArgumentOutOfRange();
+
+            fixed (byte* srcPtr = src)
+            fixed (byte* dstPtr = dst)
             {
-                Unsafe.CopyBlock(dstPtr, srcPtr, (uint)src.Length);
+                Unsafe.CopyBlock(dstPtr, srcPtr, (uint)length);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BlockCopyTo(this Span<byte> src, Span<byte> dst)
         {
-            Unsafe.CopyBlock(ref dst[0], ref src[0], (uint)src.Length);
+            int length = src.Length;
+            if (length == 0) return;
+            if (length > dst.Length) ThrowHelper.ThrowArgumentOutOfRange();
+
+            Unsafe.CopyBlock(ref dst[0], ref src[0], (uint)length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void InitBlock(this Span<byte> src, byte c)
         {
-            Unsafe.InitBlock(ref src[0], c, (uint)src.Length);
+            int length = src.Length;
+            if (length == 0) return;
+            
+            Unsafe.InitBlock(ref src[0], c, (uint)length);
         }
 
-        public static ReadOnlySpan<T> Cast<T>(this ReadOnlySpan<byte> src) where T : unmanaged
-        {
-            return MemoryMarshal.Cast<byte, T>(src);
-        }
+        public static ReadOnlySpan<T> Cast<T>(this ReadOnlySpan<byte> src) where T : unmanaged =>
+            MemoryMarshal.Cast<byte, T>(src);
 
-        public static Span<T> Cast<T>(this Span<byte> src) where T : unmanaged =>  MemoryMarshal.Cast<byte, T>(src);
+        public static Span<T> Cast<T>(this Span<byte> src) where T : unmanaged =>
+            MemoryMarshal.Cast<byte, T>(src);
 
         public static T Read<T>(this ReadOnlySpan<byte> span) where T : unmanaged => MemoryMarshal.Read<T>(span);
-
-        public static float ReadFloat(this ReadOnlySpan<byte> span)
-        {
-            if (span.Length < sizeof(float)) ThrowHelper.ThrowArgumentOutOfRange();
-            fixed (byte* spanPtr = &span[0]) return *(float*)spanPtr;
-        }
-
 
         [UsedImplicitly]
         sealed class OpenList
         {
             public readonly Array? items;
         }
-        
-        /*
-        [StructLayout(LayoutKind.Explicit)]
-        struct ListConverter
-        {
-            [UsedImplicitly]
-            sealed class OpenList
-            {
-                public readonly Array? items;
-            }
-
-            [FieldOffset(0)] public IList list;
-            [FieldOffset(0)] readonly OpenList openList;
-
-            public Array? ExtractArray() => openList.items;
-        }
-        */
 
         static Array? ExtractArray(IList list)
         {
             return Unsafe.As<IList, OpenList>(ref list).items;
-            //return new ListConverter { list = list }.ExtractArray();
         }
 
         /// <summary>

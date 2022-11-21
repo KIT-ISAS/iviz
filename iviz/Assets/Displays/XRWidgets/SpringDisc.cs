@@ -16,10 +16,10 @@ namespace Iviz.Displays.XR
         [SerializeField] MeshMarkerDisplay? outerDisc;
         [SerializeField] MeshMarkerDisplay? innerDisc;
         [SerializeField] MeshMarkerDisplay? glow;
+        [SerializeField] Color color = new(0, 0.6f, 1f);
+        [SerializeField] Color secondaryColor = Color.white;
 
         CancellationTokenSource? tokenSource;
-        Color color = new(0, 0.6f, 1f);
-        Color secondaryColor = Color.white;
 
         MeshMarkerDisplay Anchor => anchor.AssertNotNull(nameof(anchor));
         MeshMarkerDisplay Link => link.AssertNotNull(nameof(link));
@@ -29,6 +29,7 @@ namespace Iviz.Displays.XR
         XRScreenDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
 
         public event Action<Vector3>? Moved;
+        public event Action? PointerUp;
         
         public Color Color
         {
@@ -38,6 +39,7 @@ namespace Iviz.Displays.XR
                 color = value;
                 OuterDisc.Color = value.ScaledBy(0.5f);
                 Link.Color = value.WithAlpha(0.8f);
+                Link.EmissiveColor = value.ScaledBy(0.7f);
                 Glow.Color = value.WithAlpha(0.8f);
                 Glow.EmissiveColor = value;
             }
@@ -80,6 +82,7 @@ namespace Iviz.Displays.XR
                 Glow.Visible = false;
 
                 Moved?.Invoke(Vector3.zero);
+                PointerUp?.Invoke();
 
                 tokenSource?.Cancel();
                 tokenSource = new CancellationTokenSource();
@@ -116,6 +119,7 @@ namespace Iviz.Displays.XR
         public void Suspend()
         {
             Moved = null;
+            PointerUp = null;
             OuterDisc.Transform.localPosition = Vector3.zero;
             OnDiscMoved(false);
             tokenSource?.Cancel();

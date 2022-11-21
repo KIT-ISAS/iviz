@@ -327,8 +327,8 @@ namespace Iviz.Ros
 
                     if (ros1Client != null)
                     {
-                        watchdogTask = WatchdogTask(ros1Client.RosMasterClient, token);
-                        ntpTask = NtpCheckerTask(ros1Client.MasterUri.Host, token);
+                        watchdogTask = WatchdogTask(ros1Client.RosMasterClient, token).AsTask();
+                        ntpTask = NtpCheckerTask(ros1Client.MasterUri.Host, token).AsTask();
                     }
                 });
 
@@ -485,9 +485,7 @@ namespace Iviz.Ros
             }
         }
 
-        static async Task WatchdogTask(
-            RosMasterClient masterApi,
-            CancellationToken token)
+        static async ValueTask WatchdogTask(RosMasterClient masterApi, CancellationToken token)
         {
             const int maxTimeMasterUnseenInMs = 10000;
             const int delayBetweenPingsInMs = 5000;
@@ -565,7 +563,7 @@ namespace Iviz.Ros
             SetConnectionWarningState(false);
         }
 
-        static async Task NtpCheckerTask(string hostname, CancellationToken token)
+        static async ValueTask NtpCheckerTask(string hostname, CancellationToken token)
         {
             RosLogger.Debug("[NtpChecker]: Starting NTP task.");
             time.GlobalTimeOffset = TimeSpan.Zero;
@@ -932,9 +930,9 @@ namespace Iviz.Ros
             Post(() =>
             {
                 if (subscribersByTopic.TryGetValue(listener.Topic, out var subscribedTopic) &&
-                    subscribedTopic.Subscriber != null)
+                    subscribedTopic.Subscriber is { } subscriber)
                 {
-                    subscribedTopic.Subscriber.IsPaused = value;
+                    subscriber.IsPaused = value;
                 }
 
                 return default;
@@ -1092,8 +1090,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemTopicTypesAsync)}",
-                    e);
+                RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemTopicTypesAsync)}", e);
             }
         }
 

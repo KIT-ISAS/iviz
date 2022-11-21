@@ -4,6 +4,7 @@ using Iviz.Common;
 using Iviz.Core;
 using Iviz.Core.Configurations;
 using Iviz.Displays.XR;
+using Iviz.Displays.XRDialogs;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 
@@ -38,7 +39,11 @@ namespace Iviz.Controllers.XR
         [SerializeField] CanvasHolder? canvasHolder;
 
         [SerializeField] GameObject? manipulableFrame;
-        [SerializeField] ButtonBar? frameButtonBar;
+        [SerializeField] RadialButtonBar? frameButtonBar;
+        [SerializeField] XRJoystickPanel? joystickPanel;
+        [SerializeField] XRHolder? joystickHolder;
+        [SerializeField] PalmCompass? palmCompass;
+        [SerializeField] bool handCompassVisible;
 
         public GameObject HololensRig => hololensRig.AssertNotNull(nameof(hololensRig)); 
         public ARMeshManager MeshManager => meshManager.AssertNotNull(nameof(meshManager)); 
@@ -51,6 +56,10 @@ namespace Iviz.Controllers.XR
         public Transform CameraOffset => cameraOffset.AssertNotNull(nameof(cameraOffset));
         public CanvasHolder CanvasHolder => canvasHolder.AssertNotNull(nameof(canvasHolder));
         public GameObject ManipulableFrame => manipulableFrame.AssertNotNull(nameof(manipulableFrame));
-        public ButtonBar FrameButtonBar => frameButtonBar.AssertNotNull(nameof(frameButtonBar));
+        public RadialButtonBar FrameButtonBar => frameButtonBar.AssertNotNull(nameof(frameButtonBar));
+        public PalmCompass PalmCompass => palmCompass.AssertNotNull(nameof(palmCompass));
+        public XRJoystickPanel JoystickPanel => joystickPanel.AssertNotNull(nameof(joystickPanel));
+        public XRHolder JoystickHolder => joystickHolder.AssertNotNull(nameof(joystickHolder));
+        public bool CompassVisible => handCompassVisible;
     }
 }

@@ -109,4 +109,8 @@ MonoBehaviour:
   - {fileID: 2800000, guid: e643106c904436a43b35141a0ace3d3e, type: 3}
   - {fileID: 2800000, guid: a845f89bb5a7b43bab201c02881c5ebf, type: 3}
   - {fileID: 2800000, guid: 1d854d40bed339c40bfea37c2b5c3e61, type: 3}
+  - {fileID: 2800000, guid: c8c6062f0d98641948f3e89471555094, type: 3}
   meshRenderer: {fileID: 3252963121550644602}
+  color: {r: 1, g: 1, b: 1, a: 1}
+  emissiveColor: {r: 1, g: 1, b: 1, a: 1}
+  mTransform: {fileID: 0}

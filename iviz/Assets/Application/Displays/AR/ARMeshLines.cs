@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Iviz.Controllers;
 using Iviz.Controllers.XR;
 using Iviz.Core;
@@ -49,11 +50,11 @@ namespace Iviz.Displays
 
                 resource = ResourcePool.RentDisplay<LineDisplay>(container.transform);
                 resource.ElementScale = 0.001f;
-                resource.Visible = ARController.IsXRVisible;
+                //resource.Visible = ARController.IsXRVisible;
                 //resource.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
-                resource.MaterialOverride = ARController.IsPulseActive
-                    ? Resources.Resource.Materials.LinePulse.Object
-                    : Resources.Resource.Materials.LineMesh.Object;
+                //resource.MaterialOverride = ARController.IsPulseActive
+                //    ? Resources.Resource.Materials.LinePulse.Object
+                //    : Resources.Resource.Materials.LineMesh.Object;
 
                 return resource;
             }
@@ -63,12 +64,6 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            if (Settings.IsHololens)
-            {
-                enabled = false;
-                return;
-            }
-
             pulseMaterialSet = ARController.IsPulseActive;
             MeshFilter.sharedMesh = new Mesh { name = "AR Mesh" };
             Resource.Visible = Visible;
@@ -82,10 +77,10 @@ namespace Iviz.Displays
                 RosLogger.Warn($"{nameof(ARMeshLines)}: No mesh manager found!");
             }
 
-            ARController.ARCameraViewChanged += OnARCameraViewChanged;
+            //ARController.ARCameraViewChanged += OnARCameraViewChanged;
             GameThread.EveryTenthOfASecond += CheckMesh;
 
-            OnARCameraViewChanged(ARController.IsXRVisible);
+            //OnARCameraViewChanged(ARController.IsXRVisible);
         }
 
         void OnARCameraViewChanged(bool value)
@@ -102,10 +97,12 @@ namespace Iviz.Displays
 
             if (args.removed.Contains(MeshFilter))
             {
+                Debug.Log("removing!");
                 Resource.Reset();
             }
         }
 
+        /*
         void Update()
         {
             if (Resource.Visible)
@@ -128,6 +125,7 @@ namespace Iviz.Displays
                 Resource.Visible = !ARController.IsXRVisible;
             }
         }
+        */
 
         void CheckMesh()
         {
@@ -158,51 +156,37 @@ namespace Iviz.Displays
                 return;
             }
 
-            int numLines = indices.Count;  // 3 indices per triangle, 3 lines per triangle => 1 line per index
-            using var output =
-                new NativeArray<float4x2>(numLines, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            int numLines = indices.Count; // 3 indices per triangle, 3 lines per triangle => 1 line per index
+            using var output = new Rent<float4x2>(numLines);
 
-            /*
-            await new CopyTriangles
-            {
-                triangles = indices.AsNativeArray().Cast<int, int3>(),
-                vertices = vertices.AsNativeArray().Cast<Vector3, float3>(),
-                output = output
-            }.Schedule().AsTask();
-
-            // we're in a different frame now!
+            BurstUtils.CopyTriangles(indices.AsSpan(), vertices.AsSpan(), output.AsSpan());
             Resource.Set(output.AsReadOnlySpan(), false);
-            */
         }
 
-        [BurstCompile(CompileSynchronously = true)]
-        struct CopyTriangles : IJob
+        [BurstCompile]
+        static unsafe class BurstUtils
         {
-            [ReadOnly] public NativeArray<int3> triangles;
-            [ReadOnly] public NativeArray<float3> vertices;
-            [WriteOnly] public NativeArray<float4x2> output;
-
-            public void Execute()
+            [BurstCompile(CompileSynchronously = true)]
+            static void CopyTriangles([NoAlias] int3* trianglesPtr, [NoAlias] float3* verticesPtr,
+                [NoAlias] Float4x2x3* outputPtr, int trianglesLength)
             {
-                var output3 = output.Cast<float4x2, Float4x2x3>();
-
-                for (int i = 0; i < triangles.Length; i++)
+                for (int i = 0; i < trianglesLength; i++)
                 {
-                    int ia = triangles[i].x;
-                    var a = vertices[ia];
+                    int ia = trianglesPtr[i].x;
+                    var a = verticesPtr[ia];
 
-                    int ib = triangles[i].y;
-                    var b = vertices[ib];
+                    int ib = trianglesPtr[i].y;
+                    var b = verticesPtr[ib];
 
-                    int ic = triangles[i].z;
-                    var c = vertices[ic];
+                    int ic = trianglesPtr[i].z;
+                    var c = verticesPtr[ic];
 
                     Float4x2x3 f;
                     Write(out f.a, a, b);
                     Write(out f.b, b, c);
                     Write(out f.c, c, a);
 
-                    output3[i] = f;
+                    outputPtr[i] = f;
                 }
             }
 
@@ -220,12 +204,24 @@ namespace Iviz.Displays
                 f.c1.w = b.z; // unused
             }
 
+            [StructLayout(LayoutKind.Sequential)]
             struct Float4x2x3
             {
                 public float4x2 a, b, c;
             }
-        }
 
+            public static void CopyTriangles(Span<int> triangles, Span<Vector3> vertices, Span<float4x2> output)
+            {
+                fixed (int* trianglesPtr = triangles)
+                fixed (Vector3* verticesPtr = vertices)
+                fixed (float4x2* outputPtr = output)
+                {
+                    CopyTriangles((int3*)trianglesPtr, (float3*)verticesPtr, (Float4x2x3*)outputPtr,
+                        triangles.Length / 3);
+                }
+            }
+        }
+        
         public void SplitForRecycle()
         {
             resource.ReturnToPool();
@@ -236,7 +232,7 @@ namespace Iviz.Displays
         {
             resource.ReturnToPool();
 
-            ARController.ARCameraViewChanged -= OnARCameraViewChanged;
+            //ARController.ARCameraViewChanged -= OnARCameraViewChanged;
             GameThread.EveryTenthOfASecond -= CheckMesh;
 
             Destroy(MeshFilter.sharedMesh);

@@ -423,7 +423,7 @@ namespace Iviz.Displays
                     if (!Settings.SupportsRGB24)
                     {
                         texture = EnsureSize(width, height, TextureFormat.RGBA32);
-                        ConversionUtils.CopyPixelsRgbToRgba(texture.AsSpan(), data);
+                        ConversionUtils.CopyPixelsRgbToRgba(data, texture.AsSpan());
                     }
                     else
                     {
@@ -444,7 +444,7 @@ namespace Iviz.Displays
                     if (!Settings.SupportsR16)
                     {
                         texture = EnsureSize(width, height, TextureFormat.R8);
-                        ConversionUtils.CopyPixelsR16ToR8(texture.AsSpan(), data);
+                        ConversionUtils.CopyPixelsR16ToR8(data, texture.AsSpan());
 
                         intensityBounds = CalculateBounds(texture.GetRawTextureData<byte>());
                         MeasuredIntensityBounds = intensityBounds;

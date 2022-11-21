@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System.Collections.Generic;
 using Iviz.Core;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -8,6 +9,7 @@ namespace Iviz.Displays
 {
     public abstract class XRScreenDraggable : ScreenDraggable
     {
+        readonly HashSet<Object> hovering = new();
         XRSimpleInteractable? interactable;
 
         protected void Start()
@@ -39,14 +41,27 @@ namespace Iviz.Displays
             interactorTransform = null;
         }
 
-        void OnHoverEntered(HoverEnterEventArgs _)
+        void OnHoverEntered(HoverEnterEventArgs args)
         {
-            StartHover();
+            hovering.Add(args.interactor.gameObject);
+            if (hovering.Count == 1)
+            {
+                StartHover();
+            }
         }
 
-        void OnHoverExited(HoverExitEventArgs _)
+        void OnHoverExited(HoverExitEventArgs args)
         {
-            EndHover();
+            UnregisterHover(args.interactor.gameObject);
+        }
+
+        public void UnregisterHover(GameObject interactor)
+        {
+            hovering.Remove(interactor);
+            if (hovering.Count == 0)
+            {
+                EndHover();
+            }
         }
 
         void TriggerPointerMove()

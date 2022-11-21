@@ -15,8 +15,8 @@ namespace VNC
 {
     internal readonly struct FrameRectangle : IDisposable
     {
-        static float[]? paletteBytes;
-        static Span<float> PaletteBuffer => (paletteBytes ??= new float[256]);
+        static uint[]? paletteBytes;
+        static Span<uint> PaletteBuffer => (paletteBytes ??= new uint[256]);
 
         readonly byte[] buffer;
         readonly int width;
@@ -73,12 +73,12 @@ namespace VNC
 
         void SetPixels3(ReadOnlySpan<byte> src)
         {
-            ConversionUtils.CopyPixelsRgbToRgba(BufferSpan().Cast<uint>(), src.Cast<Rgb>());
+            ConversionUtils.CopyPixelsRgbToRgba(src.Cast<Rgb>(), BufferSpan().Cast<uint>());
         }
 
         void SetPixels2(ReadOnlySpan<byte> src)
         {
-            ConversionUtils.CopyPixels565ToRgba(BufferSpan().Cast<uint>(), src.Cast<ushort>());
+            ConversionUtils.CopyPixels565ToRgba(src.Cast<ushort>(), BufferSpan().Cast<uint>());
         }
 
         public bool SetPixelsPalette(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette, in PixelFormat pixelFormat)
@@ -113,7 +113,7 @@ namespace VNC
 
         void SetPixelsPalette4(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
         {
-            var srcPalette4 = palette.Cast<float>();
+            var srcPalette4 = palette.Cast<uint>();
 
             if (srcPalette4.Length == 256)
             {
@@ -129,22 +129,24 @@ namespace VNC
         void SetPixelsPalette3(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
         {
             var srcPalette3 = palette.Cast<Rgb>();
-            ConversionUtils.CopyPixelsRgbToRgba(MemoryMarshal.Cast<float, uint>(PaletteBuffer), srcPalette3);
+            ConversionUtils.CopyPixelsRgbToRgba(srcPalette3, PaletteBuffer);
             SetPixelsPalette(indices, PaletteBuffer);
         }
 
         void SetPixelsPalette2(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
         {
             var srcPalette2 = palette.Cast<ushort>();
-            ConversionUtils.CopyPixels565ToRgba(MemoryMarshal.Cast<float, uint>(PaletteBuffer), srcPalette2);
+            ConversionUtils.CopyPixels565ToRgba(srcPalette2, PaletteBuffer);
             SetPixelsPalette(indices, PaletteBuffer);
         }
 
-        void SetPixelsPalette(ReadOnlySpan<byte> indices, ReadOnlySpan<float> palette)
+        void SetPixelsPalette(ReadOnlySpan<byte> indices, ReadOnlySpan<uint> palette)
         {
-            SetPixelsPaletteN(BufferSpan(), indices, palette);
+            //SetPixelsPaletteN(BufferSpan(), indices, palette);
+            ConversionUtils.SetPixelsPaletteN(BufferSpan(), indices.Cast<uint>(), palette);
         }
 
+        /*
         static void SetPixelsPaletteN(ReadOnlySpan<byte> dst, ReadOnlySpan<byte> indices, ReadOnlySpan<float> palette)
         {
             var dst4 = dst.Cast<float>();
@@ -179,6 +181,7 @@ namespace VNC
                 indicesPtr = ref indicesPtr.Plus(1);
             }
         }
+        */
 
         public void CopyTo(Span<byte> textureSpan, int textureWidth, in Position position)
         {
@@ -307,12 +310,12 @@ namespace VNC
                 }
             }
         }
-        
+
 
         [AssertionMethod]
         static void AssertSize(in ReadOnlySpan<byte> span, int size)
         {
-            if (span.Length < size) 
+            if (span.Length < size)
                 ThrowHelper.ThrowArgumentOutOfRange("Span array is too short for the given operation");
         }
     }

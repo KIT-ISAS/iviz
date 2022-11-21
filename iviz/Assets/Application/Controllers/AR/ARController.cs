@@ -44,21 +44,21 @@ namespace Iviz.Controllers
         FpsMax
     }
 
+    public enum RootMover
+    {
+        Anchor,
+        Executor,
+        ControlMarker,
+        Setup
+    }
+
     public abstract class ARController : IController, IHasFrame
     {
-        public enum RootMover
-        {
-            Anchor,
-            Executor,
-            ControlMarker,
-            Setup
-        }
-
         const string HeadFrameId = "~xr/head";
         protected const string CameraFrameId = "~xr/camera";
 
         static Camera ARCamera => Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
-        static ARJoystick ARJoystick => ModuleListPanel.Instance.ARJoystick;
+        static ARJoystickPanel ARJoystickPanel => ModuleListPanel.Instance.ARJoystickPanel;
 
         public static Vector3 DefaultWorldOffset => new(0.5f, 0, -0.2f);
         public static bool IsActive => Instance != null;
@@ -201,7 +201,7 @@ namespace Iviz.Controllers
             set
             {
                 config.ShowARJoystick = value;
-                ARJoystick.Visible = value;
+                ARJoystickPanel.Visible = value;
 
                 if (value)
                 {
@@ -226,12 +226,12 @@ namespace Iviz.Controllers
 
         protected ARController()
         {
-            ARJoystick.ChangedPosition += OnARJoystickChangedPosition;
-            ARJoystick.ChangedAngle += OnARJoystickChangedAngle;
-            ARJoystick.ChangedScale += OnARJoystickChangedScale;
-            ARJoystick.PointerUp += OnARJoystickPointerUp;
-            ARJoystick.ResetScale += OnARJoystickResetScale;
-            ARJoystick.Close += ModuleListPanel.Instance.ARToolbarPanel.ToggleARJoystick;
+            ARJoystickPanel.ChangedPosition += OnARJoystickChangedPosition;
+            ARJoystickPanel.ChangedAngle += OnARJoystickChangedAngle;
+            ARJoystickPanel.ChangedScale += OnARJoystickChangedScale;
+            ARJoystickPanel.PointerUp += OnARJoystickPointerUp;
+            ARJoystickPanel.ResetScale += OnARJoystickResetScale;
+            ARJoystickPanel.Close += ModuleListPanel.Instance.ARToolbarPanel.ToggleARJoystick;
             GameThread.EveryFrame += Update;
 
             Settings.SettingsManager.UpdateQualityLevel();
@@ -287,7 +287,7 @@ namespace Iviz.Controllers
 
             joyVelocityAngle = newVelocityAngle;
 
-            if (ARJoystick.IsGlobal)
+            if (ARJoystickPanel.IsGlobal)
             {
                 SetWorldAngle(WorldAngle + newVelocityAngle, RootMover.ControlMarker);
             }
@@ -319,7 +319,7 @@ namespace Iviz.Controllers
             joyVelocityPos = newVelocityPos;
 
             Vector3 deltaWorldPosition;
-            if (ARJoystick.IsGlobal)
+            if (ARJoystickPanel.IsGlobal)
             {
                 deltaWorldPosition = WorldPose.rotation * newVelocityPos.Ros2Unity();
             }
@@ -480,9 +480,9 @@ namespace Iviz.Controllers
             WorldScale = 1;
 
             WorldPoseChanged = null;
-            ARJoystick.ChangedPosition -= OnARJoystickChangedPosition;
-            ARJoystick.ChangedAngle -= OnARJoystickChangedAngle;
-            ARJoystick.PointerUp -= OnARJoystickPointerUp;
+            ARJoystickPanel.ChangedPosition -= OnARJoystickChangedPosition;
+            ARJoystickPanel.ChangedAngle -= OnARJoystickChangedAngle;
+            ARJoystickPanel.PointerUp -= OnARJoystickPointerUp;
             GameThread.EveryFrame -= Update;
 
             ShowARJoystick = false;

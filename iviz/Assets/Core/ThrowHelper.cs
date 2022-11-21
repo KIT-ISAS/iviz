@@ -27,7 +27,7 @@ namespace Iviz.Core
 
         public static void ThrowIfNullOrEmpty([System.Diagnostics.CodeAnalysis.NotNull] string? t, string nameOfT)
         {
-            if (string.IsNullOrWhiteSpace(t))
+            if (t is not { Length: not 0 })
             {
                 BuiltIns.ThrowArgumentNull(nameOfT, "Argument cannot be null or empty");
             }

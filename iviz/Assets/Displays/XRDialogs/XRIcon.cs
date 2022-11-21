@@ -16,5 +16,6 @@ namespace Iviz.Displays.XR
         Error = Msgs.IvizMsgs.Dialog.ICON_ERROR,
         Dialogs = Msgs.IvizMsgs.Dialog.ICON_DIALOGS,
         Question = Msgs.IvizMsgs.Dialog.ICON_QUESTION,
+        Mover
     }
 }

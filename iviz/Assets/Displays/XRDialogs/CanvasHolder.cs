@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public sealed class CanvasHolder : MonoBehaviour, IDisplay, IRecyclable
+    public sealed class CanvasHolder : XRHolder, IDisplay, IRecyclable
     {
         const float HeaderHeight = 0.075f;
 
@@ -17,24 +17,17 @@ namespace Iviz.Displays.XR
         [SerializeField] BoxCollider? boxCollider;
         [SerializeField] FixedDistanceDraggable? draggable;
         [SerializeField] TMP_Text? label;
-        [SerializeField] bool followsCamera;
         [SerializeField] Vector2 canvasSize = new Vector2(800, 600);
+        [SerializeField] bool followsCamera;
 
-        CancellationTokenSource? tokenSource;
         RoundedPlaneDisplay? background;
         SelectionFrame? frame;
-        Transform? mTransform;
-
-        bool isDragging;
-        float cameraZ = 1.5f;
 
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
         RoundedPlaneDisplay Background => ResourcePool.RentChecked(ref background, Holder);
         FixedDistanceDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
         Transform Holder => Draggable.Transform;
         TMP_Text Label => label.AssertNotNull(nameof(label));
-
-        public Transform Transform => this.EnsureHasTransform(ref mTransform);
 
         public string Title
         {
@@ -100,8 +93,11 @@ namespace Iviz.Displays.XR
                 }
                 else
                 {
-                    frame.ReturnToPool();
+                    var oldFrame = frame;
                     frame = null;
+                    
+                    // may happen during a disable, this may cause an error so post on next frame
+                    GameThread.Post(oldFrame.ReturnToPool); 
                 }                
             };
 
@@ -118,36 +114,15 @@ namespace Iviz.Displays.XR
             FollowsCamera = followsCamera;
         }
 
-        public Pose GetTargetPose()
+        protected override Pose ProcessPose(in Pose pose)
         {
-            var mainCameraPose = new Pose(
-                Settings.MainCameraPose.position,
-                Quaternion.Euler(0, Settings.MainCameraPose.rotation.eulerAngles.y, 0)
-            );
-
             var canvasTransform = (RectTransform)Canvas.transform;
             float sizeY = canvasTransform.rect.size.y * canvasTransform.localScale.y;
-            var targetPosition = mainCameraPose.position + mainCameraPose.forward * 1.5f - mainCameraPose.up * 0.2f;
-            targetPosition.y = Mathf.Max(targetPosition.y, sizeY / 2 + 0.5f);
-            cameraZ = 1.5f;
 
-            var targetRotation = CalculateOrientationToCamera();
+            var processedPose = pose;
+            processedPose.position.y = Mathf.Max(processedPose.position.y, sizeY / 2 + 0.5f);
 
-            return ClampTargetPose(new Pose(targetPosition, targetRotation), mainCameraPose);
-        }
-
-        public void InitializePose()
-        {
-            transform.SetPose(GetTargetPose());
-
-            tokenSource?.Cancel();
-            tokenSource = new CancellationTokenSource();
-
-            FAnimator.Spawn(tokenSource.Token, 0.15f, t =>
-            {
-                float scale = Mathf.Sqrt(t);
-                transform.localScale = scale * Vector3.one;
-            });
+            return processedPose;
         }
 
         void OnStartDragging()
@@ -178,11 +153,6 @@ namespace Iviz.Displays.XR
                 t => transform.rotation = Quaternion.Lerp(start, CalculateOrientationToCamera(), t));
         }
 
-        Quaternion CalculateOrientationToCamera()
-        {
-            return Quaternion.LookRotation((Transform.position - Settings.MainCameraPose.position).WithY(0));
-        }
-
         public void ReturnToPool()
         {
             tokenSource?.Cancel();
@@ -198,57 +168,6 @@ namespace Iviz.Displays.XR
                 ResourceUtils.ReturnToPool(this);
             });
         }
-
-        void Update()
-        {
-            const float damping = 0.05f;
-
-            var mainCameraPose = new Pose(
-                Settings.MainCameraPose.position,
-                Quaternion.Euler(0, Settings.MainCameraPose.rotation.eulerAngles.y, 0)
-            );
-
-            var currentPose = Transform.AsPose();
-            var (targetPosition, targetRotation) = ClampTargetPose(currentPose, mainCameraPose);
-
-            Transform.SetPositionAndRotation(
-                Vector3.Lerp(currentPose.position, targetPosition, damping),
-                Quaternion.Lerp(currentPose.rotation, targetRotation, damping * 0.5f));
-        }
-
-        Pose ClampTargetPose(in Pose currentPose, in Pose mainCameraPose)
-        {
-            const float minX = -0.5f;
-            const float maxX = 0.5f;
-            const float minY = -0.4f;
-            const float maxY = 0f;
-            const float minZ = 1.0f;
-            const float maxZ = 2.0f;
-            const float angleThreshold = 15; 
-
-            var (currentPositionLocal, currentRotationLocal) = mainCameraPose.InverseMultiply(currentPose);
-            var targetPositionLocal = Clamp(currentPositionLocal);
-
-            if (!isDragging)
-            {
-                targetPositionLocal.z = cameraZ;
-            }
-
-            float currentAngleLocal = UnityUtils.RegularizeAngle(currentRotationLocal.eulerAngles.y);
-
-            var targetRotationLocal = Mathf.Abs(currentAngleLocal) < angleThreshold
-                ? currentRotationLocal
-                : Quaternion.identity;
-
-            return mainCameraPose.Multiply(new Pose(targetPositionLocal, targetRotationLocal));
-
-            static Vector3 Clamp(in Vector3 value) => new(
-                Mathf.Clamp(value.x, minX, maxX),
-                Mathf.Clamp(value.y, minY, maxY),
-                Mathf.Clamp(value.z, minZ, maxZ)
-            );
-        }
-
 
         public void Suspend()
         {

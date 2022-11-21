@@ -9,11 +9,12 @@ using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Displays.XR;
+using Iviz.Displays.XRDialogs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
-using Microsoft.MixedReality.WorldLocking.Core;
+//using Microsoft.MixedReality.WorldLocking.Core;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.ARFoundation;
@@ -42,12 +43,14 @@ namespace Iviz.Controllers.XR
         readonly PaddleController rightPaddle;
         readonly Transform cameraOffset;
         readonly CanvasHolder mainCanvasHolder;
-        readonly GameObject hololensInitManipulableFrame;
+        readonly GameObject manipulableFrame;
         readonly ARAnchorManager anchorManager;
-        readonly ButtonBar hololensInitButtonBar;
+        readonly RadialButtonBar frameButtonBar;
+
+        readonly PalmCompass? palmCompass;
 
         readonly HandGestures leftGestures = new(HandType.Left);
-        readonly HandGestures rightGestures = new(HandType.Right);
+        //readonly HandGestures rightGestures = new(HandType.Right);
 
         readonly IPublishedFrame headFrame;
         readonly IPublishedFrame leftControllerFrame;
@@ -55,8 +58,24 @@ namespace Iviz.Controllers.XR
         readonly IPublishedFrame? gazeFrame;
 
         readonly XRConfiguration config = new();
+        readonly bool handCompassVisible;
 
         ARAnchor? originAnchor;
+
+
+        bool gazeActive;
+        bool leftHandActive;
+        bool rightHandActive;
+
+        uint gazeSeqNr;
+        uint leftHandSeqNr;
+        uint rightHandSeqNr;
+
+        float? joyVelocityAngle;
+        Vector3? joyVelocityPos;
+        float? joyVelocityScale;
+
+        CancellationTokenSource? canvasTokenSource;
 
         public ARMeshManager MeshManager { get; }
 
@@ -67,18 +86,6 @@ namespace Iviz.Controllers.XR
         CustomController? RightController =>
             rightHand.isActiveAndEnabled ? rightHand :
             rightPaddle.isActiveAndEnabled ? rightPaddle : null;
-
-        PalmCompass? palmCompass;
-
-        bool gazeActive;
-        bool leftHandActive;
-        bool rightHandActive;
-
-        uint gazeSeqNr;
-        uint leftHandSeqNr;
-        uint rightHandSeqNr;
-
-        CancellationTokenSource? canvasTokenSource;
 
         public static XRController? Instance { get; private set; }
 
@@ -110,6 +117,7 @@ namespace Iviz.Controllers.XR
             rightPaddle = contents.RightPaddle;
             cameraOffset = contents.CameraOffset;
             mainCanvasHolder = contents.CanvasHolder;
+            handCompassVisible = contents.CompassVisible;
 
             Config = configuration ?? new XRConfiguration();
 
@@ -131,25 +139,57 @@ namespace Iviz.Controllers.XR
 
             leftGestures.PalmClicked += () => ToggleMainCanvas(LeftController!);
             leftGestures.GestureChanged += ManageGestureLeft;
-            
+
             leftPaddle.SecondaryClicked += () => ToggleMainCanvas(leftPaddle);
             rightPaddle.SecondaryClicked += () => ToggleMainCanvas(rightPaddle);
 
             anchorManager = contents.AnchorManager;
 
-            hololensInitManipulableFrame = contents.ManipulableFrame;
-            hololensInitButtonBar = contents.FrameButtonBar;
+            manipulableFrame = contents.ManipulableFrame;
+            frameButtonBar = contents.FrameButtonBar;
 
             if (Settings.IsHololens)
             {
                 contents.HololensRig.SetActive(true);
-                hololensInitManipulableFrame.SetActive(true);
-                hololensInitButtonBar.Visible = true;
-                hololensInitButtonBar.Clicked += OnFrameHololensInitButtonBarClicked;
+                manipulableFrame.SetActive(true);
+                frameButtonBar.Visible = true;
+                frameButtonBar.Clicked += OnFrameButtonBarClicked;
 
                 if (ModuleListPanel.Instance.TryLoadXRConfiguration(out var anchorPose))
                 {
-                    hololensInitManipulableFrame.transform.SetPose(anchorPose);
+                    manipulableFrame.transform.SetPose(anchorPose);
+                }
+
+                palmCompass = contents.PalmCompass;
+                //palmCompass.Visible = true;
+                //palmCompass.Transform.SetParentLocal(leftHand.PalmTransform);
+
+                var joystickPanel = contents.JoystickPanel;
+                var holder = contents.JoystickHolder;
+                joystickPanel.ChangedPosition += OnXRJoystickChangedPosition;
+                joystickPanel.ChangedAngle += OnXRJoystickChangedAngle;
+                joystickPanel.ChangedScale += OnXRJoystickChangedScale;
+                joystickPanel.PointerUp += OnXRJoystickPointerUp;
+                //joystickPanel.ResetScale += OnARJoystickResetScale;
+                joystickPanel.Close += ToggleJoystickPanel;
+
+                palmCompass.ButtonBar.Clicked += i =>
+                {
+                    switch (i)
+                    {
+                        case 0:
+                            ToggleJoystickPanel();
+                            break;
+                    }
+                };
+
+                void ToggleJoystickPanel()
+                {
+                    joystickPanel.Visible = !joystickPanel.Visible;
+                    if (joystickPanel.Visible)
+                    {
+                        holder.InitializePose();
+                    }
                 }
             }
 
@@ -157,9 +197,99 @@ namespace Iviz.Controllers.XR
             Instance = this;
 
             ModuleListPanel.CallAfterInitialized(() => mainCanvasHolder.Visible = false);
+            
         }
 
-        void OnFrameHololensInitButtonBarClicked(int index)
+
+        void OnXRJoystickChangedPosition(Vector3 dPos)
+        {
+            Vector3 newVelocityPos;
+            if (joyVelocityPos is { } velocityPos
+                && (Sign(velocityPos) == 0 || Sign(velocityPos) == Sign(dPos)))
+            {
+                newVelocityPos = velocityPos + 5e-6f * dPos;
+            }
+            else
+            {
+                newVelocityPos = Vector3.zero;
+            }
+
+            joyVelocityPos = newVelocityPos;
+
+            Vector3 deltaWorldPosition = WorldPose.rotation * newVelocityPos.Ros2Unity();
+            SetWorldPosition(WorldPose.position + deltaWorldPosition);
+
+            static int Sign(in Vector3 v) =>
+                Math.Sign(v.x) + Math.Sign(v.y) + Math.Sign(v.z); // only one of the components is nonzero
+        }
+
+        void OnXRJoystickChangedAngle(float dA)
+        {
+            float newVelocityAngle;
+            if (joyVelocityAngle is { } velocityAngle &&
+                (velocityAngle == 0 || Math.Sign(velocityAngle) == Math.Sign(dA)))
+            {
+                newVelocityAngle = velocityAngle + 0.001f * dA;
+            }
+            else
+            {
+                newVelocityAngle = 0;
+            }
+
+            joyVelocityAngle = newVelocityAngle;
+
+            float worldAngle = AngleFromPose(WorldPose);
+            SetWorldAngle(worldAngle + newVelocityAngle);
+        }
+
+        void OnXRJoystickChangedScale(float dA)
+        {
+            float newVelocityScale;
+            if (joyVelocityScale is { } velocityScale &&
+                (velocityScale == 0 || Math.Sign(velocityScale) == Math.Sign(dA)))
+            {
+                newVelocityScale = velocityScale + 1e-4f * dA;
+            }
+            else
+            {
+                newVelocityScale = 0;
+            }
+
+            joyVelocityScale = newVelocityScale;
+
+            WorldScale *= Mathf.Exp(newVelocityScale);
+        }
+
+        void OnXRJoystickPointerUp()
+        {
+            joyVelocityPos = null;
+            joyVelocityAngle = null;
+            joyVelocityScale = null;
+        }
+
+        static Pose WorldPose
+        {
+            get => TfModule.RootFrame.Transform.AsPose();
+            set => TfModule.RootFrame.Transform.SetPose(value);
+        }
+
+        static void SetWorldPosition(in Vector3 unityPosition)
+        {
+            WorldPose = WorldPose.WithPosition(unityPosition);
+        }
+
+        static void SetWorldAngle(float angle)
+        {
+            var rotation = Quaternion.AngleAxis(angle, Vector3.up);
+            WorldPose = WorldPose.WithRotation(rotation);
+        }
+
+        static float AngleFromPose(in Pose unityPose)
+        {
+            return UnityUtils.RegularizeAngle(unityPose.rotation.eulerAngles.y);
+        }
+
+        void OnFrameButtonBarClicked(int index)
         {
             const int startButton = 0;
             const int downButton = 1;
@@ -167,32 +297,34 @@ namespace Iviz.Controllers.XR
             switch (index)
             {
                 case startButton:
-                    var newOriginAbsolute = hololensInitManipulableFrame.transform.AsPose();
+                    var newOriginAbsolute = manipulableFrame.transform.AsPose();
                     TfModule.RootFrame.Transform.SetPose(newOriginAbsolute);
-                    hololensInitManipulableFrame.SetActive(false);
-                    hololensInitButtonBar.Visible = false;
+                    manipulableFrame.SetActive(false);
+                    frameButtonBar.Visible = false;
 
+                    /*
                     WorldLockingManager.GetInstance().AttachmentPointManager.CreateAttachmentPoint(
                         newOriginAbsolute.position, null,
                         adjustment =>
                         {
                             var newPose = adjustment.Multiply(TfModule.RootFrame.Transform.AsPose());
                             TfModule.RootFrame.Transform.SetPose(newPose);
-                            hololensInitManipulableFrame.transform.SetPose(newPose);
+                            manipulableFrame.transform.SetPose(newPose);
                             _ = ModuleListPanel.Instance.SaveXRConfigurationAsync(newPose);
                         },
                         _ => { }
                     );
+                    */
 
                     _ = ModuleListPanel.Instance.SaveXRConfigurationAsync(newOriginAbsolute);
                     break;
                 case downButton:
                     var clickInfo =
-                        new ClickHitInfo(new Ray(hololensInitManipulableFrame.transform.position, Vector3.down));
+                        new ClickHitInfo(new Ray(manipulableFrame.transform.position, Vector3.down));
                     if (clickInfo.TryGetRaycastResults(out var hits)
                         && hits.TryGetFirst(hit => hit.GameObject.layer == LayerType.Collider, out var colliderHit))
                     {
-                        hololensInitManipulableFrame.transform.position = colliderHit.Position;
+                        manipulableFrame.transform.position = colliderHit.Position;
                     }
 
                     break;
@@ -201,31 +333,54 @@ namespace Iviz.Controllers.XR
 
         void ManageGestureLeft()
         {
-            if (leftGestures.IsPalmUp && palmCompass == null)
+            //const float animationDurationInSec = 0.1f;
+
+            if (!handCompassVisible)
             {
-                if (leftHand.PalmTransform is not { } palmTransform)
+                return;
+            }
+
+            if (palmCompass == null)
+            {
+                Debug.LogError($"{ToString()}: Palm compass is visible but not set!");
+                return;
+            }
+
+            bool isPalmUp = leftGestures.IsPalmUp;
+            bool isPalmCompassVisible = palmCompass.Visible;
+            
+            if (isPalmUp)
+            {
+                if (isPalmCompassVisible || leftHand.PalmTransform is not { } palmTransform)
                 {
                     return;
                 }
 
-                var newPalmCompass = ResourcePool.RentDisplay<PalmCompass>(palmTransform);
+                palmCompass.Transform.SetParentLocal(palmTransform);
+                //var newPalmCompass = ResourcePool.RentDisplay<PalmCompass>(palmTransform);
                 float baseScale = 0.125f / palmTransform.localScale.x;
-                newPalmCompass.Transform.localScale = Vector3.zero;
-                newPalmCompass.Transform.localRotation = Quaternions.Rotate180AroundX;
-                newPalmCompass.gameObject.SetActive(false);
-                palmCompass = newPalmCompass;
-                FAnimator.Spawn(default, 0.1f,
-                    t => newPalmCompass.Transform.localScale = Mathf.Sqrt(t) * baseScale * Vector3.one);
-            }
-            else if (!leftGestures.IsPalmUp && palmCompass != null)
-            {
-                var oldPalmCompass = palmCompass;
-                float baseScale = 0.125f / oldPalmCompass.transform.parent.localScale.x;
-                palmCompass = null;
+                //palmCompass.Transform.localScale = Vector3.zero;
+                palmCompass.Transform.localScale = baseScale * Vector3.one;
+                palmCompass.Transform.localRotation = Quaternions.Rotate180AroundX;
+                palmCompass.Visible = true;
 
-                FAnimator.Spawn(default, 0.1f,
-                    t => oldPalmCompass.Transform.localScale = baseScale * Mathf.Sqrt(1 - t) * Vector3.one,
-                    () => oldPalmCompass.ReturnToPool());
+                //FAnimator.Spawn(default, animationDurationInSec,
+                //    t => newPalmCompass.Transform.localScale = Mathf.Sqrt(t) * baseScale * Vector3.one);
+            }
+            else if (!isPalmUp)
+            {
+                if (!isPalmCompassVisible)
+                {
+                    return;
+                }
+                //var oldPalmCompass = palmCompass;
+                //float baseScale = 0.125f / oldPalmCompass.transform.parent.localScale.x;
+                //palmCompass = null;
+                palmCompass.Visible = false;
+
+                //FAnimator.Spawn(default, animationDurationInSec,
+                //    t => oldPalmCompass.Transform.localScale = baseScale * Mathf.Sqrt(1 - t) * Vector3.one,
+                //    oldPalmCompass.ReturnToPool);
             }
         }
 
@@ -266,10 +421,7 @@ namespace Iviz.Controllers.XR
                 ? TfModule.RelativeToFixedFrame(rightController.transform.AsPose())
                 : Pose.identity;
 
-            leftGestures.Process(leftHand.State);
             leftGestures.Process(leftHand.State, rightHand.State);
-            rightGestures.Process(rightHand.State);
-            rightGestures.Process(rightHand.State, leftHand.State);
         }
 
         static void UpdateHandSender(
@@ -386,6 +538,7 @@ namespace Iviz.Controllers.XR
             mainCanvasHolder.Transform.localScale = Vector3.zero;
             mainCanvasHolder.transform.rotation = targetRotation;
 
+            canvasTokenSource?.Cancel();
             canvasTokenSource = new CancellationTokenSource();
             FAnimator.Spawn(canvasTokenSource.Token, 0.25f, t =>
                 {

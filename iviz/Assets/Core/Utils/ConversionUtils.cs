@@ -19,12 +19,12 @@ namespace Iviz.Core
 {
     public static unsafe class ConversionUtils
     {
-        public static void CopyPixelsRgbToRgba(Span<byte> dst4, ReadOnlySpan<byte> src3)
+        public static void CopyPixelsRgbToRgba(ReadOnlySpan<byte> src3, Span<byte> dst4)
         {
-            CopyPixelsRgbToRgba(dst4.Cast<uint>(), src3.Cast<Rgb>());
+            CopyPixelsRgbToRgba(src3.Cast<Rgb>(), dst4.Cast<uint>());
         }
 
-        public static void CopyPixelsRgbToRgba(Span<uint> dst4, ReadOnlySpan<Rgb> src3)
+        public static void CopyPixelsRgbToRgba(ReadOnlySpan<Rgb> src3, Span<uint> dst4)
         {
             fixed (Rgb* src3Ptr = src3)
             fixed (uint* dst4Ptr = dst4)
@@ -51,20 +51,32 @@ namespace Iviz.Core
                     };
                 }
             }
-
-            /*
-            [BurstCompile(CompileSynchronously = true)]
-            public static void Palette([NoAlias] byte* input, [NoAlias] float* palette, [NoAlias] float* output, int inputLength)
+        }
+        
+        public static void SetPixelsPaletteN(ReadOnlySpan<byte> indices, ReadOnlySpan<uint> palette, ReadOnlySpan<uint> output)
+        {
+            fixed (byte* indicesPtr = indices)
+            fixed (uint* palettePtr = palette)
+            fixed (uint* outputPtr = output)
             {
-                for (int i = 0; i < inputLength; i++)
-                {
-                    output[i] = palette[input[i]];
-                }
+                SetPixelsPaletteNJob.Execute(indicesPtr, palettePtr, outputPtr, indices.Length);
             }
-            */
         }
 
-        public static void CopyPixels565ToRgba(Span<uint> dst4, ReadOnlySpan<ushort> src2)
+        [BurstCompile]
+        static class SetPixelsPaletteNJob
+        {
+            [BurstCompile(CompileSynchronously = true)]
+            public static void Execute([NoAlias] byte* indices, [NoAlias] uint* palette, [NoAlias] uint* output, int indicesLength)
+            {
+                for (int i = 0; i < indicesLength; i++)
+                {
+                    output[i] = palette[indices[i]];
+                }
+            }
+        }
+
+        public static void CopyPixels565ToRgba(ReadOnlySpan<ushort> src2, Span<uint> dst4)
         {
             fixed (ushort* src2Ptr = src2)
             fixed (uint* dst4Ptr = dst4)
@@ -107,7 +119,7 @@ namespace Iviz.Core
 
         public static int Convert565To888(int rgb565) => InternalConvert565To888(rgb565);
 
-        public static void CopyPixelsR16ToR8(Span<byte> dst, ReadOnlySpan<byte> src)
+        public static void CopyPixelsR16ToR8(ReadOnlySpan<byte> src, Span<byte> dst)
         {
             fixed (byte* srcPtr = src)
             fixed (byte* dstPtr = dst)

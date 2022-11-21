@@ -72,7 +72,7 @@ namespace Iviz.App
         [SerializeField] ARToolbarPanel? arSidePanel;
         [SerializeField] ModulePanelManager? dataPanelManager;
         [SerializeField] DialogPanelManager? dialogPanelManager;
-        [SerializeField] ARJoystick? arJoystick;
+        [SerializeField] ARJoystickPanel? arJoystick;
         [SerializeField] TwistJoystick? twistJoystick;
         [SerializeField] SafeAreaPanel? safeAreaPanel;
         [SerializeField] GameObject? contentObject;
@@ -126,7 +126,7 @@ namespace Iviz.App
         public ModulePanelManager ModulePanelManager => dataPanelManager.AssertNotNull(nameof(dataPanelManager));
         public DialogPanelManager DialogPanelManager => dialogPanelManager.AssertNotNull(nameof(dialogPanelManager));
         public TwistJoystick TwistJoystick => twistJoystick.AssertNotNull(nameof(twistJoystick));
-        public ARJoystick ARJoystick => arJoystick.AssertNotNull(nameof(arJoystick));
+        public ARJoystickPanel ARJoystickPanel => arJoystick.AssertNotNull(nameof(arJoystick));
         public ARToolbarPanel ARToolbarPanel => arSidePanel.AssertNotNull(nameof(arSidePanel));
 
         public XRContents XRController => xrController != null

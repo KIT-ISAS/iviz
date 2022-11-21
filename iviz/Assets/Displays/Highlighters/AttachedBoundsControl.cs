@@ -8,15 +8,16 @@ using UnityEngine;
 
 namespace Iviz.Displays.Highlighters
 {
-    public abstract class AttachedBoundsControl : IBoundsControl
+    public class AttachedBoundsControl : IBoundsControl
     {
         readonly Transform nodeTransform;
         readonly BoxCollider collider;
 
+        readonly IHasBounds source;
+        readonly bool useTransformFromSource;
         SelectionFrame? frame;
-        IHasBounds? source;
-        ScreenDraggable? draggable;
-        bool useTransformFromSource;
+
+        protected readonly ScreenDraggable draggable;
 
         public float FrameColumnWidth { get; set; } = 0.001f;
         public event Action? PointerDown;
@@ -35,17 +36,6 @@ namespace Iviz.Displays.Highlighters
             set => nodeTransform.gameObject.SetActive(value);
         }
 
-        protected AttachedBoundsControl()
-        {
-            var node = new GameObject("[Clickable Control]")
-            {
-                layer = LayerType.Clickable
-            };
-
-            collider = node.gameObject.AddComponent<BoxCollider>();
-            nodeTransform = node.transform;
-        }
-
         public Quaternion BaseOrientation
         {
             set
@@ -57,8 +47,16 @@ namespace Iviz.Displays.Highlighters
             }
         }
 
-        protected T InitializeDraggable<T>(IHasBounds newSource, Transform? target) where T : ScreenDraggable
+        protected AttachedBoundsControl(IHasBounds newSource, Transform? target, Type type)
         {
+            var node = new GameObject("[Clickable Control]")
+            {
+                layer = LayerType.Clickable
+            };
+
+            collider = node.gameObject.AddComponent<BoxCollider>();
+            nodeTransform = node.transform;
+
             source = newSource;
             if (source.BoundsTransform is { } boundsTransform)
             {
@@ -71,7 +69,7 @@ namespace Iviz.Displays.Highlighters
                 nodeTransform.localScale = Vector3.zero;
             }
 
-            draggable = nodeTransform.gameObject.AddComponent<T>();
+            draggable = (ScreenDraggable)nodeTransform.gameObject.AddComponent(type);
             draggable.RayCollider = collider;
 
             useTransformFromSource = target == null;
@@ -92,13 +90,19 @@ namespace Iviz.Displays.Highlighters
 
             draggable.StateChanged += () =>
             {
-                if ((draggable.IsDragging || draggable.IsHovering) && source.Bounds is { } validBounds)
+                if ((draggable.IsDragging || draggable.IsHovering))
                 {
+                    if (source.VisibleBounds is not { } visibleBounds)
+                    {
+                        Reset();
+                        return;
+                    }
+                    
                     if (frame == null)
                     {
                         frame = ResourcePool.RentDisplay<SelectionFrame>(nodeTransform);
-                        frame.Size = validBounds.size;
-                        frame.Transform.localPosition = validBounds.center;
+                        frame.Size = visibleBounds.size;
+                        frame.Transform.localPosition = visibleBounds.center;
                     }
 
                     frame.Visible = true;
@@ -109,31 +113,22 @@ namespace Iviz.Displays.Highlighters
                     frame.Color = draggable.IsDragging
                         ? Resource.Colors.DraggableSelectedColor
                         : Resource.Colors.DraggableHoverColor;
-                    
+
                     frame.UpdateColumnWidth();
                 }
                 else if (frame != null)
                 {
-                    var tmpFrame = frame;
-                    GameThread.Post(() => tmpFrame.ReturnToPool());
+                    GameThread.Post(frame.ReturnToPool); // stores copy of frame
                     frame = null;
                 }
             };
 
             source.BoundsChanged += OnBoundsChanged;
             OnBoundsChanged();
-
-            return (T)draggable;
         }
 
         void OnBoundsChanged()
         {
-            if (source == null || draggable == null)
-            {
-                Debug.LogError($"{this}: {nameof(OnBoundsChanged)}() called on uninitialized attached bounds");
-                return;
-            }
-
             if (source.BoundsTransform is { } validTransform)
             {
                 nodeTransform.SetParentLocal(validTransform.parent);
@@ -149,23 +144,29 @@ namespace Iviz.Displays.Highlighters
                 nodeTransform.localScale = Vector3.zero;
             }
 
-            if (source.Bounds is { } validBounds)
+            if (source.Bounds is not { } validBounds)
             {
-                if (frame != null)
-                {
-                    frame.Size = validBounds.size;
-                    frame.Transform.localPosition = validBounds.center;
-                    frame.Visible = draggable.IsDragging || draggable.IsHovering;
-                    frame.UpdateColumnWidth();
-                }
+                Reset();
+                return;
+            }
 
-                collider.SetLocalBounds(validBounds);
-            }
-            else
+            collider.SetLocalBounds(validBounds);
+
+            if (frame == null)
             {
-                frame.ReturnToPool();
-                frame = null;
+                return;
             }
+
+            if (source.VisibleBounds is not { } visibleBounds)
+            {
+                Reset();
+                return;
+            }
+
+            frame.Size = visibleBounds.size;
+            frame.Transform.localPosition = visibleBounds.center;
+            frame.Visible = draggable.IsDragging || draggable.IsHovering;
+            frame.UpdateColumnWidth();
         }
 
         public void Reset()
@@ -182,15 +183,9 @@ namespace Iviz.Displays.Highlighters
             StartDragging = null;
             EndDragging = null;
 
-            if (frame != null)
-            {
-                frame.ReturnToPool();
-            }
+            Reset();
 
-            if (source != null)
-            {
-                source.BoundsChanged -= OnBoundsChanged;
-            }
+            source.BoundsChanged -= OnBoundsChanged;
 
             UnityEngine.Object.Destroy(nodeTransform.gameObject);
         }
@@ -198,44 +193,44 @@ namespace Iviz.Displays.Highlighters
 
     public sealed class StaticBoundsControl : AttachedBoundsControl
     {
-        public StaticBoundsControl(IHasBounds source)
+        public StaticBoundsControl(IHasBounds source) :
+            base(source, null, typeof(StaticDraggable))
         {
-            InitializeDraggable<StaticDraggable>(source, null);
         }
     }
 
     public sealed class LineBoundsControl : AttachedBoundsControl
     {
-        public LineBoundsControl(IHasBounds source, Transform target)
+        public LineBoundsControl(IHasBounds source, Transform target) :
+            base(source, target, typeof(LineDraggable))
         {
-            InitializeDraggable<LineDraggable>(source, target);
         }
     }
 
     public sealed class PlaneBoundsControl : AttachedBoundsControl
     {
-        public PlaneBoundsControl(IHasBounds source, Transform target)
+        public PlaneBoundsControl(IHasBounds source, Transform target) :
+            base(source, target, typeof(PlaneDraggable))
         {
-            InitializeDraggable<PlaneDraggable>(source, target);
         }
     }
 
     public sealed class RotationBoundsControl : AttachedBoundsControl
     {
-        public RotationBoundsControl(IHasBounds source, Transform target)
+        public RotationBoundsControl(IHasBounds source, Transform target) :
+            base(source, target, typeof(RotationDraggable))
         {
-            InitializeDraggable<RotationDraggable>(source, target);
         }
     }
 
     public sealed class FixedDistanceBoundsControl : AttachedBoundsControl
     {
-        public FixedDistanceBoundsControl(IHasBounds source, Transform target)
+        public FixedDistanceBoundsControl(IHasBounds source, Transform target) :
+            base(source, target, typeof(FixedDistanceDraggable))
         {
-            var draggable = InitializeDraggable<FixedDistanceDraggable>(source, target);
             if (Settings.IsXR)
             {
-                draggable.ForwardScale = 5f;
+                ((FixedDistanceDraggable)draggable).ForwardScale = 5f;
             }
         }
     }

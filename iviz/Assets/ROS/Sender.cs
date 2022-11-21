@@ -52,9 +52,13 @@ namespace Iviz.Ros
             {
                 Connection.Unadvertise(this);
             }
+            catch (ObjectDisposedException)
+            {
+                // already shutdown
+            }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Exception while disposing", e);
+                RosLogger.Error($"{ToString()}: Exception while disposing", e);
             }
         }
 

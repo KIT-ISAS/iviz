@@ -123,8 +123,6 @@ namespace Iviz.Controllers
                 return;
             }
 
-            //robot.Visible = false;
-
             var vizObject = new PreviewObject(msg, robot, $"{nameof(RobotPreview)} - {robot.Name}")
                 { Interactable = Interactable, Visible = Visible };
             vizObjects[vizObject.id] = vizObject;
@@ -137,9 +135,6 @@ namespace Iviz.Controllers
             {
                 RosLogger.Error($"{ToString()}: Preview '{msg.Id}' failed to initialize robot.", e);
             }
-
-
-            //robot.Visible = true;
         }
 
         // ----------------------------------------------

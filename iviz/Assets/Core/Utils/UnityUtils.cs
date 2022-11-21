@@ -336,7 +336,12 @@ namespace Iviz.Core
             t ??= o.AssertHasComponent<T>(name, caller, lineNumber);
 
         [AssertionMethod]
-        public static Transform EnsureHasTransform(this Component o, ref Transform? t) => t ??= o.transform;
+        public static Transform EnsureHasTransform(this Component o, ref Transform? t) =>
+            t != null ? t : (t = o.transform);
+
+        [AssertionMethod]
+        public static RectTransform EnsureHasTransform(this Component o, ref RectTransform? t) =>
+            t != null ? t : (t = (RectTransform)o.transform);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color WithAlpha(this in Color c, float alpha)
