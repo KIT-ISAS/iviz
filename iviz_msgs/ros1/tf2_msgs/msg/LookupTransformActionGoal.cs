@@ -59,9 +59,9 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (GoalId is null) BuiltIns.ThrowNullReference();
+            if (GoalId is null) BuiltIns.ThrowNullReference(nameof(GoalId));
             GoalId.RosValidate();
-            if (Goal is null) BuiltIns.ThrowNullReference();
+            if (Goal is null) BuiltIns.ThrowNullReference(nameof(Goal));
             Goal.RosValidate();
         }
     

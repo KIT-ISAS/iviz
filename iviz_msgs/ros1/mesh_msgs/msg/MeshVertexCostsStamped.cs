@@ -62,16 +62,18 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Uuid);
+            b.Align4();
             b.Serialize(Type);
             MeshVertexCosts.RosSerialize(ref b);
         }
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference();
-            if (Type is null) BuiltIns.ThrowNullReference();
-            if (MeshVertexCosts is null) BuiltIns.ThrowNullReference();
+            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
+            if (Type is null) BuiltIns.ThrowNullReference(nameof(Type));
+            if (MeshVertexCosts is null) BuiltIns.ThrowNullReference(nameof(MeshVertexCosts));
             MeshVertexCosts.RosValidate();
         }
     

@@ -51,14 +51,16 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Key);
+            b.Align4();
             b.Serialize(Value);
         }
         
         public void RosValidate()
         {
-            if (Key is null) BuiltIns.ThrowNullReference();
-            if (Value is null) BuiltIns.ThrowNullReference();
+            if (Key is null) BuiltIns.ThrowNullReference(nameof(Key));
+            if (Value is null) BuiltIns.ThrowNullReference(nameof(Value));
         }
     
         public int RosMessageLength

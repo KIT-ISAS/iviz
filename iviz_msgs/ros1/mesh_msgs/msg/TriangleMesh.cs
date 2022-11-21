@@ -259,10 +259,15 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 t.RosSerialize(ref b);
             }
+            b.Serialize(Vertices.Length);
             b.SerializeStructArray(Vertices);
+            b.Serialize(VertexNormals.Length);
             b.SerializeStructArray(VertexNormals);
+            b.Serialize(VertexColors.Length);
             b.SerializeStructArray(VertexColors);
+            b.Serialize(TriangleColors.Length);
             b.SerializeStructArray(TriangleColors);
+            b.Serialize(VertexTextureCoords.Length);
             b.SerializeStructArray(VertexTextureCoords);
             b.Serialize(FaceMaterials.Length);
             foreach (var t in FaceMaterials)
@@ -283,26 +288,38 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Triangles.Length);
             foreach (var t in Triangles)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
+            b.Serialize(Vertices.Length);
+            b.Align8();
             b.SerializeStructArray(Vertices);
+            b.Serialize(VertexNormals.Length);
+            b.Align8();
             b.SerializeStructArray(VertexNormals);
+            b.Serialize(VertexColors.Length);
             b.SerializeStructArray(VertexColors);
+            b.Serialize(TriangleColors.Length);
             b.SerializeStructArray(TriangleColors);
+            b.Serialize(VertexTextureCoords.Length);
+            b.Align8();
             b.SerializeStructArray(VertexTextureCoords);
             b.Serialize(FaceMaterials.Length);
             foreach (var t in FaceMaterials)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(Textures.Length);
             foreach (var t in Textures)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(Clusters.Length);
             foreach (var t in Clusters)
             {
@@ -312,30 +329,30 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Triangles is null) BuiltIns.ThrowNullReference();
+            if (Triangles is null) BuiltIns.ThrowNullReference(nameof(Triangles));
             for (int i = 0; i < Triangles.Length; i++)
             {
                 if (Triangles[i] is null) BuiltIns.ThrowNullReference(nameof(Triangles), i);
                 Triangles[i].RosValidate();
             }
-            if (Vertices is null) BuiltIns.ThrowNullReference();
-            if (VertexNormals is null) BuiltIns.ThrowNullReference();
-            if (VertexColors is null) BuiltIns.ThrowNullReference();
-            if (TriangleColors is null) BuiltIns.ThrowNullReference();
-            if (VertexTextureCoords is null) BuiltIns.ThrowNullReference();
-            if (FaceMaterials is null) BuiltIns.ThrowNullReference();
+            if (Vertices is null) BuiltIns.ThrowNullReference(nameof(Vertices));
+            if (VertexNormals is null) BuiltIns.ThrowNullReference(nameof(VertexNormals));
+            if (VertexColors is null) BuiltIns.ThrowNullReference(nameof(VertexColors));
+            if (TriangleColors is null) BuiltIns.ThrowNullReference(nameof(TriangleColors));
+            if (VertexTextureCoords is null) BuiltIns.ThrowNullReference(nameof(VertexTextureCoords));
+            if (FaceMaterials is null) BuiltIns.ThrowNullReference(nameof(FaceMaterials));
             for (int i = 0; i < FaceMaterials.Length; i++)
             {
                 if (FaceMaterials[i] is null) BuiltIns.ThrowNullReference(nameof(FaceMaterials), i);
                 FaceMaterials[i].RosValidate();
             }
-            if (Textures is null) BuiltIns.ThrowNullReference();
+            if (Textures is null) BuiltIns.ThrowNullReference(nameof(Textures));
             for (int i = 0; i < Textures.Length; i++)
             {
                 if (Textures[i] is null) BuiltIns.ThrowNullReference(nameof(Textures), i);
                 Textures[i].RosValidate();
             }
-            if (Clusters is null) BuiltIns.ThrowNullReference();
+            if (Clusters is null) BuiltIns.ThrowNullReference(nameof(Clusters));
             for (int i = 0; i < Clusters.Length; i++)
             {
                 if (Clusters[i] is null) BuiltIns.ThrowNullReference(nameof(Clusters), i);

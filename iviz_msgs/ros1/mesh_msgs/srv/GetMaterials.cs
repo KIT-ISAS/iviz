@@ -84,12 +84,13 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Uuid);
         }
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference();
+            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
         }
     
         public int RosMessageLength
@@ -156,7 +157,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (MeshMaterialsStamped is null) BuiltIns.ThrowNullReference();
+            if (MeshMaterialsStamped is null) BuiltIns.ThrowNullReference(nameof(MeshMaterialsStamped));
             MeshMaterialsStamped.RosValidate();
         }
     

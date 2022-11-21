@@ -58,17 +58,20 @@ namespace Iviz.Msgs.PclMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(Vertices_.Length);
             b.SerializeStructArray(Vertices_);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(Vertices_.Length);
             b.SerializeStructArray(Vertices_);
         }
         
         public void RosValidate()
         {
-            if (Vertices_ is null) BuiltIns.ThrowNullReference();
+            if (Vertices_ is null) BuiltIns.ThrowNullReference(nameof(Vertices_));
         }
     
         public int RosMessageLength

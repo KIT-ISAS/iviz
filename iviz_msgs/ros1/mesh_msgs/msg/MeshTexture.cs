@@ -55,15 +55,17 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Uuid);
+            b.Align4();
             b.Serialize(TextureIndex);
             Image.RosSerialize(ref b);
         }
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference();
-            if (Image is null) BuiltIns.ThrowNullReference();
+            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
+            if (Image is null) BuiltIns.ThrowNullReference(nameof(Image));
             Image.RosValidate();
         }
     

@@ -106,6 +106,7 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(IsBigendian);
             b.Serialize(PointStep);
             b.Serialize(RowStep);
+            b.Serialize(Data.Length);
             b.SerializeStructArray(Data);
             b.Serialize(IsDense);
         }
@@ -113,6 +114,7 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Height);
             b.Serialize(Width);
             b.Serialize(Fields.Length);
@@ -121,21 +123,23 @@ namespace Iviz.Msgs.SensorMsgs
                 t.RosSerialize(ref b);
             }
             b.Serialize(IsBigendian);
+            b.Align4();
             b.Serialize(PointStep);
             b.Serialize(RowStep);
+            b.Serialize(Data.Length);
             b.SerializeStructArray(Data);
             b.Serialize(IsDense);
         }
         
         public void RosValidate()
         {
-            if (Fields is null) BuiltIns.ThrowNullReference();
+            if (Fields is null) BuiltIns.ThrowNullReference(nameof(Fields));
             for (int i = 0; i < Fields.Length; i++)
             {
                 if (Fields[i] is null) BuiltIns.ThrowNullReference(nameof(Fields), i);
                 Fields[i].RosValidate();
             }
-            if (Data is null) BuiltIns.ThrowNullReference();
+            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
         }
     
         public int RosMessageLength

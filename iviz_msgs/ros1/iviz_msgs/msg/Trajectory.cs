@@ -83,20 +83,26 @@ namespace Iviz.Msgs.IvizMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(Poses.Length);
             b.SerializeStructArray(Poses);
+            b.Serialize(Timestamps.Length);
             b.SerializeStructArray(Timestamps);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(Poses.Length);
+            b.Align8();
             b.SerializeStructArray(Poses);
+            b.Serialize(Timestamps.Length);
             b.SerializeStructArray(Timestamps);
         }
         
         public void RosValidate()
         {
-            if (Poses is null) BuiltIns.ThrowNullReference();
-            if (Timestamps is null) BuiltIns.ThrowNullReference();
+            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
+            if (Timestamps is null) BuiltIns.ThrowNullReference(nameof(Timestamps));
         }
     
         public int RosMessageLength

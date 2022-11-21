@@ -63,6 +63,7 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Uuid);
             Cluster.RosSerialize(ref b);
             b.Serialize(@override);
@@ -70,8 +71,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference();
-            if (Cluster is null) BuiltIns.ThrowNullReference();
+            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
+            if (Cluster is null) BuiltIns.ThrowNullReference(nameof(Cluster));
             Cluster.RosValidate();
         }
     

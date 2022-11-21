@@ -112,7 +112,9 @@ namespace Iviz.Msgs.IvizMsgs
             Header.RosSerialize(ref b);
             b.Serialize(Action);
             b.Serialize(Id);
+            b.Serialize(JointNames.Length);
             b.SerializeArray(JointNames);
+            b.Serialize(JointValues.Length);
             b.SerializeStructArray(JointValues);
             b.Serialize(RobotDescription);
             b.Serialize(SourceNode);
@@ -130,13 +132,22 @@ namespace Iviz.Msgs.IvizMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(Action);
+            b.Align4();
             b.Serialize(Id);
+            b.Align4();
+            b.Serialize(JointNames.Length);
             b.SerializeArray(JointNames);
+            b.Align4();
+            b.Serialize(JointValues.Length);
             b.SerializeStructArray(JointValues);
             b.Serialize(RobotDescription);
+            b.Align4();
             b.Serialize(SourceNode);
+            b.Align4();
             b.Serialize(SourceParameter);
+            b.Align4();
             b.Serialize(SavedRobotName);
+            b.Align4();
             b.Serialize(in Tint);
             b.Serialize(Metallic);
             b.Serialize(Smoothness);
@@ -147,17 +158,17 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference();
-            if (JointNames is null) BuiltIns.ThrowNullReference();
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (JointNames is null) BuiltIns.ThrowNullReference(nameof(JointNames));
             for (int i = 0; i < JointNames.Length; i++)
             {
                 if (JointNames[i] is null) BuiltIns.ThrowNullReference(nameof(JointNames), i);
             }
-            if (JointValues is null) BuiltIns.ThrowNullReference();
-            if (RobotDescription is null) BuiltIns.ThrowNullReference();
-            if (SourceNode is null) BuiltIns.ThrowNullReference();
-            if (SourceParameter is null) BuiltIns.ThrowNullReference();
-            if (SavedRobotName is null) BuiltIns.ThrowNullReference();
+            if (JointValues is null) BuiltIns.ThrowNullReference(nameof(JointValues));
+            if (RobotDescription is null) BuiltIns.ThrowNullReference(nameof(RobotDescription));
+            if (SourceNode is null) BuiltIns.ThrowNullReference(nameof(SourceNode));
+            if (SourceParameter is null) BuiltIns.ThrowNullReference(nameof(SourceParameter));
+            if (SavedRobotName is null) BuiltIns.ThrowNullReference(nameof(SavedRobotName));
         }
     
         public int RosMessageLength

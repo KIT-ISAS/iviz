@@ -285,7 +285,7 @@ internal static class RosUtils
             return null;
         }
 
-        if (mtuCandidate is not { } mtu || mtu is 0 or > ushort.MaxValue)
+        if (mtuCandidate is not { } mtu || mtu is <= 0 or > ushort.MaxValue)
         {
             return null; // mono is bad at finding the mtu
         }

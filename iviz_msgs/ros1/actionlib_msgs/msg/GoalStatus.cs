@@ -83,14 +83,15 @@ namespace Iviz.Msgs.ActionlibMsgs
         {
             GoalId.RosSerialize(ref b);
             b.Serialize(Status);
+            b.Align4();
             b.Serialize(Text);
         }
         
         public void RosValidate()
         {
-            if (GoalId is null) BuiltIns.ThrowNullReference();
+            if (GoalId is null) BuiltIns.ThrowNullReference(nameof(GoalId));
             GoalId.RosValidate();
-            if (Text is null) BuiltIns.ThrowNullReference();
+            if (Text is null) BuiltIns.ThrowNullReference(nameof(Text));
         }
     
         public int RosMessageLength

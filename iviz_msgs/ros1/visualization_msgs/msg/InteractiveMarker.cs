@@ -129,15 +129,19 @@ namespace Iviz.Msgs.VisualizationMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align8();
             b.Serialize(in Pose);
             b.Serialize(Name);
+            b.Align4();
             b.Serialize(Description);
+            b.Align4();
             b.Serialize(Scale);
             b.Serialize(MenuEntries.Length);
             foreach (var t in MenuEntries)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(Controls.Length);
             foreach (var t in Controls)
             {
@@ -147,15 +151,15 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
-            if (Description is null) BuiltIns.ThrowNullReference();
-            if (MenuEntries is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Description is null) BuiltIns.ThrowNullReference(nameof(Description));
+            if (MenuEntries is null) BuiltIns.ThrowNullReference(nameof(MenuEntries));
             for (int i = 0; i < MenuEntries.Length; i++)
             {
                 if (MenuEntries[i] is null) BuiltIns.ThrowNullReference(nameof(MenuEntries), i);
                 MenuEntries[i].RosValidate();
             }
-            if (Controls is null) BuiltIns.ThrowNullReference();
+            if (Controls is null) BuiltIns.ThrowNullReference(nameof(Controls));
             for (int i = 0; i < Controls.Length; i++)
             {
                 if (Controls[i] is null) BuiltIns.ThrowNullReference(nameof(Controls), i);

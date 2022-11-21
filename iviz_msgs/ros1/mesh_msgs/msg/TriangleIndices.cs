@@ -51,13 +51,14 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.SerializeStructArray(VertexIndices, 3);
         }
         
         public void RosValidate()
         {
-            if (VertexIndices is null) BuiltIns.ThrowNullReference();
-            if (VertexIndices.Length != 3) BuiltIns.ThrowInvalidSizeForFixedArray(VertexIndices.Length, 3);
+            if (VertexIndices is null) BuiltIns.ThrowNullReference(nameof(VertexIndices));
+            if (VertexIndices.Length != 3) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(VertexIndices), VertexIndices.Length, 3);
         }
     
         public const int RosFixedMessageLength = 12;

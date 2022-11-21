@@ -93,14 +93,16 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(FilePath);
+            b.Align4();
             b.Serialize(TopicName);
         }
         
         public void RosValidate()
         {
-            if (FilePath is null) BuiltIns.ThrowNullReference();
-            if (TopicName is null) BuiltIns.ThrowNullReference();
+            if (FilePath is null) BuiltIns.ThrowNullReference(nameof(FilePath));
+            if (TopicName is null) BuiltIns.ThrowNullReference(nameof(TopicName));
         }
     
         public int RosMessageLength

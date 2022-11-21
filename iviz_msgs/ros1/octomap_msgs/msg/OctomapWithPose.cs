@@ -56,13 +56,14 @@ namespace Iviz.Msgs.OctomapMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align8();
             b.Serialize(in Origin);
             Octomap.RosSerialize(ref b);
         }
         
         public void RosValidate()
         {
-            if (Octomap is null) BuiltIns.ThrowNullReference();
+            if (Octomap is null) BuiltIns.ThrowNullReference(nameof(Octomap));
             Octomap.RosValidate();
         }
     

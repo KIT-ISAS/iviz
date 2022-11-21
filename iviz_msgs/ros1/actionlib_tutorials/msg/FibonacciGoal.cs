@@ -42,6 +42,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Order);
         }
         

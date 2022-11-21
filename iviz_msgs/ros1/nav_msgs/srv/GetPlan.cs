@@ -102,14 +102,15 @@ namespace Iviz.Msgs.NavMsgs
         {
             Start.RosSerialize(ref b);
             Goal.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Tolerance);
         }
         
         public void RosValidate()
         {
-            if (Start is null) BuiltIns.ThrowNullReference();
+            if (Start is null) BuiltIns.ThrowNullReference(nameof(Start));
             Start.RosValidate();
-            if (Goal is null) BuiltIns.ThrowNullReference();
+            if (Goal is null) BuiltIns.ThrowNullReference(nameof(Goal));
             Goal.RosValidate();
         }
     
@@ -180,7 +181,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Plan is null) BuiltIns.ThrowNullReference();
+            if (Plan is null) BuiltIns.ThrowNullReference(nameof(Plan));
             Plan.RosValidate();
         }
     

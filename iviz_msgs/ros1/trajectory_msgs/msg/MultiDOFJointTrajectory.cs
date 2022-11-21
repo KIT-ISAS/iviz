@@ -73,6 +73,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
+            b.Serialize(JointNames.Length);
             b.SerializeArray(JointNames);
             b.Serialize(Points.Length);
             foreach (var t in Points)
@@ -84,7 +85,10 @@ namespace Iviz.Msgs.TrajectoryMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
+            b.Serialize(JointNames.Length);
             b.SerializeArray(JointNames);
+            b.Align4();
             b.Serialize(Points.Length);
             foreach (var t in Points)
             {
@@ -94,12 +98,12 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public void RosValidate()
         {
-            if (JointNames is null) BuiltIns.ThrowNullReference();
+            if (JointNames is null) BuiltIns.ThrowNullReference(nameof(JointNames));
             for (int i = 0; i < JointNames.Length; i++)
             {
                 if (JointNames[i] is null) BuiltIns.ThrowNullReference(nameof(JointNames), i);
             }
-            if (Points is null) BuiltIns.ThrowNullReference();
+            if (Points is null) BuiltIns.ThrowNullReference(nameof(Points));
             for (int i = 0; i < Points.Length; i++)
             {
                 if (Points[i] is null) BuiltIns.ThrowNullReference(nameof(Points), i);

@@ -50,20 +50,24 @@ namespace Iviz.Msgs.HriMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(GroupId);
+            b.Serialize(Members.Length);
             b.SerializeArray(Members);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(GroupId);
+            b.Align4();
+            b.Serialize(Members.Length);
             b.SerializeArray(Members);
         }
         
         public void RosValidate()
         {
-            if (GroupId is null) BuiltIns.ThrowNullReference();
-            if (Members is null) BuiltIns.ThrowNullReference();
+            if (GroupId is null) BuiltIns.ThrowNullReference(nameof(GroupId));
+            if (Members is null) BuiltIns.ThrowNullReference(nameof(Members));
             for (int i = 0; i < Members.Length; i++)
             {
                 if (Members[i] is null) BuiltIns.ThrowNullReference(nameof(Members), i);

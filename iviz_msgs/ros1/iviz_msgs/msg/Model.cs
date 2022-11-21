@@ -139,19 +139,25 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Name);
+            b.Align4();
             b.Serialize(Filename);
+            b.Align4();
             b.Serialize(OrientationHint);
+            b.Align4();
             b.Serialize(Meshes.Length);
             foreach (var t in Meshes)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(Materials.Length);
             foreach (var t in Materials)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(Nodes.Length);
             foreach (var t in Nodes)
             {
@@ -161,22 +167,22 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
-            if (Filename is null) BuiltIns.ThrowNullReference();
-            if (OrientationHint is null) BuiltIns.ThrowNullReference();
-            if (Meshes is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Filename is null) BuiltIns.ThrowNullReference(nameof(Filename));
+            if (OrientationHint is null) BuiltIns.ThrowNullReference(nameof(OrientationHint));
+            if (Meshes is null) BuiltIns.ThrowNullReference(nameof(Meshes));
             for (int i = 0; i < Meshes.Length; i++)
             {
                 if (Meshes[i] is null) BuiltIns.ThrowNullReference(nameof(Meshes), i);
                 Meshes[i].RosValidate();
             }
-            if (Materials is null) BuiltIns.ThrowNullReference();
+            if (Materials is null) BuiltIns.ThrowNullReference(nameof(Materials));
             for (int i = 0; i < Materials.Length; i++)
             {
                 if (Materials[i] is null) BuiltIns.ThrowNullReference(nameof(Materials), i);
                 Materials[i].RosValidate();
             }
-            if (Nodes is null) BuiltIns.ThrowNullReference();
+            if (Nodes is null) BuiltIns.ThrowNullReference(nameof(Nodes));
             for (int i = 0; i < Nodes.Length; i++)
             {
                 if (Nodes[i] is null) BuiltIns.ThrowNullReference(nameof(Nodes), i);

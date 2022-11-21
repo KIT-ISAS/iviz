@@ -58,17 +58,20 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(Sequence.Length);
             b.SerializeStructArray(Sequence);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(Sequence.Length);
             b.SerializeStructArray(Sequence);
         }
         
         public void RosValidate()
         {
-            if (Sequence is null) BuiltIns.ThrowNullReference();
+            if (Sequence is null) BuiltIns.ThrowNullReference(nameof(Sequence));
         }
     
         public int RosMessageLength

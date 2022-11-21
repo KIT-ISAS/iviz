@@ -103,21 +103,27 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Stamp);
             b.Serialize(Level);
+            b.Align4();
             b.Serialize(Name);
+            b.Align4();
             b.Serialize(Msg);
+            b.Align4();
             b.Serialize(File);
+            b.Align4();
             b.Serialize(Function);
+            b.Align4();
             b.Serialize(Line);
         }
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
-            if (Msg is null) BuiltIns.ThrowNullReference();
-            if (File is null) BuiltIns.ThrowNullReference();
-            if (Function is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Msg is null) BuiltIns.ThrowNullReference(nameof(Msg));
+            if (File is null) BuiltIns.ThrowNullReference(nameof(File));
+            if (Function is null) BuiltIns.ThrowNullReference(nameof(Function));
         }
     
         public int RosMessageLength

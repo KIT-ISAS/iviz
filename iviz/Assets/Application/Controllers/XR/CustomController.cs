@@ -30,8 +30,8 @@ namespace Iviz.Controllers.XR
         public bool ButtonDown { get; protected set; }
         //public bool IsNearInteraction { get; internal set; }
 
-        public bool EnableLocking { get; set; } = true;
-        public Vector3? LockedPosition { get; internal set; }
+        public bool EnableSticky { get; set; } = false;
+        public Vector3? StickyPosition { get; internal set; }
 
         protected bool TryGetDevice(out InputDevice outDevice)
         {

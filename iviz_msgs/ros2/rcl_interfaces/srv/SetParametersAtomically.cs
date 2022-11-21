@@ -111,6 +111,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Parameters.Length);
             foreach (var t in Parameters)
             {
@@ -120,7 +121,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Parameters is null) BuiltIns.ThrowNullReference();
+            if (Parameters is null) BuiltIns.ThrowNullReference(nameof(Parameters));
             for (int i = 0; i < Parameters.Length; i++)
             {
                 if (Parameters[i] is null) BuiltIns.ThrowNullReference(nameof(Parameters), i);
@@ -194,7 +195,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Result is null) BuiltIns.ThrowNullReference();
+            if (Result is null) BuiltIns.ThrowNullReference(nameof(Result));
             Result.RosValidate();
         }
     

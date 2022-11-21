@@ -171,10 +171,15 @@ namespace Iviz.Msgs.RclInterfaces
             b.Serialize(IntegerValue);
             b.Serialize(DoubleValue);
             b.Serialize(StringValue);
+            b.Serialize(ByteArrayValue.Length);
             b.SerializeStructArray(ByteArrayValue);
+            b.Serialize(BoolArrayValue.Length);
             b.SerializeStructArray(BoolArrayValue);
+            b.Serialize(IntegerArrayValue.Length);
             b.SerializeStructArray(IntegerArrayValue);
+            b.Serialize(DoubleArrayValue.Length);
             b.SerializeStructArray(DoubleArrayValue);
+            b.Serialize(StringArrayValue.Length);
             b.SerializeArray(StringArrayValue);
         }
         
@@ -182,24 +187,35 @@ namespace Iviz.Msgs.RclInterfaces
         {
             b.Serialize(Type);
             b.Serialize(BoolValue);
+            b.Align8();
             b.Serialize(IntegerValue);
             b.Serialize(DoubleValue);
             b.Serialize(StringValue);
+            b.Align4();
+            b.Serialize(ByteArrayValue.Length);
             b.SerializeStructArray(ByteArrayValue);
+            b.Align4();
+            b.Serialize(BoolArrayValue.Length);
             b.SerializeStructArray(BoolArrayValue);
+            b.Align4();
+            b.Serialize(IntegerArrayValue.Length);
+            b.Align8();
             b.SerializeStructArray(IntegerArrayValue);
+            b.Serialize(DoubleArrayValue.Length);
+            b.Align8();
             b.SerializeStructArray(DoubleArrayValue);
+            b.Serialize(StringArrayValue.Length);
             b.SerializeArray(StringArrayValue);
         }
         
         public void RosValidate()
         {
-            if (StringValue is null) BuiltIns.ThrowNullReference();
-            if (ByteArrayValue is null) BuiltIns.ThrowNullReference();
-            if (BoolArrayValue is null) BuiltIns.ThrowNullReference();
-            if (IntegerArrayValue is null) BuiltIns.ThrowNullReference();
-            if (DoubleArrayValue is null) BuiltIns.ThrowNullReference();
-            if (StringArrayValue is null) BuiltIns.ThrowNullReference();
+            if (StringValue is null) BuiltIns.ThrowNullReference(nameof(StringValue));
+            if (ByteArrayValue is null) BuiltIns.ThrowNullReference(nameof(ByteArrayValue));
+            if (BoolArrayValue is null) BuiltIns.ThrowNullReference(nameof(BoolArrayValue));
+            if (IntegerArrayValue is null) BuiltIns.ThrowNullReference(nameof(IntegerArrayValue));
+            if (DoubleArrayValue is null) BuiltIns.ThrowNullReference(nameof(DoubleArrayValue));
+            if (StringArrayValue is null) BuiltIns.ThrowNullReference(nameof(StringArrayValue));
             for (int i = 0; i < StringArrayValue.Length; i++)
             {
                 if (StringArrayValue[i] is null) BuiltIns.ThrowNullReference(nameof(StringArrayValue), i);

@@ -81,17 +81,20 @@ namespace Iviz.Msgs.IvizMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(Frames.Length);
             b.SerializeArray(Frames);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(Frames.Length);
             b.SerializeArray(Frames);
         }
         
         public void RosValidate()
         {
-            if (Frames is null) BuiltIns.ThrowNullReference();
+            if (Frames is null) BuiltIns.ThrowNullReference(nameof(Frames));
             for (int i = 0; i < Frames.Length; i++)
             {
                 if (Frames[i] is null) BuiltIns.ThrowNullReference(nameof(Frames), i);
@@ -202,20 +205,27 @@ namespace Iviz.Msgs.IvizMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(IsValid.Length);
             b.SerializeStructArray(IsValid);
+            b.Serialize(Poses.Length);
             b.SerializeStructArray(Poses);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(IsValid.Length);
             b.SerializeStructArray(IsValid);
+            b.Align4();
+            b.Serialize(Poses.Length);
+            b.Align8();
             b.SerializeStructArray(Poses);
         }
         
         public void RosValidate()
         {
-            if (IsValid is null) BuiltIns.ThrowNullReference();
-            if (Poses is null) BuiltIns.ThrowNullReference();
+            if (IsValid is null) BuiltIns.ThrowNullReference(nameof(IsValid));
+            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
         }
     
         public int RosMessageLength

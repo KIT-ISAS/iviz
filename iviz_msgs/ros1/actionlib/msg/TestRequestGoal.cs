@@ -79,11 +79,15 @@ namespace Iviz.Msgs.Actionlib
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(TerminateStatus);
             b.Serialize(IgnoreCancel);
+            b.Align4();
             b.Serialize(ResultText);
+            b.Align4();
             b.Serialize(TheResult);
             b.Serialize(IsSimpleClient);
+            b.Align4();
             b.Serialize(DelayAccept);
             b.Serialize(DelayTerminate);
             b.Serialize(PauseStatus);
@@ -91,7 +95,7 @@ namespace Iviz.Msgs.Actionlib
         
         public void RosValidate()
         {
-            if (ResultText is null) BuiltIns.ThrowNullReference();
+            if (ResultText is null) BuiltIns.ThrowNullReference(nameof(ResultText));
         }
     
         public int RosMessageLength

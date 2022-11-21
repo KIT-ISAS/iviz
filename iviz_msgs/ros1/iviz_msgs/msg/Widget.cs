@@ -96,22 +96,26 @@ namespace Iviz.Msgs.IvizMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(Action);
+            b.Align4();
             b.Serialize(Id);
             b.Serialize(Type);
+            b.Align8();
             b.Serialize(in Pose);
             b.Serialize(in Color);
             b.Serialize(in SecondColor);
+            b.Align8();
             b.Serialize(Scale);
             b.Serialize(SecondScale);
             b.Serialize(Caption);
+            b.Align4();
             b.Serialize(SecondCaption);
         }
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference();
-            if (Caption is null) BuiltIns.ThrowNullReference();
-            if (SecondCaption is null) BuiltIns.ThrowNullReference();
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Caption is null) BuiltIns.ThrowNullReference(nameof(Caption));
+            if (SecondCaption is null) BuiltIns.ThrowNullReference(nameof(SecondCaption));
         }
     
         public int RosMessageLength

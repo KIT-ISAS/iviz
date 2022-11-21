@@ -55,14 +55,15 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Uuid);
             MeshMaterials.RosSerialize(ref b);
         }
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference();
-            if (MeshMaterials is null) BuiltIns.ThrowNullReference();
+            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
+            if (MeshMaterials is null) BuiltIns.ThrowNullReference(nameof(MeshMaterials));
             MeshMaterials.RosValidate();
         }
     

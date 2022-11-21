@@ -166,7 +166,9 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(in Color);
             b.Serialize(Lifetime);
             b.Serialize(FrameLocked);
+            b.Serialize(Points.Length);
             b.SerializeStructArray(Points);
+            b.Serialize(Colors.Length);
             b.SerializeStructArray(Colors);
             b.Serialize(Text);
             b.Serialize(MeshResource);
@@ -176,29 +178,37 @@ namespace Iviz.Msgs.VisualizationMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Ns);
+            b.Align4();
             b.Serialize(Id);
             b.Serialize(Type);
             b.Serialize(Action);
+            b.Align8();
             b.Serialize(in Pose);
             b.Serialize(in Scale);
             b.Serialize(in Color);
             b.Serialize(Lifetime);
             b.Serialize(FrameLocked);
+            b.Align4();
+            b.Serialize(Points.Length);
+            b.Align8();
             b.SerializeStructArray(Points);
+            b.Serialize(Colors.Length);
             b.SerializeStructArray(Colors);
             b.Serialize(Text);
+            b.Align4();
             b.Serialize(MeshResource);
             b.Serialize(MeshUseEmbeddedMaterials);
         }
         
         public void RosValidate()
         {
-            if (Ns is null) BuiltIns.ThrowNullReference();
-            if (Points is null) BuiltIns.ThrowNullReference();
-            if (Colors is null) BuiltIns.ThrowNullReference();
-            if (Text is null) BuiltIns.ThrowNullReference();
-            if (MeshResource is null) BuiltIns.ThrowNullReference();
+            if (Ns is null) BuiltIns.ThrowNullReference(nameof(Ns));
+            if (Points is null) BuiltIns.ThrowNullReference(nameof(Points));
+            if (Colors is null) BuiltIns.ThrowNullReference(nameof(Colors));
+            if (Text is null) BuiltIns.ThrowNullReference(nameof(Text));
+            if (MeshResource is null) BuiltIns.ThrowNullReference(nameof(MeshResource));
         }
     
         public int RosMessageLength

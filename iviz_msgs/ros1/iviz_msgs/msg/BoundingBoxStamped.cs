@@ -52,7 +52,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Boundary is null) BuiltIns.ThrowNullReference();
+            if (Boundary is null) BuiltIns.ThrowNullReference(nameof(Boundary));
             Boundary.RosValidate();
         }
     

@@ -116,13 +116,17 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Name);
+            b.Align4();
             b.Serialize(Filename);
+            b.Align4();
             b.Serialize(Includes.Length);
             foreach (var t in Includes)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(Lights.Length);
             foreach (var t in Lights)
             {
@@ -132,15 +136,15 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
-            if (Filename is null) BuiltIns.ThrowNullReference();
-            if (Includes is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Filename is null) BuiltIns.ThrowNullReference(nameof(Filename));
+            if (Includes is null) BuiltIns.ThrowNullReference(nameof(Includes));
             for (int i = 0; i < Includes.Length; i++)
             {
                 if (Includes[i] is null) BuiltIns.ThrowNullReference(nameof(Includes), i);
                 Includes[i].RosValidate();
             }
-            if (Lights is null) BuiltIns.ThrowNullReference();
+            if (Lights is null) BuiltIns.ThrowNullReference(nameof(Lights));
             for (int i = 0; i < Lights.Length; i++)
             {
                 if (Lights[i] is null) BuiltIns.ThrowNullReference(nameof(Lights), i);

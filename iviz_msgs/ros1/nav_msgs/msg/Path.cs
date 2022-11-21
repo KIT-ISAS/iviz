@@ -73,6 +73,7 @@ namespace Iviz.Msgs.NavMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Poses.Length);
             foreach (var t in Poses)
             {
@@ -82,7 +83,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Poses is null) BuiltIns.ThrowNullReference();
+            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
             for (int i = 0; i < Poses.Length; i++)
             {
                 if (Poses[i] is null) BuiltIns.ThrowNullReference(nameof(Poses), i);

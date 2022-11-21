@@ -66,6 +66,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Dialogs.Length);
             foreach (var t in Dialogs)
             {
@@ -75,7 +76,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Dialogs is null) BuiltIns.ThrowNullReference();
+            if (Dialogs is null) BuiltIns.ThrowNullReference(nameof(Dialogs));
             for (int i = 0; i < Dialogs.Length; i++)
             {
                 if (Dialogs[i] is null) BuiltIns.ThrowNullReference(nameof(Dialogs), i);

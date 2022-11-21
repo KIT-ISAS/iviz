@@ -42,12 +42,13 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Data);
         }
         
         public void RosValidate()
         {
-            if (Data is null) BuiltIns.ThrowNullReference();
+            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
         }
     
         public int RosMessageLength

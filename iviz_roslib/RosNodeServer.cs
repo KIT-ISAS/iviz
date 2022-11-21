@@ -295,7 +295,7 @@ internal sealed class RosNodeServer
                 return ErrorResponse("Failed to parse UDP entries");
             }
 
-            if (port is < 0 or >= ushort.MaxValue)
+            if (port is <= 0 or >= ushort.MaxValue)
             {
                 return ErrorResponse($"Invalid port: {port.ToString()}");
             }

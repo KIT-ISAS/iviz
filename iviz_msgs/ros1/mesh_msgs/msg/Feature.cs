@@ -71,6 +71,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align8();
             b.Serialize(in Location);
             b.Serialize(Descriptor.Length);
             foreach (var t in Descriptor)
@@ -81,7 +82,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Descriptor is null) BuiltIns.ThrowNullReference();
+            if (Descriptor is null) BuiltIns.ThrowNullReference(nameof(Descriptor));
             for (int i = 0; i < Descriptor.Length; i++)
             {
                 if (Descriptor[i] is null) BuiltIns.ThrowNullReference(nameof(Descriptor), i);

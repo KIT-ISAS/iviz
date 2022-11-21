@@ -168,8 +168,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Id);
             b.Serialize(Passed);
+            b.Align4();
             b.Serialize(Status.Length);
             foreach (var t in Status)
             {
@@ -179,8 +181,8 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference();
-            if (Status is null) BuiltIns.ThrowNullReference();
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Status is null) BuiltIns.ThrowNullReference(nameof(Status));
             for (int i = 0; i < Status.Length; i++)
             {
                 if (Status[i] is null) BuiltIns.ThrowNullReference(nameof(Status), i);

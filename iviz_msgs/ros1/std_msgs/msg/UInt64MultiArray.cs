@@ -68,20 +68,24 @@ namespace Iviz.Msgs.StdMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Layout.RosSerialize(ref b);
+            b.Serialize(Data.Length);
             b.SerializeStructArray(Data);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Layout.RosSerialize(ref b);
+            b.Align4();
+            b.Serialize(Data.Length);
+            b.Align8();
             b.SerializeStructArray(Data);
         }
         
         public void RosValidate()
         {
-            if (Layout is null) BuiltIns.ThrowNullReference();
+            if (Layout is null) BuiltIns.ThrowNullReference(nameof(Layout));
             Layout.RosValidate();
-            if (Data is null) BuiltIns.ThrowNullReference();
+            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
         }
     
         public int RosMessageLength

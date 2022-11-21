@@ -92,7 +92,9 @@ namespace Iviz.Msgs.HriMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Expression_);
+            b.Align4();
             b.Serialize(Valence);
             b.Serialize(Arousal);
             b.Serialize(Confidence);
@@ -100,7 +102,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            if (Expression_ is null) BuiltIns.ThrowNullReference();
+            if (Expression_ is null) BuiltIns.ThrowNullReference(nameof(Expression_));
         }
     
         public int RosMessageLength

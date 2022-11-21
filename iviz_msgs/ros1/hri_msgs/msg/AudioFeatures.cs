@@ -80,21 +80,24 @@ namespace Iviz.Msgs.HriMsgs
             b.Serialize(RMS);
             b.Serialize(Pitch);
             b.Serialize(HNR);
+            b.Serialize(MFCC.Length);
             b.SerializeStructArray(MFCC);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(ZCR);
             b.Serialize(RMS);
             b.Serialize(Pitch);
             b.Serialize(HNR);
+            b.Serialize(MFCC.Length);
             b.SerializeStructArray(MFCC);
         }
         
         public void RosValidate()
         {
-            if (MFCC is null) BuiltIns.ThrowNullReference();
+            if (MFCC is null) BuiltIns.ThrowNullReference(nameof(MFCC));
         }
     
         public int RosMessageLength

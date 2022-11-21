@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using Iviz.Msgs.GeometryMsgs;
 using Iviz.Tools;
 
 namespace Iviz.Msgs;
@@ -10,30 +9,24 @@ namespace Iviz.Msgs;
 /// </summary>
 public unsafe struct WriteBuffer
 {
-    readonly byte* ptr;
-    int offset;
-    int remaining;
+    byte* cursor;
+    readonly byte* end;
 
     public WriteBuffer(byte* ptr, int length)
     {
-        this.ptr = ptr;
-        offset = 0;
-        remaining = length;
+        cursor = ptr;
+        end = ptr + length;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    void Advance(int value)
-    {
-        offset += value;
-        remaining -= value;
-    }
+    void Advance(int value) => cursor += value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     readonly void ThrowIfOutOfRange(int off)
     {
-        if ((uint)off > (uint)remaining)
+        if ((nuint)off > (nuint)end - (nuint)cursor)
         {
-            BuiltIns.ThrowBufferOverflow(off, remaining);
+            BuiltIns.ThrowBufferOverflow();
         }
     }
 
@@ -52,10 +45,18 @@ public unsafe struct WriteBuffer
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Serialize(int val)
+    {
+        ThrowIfOutOfRange(sizeof(int));
+        *(int*)cursor = val;
+        Advance(sizeof(int));
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Serialize<T>(in T val) where T : unmanaged
     {
         ThrowIfOutOfRange(sizeof(T));
-        *(T*)(ptr + offset) = val;
+        *(T*)cursor = val;
         Advance(sizeof(T));
     }
 
@@ -78,7 +79,7 @@ public unsafe struct WriteBuffer
             {
                 WriteInt(length);
                 ThrowIfOutOfRange(length);
-                BuiltIns.WriteStringSimple(valPtr, ptr + offset, length);
+                BuiltIns.WriteStringSimple(valPtr, cursor, length);
                 Advance(length);
             }
             else
@@ -86,12 +87,20 @@ public unsafe struct WriteBuffer
                 int byteCount = BuiltIns.UTF8.GetByteCount(val);
                 WriteInt(byteCount);
                 ThrowIfOutOfRange(byteCount);
-                BuiltIns.UTF8.GetBytes(valPtr, val.Length, ptr + offset, remaining);
+                BuiltIns.UTF8.GetBytes(valPtr, val.Length, cursor, byteCount);
                 Advance(byteCount);
             }
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SerializeArray(string[] val, int count)
+    {
+        ThrowIfWrongSize(val, count);
+        SerializeArray(val);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeArray(string[] val)
     {
         WriteInt(val.Length);
@@ -101,54 +110,36 @@ public unsafe struct WriteBuffer
         }
     }
 
-    public void SerializeArray(string[] val, int count)
-    {
-        ThrowIfWrongSize(val, count);
-        foreach (string str in val)
-        {
-            Serialize(str);
-        }
-    }
-
-    public void SerializeStructArray<T>(T[] val) where T : unmanaged
-    {
-        int sizeOfT = Unsafe.SizeOf<T>();
-        int size = val.Length * sizeOfT;
-        ThrowIfOutOfRange(4 + size);
-
-        WriteInt(val.Length);
-        fixed (T* valPtr = val)
-        {
-            Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
-        }
-
-        Advance(size);
-    }
-
-    public void SerializeStructArray(SharedRent val)
-    {
-        const int sizeOfT = sizeof(byte);
-        int size = val.Length * sizeOfT;
-        ThrowIfOutOfRange(4 + size);
-
-        WriteInt(val.Length);
-        fixed (byte* valPtr = val.Array)
-        {
-            Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
-        }
-
-        Advance(size);
-    }
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeStructArray<T>(T[] val, int count) where T : unmanaged
     {
         ThrowIfWrongSize(val, count);
+        SerializeStructArray(val);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SerializeStructArray<T>(T[] val) where T : unmanaged
+    {
         int size = val.Length * sizeof(T);
         ThrowIfOutOfRange(size);
 
         fixed (T* valPtr = val)
         {
-            Unsafe.CopyBlock(ptr + offset, valPtr, (uint)size);
+            Unsafe.CopyBlock(cursor, valPtr, (uint)size);
+        }
+
+        Advance(size);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SerializeStructArray(SharedRent val)
+    {
+        int size = val.Length;
+        ThrowIfOutOfRange(size);
+
+        fixed (byte* valPtr = val.Array)
+        {
+            Unsafe.CopyBlock(cursor, valPtr, (uint)size);
         }
 
         Advance(size);
@@ -192,7 +183,7 @@ public unsafe struct WriteBuffer
             message.RosSerialize(ref b);
         }
     }
-    
+
     public static void Serialize(Serializer serializer, IMessage message, Span<byte> buffer)
     {
         fixed (byte* bufferPtr = buffer)
@@ -200,5 +191,5 @@ public unsafe struct WriteBuffer
             var b = new WriteBuffer2(bufferPtr, buffer.Length);
             serializer.RosSerialize(message, ref b);
         }
-    }    
+    }
 }

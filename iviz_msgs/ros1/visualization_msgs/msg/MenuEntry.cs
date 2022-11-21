@@ -97,17 +97,19 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Id);
             b.Serialize(ParentId);
             b.Serialize(Title);
+            b.Align4();
             b.Serialize(Command);
             b.Serialize(CommandType);
         }
         
         public void RosValidate()
         {
-            if (Title is null) BuiltIns.ThrowNullReference();
-            if (Command is null) BuiltIns.ThrowNullReference();
+            if (Title is null) BuiltIns.ThrowNullReference(nameof(Title));
+            if (Command is null) BuiltIns.ThrowNullReference(nameof(Command));
         }
     
         public int RosMessageLength

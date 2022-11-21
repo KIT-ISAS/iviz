@@ -179,7 +179,9 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(PowerSupplyHealth);
             b.Serialize(PowerSupplyTechnology);
             b.Serialize(Present);
+            b.Serialize(CellVoltage.Length);
             b.SerializeStructArray(CellVoltage);
+            b.Serialize(CellTemperature.Length);
             b.SerializeStructArray(CellTemperature);
             b.Serialize(Location);
             b.Serialize(SerialNumber);
@@ -188,6 +190,7 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Voltage);
             b.Serialize(Temperature);
             b.Serialize(Current);
@@ -199,18 +202,22 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(PowerSupplyHealth);
             b.Serialize(PowerSupplyTechnology);
             b.Serialize(Present);
+            b.Align4();
+            b.Serialize(CellVoltage.Length);
             b.SerializeStructArray(CellVoltage);
+            b.Serialize(CellTemperature.Length);
             b.SerializeStructArray(CellTemperature);
             b.Serialize(Location);
+            b.Align4();
             b.Serialize(SerialNumber);
         }
         
         public void RosValidate()
         {
-            if (CellVoltage is null) BuiltIns.ThrowNullReference();
-            if (CellTemperature is null) BuiltIns.ThrowNullReference();
-            if (Location is null) BuiltIns.ThrowNullReference();
-            if (SerialNumber is null) BuiltIns.ThrowNullReference();
+            if (CellVoltage is null) BuiltIns.ThrowNullReference(nameof(CellVoltage));
+            if (CellTemperature is null) BuiltIns.ThrowNullReference(nameof(CellTemperature));
+            if (Location is null) BuiltIns.ThrowNullReference(nameof(Location));
+            if (SerialNumber is null) BuiltIns.ThrowNullReference(nameof(SerialNumber));
         }
     
         public int RosMessageLength

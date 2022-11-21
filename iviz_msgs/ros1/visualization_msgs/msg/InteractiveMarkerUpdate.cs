@@ -125,43 +125,50 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 t.RosSerialize(ref b);
             }
+            b.Serialize(Erases.Length);
             b.SerializeArray(Erases);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(ServerId);
+            b.Align8();
             b.Serialize(SeqNum);
             b.Serialize(Type);
+            b.Align4();
             b.Serialize(Markers.Length);
             foreach (var t in Markers)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(Poses.Length);
             foreach (var t in Poses)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
+            b.Serialize(Erases.Length);
             b.SerializeArray(Erases);
         }
         
         public void RosValidate()
         {
-            if (ServerId is null) BuiltIns.ThrowNullReference();
-            if (Markers is null) BuiltIns.ThrowNullReference();
+            if (ServerId is null) BuiltIns.ThrowNullReference(nameof(ServerId));
+            if (Markers is null) BuiltIns.ThrowNullReference(nameof(Markers));
             for (int i = 0; i < Markers.Length; i++)
             {
                 if (Markers[i] is null) BuiltIns.ThrowNullReference(nameof(Markers), i);
                 Markers[i].RosValidate();
             }
-            if (Poses is null) BuiltIns.ThrowNullReference();
+            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
             for (int i = 0; i < Poses.Length; i++)
             {
                 if (Poses[i] is null) BuiltIns.ThrowNullReference(nameof(Poses), i);
                 Poses[i].RosValidate();
             }
-            if (Erases is null) BuiltIns.ThrowNullReference();
+            if (Erases is null) BuiltIns.ThrowNullReference(nameof(Erases));
             for (int i = 0; i < Erases.Length; i++)
             {
                 if (Erases[i] is null) BuiltIns.ThrowNullReference(nameof(Erases), i);

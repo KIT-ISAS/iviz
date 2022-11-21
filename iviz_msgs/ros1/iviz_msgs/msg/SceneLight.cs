@@ -73,10 +73,12 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Name);
             b.Serialize(Type);
             b.Serialize(CastShadows);
             b.Serialize(in Diffuse);
+            b.Align4();
             b.Serialize(Range);
             b.Serialize(in Position);
             b.Serialize(in Direction);
@@ -86,7 +88,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
         }
     
         public int RosMessageLength

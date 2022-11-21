@@ -132,6 +132,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(in BackgroundColor);
             b.Serialize(Title);
             b.Serialize(Caption);
+            b.Serialize(MenuEntries.Length);
             b.SerializeArray(MenuEntries);
             b.Serialize(BindingType);
             b.Serialize(in TfOffset);
@@ -143,17 +144,25 @@ namespace Iviz.Msgs.IvizMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(Action);
+            b.Align4();
             b.Serialize(Id);
+            b.Align4();
             b.Serialize(Lifetime);
+            b.Align8();
             b.Serialize(Scale);
             b.Serialize(Type);
             b.Serialize(Buttons);
             b.Serialize(Icon);
+            b.Align4();
             b.Serialize(in BackgroundColor);
             b.Serialize(Title);
+            b.Align4();
             b.Serialize(Caption);
+            b.Align4();
+            b.Serialize(MenuEntries.Length);
             b.SerializeArray(MenuEntries);
             b.Serialize(BindingType);
+            b.Align8();
             b.Serialize(in TfOffset);
             b.Serialize(in DialogDisplacement);
             b.Serialize(in TfDisplacement);
@@ -161,10 +170,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference();
-            if (Title is null) BuiltIns.ThrowNullReference();
-            if (Caption is null) BuiltIns.ThrowNullReference();
-            if (MenuEntries is null) BuiltIns.ThrowNullReference();
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Title is null) BuiltIns.ThrowNullReference(nameof(Title));
+            if (Caption is null) BuiltIns.ThrowNullReference(nameof(Caption));
+            if (MenuEntries is null) BuiltIns.ThrowNullReference(nameof(MenuEntries));
             for (int i = 0; i < MenuEntries.Length; i++)
             {
                 if (MenuEntries[i] is null) BuiltIns.ThrowNullReference(nameof(MenuEntries), i);

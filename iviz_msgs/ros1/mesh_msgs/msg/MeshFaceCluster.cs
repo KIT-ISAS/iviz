@@ -64,20 +64,23 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(FaceIndices.Length);
             b.SerializeStructArray(FaceIndices);
             b.Serialize(Label);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(FaceIndices.Length);
             b.SerializeStructArray(FaceIndices);
             b.Serialize(Label);
         }
         
         public void RosValidate()
         {
-            if (FaceIndices is null) BuiltIns.ThrowNullReference();
-            if (Label is null) BuiltIns.ThrowNullReference();
+            if (FaceIndices is null) BuiltIns.ThrowNullReference(nameof(FaceIndices));
+            if (Label is null) BuiltIns.ThrowNullReference(nameof(Label));
         }
     
         public int RosMessageLength

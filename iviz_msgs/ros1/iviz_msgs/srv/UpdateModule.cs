@@ -96,26 +96,31 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Id);
+            b.Serialize(Fields.Length);
             b.SerializeArray(Fields);
             b.Serialize(Config);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Id);
+            b.Align4();
+            b.Serialize(Fields.Length);
             b.SerializeArray(Fields);
+            b.Align4();
             b.Serialize(Config);
         }
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference();
-            if (Fields is null) BuiltIns.ThrowNullReference();
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Fields is null) BuiltIns.ThrowNullReference(nameof(Fields));
             for (int i = 0; i < Fields.Length; i++)
             {
                 if (Fields[i] is null) BuiltIns.ThrowNullReference(nameof(Fields), i);
             }
-            if (Config is null) BuiltIns.ThrowNullReference();
+            if (Config is null) BuiltIns.ThrowNullReference(nameof(Config));
         }
     
         public int RosMessageLength
@@ -192,12 +197,13 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Success);
+            b.Align4();
             b.Serialize(Message);
         }
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference();
+            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
         }
     
         public int RosMessageLength

@@ -52,6 +52,7 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align8();
             b.Serialize(in Transform);
             b.Serialize(IsValid);
         }

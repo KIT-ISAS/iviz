@@ -101,6 +101,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
             Header.RosSerialize(ref b);
             Status.RosSerialize(ref b);
+            b.Align8();
             b.Serialize(Latitude);
             b.Serialize(Longitude);
             b.Serialize(Altitude);
@@ -110,10 +111,10 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Status is null) BuiltIns.ThrowNullReference();
+            if (Status is null) BuiltIns.ThrowNullReference(nameof(Status));
             Status.RosValidate();
-            if (PositionCovariance is null) BuiltIns.ThrowNullReference();
-            if (PositionCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(PositionCovariance.Length, 9);
+            if (PositionCovariance is null) BuiltIns.ThrowNullReference(nameof(PositionCovariance));
+            if (PositionCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(PositionCovariance), PositionCovariance.Length, 9);
         }
     
         public int RosMessageLength

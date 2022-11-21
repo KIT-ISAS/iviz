@@ -61,13 +61,15 @@ namespace Iviz.Msgs.GeometryMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(ChildFrameId);
+            b.Align8();
             b.Serialize(in Transform);
         }
         
         public void RosValidate()
         {
-            if (ChildFrameId is null) BuiltIns.ThrowNullReference();
+            if (ChildFrameId is null) BuiltIns.ThrowNullReference(nameof(ChildFrameId));
         }
     
         public int RosMessageLength

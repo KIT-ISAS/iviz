@@ -80,20 +80,24 @@ namespace Iviz.Msgs.SensorMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(Format);
+            b.Serialize(Data.Length);
             b.SerializeStructArray(Data);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Format);
+            b.Align4();
+            b.Serialize(Data.Length);
             b.SerializeStructArray(Data);
         }
         
         public void RosValidate()
         {
-            if (Format is null) BuiltIns.ThrowNullReference();
-            if (Data is null) BuiltIns.ThrowNullReference();
+            if (Format is null) BuiltIns.ThrowNullReference(nameof(Format));
+            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
         }
     
         public int RosMessageLength

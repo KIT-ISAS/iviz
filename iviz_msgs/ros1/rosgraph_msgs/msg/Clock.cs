@@ -44,6 +44,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Clock_);
         }
         

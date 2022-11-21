@@ -147,30 +147,34 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Name);
+            b.Align8();
             b.Serialize(in Orientation);
             b.Serialize(OrientationMode);
             b.Serialize(InteractionMode);
             b.Serialize(AlwaysVisible);
+            b.Align4();
             b.Serialize(Markers.Length);
             foreach (var t in Markers)
             {
                 t.RosSerialize(ref b);
             }
             b.Serialize(IndependentMarkerOrientation);
+            b.Align4();
             b.Serialize(Description);
         }
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
-            if (Markers is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Markers is null) BuiltIns.ThrowNullReference(nameof(Markers));
             for (int i = 0; i < Markers.Length; i++)
             {
                 if (Markers[i] is null) BuiltIns.ThrowNullReference(nameof(Markers), i);
                 Markers[i].RosValidate();
             }
-            if (Description is null) BuiltIns.ThrowNullReference();
+            if (Description is null) BuiltIns.ThrowNullReference(nameof(Description));
         }
     
         public int RosMessageLength

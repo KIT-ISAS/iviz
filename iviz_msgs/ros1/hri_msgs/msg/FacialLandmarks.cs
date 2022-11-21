@@ -163,18 +163,20 @@ namespace Iviz.Msgs.HriMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(Landmarks.Length);
             foreach (var t in Landmarks)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(Height);
             b.Serialize(Width);
         }
         
         public void RosValidate()
         {
-            if (Landmarks is null) BuiltIns.ThrowNullReference();
+            if (Landmarks is null) BuiltIns.ThrowNullReference(nameof(Landmarks));
             for (int i = 0; i < Landmarks.Length; i++)
             {
                 if (Landmarks[i] is null) BuiltIns.ThrowNullReference(nameof(Landmarks), i);

@@ -117,6 +117,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(Transforms.Length);
             b.SerializeStructArray(Transforms);
             b.Serialize(Velocities.Length);
             foreach (var t in Velocities)
@@ -133,30 +134,35 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(Transforms.Length);
+            b.Align8();
             b.SerializeStructArray(Transforms);
             b.Serialize(Velocities.Length);
             foreach (var t in Velocities)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(Accelerations.Length);
             foreach (var t in Accelerations)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(TimeFromStart);
         }
         
         public void RosValidate()
         {
-            if (Transforms is null) BuiltIns.ThrowNullReference();
-            if (Velocities is null) BuiltIns.ThrowNullReference();
+            if (Transforms is null) BuiltIns.ThrowNullReference(nameof(Transforms));
+            if (Velocities is null) BuiltIns.ThrowNullReference(nameof(Velocities));
             for (int i = 0; i < Velocities.Length; i++)
             {
                 if (Velocities[i] is null) BuiltIns.ThrowNullReference(nameof(Velocities), i);
                 Velocities[i].RosValidate();
             }
-            if (Accelerations is null) BuiltIns.ThrowNullReference();
+            if (Accelerations is null) BuiltIns.ThrowNullReference(nameof(Accelerations));
             for (int i = 0; i < Accelerations.Length; i++)
             {
                 if (Accelerations[i] is null) BuiltIns.ThrowNullReference(nameof(Accelerations), i);

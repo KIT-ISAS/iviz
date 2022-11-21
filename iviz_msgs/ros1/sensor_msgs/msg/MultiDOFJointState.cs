@@ -130,7 +130,9 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
+            b.Serialize(JointNames.Length);
             b.SerializeArray(JointNames);
+            b.Serialize(Transforms.Length);
             b.SerializeStructArray(Transforms);
             b.Serialize(Twist.Length);
             foreach (var t in Twist)
@@ -147,13 +149,19 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
+            b.Serialize(JointNames.Length);
             b.SerializeArray(JointNames);
+            b.Align4();
+            b.Serialize(Transforms.Length);
+            b.Align8();
             b.SerializeStructArray(Transforms);
             b.Serialize(Twist.Length);
             foreach (var t in Twist)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(Wrench.Length);
             foreach (var t in Wrench)
             {
@@ -163,19 +171,19 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (JointNames is null) BuiltIns.ThrowNullReference();
+            if (JointNames is null) BuiltIns.ThrowNullReference(nameof(JointNames));
             for (int i = 0; i < JointNames.Length; i++)
             {
                 if (JointNames[i] is null) BuiltIns.ThrowNullReference(nameof(JointNames), i);
             }
-            if (Transforms is null) BuiltIns.ThrowNullReference();
-            if (Twist is null) BuiltIns.ThrowNullReference();
+            if (Transforms is null) BuiltIns.ThrowNullReference(nameof(Transforms));
+            if (Twist is null) BuiltIns.ThrowNullReference(nameof(Twist));
             for (int i = 0; i < Twist.Length; i++)
             {
                 if (Twist[i] is null) BuiltIns.ThrowNullReference(nameof(Twist), i);
                 Twist[i].RosValidate();
             }
-            if (Wrench is null) BuiltIns.ThrowNullReference();
+            if (Wrench is null) BuiltIns.ThrowNullReference(nameof(Wrench));
             for (int i = 0; i < Wrench.Length; i++)
             {
                 if (Wrench[i] is null) BuiltIns.ThrowNullReference(nameof(Wrench), i);

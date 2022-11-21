@@ -60,10 +60,12 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(MapLoadTime);
             b.Serialize(Resolution);
             b.Serialize(Width);
             b.Serialize(Height);
+            b.Align8();
             b.Serialize(in Origin);
         }
         

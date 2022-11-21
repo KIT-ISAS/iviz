@@ -100,21 +100,26 @@ namespace Iviz.Msgs.VisualizationMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
             b.Serialize(ClientId);
+            b.Align4();
             b.Serialize(MarkerName);
+            b.Align4();
             b.Serialize(ControlName);
             b.Serialize(EventType);
+            b.Align8();
             b.Serialize(in Pose);
             b.Serialize(MenuEntryId);
+            b.Align8();
             b.Serialize(in MousePoint);
             b.Serialize(MousePointValid);
         }
         
         public void RosValidate()
         {
-            if (ClientId is null) BuiltIns.ThrowNullReference();
-            if (MarkerName is null) BuiltIns.ThrowNullReference();
-            if (ControlName is null) BuiltIns.ThrowNullReference();
+            if (ClientId is null) BuiltIns.ThrowNullReference(nameof(ClientId));
+            if (MarkerName is null) BuiltIns.ThrowNullReference(nameof(MarkerName));
+            if (ControlName is null) BuiltIns.ThrowNullReference(nameof(ControlName));
         }
     
         public int RosMessageLength

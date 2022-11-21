@@ -104,6 +104,7 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align8();
             b.Serialize(in Orientation);
             b.SerializeStructArray(OrientationCovariance, 9);
             b.Serialize(in AngularVelocity);
@@ -114,12 +115,12 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (OrientationCovariance is null) BuiltIns.ThrowNullReference();
-            if (OrientationCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(OrientationCovariance.Length, 9);
-            if (AngularVelocityCovariance is null) BuiltIns.ThrowNullReference();
-            if (AngularVelocityCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(AngularVelocityCovariance.Length, 9);
-            if (LinearAccelerationCovariance is null) BuiltIns.ThrowNullReference();
-            if (LinearAccelerationCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(LinearAccelerationCovariance.Length, 9);
+            if (OrientationCovariance is null) BuiltIns.ThrowNullReference(nameof(OrientationCovariance));
+            if (OrientationCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(OrientationCovariance), OrientationCovariance.Length, 9);
+            if (AngularVelocityCovariance is null) BuiltIns.ThrowNullReference(nameof(AngularVelocityCovariance));
+            if (AngularVelocityCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(AngularVelocityCovariance), AngularVelocityCovariance.Length, 9);
+            if (LinearAccelerationCovariance is null) BuiltIns.ThrowNullReference(nameof(LinearAccelerationCovariance));
+            if (LinearAccelerationCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(LinearAccelerationCovariance), LinearAccelerationCovariance.Length, 9);
         }
     
         public int RosMessageLength

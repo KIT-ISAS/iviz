@@ -91,18 +91,22 @@ namespace Iviz.Msgs.ShapeMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Type);
+            b.Serialize(Dimensions.Length);
             b.SerializeStructArray(Dimensions);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Serialize(Type);
+            b.Align4();
+            b.Serialize(Dimensions.Length);
+            b.Align8();
             b.SerializeStructArray(Dimensions);
         }
         
         public void RosValidate()
         {
-            if (Dimensions is null) BuiltIns.ThrowNullReference();
+            if (Dimensions is null) BuiltIns.ThrowNullReference(nameof(Dimensions));
         }
     
         public int RosMessageLength

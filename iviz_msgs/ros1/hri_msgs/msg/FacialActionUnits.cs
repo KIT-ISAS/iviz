@@ -275,24 +275,31 @@ namespace Iviz.Msgs.HriMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
+            b.Serialize(FAU.Length);
             b.SerializeStructArray(FAU);
+            b.Serialize(Intensity.Length);
             b.SerializeStructArray(Intensity);
+            b.Serialize(Confidence.Length);
             b.SerializeStructArray(Confidence);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
+            b.Serialize(FAU.Length);
             b.SerializeStructArray(FAU);
+            b.Serialize(Intensity.Length);
             b.SerializeStructArray(Intensity);
+            b.Serialize(Confidence.Length);
             b.SerializeStructArray(Confidence);
         }
         
         public void RosValidate()
         {
-            if (FAU is null) BuiltIns.ThrowNullReference();
-            if (Intensity is null) BuiltIns.ThrowNullReference();
-            if (Confidence is null) BuiltIns.ThrowNullReference();
+            if (FAU is null) BuiltIns.ThrowNullReference(nameof(FAU));
+            if (Intensity is null) BuiltIns.ThrowNullReference(nameof(Intensity));
+            if (Confidence is null) BuiltIns.ThrowNullReference(nameof(Confidence));
         }
     
         public int RosMessageLength

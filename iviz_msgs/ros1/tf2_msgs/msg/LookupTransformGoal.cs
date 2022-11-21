@@ -68,8 +68,11 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(TargetFrame);
+            b.Align4();
             b.Serialize(SourceFrame);
+            b.Align4();
             b.Serialize(SourceTime);
             b.Serialize(Timeout);
             b.Serialize(TargetTime);
@@ -79,9 +82,9 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (TargetFrame is null) BuiltIns.ThrowNullReference();
-            if (SourceFrame is null) BuiltIns.ThrowNullReference();
-            if (FixedFrame is null) BuiltIns.ThrowNullReference();
+            if (TargetFrame is null) BuiltIns.ThrowNullReference(nameof(TargetFrame));
+            if (SourceFrame is null) BuiltIns.ThrowNullReference(nameof(SourceFrame));
+            if (FixedFrame is null) BuiltIns.ThrowNullReference(nameof(FixedFrame));
         }
     
         public int RosMessageLength

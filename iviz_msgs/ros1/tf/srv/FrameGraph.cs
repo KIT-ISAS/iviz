@@ -132,12 +132,13 @@ namespace Iviz.Msgs.Tf
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(DotGraph);
         }
         
         public void RosValidate()
         {
-            if (DotGraph is null) BuiltIns.ThrowNullReference();
+            if (DotGraph is null) BuiltIns.ThrowNullReference(nameof(DotGraph));
         }
     
         public int RosMessageLength

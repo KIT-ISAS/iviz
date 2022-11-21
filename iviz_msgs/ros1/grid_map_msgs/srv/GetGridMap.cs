@@ -102,23 +102,27 @@ namespace Iviz.Msgs.GridMapMsgs
             b.Serialize(PositionY);
             b.Serialize(LengthX);
             b.Serialize(LengthY);
+            b.Serialize(Layers.Length);
             b.SerializeArray(Layers);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(FrameId);
+            b.Align8();
             b.Serialize(PositionX);
             b.Serialize(PositionY);
             b.Serialize(LengthX);
             b.Serialize(LengthY);
+            b.Serialize(Layers.Length);
             b.SerializeArray(Layers);
         }
         
         public void RosValidate()
         {
-            if (FrameId is null) BuiltIns.ThrowNullReference();
-            if (Layers is null) BuiltIns.ThrowNullReference();
+            if (FrameId is null) BuiltIns.ThrowNullReference(nameof(FrameId));
+            if (Layers is null) BuiltIns.ThrowNullReference(nameof(Layers));
             for (int i = 0; i < Layers.Length; i++)
             {
                 if (Layers[i] is null) BuiltIns.ThrowNullReference(nameof(Layers), i);
@@ -197,7 +201,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            if (Map is null) BuiltIns.ThrowNullReference();
+            if (Map is null) BuiltIns.ThrowNullReference(nameof(Map));
             Map.RosValidate();
         }
     

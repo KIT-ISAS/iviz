@@ -20,7 +20,6 @@ namespace Iviz.App
         [SerializeField] Button? clearModelCache;
         [SerializeField] Button? clearSavedFiles;
         [SerializeField] Button? clearHostHistory;
-        [SerializeField] DropdownWidget? modelService;
 
         [SerializeField] TMP_Text? modelCacheLabel;
         [SerializeField] TMP_Text? savedFilesLabel;
@@ -51,13 +50,6 @@ namespace Iviz.App
             ClearModelCache.onClick.AddListener(() => ClearModelCacheClicked?.Invoke());
             ClearSavedFiles.onClick.AddListener(() => ClearSavedFilesClicked?.Invoke());
             ClearHostHistory.onClick.AddListener(() => ClearHostHistoryClicked?.Invoke());
-
-            /*
-            if (Settings.IsMobile)
-            {
-                ModelService.Visible = false;
-            }
-            */
         }
 
         public override void ClearSubscribers()
@@ -67,7 +59,6 @@ namespace Iviz.App
             TargetFps.ClearSubscribers();
             NetworkProcessing.ClearSubscribers();
             Close.ClearSubscribers();
-            //ModelService.ClearSubscribers();
 
             ClearHostHistoryClicked = null;
             ClearModelCacheClicked = null;

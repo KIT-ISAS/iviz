@@ -62,18 +62,21 @@ namespace Iviz.Msgs.PclMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
+            b.Serialize(Indices.Length);
             b.SerializeStructArray(Indices);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
+            b.Serialize(Indices.Length);
             b.SerializeStructArray(Indices);
         }
         
         public void RosValidate()
         {
-            if (Indices is null) BuiltIns.ThrowNullReference();
+            if (Indices is null) BuiltIns.ThrowNullReference(nameof(Indices));
         }
     
         public int RosMessageLength

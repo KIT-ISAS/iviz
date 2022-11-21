@@ -73,15 +73,18 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Name);
+            b.Align4();
             b.Serialize(Offset);
             b.Serialize(Datatype);
+            b.Align4();
             b.Serialize(Count);
         }
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
         }
     
         public int RosMessageLength

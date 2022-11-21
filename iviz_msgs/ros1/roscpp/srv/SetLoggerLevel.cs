@@ -91,14 +91,16 @@ namespace Iviz.Msgs.Roscpp
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Logger);
+            b.Align4();
             b.Serialize(Level);
         }
         
         public void RosValidate()
         {
-            if (Logger is null) BuiltIns.ThrowNullReference();
-            if (Level is null) BuiltIns.ThrowNullReference();
+            if (Logger is null) BuiltIns.ThrowNullReference(nameof(Logger));
+            if (Level is null) BuiltIns.ThrowNullReference(nameof(Level));
         }
     
         public int RosMessageLength

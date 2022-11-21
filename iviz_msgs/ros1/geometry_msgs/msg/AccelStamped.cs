@@ -53,7 +53,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Accel is null) BuiltIns.ThrowNullReference();
+            if (Accel is null) BuiltIns.ThrowNullReference(nameof(Accel));
             Accel.RosValidate();
         }
     

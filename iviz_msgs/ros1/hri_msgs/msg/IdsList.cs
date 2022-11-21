@@ -46,18 +46,21 @@ namespace Iviz.Msgs.HriMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
+            b.Serialize(Ids.Length);
             b.SerializeArray(Ids);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
+            b.Align4();
+            b.Serialize(Ids.Length);
             b.SerializeArray(Ids);
         }
         
         public void RosValidate()
         {
-            if (Ids is null) BuiltIns.ThrowNullReference();
+            if (Ids is null) BuiltIns.ThrowNullReference(nameof(Ids));
             for (int i = 0; i < Ids.Length; i++)
             {
                 if (Ids[i] is null) BuiltIns.ThrowNullReference(nameof(Ids), i);

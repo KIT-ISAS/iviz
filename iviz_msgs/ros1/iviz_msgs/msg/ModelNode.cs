@@ -76,23 +76,28 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Name);
             b.Serialize(Parent);
             Transform.RosSerialize(ref b);
+            b.Serialize(Meshes.Length);
             b.SerializeStructArray(Meshes);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Name);
+            b.Align4();
             b.Serialize(Parent);
             Transform.RosSerialize(ref b);
+            b.Align4();
+            b.Serialize(Meshes.Length);
             b.SerializeStructArray(Meshes);
         }
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
-            if (Transform is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Transform is null) BuiltIns.ThrowNullReference(nameof(Transform));
             Transform.RosValidate();
-            if (Meshes is null) BuiltIns.ThrowNullReference();
+            if (Meshes is null) BuiltIns.ThrowNullReference(nameof(Meshes));
         }
     
         public int RosMessageLength

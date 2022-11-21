@@ -49,14 +49,16 @@ namespace Iviz.Msgs.Roscpp
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Name);
+            b.Align4();
             b.Serialize(Level);
         }
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
-            if (Level is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Level is null) BuiltIns.ThrowNullReference(nameof(Level));
         }
     
         public int RosMessageLength

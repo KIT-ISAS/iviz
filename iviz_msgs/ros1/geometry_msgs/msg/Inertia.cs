@@ -70,6 +70,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align8();
             b.Serialize(M);
             b.Serialize(in Com);
             b.Serialize(Ixx);

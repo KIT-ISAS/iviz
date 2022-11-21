@@ -60,6 +60,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public readonly void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Stamp);
             b.Serialize(FrameId ?? "");
         }

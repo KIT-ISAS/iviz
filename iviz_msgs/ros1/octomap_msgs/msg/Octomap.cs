@@ -75,6 +75,7 @@ namespace Iviz.Msgs.OctomapMsgs
             b.Serialize(Binary);
             b.Serialize(Id);
             b.Serialize(Resolution);
+            b.Serialize(Data.Length);
             b.SerializeStructArray(Data);
         }
         
@@ -82,15 +83,18 @@ namespace Iviz.Msgs.OctomapMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(Binary);
+            b.Align4();
             b.Serialize(Id);
+            b.Align8();
             b.Serialize(Resolution);
+            b.Serialize(Data.Length);
             b.SerializeStructArray(Data);
         }
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference();
-            if (Data is null) BuiltIns.ThrowNullReference();
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
         }
     
         public int RosMessageLength

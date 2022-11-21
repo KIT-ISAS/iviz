@@ -80,17 +80,20 @@ namespace Iviz.Msgs.RclInterfaces
     
         public void RosSerialize(ref WriteBuffer b)
         {
+            b.Serialize(Names.Length);
             b.SerializeArray(Names);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
+            b.Serialize(Names.Length);
             b.SerializeArray(Names);
         }
         
         public void RosValidate()
         {
-            if (Names is null) BuiltIns.ThrowNullReference();
+            if (Names is null) BuiltIns.ThrowNullReference(nameof(Names));
             for (int i = 0; i < Names.Length; i++)
             {
                 if (Names[i] is null) BuiltIns.ThrowNullReference(nameof(Names), i);
@@ -184,6 +187,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Descriptors.Length);
             foreach (var t in Descriptors)
             {
@@ -193,7 +197,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Descriptors is null) BuiltIns.ThrowNullReference();
+            if (Descriptors is null) BuiltIns.ThrowNullReference(nameof(Descriptors));
             for (int i = 0; i < Descriptors.Length; i++)
             {
                 if (Descriptors[i] is null) BuiltIns.ThrowNullReference(nameof(Descriptors), i);

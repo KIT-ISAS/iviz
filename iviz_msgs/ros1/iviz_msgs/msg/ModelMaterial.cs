@@ -106,16 +106,19 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Name);
             b.Serialize(in Ambient);
             b.Serialize(in Diffuse);
             b.Serialize(in Emissive);
+            b.Align4();
             b.Serialize(Opacity);
             b.Serialize(BumpScaling);
             b.Serialize(Shininess);
             b.Serialize(ShininessStrength);
             b.Serialize(Reflectivity);
             b.Serialize(BlendMode);
+            b.Align4();
             b.Serialize(Textures.Length);
             foreach (var t in Textures)
             {
@@ -125,8 +128,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference();
-            if (Textures is null) BuiltIns.ThrowNullReference();
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Textures is null) BuiltIns.ThrowNullReference(nameof(Textures));
             for (int i = 0; i < Textures.Length; i++)
             {
                 if (Textures[i] is null) BuiltIns.ThrowNullReference(nameof(Textures), i);

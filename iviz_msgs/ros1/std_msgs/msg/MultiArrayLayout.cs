@@ -96,17 +96,19 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Dim.Length);
             foreach (var t in Dim)
             {
                 t.RosSerialize(ref b);
             }
+            b.Align4();
             b.Serialize(DataOffset);
         }
         
         public void RosValidate()
         {
-            if (Dim is null) BuiltIns.ThrowNullReference();
+            if (Dim is null) BuiltIns.ThrowNullReference(nameof(Dim));
             for (int i = 0; i < Dim.Length; i++)
             {
                 if (Dim[i] is null) BuiltIns.ThrowNullReference(nameof(Dim), i);

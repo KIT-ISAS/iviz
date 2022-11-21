@@ -66,6 +66,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Widgets.Length);
             foreach (var t in Widgets)
             {
@@ -75,7 +76,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Widgets is null) BuiltIns.ThrowNullReference();
+            if (Widgets is null) BuiltIns.ThrowNullReference(nameof(Widgets));
             for (int i = 0; i < Widgets.Length; i++)
             {
                 if (Widgets[i] is null) BuiltIns.ThrowNullReference(nameof(Widgets), i);
