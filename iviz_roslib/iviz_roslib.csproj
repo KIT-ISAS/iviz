@@ -1,32 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <AssemblyName>Iviz.Roslib</AssemblyName>
-    <RootNamespace>Iviz.Roslib</RootNamespace>
-    <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
-    <Nullable>enable</Nullable>
-    <LangVersion>default</LangVersion>
-    <IsTrimmable>true</IsTrimmable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>    
-  </PropertyGroup>
+    <PropertyGroup>
+        <AssemblyName>Iviz.Roslib</AssemblyName>
+        <RootNamespace>Iviz.Roslib</RootNamespace>
+        <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
+        <Nullable>enable</Nullable>
+        <LangVersion>default</LangVersion>
+        <IsTrimmable>true</IsTrimmable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugType>portable</DebugType>
-    <Optimize>false</Optimize>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugSymbols>false</DebugSymbols>
-    <DebugType>portable</DebugType>
-    <DefineConstants>TRACE;ENABLE_PROFILER</DefineConstants>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\iviz_dynamic_msg_lib\iviz_dynamic_msg_lib.csproj" />
-    <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
-    <ProjectReference Include="..\iviz_msgs_gen_lib\iviz_msgs_gen_lib.csproj" />
-    <ProjectReference Include="..\iviz_rosclient\iviz_rosclient.csproj" />
-    <ProjectReference Include="..\iviz_xmlrpc\iviz_xmlrpc.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="POCOs\" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\iviz_dynamic_msg_lib\iviz_dynamic_msg_lib.csproj"/>
+        <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj"/>
+        <ProjectReference Include="..\iviz_msgs_gen_lib\iviz_msgs_gen_lib.csproj"/>
+        <ProjectReference Include="..\iviz_rosclient\iviz_rosclient.csproj"/>
+        <ProjectReference Include="..\iviz_xmlrpc\iviz_xmlrpc.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Folder Include="POCOs\"/>
+    </ItemGroup>
 </Project>

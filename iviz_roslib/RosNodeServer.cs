@@ -385,7 +385,7 @@ internal sealed class RosNodeServer
                     }
                     case "params":
                     {
-                        if (!value.TryGetArray(out RosValue[] elementObjs) ||
+                        if (!value.TryGetArray(out var elementObjs) ||
                             elementObjs.Length == 0)
                         {
                             return ErrorResponse("Failed to parse arguments");

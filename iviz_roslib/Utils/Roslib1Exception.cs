@@ -2,7 +2,7 @@ using System;
 
 namespace Iviz.Roslib;
 
-public class Roslib1Exception : Exception
+public class Roslib1Exception : RoslibException
 {
     protected Roslib1Exception(string message) : base(message)
     {

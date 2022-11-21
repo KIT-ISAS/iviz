@@ -37,8 +37,6 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
     
     public LoopbackReceiver<TMessage>? LoopbackReceiver;
 
-    bool KeepRunning => !runningTs.IsCancellationRequested;
-
     public bool TcpNoDelay
     {
         get => TcpClient.NoDelay;
