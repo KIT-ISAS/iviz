@@ -73,35 +73,35 @@ public unsafe struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int AddLength(int c, IMessage[] array) // used by tests
     {
-        int d = Align4(c) + sizeof(int);
+        int size = Align4(c) + sizeof(int);
         foreach (var message in array)
         {
-            d = message.AddRos2MessageLength(d);
+            size = message.AddRos2MessageLength(size);
         }
 
-        return d;
+        return size;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int AddLength(int c, string? s)
     {
-        int d = c + (sizeof(int) + 1); // trailing '\0'
+        int size = c + (sizeof(int) + 1); // trailing '\0'
         return s is not { Length: not 0 }
-            ? d
-            : d + BuiltIns.GetByteCount(s);
+            ? size
+            : size + BuiltIns.GetByteCount(s);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int AddLength(int c, string[] bs)
     {
-        int d = c + sizeof(int);
+        int size = c + sizeof(int);
         foreach (string b in bs)
         {
-            d = Align4(d);
-            d = AddLength(d, b);
+            size = Align4(size);
+            size = AddLength(size, b);
         }
 
-        return d;
+        return size;
     }
 
     #endregion

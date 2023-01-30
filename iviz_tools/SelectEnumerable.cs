@@ -28,7 +28,7 @@ public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB>, ICollec
 
     public int Count => a.Count;
     public TB this[int index] => f(a[index]);
-    
+
     public SelectEnumerable(TC a, Func<TA, TB> f)
     {
         this.a = a;
@@ -50,9 +50,10 @@ public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB>, ICollec
         {
             array[i] = f(a[i]);
         }
+
         return array;
     }
-    
+
     public void CopyTo(TB[] array, int arrayIndex)
     {
         int count = a.Count;

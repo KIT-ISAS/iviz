@@ -217,23 +217,18 @@ namespace Iviz.Controllers
 
         static int FieldSizeFromType(int datatype)
         {
-            switch (datatype)
+            return datatype switch
             {
-                case PointField.FLOAT64:
-                    return 8;
-                case PointField.FLOAT32:
-                case PointField.INT32:
-                case PointField.UINT32:
-                    return 4;
-                case PointField.INT16:
-                case PointField.UINT16:
-                    return 2;
-                case PointField.INT8:
-                case PointField.UINT8:
-                    return 1;
-                default:
-                    return -1;
-            }
+                PointField.FLOAT64 => 8,
+                PointField.FLOAT32 => 4,
+                PointField.INT32 => 4,
+                PointField.UINT32 => 4,
+                PointField.INT16 => 2,
+                PointField.UINT16 => 2,
+                PointField.INT8 => 1,
+                PointField.UINT8 => 1,
+                _ => -1
+            };
         }
 
         bool Handler(PointCloud2 msg, IRosConnection _)
@@ -250,7 +245,10 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    ProcessMessage(msg);
+                    if (!ProcessMessage(msg))
+                    {
+                        IsProcessing = false;
+                    }
                 }
                 catch (Exception e)
                 {
@@ -275,7 +273,7 @@ namespace Iviz.Controllers
 
         static bool TryGetField(PointField[] fields, string name, [NotNullWhen(true)] out PointField? result)
         {
-            foreach (PointField field in fields)
+            foreach (var field in fields)
             {
                 if (field.Name != name)
                 {
@@ -308,13 +306,12 @@ namespace Iviz.Controllers
             return true;
         }
 
-        void ProcessMessage(PointCloud2 msg)
+        bool ProcessMessage(PointCloud2 msg)
         {
             if (!node.IsAlive)
             {
                 // we're dead
-                IsProcessing = false;
-                return;
+                return false;
             }
 
             int numPoints;
@@ -323,13 +320,22 @@ namespace Iviz.Controllers
             {
                 numPoints = (int)(msg.Width * msg.Height);
 
-                if (msg.PointStep < 3 * sizeof(float) ||
-                    msg.RowStep < msg.PointStep * msg.Width ||
-                    msg.Data.Length < msg.RowStep * msg.Height)
+                if (msg.PointStep < 3 * sizeof(float))
                 {
-                    RosLogger.Error($"{this}: Invalid point cloud dimensions!");
-                    IsProcessing = false;
-                    return;
+                    RosLogger.Error($"{this}: Invalid point step size!");
+                    return false;
+                }
+
+                if (msg.RowStep < msg.PointStep * msg.Width)
+                {
+                    RosLogger.Error($"{this}: Row step size does not correspond to point step size and width!");
+                    return false;
+                }
+
+                if (msg.Data.Length < msg.RowStep * msg.Height)
+                {
+                    RosLogger.Error($"{this}: Data length does not correspond to row step size and height!");
+                    return false;
                 }
             }
 
@@ -337,8 +343,7 @@ namespace Iviz.Controllers
             {
                 RosLogger.Error(
                     $"{this}: Number of elements is greater than maximum of {NativeList.MaxElements.ToString()}");
-                IsProcessing = false;
-                return;
+                return false;
             }
 
             if (!FieldsEqual(msg.Fields))
@@ -354,9 +359,9 @@ namespace Iviz.Controllers
                 !TryGetField(msg.Fields, "y", out var yField) || yField.Datatype != PointField.FLOAT32 ||
                 !TryGetField(msg.Fields, "z", out var zField) || zField.Datatype != PointField.FLOAT32)
             {
-                RosLogger.Error($"{this}: Unsupported point cloud! Expected XYZ as floats.");
-                IsProcessing = false;
-                return;
+                RosLogger.Error($"{this}: Unsupported point cloud! " +
+                                "Expected three float data fields 'x', 'y', and 'z'.");
+                return false;
             }
 
             checked
@@ -366,22 +371,20 @@ namespace Iviz.Controllers
                     || zField.Offset + sizeof(float) > msg.PointStep)
                 {
                     RosLogger.Error($"{this}: Invalid position offsets");
-                    IsProcessing = false;
+                    return false;
                 }
             }
 
             if (!TryGetField(msg.Fields, config.IntensityChannel, out PointField? iField))
             {
-                IsProcessing = false;
-                return;
+                return false;
             }
 
             int iFieldSize = FieldSizeFromType(iField.Datatype);
             if (iFieldSize < 0)
             {
                 RosLogger.Error($"{this}: Invalid or unsupported intensity field type {iField.Datatype.ToString()}");
-                IsProcessing = false;
-                return;
+                return false;
             }
 
             checked
@@ -390,16 +393,14 @@ namespace Iviz.Controllers
                 {
                     RosLogger.Error($"{this}: Invalid field properties iOffset={iField.Offset.ToString()} " +
                                     $"iFieldSize={iFieldSize.ToString()} dataType={iField.Datatype.ToString()}");
-                    IsProcessing = false;
-                    return;
+                    return false;
                 }
             }
 
             if (xField.Count != 1 || yField.Count != 1 || zField.Count != 1 || iField.Count != 1)
             {
                 RosLogger.Error($"{this}: Expected all point field counts to be 1");
-                IsProcessing = false;
-                return;
+                return false;
             }
 
             int xOffset = (int)xField.Offset;
@@ -456,6 +457,8 @@ namespace Iviz.Controllers
                     IsProcessing = false;
                 }
             });
+
+            return true;
         }
 
 
@@ -472,12 +475,10 @@ namespace Iviz.Controllers
                 ? GeneratePointBufferXYZ(pointBuffer, msg, iOffset, rgbaHint ? PointField.FLOAT32 : iType)
                 : GeneratePointBufferSlow(pointBuffer, msg, xOffset, yOffset, zOffset, iOffset, iType, rgbaHint);
         }
-        
+
         static unsafe int GeneratePointBufferSlow(float4[] pointBuffer, PointCloud2 msg, int xOffset, int yOffset,
             int zOffset, int iOffset, int iType, bool rgbaHint)
         {
-            static float ReadFloat(byte* ptr) => *(float*)ptr;
-
             int height = (int)msg.Height;
             int width = (int)msg.Width;
             int rowStep = (int)msg.RowStep;
@@ -485,7 +486,10 @@ namespace Iviz.Controllers
 
             if (rowStep > width * pointStep) ThrowHelper.ThrowArgumentOutOfRange();
 
-            if (rgbaHint) Process(new IFloatReader.FloatReader());
+            if (rgbaHint)
+            {
+                return Process(new IFloatReader.FloatReader());
+            }
 
             return iType switch
             {
@@ -530,8 +534,10 @@ namespace Iviz.Controllers
 
                     return dstOff;
                 }
-            }
+            }            
         }
+
+        static unsafe float ReadFloat(byte* ptr) => *(float*)ptr;
 
         static unsafe int GeneratePointBufferXYZ(float4[] dstBuffer, PointCloud2 msg, int iOffset, int iType)
         {
@@ -625,7 +631,7 @@ namespace Iviz.Controllers
                         for (int u = 0; u < width; u++, pointPtr += pointStep)
                         {
                             ref var point = ref *(float3*)pointPtr;
-                            
+
                             float4 f;
                             f.z = point.x;
                             f.x = -point.y;
@@ -642,7 +648,7 @@ namespace Iviz.Controllers
 
                 return dstOff;
             }
-            
+
             // ----------       
         }
 
@@ -816,7 +822,7 @@ namespace Iviz.Controllers
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static bool IsPointValid4(in float4 point)
             {
-                return math.all(math.abs(point) < MaxPositionMagnitude) 
+                return math.all(math.abs(point) < MaxPositionMagnitude)
                        && math.all(math.isfinite(point));
             }
         }

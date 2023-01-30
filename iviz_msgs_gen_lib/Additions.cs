@@ -124,6 +124,11 @@ namespace Iviz.MsgsGen
                 "public override int GetHashCode() => System.HashCode.Combine(R, G, B, A);",
             },
 
+            ["iviz_msgs/Color32"] = new[]
+            {
+                "public static implicit operator Color32(in StdMsgs.ColorRGBA p) => new((byte)(p.R * 255), (byte)(p.G * 255), (byte)(p.B * 255), (byte)(p.A * 255));"
+            },
+
             ["geometry_msgs/Point32"] = new[]
             {
                 "public static Point32 Zero => new();",

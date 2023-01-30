@@ -20,7 +20,12 @@ namespace Iviz.Ros
 
         public string Topic { get; }
         public string Type { get; }
-        int? ISender.Id => Id;
+        int? ISender.Id
+        {
+            get => Id;
+            set => Id = value;
+        }
+
         internal int? Id { get; set; }
         public RosSenderStats Stats { get; private set; }
         public int NumSubscribers { get; private set; }
