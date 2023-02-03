@@ -37,6 +37,11 @@ public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB>, ICollec
 
     public Enumerator GetEnumerator() => new(a, f);
 
+    public SelectEnumerable<SelectEnumerable<TC, TA, TB>, TB, TD> Select<TD>(Func<TB, TD> ff)
+    {
+        return new SelectEnumerable<SelectEnumerable<TC, TA, TB>, TB, TD>(this, ff);
+    }
+
     public TB[] ToArray()
     {
         int count = a.Count;
