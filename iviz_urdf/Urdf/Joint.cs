@@ -59,7 +59,8 @@ namespace Iviz.Urdf
         [DataMember]
         public Axis Axis { get; }
 
-        [DataMember] public Limit Limit { get; }
+        [DataMember] 
+        public Limit Limit { get; }
 
         internal Joint(XmlNode node)
         {

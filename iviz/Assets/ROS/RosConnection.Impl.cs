@@ -726,8 +726,6 @@ namespace Iviz.Ros
             int? id;
             if (Connected)
             {
-                int newId = GetFreeId();
-
                 await newAdvertisedTopic.AdvertiseAsync(Client, token);
                 var publisher = newAdvertisedTopic.Publisher;
                 if (publisher == null)
@@ -736,6 +734,7 @@ namespace Iviz.Ros
                     return;
                 }
 
+                int newId = GetFreeId();
                 publishers[newId] = publisher;
                 id = newId;
             }
@@ -847,7 +846,14 @@ namespace Iviz.Ros
 
         internal void Publish<T>(int? advertiserId, T msg) where T : IMessage, new()
         {
-            if (advertiserId is not { } id || runningTs.IsCancellationRequested)
+            if (advertiserId is not { } id)
+            {
+                RosLogger.Debug($"[{nameof(RosConnection)}]: " +
+                                $"Sender tried to publish but does not have an associated publisher!");
+                return;
+            }
+
+            if (runningTs.IsCancellationRequested)
             {
                 return;
             }
@@ -967,6 +973,9 @@ namespace Iviz.Ros
 
         ValueTask UnadvertiseCore(ISender advertiser, CancellationToken token)
         {
+            int? advertiserId = advertiser.Id;
+            advertiser.Id = null;
+            
             if (!publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
                 return default;
@@ -979,7 +988,7 @@ namespace Iviz.Ros
             }
 
             publishersByTopic.Remove(advertiser.Topic);
-            if (advertiser.Id is { } id)
+            if (advertiserId is { } id)
             {
                 publishers[id] = null;
             }

@@ -244,12 +244,7 @@ public class Ros2Subscriber : Signalizable
             Array.Resize(ref publisherStats, 2 * publisherStats.Length);
         }
 
-        publisherStats[numPublishers++] = new PublisherStats
-        {
-            guid = guid,
-            numReceived = 1,
-            bytesReceived = lengthInBytes
-        };
+        publisherStats[numPublishers++] = new PublisherStats(guid, lengthInBytes);
 
         Array.Sort(publisherStats, 0, numPublishers);
     }
@@ -349,9 +344,16 @@ public class Ros2Subscriber : Signalizable
     
     struct PublisherStats : IComparable<PublisherStats>
     {
-        public Guid guid;
+        public readonly Guid guid;
         public long bytesReceived;
         public int numReceived;
+
+        public PublisherStats(in Guid guid, int bytesReceived)
+        {
+            this.guid = guid;
+            this.bytesReceived = bytesReceived;
+            numReceived = 1;
+        }
 
         public int CompareTo(PublisherStats other) => guid.CompareTo(other.guid);
     }    
