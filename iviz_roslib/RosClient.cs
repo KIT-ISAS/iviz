@@ -400,7 +400,7 @@ public sealed class RosClient : IRosClient
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
-            throw new RosConnectionException($"Failed to contact the master URI at '{masterUri}'", e);
+            throw new RosConnectionException($"Failed to contact the master URI at '{MasterUri}'", e);
         }
 
         try
@@ -410,7 +410,7 @@ public sealed class RosClient : IRosClient
         }
         catch (SocketException e)
         {
-            throw new RosUriBindingException($"Failed to bind to local URI '{ownUri}'", e);
+            throw new RosUriBindingException($"Failed to bind to local URI '{CallerUri}'", e);
         }
 
         // Start the XmlRpc server.
