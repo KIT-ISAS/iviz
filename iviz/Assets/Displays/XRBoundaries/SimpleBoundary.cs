@@ -48,7 +48,7 @@ namespace Iviz.Displays.XR
             }
         }
 
-        public float SecondaryScale
+        public override float FrameWidth
         {
             set => Frame.ColumnWidth = value;
         }

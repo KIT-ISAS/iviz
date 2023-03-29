@@ -351,10 +351,12 @@ namespace Iviz.App
         void OnRosInfoChanged()
         {
             var connectionData = Dialogs.ConnectionData;
-            string rosId = (connectionData.RosVersion == RosVersion.ROS1 ? "ROS1" : "ROS2");
-            UpperCanvas.MasterUriStr.Text = connectionData.MyId == null
-                ? $"<u>(?)</u>\n<color=grey>{rosId}</color>"
-                : $"<u>{connectionData.MyId}</u>\n<color=grey>{rosId}</color>";
+
+            string uriStrMyId = connectionData.MyId ?? "?";
+            string uriStrMaster = connectionData.RosVersion == RosVersion.ROS1
+                ? connectionData.MasterUri?.Host ?? "?"
+                : "ROS2";
+            UpperCanvas.MasterUriStr.Text = $"<u>{uriStrMyId}</u>\n<color=grey>{uriStrMaster}</color>";
 
             if (connectionData.RosVersion == RosVersion.ROS1)
             {
@@ -547,7 +549,8 @@ namespace Iviz.App
             string fullPath = $"{Settings.SavedFolder}/{defaultConfigPrefix}{LoadConfigDialogData.Suffix}";
             if (File.Exists(fullPath))
             {
-                _ = LoadStateConfigurationAsync($"{defaultConfigPrefix}{LoadConfigDialogData.Suffix}").AwaitNoThrow(this);
+                _ = LoadStateConfigurationAsync($"{defaultConfigPrefix}{LoadConfigDialogData.Suffix}")
+                    .AwaitNoThrow(this);
             }
         }
 
@@ -1018,7 +1021,7 @@ namespace Iviz.App
             ThrowHelper.ThrowIfNull(caller, nameof(caller));
             Dialogs.MarkerData.Show(caller);
         }
-        
+
         public void ShowMarkerDialog(SimpleRobotModuleData caller)
         {
             ThrowHelper.ThrowIfNull(caller, nameof(caller));
@@ -1151,7 +1154,7 @@ namespace Iviz.App
             }
 
             // try to recover!
-            _ =  Dialogs.ConnectionData.TryResetConnectionsAsync().AwaitNoThrow(this);
+            _ = Dialogs.ConnectionData.TryResetConnectionsAsync().AwaitNoThrow(this);
         }
 
         public override string ToString() => $"[{nameof(ModuleListPanel)}]";

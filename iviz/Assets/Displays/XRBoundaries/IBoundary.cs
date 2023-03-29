@@ -11,18 +11,4 @@ namespace Iviz.Displays.XR
         Collider = Boundary.BEHAVIOR_COLLIDER,
         NotifyCollision = Boundary.BEHAVIOR_NOTIFY_COLLISION
     }
-    
-    public interface IBoundary : IDisplay, IIsInteractable
-    {
-        string Id { set; } 
-        BehaviorType Behavior { set; }
-        Vector3 Scale { set; }
-        string Caption { set; }     
-        Color Color { set; }   
-        Color SecondColor { set; }
-
-
-        event Action<string>? EnteredCollision;
-        event Action<string>? ExitedCollision;
-    }
 }

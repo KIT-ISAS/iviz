@@ -16,6 +16,8 @@ namespace Iviz.Controllers
     {
         readonly Dictionary<string, RobotModel> cachedRobots = new();
 
+        public override string Title => "Robot Previews";
+
         public override string BriefDescription
         {
             get

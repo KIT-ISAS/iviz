@@ -167,6 +167,8 @@ namespace Iviz.Controllers
             }
         }
 
+        public string Title => "Interactive Markers";
+
         public string Topic => config.Topic;
 
         public int NumEntriesForLog => interactiveMarkers.Count;

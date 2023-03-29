@@ -8,6 +8,7 @@ namespace Iviz.Common
 {
     public interface IMarkerDialogListener
     {
+        string Title { get; }
         string Topic { get; }
         int NumEntriesForLog { get; }
         void GenerateLog(StringBuilder description, int minIndex, int numEntries);

@@ -55,15 +55,7 @@ namespace Iviz.App
             panel.PointCloudType.Index = (int) listener.PointCloudType;
 
             panel.PointSize.ValueChanged += f => listener.PointSize = f;
-            panel.IntensityChannel.Submit += s =>
-            {
-                listener.IntensityChannel = s;
-                
-                // the pointcloud needs to be rebuilt. we do not keep a cache of the message,
-                // but the sender is usually set to latching.
-                // in this case, resetting asks for a copy of the last message.
-                listener.Listener.Reset(); 
-            };
+            panel.IntensityChannel.Submit += s => listener.IntensityChannel = s;
             panel.Colormap.ValueChanged += (i, _) => listener.Colormap = (ColormapId) i;
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;

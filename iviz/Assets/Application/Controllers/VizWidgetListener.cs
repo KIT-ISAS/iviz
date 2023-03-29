@@ -72,6 +72,8 @@ namespace Iviz.Controllers
             }
         }
 
+        public string Title => vizHandler.Title;
+
         public string Topic => Config.Topic;
 
         public int NumEntriesForLog => vizHandler.Count;

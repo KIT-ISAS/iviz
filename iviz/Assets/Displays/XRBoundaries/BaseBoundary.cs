@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public abstract class BaseBoundary : MonoBehaviour, IBoundary, IRecyclable
+    public abstract class BaseBoundary : MonoBehaviour, IRecyclable, IDisplay
     {
         Tooltip? tooltip;
         Transform? mTransform;
@@ -74,6 +74,8 @@ namespace Iviz.Displays.XR
         
         public abstract Color SecondColor { set; }
 
+        public abstract float FrameWidth { set; }
+        
         static Tooltip CreateTooltip(Transform transform)
         {
             var tooltip = ResourcePool.RentDisplay<Tooltip>(transform);
@@ -116,9 +118,13 @@ namespace Iviz.Displays.XR
 
             if (collision.gameObject.TryGetComponent<BaseBoundary>(out var boundary))
             {
-                Debug.Log( this + ": Exit " + boundary.Id);
+                //Debug.Log( this + ": Exit " + boundary.Id);
                 ExitedCollision(boundary.Id ?? "");
             }
+        }
+
+        public void Initialize()
+        {
         }
         
         public virtual void Suspend()

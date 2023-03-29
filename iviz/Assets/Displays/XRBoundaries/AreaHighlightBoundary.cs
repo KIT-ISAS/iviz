@@ -60,6 +60,11 @@ namespace Iviz.Displays.XR
             }
         }
 
+        public override float FrameWidth
+        {
+            set => Lines.ElementScale = value;
+        }
+
         public override Color Color
         {
             set

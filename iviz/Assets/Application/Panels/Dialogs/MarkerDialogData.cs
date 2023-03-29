@@ -36,11 +36,13 @@ namespace Iviz.App
 
             ResetPanelPosition();
 
+            panel.Title = listener.Title;
+            
             const int maxLabelWidth = 300;
             using (var description = BuilderPool.Rent())
             {
                 Resource.Font.Split(description, listener.Topic, maxLabelWidth);
-                panel.Label.SetText(description);
+                panel.Subtitle.SetText(description);
             }
 
             panel.Close.Clicked += Close;

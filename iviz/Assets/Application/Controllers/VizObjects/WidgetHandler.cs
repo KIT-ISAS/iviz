@@ -11,6 +11,8 @@ namespace Iviz.Controllers
     {
         readonly IWidgetFeedback feedback;
 
+        public override string Title => "Widgets";
+
         public override string BriefDescription
         {
             get

@@ -12,6 +12,7 @@ namespace Iviz.App
     {
         [SerializeField] SimpleButtonWidget? close;
         [SerializeField] Button? reset;
+        [SerializeField] TMP_Text? title;
         [SerializeField] DataLabelWidget? label;
         [SerializeField] TMP_Text? text;
         [SerializeField] LinkResolver? linkResolver;
@@ -26,8 +27,9 @@ namespace Iviz.App
         Button Right => right.AssertNotNull(nameof(right));
         TMP_Text LeftText => leftText.AssertNotNull(nameof(leftText));
         TMP_Text RightText => rightText.AssertNotNull(nameof(rightText));
+        TMP_Text TitleText => title.AssertNotNull(nameof(title));
         public SimpleButtonWidget Close => close.AssertNotNull(nameof(close));
-        public DataLabelWidget Label => label.AssertNotNull(nameof(label));
+        public DataLabelWidget Subtitle => label.AssertNotNull(nameof(label));
         public TMP_Text Text => text.AssertNotNull(nameof(text));
 
         public event Action<int>? Flipped; 
@@ -40,6 +42,11 @@ namespace Iviz.App
         public string RightCaption
         {
             set => RightText.text = value;
+        }
+
+        public string Title
+        {
+            set => TitleText.text = value;
         }
 
         public event Action? ResetAll;

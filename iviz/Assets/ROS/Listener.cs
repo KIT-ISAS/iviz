@@ -242,11 +242,19 @@ namespace Iviz.Ros
                 try
                 {
                     lastMsgBytes += serializer.RosMessageLength(msg);
+                }
+                catch (Exception e)
+                {
+                    RosLogger.Error($"{ToString()}: Error during {nameof(serializer.RosMessageLength)}", e);
+                }
+
+                try
+                {
                     handlerOnGameThread(msg);
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{ToString()}: Error during callback", e);
+                    RosLogger.Error($"{ToString()}: Error during callback handler", e);
                 }
             }
 
@@ -264,22 +272,25 @@ namespace Iviz.Ros
             totalMsgCounter++;
             recentMsgCounter++;
 
-            bool processed;
             try
             {
                 lastMsgBytes += serializer.RosMessageLength(msg);
-                processed = directHandler(msg, receiver);
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{ToString()}: Error during callback", e); // happens with annoying frequency
-                processed = false;
+                RosLogger.Error($"{ToString()}: Error during {nameof(serializer.RosMessageLength)}", e);
             }
 
-            if (!processed)
+            try
             {
-                droppedMsgCounter++;
+                if (directHandler(msg, receiver)) return;
             }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{ToString()}: Error during callback handler", e); // happens with annoying frequency
+            }
+
+            droppedMsgCounter++;
         }
 
         void UpdateStats()

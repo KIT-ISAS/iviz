@@ -20,6 +20,8 @@ namespace Iviz.Controllers
     {
         readonly IDialogFeedback feedback;
 
+        public override string Title => "Dialogs";
+
         public override string BriefDescription
         {
             get

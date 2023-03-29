@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Tools;
 using Iviz.Urdf;
@@ -557,6 +558,11 @@ namespace Iviz.Core
         public static Array? Share(this Array _)
         {
             return null;
+        }
+
+        public static void IncreaseRefCount(this PointCloud2 msg)
+        {
+            msg.Data.Share();
         }
 
         public static float RegularizeAngle(float angleInDeg) =>

@@ -206,6 +206,8 @@ namespace Iviz.Controllers
             }
         }
 
+        public string Title => "Markers";
+
         public string Topic => config.Topic;
 
         public override IListener Listener { get; }

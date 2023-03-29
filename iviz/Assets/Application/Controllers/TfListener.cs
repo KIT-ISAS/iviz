@@ -219,7 +219,7 @@ namespace Iviz.Controllers
 
             if (parent == null || parent == TfModule.OriginFrame)
             {
-                Debug.Log("Publishing orphan frame " + frame.Id);
+                // Debug.Log("Publishing orphan frame " + frame.Id);
                 parentFrameId = "";
                 localPose = TfModule.RelativeToFixedFrame(frame.Transform);
             }

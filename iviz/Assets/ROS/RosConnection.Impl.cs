@@ -569,6 +569,8 @@ namespace Iviz.Ros
 
         static async Task NtpCheckerTask(string hostname, CancellationToken token)
         {
+            const string ntpCheckerName = "[NtpChecker]";
+            
             RosLogger.Debug("[NtpChecker]: Starting NTP task.");
             time.GlobalTimeOffset = TimeSpan.Zero;
 
@@ -581,11 +583,11 @@ namespace Iviz.Ros
             {
                 if (e is OperationCanceledException or IOException)
                 {
-                    RosLogger.Debug("[NtpChecker]: Master does not appear to have an NTP clock running.");
+                    RosLogger.Debug($"{ntpCheckerName}: Master does not appear to have an NTP clock running.");
                 }
                 else
                 {
-                    RosLogger.Error("[NtpChecker]: Failed to read NTP clock from the master.", e);
+                    RosLogger.Error($"{ntpCheckerName}: Failed to read NTP clock from the master.", e);
                 }
 
                 return;
@@ -594,7 +596,7 @@ namespace Iviz.Ros
             const int minOffsetInMs = 2;
             if (Mathf.Abs((float)offset.TotalMilliseconds) < minOffsetInMs)
             {
-                RosLogger.Info("[NtpChecker]: No significant time offset detected from master clock.");
+                RosLogger.Info($"{ntpCheckerName}: No significant time offset detected from master clock.");
             }
             else
             {
@@ -602,7 +604,7 @@ namespace Iviz.Ros
                 string offsetStr = Mathf.Abs((float)offset.TotalSeconds) >= 1
                     ? offset.TotalSeconds.ToString("#,0.###") + " sec"
                     : offset.TotalMilliseconds.ToString("#,0.###") + " ms";
-                RosLogger.Info($"[NtpChecker]: Master clock appears to have a time offset of {offsetStr}. " +
+                RosLogger.Info($"{ntpCheckerName}: Master clock appears to have a time offset of {offsetStr}. " +
                                "Local published messages will use this offset.");
             }
         }
@@ -848,8 +850,8 @@ namespace Iviz.Ros
         {
             if (advertiserId is not { } id)
             {
-                RosLogger.Debug($"[{nameof(RosConnection)}]: " +
-                                $"Sender tried to publish but does not have an associated publisher!");
+                // RosLogger.Debug($"[{nameof(RosConnection)}]: " +
+                //                $"Sender tried to publish but does not have an associated publisher!");
                 return;
             }
 

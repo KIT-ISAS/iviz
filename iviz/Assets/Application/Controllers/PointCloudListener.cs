@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Iviz.Common;
@@ -17,8 +16,6 @@ using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
-using Unity.Burst;
-using Unity.Burst.CompilerServices;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -32,6 +29,7 @@ namespace Iviz.Controllers
         readonly PointListDisplay pointCloud;
         readonly MeshListDisplay meshCloud;
 
+        PointCloud2? lastMessage;
         float4[] pointBuffer = Array.Empty<float4>();
         bool isProcessing;
 
@@ -86,7 +84,11 @@ namespace Iviz.Controllers
         public string IntensityChannel
         {
             get => config.IntensityChannel;
-            set => config.IntensityChannel = value;
+            set
+            {
+                config.IntensityChannel = value;
+                RehandleLastMessage();
+            }
         }
 
         public float PointSize
@@ -190,6 +192,8 @@ namespace Iviz.Controllers
                         meshCloud.MeshResource = Resource.Displays.Sphere;
                         break;
                 }
+
+                RehandleLastMessage();
             }
         }
 
@@ -201,7 +205,7 @@ namespace Iviz.Controllers
 
         public PointCloudListener(PointCloudConfiguration? config, string topic)
         {
-            node = new FrameNode("PointCloudListener");
+            node = new FrameNode(nameof(PointCloudListener));
             pointCloud = ResourcePool.RentDisplay<PointListDisplay>(node.Transform);
             meshCloud = ResourcePool.RentDisplay<MeshListDisplay>(node.Transform);
             meshCloud.EnableShadows = false;
@@ -231,7 +235,16 @@ namespace Iviz.Controllers
             };
         }
 
-        bool Handler(PointCloud2 msg, IRosConnection _)
+        PointCloud2 LastMessage
+        {
+            set
+            {
+                lastMessage?.Dispose();
+                lastMessage = value;
+            }
+        }
+
+        bool Handler(PointCloud2 msg, IRosConnection? _)
         {
             if (IsProcessing)
             {
@@ -240,7 +253,7 @@ namespace Iviz.Controllers
 
             IsProcessing = true;
 
-            var shared = msg.Data.Share();
+            msg.IncreaseRefCount();
             Task.Run(() =>
             {
                 try
@@ -257,11 +270,19 @@ namespace Iviz.Controllers
                 }
                 finally
                 {
-                    shared.TryReturn();
+                    LastMessage = msg;
                 }
             });
 
             return true;
+        }
+
+        void RehandleLastMessage()
+        {
+            if (lastMessage is { } msg)
+            {
+                Handler(msg, null);
+            }
         }
 
         void UpdateSize()
@@ -269,41 +290,6 @@ namespace Iviz.Controllers
             float value = PointSize;
             pointCloud.ElementScale = value;
             meshCloud.ElementScale = value;
-        }
-
-        static bool TryGetField(PointField[] fields, string name, [NotNullWhen(true)] out PointField? result)
-        {
-            foreach (var field in fields)
-            {
-                if (field.Name != name)
-                {
-                    continue;
-                }
-
-                result = field;
-                return true;
-            }
-
-            result = null;
-            return false;
-        }
-
-        bool FieldsEqual(PointField[] fields)
-        {
-            if (fieldNames.Count != fields.Length)
-            {
-                return false;
-            }
-
-            foreach (var (field, fieldName) in fields.Zip(fieldNames))
-            {
-                if (field.Name != fieldName)
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         bool ProcessMessage(PointCloud2 msg)
@@ -314,8 +300,16 @@ namespace Iviz.Controllers
                 return false;
             }
 
-            int numPoints;
+            if (!PointCloudHelper.FieldsEqual(fieldNames, msg.Fields))
+            {
+                fieldNames.Clear();
+                foreach (var field in msg.Fields)
+                {
+                    fieldNames.Add(field.Name);
+                }
+            }
 
+            /*
             checked
             {
                 numPoints = (int)(msg.Width * msg.Height);
@@ -346,14 +340,6 @@ namespace Iviz.Controllers
                 return false;
             }
 
-            if (!FieldsEqual(msg.Fields))
-            {
-                fieldNames.Clear();
-                foreach (var field in msg.Fields)
-                {
-                    fieldNames.Add(field.Name);
-                }
-            }
 
             if (!TryGetField(msg.Fields, "x", out var xField) || xField.Datatype != PointField.FLOAT32 ||
                 !TryGetField(msg.Fields, "y", out var yField) || yField.Datatype != PointField.FLOAT32 ||
@@ -415,11 +401,32 @@ namespace Iviz.Controllers
             }
 
             int pointBufferLength =
-                GeneratePointBuffer(pointBuffer, msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
-            var pointBufferToUse = new Memory<float4>(pointBuffer, 0, pointBufferLength);
+                PointCloudHelper.GeneratePointBuffer(pointBuffer, msg, xOffset, yOffset, zOffset, iOffset,
+                    iField.Datatype, rgbaHint);
+                    */
 
-            bool useColormap = !rgbaHint;
+            Memory<float4> pointBufferToUse;
+            bool useColormap;
             var header = msg.Header;
+
+            try
+            {
+                if (PointCloudHelper.GeneratePointBuffer(ref pointBuffer, msg, config.IntensityChannel,
+                        out bool rgbaHint)
+                    is not { } pointBufferLength)
+                {
+                    return false; // unknown intensity channel
+                }
+                
+                pointBufferToUse = new Memory<float4>(pointBuffer, 0, pointBufferLength);
+                useColormap = !rgbaHint;
+            }
+            catch (PointCloudHelperException e)
+            {
+                RosLogger.Error($"{this}: {e.Message}");
+                return false;
+            }
+
             GameThread.PostInListenerQueue(() =>
             {
                 try
@@ -461,370 +468,17 @@ namespace Iviz.Controllers
             return true;
         }
 
-
-        static int GeneratePointBuffer(float4[] pointBuffer, PointCloud2 msg, int xOffset, int yOffset,
-            int zOffset, int iOffset, int iType, bool rgbaHint)
-        {
-            if (msg.Width == 0 || msg.Height == 0)
-            {
-                return 0;
-            }
-
-            bool xyzAligned = xOffset == 0 && yOffset == 4 && zOffset == 8;
-            return xyzAligned
-                ? GeneratePointBufferXYZ(pointBuffer, msg, iOffset, rgbaHint ? PointField.FLOAT32 : iType)
-                : GeneratePointBufferSlow(pointBuffer, msg, xOffset, yOffset, zOffset, iOffset, iType, rgbaHint);
-        }
-
-        static unsafe int GeneratePointBufferSlow(float4[] pointBuffer, PointCloud2 msg, int xOffset, int yOffset,
-            int zOffset, int iOffset, int iType, bool rgbaHint)
-        {
-            int height = (int)msg.Height;
-            int width = (int)msg.Width;
-            int rowStep = (int)msg.RowStep;
-            int pointStep = (int)msg.PointStep;
-
-            if (rowStep > width * pointStep) ThrowHelper.ThrowArgumentOutOfRange();
-
-            if (rgbaHint)
-            {
-                return Process(new IFloatReader.FloatReader());
-            }
-
-            return iType switch
-            {
-                PointField.FLOAT32 => Process(new IFloatReader.FloatReader()),
-                PointField.FLOAT64 => Process(new IFloatReader.DoubleReader()),
-                PointField.INT8 => Process(new IFloatReader.SbyteReader()),
-                PointField.UINT8 => Process(new IFloatReader.ByteReader()),
-                PointField.INT16 => Process(new IFloatReader.ShortReader()),
-                PointField.UINT16 => Process(new IFloatReader.UshortReader()),
-                PointField.INT32 => Process(new IFloatReader.IntReader()),
-                PointField.UINT32 => Process(new IFloatReader.UintReader()),
-                _ => Process(new IFloatReader.NullReader()),
-            };
-
-            int Process<T>(T t) where T : struct, IFloatReader
-            {
-                int dstOff = 0;
-                fixed (byte* dataPtr = msg.Data.Array)
-                {
-                    byte* rowPtr = dataPtr;
-                    for (int v = 0; v < height; v++)
-                    {
-                        byte* pointPtr = rowPtr;
-
-                        for (int u = 0; u < width; u++, pointPtr += pointStep)
-                        {
-                            float x = ReadFloat(pointPtr + xOffset);
-                            float y = ReadFloat(pointPtr + yOffset);
-                            float z = ReadFloat(pointPtr + zOffset);
-
-                            ref var f = ref pointBuffer[dstOff];
-                            f.x = -y;
-                            f.y = z;
-                            f.z = x;
-                            f.w = t.Read(pointPtr + iOffset);
-
-                            if (IsPointValid(f)) dstOff++;
-                        }
-
-                        rowPtr += rowStep;
-                    }
-
-                    return dstOff;
-                }
-            }            
-        }
-
-        static unsafe float ReadFloat(byte* ptr) => *(float*)ptr;
-
-        static unsafe int GeneratePointBufferXYZ(float4[] dstBuffer, PointCloud2 msg, int iOffset, int iType)
-        {
-            int rowStep = (int)msg.RowStep;
-            int pointStep = (int)msg.PointStep;
-            int height = (int)msg.Height;
-            int width = (int)msg.Width;
-
-            return iType switch
-            {
-                PointField.FLOAT32 when iOffset == 8 && pointStep == 12 => ParseXyz(), // xyz
-                PointField.FLOAT32 when iOffset == 12 && pointStep == 16 => ParseXyzw(), // xyzw
-                PointField.FLOAT32 when iOffset == 8 && pointStep == 16 => ParseXyzz(), // xyzz
-                PointField.FLOAT32 => Parse(new IFloatReader.FloatReader()),
-                PointField.FLOAT64 => Parse(new IFloatReader.DoubleReader()),
-                PointField.INT8 => Parse(new IFloatReader.SbyteReader()),
-                PointField.UINT8 => Parse(new IFloatReader.ByteReader()),
-                PointField.INT16 => Parse(new IFloatReader.ShortReader()),
-                PointField.UINT16 => Parse(new IFloatReader.UshortReader()),
-                PointField.INT32 => Parse(new IFloatReader.IntReader()),
-                PointField.UINT32 => Parse(new IFloatReader.UintReader()),
-                _ => throw new IndexOutOfRangeException()
-            };
-
-            // ----------       
-
-            int ParseXyz() // xyz
-            {
-                int dstOff = 0;
-                var dataRow = msg.Data.AsSpan();
-                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
-                {
-                    var src = dataRow.Cast<float3>()[..width];
-                    var dst = dstBuffer.AsSpan(dstOff, width);
-                    fixed (float3* srcPtr = &src[0])
-                    fixed (float4* dstPtr = &dst[0])
-                    {
-                        dstOff += BurstUtils.ParseFloat3(srcPtr, dstPtr, width);
-                    }
-                }
-
-                return dstOff;
-            }
-
-            int ParseXyzw() // xyzw
-            {
-                int dstOff = 0;
-                var dataRow = msg.Data.AsSpan();
-                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
-                {
-                    var src = dataRow.Cast<float4>()[..width];
-                    var dst = dstBuffer.AsSpan(dstOff, width);
-                    fixed (float4* srcPtr = &src[0])
-                    fixed (float4* dstPtr = &dst[0])
-                    {
-                        dstOff += BurstUtils.ParseFloat4(srcPtr, dstPtr, width);
-                    }
-                }
-
-                return dstOff;
-            }
-
-            int ParseXyzz() // xyzz
-            {
-                int dstOff = 0;
-                var dataRow = msg.Data.AsSpan();
-                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
-                {
-                    var src = dataRow.Cast<float4>()[..width];
-                    var dst = dstBuffer.AsSpan(dstOff, width);
-                    fixed (float4* srcPtr = &src[0])
-                    fixed (float4* dstPtr = &dst[0])
-                    {
-                        dstOff += BurstUtils.ParseFloat4Z(srcPtr, dstPtr, width);
-                    }
-                }
-
-                return dstOff;
-            }
-
-            int Parse<T>(T t) where T : struct, IFloatReader
-            {
-                int dstOff = 0;
-                fixed (byte* dataPtr = msg.Data.Array)
-                {
-                    byte* rowPtr = dataPtr;
-                    for (int v = 0; v < height; v++)
-                    {
-                        byte* pointPtr = rowPtr;
-
-                        for (int u = 0; u < width; u++, pointPtr += pointStep)
-                        {
-                            ref var point = ref *(float3*)pointPtr;
-
-                            float4 f;
-                            f.z = point.x;
-                            f.x = -point.y;
-                            f.y = point.z;
-                            f.w = t.Read(pointPtr + iOffset);
-
-                            dstBuffer[dstOff] = f;
-                            if (IsPointValid(point)) dstOff++;
-                        }
-
-                        rowPtr += rowStep;
-                    }
-                }
-
-                return dstOff;
-            }
-
-            // ----------       
-        }
-
         public override void Dispose()
         {
             base.Dispose();
+
+            lastMessage?.Dispose();
 
             pointCloud.ReturnToPool();
             meshCloud.ReturnToPool();
 
             node.Dispose();
             pointBuffer = Array.Empty<float4>();
-        }
-
-        const float MaxPositionMagnitude = PointListDisplay.MaxPositionMagnitude;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsPointValid(in float3 point) => IsValid(point.x) && IsValid(point.y) && IsValid(point.z);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsPointValid(in float4 point) => IsValid(point.x) && IsValid(point.y) && IsValid(point.z);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsValid(float f) => f.IsValid() && Mathf.Abs(f) < MaxPositionMagnitude;
-
-        unsafe interface IFloatReader
-        {
-            float Read(byte* b);
-
-            struct FloatReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => *(float*)b;
-            }
-
-            struct DoubleReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => (float)*(double*)b;
-            }
-
-            struct SbyteReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => *(sbyte*)b;
-            }
-
-            struct ByteReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => *b;
-            }
-
-            struct IntReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => *(int*)b;
-            }
-
-            struct UintReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => *(uint*)b;
-            }
-
-            struct ShortReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => *(short*)b;
-            }
-
-            struct UshortReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => *(ushort*)b;
-            }
-
-            struct NullReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => 0;
-            }
-        }
-
-        [BurstCompile]
-        static unsafe class BurstUtils
-        {
-            [BurstCompile(CompileSynchronously = true)]
-            public static int ParseFloat3([NoAlias] float3* input, [NoAlias] float4* output, int inputLength)
-            {
-                int o = 0;
-                for (int i = 0; i < inputLength; i++)
-                {
-                    float3 point3 = input[i];
-
-                    float4 point;
-                    point.x = point3.x;
-                    point.y = point3.y;
-                    point.z = point3.z;
-                    point.w = point3.z;
-
-                    float4 f;
-                    f.z = point.x;
-                    f.x = -point.y;
-                    f.y = point.z;
-                    f.w = point.w;
-
-                    output[o] = f;
-
-                    if (Hint.Likely(IsPointValid4(f))) o++;
-                }
-
-                return o;
-            }
-
-            [BurstCompile(CompileSynchronously = true)]
-            public static int ParseFloat4([NoAlias] float4* input, [NoAlias] float4* output, int inputLength)
-            {
-                int o = 0;
-                for (int i = 0; i < inputLength; i++)
-                {
-                    float4 point = input[i];
-
-                    float4 f;
-                    f.z = point.x;
-                    f.x = -point.y;
-                    f.y = point.z;
-                    f.w = point.w;
-
-                    output[o] = f;
-
-                    if (Hint.Likely(IsPointValid3(point))) o++;
-                }
-
-                return o;
-            }
-
-            [BurstCompile(CompileSynchronously = true)]
-            public static int ParseFloat4Z([NoAlias] float4* input, [NoAlias] float4* output, int inputLength)
-            {
-                int o = 0;
-                for (int i = 0; i < inputLength; i++)
-                {
-                    float4 point = input[i];
-
-                    float4 f;
-                    f.z = point.x;
-                    f.x = -point.y;
-                    f.y = point.z;
-                    f.w = point.z;
-
-                    output[o] = f;
-
-                    if (Hint.Likely(IsPointValid4(f))) o++;
-                }
-
-                return o;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static bool IsPointValid3(in float4 point)
-            {
-                float4 p;
-                p.x = point.x;
-                p.y = point.y;
-                p.z = point.z;
-                p.w = point.z;
-                return IsPointValid4(p);
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static bool IsPointValid4(in float4 point)
-            {
-                return math.all(math.abs(point) < MaxPositionMagnitude)
-                       && math.all(math.isfinite(point));
-            }
         }
     }
 }

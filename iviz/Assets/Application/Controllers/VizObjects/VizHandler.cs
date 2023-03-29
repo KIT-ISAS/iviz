@@ -22,6 +22,8 @@ namespace Iviz.Controllers
 
         public int Count => vizObjects.Count;
 
+        public abstract string Title { get; }
+
         public abstract string BriefDescription { get; }
 
         public bool Visible
