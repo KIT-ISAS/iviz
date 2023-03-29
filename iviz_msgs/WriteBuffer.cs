@@ -103,7 +103,6 @@ public unsafe struct WriteBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeArray(string[] val)
     {
-        WriteInt(val.Length);
         foreach (string str in val)
         {
             Serialize(str);

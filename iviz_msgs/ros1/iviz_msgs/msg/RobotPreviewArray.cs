@@ -66,6 +66,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Previews.Length);
             foreach (var t in Previews)
             {
@@ -75,7 +76,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Previews is null) BuiltIns.ThrowNullReference();
+            if (Previews is null) BuiltIns.ThrowNullReference(nameof(Previews));
             for (int i = 0; i < Previews.Length; i++)
             {
                 if (Previews[i] is null) BuiltIns.ThrowNullReference(nameof(Previews), i);
