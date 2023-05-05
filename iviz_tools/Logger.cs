@@ -3,19 +3,31 @@ using JetBrains.Annotations;
 
 namespace Iviz.Tools;
 
-
 /// <summary>
 /// Class that processes logging information.
 /// </summary>
 public static class Logger
 {
-    public static Action<string>? LogDebugCallback { get; set; }
+    /// <summary>
+    /// Callback function when a log message of level 'debug' is produced. 
+    /// </summary>
+    public static Action<string>? LogDebugCallback;
+
+    /// <summary>
+    /// Callback function when a log message of level 'default' is produced. 
+    /// </summary>
+    public static Action<string>? LogCallback;
+
+    /// <summary>
+    /// Callback function when a log message of level 'error' is produced. 
+    /// </summary>
+    public static Action<string>? LogErrorCallback;
 
     public static void LogDebug(string arg1)
     {
         LogDebugCallback?.Invoke(arg1);
     }
-    
+
     [StringFormatMethod("format")]
     public static void LogDebugFormat(string format, object? arg1)
     {
@@ -70,16 +82,11 @@ public static class Logger
         LogDebugCallback?.Invoke(string.Format(format, objs));
     }
 
-    /// <summary>
-    /// Callback function when a log message of level 'default' is produced. 
-    /// </summary>
-    public static Action<string>? LogCallback { get; set; }
-
     public static void Log(string arg1)
     {
         LogCallback?.Invoke(arg1);
     }
-    
+
     [StringFormatMethod("format")]
     public static void LogFormat(string format, object? arg1)
     {
@@ -103,7 +110,7 @@ public static class Logger
     {
         LogCallback?.Invoke(string.Format(format, arg1, arg2));
     }
-    
+
     [StringFormatMethod("format")]
     public static void LogFormat(string format, object? arg1, Exception? arg2)
     {
@@ -127,11 +134,6 @@ public static class Logger
     {
         LogCallback?.Invoke(string.Format(format, objs));
     }
-
-    /// <summary>
-    /// Callback function when a log message of level 'error' is produced. 
-    /// </summary>
-    public static Action<string>? LogErrorCallback { get; set; }
 
     public static void LogError(string arg1)
     {
@@ -161,7 +163,7 @@ public static class Logger
     {
         LogErrorCallback?.Invoke(string.Format(format, arg1, arg2));
     }
-    
+
     [StringFormatMethod("format")]
     public static void LogErrorFormat(string format, object? arg1, string? arg2)
     {

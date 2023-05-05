@@ -7,6 +7,7 @@ using Iviz.Resources;
 using Iviz.Tools;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Iviz.App
@@ -64,7 +65,7 @@ namespace Iviz.App
             set
             {
                 isNegative = value < 0;
-                SignText.text = isNegative ? "[-]" : "[+]";
+                SignText.text = isNegative ? "[ -1 ]" : "[ +1 ]";
 
                 float absValue = Mathf.Abs(value);
                 if (absValue == 0)
@@ -103,8 +104,12 @@ namespace Iviz.App
 
         float ValueInternal
         {
-            get => Slider.value;
-            set => Slider.SetValueWithoutNotify(Math.Max((int)value, 0));
+            get => isNegative ? (100 - Slider.value) : Slider.value;
+            set
+            {
+                int valueToSet = Math.Max((int)value, 0);
+                Slider.SetValueWithoutNotify(isNegative ? (100 - valueToSet) : valueToSet);
+            }
         }
 
         public bool Interactable
@@ -126,14 +131,19 @@ namespace Iviz.App
 
         void Awake()
         {
-            Slider.onValueChanged.AddListener(_ => OnValueChanged());
+            Slider.onValueChanged.AddListener(_ => { OnValueChanged(); });
+            Slider.GetComponent<EventTrigger>().triggers[0].callback.AddListener(_ =>
+            {
+                if (ValueInternal is (> 0 and < 10) or 100)
+                {
+                    Value = Value;
+                }
+            });
             Left.onClick.AddListener(() => UpdatePowerNoChange(power - 1));
             Right.onClick.AddListener(() => UpdatePowerNoChange(power + 1));
             Sign.onClick.AddListener(() =>
             {
-                isNegative = !isNegative;
-                SignText.text = isNegative ? "[-]" : "[+]";
-                UpdateValue();
+                Value = -Value;
             });
             Value = 50;
         }

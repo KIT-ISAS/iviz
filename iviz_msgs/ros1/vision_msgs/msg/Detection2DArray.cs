@@ -30,12 +30,15 @@ namespace Iviz.Msgs.VisionMsgs
             Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Detection2D>.Value
-                    : new Detection2D[n];
-                for (int i = 0; i < n; i++)
+                Detection2D[] array;
+                if (n == 0) array = EmptyArray<Detection2D>.Value;
+                else
                 {
-                    array[i] = new Detection2D(ref b);
+                    array = new Detection2D[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Detection2D(ref b);
+                    }
                 }
                 Detections = array;
             }
@@ -47,12 +50,15 @@ namespace Iviz.Msgs.VisionMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Detection2D>.Value
-                    : new Detection2D[n];
-                for (int i = 0; i < n; i++)
+                Detection2D[] array;
+                if (n == 0) array = EmptyArray<Detection2D>.Value;
+                else
                 {
-                    array[i] = new Detection2D(ref b);
+                    array = new Detection2D[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Detection2D(ref b);
+                    }
                 }
                 Detections = array;
             }
@@ -85,12 +91,7 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            if (Detections is null) BuiltIns.ThrowNullReference(nameof(Detections));
-            for (int i = 0; i < Detections.Length; i++)
-            {
-                if (Detections[i] is null) BuiltIns.ThrowNullReference(nameof(Detections), i);
-                Detections[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Detections, nameof(Detections));
         }
     
         public int RosMessageLength

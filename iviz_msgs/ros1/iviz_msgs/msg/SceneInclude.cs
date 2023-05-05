@@ -75,12 +75,12 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Uri is null) BuiltIns.ThrowNullReference(nameof(Uri));
-            if (Pose is null) BuiltIns.ThrowNullReference(nameof(Pose));
+            BuiltIns.ThrowIfNull(Uri, nameof(Uri));
+            BuiltIns.ThrowIfNull(Pose, nameof(Pose));
             Pose.RosValidate();
-            if (Material is null) BuiltIns.ThrowNullReference(nameof(Material));
+            BuiltIns.ThrowIfNull(Material, nameof(Material));
             Material.RosValidate();
-            if (Package is null) BuiltIns.ThrowNullReference(nameof(Package));
+            BuiltIns.ThrowIfNull(Package, nameof(Package));
         }
     
         public int RosMessageLength

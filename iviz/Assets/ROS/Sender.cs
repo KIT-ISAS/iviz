@@ -8,48 +8,37 @@ using Iviz.Msgs;
 
 namespace Iviz.Ros
 {
-    /// <inheritdoc cref="ISender"/>
+    /// <inheritdoc cref="Sender"/>
     /// <typeparam name="T">The ROS message type</typeparam>
-    public sealed class Sender<T> : ISender where T : IMessage, new()
+    public sealed class Sender<T> : Sender where T : IMessage, new()
     {
-        static RosConnection Connection => RosManager.RosConnection;
-
         readonly Serializer<T> serializer;
         int lastMsgBytes;
         int recentMsgs;
 
-        public string Topic { get; }
-        public string Type { get; }
-        int? ISender.Id
+        Sender(string topic, T generator) : base(topic, generator.RosMessageType)
         {
-            get => Id;
-            set => Id = value;
-        }
-
-        internal int? Id { get; set; }
-        public RosSenderStats Stats { get; private set; }
-        public int NumSubscribers { get; private set; }
-
-        public Sender(string topic)
-        {
-            ThrowHelper.ThrowIfNullOrEmpty(topic, nameof(topic));
-
-            Topic = topic;
-
-            var generator = new T();
-            Type = generator.RosMessageType;
             serializer = generator.CreateSerializer();
-
             GameThread.EverySecond += UpdateStats;
             Connection.Advertise(this);
         }
 
-        void ISender.Publish(IMessage msg)
+        public Sender(string topic) : this(topic, new T())
         {
-            Publish((T)msg);
         }
 
-        public void Dispose()
+        public override void Publish(IMessage msg)
+        {
+            if (msg is not T msgAsT)
+            {
+                BuiltIns.ThrowArgument(nameof(msg), "Message type does not match");
+                return; // unreachable
+            }
+
+            Publish(msgAsT);
+        }
+
+        public override void Dispose()
         {
             GameThread.EverySecond -= UpdateStats;
 
@@ -59,7 +48,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Exception while disposing", e);
+                RosLogger.Error($"{ToString()}: Exception while disposing", e);
             }
         }
 
@@ -79,10 +68,11 @@ namespace Iviz.Ros
 
         void UpdateStats()
         {
+            NumSubscribers = Connection.GetNumSubscribers(Id) ?? 0; 
+            
             if (recentMsgs == 0)
             {
                 Stats = default;
-                NumSubscribers = Connection.GetNumSubscribers(Id);
                 return;
             }
 
@@ -92,22 +82,6 @@ namespace Iviz.Ros
 
             recentMsgs = 0;
             lastMsgBytes = 0;
-
-            NumSubscribers = Connection.GetNumSubscribers(Id);
         }
-
-        public void WriteDescriptionTo(StringBuilder description)
-        {
-            int numSubscribers = NumSubscribers;
-            if (numSubscribers == -1)
-            {
-                description.Append("Off");
-                return;
-            }
-
-            description.Append(numSubscribers).Append(" sub");
-        }
-
-        public override string ToString() => $"[{nameof(Sender<T>)} {Topic} [{Type}]]";
     }
 }

@@ -58,7 +58,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Reason is null) BuiltIns.ThrowNullReference(nameof(Reason));
+            BuiltIns.ThrowIfNull(Reason, nameof(Reason));
         }
     
         public int RosMessageLength

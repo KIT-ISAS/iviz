@@ -25,7 +25,7 @@ namespace Iviz.Core
         {
             return texture.GetRawTextureData<byte>().GetUnsafePtr();
         }
-        
+
         public static Span<T> AsSpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
             return new Span<T>(array.GetUnsafePtr(), array.Length);
@@ -52,19 +52,30 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this List<T> list) where T : unmanaged
         {
-            int count = list.Count;
-            return count == 0 
-                ? default 
-                : new ReadOnlySpan<T>((T[]?)ExtractArray(list), 0, count);
+            return new ReadOnlySpan<T>((T[]?)ExtractArray(list), 0, list.Count);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyFrom<T>(this Texture2D dst, ReadOnlySpan<T> srcSpan) where T : unmanaged
+        public static void CopyFrom(this Texture2D dst, ReadOnlySpan<byte> srcSpan)
         {
-            var srcBytes = MemoryMarshal.AsBytes(srcSpan);
-            fixed (byte* srcBytesPtr = &srcBytes[0])
+            uint length = (uint)srcSpan.Length;
+            if (length == 0) return;
+
+            fixed (byte* srcBytesPtr = &srcSpan[0])
             {
-                Unsafe.CopyBlock(dst.GetUnsafePtr(), srcBytesPtr, (uint)srcBytes.Length);
+                Unsafe.CopyBlock(dst.GetUnsafePtr(), srcBytesPtr, length);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void CopyFrom(this Texture2D dst, ReadOnlySpan<float> srcSpan)
+        {
+            uint length = (uint)srcSpan.Length;
+            if (length == 0) return;
+
+            fixed (float* srcBytesPtr = &srcSpan[0])
+            {
+                Unsafe.CopyBlock(dst.GetUnsafePtr(), srcBytesPtr, length * sizeof(float));
             }
         }
 
@@ -95,7 +106,7 @@ namespace Iviz.Core
             return MemoryMarshal.Cast<byte, T>(src);
         }
 
-        public static Span<T> Cast<T>(this Span<byte> src) where T : unmanaged =>  MemoryMarshal.Cast<byte, T>(src);
+        public static Span<T> Cast<T>(this Span<byte> src) where T : unmanaged => MemoryMarshal.Cast<byte, T>(src);
 
         public static T Read<T>(this ReadOnlySpan<byte> span) where T : unmanaged => MemoryMarshal.Read<T>(span);
 
@@ -111,28 +122,10 @@ namespace Iviz.Core
         {
             public readonly Array? items;
         }
-        
-        /*
-        [StructLayout(LayoutKind.Explicit)]
-        struct ListConverter
-        {
-            [UsedImplicitly]
-            sealed class OpenList
-            {
-                public readonly Array? items;
-            }
-
-            [FieldOffset(0)] public IList list;
-            [FieldOffset(0)] readonly OpenList openList;
-
-            public Array? ExtractArray() => openList.items;
-        }
-        */
 
         static Array? ExtractArray(IList list)
         {
             return Unsafe.As<IList, OpenList>(ref list).items;
-            //return new ListConverter { list = list }.ExtractArray();
         }
 
         /// <summary>
@@ -140,23 +133,5 @@ namespace Iviz.Core
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<byte> AsSpan(this IntPtr ptr, int size) => new(ptr.ToPointer(), size);
-
-
-        /*
-        ref struct GetLengthHelper
-        {
-            public Span<byte> span;
-            public int length;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining), Preserve, SkipLocalsInit]
-        public static int GetLength(this Span<byte> span)
-        {
-            GetLengthHelper h;
-            h.span = span;
-            h.length = 0;
-            return Unsafe.Subtract(ref h.length, 1);
-        }
-        */
     }
 }

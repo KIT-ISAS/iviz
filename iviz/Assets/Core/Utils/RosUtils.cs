@@ -32,11 +32,13 @@ namespace Iviz.Core
             return q;
         }
 
-        public static Pose FromCameraFrame(this in Pose pose)
+        public static Pose FromCameraFrame(this in Pose p)
         {
+            var xFrontToZFrontInverse = new Quaternion(-0.5, 0.5, -0.5, -0.5);
+
             Pose q;
-            q.Position = pose.Position;
-            q.Orientation = pose.Orientation * /*XFrontToZFront.Inverse*/ new Quaternion(-0.5, 0.5, -0.5, -0.5);
+            q.Position = p.Position;
+            q.Orientation = p.Orientation * xFrontToZFrontInverse;
             return q;
         }
 
@@ -293,7 +295,7 @@ namespace Iviz.Core
         static void Ros2Unity(this in Quaternion p, out UnityEngine.Quaternion q)
         {
             // (p.X == 0 && p.Y == 0 && p.Z == 0 && p.W == 0) ? UnityEngine.Quaternion.identity : p.ToUnity().Ros2Unity();
-            if (p.X == 0 && p.Y == 0 && p.Z == 0 && p.W == 0)
+            if (p is { X: 0, Y: 0, Z: 0, W: 0 })
             {
                 q.x = 0;
                 q.y = 0;

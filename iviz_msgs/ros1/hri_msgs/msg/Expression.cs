@@ -102,7 +102,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            if (Expression_ is null) BuiltIns.ThrowNullReference(nameof(Expression_));
+            BuiltIns.ThrowIfNull(Expression_, nameof(Expression_));
         }
     
         public int RosMessageLength

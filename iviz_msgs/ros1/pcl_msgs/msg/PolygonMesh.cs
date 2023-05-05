@@ -34,12 +34,15 @@ namespace Iviz.Msgs.PclMsgs
             Cloud = new SensorMsgs.PointCloud2(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Vertices>.Value
-                    : new Vertices[n];
-                for (int i = 0; i < n; i++)
+                Vertices[] array;
+                if (n == 0) array = EmptyArray<Vertices>.Value;
+                else
                 {
-                    array[i] = new Vertices(ref b);
+                    array = new Vertices[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Vertices(ref b);
+                    }
                 }
                 Polygons = array;
             }
@@ -52,12 +55,15 @@ namespace Iviz.Msgs.PclMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Vertices>.Value
-                    : new Vertices[n];
-                for (int i = 0; i < n; i++)
+                Vertices[] array;
+                if (n == 0) array = EmptyArray<Vertices>.Value;
+                else
                 {
-                    array[i] = new Vertices(ref b);
+                    array = new Vertices[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Vertices(ref b);
+                    }
                 }
                 Polygons = array;
             }
@@ -92,14 +98,9 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            if (Cloud is null) BuiltIns.ThrowNullReference(nameof(Cloud));
+            BuiltIns.ThrowIfNull(Cloud, nameof(Cloud));
             Cloud.RosValidate();
-            if (Polygons is null) BuiltIns.ThrowNullReference(nameof(Polygons));
-            for (int i = 0; i < Polygons.Length; i++)
-            {
-                if (Polygons[i] is null) BuiltIns.ThrowNullReference(nameof(Polygons), i);
-                Polygons[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Polygons, nameof(Polygons));
         }
     
         public int RosMessageLength

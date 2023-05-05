@@ -114,12 +114,15 @@ namespace Iviz.Msgs.Roscpp
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Logger>.Value
-                    : new Logger[n];
-                for (int i = 0; i < n; i++)
+                Logger[] array;
+                if (n == 0) array = EmptyArray<Logger>.Value;
+                else
                 {
-                    array[i] = new Logger(ref b);
+                    array = new Logger[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Logger(ref b);
+                    }
                 }
                 Loggers = array;
             }
@@ -130,12 +133,15 @@ namespace Iviz.Msgs.Roscpp
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Logger>.Value
-                    : new Logger[n];
-                for (int i = 0; i < n; i++)
+                Logger[] array;
+                if (n == 0) array = EmptyArray<Logger>.Value;
+                else
                 {
-                    array[i] = new Logger(ref b);
+                    array = new Logger[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Logger(ref b);
+                    }
                 }
                 Loggers = array;
             }
@@ -166,12 +172,7 @@ namespace Iviz.Msgs.Roscpp
         
         public void RosValidate()
         {
-            if (Loggers is null) BuiltIns.ThrowNullReference(nameof(Loggers));
-            for (int i = 0; i < Loggers.Length; i++)
-            {
-                if (Loggers[i] is null) BuiltIns.ThrowNullReference(nameof(Loggers), i);
-                Loggers[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Loggers, nameof(Loggers));
         }
     
         public int RosMessageLength

@@ -218,7 +218,7 @@ namespace Iviz.Controllers
             set => config.VectorScale = value;
         }
 
-        public override IListener Listener { get; }
+        public override Listener Listener { get; }
 
         public Vector3 TrailPosition => frameNode.Transform.TransformPoint(cachedDirection * VectorScale);
 

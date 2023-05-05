@@ -42,12 +42,15 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out BlendMode);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ModelTexture>.Value
-                    : new ModelTexture[n];
-                for (int i = 0; i < n; i++)
+                ModelTexture[] array;
+                if (n == 0) array = EmptyArray<ModelTexture>.Value;
+                else
                 {
-                    array[i] = new ModelTexture(ref b);
+                    array = new ModelTexture[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ModelTexture(ref b);
+                    }
                 }
                 Textures = array;
             }
@@ -70,12 +73,15 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ModelTexture>.Value
-                    : new ModelTexture[n];
-                for (int i = 0; i < n; i++)
+                ModelTexture[] array;
+                if (n == 0) array = EmptyArray<ModelTexture>.Value;
+                else
                 {
-                    array[i] = new ModelTexture(ref b);
+                    array = new ModelTexture[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ModelTexture(ref b);
+                    }
                 }
                 Textures = array;
             }
@@ -128,13 +134,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Textures is null) BuiltIns.ThrowNullReference(nameof(Textures));
-            for (int i = 0; i < Textures.Length; i++)
-            {
-                if (Textures[i] is null) BuiltIns.ThrowNullReference(nameof(Textures), i);
-                Textures[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Name, nameof(Name));
+            BuiltIns.ThrowIfNull(Textures, nameof(Textures));
         }
     
         public int RosMessageLength

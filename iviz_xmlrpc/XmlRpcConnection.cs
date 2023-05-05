@@ -51,7 +51,7 @@ public sealed class XmlRpcConnection : IDisposable, IComparable<XmlRpcConnection
     public async ValueTask<RosValue> MethodCallAsync(Uri callerUri, string method, XmlRpcArg[] args,
         CancellationToken token = default)
     {
-        if (disposed) throw new ObjectDisposedException("this");
+        if (disposed)  throw new ObjectDisposedException(nameof(XmlRpcConnection));
         if (callerUri is null) BaseUtils.ThrowArgumentNull(nameof(callerUri));
         if (args is null) BaseUtils.ThrowArgumentNull(nameof(args));
 
@@ -111,6 +111,7 @@ public sealed class XmlRpcConnection : IDisposable, IComparable<XmlRpcConnection
             }
             finally
             {
+                // this debug check is meant for IL2CPP in mobile, such as the Hololens, where thread starvation is common 
                 var end = DateTime.Now;
                 int msDiff = (int)(end - start).TotalMilliseconds;
                 if (msDiff > 5000)

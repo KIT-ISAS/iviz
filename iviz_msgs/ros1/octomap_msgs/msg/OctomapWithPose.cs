@@ -63,7 +63,7 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public void RosValidate()
         {
-            if (Octomap is null) BuiltIns.ThrowNullReference(nameof(Octomap));
+            BuiltIns.ThrowIfNull(Octomap, nameof(Octomap));
             Octomap.RosValidate();
         }
     

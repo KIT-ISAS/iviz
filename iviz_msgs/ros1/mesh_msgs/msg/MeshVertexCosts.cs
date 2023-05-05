@@ -29,7 +29,7 @@ namespace Iviz.Msgs.MeshMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Costs = array;
@@ -45,7 +45,7 @@ namespace Iviz.Msgs.MeshMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Costs = array;
@@ -71,7 +71,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Costs is null) BuiltIns.ThrowNullReference(nameof(Costs));
+            BuiltIns.ThrowIfNull(Costs, nameof(Costs));
         }
     
         public int RosMessageLength

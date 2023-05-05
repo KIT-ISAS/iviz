@@ -210,7 +210,7 @@ namespace Iviz.Controllers
 
         public string Topic => config.Topic;
 
-        public override IListener Listener { get; }
+        public override Listener Listener { get; }
         
         public IReadOnlyList<bool> VisibleMask
         {

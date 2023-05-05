@@ -28,12 +28,15 @@ namespace Iviz.Msgs.MeshMsgs
             MapUuid = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MeshMsgs.Feature>.Value
-                    : new MeshMsgs.Feature[n];
-                for (int i = 0; i < n; i++)
+                MeshMsgs.Feature[] array;
+                if (n == 0) array = EmptyArray<MeshMsgs.Feature>.Value;
+                else
                 {
-                    array[i] = new MeshMsgs.Feature(ref b);
+                    array = new MeshMsgs.Feature[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MeshMsgs.Feature(ref b);
+                    }
                 }
                 Features = array;
             }
@@ -46,12 +49,15 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MeshMsgs.Feature>.Value
-                    : new MeshMsgs.Feature[n];
-                for (int i = 0; i < n; i++)
+                MeshMsgs.Feature[] array;
+                if (n == 0) array = EmptyArray<MeshMsgs.Feature>.Value;
+                else
                 {
-                    array[i] = new MeshMsgs.Feature(ref b);
+                    array = new MeshMsgs.Feature[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MeshMsgs.Feature(ref b);
+                    }
                 }
                 Features = array;
             }
@@ -85,13 +91,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (MapUuid is null) BuiltIns.ThrowNullReference(nameof(MapUuid));
-            if (Features is null) BuiltIns.ThrowNullReference(nameof(Features));
-            for (int i = 0; i < Features.Length; i++)
-            {
-                if (Features[i] is null) BuiltIns.ThrowNullReference(nameof(Features), i);
-                Features[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(MapUuid, nameof(MapUuid));
+            BuiltIns.ThrowIfNull(Features, nameof(Features));
         }
     
         public int RosMessageLength

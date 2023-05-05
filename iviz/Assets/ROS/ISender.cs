@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Text;
+using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Roslib;
 
@@ -12,15 +13,39 @@ namespace Iviz.Ros
     /// There can be multiple Senders that refer to the same shared publisher.
     /// The original is stored in an <see cref="AdvertisedTopic{T}"/>.  
     /// </summary>
-    public interface ISender
+    public abstract class Sender
     {
-        string Topic { get; }
-        string Type { get; }
         internal int? Id { get; set; }
-        RosSenderStats Stats { get; }
-        int NumSubscribers { get; }
-        void Dispose();
-        void Publish(IMessage msg);
-        void WriteDescriptionTo(StringBuilder description);
+        public string Topic { get; }
+        public string Type { get; }
+        public RosSenderStats Stats { get; protected set; }
+        public int NumSubscribers { get; protected set; }
+
+        protected Sender(string topic, string type)
+        {
+            ThrowHelper.ThrowIfNullOrEmpty(topic, nameof(topic));
+            ThrowHelper.ThrowIfNullOrEmpty(type, nameof(type));
+
+            Topic = topic;
+            Type = type;
+        }
+
+        public void WriteDescriptionTo(StringBuilder description)
+        {
+            if (Connection.GetNumSubscribers(Id) is not { } numSubscribers)
+            {
+                description.Append("Off");
+                return;
+            }
+
+            description.Append(numSubscribers).Append(" sub");
+        }
+
+        public override string ToString() => $"[{nameof(Sender)} {Topic} [{Type}]]";
+
+        public abstract void Dispose();
+        public abstract void Publish(IMessage msg);
+
+        private protected static RosConnection Connection => RosManager.RosConnection;
     }
 }

@@ -92,7 +92,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Uri is null) BuiltIns.ThrowNullReference(nameof(Uri));
+            BuiltIns.ThrowIfNull(Uri, nameof(Uri));
         }
     
         public int RosMessageLength
@@ -150,7 +150,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n == 0) array = EmptyArray<byte>.Value;
                 else
                 {
-                     array = new byte[n];
+                    array = new byte[n];
                     b.DeserializeStructArray(array);
                 }
                 Bytes = array;
@@ -168,7 +168,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n == 0) array = EmptyArray<byte>.Value;
                 else
                 {
-                     array = new byte[n];
+                    array = new byte[n];
                     b.DeserializeStructArray(array);
                 }
                 Bytes = array;
@@ -201,8 +201,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Bytes is null) BuiltIns.ThrowNullReference(nameof(Bytes));
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            BuiltIns.ThrowIfNull(Bytes, nameof(Bytes));
+            BuiltIns.ThrowIfNull(Message, nameof(Message));
         }
     
         public int RosMessageLength

@@ -106,11 +106,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Prefixes is null) BuiltIns.ThrowNullReference(nameof(Prefixes));
-            for (int i = 0; i < Prefixes.Length; i++)
-            {
-                if (Prefixes[i] is null) BuiltIns.ThrowNullReference(nameof(Prefixes), i);
-            }
+            BuiltIns.ThrowIfNull(Prefixes, nameof(Prefixes));
         }
     
         public int RosMessageLength
@@ -180,7 +176,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Result is null) BuiltIns.ThrowNullReference(nameof(Result));
+            BuiltIns.ThrowIfNull(Result, nameof(Result));
             Result.RosValidate();
         }
     

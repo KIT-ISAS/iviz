@@ -61,11 +61,11 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (ActionGoal is null) BuiltIns.ThrowNullReference(nameof(ActionGoal));
+            BuiltIns.ThrowIfNull(ActionGoal, nameof(ActionGoal));
             ActionGoal.RosValidate();
-            if (ActionResult is null) BuiltIns.ThrowNullReference(nameof(ActionResult));
+            BuiltIns.ThrowIfNull(ActionResult, nameof(ActionResult));
             ActionResult.RosValidate();
-            if (ActionFeedback is null) BuiltIns.ThrowNullReference(nameof(ActionFeedback));
+            BuiltIns.ThrowIfNull(ActionFeedback, nameof(ActionFeedback));
             ActionFeedback.RosValidate();
         }
     

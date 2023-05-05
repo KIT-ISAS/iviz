@@ -50,7 +50,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 Position = array;
@@ -61,7 +61,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 Velocity = array;
@@ -72,7 +72,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 Effort = array;
@@ -91,7 +91,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -103,7 +103,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -115,7 +115,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -160,14 +160,10 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            for (int i = 0; i < Name.Length; i++)
-            {
-                if (Name[i] is null) BuiltIns.ThrowNullReference(nameof(Name), i);
-            }
-            if (Position is null) BuiltIns.ThrowNullReference(nameof(Position));
-            if (Velocity is null) BuiltIns.ThrowNullReference(nameof(Velocity));
-            if (Effort is null) BuiltIns.ThrowNullReference(nameof(Effort));
+            BuiltIns.ThrowIfNull(Name, nameof(Name));
+            BuiltIns.ThrowIfNull(Position, nameof(Position));
+            BuiltIns.ThrowIfNull(Velocity, nameof(Velocity));
+            BuiltIns.ThrowIfNull(Effort, nameof(Effort));
         }
     
         public int RosMessageLength

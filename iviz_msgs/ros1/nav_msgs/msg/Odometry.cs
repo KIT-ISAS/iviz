@@ -71,10 +71,10 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (ChildFrameId is null) BuiltIns.ThrowNullReference(nameof(ChildFrameId));
-            if (Pose is null) BuiltIns.ThrowNullReference(nameof(Pose));
+            BuiltIns.ThrowIfNull(ChildFrameId, nameof(ChildFrameId));
+            BuiltIns.ThrowIfNull(Pose, nameof(Pose));
             Pose.RosValidate();
-            if (Twist is null) BuiltIns.ThrowNullReference(nameof(Twist));
+            BuiltIns.ThrowIfNull(Twist, nameof(Twist));
             Twist.RosValidate();
         }
     

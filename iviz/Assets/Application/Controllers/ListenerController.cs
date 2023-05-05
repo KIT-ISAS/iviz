@@ -14,7 +14,7 @@ namespace Iviz.Controllers
         /// <summary>
         /// The ROS subscriber of this controller.
         /// </summary>
-        public abstract IListener Listener { get; }
+        public abstract Listener Listener { get; }
         
         /// <summary>
         /// The frame on which the visualizations are attached.

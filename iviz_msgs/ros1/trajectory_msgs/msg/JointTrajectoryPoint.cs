@@ -33,7 +33,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 Positions = array;
@@ -44,7 +44,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 Velocities = array;
@@ -55,7 +55,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 Accelerations = array;
@@ -66,7 +66,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 Effort = array;
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -95,7 +95,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -107,7 +107,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -119,7 +119,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -165,10 +165,10 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public void RosValidate()
         {
-            if (Positions is null) BuiltIns.ThrowNullReference(nameof(Positions));
-            if (Velocities is null) BuiltIns.ThrowNullReference(nameof(Velocities));
-            if (Accelerations is null) BuiltIns.ThrowNullReference(nameof(Accelerations));
-            if (Effort is null) BuiltIns.ThrowNullReference(nameof(Effort));
+            BuiltIns.ThrowIfNull(Positions, nameof(Positions));
+            BuiltIns.ThrowIfNull(Velocities, nameof(Velocities));
+            BuiltIns.ThrowIfNull(Accelerations, nameof(Accelerations));
+            BuiltIns.ThrowIfNull(Effort, nameof(Effort));
         }
     
         public int RosMessageLength

@@ -18,13 +18,13 @@ namespace Iviz.App
         [SerializeField] TMP_Text? text;
         [SerializeField] Image? panel;
 
-        ISender? sender;
+        Sender? sender;
 
         TMP_Text Text => text.AssertNotNull(nameof(text));
         Image Panel => panel.AssertNotNull(nameof(panel));
         string? Topic => Sender?.Topic;
 
-        ISender? Sender
+        Sender? Sender
         {
             get => sender;
             set
@@ -43,13 +43,10 @@ namespace Iviz.App
             }
         }
 
-        int NumSubscribers =>
-            (!RosManager.IsConnected || Sender == null) ? -1 : Sender.NumSubscribers;
-
         int MessagesPerSecond => Sender?.Stats.MessagesPerSecond ?? 0;
         long BytesPerSecond => Sender?.Stats.BytesPerSecond ?? 0;
 
-        public void Set(ISender? newSender)
+        public void Set(Sender? newSender)
         {
             Sender = newSender;
             if (newSender == null)

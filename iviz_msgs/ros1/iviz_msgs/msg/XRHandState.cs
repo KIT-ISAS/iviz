@@ -202,11 +202,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Thumb is null) BuiltIns.ThrowNullReference(nameof(Thumb));
-            if (Index is null) BuiltIns.ThrowNullReference(nameof(Index));
-            if (Middle is null) BuiltIns.ThrowNullReference(nameof(Middle));
-            if (Ring is null) BuiltIns.ThrowNullReference(nameof(Ring));
-            if (Little is null) BuiltIns.ThrowNullReference(nameof(Little));
+            BuiltIns.ThrowIfNull(Thumb, nameof(Thumb));
+            BuiltIns.ThrowIfNull(Index, nameof(Index));
+            BuiltIns.ThrowIfNull(Middle, nameof(Middle));
+            BuiltIns.ThrowIfNull(Ring, nameof(Ring));
+            BuiltIns.ThrowIfNull(Little, nameof(Little));
         }
     
         public int RosMessageLength

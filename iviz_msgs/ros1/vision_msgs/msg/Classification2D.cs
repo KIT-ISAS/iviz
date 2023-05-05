@@ -39,12 +39,15 @@ namespace Iviz.Msgs.VisionMsgs
             Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ObjectHypothesis>.Value
-                    : new ObjectHypothesis[n];
-                for (int i = 0; i < n; i++)
+                ObjectHypothesis[] array;
+                if (n == 0) array = EmptyArray<ObjectHypothesis>.Value;
+                else
                 {
-                    array[i] = new ObjectHypothesis(ref b);
+                    array = new ObjectHypothesis[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ObjectHypothesis(ref b);
+                    }
                 }
                 Results = array;
             }
@@ -57,12 +60,15 @@ namespace Iviz.Msgs.VisionMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ObjectHypothesis>.Value
-                    : new ObjectHypothesis[n];
-                for (int i = 0; i < n; i++)
+                ObjectHypothesis[] array;
+                if (n == 0) array = EmptyArray<ObjectHypothesis>.Value;
+                else
                 {
-                    array[i] = new ObjectHypothesis(ref b);
+                    array = new ObjectHypothesis[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ObjectHypothesis(ref b);
+                    }
                 }
                 Results = array;
             }
@@ -98,13 +104,8 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            if (Results is null) BuiltIns.ThrowNullReference(nameof(Results));
-            for (int i = 0; i < Results.Length; i++)
-            {
-                if (Results[i] is null) BuiltIns.ThrowNullReference(nameof(Results), i);
-                Results[i].RosValidate();
-            }
-            if (SourceImg is null) BuiltIns.ThrowNullReference(nameof(SourceImg));
+            BuiltIns.ThrowIfNull(Results, nameof(Results));
+            BuiltIns.ThrowIfNull(SourceImg, nameof(SourceImg));
             SourceImg.RosValidate();
         }
     

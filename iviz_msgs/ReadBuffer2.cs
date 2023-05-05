@@ -391,31 +391,13 @@ public unsafe struct ReadBuffer2
         t = *(Transform*)cursor;
         Advance(size);
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize(out Point32 t)
-    {
-        const int size = Point32.Ros2FixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Point32*)cursor;
-        Advance(size);
-    }
-
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Color32 t)
     {
         const int size = Color32.Ros2FixedMessageLength;
         ThrowIfOutOfRange(size);
         t = *(Color32*)cursor;
-        Advance(size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize(out Triangle t)
-    {
-        const int size = Triangle.Ros2FixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Triangle*)cursor;
         Advance(size);
     }
 

@@ -16,12 +16,12 @@ namespace Iviz.App
 
         [SerializeField] TMP_Text? text;
         [SerializeField] Image? panel;
-        IListener? listener;
+        Listener? listener;
 
         TMP_Text Text => text.AssertNotNull(nameof(text));
         Image Panel => panel.AssertNotNull(nameof(text));
 
-        public IListener? Listener
+        public Listener? Listener
         {
             private get => listener;
             set

@@ -554,9 +554,9 @@ namespace Iviz.Controllers
                 return;
             }
 
-            bool shouldPublishColor = ColorSender.NumSubscribers != 0;
-            bool shouldPublishDepth = DepthSender.NumSubscribers != 0;
-            bool shouldPublishConfidence = DepthConfidenceSender.NumSubscribers != 0;
+            bool shouldPublishColor = ColorSender.NumSubscribers > 0;
+            bool shouldPublishDepth = DepthSender.NumSubscribers > 0;
+            bool shouldPublishConfidence = DepthConfidenceSender.NumSubscribers > 0;
             if (!shouldPublishColor && !shouldPublishDepth && !shouldPublishConfidence)
             {
                 return;

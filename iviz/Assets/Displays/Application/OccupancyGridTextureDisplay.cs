@@ -173,7 +173,7 @@ namespace Iviz.Displays
             int numValidValues = 0;
 
             int rowSize = bounds.width;
-            foreach (int v in ..bounds.height)
+            for (int v = 0; v < bounds.height; v++)
             {
                 int srcOffset = (v + bounds.y) * pitch + bounds.x;
                 int dstOffset = v * rowSize;

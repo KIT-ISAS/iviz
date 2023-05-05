@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Tools;
+using Unity.Burst;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -173,8 +174,13 @@ namespace Iviz.Displays
             {
                 return false;
             }
-            
-            var lineSpan = lineBuffer.AsSpan();
+
+            unsafe
+            {
+                return LineDisplayUtils.CheckIfAlphaNeeded(lineBuffer.GetUnsafePtr(), bufferLength);
+            }
+
+            /*
             for (int i = 0; i < lineSpan.Length; i++)
             {
                 ref float4x2 line = ref lineSpan[i];
@@ -192,6 +198,7 @@ namespace Iviz.Displays
             }
 
             return false;
+            */
         }
 
         public override Color Tint
@@ -396,13 +403,13 @@ namespace Iviz.Displays
             lineComputeBuffer?.Release();
             lineComputeBuffer = null;
         }
-        
+
         void OnDestroy()
         {
             lineBuffer.Dispose();
 
             Properties.SetBuffer(ShaderIds.LinesId, (ComputeBuffer?)null);
-            
+
             if (lineComputeBuffer != null)
             {
                 lineComputeBuffer.Release();
@@ -411,6 +418,6 @@ namespace Iviz.Displays
 
             Mesh.Clear();
             Destroy(Mesh);
-        }        
+        }
     }
 }

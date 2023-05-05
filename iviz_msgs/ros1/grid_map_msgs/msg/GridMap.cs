@@ -38,12 +38,15 @@ namespace Iviz.Msgs.GridMapMsgs
             BasicLayers = b.DeserializeStringArray();
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<StdMsgs.Float32MultiArray>.Value
-                    : new StdMsgs.Float32MultiArray[n];
-                for (int i = 0; i < n; i++)
+                StdMsgs.Float32MultiArray[] array;
+                if (n == 0) array = EmptyArray<StdMsgs.Float32MultiArray>.Value;
+                else
                 {
-                    array[i] = new StdMsgs.Float32MultiArray(ref b);
+                    array = new StdMsgs.Float32MultiArray[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new StdMsgs.Float32MultiArray(ref b);
+                    }
                 }
                 Data = array;
             }
@@ -61,12 +64,15 @@ namespace Iviz.Msgs.GridMapMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<StdMsgs.Float32MultiArray>.Value
-                    : new StdMsgs.Float32MultiArray[n];
-                for (int i = 0; i < n; i++)
+                StdMsgs.Float32MultiArray[] array;
+                if (n == 0) array = EmptyArray<StdMsgs.Float32MultiArray>.Value;
+                else
                 {
-                    array[i] = new StdMsgs.Float32MultiArray(ref b);
+                    array = new StdMsgs.Float32MultiArray[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new StdMsgs.Float32MultiArray(ref b);
+                    }
                 }
                 Data = array;
             }
@@ -117,24 +123,11 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            if (Info is null) BuiltIns.ThrowNullReference(nameof(Info));
+            BuiltIns.ThrowIfNull(Info, nameof(Info));
             Info.RosValidate();
-            if (Layers is null) BuiltIns.ThrowNullReference(nameof(Layers));
-            for (int i = 0; i < Layers.Length; i++)
-            {
-                if (Layers[i] is null) BuiltIns.ThrowNullReference(nameof(Layers), i);
-            }
-            if (BasicLayers is null) BuiltIns.ThrowNullReference(nameof(BasicLayers));
-            for (int i = 0; i < BasicLayers.Length; i++)
-            {
-                if (BasicLayers[i] is null) BuiltIns.ThrowNullReference(nameof(BasicLayers), i);
-            }
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
-            for (int i = 0; i < Data.Length; i++)
-            {
-                if (Data[i] is null) BuiltIns.ThrowNullReference(nameof(Data), i);
-                Data[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Layers, nameof(Layers));
+            BuiltIns.ThrowIfNull(BasicLayers, nameof(BasicLayers));
+            BuiltIns.ThrowIfNull(Data, nameof(Data));
         }
     
         public int RosMessageLength

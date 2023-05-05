@@ -79,7 +79,7 @@ namespace Iviz.Displays
             {
                 return;
             }
-            
+
             int[] array = mesh.GetIndices(0); // allocates! use sparingly
             switch (meshTopology)
             {
@@ -133,7 +133,7 @@ namespace Iviz.Displays
             if (pointsLength == 0)
             {
                 Collider.SetLocalBounds(ownMesh.bounds);
-                BoundsChanged?.Invoke();
+                RaiseBoundsChanged();
                 return;
             }
 
@@ -159,7 +159,7 @@ namespace Iviz.Displays
 
             ownMesh.RecalculateNormals();
             Collider.SetLocalBounds(ownMesh.bounds);
-            BoundsChanged?.Invoke();
+            RaiseBoundsChanged();
         }
 
         public void Set(
@@ -193,7 +193,7 @@ namespace Iviz.Displays
             if (points.Length == 0 || triangles.Length == 0)
             {
                 Collider.SetLocalBounds(ownMesh.bounds);
-                BoundsChanged?.Invoke();
+                RaiseBoundsChanged();
                 return;
             }
 
@@ -231,7 +231,20 @@ namespace Iviz.Displays
             }
 
             Collider.SetLocalBounds(ownMesh.bounds);
-            BoundsChanged?.Invoke();
+            RaiseBoundsChanged();
+        }
+
+        void RaiseBoundsChanged()
+        {
+            try
+            {
+                BoundsChanged?.Invoke();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{ToString()}: " +
+                                $"Error during {nameof(RaiseBoundsChanged)}", e);
+            }
         }
 
         public override void Suspend()

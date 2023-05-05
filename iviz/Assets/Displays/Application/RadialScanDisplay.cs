@@ -221,7 +221,7 @@ namespace Iviz.Displays
 
                 cacheProperties = (angleMin, angleIncrement, intensities.Length);
 
-                foreach (int i in ..ranges.Length)
+                for (int i = 0; i < ranges.Length; i++)
                 {
                     float a = angleMin + angleIncrement * i;
                     //(xz.x, _, xz.y) = ( Mathf.Cos(a),  Mathf.Sin(a), 0 ).Ros2Unity();
@@ -245,17 +245,15 @@ namespace Iviz.Displays
                 for (int i = 0; i < length; i++)
                 {
                     float range = ranges[i];
-                    if (range.IsInvalid() || range > rangeMax || range < rangeMin)
-                    {
-                        continue;
-                    }
+                    
+                    if (range.IsInvalid() || range > rangeMax || range < rangeMin) continue;
 
-                    var (x, z) = mCache[i];
+                    var cachedXZ = mCache[i];
 
                     float4 f;
-                    f.x = x * range;
+                    f.x = cachedXZ.x * range;
                     f.y = 0;
-                    f.z = z * range;
+                    f.z = cachedXZ.y * range;
                     f.w = useIntensity ? intensities[i] : range;
                     pointBuffer.Add(f);
                 }
@@ -277,12 +275,12 @@ namespace Iviz.Displays
                         continue;
                     }
 
-                    var (x, z) = mCache[i];
+                    var cachedXZ = mCache[i];
 
                     float4 f1;
-                    f1.x = x * range;
+                    f1.x = cachedXZ.x * range;
                     f1.y = 0;
-                    f1.z = z * range;
+                    f1.z = cachedXZ.y * range;
                     f1.w = useIntensity ? intensities[i] : range;
 
                     if (prevF is { } f0)

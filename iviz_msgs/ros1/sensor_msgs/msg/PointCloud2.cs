@@ -48,12 +48,15 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Width);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<PointField>.Value
-                    : new PointField[n];
-                for (int i = 0; i < n; i++)
+                PointField[] array;
+                if (n == 0) array = EmptyArray<PointField>.Value;
+                else
                 {
-                    array[i] = new PointField(ref b);
+                    array = new PointField[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new PointField(ref b);
+                    }
                 }
                 Fields = array;
             }
@@ -72,12 +75,15 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Width);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<PointField>.Value
-                    : new PointField[n];
-                for (int i = 0; i < n; i++)
+                PointField[] array;
+                if (n == 0) array = EmptyArray<PointField>.Value;
+                else
                 {
-                    array[i] = new PointField(ref b);
+                    array = new PointField[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new PointField(ref b);
+                    }
                 }
                 Fields = array;
             }
@@ -133,13 +139,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Fields is null) BuiltIns.ThrowNullReference(nameof(Fields));
-            for (int i = 0; i < Fields.Length; i++)
-            {
-                if (Fields[i] is null) BuiltIns.ThrowNullReference(nameof(Fields), i);
-                Fields[i].RosValidate();
-            }
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            BuiltIns.ThrowIfNull(Fields, nameof(Fields));
+            BuiltIns.ThrowIfNull(Data, nameof(Data));
         }
     
         public int RosMessageLength

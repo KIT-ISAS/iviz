@@ -9,6 +9,7 @@ using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.Configurations;
 using Iviz.Displays;
+using Iviz.Displays.Helpers;
 using Iviz.Msgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
@@ -31,19 +32,9 @@ namespace Iviz.Controllers
         int numCellsX;
         int numCellsY;
         float cellSize;
-        bool isProcessing;
+        InterlockedBoolean isProcessing;
 
         public override TfFrame? Frame => cubeNode.Parent;
-
-        bool IsProcessing
-        {
-            get => isProcessing;
-            set
-            {
-                isProcessing = value;
-                Listener.SetPause(value);
-            }
-        }
 
         public string Description
         {
@@ -206,7 +197,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public override IListener Listener { get; }
+        public override Listener Listener { get; }
 
         public OccupancyGridListener(OccupancyGridConfiguration? config, string topic)
         {
@@ -219,15 +210,11 @@ namespace Iviz.Controllers
             };
 
             Listener = new Listener<OccupancyGrid>(Config.Topic, Handle);
+            isProcessing.Changed = Listener.SetPause;
         }
 
         void Handle(OccupancyGrid msg)
         {
-            if (IsProcessing)
-            {
-                return;
-            }
-
             sbyte[] data = msg.Data;
             var info = msg.Info;
 
@@ -235,7 +222,7 @@ namespace Iviz.Controllers
             {
                 if (data.Length != info.Width * info.Height)
                 {
-                    RosLogger.Error($"{this}: Size {info.Width.ToString()}x{info.Height.ToString()} " +
+                    RosLogger.Error($"{ToString()}: Size {info.Width.ToString()}x{info.Height.ToString()} " +
                                     $"does not match data length {data.Length.ToString()}!");
                     return;
                 }
@@ -243,20 +230,20 @@ namespace Iviz.Controllers
 
             if (info.Resolution.IsInvalid() || info.Resolution < 0)
             {
-                RosLogger.Error($"{this}: {nameof(MapMetaData)} has invalid values!");
+                RosLogger.Error($"{ToString()}: {nameof(MapMetaData)} has invalid values!");
                 return;
             }
 
             if (info.Origin.IsInvalid())
             {
-                RosLogger.Error($"{this}: Origin has invalid values!");
+                RosLogger.Error($"{ToString()}: Origin has invalid values!");
                 return;
             }
 
             int maxGridSize = Settings.MaxTextureSize;
             if (info.Width > maxGridSize || info.Height > maxGridSize)
             {
-                RosLogger.Error($"{this}: Gridmap is too large! Iviz only supports gridmap sizes " +
+                RosLogger.Error($"{ToString()}: Occupancy grid is too large! Iviz only supports grid sizes " +
                                 $"up to {maxGridSize.ToString()}");
                 return;
             }
@@ -265,7 +252,7 @@ namespace Iviz.Controllers
             Pose validatedOrigin;
             if (!origin.IsUsable())
             {
-                RosLogger.Warn($"{this}: Cannot use ({origin.position.x.ToString(BuiltIns.Culture)}, " +
+                RosLogger.Warn($"{ToString()}: Cannot use ({origin.position.x.ToString(BuiltIns.Culture)}, " +
                                $"{origin.position.y.ToString(BuiltIns.Culture)}, " +
                                $"{origin.position.z.ToString(BuiltIns.Culture)}) " +
                                "as position. Values too large!");
@@ -274,6 +261,11 @@ namespace Iviz.Controllers
             else
             {
                 validatedOrigin = origin;
+            }
+
+            if (!isProcessing.TrySet())
+            {
+                return;
             }
 
             cubeNode.AttachTo(msg.Header);
@@ -287,15 +279,14 @@ namespace Iviz.Controllers
 
             try
             {
-                IsProcessing = true;
                 if (CubesVisible)
                 {
-                    tasks.AddRange(SetCubes(data, validatedOrigin));
+                    SetCubes(tasks, data, validatedOrigin);
                 }
 
                 if (TextureVisible)
                 {
-                    tasks.AddRange(SetTextures(data, validatedOrigin));
+                    SetTextures(tasks, data, validatedOrigin);
                 }
             }
             finally
@@ -306,14 +297,12 @@ namespace Iviz.Controllers
             async void AwaitAndReset()
             {
                 await Task.WhenAll(tasks).AwaitNoThrow(this);
-                IsProcessing = false;
+                isProcessing.Reset();
             }
         }
 
-        IEnumerable<Task> SetCubes(sbyte[] data, Pose pose)
+        void SetCubes(List<Task> tasks, sbyte[] data, Pose pose)
         {
-            var tasks = new List<Task>();
-
             if (gridTiles.Length != 16)
             {
                 gridTiles = new OccupancyGridDisplay[16];
@@ -330,12 +319,11 @@ namespace Iviz.Controllers
                 }
             }
 
-            int i = 0;
-            foreach (int v in ..4)
+            for (int v = 0; v < 4; v++)
             {
-                foreach (int u in ..4)
+                for (int u = 0; u < 4; u++)
                 {
-                    var grid = gridTiles[i++];
+                    var grid = gridTiles[v * 4 + u];
                     grid.NumCellsX = numCellsX;
                     grid.NumCellsY = numCellsY;
                     grid.CellSize = cellSize;
@@ -358,21 +346,18 @@ namespace Iviz.Controllers
                         }
                         catch (Exception e)
                         {
-                            RosLogger.Error($"{this}: Error processing occupancy grid cube", e);
-                        }                        
+                            RosLogger.Error($"{ToString()}: Error processing occupancy grid cube", e);
+                        }
                     }
                 }
             }
 
 
             ScaleZ = ScaleZ;
-            return tasks;
         }
 
-        IEnumerable<Task> SetTextures(sbyte[] data, Pose pose)
+        void SetTextures(List<Task> tasks, sbyte[] data, Pose pose)
         {
-            var tasks = new List<Task>();
-
             int tileSizeX = (numCellsX + MaxTileSize - 1) / MaxTileSize;
             int tileSizeY = (numCellsY + MaxTileSize - 1) / MaxTileSize;
             int tileTotalSize = tileSizeY * tileSizeX;
@@ -403,10 +388,9 @@ namespace Iviz.Controllers
                 }
             }
 
-            int i = 0;
-            foreach (int v in ..tileSizeY)
+            for (int v = 0; v < tileSizeY; v++)
             {
-                foreach (int u in ..tileSizeX)
+                for (int u = 0; u < tileSizeX; u++)
                 {
                     int xMin = u * MaxTileSize;
                     int xMax = Mathf.Min(xMin + MaxTileSize, numCellsX);
@@ -421,7 +405,7 @@ namespace Iviz.Controllers
                         yMax = yMax
                     };
 
-                    var texture = textureTiles[i++];
+                    var texture = textureTiles[v * tileSizeX + u];
                     tasks.Add(Task.Run(ProcessTexture));
 
                     void ProcessTexture()
@@ -432,13 +416,11 @@ namespace Iviz.Controllers
                         }
                         catch (Exception e)
                         {
-                            RosLogger.Error($"{this}: Error processing occupancy grid texture", e);
+                            RosLogger.Error($"{ToString()}: Error processing occupancy grid texture", e);
                         }
                     }
                 }
             }
-
-            return tasks;
         }
 
 

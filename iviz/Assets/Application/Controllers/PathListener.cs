@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.Configurations;
@@ -16,6 +17,7 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
+    [Obsolete]
     public sealed class PathListener : ListenerController
     {
         readonly FrameNode node;
@@ -115,12 +117,12 @@ namespace Iviz.Controllers
         readonly List<Pose> savedPoses = new();
         readonly NativeList<LineWithColor> lines = new();
 
-        IListener listener;
-        public override IListener Listener => listener;
+        Listener listener;
+        public override Listener Listener => listener;
 
         public PathListener()
         {
-            node = FrameNode.Instantiate("PathNode");
+            node = new FrameNode("PathNode");
             resource = ResourcePool.Rent<LineDisplay>(Resource.Displays.Line, node.Transform);
             resource.ElementScale = 0.005f;
             resource.Tint = Color.white;

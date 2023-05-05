@@ -61,8 +61,8 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public void RosValidate()
         {
-            if (Coef is null) BuiltIns.ThrowNullReference(nameof(Coef));
-            if (Coef.Length != 4) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(Coef), Coef.Length, 4);
+            BuiltIns.ThrowIfNull(Coef, nameof(Coef));
+            BuiltIns.ThrowIfWrongSize(Coef, nameof(Coef), 4);
         }
     
         public const int RosFixedMessageLength = 32;

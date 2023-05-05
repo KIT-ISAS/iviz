@@ -118,10 +118,5 @@ namespace Iviz.Controllers.TF
         public bool IsAlive => !disposed;
 
         public override string ToString() => "{" + Name + "}";
-
-        public static FrameNode Instantiate(string name)
-        {
-            return new FrameNode(name);
-        }
     }
 }

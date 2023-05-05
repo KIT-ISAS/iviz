@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public sealed class RobotPreviewHandler : VizHandler
+    public sealed class RobotPreviewHandler : VizHandler, IHandles<RobotPreview>, IHandlesArray<RobotPreviewArray>
     {
         readonly Dictionary<string, RobotModel> cachedRobots = new();
 
@@ -35,15 +35,15 @@ namespace Iviz.Controllers
             }
         }
 
-        public void Handler(RobotPreviewArray msg)
+        public void Handle(RobotPreviewArray msg)
         {
             foreach (var widget in msg.Previews)
             {
-                Handler(widget);
+                Handle(widget);
             }
         }
         
-        public void Handler(RobotPreview msg)
+        public void Handle(RobotPreview msg)
         {
             switch ((ActionType)msg.Action)
             {

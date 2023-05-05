@@ -31,7 +31,7 @@ namespace Iviz.Msgs.PclMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Values = array;
@@ -48,7 +48,7 @@ namespace Iviz.Msgs.PclMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Values = array;
@@ -76,7 +76,7 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            if (Values is null) BuiltIns.ThrowNullReference(nameof(Values));
+            BuiltIns.ThrowIfNull(Values, nameof(Values));
         }
     
         public int RosMessageLength

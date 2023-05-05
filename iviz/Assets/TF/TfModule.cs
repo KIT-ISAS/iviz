@@ -202,7 +202,7 @@ namespace Iviz.Controllers.TF
         public TfModule(Func<string, TfFrame> frameFactory)
         {
             instance = this;
-            
+
             ThrowHelper.ThrowIfNull(frameFactory, nameof(frameFactory));
             this.frameFactory = frameFactory;
 
@@ -345,7 +345,7 @@ namespace Iviz.Controllers.TF
             const int maxPoseMagnitude = 10000;
             return t.MaxAbsCoeff() < maxPoseMagnitude;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool CheckIfWithinThreshold(in Quaternion t)
         {
@@ -362,7 +362,7 @@ namespace Iviz.Controllers.TF
                 return;
             }
 
-            RosLogger.Info($"{nameof(TfModule)}: Ignoring transform '{childId}' with too large values.");
+            RosLogger.Info($"{nameof(TfModule)}: Ignoring transform '{childId}' with too large values");
             warningTimestamps[childId] = GameThread.GameTime + WarningBlacklistTimeInSec;
         }
 
@@ -374,13 +374,13 @@ namespace Iviz.Controllers.TF
                 return;
             }
 
-            RosLogger.Info($"{nameof(TfModule)}: Ignoring transform '{childId}' with invalid values.");
+            RosLogger.Info($"{nameof(TfModule)}: Ignoring transform '{childId}' with invalid values");
             warningTimestamps[childId] = GameThread.GameTime + WarningBlacklistTimeInSec;
         }
 
         public void Reset()
         {
-            ResetFrames?.Invoke();
+            RaiseResetFrames();
 
             bool prevKeepAllFrames = keepAllFrames;
 
@@ -402,6 +402,18 @@ namespace Iviz.Controllers.TF
             KeepAllFrames = prevKeepAllFrames;
 
             warningTimestamps.Clear();
+        }
+
+        void RaiseResetFrames()
+        {
+            try
+            {
+                ResetFrames?.Invoke();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{ToString()}: Error during {nameof(RaiseResetFrames)}", e);
+            }
         }
 
         TfFrame Add(TfFrame t)
@@ -451,7 +463,7 @@ namespace Iviz.Controllers.TF
 
             if (frameId.Length == 0)
             {
-                throw new ArgumentException("Cannot create frame with empty name", nameof(frameId));
+                ThrowHelper.ThrowArgument("Cannot create frame with empty name", nameof(frameId));
             }
 
             string validatedFrameId = frameId[0] switch

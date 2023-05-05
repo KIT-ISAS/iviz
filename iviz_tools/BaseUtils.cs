@@ -14,21 +14,12 @@ namespace Iviz.Tools;
 
 public static class BaseUtils
 {
-    public static Random Random => Defaults.Random;
-
     public const string GenericExceptionFormat = "{0}: {1}";
 
     public static bool HasPrefix(this string check, string prefix)
     {
-        if (check is null)
-        {
-            throw new ArgumentNullException(nameof(check));
-        }
-
-        if (prefix is null)
-        {
-            throw new ArgumentNullException(nameof(prefix));
-        }
+        if (check is null) ThrowArgumentNull(nameof(check));
+        if (prefix is null) ThrowArgumentNull(nameof(prefix));
 
         if (check.Length < prefix.Length)
         {
@@ -48,15 +39,8 @@ public static class BaseUtils
 
     public static bool HasSuffix(this string check, string suffix)
     {
-        if (check is null)
-        {
-            throw new ArgumentNullException(nameof(check));
-        }
-
-        if (suffix is null)
-        {
-            throw new ArgumentNullException(nameof(suffix));
-        }
+        if (check is null) ThrowArgumentNull(nameof(check));
+        if (suffix is null) ThrowArgumentNull(nameof(suffix));
 
         if (check.Length < suffix.Length)
         {
@@ -76,29 +60,7 @@ public static class BaseUtils
     }
 
     public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t) => new(t);
-
-    public static int Sum<T>(this ReadOnlySpan<T> ts, Func<T, int> selector)
-    {
-        int sum = 0;
-        foreach (T t in ts)
-        {
-            sum += selector(t);
-        }
-
-        return sum;
-    }
-
-    public static int Sum<T>(this T[] ts, Func<T, int> selector)
-    {
-        int sum = 0;
-        foreach (T t in ts)
-        {
-            sum += selector(t);
-        }
-
-        return sum;
-    }
-
+    
     /// <summary>
     /// Copies the content of the string into a byte <see cref="Rent"/>.
     /// </summary>
@@ -176,16 +138,4 @@ public static class BaseUtils
 
     [DoesNotReturn]
     static int ThrowIndexOutOfRange() => throw new IndexOutOfRangeException();
-}
-
-public sealed class ConcurrentSet<T> : IReadOnlyCollection<T> where T : notnull
-{
-    readonly ConcurrentDictionary<T, object?> backend = new();
-    public IEnumerator<T> GetEnumerator() => backend.Keys.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    public void Add(T s) => backend[s] = null;
-    public bool Remove(T s) => backend.TryRemove(s, out _);
-    public int Count => backend.Count;
-    public void Clear() => backend.Clear();
-    public T[] ToArray() => backend.Keys.ToArray();
 }

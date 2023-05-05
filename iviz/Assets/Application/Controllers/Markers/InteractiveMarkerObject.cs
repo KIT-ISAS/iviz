@@ -45,7 +45,7 @@ namespace Iviz.Controllers
                 poseUpdateEnabled = value;
                 if (poseUpdateEnabled && bufferedPose != null)
                 {
-                    ControlNode.transform.SetLocalPose(bufferedPose.Value);
+                    ControlNode.SetLocalPose(bufferedPose.Value);
                     bufferedPose = null;
                 }
             }
@@ -85,7 +85,7 @@ namespace Iviz.Controllers
             {
                 if (PoseUpdateEnabled)
                 {
-                    ControlNode.transform.SetLocalPose(value);
+                    ControlNode.SetLocalPose(value);
                 }
                 else
                 {

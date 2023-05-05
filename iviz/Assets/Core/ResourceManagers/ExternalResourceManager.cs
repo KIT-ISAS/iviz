@@ -253,7 +253,7 @@ namespace Iviz.Displays
         }
 
         public ValueTask<ResourceKey<GameObject>?> TryGetGameObjectAsync(string uriString,
-            IServiceProvider? provider, CancellationToken token = default)
+            ServiceProvider? provider, CancellationToken token = default)
         {
             ThrowHelper.ThrowIfNull(uriString, nameof(uriString));
 
@@ -284,7 +284,7 @@ namespace Iviz.Displays
         }
 
         async ValueTask<ResourceKey<GameObject>?> GetGameObjectAsync(string uriString, Uri uri,
-            IServiceProvider? provider, CancellationToken token)
+            ServiceProvider? provider, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
 
@@ -333,7 +333,7 @@ namespace Iviz.Displays
             return loadedModels.TryGetValue(uriString, out resource);
         }
 
-        async ValueTask<ResourceKey<GameObject>?> GetModelAsync(string uriString, IServiceProvider? provider,
+        async ValueTask<ResourceKey<GameObject>?> GetModelAsync(string uriString, ServiceProvider? provider,
             CancellationToken token)
         {
             // we just passed a mutex, the quick paths may have just become valid
@@ -365,7 +365,7 @@ namespace Iviz.Displays
         }
 
         async ValueTask<ResourceKey<GameObject>?> GetModelFromServerAsync(string uriString,
-            IServiceProvider provider, CancellationToken token)
+            ServiceProvider provider, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
 
@@ -395,7 +395,7 @@ namespace Iviz.Displays
             return loadedScenes.TryGetValue(uriString, out resource);
         }
 
-        async ValueTask<ResourceKey<GameObject>?> GetSceneAsync(string uriString, IServiceProvider? provider,
+        async ValueTask<ResourceKey<GameObject>?> GetSceneAsync(string uriString, ServiceProvider? provider,
             CancellationToken token)
         {
             if (resourceFiles.Scenes.TryGetValue(uriString, out string localPath))
@@ -416,7 +416,7 @@ namespace Iviz.Displays
         }
 
         async ValueTask<ResourceKey<GameObject>?> GetSceneFromServerAsync(string uriString,
-            IServiceProvider provider, CancellationToken token)
+            ServiceProvider provider, CancellationToken token)
         {
             var msg = new GetSdf { Request = { Uri = uriString } };
             if (await provider.CallModelServiceAsync(SceneServiceName, msg, TimeoutInMs, token) && msg.Response.Success)
@@ -436,7 +436,7 @@ namespace Iviz.Displays
             return null;
         }
 
-        public ValueTask<ResourceKey<Texture2D>?> TryGetTextureAsync(string uriString, IServiceProvider? provider,
+        public ValueTask<ResourceKey<Texture2D>?> TryGetTextureAsync(string uriString, ServiceProvider? provider,
             CancellationToken token)
         {
             ThrowHelper.ThrowIfNull(uriString, nameof(uriString));
@@ -460,7 +460,7 @@ namespace Iviz.Displays
             return GetTextureAsync(uriString, provider, token);
         }
 
-        async ValueTask<ResourceKey<Texture2D>?> GetTextureAsync(string uriString, IServiceProvider? provider,
+        async ValueTask<ResourceKey<Texture2D>?> GetTextureAsync(string uriString, ServiceProvider? provider,
             CancellationToken token)
         {
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
@@ -482,7 +482,7 @@ namespace Iviz.Displays
         }
 
         async ValueTask<ResourceKey<Texture2D>?> GetTextureFromServerAsync(string uriString,
-            IServiceProvider provider, CancellationToken token)
+            ServiceProvider provider, CancellationToken token)
         {
             var msg = new GetModelTexture { Request = { Uri = uriString } };
             bool hasService = await provider.CallModelServiceAsync(TextureServiceName, msg, TimeoutInMs, token);
@@ -532,7 +532,7 @@ namespace Iviz.Displays
         }
 
         async ValueTask<ResourceKey<GameObject>?> LoadLocalModelAsync(string uriString, string localPath,
-            IServiceProvider? provider, CancellationToken token)
+            ServiceProvider? provider, CancellationToken token)
         {
             GameObject obj;
             try
@@ -583,7 +583,7 @@ namespace Iviz.Displays
         }
 
         async ValueTask<ResourceKey<GameObject>?> LoadLocalSceneAsync(string uriString, string localPath,
-            IServiceProvider? provider, CancellationToken token)
+            ServiceProvider? provider, CancellationToken token)
         {
             GameObject obj;
 
@@ -618,7 +618,7 @@ namespace Iviz.Displays
         }
 
         async ValueTask<ResourceKey<GameObject>?> ProcessModelResponseAsync(string uriString,
-            GetModelResourceResponse msg, IServiceProvider provider,
+            GetModelResourceResponse msg, ServiceProvider provider,
             CancellationToken token)
         {
             try
@@ -682,7 +682,7 @@ namespace Iviz.Displays
         }
 
         async ValueTask<ResourceKey<GameObject>?> ProcessSceneResponseAsync(string uriString,
-            GetSdfResponse msg, IServiceProvider? provider, CancellationToken token)
+            GetSdfResponse msg, ServiceProvider? provider, CancellationToken token)
         {
             try
             {
@@ -715,7 +715,7 @@ namespace Iviz.Displays
         }
 
         async ValueTask<GameObject> CreateModelObjectAsync(string uriString, Model msg,
-            IServiceProvider? provider, CancellationToken token)
+            ServiceProvider? provider, CancellationToken token)
         {
             var model = (await SceneModel.CreateAsync(uriString, msg, provider, token)).gameObject;
             if (node != null)
@@ -733,7 +733,7 @@ namespace Iviz.Displays
             Spot
         }
 
-        async ValueTask<GameObject> CreateSceneNodeAsync(Scene scene, IServiceProvider? provider,
+        async ValueTask<GameObject> CreateSceneNodeAsync(Scene scene, ServiceProvider? provider,
             CancellationToken token)
         {
             token.ThrowIfCancellationRequested();

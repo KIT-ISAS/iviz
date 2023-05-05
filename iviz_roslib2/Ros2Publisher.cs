@@ -43,7 +43,7 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
     {
         if (!IsAlive)
         {
-            throw new ObjectDisposedException("this", "This is not a valid publisher");
+            BuiltIns.ThrowObjectDisposed(nameof(Ros2Publisher<TMessage>), "This is not a valid publisher");
         }
     }
 

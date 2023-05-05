@@ -268,14 +268,15 @@ namespace Iviz.Controllers
                     break;
             }
 
-            BoundsChanged?.Invoke();
+            RaiseBoundsChanged();
         }
 
         T ValidateResource<T>() where T : MarkerDisplay
         {
-            T? t = resource as T;
-            if (t is null) ThrowHelper.ThrowMissingAssetField("Resource does not have a marker component!");
-            return t;
+            if (resource is T t) return t;
+            
+            ThrowHelper.ThrowMissingAssetField("Resource does not have a marker component!");
+            return null!; // unreachable
         }
 
         void CreateTriangleList(Marker msg)
@@ -552,7 +553,7 @@ namespace Iviz.Controllers
                     RosLogger.Warn($"{ToString()}: Marker type '{msg.Type.ToString()}' has no resource assigned!");
                 }
 
-                BoundsChanged?.Invoke();
+                RaiseBoundsChanged();
                 return;
             }
 
@@ -589,12 +590,20 @@ namespace Iviz.Controllers
                 supportsLayer.Layer = LayerType.IgnoreRaycast;
             }
 
-            BoundsChanged?.Invoke();
+            RaiseBoundsChanged();
         }
 
         void RaiseBoundsChanged()
         {
-            BoundsChanged?.Invoke();
+            try
+            {
+                BoundsChanged?.Invoke();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{ToString()}: " +
+                                $"Error during {nameof(RaiseBoundsChanged)}", e);
+            }
         }
 
         void UpdateTransform(Marker msg)
@@ -668,7 +677,7 @@ namespace Iviz.Controllers
                 runningTs.Cancel();
             }
         }
-        
+
         void StopLoadResourceTask()
         {
             runningTs?.Cancel();
@@ -686,13 +695,13 @@ namespace Iviz.Controllers
             previousHash = currentHash;
             return false;
         }
-        
+
         public void GetErrorCount(out int totalErrors, out int totalWarnings)
         {
             totalErrors = numErrors;
             totalWarnings = numWarnings;
         }
-        
+
         public void GenerateLog(StringBuilder description)
         {
             GenerateLog(description, this);
@@ -723,7 +732,7 @@ namespace Iviz.Controllers
             resource.ReturnToPool(resourceKey);
             resource = null;
             resourceKey = null;
-            BoundsChanged?.Invoke();
+            RaiseBoundsChanged();
         }
 
         public override string ToString() => $"[{nameof(MarkerObject)} {node.Name}]";

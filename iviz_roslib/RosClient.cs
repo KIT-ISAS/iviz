@@ -1571,7 +1571,6 @@ public sealed class RosClient : IRosClient
         var closeConnectionsTask = CloseConnectionsAsync().AsTask();
         if (token.IsCancellationRequested)
         {
-            Logger.LogFormat("{0}: Pre-cancelled token passed to " + nameof(CloseAsync), this);
             return; // closeConnectionsTask will keep running in the background
         }
 
@@ -1624,7 +1623,8 @@ public sealed class RosClient : IRosClient
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: " + nameof(RosServiceCaller) + ".Dispose() threw! {1}", this, e);
+                Logger.LogErrorFormat("{0}: " + nameof(RosServiceCaller) + "." + 
+                                      nameof(RosServiceCaller.Dispose) + " threw! {1}", this, e);
             }
         }
 
@@ -1636,7 +1636,8 @@ public sealed class RosClient : IRosClient
         }
         catch (Exception e)
         {
-            Logger.LogErrorFormat("{0}: " + nameof(RosMasterClient) + ".Dispose() threw! {1}", this, e);
+            Logger.LogErrorFormat("{0}: " + nameof(RosMasterClient) + "." +
+                                  nameof(RosMasterClient.Dispose) + "() threw! {1}", this, e);
         }
     }
 

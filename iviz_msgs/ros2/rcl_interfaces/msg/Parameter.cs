@@ -60,8 +60,8 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Value is null) BuiltIns.ThrowNullReference(nameof(Value));
+            BuiltIns.ThrowIfNull(Name, nameof(Name));
+            BuiltIns.ThrowIfNull(Value, nameof(Value));
             Value.RosValidate();
         }
     

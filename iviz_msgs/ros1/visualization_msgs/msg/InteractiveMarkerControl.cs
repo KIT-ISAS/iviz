@@ -86,12 +86,15 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out AlwaysVisible);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Marker>.Value
-                    : new Marker[n];
-                for (int i = 0; i < n; i++)
+                Marker[] array;
+                if (n == 0) array = EmptyArray<Marker>.Value;
+                else
                 {
-                    array[i] = new Marker(ref b);
+                    array = new Marker[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Marker(ref b);
+                    }
                 }
                 Markers = array;
             }
@@ -111,12 +114,15 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Marker>.Value
-                    : new Marker[n];
-                for (int i = 0; i < n; i++)
+                Marker[] array;
+                if (n == 0) array = EmptyArray<Marker>.Value;
+                else
                 {
-                    array[i] = new Marker(ref b);
+                    array = new Marker[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Marker(ref b);
+                    }
                 }
                 Markers = array;
             }
@@ -167,14 +173,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Markers is null) BuiltIns.ThrowNullReference(nameof(Markers));
-            for (int i = 0; i < Markers.Length; i++)
-            {
-                if (Markers[i] is null) BuiltIns.ThrowNullReference(nameof(Markers), i);
-                Markers[i].RosValidate();
-            }
-            if (Description is null) BuiltIns.ThrowNullReference(nameof(Description));
+            BuiltIns.ThrowIfNull(Name, nameof(Name));
+            BuiltIns.ThrowIfNull(Markers, nameof(Markers));
+            BuiltIns.ThrowIfNull(Description, nameof(Description));
         }
     
         public int RosMessageLength

@@ -21,7 +21,7 @@ namespace Iviz.Controllers
         uint twistSeq;
 
         public Sender<Joy>? SenderJoy { get; private set; }
-        public ISender? SenderTwist { get; private set; }
+        public Sender? SenderTwist { get; private set; }
 
         public JoystickController(TwistJoystick joystick)
         {

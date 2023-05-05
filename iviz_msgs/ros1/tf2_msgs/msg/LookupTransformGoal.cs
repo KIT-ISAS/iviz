@@ -82,9 +82,9 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (TargetFrame is null) BuiltIns.ThrowNullReference(nameof(TargetFrame));
-            if (SourceFrame is null) BuiltIns.ThrowNullReference(nameof(SourceFrame));
-            if (FixedFrame is null) BuiltIns.ThrowNullReference(nameof(FixedFrame));
+            BuiltIns.ThrowIfNull(TargetFrame, nameof(TargetFrame));
+            BuiltIns.ThrowIfNull(SourceFrame, nameof(SourceFrame));
+            BuiltIns.ThrowIfNull(FixedFrame, nameof(FixedFrame));
         }
     
         public int RosMessageLength

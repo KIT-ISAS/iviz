@@ -74,7 +74,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
     {
         if (!IsAlive)
         {
-            throw new ObjectDisposedException(nameof(Ros2Subscriber<TMessage>), "This is not a valid subscriber");
+            BuiltIns.ThrowObjectDisposed(nameof(Ros2Subscriber<TMessage>), "This is not a valid subscriber");
         }
     }
 

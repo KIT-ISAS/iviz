@@ -27,12 +27,15 @@ namespace Iviz.Msgs.VisionMsgs
             Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<VisionMsgs.BoundingBox3D>.Value
-                    : new VisionMsgs.BoundingBox3D[n];
-                for (int i = 0; i < n; i++)
+                VisionMsgs.BoundingBox3D[] array;
+                if (n == 0) array = EmptyArray<VisionMsgs.BoundingBox3D>.Value;
+                else
                 {
-                    array[i] = new VisionMsgs.BoundingBox3D(ref b);
+                    array = new VisionMsgs.BoundingBox3D[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new VisionMsgs.BoundingBox3D(ref b);
+                    }
                 }
                 Boxes = array;
             }
@@ -44,12 +47,15 @@ namespace Iviz.Msgs.VisionMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<VisionMsgs.BoundingBox3D>.Value
-                    : new VisionMsgs.BoundingBox3D[n];
-                for (int i = 0; i < n; i++)
+                VisionMsgs.BoundingBox3D[] array;
+                if (n == 0) array = EmptyArray<VisionMsgs.BoundingBox3D>.Value;
+                else
                 {
-                    array[i] = new VisionMsgs.BoundingBox3D(ref b);
+                    array = new VisionMsgs.BoundingBox3D[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new VisionMsgs.BoundingBox3D(ref b);
+                    }
                 }
                 Boxes = array;
             }
@@ -82,12 +88,7 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            if (Boxes is null) BuiltIns.ThrowNullReference(nameof(Boxes));
-            for (int i = 0; i < Boxes.Length; i++)
-            {
-                if (Boxes[i] is null) BuiltIns.ThrowNullReference(nameof(Boxes), i);
-                Boxes[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Boxes, nameof(Boxes));
         }
     
         public int RosMessageLength

@@ -254,7 +254,7 @@ namespace Iviz.App
 
         static void GenerateReportRos2(StringBuilder builder, Ros2Client client)
         {
-            if (!IRosProvider.IsRos2VersionSupported)
+            if (!RosProvider.IsRos2VersionSupported)
             {
                 builder.Append("<b>Error:</b> ROS version not supported!");
                 return;

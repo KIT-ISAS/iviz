@@ -36,7 +36,7 @@ namespace Iviz.Msgs.StdMsgs
                 if (n == 0) array = EmptyArray<ulong>.Value;
                 else
                 {
-                     array = new ulong[n];
+                    array = new ulong[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.StdMsgs
                 if (n == 0) array = EmptyArray<ulong>.Value;
                 else
                 {
-                     array = new ulong[n];
+                    array = new ulong[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -83,9 +83,9 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            if (Layout is null) BuiltIns.ThrowNullReference(nameof(Layout));
+            BuiltIns.ThrowIfNull(Layout, nameof(Layout));
             Layout.RosValidate();
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            BuiltIns.ThrowIfNull(Data, nameof(Data));
         }
     
         public int RosMessageLength

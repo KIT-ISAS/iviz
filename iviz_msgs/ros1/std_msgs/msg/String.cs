@@ -48,7 +48,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            BuiltIns.ThrowIfNull(Data, nameof(Data));
         }
     
         public int RosMessageLength

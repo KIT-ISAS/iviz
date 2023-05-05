@@ -1,3 +1,4 @@
+using Iviz.Msgs;
 using Iviz.Tools;
 
 namespace Iviz.Roslib2.RclInterop;
@@ -82,8 +83,8 @@ internal sealed class RclWaitSet : IDisposable
         }
     }
 
-    static void ThrowHandlesOutOfRange() => throw new IndexOutOfRangeException("Handle sizes are larger than allocated!");
-    static void ThrowObjectDisposed() => throw new ObjectDisposedException(nameof(RclWaitSet));
+    static void ThrowHandlesOutOfRange() => BuiltIns.ThrowArgumentOutOfRange("Handle sizes are larger than allocated!");
+    static void ThrowObjectDisposed() => BuiltIns.ThrowObjectDisposed(nameof(RclWaitSet));
     
     void Check(int result) => Rcl.Check(contextHandle, result);
 

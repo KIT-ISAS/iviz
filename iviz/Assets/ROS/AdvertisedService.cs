@@ -10,13 +10,12 @@ using Iviz.Tools;
 
 namespace Iviz.Ros
 {
-    internal sealed class AdvertisedService<T> : IAdvertisedService where T : IService, new()
+    internal sealed class AdvertisedService<T> : AdvertisedService where T : IService, new()
     {
         const int NumRetries = 3;
         const int WaitBetweenRetriesInMs = 500;
-        
+
         readonly string service;
-        readonly Func<T, ValueTask> callToCallback; // cached delegate that calls callback()
         Func<T, ValueTask> callback;
 
         public AdvertisedService(string service, Func<T, ValueTask> callback)
@@ -25,10 +24,9 @@ namespace Iviz.Ros
             ThrowHelper.ThrowIfNull(callback, nameof(callback));
             this.service = service;
             this.callback = callback;
-            callToCallback = t => this.callback(t);
         }
 
-        public bool TrySetCallback<TU>(Func<TU, ValueTask> newCallback) where TU : IService
+        public override bool TrySetCallback(Delegate newCallback) 
         {
             if (newCallback is not Func<T, ValueTask> validatedCallback)
             {
@@ -39,23 +37,27 @@ namespace Iviz.Ros
             return true;
         }
 
-        public async ValueTask AdvertiseAsync(IRosClient? client, CancellationToken token)
+        public override async ValueTask AdvertiseAsync(IRosClient? client, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            if (client != null)
+            if (client == null)
             {
-                foreach (int t in ..NumRetries)
+                return;
+            }
+
+            ValueTask CallToCallback(T t) => this.callback(t); // can't pass callback directly, it may be changed
+
+            for (int t = 0; t < NumRetries; t++)
+            {
+                try
                 {
-                    try
-                    {
-                        await client.AdvertiseServiceAsync(service, callToCallback, token);
-                        break;
-                    }
-                    catch (RoslibException e)
-                    {
-                        RosLogger.Error($"{this}: Failed to advertise service (try {t.ToString()}): ", e);
-                        await Task.Delay(WaitBetweenRetriesInMs, token);
-                    }
+                    await client.AdvertiseServiceAsync<T>(service, CallToCallback, token);
+                    break;
+                }
+                catch (RoslibException e)
+                {
+                    RosLogger.Error($"{ToString()}: Failed to advertise service (try {t.ToString()}): ", e);
+                    await Task.Delay(WaitBetweenRetriesInMs, token);
                 }
             }
         }

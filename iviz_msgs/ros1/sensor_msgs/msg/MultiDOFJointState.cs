@@ -58,23 +58,29 @@ namespace Iviz.Msgs.SensorMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Twist>.Value
-                    : new GeometryMsgs.Twist[n];
-                for (int i = 0; i < n; i++)
+                GeometryMsgs.Twist[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Twist>.Value;
+                else
                 {
-                    array[i] = new GeometryMsgs.Twist(ref b);
+                    array = new GeometryMsgs.Twist[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new GeometryMsgs.Twist(ref b);
+                    }
                 }
                 Twist = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Wrench>.Value
-                    : new GeometryMsgs.Wrench[n];
-                for (int i = 0; i < n; i++)
+                GeometryMsgs.Wrench[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Wrench>.Value;
+                else
                 {
-                    array[i] = new GeometryMsgs.Wrench(ref b);
+                    array = new GeometryMsgs.Wrench[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new GeometryMsgs.Wrench(ref b);
+                    }
                 }
                 Wrench = array;
             }
@@ -100,24 +106,30 @@ namespace Iviz.Msgs.SensorMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Twist>.Value
-                    : new GeometryMsgs.Twist[n];
-                for (int i = 0; i < n; i++)
+                GeometryMsgs.Twist[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Twist>.Value;
+                else
                 {
-                    array[i] = new GeometryMsgs.Twist(ref b);
+                    array = new GeometryMsgs.Twist[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new GeometryMsgs.Twist(ref b);
+                    }
                 }
                 Twist = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Wrench>.Value
-                    : new GeometryMsgs.Wrench[n];
-                for (int i = 0; i < n; i++)
+                GeometryMsgs.Wrench[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Wrench>.Value;
+                else
                 {
-                    array[i] = new GeometryMsgs.Wrench(ref b);
+                    array = new GeometryMsgs.Wrench[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new GeometryMsgs.Wrench(ref b);
+                    }
                 }
                 Wrench = array;
             }
@@ -171,24 +183,10 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (JointNames is null) BuiltIns.ThrowNullReference(nameof(JointNames));
-            for (int i = 0; i < JointNames.Length; i++)
-            {
-                if (JointNames[i] is null) BuiltIns.ThrowNullReference(nameof(JointNames), i);
-            }
-            if (Transforms is null) BuiltIns.ThrowNullReference(nameof(Transforms));
-            if (Twist is null) BuiltIns.ThrowNullReference(nameof(Twist));
-            for (int i = 0; i < Twist.Length; i++)
-            {
-                if (Twist[i] is null) BuiltIns.ThrowNullReference(nameof(Twist), i);
-                Twist[i].RosValidate();
-            }
-            if (Wrench is null) BuiltIns.ThrowNullReference(nameof(Wrench));
-            for (int i = 0; i < Wrench.Length; i++)
-            {
-                if (Wrench[i] is null) BuiltIns.ThrowNullReference(nameof(Wrench), i);
-                Wrench[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(JointNames, nameof(JointNames));
+            BuiltIns.ThrowIfNull(Transforms, nameof(Transforms));
+            BuiltIns.ThrowIfNull(Twist, nameof(Twist));
+            BuiltIns.ThrowIfNull(Wrench, nameof(Wrench));
         }
     
         public int RosMessageLength

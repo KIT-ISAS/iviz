@@ -66,12 +66,8 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            if (GroupId is null) BuiltIns.ThrowNullReference(nameof(GroupId));
-            if (Members is null) BuiltIns.ThrowNullReference(nameof(Members));
-            for (int i = 0; i < Members.Length; i++)
-            {
-                if (Members[i] is null) BuiltIns.ThrowNullReference(nameof(Members), i);
-            }
+            BuiltIns.ThrowIfNull(GroupId, nameof(GroupId));
+            BuiltIns.ThrowIfNull(Members, nameof(Members));
         }
     
         public int RosMessageLength

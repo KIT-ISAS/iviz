@@ -13,7 +13,7 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
-internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSender where TMessage : IMessage
+internal sealed class UdpSender<TMessage> : ProtocolSender<TMessage>, IUdpSender where TMessage : IMessage
 {
     readonly CancellationTokenSource runningTs = new();
     readonly SenderQueue<TMessage> senderQueue;
@@ -53,7 +53,7 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
     public LoopbackReceiver<TMessage>? LoopbackReceiver { private get; set; }
 
     public UdpSender(RpcUdpTopicRequest request, TopicInfo topicInfo,
-        ILatchedMessageProvider<TMessage> provider,
+        LatchedMessageProvider<TMessage> provider,
         out byte[] responseHeader)
     {
         this.topicInfo = topicInfo;
@@ -125,7 +125,7 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
             $"md5sum={topicInfo.Md5Sum}",
             $"type={topicInfo.Type}",
             $"callerid={topicInfo.CallerId}",
-            provider.HasLatchedMessage() ? "latching=1" : "latching=0",
+            provider.HasLatchedMessage ? "latching=1" : "latching=0",
             $"message_definition={topicInfo.MessageDependencies}",
         };
 
@@ -134,7 +134,7 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
         task = TaskUtils.Run(() => StartSession(provider).AwaitNoThrow(this));
     }
 
-    async ValueTask StartSession(ILatchedMessageProvider<TMessage> provider)
+    async ValueTask StartSession(LatchedMessageProvider<TMessage> provider)
     {
         Logger.LogDebugFormat("{0}: Started!", this);
 
@@ -168,17 +168,16 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
         senderQueue.FlushRemaining();
     }
 
-    async ValueTask ProcessLoop(ILatchedMessageProvider<TMessage> provider)
+    async ValueTask ProcessLoop(LatchedMessageProvider<TMessage> provider)
     {
         using var writeBuffer = new Rent(MaxPacketSize);
         writeBuffer[..UdpRosParams.HeaderLength].Fill(0);
 
         _ = TaskUtils.Run(KeepAliveMessages);
 
-        var latchedMsg = provider.GetLatchedMessage();
-        if (latchedMsg.hasValue)
+        if (provider.TryGetLatchedMessage(out var latchedMsg))
         {
-            Publish(latchedMsg.value!);
+            Publish(latchedMsg);
         }
 
         while (KeepRunning)
@@ -187,9 +186,10 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
 
             var queue = senderQueue.ReadAll(ref numDropped, ref bytesDropped);
 
-            if (LoopbackReceiver != null)
+            var loopbackReceiver = LoopbackReceiver;
+            if (loopbackReceiver != null)
             {
-                senderQueue.DirectSendToLoopback(queue, LoopbackReceiver, ref numSent, ref bytesSent);
+                senderQueue.DirectSendToLoopback(queue, loopbackReceiver, ref numSent, ref bytesSent);
             }
             else
             {
@@ -201,7 +201,6 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
     async ValueTask SendWithSocketAsync(RangeEnumerable<SenderQueue<TMessage>.Entry?> queue, Rent writeBuffer)
     {
         const int udpPlusSizeHeaders = UdpRosParams.HeaderLength + 4;
-        //byte[] array = writeBuffer.Array;
 
         using var messageBuffer = new ResizableRent();
 
@@ -391,7 +390,7 @@ internal sealed class UdpSender<TMessage> : IProtocolSender<TMessage>, IUdpSende
     public override ValueTask PublishAndWaitAsync(in TMessage message, CancellationToken token)
     {
         return task.IsCompleted
-            ? Task.FromException(new ObjectDisposedException("this")).AsValueTask()
+            ? Task.FromException(new ObjectDisposedException(nameof(UdpSender<TMessage>))).AsValueTask()
             : senderQueue.EnqueueAsync(message, token, ref numDropped, ref bytesDropped);
     }
 

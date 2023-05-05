@@ -448,12 +448,12 @@ namespace Iviz.Controllers
                         HelpText = "[Error Loading Robot. See Log.]";
                         Robot = null;
                         robotLoadingTask = null;
-                        RobotFinishedLoading?.Invoke();
+                        RaiseRobotFinishedLoading();
                         return;
                     case TaskStatus.Canceled:
                         HelpText = "[Robot Task canceled.]";
                         robotLoadingTask = null;
-                        RobotFinishedLoading?.Invoke();
+                        RaiseRobotFinishedLoading();
                         return;
                     case TaskStatus.RanToCompletion:
                         node.Name = "SimpleRobotNode:" + Name;
@@ -487,15 +487,41 @@ namespace Iviz.Controllers
                         }
 
                         robotLoadingTask = null;
-                        RobotFinishedLoading?.Invoke();
+                        RaiseRobotFinishedLoading();
                         break;
                 }
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{ToString()}: Error in {nameof(UpdateStartTaskStatus)}", e);
+                RosLogger.Error($"{ToString()}: Error during {nameof(UpdateStartTaskStatus)}", e);
             }
         }
+        
+        void RaiseStopped()
+        {
+            try
+            {
+                Stopped?.Invoke();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{ToString()}: " +
+                                $"Error during {nameof(RaiseStopped)}", e);
+            }                          
+        }         
+        
+        void RaiseRobotFinishedLoading()
+        {
+            try
+            {
+                RobotFinishedLoading?.Invoke();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{ToString()}: " +
+                                $"Error during {nameof(RaiseRobotFinishedLoading)}", e);
+            }                          
+        }           
 
         string Decorate(string jointName)
         {
@@ -576,7 +602,7 @@ namespace Iviz.Controllers
 
             Robot = null;
             RobotFinishedLoading = null;
-            Stopped?.Invoke();
+            RaiseStopped();
             node.Dispose();
         }
 

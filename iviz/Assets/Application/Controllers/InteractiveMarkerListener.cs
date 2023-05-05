@@ -228,7 +228,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public override IListener Listener { get; }
+        public override Listener Listener { get; }
 
         public InteractiveMarkerListener(InteractiveMarkerConfiguration? config, string topic)
         {

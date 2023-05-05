@@ -88,7 +88,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Dialog is null) BuiltIns.ThrowNullReference(nameof(Dialog));
+            BuiltIns.ThrowIfNull(Dialog, nameof(Dialog));
             Dialog.RosValidate();
         }
     
@@ -170,8 +170,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
-            if (Feedback is null) BuiltIns.ThrowNullReference(nameof(Feedback));
+            BuiltIns.ThrowIfNull(Message, nameof(Message));
+            BuiltIns.ThrowIfNull(Feedback, nameof(Feedback));
             Feedback.RosValidate();
         }
     

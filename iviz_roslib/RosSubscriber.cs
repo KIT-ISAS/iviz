@@ -100,7 +100,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
     {
         if (!IsAlive)
         {
-            throw new ObjectDisposedException(nameof(RosSubscriber<TMessage>), "This is not a valid subscriber");
+            BuiltIns.ThrowObjectDisposed(nameof(RosSubscriber<TMessage>), "This is not a valid subscriber");
         }
     }
 
@@ -126,7 +126,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
     {
         if (disposed) return;
         disposed = true;
-        
+
         runningTs.Cancel();
         callbacksById.Clear();
         NumPublishersChanged = null;
@@ -137,7 +137,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
     {
         if (disposed) return default;
         disposed = true;
-        
+
         runningTs.Cancel();
         callbacksById.Clear();
         NumPublishersChanged = null;

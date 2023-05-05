@@ -13,15 +13,16 @@ public static class StructMessages
         "geometry_msgs/Pose",
         "geometry_msgs/Transform",
         "std_msgs/ColorRGBA",
+        
         "iviz_msgs/Color32",
         "iviz_msgs/Triangle",
+        "iviz_msgs/BoundingBox",
+        
+        "mesh_msgs/TriangleIndices",
     };
 
     public static readonly HashSet<string> ForceStructs = new()
     {
         "std_msgs/Header",
-        //"geometry_msgs/TransformStamped",
-        //"rosgraph_msgs/Log",
-        //"rcl_interfaces/Log",
     };
 }

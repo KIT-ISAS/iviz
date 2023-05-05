@@ -147,7 +147,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n == 0) array = EmptyArray<byte>.Value;
                 else
                 {
-                     array = new byte[n];
+                    array = new byte[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -177,7 +177,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n == 0) array = EmptyArray<byte>.Value;
                 else
                 {
-                     array = new byte[n];
+                    array = new byte[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -221,10 +221,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
-            if (Intrinsics is null) BuiltIns.ThrowNullReference(nameof(Intrinsics));
-            if (Intrinsics.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(Intrinsics), Intrinsics.Length, 9);
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            BuiltIns.ThrowIfNull(Message, nameof(Message));
+            BuiltIns.ThrowIfNull(Intrinsics, nameof(Intrinsics));
+            BuiltIns.ThrowIfWrongSize(Intrinsics, nameof(Intrinsics), 9);
+            BuiltIns.ThrowIfNull(Data, nameof(Data));
         }
     
         public int RosMessageLength

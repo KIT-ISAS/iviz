@@ -33,7 +33,7 @@ namespace Iviz.Msgs.MeshMsgs
                 if (n == 0) array = EmptyArray<uint>.Value;
                 else
                 {
-                     array = new uint[n];
+                    array = new uint[n];
                     b.DeserializeStructArray(array);
                 }
                 FaceIndices = array;
@@ -50,7 +50,7 @@ namespace Iviz.Msgs.MeshMsgs
                 if (n == 0) array = EmptyArray<uint>.Value;
                 else
                 {
-                     array = new uint[n];
+                    array = new uint[n];
                     b.DeserializeStructArray(array);
                 }
                 FaceIndices = array;
@@ -79,8 +79,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (FaceIndices is null) BuiltIns.ThrowNullReference(nameof(FaceIndices));
-            if (Label is null) BuiltIns.ThrowNullReference(nameof(Label));
+            BuiltIns.ThrowIfNull(FaceIndices, nameof(FaceIndices));
+            BuiltIns.ThrowIfNull(Label, nameof(Label));
         }
     
         public int RosMessageLength

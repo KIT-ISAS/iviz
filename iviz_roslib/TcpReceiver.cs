@@ -35,14 +35,13 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
     bool disposed;
     long numReceived;
     long bytesReceived;
+    bool isPaused;
 
     public string Topic => topicInfo.Topic;
     public string Type => topicInfo.Type;
     public Endpoint RemoteEndpoint { get; }
     public Endpoint Endpoint { get; private set; }
-    public IReadOnlyCollection<string> RosHeader { get; private set; } = Array.Empty<string>();
-
-    bool isPaused;
+    public IReadOnlyCollection<string> RosHeader { get; private set; }
 
     public bool IsPaused
     {
@@ -63,6 +62,7 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
     {
         RemoteUri = remoteUri;
         RemoteEndpoint = remoteEndpoint;
+        RosHeader = Array.Empty<string>();
         this.topicInfo = topicInfo;
         this.manager = manager;
         this.requestNoDelay = requestNoDelay;
@@ -187,7 +187,7 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
             return null;
         }
 
-        if (newTcpClient.Client is { RemoteEndPoint: { }, LocalEndPoint: { } })
+        if (newTcpClient.Client is { RemoteEndPoint: not null, LocalEndPoint: not null })
         {
             return newTcpClient;
         }
@@ -238,14 +238,13 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
             throw new RosHandshakeException($"Partner sent error message: [{message}]");
         }
 
-        RosHeader = responseHeader.ToArray();
+        string[] rosHeader = responseHeader.ToArray(); 
+        RosHeader = rosHeader;
 
         if (DynamicMessage.IsGeneric(typeof(TMessage)))
         {
             //bool allowDirectLookup = DynamicMessage.IsDynamic(typeof(TMessage));
-            const bool allowDirectLookup = false;
-            topicInfo = RosUtils.GenerateDynamicTopicInfo(topicInfo.CallerId, topicInfo.Topic, RosHeader,
-                allowDirectLookup);
+            topicInfo = RosUtils.GenerateDynamicTopicInfo(topicInfo.CallerId, topicInfo.Topic, rosHeader);
         }
     }
 

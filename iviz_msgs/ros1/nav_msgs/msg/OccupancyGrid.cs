@@ -40,7 +40,7 @@ namespace Iviz.Msgs.NavMsgs
                 if (n == 0) array = EmptyArray<sbyte>.Value;
                 else
                 {
-                     array = new sbyte[n];
+                    array = new sbyte[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.NavMsgs
                 if (n == 0) array = EmptyArray<sbyte>.Value;
                 else
                 {
-                     array = new sbyte[n];
+                    array = new sbyte[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -88,9 +88,9 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Info is null) BuiltIns.ThrowNullReference(nameof(Info));
+            BuiltIns.ThrowIfNull(Info, nameof(Info));
             Info.RosValidate();
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            BuiltIns.ThrowIfNull(Data, nameof(Data));
         }
     
         public int RosMessageLength

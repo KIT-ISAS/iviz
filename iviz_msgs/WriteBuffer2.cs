@@ -35,16 +35,17 @@ public unsafe struct WriteBuffer2
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void ThrowIfWrongSize(Array array, int size)
+    static void ThrowIfWrongSize(Array array, int expectedLength)
     {
         if (array is null)
         {
             BuiltIns.ThrowArgumentNull(nameof(array));
         }
 
-        if (array.Length != size)
+        int length = array.Length;
+        if (length != expectedLength)
         {
-            BuiltIns.ThrowInvalidSizeForFixedArray(array.Length, size);
+            BuiltIns.ThrowInvalidSizeForFixedArray(length, expectedLength);
         }
     }
 
@@ -95,10 +96,12 @@ public unsafe struct WriteBuffer2
     public static int AddLength(int c, string[] bs)
     {
         int size = c + sizeof(int);
-        foreach (string b in bs)
+        int length = bs.Length;
+
+        for (int i = 0; i < length; i++)
         {
             size = Align4(size);
-            size = AddLength(size, b);
+            size = AddLength(size, bs[i]);
         }
 
         return size;
@@ -110,7 +113,7 @@ public unsafe struct WriteBuffer2
     public void Serialize(int val)
     {
         ThrowIfOutOfRange(sizeof(int));
-        *(int*)cursor = val;
+        Unsafe.WriteUnaligned(cursor, val);
         Advance(sizeof(int));
     }
     
@@ -118,7 +121,7 @@ public unsafe struct WriteBuffer2
     public void Serialize<T>(in T val) where T : unmanaged
     {
         ThrowIfOutOfRange(sizeof(T));
-        *(T*)cursor = val;
+        Unsafe.WriteUnaligned(cursor, val);
         Advance(sizeof(T));
     }
 
@@ -128,14 +131,15 @@ public unsafe struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Serialize(string val)
     {
+        const int sizeOfInt = sizeof(int);
         int length = val.Length;
 
         if (length == 0)
         {
-            ThrowIfOutOfRange(5);
-            WriteInt(1);
-            *cursor = 0;
-            Advance(1);
+            ThrowIfOutOfRange(sizeOfInt + 1);
+            Unsafe.WriteUnaligned(cursor, 1);
+            cursor[sizeOfInt] = 0;
+            Advance(sizeOfInt + 1);
             return;
         }
 
@@ -144,22 +148,21 @@ public unsafe struct WriteBuffer2
             if (BuiltIns.CanWriteStringSimple(valPtr, length))
             {
                 int lengthPlus1 = length + 1;
-                ThrowIfOutOfRange(4 + lengthPlus1);
+                ThrowIfOutOfRange(sizeOfInt + lengthPlus1);
                 WriteInt(lengthPlus1);
                 BuiltIns.WriteStringSimple(valPtr, cursor, length);
                 cursor[length] = 0;
                 Advance(lengthPlus1);
+                return;
             }
-            else
-            {
-                int byteCount = BuiltIns.UTF8.GetByteCount(val);
-                int byteCountPlus1 = byteCount + 1;
-                ThrowIfOutOfRange(4 + byteCountPlus1);
-                WriteInt(byteCountPlus1);
-                BuiltIns.UTF8.GetBytes(valPtr, val.Length, cursor, byteCount);
-                cursor[byteCount] = 0;
-                Advance(byteCountPlus1);
-            }
+
+            int byteCount = BuiltIns.UTF8.GetByteCount(val);
+            int byteCountPlus1 = byteCount + 1;
+            ThrowIfOutOfRange(sizeOfInt + byteCountPlus1);
+            WriteInt(byteCountPlus1);
+            BuiltIns.UTF8.GetBytes(valPtr, val.Length, cursor, byteCount);
+            cursor[byteCount] = 0;
+            Advance(byteCountPlus1);
         }
     }
 
@@ -173,10 +176,11 @@ public unsafe struct WriteBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeArray(string[] val)
     {
-        foreach (string str in val)
+        int length = val.Length;
+        for (int i = 0; i < length; i++)
         {
-            Serialize(str);
-        }
+            Serialize(val[i]);
+        }        
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

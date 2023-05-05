@@ -285,7 +285,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable,
         {
             if (e.CancellationToken == runningTs.Token)
             {
-                throw new ObjectDisposedException("this", "Client was disposed.");
+                BuiltIns.ThrowObjectDisposed(nameof(RosActionClient), "Client was disposed.");
             }
 
             throw new TimeoutException("Wait for server timed out");

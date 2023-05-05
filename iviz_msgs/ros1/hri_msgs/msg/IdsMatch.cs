@@ -113,8 +113,8 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            if (Id1 is null) BuiltIns.ThrowNullReference(nameof(Id1));
-            if (Id2 is null) BuiltIns.ThrowNullReference(nameof(Id2));
+            BuiltIns.ThrowIfNull(Id1, nameof(Id1));
+            BuiltIns.ThrowIfNull(Id2, nameof(Id2));
         }
     
         public int RosMessageLength

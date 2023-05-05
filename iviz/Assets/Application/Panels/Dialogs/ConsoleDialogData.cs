@@ -4,9 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
-using System.Threading.Channels;
 using Iviz.Core;
-using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Ros;
 using Iviz.Tools;
 
@@ -53,7 +51,7 @@ namespace Iviz.App
         readonly ConcurrentQueue<LogMessage> messageQueue = new();
         int messageQueueCount;
             
-        readonly ConcurrentSet<string> ids = new();
+        readonly Core.ConcurrentSet<string> ids = new();
 
         bool isPaused;
         bool queueIsDirty;

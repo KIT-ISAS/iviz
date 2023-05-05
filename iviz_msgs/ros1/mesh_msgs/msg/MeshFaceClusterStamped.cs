@@ -71,8 +71,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
-            if (Cluster is null) BuiltIns.ThrowNullReference(nameof(Cluster));
+            BuiltIns.ThrowIfNull(Uuid, nameof(Uuid));
+            BuiltIns.ThrowIfNull(Cluster, nameof(Cluster));
             Cluster.RosValidate();
         }
     

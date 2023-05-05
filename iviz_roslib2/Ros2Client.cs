@@ -158,12 +158,8 @@ public sealed class Ros2Client : IRosClient
         if (callback is null) BuiltIns.ThrowArgumentNull(nameof(callback));
 
         string messageType = BuiltIns.GetMessageType<T>();
-        if (!AsyncRclClient.IsMessageTypeSupported(messageType))
-        {
-            ThrowUnsupportedMessageTypeException(messageType);
-        }
-
         string resolvedTopic = ResolveResourceName(topic);
+        
         if (!TryGetSubscriberImpl(resolvedTopic, out var baseSubscriber))
         {
             var subscriber = new Ros2Subscriber<T>(this);
@@ -208,12 +204,7 @@ public sealed class Ros2Client : IRosClient
         if (topic is null) BuiltIns.ThrowArgumentNull(nameof(topic));
 
         string resolvedTopic = ResolveResourceName(topic);
-
         string messageType = BuiltIns.GetMessageType<T>();
-        if (!AsyncRclClient.IsMessageTypeSupported(messageType))
-        {
-            ThrowUnsupportedMessageTypeException(messageType);
-        }
 
         if (!TryGetPublisher(resolvedTopic, out var existingPublisher))
         {
@@ -276,12 +267,7 @@ public sealed class Ros2Client : IRosClient
 
         string resolvedServiceName = ResolveResourceName(serviceName);
         string serviceType = service.RosServiceType;
-
-        if (!AsyncRclClient.IsServiceTypeSupported(serviceType))
-        {
-            ThrowUnsupportedMessageTypeException(serviceType);
-        }
-
+        
         token.ThrowIfCancellationRequested();
 
         Ros2ServiceCaller serviceCaller;
@@ -352,11 +338,6 @@ public sealed class Ros2Client : IRosClient
 
         string resolvedServiceName = ResolveResourceName(serviceName);
         string serviceType = BuiltIns.GetServiceType<T>();
-
-        if (!AsyncRclClient.IsServiceTypeSupported(serviceType))
-        {
-            ThrowUnsupportedMessageTypeException(serviceType);
-        }
 
         token.ThrowIfCancellationRequested();
 
@@ -547,12 +528,7 @@ public sealed class Ros2Client : IRosClient
 
         await Rcl.DisposeAsync(token);
     }
-
-    [DoesNotReturn]
-    static void ThrowUnsupportedMessageTypeException(string messageType) =>
-        throw new RosUnsupportedMessageException(messageType);
-
-
+    
     #region parameters
 
     string[] IRosClient.GetParameterNames() => GetParameterNames();

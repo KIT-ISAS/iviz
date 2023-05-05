@@ -13,7 +13,7 @@ namespace Iviz.Core
         const string NullException = "[null exception]";
 
         const int MaxPublishedPerSecond = 30;
-        
+
         static int publishedThisSec;
 
         public delegate void ExternalLogDelegate(in LogMessage msg);
@@ -42,7 +42,7 @@ namespace Iviz.Core
         }
 
         [Obsolete("Use Error(object, Exception) instead!", true)]
-        public static void Error(Exception _) 
+        public static void Error(Exception _)
         {
         }
 
@@ -64,7 +64,7 @@ namespace Iviz.Core
         public static void Internal(string? msg)
         {
             string msgTxt = $"<b>[{GameThread.NowFormatted}]</b> {msg ?? NullMessage}";
-            LogInternal?.Invoke(msgTxt);
+            RaiseLogInternal(msgTxt);
             UnityEngine.Debug.Log(msgTxt);
         }
 
@@ -114,10 +114,22 @@ namespace Iviz.Core
                 message = description.ToString();
             }
 
-            LogInternal?.Invoke(message);
+            RaiseLogInternal(message);
             UnityEngine.Debug.LogWarning(message);
         }
 
+        static void RaiseLogInternal(string message)
+        {
+            try
+            {
+                LogInternal?.Invoke(message);
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogError($"{nameof(RosLogger)}: Error during {nameof(RaiseLogInternal)}. " +
+                                           $"{Logger.ExceptionToString(e)}");
+            }
+        }
 
         static void PublishExternal(string? msg, LogLevel level)
         {
@@ -141,15 +153,7 @@ namespace Iviz.Core
                 return;
             }
 
-            try
-            {
-                LogExternal(new LogMessage(level, msg ?? NullMessage));
-            }
-            catch (Exception e)
-            {
-                UnityEngine.Debug.LogError(
-                    $"[{nameof(RosLogger)}]: {nameof(PublishExternal)} failed! {Logger.ExceptionToString(e)}");
-            }
+            RaiseLogExternal(new LogMessage(level, msg ?? NullMessage));
 
             PublishLocal();
 
@@ -222,7 +226,7 @@ namespace Iviz.Core
                 message = description.ToString();
             }
 
-            LogExternal(new LogMessage(level, message));
+            RaiseLogExternal(new LogMessage(level, message));
             PublishLocal();
 
             void PublishLocal()
@@ -251,5 +255,18 @@ namespace Iviz.Core
                 }
             }
         }
+        
+        static void RaiseLogExternal(in LogMessage message)
+        {
+            try
+            {
+                LogExternal?.Invoke(message);
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogError($"{nameof(RosLogger)}: Error during {nameof(RaiseLogExternal)}. " +
+                                           $"{Logger.ExceptionToString(e)}");
+            }
+        }        
     }
 }

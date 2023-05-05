@@ -266,7 +266,7 @@ namespace Iviz.Displays
                 IntensityBounds = span;
             }
 
-            BoundsChanged?.Invoke();
+            RaiseBoundsChanged();
         }
 
         void CalculateBoundsEmpty()
@@ -278,8 +278,21 @@ namespace Iviz.Displays
                 IntensityBounds = Vector2.zero;
             }
 
-            BoundsChanged?.Invoke();
+            RaiseBoundsChanged();
         }
+        
+        void RaiseBoundsChanged()
+        {
+            try
+            {
+                BoundsChanged?.Invoke();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{ToString()}: " +
+                                $"Error during {nameof(RaiseBoundsChanged)}", e);
+            }                          
+        }        
 
         protected override void Rebuild()
         {

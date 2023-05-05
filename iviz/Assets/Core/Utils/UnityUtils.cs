@@ -1,12 +1,13 @@
 #nullable enable
 
 using System;
-using System.Buffers;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -17,12 +18,9 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Tools;
-using Iviz.Urdf;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using TMPro;
-using Unity.Collections;
-using Unity.IL2CPP.CompilerServices;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -740,15 +738,16 @@ namespace Iviz.Core
             }
         }
 
-        public static bool TryGetFirst<T>(this IEnumerable<T> ts, [NotNullWhen(true)] out T? tp)
+        public static bool TryGetFirst(this HashSet<string> ts, [NotNullWhen(true)] out string? tp)
         {
-            foreach (T t in ts)
+            using var enumerator = ts.GetEnumerator();
+            if (enumerator.MoveNext())
             {
-                tp = t!;
+                tp = enumerator.Current;
                 return true;
             }
 
-            tp = default;
+            tp = null;
             return false;
         }
 
@@ -863,4 +862,17 @@ namespace Iviz.Core
                    throw new JsonException("Object could not be deserialized");
         }
     }
+    
+
+    public sealed class ConcurrentSet<T> : IReadOnlyCollection<T> where T : notnull
+    {
+        readonly ConcurrentDictionary<T, object?> backend = new();
+        public IEnumerator<T> GetEnumerator() => backend.Keys.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public void Add(T s) => backend[s] = null;
+        public bool Remove(T s) => backend.TryRemove(s, out _);
+        public int Count => backend.Count;
+        public void Clear() => backend.Clear();
+        public T[] ToArray() => backend.Keys.ToArray();
+    }    
 }

@@ -90,7 +90,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
+            BuiltIns.ThrowIfNull(Uuid, nameof(Uuid));
         }
     
         public int RosMessageLength
@@ -157,7 +157,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (MeshVertexColorsStamped is null) BuiltIns.ThrowNullReference(nameof(MeshVertexColorsStamped));
+            BuiltIns.ThrowIfNull(MeshVertexColorsStamped, nameof(MeshVertexColorsStamped));
             MeshVertexColorsStamped.RosValidate();
         }
     

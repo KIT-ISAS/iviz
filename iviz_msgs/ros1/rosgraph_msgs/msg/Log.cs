@@ -115,15 +115,11 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Msg is null) BuiltIns.ThrowNullReference(nameof(Msg));
-            if (File is null) BuiltIns.ThrowNullReference(nameof(File));
-            if (Function is null) BuiltIns.ThrowNullReference(nameof(Function));
-            if (Topics is null) BuiltIns.ThrowNullReference(nameof(Topics));
-            for (int i = 0; i < Topics.Length; i++)
-            {
-                if (Topics[i] is null) BuiltIns.ThrowNullReference(nameof(Topics), i);
-            }
+            BuiltIns.ThrowIfNull(Name, nameof(Name));
+            BuiltIns.ThrowIfNull(Msg, nameof(Msg));
+            BuiltIns.ThrowIfNull(File, nameof(File));
+            BuiltIns.ThrowIfNull(Function, nameof(Function));
+            BuiltIns.ThrowIfNull(Topics, nameof(Topics));
         }
     
         public int RosMessageLength

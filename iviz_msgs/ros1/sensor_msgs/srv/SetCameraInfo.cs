@@ -96,7 +96,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (CameraInfo is null) BuiltIns.ThrowNullReference(nameof(CameraInfo));
+            BuiltIns.ThrowIfNull(CameraInfo, nameof(CameraInfo));
             CameraInfo.RosValidate();
         }
     
@@ -173,7 +173,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (StatusMessage is null) BuiltIns.ThrowNullReference(nameof(StatusMessage));
+            BuiltIns.ThrowIfNull(StatusMessage, nameof(StatusMessage));
         }
     
         public int RosMessageLength

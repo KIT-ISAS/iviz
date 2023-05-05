@@ -952,7 +952,7 @@ public sealed class ClassInfo
                                 lines.Add($"        if (n == 0) array = EmptyArray<{variable.CsClassType}>.Value;");
                                 lines.Add($"        else");
                                 lines.Add($"        {{");
-                                lines.Add($"             array = new {variable.CsClassType}[n];");
+                                lines.Add($"            array = new {variable.CsClassType}[n];");
                                 if (isRos2)
                                 {
                                     int alignment3 = BuiltInAlignments[variable.RosClassType];
@@ -1070,14 +1070,20 @@ public sealed class ClassInfo
                             lines.Add($"    {{");
                             AddAlign(4, "    ");
                             lines.Add($"        int n = b.DeserializeArrayLength();");
-                            lines.Add($"        var array = n == 0");
-                            lines.Add($"            ? EmptyArray<{variable.CsClassType}>.Value");
-                            lines.Add($"            : new {variable.CsClassType}[n];");
-                            lines.Add($"        for (int i = 0; i < n; i++)");
+                            lines.Add($"        {variable.CsClassType}[] array;");
+                            lines.Add($"        if (n == 0) array = EmptyArray<{variable.CsClassType}>.Value;");
+                            lines.Add($"        else");
                             lines.Add($"        {{");
+                            //lines.Add($"        var array = n == 0");
+                            //lines.Add($"            ? EmptyArray<{variable.CsClassType}>.Value");
+                            //lines.Add($"            : new {variable.CsClassType}[n];");
+                            lines.Add($"            array = new {variable.CsClassType}[n];");
+                            lines.Add($"            for (int i = 0; i < n; i++)");
+                            lines.Add($"            {{");
                             lines.Add(variable.ClassIsStruct && !isAction
-                                ? $"            {variable.CsClassType}.Deserialize(ref b, out array[i]);"
-                                : $"            array[i] = new {variable.CsClassType}(ref b);");
+                                ?         $"                {variable.CsClassType}.Deserialize(ref b, out array[i]);"
+                                :         $"                array[i] = new {variable.CsClassType}(ref b);");
+                            lines.Add($"            }}");
                             lines.Add($"        }}");
                             lines.Add($"        {prefix}{variable.CsFieldName} = array;");
                             lines.Add($"    }}");
@@ -1318,7 +1324,7 @@ public sealed class ClassInfo
                                 }
 
                                 lines.Add($"    b.SerializeStructArray({variable.CsFieldName});");
-                                
+
                                 if (isRos2 && variable.ClassInfo?.Ros2HeadAlignment is { } alignment2)
                                 {
                                     currentAlignment = alignment2;
@@ -1380,7 +1386,7 @@ public sealed class ClassInfo
                     }
                 }
             }
-            
+
             void AddAlign(int alignment, string alPrefix = "")
             {
                 if (!isRos2) return;
@@ -1396,9 +1402,9 @@ public sealed class ClassInfo
                 }
 
                 currentAlignment = alignment;
-            }            
+            }
         }
-        
+
         lines.Add("}");
     }
 
@@ -1421,12 +1427,15 @@ public sealed class ClassInfo
             {
                 if (!forceStruct)
                 {
-                    lines.Add(
-                        $"    if ({variable.CsFieldName} is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}));");
-                    lines.Add(
-                        $"    if ({variable.CsFieldName}.Length != {variable.ArraySize}) " +
-                        $"BuiltIns.ThrowInvalidSizeForFixedArray(nameof({variable.CsFieldName}), " +
-                        $"{variable.CsFieldName}.Length, {variable.ArraySize});");
+                    lines.Add($"    BuiltIns.ThrowIfNull({variable.CsFieldName}, nameof({variable.CsFieldName}));");
+                    lines.Add($"    BuiltIns.ThrowIfWrongSize({variable.CsFieldName}, " +
+                              $"nameof({variable.CsFieldName}), {variable.ArraySize});");
+                    //lines.Add(
+                    //    $"    if ({variable.CsFieldName} is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}));");
+                    //lines.Add(
+                    //    $"    if ({variable.CsFieldName}.Length != {variable.ArraySize}) " +
+                    //    $"BuiltIns.ThrowInvalidSizeForFixedArray(nameof({variable.CsFieldName}), " +
+                    //    $"{variable.CsFieldName}.Length, {variable.ArraySize});");
                 }
             }
             else if (!variable.IsArray &&
@@ -1439,8 +1448,9 @@ public sealed class ClassInfo
             {
                 if (!forceStruct && (!variable.ClassIsStruct || variable.IsArray))
                 {
-                    lines.Add(
-                        $"    if ({variable.CsFieldName} is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}));");
+                    lines.Add($"    BuiltIns.ThrowIfNull({variable.CsFieldName}, nameof({variable.CsFieldName}));");
+                    //lines.Add(
+                    //    $"    if ({variable.CsFieldName} is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}));");
                 }
 
                 if (!variable.IsArray && !variable.ClassIsStruct && variable.RosClassType != "string")
@@ -1449,6 +1459,7 @@ public sealed class ClassInfo
                 }
             }
 
+            /*
             if (variable.IsArray)
             {
                 string ind;
@@ -1463,29 +1474,34 @@ public sealed class ClassInfo
                     ind = "";
                 }
 
-                if (variable.RosClassType == "string")
-                {
-                    lines.Add($"{ind}    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
-                    lines.Add($"{ind}    {{");
-                    lines.Add(
-                        $"{ind}        if ({variable.CsFieldName}[i] is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}), i);");
-                    lines.Add($"{ind}    }}");
-                }
-                else if (!BuiltInTypes.Contains(variable.RosClassType) && !variable.ClassIsStruct)
-                {
-                    lines.Add($"{ind}    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
-                    lines.Add($"{ind}    {{");
-                    lines.Add(
-                        $"{ind}        if ({variable.CsFieldName}[i] is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}), i);");
-                    lines.Add($"{ind}        {variable.CsFieldName}[i].RosValidate();");
-                    lines.Add($"{ind}    }}");
-                }
+                //if (variable.RosClassType == "string")
+                //{
+                    //lines.Add($"{ind}    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
+                    //lines.Add($"{ind}    {{");
+                    //lines.Add(
+                    //    $"{ind}        BuiltIns.ThrowIfNull({variable.CsFieldName}, nameof({variable.CsFieldName}), i);");
+                    //lines.Add(
+                    //    $"{ind}        if ({variable.CsFieldName}[i] is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}), i);");
+                    //lines.Add($"{ind}    }}");
+                    //}
+                    //else if (!BuiltInTypes.Contains(variable.RosClassType) && !variable.ClassIsStruct)
+                    //{
+                    //lines.Add($"{ind}    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
+                    //lines.Add($"{ind}    {{");
+                    //lines.Add(
+                    //    $"{ind}        BuiltIns.ThrowIfNull({variable.CsFieldName}, nameof({variable.CsFieldName}), i);");
+                    //lines.Add(
+                    //    $"{ind}        if ({variable.CsFieldName}[i] is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}), i);");
+                    //lines.Add($"{ind}        {variable.CsFieldName}[i].RosValidate();");
+                    //lines.Add($"{ind}    }}");
+                    //}
 
                 if (forceStruct)
                 {
                     lines.Add($"    }}");
                 }
             }
+            */
         }
 
         lines.Add("}");

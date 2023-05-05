@@ -6,6 +6,7 @@ using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.Configurations;
 using Iviz.Displays;
+using Iviz.Displays.Helpers;
 using Iviz.Msgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
@@ -23,7 +24,7 @@ namespace Iviz.Controllers
         readonly Listener<CameraInfo> infoListener;
 
         string? descriptionOverride;
-        bool isProcessing;
+        InterlockedBoolean isProcessing;
 
         Texture2D? Texture => imageTexture.Texture;
 
@@ -58,17 +59,7 @@ namespace Iviz.Controllers
 
         public Vector2Int ImageSize =>
             Texture != null ? new Vector2Int(Texture.width, Texture.height) : Vector2Int.zero;
-
-        bool IsProcessing
-        {
-            get => isProcessing;
-            set
-            {
-                isProcessing = value;
-                Listener.SetPause(value);
-            }
-        }
-
+        
         public ImageConfiguration Config
         {
             get => config;
@@ -212,7 +203,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public override IListener Listener { get; }
+        public override Listener Listener { get; }
 
         public ImageListener(ImageConfiguration? config, string topic, string type)
         {
@@ -233,37 +224,37 @@ namespace Iviz.Controllers
             {
                 Image.MessageType => new Listener<Image>(Config.Topic, Handler),
                 CompressedImage.MessageType => new Listener<CompressedImage>(Config.Topic, HandlerCompressed),
-                _ => Ros.Listener.ThrowUnsupportedMessageType(Config.Type)
+                _ => Listener.ThrowUnsupportedMessageType(Config.Type)
             };
 
             billboard.Title = Listener.Topic;
 
             string infoTopic = RosUtils.GetCameraInfoTopic(Config.Topic);
             infoListener = new Listener<CameraInfo>(infoTopic, InfoHandler);
+
+            isProcessing.Changed = Listener.SetPause;
         }
 
         bool HandlerCompressed(CompressedImage msg, IRosConnection _)
         {
             if (msg.Format.Length == 0)
             {
-                RosLogger.Error($"{this}: Image format field is not set!");
+                RosLogger.Error($"{ToString()}: Image format field is not set!");
                 descriptionOverride = "[Format field empty]";
                 return true;
             }
 
             if (msg.Data.Length == 0)
             {
-                RosLogger.Error($"{this}: Data field is not set!");
+                RosLogger.Error($"{ToString()}: Data field is not set!");
                 descriptionOverride = "[Data field empty]";
                 return true;
             }
 
-            if (IsProcessing)
+            if (!isProcessing.TrySet())
             {
                 return false;
             }
-
-            IsProcessing = true;
 
             var shared = msg.Data.Share();
 
@@ -275,7 +266,7 @@ namespace Iviz.Controllers
                 }
 
                 shared.TryReturn();
-                IsProcessing = false;
+                isProcessing.Reset();
             }
 
             string format = msg.Format.ToUpperInvariant();
@@ -303,7 +294,7 @@ namespace Iviz.Controllers
                     }
                     else
                     {
-                        RosLogger.Error($"{this}: Unknown format '{msg.Format}'");
+                        RosLogger.Error($"{ToString()}: Unknown format '{msg.Format}'");
                         descriptionOverride = $"[Unknown Format '{msg.Format}']";
                         GameThread.PostInListenerQueue(PostProcess);
                     }
@@ -322,29 +313,27 @@ namespace Iviz.Controllers
                 // basic checks
                 if (msg.Data.Length < msg.Width * msg.Height)
                 {
-                    RosLogger.Error($"{this}: Image data is too small!");
+                    RosLogger.Error($"{ToString()}: Image data is too small!");
                     return true;
                 }
 
                 if (msg.Step < msg.Width || msg.Data.Length < msg.Step * msg.Height)
                 {
-                    RosLogger.Error($"{this}: Image step does not correspond to image size!");
+                    RosLogger.Error($"{ToString()}: Image step does not correspond to image size!");
                     return true;
                 }
             }
 
             if (msg.Encoding.Length == 0)
             {
-                RosLogger.Error($"{this}: Image encoding field is not set!");
+                RosLogger.Error($"{ToString()}: Image encoding field is not set!");
                 return true;
             }
 
-            if (IsProcessing)
+            if (!isProcessing.TrySet())
             {
                 return false;
             }
-
-            IsProcessing = true;
 
             var shared = msg.Data.Share();
             GameThread.PostInListenerQueue(() =>
@@ -361,7 +350,7 @@ namespace Iviz.Controllers
                 }
                 finally
                 {
-                    IsProcessing = false;
+                    isProcessing.Reset();
                     shared.TryReturn();
                 }
             });
@@ -382,7 +371,7 @@ namespace Iviz.Controllers
             var intrinsic = new Intrinsic(info.K);
             if (!intrinsic.IsValid)
             {
-                RosLogger.Error($"{this}: Ignoring invalid intrinsic {intrinsic.ToString()}.");
+                RosLogger.Error($"{ToString()}: Ignoring invalid intrinsic {intrinsic.ToString()}.");
                 return;
             }
 

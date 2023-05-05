@@ -62,8 +62,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
-            if (MeshGeometry is null) BuiltIns.ThrowNullReference(nameof(MeshGeometry));
+            BuiltIns.ThrowIfNull(Uuid, nameof(Uuid));
+            BuiltIns.ThrowIfNull(MeshGeometry, nameof(MeshGeometry));
             MeshGeometry.RosValidate();
         }
     

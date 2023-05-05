@@ -57,8 +57,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (M is null) BuiltIns.ThrowNullReference(nameof(M));
-            if (M.Length != 16) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(M), M.Length, 16);
+            BuiltIns.ThrowIfNull(M, nameof(M));
+            BuiltIns.ThrowIfWrongSize(M, nameof(M), 16);
         }
     
         public const int RosFixedMessageLength = 64;

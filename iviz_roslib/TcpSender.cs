@@ -12,7 +12,7 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
-internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSender where TMessage : IMessage
+internal sealed class TcpSender<TMessage> : ProtocolSender<TMessage>, ITcpSender where TMessage : IMessage
 {
     readonly SenderQueue<TMessage> senderQueue;
     readonly Serializer<TMessage> serializer;
@@ -70,7 +70,7 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
             BytesDropped = bytesDropped
         };
 
-    public TcpSender(TcpClient client, TopicInfo topicInfo, ILatchedMessageProvider<TMessage> provider)
+    public TcpSender(TcpClient client, TopicInfo topicInfo, LatchedMessageProvider<TMessage> provider)
     {
         this.topicInfo = topicInfo;
         serializer = ((TMessage)topicInfo.Generator).CreateSerializer();
@@ -226,7 +226,7 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
         }
     }
 
-    async ValueTask StartSession(ILatchedMessageProvider<TMessage> provider)
+    async ValueTask StartSession(LatchedMessageProvider<TMessage> provider)
     {
         Logger.LogDebugFormat("{0}: Started!", this);
 
@@ -260,16 +260,15 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
         senderQueue.FlushRemaining();
     }
 
-    async ValueTask ProcessLoop(ILatchedMessageProvider<TMessage> provider)
+    async ValueTask ProcessLoop(LatchedMessageProvider<TMessage> provider)
     {
         using var writeBuffer = new ResizableRent();
 
-        await ProcessHandshake(provider.HasLatchedMessage());
+        await ProcessHandshake(provider.HasLatchedMessage);
 
-        var latchedMsg = provider.GetLatchedMessage();
-        if (latchedMsg.hasValue)
+        if (provider.TryGetLatchedMessage(out var latchedMsg))
         {
-            Publish(latchedMsg.value!);
+            Publish(latchedMsg);
         }
 
         var token = runningTs.Token;
@@ -281,9 +280,10 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
 
             var queue = senderQueue.ReadAll(ref numDropped, ref bytesDropped);
 
-            if (LoopbackReceiver != null)
+            var loopbackReceiver = LoopbackReceiver;
+            if (loopbackReceiver != null)
             {
-                senderQueue.DirectSendToLoopback(queue, LoopbackReceiver, ref numSent, ref bytesSent);
+                senderQueue.DirectSendToLoopback(queue, loopbackReceiver, ref numSent, ref bytesSent);
                 continue;
             }
 
@@ -336,7 +336,7 @@ internal sealed class TcpSender<TMessage> : IProtocolSender<TMessage>, ITcpSende
     public override ValueTask PublishAndWaitAsync(in TMessage message, CancellationToken token)
     {
         return task.IsCompleted
-            ? Task.FromException(new ObjectDisposedException("this")).AsValueTask()
+            ? Task.FromException(new ObjectDisposedException(nameof(TcpSender<TMessage>))).AsValueTask()
             : senderQueue.EnqueueAsync(message, token, ref numDropped, ref bytesDropped);
     }
 

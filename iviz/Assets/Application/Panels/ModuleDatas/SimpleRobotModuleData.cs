@@ -42,7 +42,7 @@ namespace Iviz.App
             UpdateModuleButton();
 
             RobotController.RobotFinishedLoading += OnRobotFinishedLoading;
-            IRosProvider.ConnectionStateChanged += OnConnectionStateChanged;
+            RosProvider.ConnectionStateChanged += OnConnectionStateChanged;
         }
 
         void OnConnectionStateChanged(ConnectionState state)
@@ -68,7 +68,7 @@ namespace Iviz.App
             {
                 RobotController.RobotFinishedLoading -= OnRobotFinishedLoading;
                 RobotController.Dispose();
-                IRosProvider.ConnectionStateChanged -= OnConnectionStateChanged;
+                RosProvider.ConnectionStateChanged -= OnConnectionStateChanged;
             }
             catch (Exception e)
             {

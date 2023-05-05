@@ -133,7 +133,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public override IListener Listener { get; }
+        public override Listener Listener { get; }
 
         public LaserScanListener(LaserScanConfiguration? config, string topic)
         {

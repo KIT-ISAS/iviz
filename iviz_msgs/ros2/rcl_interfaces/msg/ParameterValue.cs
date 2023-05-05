@@ -59,7 +59,7 @@ namespace Iviz.Msgs.RclInterfaces
                 if (n == 0) array = EmptyArray<byte>.Value;
                 else
                 {
-                     array = new byte[n];
+                    array = new byte[n];
                     b.DeserializeStructArray(array);
                 }
                 ByteArrayValue = array;
@@ -70,7 +70,7 @@ namespace Iviz.Msgs.RclInterfaces
                 if (n == 0) array = EmptyArray<bool>.Value;
                 else
                 {
-                     array = new bool[n];
+                    array = new bool[n];
                     b.DeserializeStructArray(array);
                 }
                 BoolArrayValue = array;
@@ -81,7 +81,7 @@ namespace Iviz.Msgs.RclInterfaces
                 if (n == 0) array = EmptyArray<long>.Value;
                 else
                 {
-                     array = new long[n];
+                    array = new long[n];
                     b.DeserializeStructArray(array);
                 }
                 IntegerArrayValue = array;
@@ -92,7 +92,7 @@ namespace Iviz.Msgs.RclInterfaces
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 DoubleArrayValue = array;
@@ -115,7 +115,7 @@ namespace Iviz.Msgs.RclInterfaces
                 if (n == 0) array = EmptyArray<byte>.Value;
                 else
                 {
-                     array = new byte[n];
+                    array = new byte[n];
                     b.DeserializeStructArray(array);
                 }
                 ByteArrayValue = array;
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.RclInterfaces
                 if (n == 0) array = EmptyArray<bool>.Value;
                 else
                 {
-                     array = new bool[n];
+                    array = new bool[n];
                     b.DeserializeStructArray(array);
                 }
                 BoolArrayValue = array;
@@ -139,7 +139,7 @@ namespace Iviz.Msgs.RclInterfaces
                 if (n == 0) array = EmptyArray<long>.Value;
                 else
                 {
-                     array = new long[n];
+                    array = new long[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -151,7 +151,7 @@ namespace Iviz.Msgs.RclInterfaces
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -210,16 +210,12 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (StringValue is null) BuiltIns.ThrowNullReference(nameof(StringValue));
-            if (ByteArrayValue is null) BuiltIns.ThrowNullReference(nameof(ByteArrayValue));
-            if (BoolArrayValue is null) BuiltIns.ThrowNullReference(nameof(BoolArrayValue));
-            if (IntegerArrayValue is null) BuiltIns.ThrowNullReference(nameof(IntegerArrayValue));
-            if (DoubleArrayValue is null) BuiltIns.ThrowNullReference(nameof(DoubleArrayValue));
-            if (StringArrayValue is null) BuiltIns.ThrowNullReference(nameof(StringArrayValue));
-            for (int i = 0; i < StringArrayValue.Length; i++)
-            {
-                if (StringArrayValue[i] is null) BuiltIns.ThrowNullReference(nameof(StringArrayValue), i);
-            }
+            BuiltIns.ThrowIfNull(StringValue, nameof(StringValue));
+            BuiltIns.ThrowIfNull(ByteArrayValue, nameof(ByteArrayValue));
+            BuiltIns.ThrowIfNull(BoolArrayValue, nameof(BoolArrayValue));
+            BuiltIns.ThrowIfNull(IntegerArrayValue, nameof(IntegerArrayValue));
+            BuiltIns.ThrowIfNull(DoubleArrayValue, nameof(DoubleArrayValue));
+            BuiltIns.ThrowIfNull(StringArrayValue, nameof(StringArrayValue));
         }
     
         public int RosMessageLength

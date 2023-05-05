@@ -108,9 +108,9 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Start is null) BuiltIns.ThrowNullReference(nameof(Start));
+            BuiltIns.ThrowIfNull(Start, nameof(Start));
             Start.RosValidate();
-            if (Goal is null) BuiltIns.ThrowNullReference(nameof(Goal));
+            BuiltIns.ThrowIfNull(Goal, nameof(Goal));
             Goal.RosValidate();
         }
     
@@ -181,7 +181,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Plan is null) BuiltIns.ThrowNullReference(nameof(Plan));
+            BuiltIns.ThrowIfNull(Plan, nameof(Plan));
             Plan.RosValidate();
         }
     

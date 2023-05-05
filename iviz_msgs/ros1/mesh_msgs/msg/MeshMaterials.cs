@@ -34,23 +34,29 @@ namespace Iviz.Msgs.MeshMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MeshMsgs.MeshFaceCluster>.Value
-                    : new MeshMsgs.MeshFaceCluster[n];
-                for (int i = 0; i < n; i++)
+                MeshMsgs.MeshFaceCluster[] array;
+                if (n == 0) array = EmptyArray<MeshMsgs.MeshFaceCluster>.Value;
+                else
                 {
-                    array[i] = new MeshMsgs.MeshFaceCluster(ref b);
+                    array = new MeshMsgs.MeshFaceCluster[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MeshMsgs.MeshFaceCluster(ref b);
+                    }
                 }
                 Clusters = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MeshMsgs.MeshMaterial>.Value
-                    : new MeshMsgs.MeshMaterial[n];
-                for (int i = 0; i < n; i++)
+                MeshMsgs.MeshMaterial[] array;
+                if (n == 0) array = EmptyArray<MeshMsgs.MeshMaterial>.Value;
+                else
                 {
-                    array[i] = new MeshMsgs.MeshMaterial(ref b);
+                    array = new MeshMsgs.MeshMaterial[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MeshMsgs.MeshMaterial(ref b);
+                    }
                 }
                 Materials = array;
             }
@@ -60,19 +66,22 @@ namespace Iviz.Msgs.MeshMsgs
                 if (n == 0) array = EmptyArray<uint>.Value;
                 else
                 {
-                     array = new uint[n];
+                    array = new uint[n];
                     b.DeserializeStructArray(array);
                 }
                 ClusterMaterials = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MeshMsgs.MeshVertexTexCoords>.Value
-                    : new MeshMsgs.MeshVertexTexCoords[n];
-                for (int i = 0; i < n; i++)
+                MeshMsgs.MeshVertexTexCoords[] array;
+                if (n == 0) array = EmptyArray<MeshMsgs.MeshVertexTexCoords>.Value;
+                else
                 {
-                    array[i] = new MeshMsgs.MeshVertexTexCoords(ref b);
+                    array = new MeshMsgs.MeshVertexTexCoords[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MeshMsgs.MeshVertexTexCoords(ref b);
+                    }
                 }
                 VertexTexCoords = array;
             }
@@ -83,24 +92,30 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MeshMsgs.MeshFaceCluster>.Value
-                    : new MeshMsgs.MeshFaceCluster[n];
-                for (int i = 0; i < n; i++)
+                MeshMsgs.MeshFaceCluster[] array;
+                if (n == 0) array = EmptyArray<MeshMsgs.MeshFaceCluster>.Value;
+                else
                 {
-                    array[i] = new MeshMsgs.MeshFaceCluster(ref b);
+                    array = new MeshMsgs.MeshFaceCluster[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MeshMsgs.MeshFaceCluster(ref b);
+                    }
                 }
                 Clusters = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MeshMsgs.MeshMaterial>.Value
-                    : new MeshMsgs.MeshMaterial[n];
-                for (int i = 0; i < n; i++)
+                MeshMsgs.MeshMaterial[] array;
+                if (n == 0) array = EmptyArray<MeshMsgs.MeshMaterial>.Value;
+                else
                 {
-                    array[i] = new MeshMsgs.MeshMaterial(ref b);
+                    array = new MeshMsgs.MeshMaterial[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MeshMsgs.MeshMaterial(ref b);
+                    }
                 }
                 Materials = array;
             }
@@ -111,19 +126,22 @@ namespace Iviz.Msgs.MeshMsgs
                 if (n == 0) array = EmptyArray<uint>.Value;
                 else
                 {
-                     array = new uint[n];
+                    array = new uint[n];
                     b.DeserializeStructArray(array);
                 }
                 ClusterMaterials = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MeshMsgs.MeshVertexTexCoords>.Value
-                    : new MeshMsgs.MeshVertexTexCoords[n];
-                for (int i = 0; i < n; i++)
+                MeshMsgs.MeshVertexTexCoords[] array;
+                if (n == 0) array = EmptyArray<MeshMsgs.MeshVertexTexCoords>.Value;
+                else
                 {
-                    array[i] = new MeshMsgs.MeshVertexTexCoords(ref b);
+                    array = new MeshMsgs.MeshVertexTexCoords[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MeshMsgs.MeshVertexTexCoords(ref b);
+                    }
                 }
                 VertexTexCoords = array;
             }
@@ -180,25 +198,10 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Clusters is null) BuiltIns.ThrowNullReference(nameof(Clusters));
-            for (int i = 0; i < Clusters.Length; i++)
-            {
-                if (Clusters[i] is null) BuiltIns.ThrowNullReference(nameof(Clusters), i);
-                Clusters[i].RosValidate();
-            }
-            if (Materials is null) BuiltIns.ThrowNullReference(nameof(Materials));
-            for (int i = 0; i < Materials.Length; i++)
-            {
-                if (Materials[i] is null) BuiltIns.ThrowNullReference(nameof(Materials), i);
-                Materials[i].RosValidate();
-            }
-            if (ClusterMaterials is null) BuiltIns.ThrowNullReference(nameof(ClusterMaterials));
-            if (VertexTexCoords is null) BuiltIns.ThrowNullReference(nameof(VertexTexCoords));
-            for (int i = 0; i < VertexTexCoords.Length; i++)
-            {
-                if (VertexTexCoords[i] is null) BuiltIns.ThrowNullReference(nameof(VertexTexCoords), i);
-                VertexTexCoords[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Clusters, nameof(Clusters));
+            BuiltIns.ThrowIfNull(Materials, nameof(Materials));
+            BuiltIns.ThrowIfNull(ClusterMaterials, nameof(ClusterMaterials));
+            BuiltIns.ThrowIfNull(VertexTexCoords, nameof(VertexTexCoords));
         }
     
         public int RosMessageLength

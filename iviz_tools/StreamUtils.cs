@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -183,7 +182,7 @@ public static class StreamUtils
 
     public static async ValueTask WriteHeaderAsync(this TcpClient client, string[] contents, CancellationToken token)
     {
-        int totalLength = 4 * contents.Length + contents.Sum(entry => Defaults.UTF8.GetByteCount(entry));
+        int totalLength = contents.SumLengths();
 
         using var array = new Rent(totalLength + 4);
 
@@ -195,9 +194,9 @@ public static class StreamUtils
         await client.WriteChunkAsync(array, token);
     }
 
-    public static byte[] WriteHeaderToArray(ReadOnlySpan<string> contents)
+    public static byte[] WriteHeaderToArray(string[] contents)
     {
-        int totalLength = 4 * contents.Length + contents.Sum(entry => Defaults.UTF8.GetByteCount(entry));
+        int totalLength = contents.SumLengths();
 
         byte[] array = new byte[totalLength];
         using var writer = new BinaryWriter(new MemoryStream(array));
@@ -205,13 +204,13 @@ public static class StreamUtils
         return array;
     }
 
-    static void WriteHeaderEntries(BinaryWriter writer, ReadOnlySpan<string> contents)
+    static void WriteHeaderEntries(BinaryWriter writer, string[] contents)
     {
         foreach (string entry in contents)
         {
             using var bytes = entry.AsRent();
             writer.Write(bytes.Length);
-            writer.Write(bytes);
+            writer.Write(bytes.Array, 0, bytes.Length);
         }
     }
 
@@ -222,12 +221,13 @@ public static class StreamUtils
             return e.Message;
         }
 
-        // fix mono bug!
+        // check if mono bug
         if (!se.Message.HasPrefix("mono-io-layer-error"))
         {
             return CheckSocketExceptionMessage(e.Message);
         }
 
+        // fix mono bug!
         int fixedErrorCode = (se.ErrorCode is <= (int)SocketError.Success or >= (int)SocketError.OperationAborted)
             ? se.ErrorCode
             : se.ErrorCode + 10000;
@@ -241,24 +241,6 @@ public static class StreamUtils
         // in windows and hololens the socket error may be padded with \0s after a \r
         int terminatorIndex = message.IndexOf('\r');
         return terminatorIndex != -1 ? message[..terminatorIndex] : message;
-    }
-
-    /// <summary>
-    /// Enqueues a connection to the given port.
-    /// Used in Dispose() functions to force a listener to get out of waiting, as simply
-    /// closing it doesn't work in Mono. 
-    /// </summary>
-    public static void EnqueueConnection(int port, object caller)
-    {
-        try
-        {
-            using var client = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } };
-            client.Connect(IPAddress.Loopback, port);
-        }
-        catch
-        {
-            Logger.LogDebugFormat("{0}: Listener threw while disposing", caller);
-        }
     }
 
     /// <summary>
@@ -284,6 +266,17 @@ public static class StreamUtils
             Logger.LogDebugFormat("{0}: Listener threw while disposing", caller);
         }
     }
+    
+    static int SumLengths(this string[] contents)
+    {
+        int sum = 4 * contents.Length;
+        foreach (string t in contents)
+        {
+            sum += Defaults.UTF8.GetByteCount(t);
+        }
+
+        return sum;
+    }    
 }
 
 public static class CallbackHelpers

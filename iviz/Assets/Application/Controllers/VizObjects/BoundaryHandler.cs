@@ -15,7 +15,7 @@ namespace Iviz.Controllers
         void OnBoundaryColliderExited(string id, string otherId);
     }
 
-    public sealed class BoundaryHandler : VizHandler
+    public sealed class BoundaryHandler : VizHandler, IHandles<Boundary>, IHandlesArray<BoundaryArray>
     {
         readonly IBoundaryFeedback feedback;
 
@@ -43,15 +43,15 @@ namespace Iviz.Controllers
             this.feedback = feedback;
         }
 
-        public void Handler(BoundaryArray msg)
+        public void Handle(BoundaryArray msg)
         {
             foreach (var boundary in msg.Boundaries)
             {
-                Handler(boundary);
+                Handle(boundary);
             }
         }
 
-        public void Handler(Boundary msg)
+        public void Handle(Boundary msg)
         {
             switch ((ActionType)msg.Action)
             {

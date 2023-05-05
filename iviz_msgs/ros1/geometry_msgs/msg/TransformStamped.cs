@@ -69,7 +69,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (ChildFrameId is null) BuiltIns.ThrowNullReference(nameof(ChildFrameId));
+            BuiltIns.ThrowIfNull(ChildFrameId, nameof(ChildFrameId));
         }
     
         public int RosMessageLength

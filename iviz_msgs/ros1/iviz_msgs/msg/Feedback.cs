@@ -140,10 +140,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (VizId is null) BuiltIns.ThrowNullReference(nameof(VizId));
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Trajectory is null) BuiltIns.ThrowNullReference(nameof(Trajectory));
-            if (ColliderId is null) BuiltIns.ThrowNullReference(nameof(ColliderId));
+            BuiltIns.ThrowIfNull(VizId, nameof(VizId));
+            BuiltIns.ThrowIfNull(Id, nameof(Id));
+            BuiltIns.ThrowIfNull(Trajectory, nameof(Trajectory));
+            BuiltIns.ThrowIfNull(ColliderId, nameof(ColliderId));
         }
     
         public int RosMessageLength

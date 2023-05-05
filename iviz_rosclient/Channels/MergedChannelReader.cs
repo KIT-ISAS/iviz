@@ -53,7 +53,7 @@ public sealed class MergedChannelReader<TMessage> : IEnumerable<TMessage>, IAsyn
 
             if (!readyTask.Result)
             {
-                throw new ObjectDisposedException($"{nameof(sources)}[{readyTaskId}]",
+                BuiltIns.ThrowObjectDisposed($"{nameof(sources)}[{readyTaskId}]",
                     $"Channel {readyTaskId} has been disposed!");
             }
 
@@ -87,7 +87,7 @@ public sealed class MergedChannelReader<TMessage> : IEnumerable<TMessage>, IAsyn
             int index = Array.IndexOf(tasks, readyTask);
             if (!await readyTask)
             {
-                throw new ObjectDisposedException($"{nameof(sources)}[{index}]", $"Channel {index} has been disposed!");
+                BuiltIns.ThrowObjectDisposed($"{nameof(sources)}[{index}]", $"Channel {index} has been disposed!");
             }
 
             var sourceChannel = sources[index];
@@ -136,7 +136,7 @@ public sealed class MergedChannelReader : IEnumerable<IMessage>, IAsyncEnumerabl
 
             if (!readyTask.Result)
             {
-                throw new ObjectDisposedException($"{nameof(sources)}[{index}]",
+                BuiltIns.ThrowObjectDisposed($"{nameof(sources)}[{index}]",
                     $"Channel {index} has been disposed!");
             }
 
@@ -180,7 +180,7 @@ public sealed class MergedChannelReader : IEnumerable<IMessage>, IAsyncEnumerabl
 
                 if (!await readyTask)
                 {
-                    throw new ObjectDisposedException($"{nameof(sources)}[{i}]", $"Channel {i} has been disposed!");
+                    BuiltIns.ThrowObjectDisposed($"{nameof(sources)}[{i}]", $"Channel {i} has been disposed!");
                 }
 
                 yield return await sources[i].ReadAsync(token);

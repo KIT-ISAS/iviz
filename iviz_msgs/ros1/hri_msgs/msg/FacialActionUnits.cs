@@ -200,7 +200,7 @@ namespace Iviz.Msgs.HriMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 FAU = array;
@@ -211,7 +211,7 @@ namespace Iviz.Msgs.HriMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Intensity = array;
@@ -222,7 +222,7 @@ namespace Iviz.Msgs.HriMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Confidence = array;
@@ -239,7 +239,7 @@ namespace Iviz.Msgs.HriMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 FAU = array;
@@ -250,7 +250,7 @@ namespace Iviz.Msgs.HriMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Intensity = array;
@@ -261,7 +261,7 @@ namespace Iviz.Msgs.HriMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Confidence = array;
@@ -297,9 +297,9 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            if (FAU is null) BuiltIns.ThrowNullReference(nameof(FAU));
-            if (Intensity is null) BuiltIns.ThrowNullReference(nameof(Intensity));
-            if (Confidence is null) BuiltIns.ThrowNullReference(nameof(Confidence));
+            BuiltIns.ThrowIfNull(FAU, nameof(FAU));
+            BuiltIns.ThrowIfNull(Intensity, nameof(Intensity));
+            BuiltIns.ThrowIfNull(Confidence, nameof(Confidence));
         }
     
         public int RosMessageLength

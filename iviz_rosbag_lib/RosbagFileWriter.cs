@@ -412,7 +412,7 @@ public sealed class RosbagFileWriter : IDisposable
     {
         if (disposed)
         {
-            throw new ObjectDisposedException("RosbagFileWriter",
+            BuiltIns.ThrowObjectDisposed(nameof(RosbagFileWriter),
                 "Cannot write in a rosbag file that has already been disposed.");
         }
 

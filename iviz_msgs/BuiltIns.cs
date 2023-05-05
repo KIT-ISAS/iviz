@@ -161,7 +161,7 @@ public static class BuiltIns
     
     public static byte[] SerializeToArrayRos1(this IMessage o)
     {
-        var serializer = o.CreateSerializer();
+        Serializer serializer = o.CreateSerializer();
         serializer.RosValidate(o);
         byte[] bytes = new byte[serializer.RosMessageLength(o)];
         WriteBuffer.Serialize(serializer, o, bytes);
@@ -171,7 +171,7 @@ public static class BuiltIns
 
     public static byte[] SerializeToArrayRos2(this IMessage o)
     {
-        var serializer = o.CreateSerializer();
+        Serializer serializer = o.CreateSerializer();
         serializer.RosValidate(o);
         byte[] bytes = new byte[serializer.Ros2MessageLength(o)];
         WriteBuffer2.Serialize(serializer, o, bytes);
@@ -271,14 +271,41 @@ public static class BuiltIns
         return ((IHasSerializer<T>)t).CreateDeserializer();
     }
 
-    [DoesNotReturn, AssertionMethod]
-    public static void ThrowArgument(string arg, string message) => throw new ArgumentNullException(arg, message);
+    [AssertionMethod]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void ThrowIfNull(object arg, string name)
+    {
+        if (arg is null) ThrowNullReference(name);
+    }
+
+    [AssertionMethod]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void ThrowIfNull(object[] arg, string name)
+    {
+        if (arg is null) ThrowNullReference(name);
+        
+        int length = arg.Length;
+        for (int i = 0; i < length; i++)
+        {
+            if (arg[i] is null) ThrowNullReference(name, i);
+        }
+    }
+    
+    [AssertionMethod]
+    public static void ThrowIfWrongSize(Array arg, string name, int expectedLength)
+    {
+        int length = arg.Length;
+        if (length != expectedLength) ThrowInvalidSizeForFixedArray(name, length, expectedLength);
+    }
 
     [DoesNotReturn, AssertionMethod]
-    public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);
+    public static void ThrowArgument([InvokerParameterName] string arg, string message) => throw new ArgumentNullException(arg, message);
 
     [DoesNotReturn, AssertionMethod]
-    public static void ThrowArgumentNull(string arg, string message) => throw new ArgumentNullException(arg, message);
+    public static void ThrowArgumentNull([InvokerParameterName] string arg) => throw new ArgumentNullException(arg);
+
+    [DoesNotReturn, AssertionMethod]
+    public static void ThrowArgumentNull([InvokerParameterName] string arg, string message) => throw new ArgumentNullException(arg, message);
 
     [DoesNotReturn, AssertionMethod]
     public static void ThrowNullReference(string arg) => throw new NullReferenceException(arg);
@@ -300,7 +327,8 @@ public static class BuiltIns
 
     [DoesNotReturn, AssertionMethod]
     public static void ThrowImplausibleBufferSize() =>
-        throw new RosBufferException("Message requested a negative amount or an implausible more than 1TB elements.");
+        throw new RosBufferException("Message requested an array with negative size or an " +
+                                     "implausible amount of more than 1TB elements.");
 
     [DoesNotReturn, AssertionMethod]
     public static void ThrowArgumentOutOfRange() => throw new ArgumentOutOfRangeException();
@@ -315,4 +343,16 @@ public static class BuiltIns
     [DoesNotReturn, AssertionMethod]
     public static void ThrowInvalidSizeForFixedArray(string arg, int size, int expected) =>
         throw new RosInvalidSizeForFixedArrayException(arg, size, expected);
+
+    [DoesNotReturn]
+    public static void ThrowObjectDisposed(string name) =>
+        throw new ObjectDisposedException(name);
+
+    [DoesNotReturn]
+    public static void ThrowObjectDisposed(string name, string message) =>
+        throw new ObjectDisposedException(name, message);
+    
+    [DoesNotReturn]
+    public static IntPtr ThrowPointerDisposed(string name) =>
+        throw new ObjectDisposedException(name);
 }

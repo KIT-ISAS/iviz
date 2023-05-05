@@ -4,11 +4,7 @@ namespace Iviz.Msgs;
 
 public class RosException : Exception
 {
-    protected RosException(string msg) : base(msg)
-    {
-    }
-
-    protected RosException(string msg, Exception e) : base(msg, e)
+    protected RosException(string msg, Exception? e = null) : base(msg, e)
     {
     }
 }

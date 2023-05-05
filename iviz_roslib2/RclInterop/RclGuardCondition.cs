@@ -1,3 +1,4 @@
+using Iviz.Msgs;
 using Iviz.Tools;
 
 namespace Iviz.Roslib2.RclInterop;
@@ -8,7 +9,7 @@ internal sealed class RclGuardCondition : IDisposable
     bool disposed;
     
     internal IntPtr Handle => disposed 
-        ? throw new ObjectDisposedException(ToString()) 
+        ? BuiltIns.ThrowPointerDisposed(nameof(RclGuardCondition)) 
         : guardHandle;
 
     public RclGuardCondition(IntPtr contextHandle)

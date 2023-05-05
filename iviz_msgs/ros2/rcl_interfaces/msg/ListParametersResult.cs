@@ -64,16 +64,8 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Names is null) BuiltIns.ThrowNullReference(nameof(Names));
-            for (int i = 0; i < Names.Length; i++)
-            {
-                if (Names[i] is null) BuiltIns.ThrowNullReference(nameof(Names), i);
-            }
-            if (Prefixes is null) BuiltIns.ThrowNullReference(nameof(Prefixes));
-            for (int i = 0; i < Prefixes.Length; i++)
-            {
-                if (Prefixes[i] is null) BuiltIns.ThrowNullReference(nameof(Prefixes), i);
-            }
+            BuiltIns.ThrowIfNull(Names, nameof(Names));
+            BuiltIns.ThrowIfNull(Prefixes, nameof(Prefixes));
         }
     
         public int RosMessageLength

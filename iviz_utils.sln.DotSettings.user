@@ -6,61 +6,61 @@
 	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/CustomBuildToolPath/@EntryValue">/usr/local/share/dotnet/sdk/6.0.202/MSBuild.dll</s:String>
 	<s:Int64 x:Key="/Default/Environment/Hierarchy/Build/BuildTool/MsbuildVersion/@EntryValue">1114112</s:Int64>
 	
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=289aa647_002D5e74_002D4287_002D96d2_002D3cbb7b0f8886/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestTf" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMagnitude&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=289aa647_002D5e74_002D4287_002D96d2_002D3cbb7b0f8886/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestTf" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMagnitude&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=2eb9d9e0_002Df4a3_002D4052_002D92b6_002D6c2518d9d8e6/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestChannelAsync" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;Or&gt;&#xD;
-    &lt;ProjectFile&gt;D426E606-432C-4314-B451-285C6AEA44F2/f:NetworkTests.cs&lt;/ProjectFile&gt;&#xD;
-    &lt;TestAncestor&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMarkers&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestImages&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf2&lt;/TestId&gt;&#xD;
-    &lt;/TestAncestor&gt;&#xD;
-  &lt;/Or&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=2eb9d9e0_002Df4a3_002D4052_002D92b6_002D6c2518d9d8e6/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestChannelAsync" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;Or&gt;
+    &lt;ProjectFile&gt;D426E606-432C-4314-B451-285C6AEA44F2/f:NetworkTests.cs&lt;/ProjectFile&gt;
+    &lt;TestAncestor&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMarkers&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestImages&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf2&lt;/TestId&gt;
+    &lt;/TestAncestor&gt;
+  &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=c19efdf8_002D9b7c_002D4544_002D9db1_002D35f8f67ab4e8/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestTf2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf2&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestOccupancyGrid&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMagnitude&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf3&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMarkers&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.NetworkTests.TestChannelAsync&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestImage&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestWorld&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestDialogs&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.MessageTests.TestMessageConsistency&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.MessageTests&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.RosMasterTests&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.Message2Tests.TestMessageConsistency&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.Message2Tests.TestMessageConsistencyN&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=c19efdf8_002D9b7c_002D4544_002D9db1_002D35f8f67ab4e8/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestTf2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf2&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestOccupancyGrid&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMagnitude&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf3&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMarkers&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.NetworkTests.TestChannelAsync&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestImage&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestWorld&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestDialogs&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.MessageTests.TestMessageConsistency&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.MessageTests&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.RosMasterTests&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.Message2Tests.TestMessageConsistency&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.Message2Tests.TestMessageConsistencyN&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e3adf1f9_002D6f13_002D431e_002Da944_002Db6b703a80cb5/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestChannelsAsync" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;Or&gt;&#xD;
-    &lt;TestAncestor&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net5.0::Iviz.UtilsTests.NetworkTests.TestChannelsAsync&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net5.0::Iviz.UtilsTests.NetworkTests.TestRosClientGetTopics&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestAddModule&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMarkers&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.NetworkTests.TestChannelAsync&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestImages&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf2&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMarkers2&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestInteractiveMarkers&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMagnitude&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestOccupancyGrid&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.BagTests.TestTopics&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.BagTests.TestMessages&lt;/TestId&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.Message2Tests&lt;/TestId&gt;&#xD;
-    &lt;/TestAncestor&gt;&#xD;
-    &lt;ProjectFile&gt;D426E606-432C-4314-B451-285C6AEA44F2/f:MessageTests.cs&lt;/ProjectFile&gt;&#xD;
-  &lt;/Or&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e3adf1f9_002D6f13_002D431e_002Da944_002Db6b703a80cb5/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestChannelsAsync" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;Or&gt;
+    &lt;TestAncestor&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net5.0::Iviz.UtilsTests.NetworkTests.TestChannelsAsync&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net5.0::Iviz.UtilsTests.NetworkTests.TestRosClientGetTopics&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestAddModule&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMarkers&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.NetworkTests.TestChannelAsync&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestImages&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf2&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMarkers2&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestInteractiveMarkers&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMagnitude&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestOccupancyGrid&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.BagTests.TestTopics&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.BagTests.TestMessages&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.Message2Tests&lt;/TestId&gt;
+    &lt;/TestAncestor&gt;
+    &lt;ProjectFile&gt;D426E606-432C-4314-B451-285C6AEA44F2/f:MessageTests.cs&lt;/ProjectFile&gt;
+  &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String>
 	
 	
@@ -77,6 +77,7 @@
 	
 	
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/Initialized/@EntryValue">True</s:Boolean>
+	
 	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=817471d7_002D0209_002D4429_002D98ba_002D44291b25384a_0023iviz_005Fmsgs_005Fwrapper/@EntryIndexedValue">True</s:Boolean>
 	
 	

@@ -41,7 +41,7 @@ internal static class RosUtils
             if (numRead + length > toRead)
             {
                 throw new RosInvalidHeaderException(
-                    $"Invalid header entry size {length}, buffer has only {toRead - numRead} bytes left");
+                    $"Invalid header entry size {length}. Buffer has only {toRead - numRead} bytes left");
             }
 
             string entry;
@@ -85,8 +85,7 @@ internal static class RosUtils
     }
 
 
-    internal static TopicInfo GenerateDynamicTopicInfo(string callerId, string topicName,
-        IReadOnlyCollection<string> responses, bool allowDirectLookup)
+    internal static TopicInfo GenerateDynamicTopicInfo(string callerId, string topicName, string[] responses)
     {
         const string typePrefix = "type=";
         const string definitionPrefix = "message_definition=";
@@ -97,9 +96,11 @@ internal static class RosUtils
         if (string.IsNullOrEmpty(dynamicMsgName))
         {
             throw new RosHandshakeException(
-                "Partner did not send type, required to instantiate dynamic messages.");
+                "Partner did not send the message type in the header. " +
+                "This information is required to instantiate dynamic messages.");
         }
 
+        const bool allowDirectLookup = false;
         if (allowDirectLookup && BuiltIns.TryGetGeneratorFromMessageName(dynamicMsgName) is { } lookupGenerator)
         {
             return new TopicInfo(callerId, topicName, lookupGenerator);
@@ -112,7 +113,8 @@ internal static class RosUtils
         if (string.IsNullOrEmpty(dynamicDependencies))
         {
             throw new RosHandshakeException(
-                "Partner did not send definition, required to instantiate dynamic messages.");
+                "Partner did not send the message definition in the header. " +
+                "This information is required to instantiate dynamic messages.");
         }
 
         // T == DynamicMessage
@@ -128,7 +130,8 @@ internal static class RosUtils
             ? info.IPv4Mask.GetAddressBytes()
             : GetSubnetMaskFromV6PrefixLength(info.PrefixLength);
 
-        foreach (int i in ..addressABytes.Length)
+        int length = addressABytes.Length;
+        for (int i = 0; i < length; i++)
         {
             if ((addressABytes[i] & subnetMaskBytes[i]) != (addressBBytes[i] & subnetMaskBytes[i]))
             {
@@ -291,7 +294,7 @@ internal static class RosUtils
         }
 
         int headerSize =
-            (remoteAddress.AddressFamily == AddressFamily.InterNetworkV6 && !remoteAddress.IsIPv4MappedToIPv6)
+            remoteAddress is { AddressFamily: AddressFamily.InterNetworkV6, IsIPv4MappedToIPv6: false }
                 ? UdpRosParams.Ip6UdpHeadersLength
                 : UdpRosParams.Ip4UdpHeadersLength;
         return mtu - headerSize;
@@ -323,7 +326,7 @@ internal static class RosUtils
     {
         return address.AddressFamily == AddressFamily.InterNetworkV6
             ? "[" + address.ToString() + "]"
-            : address.ToString();        
+            : address.ToString();
     }
 }
 

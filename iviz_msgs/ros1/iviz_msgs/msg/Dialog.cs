@@ -170,14 +170,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Title is null) BuiltIns.ThrowNullReference(nameof(Title));
-            if (Caption is null) BuiltIns.ThrowNullReference(nameof(Caption));
-            if (MenuEntries is null) BuiltIns.ThrowNullReference(nameof(MenuEntries));
-            for (int i = 0; i < MenuEntries.Length; i++)
-            {
-                if (MenuEntries[i] is null) BuiltIns.ThrowNullReference(nameof(MenuEntries), i);
-            }
+            BuiltIns.ThrowIfNull(Id, nameof(Id));
+            BuiltIns.ThrowIfNull(Title, nameof(Title));
+            BuiltIns.ThrowIfNull(Caption, nameof(Caption));
+            BuiltIns.ThrowIfNull(MenuEntries, nameof(MenuEntries));
         }
     
         public int RosMessageLength

@@ -14,7 +14,7 @@ namespace Iviz.Displays.XR
         
         [SerializeField] BoxCollider? boxCollider;
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
-        protected Transform Transform => this.EnsureHasTransform(ref mTransform);
+        public Transform Transform => this.EnsureHasTransform(ref mTransform);
 
         public string Id { get; set; } = "";
         public event Action<string>? EnteredCollision;
@@ -141,7 +141,12 @@ namespace Iviz.Displays.XR
 
         public override string ToString()
         {
-            return $"[Boundary Id='{Id}']";
+            return $"[{nameof(BaseBoundary)} Id='{Id}']";
+        }
+
+        public bool Visible
+        {
+            set => gameObject.SetActive(value);
         }
     }
 }

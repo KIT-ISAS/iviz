@@ -40,12 +40,15 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out SeqNum);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<InteractiveMarker>.Value
-                    : new InteractiveMarker[n];
-                for (int i = 0; i < n; i++)
+                InteractiveMarker[] array;
+                if (n == 0) array = EmptyArray<InteractiveMarker>.Value;
+                else
                 {
-                    array[i] = new InteractiveMarker(ref b);
+                    array = new InteractiveMarker[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new InteractiveMarker(ref b);
+                    }
                 }
                 Markers = array;
             }
@@ -59,12 +62,15 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out SeqNum);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<InteractiveMarker>.Value
-                    : new InteractiveMarker[n];
-                for (int i = 0; i < n; i++)
+                InteractiveMarker[] array;
+                if (n == 0) array = EmptyArray<InteractiveMarker>.Value;
+                else
                 {
-                    array[i] = new InteractiveMarker(ref b);
+                    array = new InteractiveMarker[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new InteractiveMarker(ref b);
+                    }
                 }
                 Markers = array;
             }
@@ -100,13 +106,8 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (ServerId is null) BuiltIns.ThrowNullReference(nameof(ServerId));
-            if (Markers is null) BuiltIns.ThrowNullReference(nameof(Markers));
-            for (int i = 0; i < Markers.Length; i++)
-            {
-                if (Markers[i] is null) BuiltIns.ThrowNullReference(nameof(Markers), i);
-                Markers[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(ServerId, nameof(ServerId));
+            BuiltIns.ThrowIfNull(Markers, nameof(Markers));
         }
     
         public int RosMessageLength

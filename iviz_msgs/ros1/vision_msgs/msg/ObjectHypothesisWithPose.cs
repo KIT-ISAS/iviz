@@ -74,7 +74,7 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            if (Pose is null) BuiltIns.ThrowNullReference(nameof(Pose));
+            BuiltIns.ThrowIfNull(Pose, nameof(Pose));
             Pose.RosValidate();
         }
     

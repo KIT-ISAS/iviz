@@ -41,6 +41,7 @@ public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMe
         [ColorRGBA.MessageType] = new MessageGenerator<ColorRGBA>(),
         [Color32.MessageType] = new MessageGenerator<Color32>(),
         [Triangle.MessageType] = new MessageGenerator<Triangle>(),
+        [BoundingBox.MessageType] = new MessageGenerator<BoundingBox>(),
 
         [Header.MessageType] = new MessageGenerator<Header>(),
     };
@@ -164,7 +165,7 @@ public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMe
         RosMd5Sum = other.RosMd5Sum;
         RosDependenciesBase64 = other.RosDependenciesBase64;
         var fields = new Property[other.Fields.Count];
-        foreach (int i in ..fields.Length)
+        for (int i = 0; i < fields.Length; i++)
         {
             fields[i] = new Property(other.Fields[i].Name, other.Fields[i].Value.Generate());
         }

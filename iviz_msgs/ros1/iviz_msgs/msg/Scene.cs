@@ -40,23 +40,29 @@ namespace Iviz.Msgs.IvizMsgs
             Filename = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<SceneInclude>.Value
-                    : new SceneInclude[n];
-                for (int i = 0; i < n; i++)
+                SceneInclude[] array;
+                if (n == 0) array = EmptyArray<SceneInclude>.Value;
+                else
                 {
-                    array[i] = new SceneInclude(ref b);
+                    array = new SceneInclude[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new SceneInclude(ref b);
+                    }
                 }
                 Includes = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<SceneLight>.Value
-                    : new SceneLight[n];
-                for (int i = 0; i < n; i++)
+                SceneLight[] array;
+                if (n == 0) array = EmptyArray<SceneLight>.Value;
+                else
                 {
-                    array[i] = new SceneLight(ref b);
+                    array = new SceneLight[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new SceneLight(ref b);
+                    }
                 }
                 Lights = array;
             }
@@ -71,24 +77,30 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<SceneInclude>.Value
-                    : new SceneInclude[n];
-                for (int i = 0; i < n; i++)
+                SceneInclude[] array;
+                if (n == 0) array = EmptyArray<SceneInclude>.Value;
+                else
                 {
-                    array[i] = new SceneInclude(ref b);
+                    array = new SceneInclude[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new SceneInclude(ref b);
+                    }
                 }
                 Includes = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<SceneLight>.Value
-                    : new SceneLight[n];
-                for (int i = 0; i < n; i++)
+                SceneLight[] array;
+                if (n == 0) array = EmptyArray<SceneLight>.Value;
+                else
                 {
-                    array[i] = new SceneLight(ref b);
+                    array = new SceneLight[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new SceneLight(ref b);
+                    }
                 }
                 Lights = array;
             }
@@ -136,20 +148,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Filename is null) BuiltIns.ThrowNullReference(nameof(Filename));
-            if (Includes is null) BuiltIns.ThrowNullReference(nameof(Includes));
-            for (int i = 0; i < Includes.Length; i++)
-            {
-                if (Includes[i] is null) BuiltIns.ThrowNullReference(nameof(Includes), i);
-                Includes[i].RosValidate();
-            }
-            if (Lights is null) BuiltIns.ThrowNullReference(nameof(Lights));
-            for (int i = 0; i < Lights.Length; i++)
-            {
-                if (Lights[i] is null) BuiltIns.ThrowNullReference(nameof(Lights), i);
-                Lights[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Name, nameof(Name));
+            BuiltIns.ThrowIfNull(Filename, nameof(Filename));
+            BuiltIns.ThrowIfNull(Includes, nameof(Includes));
+            BuiltIns.ThrowIfNull(Lights, nameof(Lights));
         }
     
         public int RosMessageLength

@@ -15,7 +15,7 @@ internal sealed class RclServiceServer : IDisposable, IHasHandle
     public string ServiceType { get; }
 
     public IntPtr Handle => disposed
-        ? throw new ObjectDisposedException(ToString())
+        ? BuiltIns.ThrowPointerDisposed(nameof(RclServiceServer)) 
         : serviceHandle;
 
     public RclServiceServer(IntPtr contextHandle, IntPtr nodeHandle, string service, string serviceType,

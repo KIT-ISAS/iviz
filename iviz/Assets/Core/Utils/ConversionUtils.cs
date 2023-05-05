@@ -480,6 +480,29 @@ namespace Iviz.Core
         }
     }
 
+    [BurstCompile]
+    internal static unsafe class LineDisplayUtils
+    {
+        [BurstCompile(CompileSynchronously = true)]
+        public static bool CheckIfAlphaNeeded([NoAlias] float4x2* lineSpan, int size)
+        {
+            uint4x2* lineSpanInt = (uint4x2*)lineSpan;
+            for (int i = 0; i < size; i++)
+            {
+                var line = lineSpanInt[i];
+                uint cA = line.c0.w;
+                uint cB = line.c1.w;
+
+                if (cA >> 24 < 255 || cB >> 24 < 255)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+    
     [StructLayout(LayoutKind.Sequential)]
     public struct Rgba
     {

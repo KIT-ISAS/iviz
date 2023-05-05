@@ -13,14 +13,14 @@ namespace Iviz.Ros
     /// Partial implementation of a ROS connection. The rest is in <see cref="RosConnection"/>.
     /// Here we only handle initializing connections and task queues.
     /// </summary>
-    internal sealed partial class RosConnection : IRosProvider
+    internal sealed partial class RosConnection : RosProvider
     {
         const int TaskWaitTimeInMs = 2000;
         const int ConnectionRetryTimeInMs = TaskWaitTimeInMs;
 
         bool disposed;
 
-        public const bool IsRos2VersionSupported = Settings.IsAndroid || Settings.IsIPhone || Settings.IsMacOS;
+        public new const bool IsRos2VersionSupported = Settings.IsAndroid || Settings.IsIPhone || Settings.IsMacOS;
 
         readonly SemaphoreSlim signal = new(0);
         readonly Task task;
@@ -32,8 +32,7 @@ namespace Iviz.Ros
         bool tryConnectOnce;
 
         public bool IsConnected => connectionState == ConnectionState.Connected;
-        public bool KeepReconnecting { get; set; }
-
+        
         public RosConnection()
         {
             task = TaskUtils.Run(() => Run().AwaitNoThrow(this));
@@ -46,7 +45,7 @@ namespace Iviz.Ros
             task.WaitNoThrow(this);
             disposed = true;
 
-            IRosProvider.ClearEvents();
+            ClearEvents();
         }
 
         void SetConnectionState(ConnectionState newState)
@@ -57,12 +56,12 @@ namespace Iviz.Ros
             }
 
             connectionState = newState;
-            GameThread.Post(() => IRosProvider.RaiseConnectionStateChanged(newState));
+            GameThread.Post(() => RaiseConnectionStateChanged(newState));
         }
 
         static void SetConnectionWarningState(bool value)
         {
-            GameThread.Post(() => IRosProvider.RaiseConnectionWarningStateChanged(value));
+            GameThread.Post(() => RaiseConnectionWarningStateChanged(value));
         }
 
         /// <summary>
@@ -129,6 +128,14 @@ namespace Iviz.Ros
 
             bool connectionResult;
 
+            if (!ValidateCanConnect())
+            {
+                KeepReconnecting = false;
+                SetConnectionState(ConnectionState.Disconnected);
+                tryConnectOnce = false;
+                return;
+            }
+            
             try
             {
                 lastConnectionTry = now;
@@ -163,7 +170,7 @@ namespace Iviz.Ros
             }
         }
 
-        public void TryOnceToConnect()
+        public override void TryOnceToConnect()
         {
             if (connectionState != ConnectionState.Disconnected)
             {

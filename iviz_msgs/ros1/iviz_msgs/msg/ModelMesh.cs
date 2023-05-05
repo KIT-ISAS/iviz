@@ -79,23 +79,29 @@ namespace Iviz.Msgs.IvizMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ModelTexCoords>.Value
-                    : new ModelTexCoords[n];
-                for (int i = 0; i < n; i++)
+                ModelTexCoords[] array;
+                if (n == 0) array = EmptyArray<ModelTexCoords>.Value;
+                else
                 {
-                    array[i] = new ModelTexCoords(ref b);
+                    array = new ModelTexCoords[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ModelTexCoords(ref b);
+                    }
                 }
                 TexCoords = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ModelColorChannel>.Value
-                    : new ModelColorChannel[n];
-                for (int i = 0; i < n; i++)
+                ModelColorChannel[] array;
+                if (n == 0) array = EmptyArray<ModelColorChannel>.Value;
+                else
                 {
-                    array[i] = new ModelColorChannel(ref b);
+                    array = new ModelColorChannel[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ModelColorChannel(ref b);
+                    }
                 }
                 ColorChannels = array;
             }
@@ -164,24 +170,30 @@ namespace Iviz.Msgs.IvizMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ModelTexCoords>.Value
-                    : new ModelTexCoords[n];
-                for (int i = 0; i < n; i++)
+                ModelTexCoords[] array;
+                if (n == 0) array = EmptyArray<ModelTexCoords>.Value;
+                else
                 {
-                    array[i] = new ModelTexCoords(ref b);
+                    array = new ModelTexCoords[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ModelTexCoords(ref b);
+                    }
                 }
                 TexCoords = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ModelColorChannel>.Value
-                    : new ModelColorChannel[n];
-                for (int i = 0; i < n; i++)
+                ModelColorChannel[] array;
+                if (n == 0) array = EmptyArray<ModelColorChannel>.Value;
+                else
                 {
-                    array[i] = new ModelColorChannel(ref b);
+                    array = new ModelColorChannel[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ModelColorChannel(ref b);
+                    }
                 }
                 ColorChannels = array;
             }
@@ -262,24 +274,14 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Vertices is null) BuiltIns.ThrowNullReference(nameof(Vertices));
-            if (Normals is null) BuiltIns.ThrowNullReference(nameof(Normals));
-            if (Tangents is null) BuiltIns.ThrowNullReference(nameof(Tangents));
-            if (BiTangents is null) BuiltIns.ThrowNullReference(nameof(BiTangents));
-            if (TexCoords is null) BuiltIns.ThrowNullReference(nameof(TexCoords));
-            for (int i = 0; i < TexCoords.Length; i++)
-            {
-                if (TexCoords[i] is null) BuiltIns.ThrowNullReference(nameof(TexCoords), i);
-                TexCoords[i].RosValidate();
-            }
-            if (ColorChannels is null) BuiltIns.ThrowNullReference(nameof(ColorChannels));
-            for (int i = 0; i < ColorChannels.Length; i++)
-            {
-                if (ColorChannels[i] is null) BuiltIns.ThrowNullReference(nameof(ColorChannels), i);
-                ColorChannels[i].RosValidate();
-            }
-            if (Faces is null) BuiltIns.ThrowNullReference(nameof(Faces));
+            BuiltIns.ThrowIfNull(Name, nameof(Name));
+            BuiltIns.ThrowIfNull(Vertices, nameof(Vertices));
+            BuiltIns.ThrowIfNull(Normals, nameof(Normals));
+            BuiltIns.ThrowIfNull(Tangents, nameof(Tangents));
+            BuiltIns.ThrowIfNull(BiTangents, nameof(BiTangents));
+            BuiltIns.ThrowIfNull(TexCoords, nameof(TexCoords));
+            BuiltIns.ThrowIfNull(ColorChannels, nameof(ColorChannels));
+            BuiltIns.ThrowIfNull(Faces, nameof(Faces));
         }
     
         public int RosMessageLength

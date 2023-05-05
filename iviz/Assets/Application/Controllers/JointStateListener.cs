@@ -91,8 +91,8 @@ namespace Iviz.Controllers
 
         readonly HashSet<string> warnNotFound = new HashSet<string>();
 
-        [CanBeNull] IListener listener;
-        [CanBeNull] public override IListener Listener => listener;
+        [CanBeNull] Listener listener;
+        [CanBeNull] public override Listener Listener => listener;
         
         void OnRobotStopped()
         {

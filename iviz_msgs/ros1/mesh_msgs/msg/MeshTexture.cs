@@ -64,8 +64,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
-            if (Image is null) BuiltIns.ThrowNullReference(nameof(Image));
+            BuiltIns.ThrowIfNull(Uuid, nameof(Uuid));
+            BuiltIns.ThrowIfNull(Image, nameof(Image));
             Image.RosValidate();
         }
     

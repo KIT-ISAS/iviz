@@ -37,7 +37,7 @@ namespace Iviz.Msgs.OctomapMsgs
                 if (n == 0) array = EmptyArray<sbyte>.Value;
                 else
                 {
-                     array = new sbyte[n];
+                    array = new sbyte[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.OctomapMsgs
                 if (n == 0) array = EmptyArray<sbyte>.Value;
                 else
                 {
-                     array = new sbyte[n];
+                    array = new sbyte[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -93,8 +93,8 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            BuiltIns.ThrowIfNull(Id, nameof(Id));
+            BuiltIns.ThrowIfNull(Data, nameof(Data));
         }
     
         public int RosMessageLength

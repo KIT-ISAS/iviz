@@ -50,7 +50,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 JointValues = array;
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 JointValues = array;
@@ -158,17 +158,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (JointNames is null) BuiltIns.ThrowNullReference(nameof(JointNames));
-            for (int i = 0; i < JointNames.Length; i++)
-            {
-                if (JointNames[i] is null) BuiltIns.ThrowNullReference(nameof(JointNames), i);
-            }
-            if (JointValues is null) BuiltIns.ThrowNullReference(nameof(JointValues));
-            if (RobotDescription is null) BuiltIns.ThrowNullReference(nameof(RobotDescription));
-            if (SourceNode is null) BuiltIns.ThrowNullReference(nameof(SourceNode));
-            if (SourceParameter is null) BuiltIns.ThrowNullReference(nameof(SourceParameter));
-            if (SavedRobotName is null) BuiltIns.ThrowNullReference(nameof(SavedRobotName));
+            BuiltIns.ThrowIfNull(Id, nameof(Id));
+            BuiltIns.ThrowIfNull(JointNames, nameof(JointNames));
+            BuiltIns.ThrowIfNull(JointValues, nameof(JointValues));
+            BuiltIns.ThrowIfNull(RobotDescription, nameof(RobotDescription));
+            BuiltIns.ThrowIfNull(SourceNode, nameof(SourceNode));
+            BuiltIns.ThrowIfNull(SourceParameter, nameof(SourceParameter));
+            BuiltIns.ThrowIfNull(SavedRobotName, nameof(SavedRobotName));
         }
     
         public int RosMessageLength

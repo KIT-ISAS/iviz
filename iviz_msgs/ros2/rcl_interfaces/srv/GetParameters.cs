@@ -99,11 +99,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Names is null) BuiltIns.ThrowNullReference(nameof(Names));
-            for (int i = 0; i < Names.Length; i++)
-            {
-                if (Names[i] is null) BuiltIns.ThrowNullReference(nameof(Names), i);
-            }
+            BuiltIns.ThrowIfNull(Names, nameof(Names));
         }
     
         public int RosMessageLength
@@ -151,12 +147,15 @@ namespace Iviz.Msgs.RclInterfaces
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ParameterValue>.Value
-                    : new ParameterValue[n];
-                for (int i = 0; i < n; i++)
+                ParameterValue[] array;
+                if (n == 0) array = EmptyArray<ParameterValue>.Value;
+                else
                 {
-                    array[i] = new ParameterValue(ref b);
+                    array = new ParameterValue[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ParameterValue(ref b);
+                    }
                 }
                 Values = array;
             }
@@ -167,12 +166,15 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ParameterValue>.Value
-                    : new ParameterValue[n];
-                for (int i = 0; i < n; i++)
+                ParameterValue[] array;
+                if (n == 0) array = EmptyArray<ParameterValue>.Value;
+                else
                 {
-                    array[i] = new ParameterValue(ref b);
+                    array = new ParameterValue[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ParameterValue(ref b);
+                    }
                 }
                 Values = array;
             }
@@ -203,12 +205,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Values is null) BuiltIns.ThrowNullReference(nameof(Values));
-            for (int i = 0; i < Values.Length; i++)
-            {
-                if (Values[i] is null) BuiltIns.ThrowNullReference(nameof(Values), i);
-                Values[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Values, nameof(Values));
         }
     
         public int RosMessageLength

@@ -93,7 +93,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info($"{this}: Disposing!");
+            RosLogger.Info($"{ToString()}: Disposing!");
             server.Dispose();
 
             // should return immediately, the waiting happened in server.Dispose()

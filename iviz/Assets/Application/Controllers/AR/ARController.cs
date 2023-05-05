@@ -263,13 +263,29 @@ namespace Iviz.Controllers
 
         protected static void RaiseARStateChanged()
         {
-            ARStateChanged?.Invoke(true);
-            ARCameraViewChanged?.Invoke(true);
+            try
+            {
+                ARStateChanged?.Invoke(true);
+                ARCameraViewChanged?.Invoke(true);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{nameof(ARController)}: " +
+                                $"Error during {nameof(RaiseARStateChanged)}", e);
+            }            
         }
 
         protected static void RaiseARCameraViewChanged(bool value)
         {
-            ARCameraViewChanged?.Invoke(value);
+            try
+            {
+                ARCameraViewChanged?.Invoke(value);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{nameof(ARController)}: " +
+                                $"Error during {nameof(RaiseARCameraViewChanged)}", e);
+            }            
         }
 
         void OnARJoystickChangedAngle(float dA)

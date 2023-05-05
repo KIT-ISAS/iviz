@@ -36,7 +36,7 @@ namespace Iviz.Ros
             requiresDispose = typeof(IDisposable).IsAssignableFrom(typeof(T));
         }
 
-        public void Add(IListener subscriber)
+        public void Add(Listener subscriber)
         {
             if (listeners.Contains(subscriber))
             {
@@ -46,7 +46,7 @@ namespace Iviz.Ros
             listeners = listeners.Append((Listener<T>)subscriber).ToArray();
         }
 
-        public void Remove(IListener subscriber)
+        public void Remove(Listener subscriber)
         {
             if (!listeners.Contains(subscriber))
             {
@@ -56,7 +56,7 @@ namespace Iviz.Ros
             listeners = listeners.Where(s => s != subscriber).ToArray();
         }
 
-        public async ValueTask SubscribeAsync(IRosClient? client, IListener? listener, CancellationToken token)
+        public async ValueTask SubscribeAsync(IRosClient? client, Listener? listener, CancellationToken token)
         {
             if (listener != null)
             {
@@ -70,7 +70,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            foreach (int t in ..NumRetries)
+            for (int i = 0; i < NumRetries; i++)
             {
                 try
                 {
@@ -86,7 +86,7 @@ namespace Iviz.Ros
                 }
                 catch (RoslibException e)
                 {
-                    RosLogger.Error($"{this}: Failed to subscribe to topic (try {t.ToString()}): ", e);
+                    RosLogger.Error($"{ToString()}: Failed to subscribe to topic (try {i.ToString()}): ", e);
                     await Task.Delay(WaitBetweenRetriesInMs, token);
                 }
             }
@@ -151,14 +151,7 @@ namespace Iviz.Ros
             var cache = listeners;
             foreach (var listener in cache)
             {
-                try
-                {
-                    listener.EnqueueMessage(msg, receiver);
-                }
-                catch (Exception e)
-                {
-                    RosLogger.Error($"{ToString()}: Error in {nameof(Handle)}", e);
-                }
+                listener.EnqueueMessage(msg, receiver);
             }
 
             if (requiresDispose)

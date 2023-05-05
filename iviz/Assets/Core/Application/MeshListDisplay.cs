@@ -22,12 +22,16 @@ namespace Iviz.Displays
         [SerializeField] Vector3 preTranslation;
         [SerializeField] Mesh? mesh;
 
-        readonly uint[] argsBuffer = { 0, 0, 0, 0, 0 };
-        ComputeBuffer? argsComputeBuffer;
-        ResourceKey<GameObject>? meshResource;
+        const int BufferIndexCount = 0;
+        const int BufferInstanceCount = 1;
+        const int BufferIndexStart = 2;
+        const int BufferBaseVertex = 3;
+        const int BufferSize = 6;
 
+        readonly uint[] argsBuffer = new uint[BufferSize];
         readonly NativeList<float4> pointBuffer = new();
 
+        ComputeBuffer? argsComputeBuffer;
         ComputeBuffer? pointComputeBuffer;
         bool useIntensityForScaleY;
         bool useIntensityForAllScales;
@@ -40,9 +44,9 @@ namespace Iviz.Displays
                 ThrowHelper.ThrowIfNull(value, nameof(value));
                 mesh = value;
 
-                argsBuffer[0] = mesh.GetIndexCount(0);
-                argsBuffer[2] = mesh.GetIndexStart(0);
-                argsBuffer[3] = mesh.GetBaseVertex(0);
+                argsBuffer[BufferIndexCount] = mesh.GetIndexCount(0);
+                argsBuffer[BufferIndexStart] = mesh.GetIndexStart(0);
+                argsBuffer[BufferBaseVertex] = mesh.GetBaseVertex(0);
             }
         }
 
@@ -58,7 +62,6 @@ namespace Iviz.Displays
                 var meshContainer = value.Object.AssertHasComponent<MeshMarkerDisplay>(nameof(value.Object));
 
                 Mesh = meshContainer.Mesh;
-                meshResource = value;
             }
         }
 
@@ -136,8 +139,7 @@ namespace Iviz.Displays
             ElementScale3 = Vector3.one;
             Colormap = ColormapId.gray;
 
-            argsComputeBuffer =
-                new ComputeBuffer(1, argsBuffer.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
+            argsComputeBuffer = new ComputeBuffer(1, BufferSize * sizeof(uint), ComputeBufferType.IndirectArguments);
             argsComputeBuffer.SetData(argsBuffer);
 
             OcclusionOnly = false;
@@ -156,9 +158,10 @@ namespace Iviz.Displays
             Properties.SetVector(ShaderIds.BoundaryCenterId, worldBounds.center);
 
             var material = FindMaterial();
+            var shadowCastingMode = EnableShadows && !OcclusionOnly ? ShadowCastingMode.On : ShadowCastingMode.Off;
 
-            Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer,
-                0, Properties, EnableShadows && !OcclusionOnly ? ShadowCastingMode.On : ShadowCastingMode.Off);
+            Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer, 0, Properties,
+                shadowCastingMode);
         }
 
         Material FindMaterial()
@@ -299,7 +302,7 @@ namespace Iviz.Displays
             bool isSinglePassStereo = XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
             int instanceCount = isSinglePassStereo ? 2 * Size : Size;
 
-            argsBuffer[1] = (uint)instanceCount;
+            argsBuffer[BufferInstanceCount] = (uint)instanceCount;
             argsComputeBuffer?.SetData(argsBuffer);
 
             Vector3 meshScale = ElementScale * ElementScale3;

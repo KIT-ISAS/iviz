@@ -22,9 +22,9 @@ namespace Iviz.App
         static Uri? localhostMaster;
         static Uri LocalhostMaster => localhostMaster ??= new Uri("http://127.0.0.1:11311/");
 
-        static Uri DefaultMasterUri => RosClient.TryGetMasterUri();
-        static Uri DefaultMyUri => RosClient.TryGetCallerUri(DefaultPort);
-        static string DefaultMyId => "iviz_" + UnityUtils.GetPlatformName();
+        public static Uri DefaultMasterUri => RosClient.TryGetMasterUri();
+        public static Uri DefaultMyUri => RosClient.TryGetCallerUri(DefaultPort);
+        public static string DefaultMyId => "iviz_" + UnityUtils.GetPlatformName();
 
         readonly ConnectionDialogPanel panel;
         readonly List<Uri> lastMasterUris = new();
@@ -279,7 +279,7 @@ namespace Iviz.App
             panel.DiscoveryServer.SetHints(LastDiscoveryServers.Select(
                 endpoint => endpoint?.Description() ?? noneStr));
 
-            if (!IRosProvider.IsRos2VersionSupported)
+            if (!RosProvider.IsRos2VersionSupported)
             {
                 RosVersion = RosVersion.ROS1;
                 panel.RosVersion1.Interactable = false;
@@ -400,7 +400,7 @@ namespace Iviz.App
 
             panel.RosVersion1.Clicked += () =>
             {
-                if (!IRosProvider.IsRos2VersionSupported)
+                if (!RosProvider.IsRos2VersionSupported)
                 {
                     RosLogger.Internal("<b>Error:</b> ROS2 is not supported on this platform.");
                     return;

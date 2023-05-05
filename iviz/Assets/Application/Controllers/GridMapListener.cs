@@ -183,7 +183,7 @@ namespace Iviz.Controllers
 
         public ReadOnlyCollection<string> FieldNames { get; }
 
-        public override IListener Listener { get; }
+        public override Listener Listener { get; }
 
         public GridMapListener(GridMapConfiguration? config, string topic)
         {
@@ -344,7 +344,7 @@ namespace Iviz.Controllers
             {
                 resource.Set((int)width, (int)height,
                     (float)info.LengthX, (float)info.LengthY,
-                    multiArray.Data.AsSpan().Slice(offset, (int)numElements));
+                    multiArray.Data.AsSpan(offset, (int)numElements));
             }
             else
             {

@@ -29,7 +29,7 @@ namespace Iviz.Msgs.ActionlibTutorials
                 if (n == 0) array = EmptyArray<int>.Value;
                 else
                 {
-                     array = new int[n];
+                    array = new int[n];
                     b.DeserializeStructArray(array);
                 }
                 Sequence = array;
@@ -45,7 +45,7 @@ namespace Iviz.Msgs.ActionlibTutorials
                 if (n == 0) array = EmptyArray<int>.Value;
                 else
                 {
-                     array = new int[n];
+                    array = new int[n];
                     b.DeserializeStructArray(array);
                 }
                 Sequence = array;
@@ -71,7 +71,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public void RosValidate()
         {
-            if (Sequence is null) BuiltIns.ThrowNullReference(nameof(Sequence));
+            BuiltIns.ThrowIfNull(Sequence, nameof(Sequence));
         }
     
         public int RosMessageLength

@@ -166,7 +166,7 @@ namespace Iviz.Displays
         {
             if (pointBuffer.Length == 0)
             {
-                return (0, 0);
+                return default;
             }
 
             float* output = stackalloc float[2];
@@ -182,7 +182,7 @@ namespace Iviz.Displays
         {
             if (pointBuffer.Length == 0)
             {
-                return (0, 0);
+                return default;
             }
 
             float* output = stackalloc float[2];
@@ -195,7 +195,7 @@ namespace Iviz.Displays
         {
             if (pointBuffer.Length == 0)
             {
-                return (0, 0);
+                return default;
             }
 
             ushort* output = stackalloc ushort[2];
@@ -208,7 +208,7 @@ namespace Iviz.Displays
         {
             if (pointBuffer.Length == 0)
             {
-                return (0, 0);
+                return default;
             }
 
             byte* output = stackalloc byte[2];

@@ -12,7 +12,7 @@ public class RoslibException : RosException
     {
     }
 
-    public RoslibException(string message, Exception innerException) : base(message, innerException)
+    public RoslibException(string message, Exception? innerException) : base(message, innerException)
     {
     }
 }

@@ -4,11 +4,12 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace Iviz.Core
 {
-    public sealed class NativeList<T> : IDisposable where T : unmanaged
+    public sealed unsafe class NativeList<T> : IDisposable where T : unmanaged
     {
         static NativeArray<T> emptyArray;
 
@@ -17,14 +18,20 @@ namespace Iviz.Core
             : (emptyArray = new NativeArray<T>(0, Allocator.Persistent));
 
         NativeArray<T> array;
+        T* unsafePtr;
+        
         int length;
+        int capacity;
+        
         bool disposed;
 
-        public int Capacity => array.Length;
-
+        public int Length => length;
+        public int Capacity => capacity;
+        public T* GetUnsafePtr() => unsafePtr;
+        
         public void EnsureCapacity(int value)
         {
-            if (value <= Capacity)
+            if (value <= capacity)
             {
                 return;
             }
@@ -34,7 +41,7 @@ namespace Iviz.Core
                 ThrowHelper.ThrowArgumentOutOfRange(nameof(value));
             }
 
-            int newCapacity = Mathf.Max(Capacity, 16);
+            int newCapacity = Mathf.Max(capacity, 16);
             while (newCapacity < value)
             {
                 newCapacity *= 2;
@@ -44,51 +51,53 @@ namespace Iviz.Core
                 new NativeArray<T>(newCapacity, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
             if (array.Length != 0)
             {
-                NativeArray<T>.Copy(array, newArray, length);
+                NativeArray<T>.Copy(array, 0, newArray, 0, length);
                 array.Dispose();
             }
 
             array = newArray;
+            capacity = newCapacity;
+            unsafePtr = array.GetUnsafePtr();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(in T t)
         {
             int nextLength = length + 1;
-            EnsureCapacity(nextLength);
-            SetUnsafe(length, t);
+            if (nextLength >= capacity)
+            {
+                EnsureCapacity(nextLength);
+            }
+
+            unsafePtr[length] = t;
             length = nextLength;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddUnsafe(in T t)
         {
-            SetUnsafe(length++, t);
+            unsafePtr[length++] = t;
         }
-
-        unsafe void SetUnsafe(int index, in T t)
-        {
-            array.GetUnsafePtr()[index] = t;
-        } 
 
         public void AddRange(ReadOnlySpan<T> otherArray)
         {
-            if (otherArray.Length == 0)
+            int otherLength = otherArray.Length;
+            if (otherLength == 0)
             {
                 return;
             }
 
-            EnsureCapacity(length + otherArray.Length);
-            otherArray.CopyTo(array.AsSpan(length, otherArray.Length));
-            length += otherArray.Length;
+            EnsureCapacity(length + otherLength);
+
+            var destination = new Span<T>(unsafePtr + length, otherLength);
+            otherArray.CopyTo(destination);
+            
+            length += otherLength;
         }
 
-        public NativeArray<T> AsArray() => length == 0 ? EmptyArray : array.GetSubArray(0, length);
+        public NativeArray<T> AsArray() => length == 0 ? EmptyArray : array.GetSubArray(0, length); 
 
-        public int Length => length;
-
-        public unsafe Span<T> AsSpan() => new(array.GetUnsafePtr(), length);
-
-        unsafe ReadOnlySpan<T> AsReadOnlySpan() => new(array.GetUnsafePtr(), length);
+        ReadOnlySpan<T> AsReadOnlySpan() => new(unsafePtr, length);
 
         public void Clear()
         {
@@ -98,14 +107,17 @@ namespace Iviz.Core
         public void Reset()
         {
             length = 0;
-            
-            if (Capacity <= 16)
+
+            if (capacity <= 16)
             {
                 return;
             }
 
             array.Dispose();
+            
             array = new NativeArray<T>(16, Allocator.Persistent);
+            capacity = 16;
+            unsafePtr = array.GetUnsafePtr();
         }
 
         public void Dispose()
@@ -116,6 +128,9 @@ namespace Iviz.Core
             }
 
             disposed = true;
+            unsafePtr = null;
+            capacity = 0;
+
             if (array.Length != 0)
             {
                 array.Dispose();
@@ -127,12 +142,6 @@ namespace Iviz.Core
         ~NativeList()
         {
             Dispose();
-        }
-
-        public void Resize(int newSize)
-        {
-            EnsureCapacity(newSize);
-            length = newSize;
         }
 
         public static implicit operator ReadOnlySpan<T>(NativeList<T> list) => list.AsReadOnlySpan();
