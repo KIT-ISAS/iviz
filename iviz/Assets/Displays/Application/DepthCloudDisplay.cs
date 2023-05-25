@@ -269,9 +269,9 @@ namespace Iviz.Displays
             float invWidth = 1.0f / width;
             float invHeight = 1.0f / height;
             int off = 0;
-            foreach (int v in ..height)
+            for (int v = 0; v < height; v++)
             {
-                foreach (int u in ..width)
+                for (int u = 0; u < width; u++)
                 {
                     uvs[off++] = new Vector2((u + 0.5f) * invWidth, (v + 0.5f) * invHeight);
                 }

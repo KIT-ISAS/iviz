@@ -22,7 +22,7 @@ namespace Iviz.App
         public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.TF;
         public override IConfiguration Configuration => listener.Config;
-        public override IController Controller => listener;
+        public override Controller Controller => listener;
 
         public TfModuleData(ModuleDataConstructor constructor)
         {

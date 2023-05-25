@@ -18,14 +18,20 @@ using Pose = UnityEngine.Pose;
 
 namespace Iviz.Controllers
 {
-    public sealed class TfListener : IController, IHasFrame
+    public sealed class TfListener : Controller, IHasFrame
     {
         const int MaxQueueSize = 10000;
 
         readonly TfConfiguration config = new();
 
-        readonly Channel<(TransformStamped[] frame, bool isStatic)> incomingMessages;
-        readonly Channel<TransformStamped> outgoingMessages;
+        //readonly Channel<(TransformStamped[] frame, bool isStatic)> incomingMessages;
+        readonly ChannelReader<(TransformStamped[] frame, bool isStatic)> incomingReader;
+        readonly ChannelWriter<(TransformStamped[] frame, bool isStatic)> incomingWriter;
+
+        //readonly Channel<TransformStamped> outgoingMessages;
+        readonly ChannelReader<TransformStamped> outgoingReader;
+        readonly ChannelWriter<TransformStamped> outgoingWriter;
+        
         uint tfSeq;
 
         static TfListener? instance;
@@ -47,7 +53,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool Visible
+        public override bool Visible
         {
             get => config.Visible;
             set
@@ -164,35 +170,41 @@ namespace Iviz.Controllers
 
             var incomingOptions = new BoundedChannelOptions(MaxQueueSize)
                 { SingleReader = true, FullMode = BoundedChannelFullMode.DropOldest };
-            incomingMessages = Channel.CreateBounded<(TransformStamped[], bool)>(incomingOptions);
-            outgoingMessages = Channel.CreateBounded<TransformStamped>(incomingOptions);
+            
+            var incomingMessages = Channel.CreateBounded<(TransformStamped[], bool)>(incomingOptions);
+            incomingReader = incomingMessages.Reader;
+            incomingWriter = incomingMessages.Writer;
+            
+            var outgoingMessages = Channel.CreateBounded<TransformStamped>(incomingOptions);
+            outgoingReader = outgoingMessages.Reader;
+            outgoingWriter = outgoingMessages.Writer;
+
         }
 
         void ProcessMessages()
         {
-            var reader = incomingMessages.Reader;
-            while (reader.TryRead(out var value))
+            var tf = Tf;
+            while (incomingReader.TryRead(out var value))
             {
                 var (transforms, isStatic) = value;
                 foreach (var transform in transforms)
                 {
-                    Tf.Process(transform, isStatic);
+                    tf.Process(transform, isStatic);
                 }
             }
         }
 
         bool HandleNonStatic(TFMessage msg, IRosConnection? _)
         {
-            return incomingMessages.Writer.TryWrite((msg.Transforms, false));
+            return incomingWriter.TryWrite((msg.Transforms, false));
         }
 
         bool HandleStatic(TFMessage msg, IRosConnection? _)
         {
-            return incomingMessages.Writer.TryWrite((msg.Transforms, true));
+            return incomingWriter.TryWrite((msg.Transforms, true));
         }
-
-
-        public void ResetController()
+        
+        public override void ResetController()
         {
             Tf.Reset();
             ListenerStatic.Reset();
@@ -240,13 +252,12 @@ namespace Iviz.Controllers
             t.Header.FrameId = parentFrameId;
             t.ChildFrameId = TfModule.ResolveFrameId(childFrameId);
             localPose.Unity2Ros(out t.Transform);
-            outgoingMessages.Writer.TryWrite(t);
+            outgoingWriter.TryWrite(t);
         }
 
         void DoPublish()
         {
-            var reader = outgoingMessages.Reader;
-            int count = reader.Count;
+            int count = outgoingReader.Count;
             if (count == 0)
             {
                 return;
@@ -255,7 +266,7 @@ namespace Iviz.Controllers
             var transforms = new TransformStamped[count];
             for (int i = 0; i < count; i++)
             {
-                transforms[i] = reader.TryRead(out var transform)
+                transforms[i] = outgoingReader.TryRead(out var transform)
                     ? transform
                     : new TransformStamped(); // shouldn't happen, single reader!
             }
@@ -266,7 +277,7 @@ namespace Iviz.Controllers
             }
             else
             {
-                incomingMessages.Writer.TryWrite((transforms, false));
+                incomingWriter.TryWrite((transforms, false));
             }
         }
 

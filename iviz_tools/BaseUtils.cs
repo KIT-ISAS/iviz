@@ -21,12 +21,13 @@ public static class BaseUtils
         if (check is null) ThrowArgumentNull(nameof(check));
         if (prefix is null) ThrowArgumentNull(nameof(prefix));
 
-        if (check.Length < prefix.Length)
+        int prefixLength = prefix.Length;
+        if (check.Length < prefixLength)
         {
             return false;
         }
 
-        for (int i = 0; i < prefix.Length; i++)
+        for (int i = 0; i < prefixLength; i++)
         {
             if (check[i] != prefix[i])
             {
@@ -42,13 +43,16 @@ public static class BaseUtils
         if (check is null) ThrowArgumentNull(nameof(check));
         if (suffix is null) ThrowArgumentNull(nameof(suffix));
 
-        if (check.Length < suffix.Length)
+        int suffixLength = suffix.Length;
+        int checkLength = check.Length;
+        
+        if (checkLength < suffixLength)
         {
             return false;
         }
 
-        int offset = check.Length - suffix.Length;
-        for (int i = 0; i < suffix.Length; i++)
+        int offset = checkLength - suffixLength;
+        for (int i = 0; i < suffixLength; i++)
         {
             if (check[offset + i] != suffix[i])
             {
@@ -80,15 +84,17 @@ public static class BaseUtils
     /// <returns>A hash integer</returns>
     public static int GetDeterministicHashCode(this string str)
     {
+        // stolen from https://andrewlock.net/why-is-string-gethashcode-different-each-time-i-run-my-program-in-net-core/
         unchecked
         {
             int hash1 = (5381 << 16) + 5381;
             int hash2 = hash1;
 
-            for (int i = 0; i < str.Length; i += 2)
+            int strLength = str.Length;
+            for (int i = 0; i < strLength; i += 2)
             {
                 hash1 = ((hash1 << 5) + hash1) ^ str[i];
-                if (i == str.Length - 1)
+                if (i == strLength - 1)
                 {
                     break;
                 }

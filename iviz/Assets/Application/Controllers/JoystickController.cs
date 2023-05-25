@@ -12,8 +12,11 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
-    public sealed class JoystickController : IController
+    public sealed class JoystickController : Controller
     {
+        const string DefaultJoyTopic = "~joy";
+        const string DefaultTwistTopic = "~twist";
+
         readonly JoystickConfiguration config = new();
         readonly TwistJoystick joystick;
 
@@ -22,6 +25,7 @@ namespace Iviz.Controllers
 
         public Sender<Joy>? SenderJoy { get; private set; }
         public Sender? SenderTwist { get; private set; }
+
 
         public JoystickController(TwistJoystick joystick)
         {
@@ -53,7 +57,7 @@ namespace Iviz.Controllers
             get => config.JoyTopic;
             set
             {
-                config.JoyTopic = string.IsNullOrWhiteSpace(value) ? "~joy" : value.Trim();
+                config.JoyTopic = string.IsNullOrWhiteSpace(value) ? DefaultJoyTopic : value.Trim();
                 RebuildSenders();
             }
         }
@@ -73,12 +77,12 @@ namespace Iviz.Controllers
             get => config.TwistTopic;
             set
             {
-                config.TwistTopic = string.IsNullOrWhiteSpace(value) ? "~twist" : value.Trim();
+                config.TwistTopic = string.IsNullOrWhiteSpace(value) ? DefaultTwistTopic : value.Trim();
                 RebuildTwist();
             }
         }
 
-        public bool Visible
+        public override bool Visible
         {
             get => config.Visible;
             set
@@ -168,7 +172,7 @@ namespace Iviz.Controllers
             Visible = false;
         }
 
-        public void ResetController()
+        public override void ResetController()
         {
         }
 
@@ -217,13 +221,14 @@ namespace Iviz.Controllers
             {
                 var (linearX, linearY) = XIsFront ? (leftY, -leftX) : (leftX, leftY);
                 var twist = new Twist(
-                    (linearX * MaxSpeed.x, linearY * MaxSpeed.y, 0),
-                    (0, 0, -rightX * MaxSpeed.z)
+                    new Msgs.GeometryMsgs.Vector3(linearX * MaxSpeed.x, linearY * MaxSpeed.y, 0),
+                    new Msgs.GeometryMsgs.Vector3(0, 0, -rightX * MaxSpeed.z)
                 );
 
                 if (UseTwistStamped)
                 {
-                    SenderTwist.Publish(
+                    var sender = (Sender<TwistStamped>)SenderTwist;
+                    sender.Publish(
                         new TwistStamped(
                             TfListener.CreateHeader(twistSeq++, frameId),
                             twist
@@ -231,7 +236,8 @@ namespace Iviz.Controllers
                 }
                 else
                 {
-                    ((Sender<Twist>)SenderTwist).Publish(twist);
+                    var sender = (Sender<Twist>)SenderTwist;
+                    sender.Publish(twist);
                 }
             }
 

@@ -291,7 +291,6 @@ namespace Iviz.Controllers
 
         public override void ResetController()
         {
-            base.ResetController();
             DestroyAllMarkers();
             FullListener?.Reset();
             Publisher?.Reset();

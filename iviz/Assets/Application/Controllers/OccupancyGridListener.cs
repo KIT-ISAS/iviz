@@ -306,7 +306,7 @@ namespace Iviz.Controllers
             if (gridTiles.Length != 16)
             {
                 gridTiles = new OccupancyGridDisplay[16];
-                foreach (int j in ..16)
+                for (int j = 0; j < 16; j++)
                 {
                     var resource = ResourcePool.Rent<OccupancyGridDisplay>(
                         Resource.Displays.OccupancyGridDisplay,
@@ -366,7 +366,7 @@ namespace Iviz.Controllers
             {
                 if (tileTotalSize > textureTiles.Count)
                 {
-                    foreach (int j in textureTiles.Count..tileTotalSize)
+                    for (int j = textureTiles.Count; j < tileTotalSize; j++)
                     {
                         var resource = ResourcePool.RentDisplay<OccupancyGridTextureDisplay>(textureNode.Transform);
                         resource.gameObject.name = $"OccupancyGridTextureResource-{j.ToString()}";

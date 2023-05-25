@@ -283,7 +283,7 @@ namespace Iviz.Displays
             }
             else if (horizontals.Count < size)
             {
-                foreach (int _ in horizontals.Count..size)
+                for (int i = horizontals.Count; i < size; i++)
                 {
                     var hResource = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Square, transform);
                     hResource.Transform.localRotation = Quaternions.Rotate270AroundX;

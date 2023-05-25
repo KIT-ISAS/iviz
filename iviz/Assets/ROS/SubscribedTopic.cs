@@ -146,17 +146,17 @@ namespace Iviz.Ros
             Subscriber = null;
         }
 
-        public override void Handle(T msg, IRosConnection receiver)
+        public override void Handle(T msg, MessageInfo messageInfo)
         {
             var cache = listeners;
             foreach (var listener in cache)
             {
-                listener.EnqueueMessage(msg, receiver);
+                listener.EnqueueMessage(msg, messageInfo);
             }
 
             if (requiresDispose)
             {
-                ((IDisposable)msg).Dispose();
+                RosUtils.Dispose(msg);
             }
         }
 

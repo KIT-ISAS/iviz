@@ -101,7 +101,7 @@ internal sealed class SenderManager<TMessage> : LatchedMessageProvider<TMessage>
                     break;
                 }
 
-                if (client.Client.RemoteEndPoint == null || client.Client.LocalEndPoint == null)
+                if (client.Client is not { RemoteEndPoint: IPEndPoint, LocalEndPoint: IPEndPoint })
                 {
                     Logger.LogFormat("{0}: Received a request, but failed to initialize connection.", this);
                     continue;

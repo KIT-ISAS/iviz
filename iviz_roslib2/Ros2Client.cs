@@ -121,7 +121,7 @@ public sealed class Ros2Client : IRosClient
         RosTransportHint transportHint = RosTransportHint.PreferTcp)
         where T : IMessage, new()
     {
-        return Subscribe(topic, new DirectRosCallback<T>(callback), out subscriber, transportHint);
+        return Subscribe(topic, new ActionRosCallback<T>(callback), out subscriber, transportHint);
     }
 
     public ValueTask<(string id, Ros2Subscriber<T> subscriber)>
@@ -130,7 +130,7 @@ public sealed class Ros2Client : IRosClient
             CancellationToken token = default)
         where T : IMessage, new()
     {
-        return SubscribeAsync(topic, new DirectRosCallback<T>(callback), transportHint, token);
+        return SubscribeAsync(topic, new ActionRosCallback<T>(callback), transportHint, token);
     }
 
     public ValueTask<(string id, Ros2Subscriber<T> subscriber)>

@@ -53,7 +53,7 @@ public sealed class RosbagFileReader : IDisposable
         Span<byte> renter = stackalloc byte[RosbagMagicLength];
         reader.ReadAll(renter);
 
-        foreach (int i in ..RosbagMagicLength)
+        for (int i = 0; i < RosbagMagicLength; i++)
         {
             if (renter[i] != RosbagMagic[i])
             {
@@ -86,7 +86,7 @@ public sealed class RosbagFileReader : IDisposable
     {
         foreach (var record in Records)
         {
-            if (record.OpCode == OpCode.Chunk && record.ChunkRecords is { } chunkRecords)
+            if (record is { OpCode: OpCode.Chunk, ChunkRecords: { } chunkRecords })
             {
                 foreach (var chunkRecord in chunkRecords)
                 {

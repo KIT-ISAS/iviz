@@ -358,7 +358,6 @@ namespace Iviz.Controllers
 
         public override void ResetController()
         {
-            base.ResetController();
             resource.Reset();
         }
 

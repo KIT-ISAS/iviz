@@ -29,6 +29,8 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
     readonly Task task;
     readonly int connectionTimeoutInMs;
 
+    readonly MessageInfo cachedInfo;
+
     int receiveBufferSize = 8192;
 
     TopicInfo topicInfo;
@@ -67,6 +69,7 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
         this.manager = manager;
         this.requestNoDelay = requestNoDelay;
         connectionTimeoutInMs = timeoutInMs;
+        cachedInfo = new MessageInfo(this);
         Status = ReceiverStatus.ConnectingTcp;
         task = TaskUtils.Run(async () => await StartSession().AwaitNoThrow(this), runningTs.Token);
     }
@@ -86,80 +89,73 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
     async ValueTask StartSession()
     {
-        bool shouldRetry = false;
-
         var newTcpClient = await StartTcpConnection();
-        if (newTcpClient != null)
+        
+        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+        if (newTcpClient?.Client?.LocalEndPoint is not IPEndPoint ipEndpoint)
         {
-            Logger.LogDebugFormat("{0}: Connected!", this);
-            var ipEndpoint = (IPEndPoint)newTcpClient.Client.LocalEndPoint!;
-            Endpoint = new Endpoint(ipEndpoint);
-            TcpClient = newTcpClient;
-
-            try
+            string errorMessage;
+            if (newTcpClient == null)
             {
-                await ProcessLoop(newTcpClient);
-                shouldRetry = true;
+                errorMessage = "Could not connect to the TCP listener";
             }
-            catch (Exception e)
+            else if (newTcpClient.Client == null)
             {
-                switch (e)
-                {
-                    case ObjectDisposedException:
-                    case OperationCanceledException:
-                        break;
-                    case IOException:
-                    case SocketException:
-                    case TimeoutException:
-                        ErrorDescription = new ErrorMessage(e);
-                        Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, e);
-                        shouldRetry = true;
-                        break;
-                    case RoslibException:
-                        ErrorDescription = new ErrorMessage(e);
-                        Logger.LogErrorFormat(BaseUtils.GenericExceptionFormat, this, e);
-                        break;
-                    default:
-                        Logger.LogFormat(BaseUtils.GenericExceptionFormat, this, e);
-                        break;
-                }
+                errorMessage = "Socket closed before handshake started";
             }
-        }
-        else
-        {
-            Logger.LogDebugFormat("{0}: Connection to the TCP listener failed!", this);
-            ErrorDescription = new ErrorMessage("Could not connect to the TCP listener");
-            shouldRetry = true;
-        }
+            else if (newTcpClient.Client.LocalEndPoint is not IPEndPoint)
+            {
+                errorMessage = "TcpClient did not provide a local IP address for connection";
+            }
+            else
+            {
+                errorMessage = "Connection failed! Unknown error";
+            }
 
-        Status = ReceiverStatus.Dead;
-        TcpClient?.Dispose();
-        TcpClient = null;
+            ErrorDescription = new ErrorMessage(errorMessage);
+            Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, errorMessage);
 
-        Logger.LogDebugFormat("{0}: Stopped!", this);
-
-        if (runningTs.IsCancellationRequested)
-        {
+            await Cleanup(true);
             return;
         }
 
-        if (!shouldRetry)
-        {
-            runningTs.Cancel();
-            return;
-        }
-
+        bool shouldRetry;
+        
         try
         {
-            await Task.Delay(2000, runningTs.Token);
-            _ = manager.RetryConnectionAsync(RemoteUri);
+            await ProcessSession(newTcpClient, ipEndpoint);
+            shouldRetry = true;
         }
-        finally
+        catch (Exception e)
         {
-            runningTs.Cancel();
+            switch (e)
+            {
+                case ObjectDisposedException:
+                case OperationCanceledException:
+                    shouldRetry = false;
+                    break;
+                case IOException:
+                case SocketException:
+                case TimeoutException:
+                    ErrorDescription = new ErrorMessage(e);
+                    Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, e);
+                    shouldRetry = true;
+                    break;
+                case RoslibException:
+                    ErrorDescription = new ErrorMessage(e);
+                    Logger.LogErrorFormat(BaseUtils.GenericExceptionFormat, this, e);
+                    shouldRetry = false;
+                    break;
+                default:
+                    Logger.LogFormat(BaseUtils.GenericExceptionFormat, this, e);
+                    shouldRetry = false;
+                    break;
+            }
         }
-    }
 
+        await Cleanup(shouldRetry);
+    }
+    
     async ValueTask<TcpClient?> StartTcpConnection()
     {
         Logger.LogDebugFormat("{0}: Trying to connect!", this);
@@ -197,7 +193,17 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
         return null;
     }
 
-
+    async ValueTask ProcessSession(TcpClient client, IPEndPoint ipEndpoint)
+    {
+        Logger.LogDebugFormat("{0}: Connected!", this);
+        Endpoint = new Endpoint(ipEndpoint);
+        TcpClient = client;
+        
+        await ProcessHandshake(client);
+        Status = ReceiverStatus.Running;
+        await ProcessMessages(client);
+    }
+    
     ValueTask SendHeader(TcpClient client)
     {
         string[] contents =
@@ -238,7 +244,7 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
             throw new RosHandshakeException($"Partner sent error message: [{message}]");
         }
 
-        string[] rosHeader = responseHeader.ToArray(); 
+        string[] rosHeader = responseHeader.ToArray();
         RosHeader = rosHeader;
 
         if (DynamicMessage.IsGeneric(typeof(TMessage)))
@@ -287,12 +293,14 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
                 }
             }
 
+            cachedInfo.MessageSize = rcvLength;
+
             var callbacks = manager.callbacks;
             foreach (var callback in callbacks)
             {
                 try
                 {
-                    callback.Handle(message, this);
+                    callback.Handle(message, cachedInfo);
                 }
                 catch (Exception e)
                 {
@@ -302,13 +310,6 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
             CheckBufferSize(client, rcvLength, ref receiveBufferSize);
         }
-    }
-
-    async ValueTask ProcessLoop(TcpClient client)
-    {
-        await ProcessHandshake(client);
-        Status = ReceiverStatus.Running;
-        await ProcessMessages(client);
     }
 
     internal override void Post(TMessage message, int rcvLength)
@@ -323,18 +324,50 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
         if (isPaused) return;
 
+        cachedInfo.MessageSize = rcvLength;
+
         var callbacks = manager.callbacks;
         foreach (var callback in callbacks)
         {
             try
             {
-                callback.Handle(message, this);
+                callback.Handle(message, cachedInfo);
             }
             catch (Exception e)
             {
                 Logger.LogErrorFormat("{0}: Exception from " + nameof(Post) + ": {1}", this, e);
             }
         }
+    }
+    
+    async ValueTask Cleanup(bool shouldRetry)
+    {
+        Status = ReceiverStatus.Dead;
+        TcpClient?.Dispose();
+        TcpClient = null;
+
+        Logger.LogDebugFormat("{0}: Stopped!", this);
+
+        if (runningTs.IsCancellationRequested)
+        {
+            return;
+        }
+
+        if (!shouldRetry)
+        {
+            runningTs.Cancel();
+            return;
+        }
+
+        try
+        {
+            await Task.Delay(2000, runningTs.Token);
+            _ = manager.RetryConnectionAsync(RemoteUri);
+        }
+        finally
+        {
+            runningTs.Cancel();
+        }        
     }
 
     public async ValueTask DisposeAsync(CancellationToken token)

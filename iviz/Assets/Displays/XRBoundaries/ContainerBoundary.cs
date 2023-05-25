@@ -1,6 +1,5 @@
 #nullable enable
 
-using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays.Helpers;
 using Iviz.Msgs.SensorMsgs;
@@ -8,41 +7,46 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public sealed class ContainerBoundary : MonoBehaviour, IDisplay, IRecyclable
+    public sealed class ContainerBoundary
     {
-        SimpleBoundary? boundary;
+        readonly SimpleBoundary boundary;
         PointCloudProcessor? pointCloud;
-        Transform? mTransform;
 
-        Transform Transform => this.EnsureHasTransform(ref mTransform);
-        SimpleBoundary Boundary => ResourcePool.RentChecked(ref boundary, Transform);
-
+        public Transform Transform { get; }
+        
         public Vector3 Scale
         {
             set
             {
-                Boundary.Scale = value;
-                Boundary.Visible = !value.ApproximatelyZero();
+                boundary.Scale = value;
+                boundary.Visible = !value.ApproximatelyZero();
             }
         }
 
         public Pose Pose
         {
-            set => Boundary.Transform.SetLocalPose(value);
+            set => boundary.Transform.SetLocalPose(value);
         }
 
-
-        void HandlePointCloud(PointCloud2 msg)
+        public ContainerBoundary()
         {
-            pointCloud ??= new PointCloudProcessor();
+            Transform = new GameObject("Detection Node").transform;
+            boundary = ResourcePool.RentDisplay<SimpleBoundary>(Transform);
+        }
+
+        public void HandlePointCloud(PointCloud2 msg)
+        {
+            pointCloud ??= new PointCloudProcessor(Transform);
+
+            if (msg.Header.FrameId.Length == 0)
+            {
+                msg.Header = default; // sets header.FrameId to null
+            }
+
             pointCloud.Handle(msg);
         }
 
-        public void Suspend()
-        {
-        }
-        
-        public void SplitForRecycle()
+        public void Dispose()
         {
             pointCloud?.Dispose();
         }

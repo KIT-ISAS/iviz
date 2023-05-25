@@ -16,7 +16,7 @@ namespace Iviz.Resources
         /// <summary>
         /// Returns or loads a resource of this type.  
         /// </summary>
-        public T Object { get; }
+        public readonly T Object;
 
         /// <summary>
         /// Returns the instance id of the resource.
@@ -26,7 +26,7 @@ namespace Iviz.Resources
         /// <summary>
         /// Name of this resource.
         /// </summary>
-        public string Name { get; }
+        public readonly string Name;
 
         /// <summary>
         /// Constructs a unique identifier from an existing instance

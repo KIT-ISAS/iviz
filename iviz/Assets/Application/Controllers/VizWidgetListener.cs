@@ -116,19 +116,18 @@ namespace Iviz.Controllers
             FeedbackSender = new Sender<Feedback>($"{config.Topic}/feedback");
             
             
-            
+            // -----
             const int maxQueueSize = 50;
 
-            (VizHandler, Listener<T>) Create<T>(IHandles<T> handler) where T : IMessage, new() =>
+            (VizHandler, Listener<T>) Create<T>(IHandles<T> handler) where T : class, IMessage, new() =>
                 ((VizHandler)handler, new(configTopic, handler.Handle, maxQueueSize));
 
-            (VizHandler, Listener<T>) CreateForArray<T>(IHandlesArray<T> handler) where T : IMessage, new() =>
+            (VizHandler, Listener<T>) CreateForArray<T>(IHandlesArray<T> handler) where T : class, IMessage, new() =>
                 ((VizHandler)handler, new(configTopic, handler.Handle, maxQueueSize));
         }
 
         public override void ResetController()
         {
-            base.ResetController();
             vizHandler.RemoveAll();
         }
 

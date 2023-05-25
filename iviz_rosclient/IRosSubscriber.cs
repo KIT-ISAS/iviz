@@ -72,7 +72,7 @@ public interface IRosSubscriber : IDisposable
     /// <param name="callback">The function to call when a message arrives.</param>
     /// <returns>The subscribed id.</returns>
     /// <exception cref="ArgumentNullException">The callback is null.</exception>
-    public string Subscribe(Action<IMessage, IRosConnection> callback);
+    public string Subscribe(Action<IMessage, MessageInfo> callback);
  
     /// <summary>
     /// Unregisters the given id from the subscriber. If the subscriber has no ids left, the topic will be unsubscribed from the master.

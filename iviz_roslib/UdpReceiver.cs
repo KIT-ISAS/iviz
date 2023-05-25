@@ -22,6 +22,7 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
     readonly CancellationTokenSource runningTs = new();
     readonly Task task;
     readonly ReceiverManager<TMessage> manager;
+    readonly MessageInfo cachedInfo;
 
     long numReceived;
     long numDropped;
@@ -57,6 +58,8 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
         TopicInfo topicInfo)
     {
         this.manager = manager;
+
+        cachedInfo = new MessageInfo(this);
 
         var (remoteHostname, remotePort, _, newMaxPacketSize, header) = response;
 
@@ -334,8 +337,8 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
                 deserializer.RosDeserialize(ref b, out message);
             }
         }
-
-        MessageCallback(message);
+        
+        MessageCallback(message, rcvLength);
 
         CheckBufferSize(rcvLength);
     }
@@ -369,18 +372,19 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
         if (!isPaused)
         {
-            MessageCallback(message);
+            MessageCallback(message, rcvLength);
         }
     }
     
-    void MessageCallback(TMessage message)
+    void MessageCallback(TMessage message, int rcvLength)
     {
+        cachedInfo.MessageSize = rcvLength;
         var callbacks = manager.callbacks;
         foreach (var callback in callbacks)
         {
             try
             {
-                callback.Handle(message, this);
+                callback.Handle(message, cachedInfo);
             }
             catch (Exception e)
             {

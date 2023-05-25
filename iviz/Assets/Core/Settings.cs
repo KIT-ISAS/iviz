@@ -21,8 +21,10 @@ namespace Iviz.Core
         public const bool IsMobile = true;
 #elif UNITY_WSA || UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
         public static bool IsMobile => IsHololens;
+#elif UNITY_EDITOR
+        public static bool IsMobile => false; // don't set as constant, need for debugging
 #else
-        public static bool IsMobile => false; // not a constant!
+        public const bool IsMobile = false;
 #endif
 
 
@@ -38,7 +40,7 @@ namespace Iviz.Core
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
         public const bool IsPhone = true;
 #else
-        public static bool IsPhone => false;
+        public const bool IsPhone = false;
 #endif
 
         public const bool IsIPhone =
@@ -208,7 +210,11 @@ namespace Iviz.Core
         {
             get
             {
+#if UNITY_EDITOR
                 if (mainCamera != null)
+#else
+                if (mainCamera is not null)
+#endif
                 {
                     return mainCamera;
                 }
@@ -229,9 +235,13 @@ namespace Iviz.Core
         /// Cached transform of the main camera. May refer to different objects depending on the view.
         /// </summary>
         public static Transform MainCameraTransform =>
+#if UNITY_EDITOR
             mainCameraTransform != null
                 ? mainCameraTransform
                 : (mainCameraTransform = MainCamera.transform);
+#else
+            mainCameraTransform ??= MainCamera.transform;
+#endif
 
         /// <summary>
         /// Cached absolute pose of <see cref="MainCameraTransform"/>. Updated each frame.

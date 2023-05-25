@@ -141,7 +141,7 @@ namespace Iviz.Controllers
 
             public virtual void Dispose()
             {
-                if (disposed) throw new ObjectDisposedException(ToString());
+                if (disposed) return;
                 disposed = true;
                 
                 Interactable = true;

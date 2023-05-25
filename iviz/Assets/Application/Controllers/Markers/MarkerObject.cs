@@ -68,7 +68,7 @@ namespace Iviz.Controllers
 
         public Transform Transform => node.Transform;
         Bounds? IHasBounds.Bounds => resource?.Bounds;
-        Transform? IHasBounds.BoundsTransform => resource?.GetTransform();
+        Transform? IHasBounds.BoundsTransform => ((Component?)resource)?.transform;
         bool IHasBounds.AcceptsHighlighter => !ShowDescription;
         string IHasBounds.Caption => node.Name;
 

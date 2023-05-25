@@ -8,7 +8,7 @@ using Iviz.Core.Configurations;
 namespace Iviz.App
 {
     /// <summary>
-    /// Manager for all stuff related to a module: the <see cref="IController"/>,
+    /// Manager for all stuff related to a module: the <see cref="Common.Controller"/>,
     /// the <see cref="IConfiguration"/>, the <see cref="ModulePanel"/>,
     /// and the button in <see cref="ModuleListPanel"/>.
     /// </summary>
@@ -17,7 +17,7 @@ namespace Iviz.App
         string moduleListButtonText = "";
         
         public abstract ModuleType ModuleType { get; }
-        public abstract IController Controller { get; }
+        public abstract Controller Controller { get; }
         public abstract IConfiguration Configuration { get; }
 
         public string ModuleListButtonText

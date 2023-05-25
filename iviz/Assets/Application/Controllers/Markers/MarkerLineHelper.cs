@@ -55,8 +55,9 @@ namespace Iviz.Controllers.Markers
         bool? ProcessLineStripSingleColor(NativeList<float4x2> lineBuffer)
         {
             var mPoints = points;
-
-            if (mPoints.Length == 0)
+            int mPointsLength = mPoints.Length;
+            
+            if (mPointsLength == 0)
             {
                 return color32.a < 255;
             }
@@ -67,12 +68,12 @@ namespace Iviz.Controllers.Markers
 
             float colorAsFloat = UnityUtils.AsFloat(color32);
 
-            lineBuffer.EnsureCapacity(mPoints.Length - 1);
+            lineBuffer.EnsureCapacity(mPointsLength - 1);
             lineBuffer.Clear();
 
             mPoints[0].Ros2Unity(colorAsFloat, out c1);
 
-            for (int i = 1; i < mPoints.Length; i++)
+            for (int i = 1; i < mPointsLength; i++)
             {
                 c0 = c1;
                 mPoints[i].Ros2Unity(colorAsFloat, out c1);
@@ -89,8 +90,9 @@ namespace Iviz.Controllers.Markers
         {
             var mPoints = points;
             var mColors = colors;
-
-            if (mPoints.Length == 0 || mPoints.Length != mColors.Length)
+            int mPointsLength = mPoints.Length;
+            
+            if (mPointsLength == 0 || mPointsLength != mColors.Length)
             {
                 return null;
             }
@@ -102,10 +104,10 @@ namespace Iviz.Controllers.Markers
             float w0 = UnityUtils.AsFloat(mColors[0].ToUnityColor32());
             mPoints[0].Ros2Unity(w0, out c1);
 
-            lineBuffer.EnsureCapacity(mPoints.Length - 1);
+            lineBuffer.EnsureCapacity(mPointsLength - 1);
             lineBuffer.Clear();
 
-            for (int i = 1; i < mPoints.Length; i++)
+            for (int i = 1; i < mPointsLength; i++)
             {
                 c0 = c1;
 
@@ -126,8 +128,9 @@ namespace Iviz.Controllers.Markers
             var mPoints = points;
             var mColors = colors;
             Color color = color32;
-
-            if (mPoints.Length == 0)
+            int mPointsLength = mPoints.Length;
+            
+            if (mPointsLength == 0)
             {
                 return color.a < 1 ? true : null;
             }
@@ -139,10 +142,10 @@ namespace Iviz.Controllers.Markers
             float w0 = UnityUtils.AsFloat(color * mColors[0].ToUnity());
             mPoints[0].Ros2Unity(w0, out c1);
 
-            lineBuffer.EnsureCapacity(mPoints.Length - 1);
+            lineBuffer.EnsureCapacity(mPointsLength - 1);
             lineBuffer.Clear();
 
-            for (int i = 1; i < mPoints.Length; i++)
+            for (int i = 1; i < mPointsLength; i++)
             {
                 c0 = c1;
 

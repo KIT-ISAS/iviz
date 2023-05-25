@@ -133,10 +133,6 @@ namespace Iviz.Controllers
                 return;
             }
 
-            //robot.Visible = false;
-
-
-            
             var vizObject = new PreviewObject(msg, robot, $"{nameof(RobotPreview)} - {robot.Name}")
                 { Interactable = Interactable, Visible = Visible };
             vizObjects[vizObject.id] = vizObject;

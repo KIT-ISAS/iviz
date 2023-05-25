@@ -20,7 +20,7 @@ namespace Iviz.Controllers
     /// <summary>
     /// Controller for robots.
     /// </summary>
-    public sealed class SimpleRobotController : IController, IHasFrame, IJointProvider
+    public sealed class SimpleRobotController : Controller, IHasFrame, IJointProvider
     {
         const int ParameterTimeoutInMs = 3000;
 
@@ -124,7 +124,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool Visible
+        public override bool Visible
         {
             get => config.Visible;
             set
@@ -606,7 +606,7 @@ namespace Iviz.Controllers
             node.Dispose();
         }
 
-        public void ResetController()
+        public override void ResetController()
         {
             Robot = null;
 

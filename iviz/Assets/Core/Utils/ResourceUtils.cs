@@ -54,7 +54,8 @@ namespace Iviz.Core
 
     public class NoModelLoaderServiceException : Exception
     {
-        public NoModelLoaderServiceException(string message, Exception e) : base(message, e)
+        public NoModelLoaderServiceException(Exception e) : base(
+            "Failed to reach the iviz model loader service", e)
         {
         }
     }

@@ -113,12 +113,12 @@ internal sealed class UdpSender<TMessage> : ProtocolSender<TMessage>, IUdpSender
         UdpClient.Client.SendBufferSize = 32768;
 
         var maybeLocalEndPoint = (IPEndPoint?)UdpClient.Client.LocalEndPoint;
-        if (maybeLocalEndPoint is not { } localEndPoint)
+        if (maybeLocalEndPoint is null)
         {
             throw new RosConnectionException("Failed to initialize socket");
         }
 
-        Endpoint = new Endpoint(localEndPoint);
+        Endpoint = new Endpoint(maybeLocalEndPoint);
 
         string[] responseHeaderContents =
         {

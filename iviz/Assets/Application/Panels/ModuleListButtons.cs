@@ -57,7 +57,7 @@ namespace Iviz.App
 
             buttons.RemoveAt(index);
 
-            foreach (int i in index..buttons.Count)
+            for (int i = index; i < buttons.Count; i++)
             {
                 float y = 2 * YOffset + i * (buttonHeight + YOffset);
                 buttons[i].Transform.anchoredPosition = new Vector2(0, -y);
@@ -65,7 +65,7 @@ namespace Iviz.App
 
             contentObjectTransform.sizeDelta = new Vector2(0, 2 * YOffset + buttons.Count * (buttonHeight + YOffset));
         }
-        
+
         public void RemoveAllButtons()
         {
             foreach (var button in buttons)
@@ -76,7 +76,7 @@ namespace Iviz.App
 
             buttons.Clear();
             contentObjectTransform.sizeDelta = new Vector2(0, 2 * YOffset);
-        }        
+        }
 
         public void UpdateButton(int index, string content)
         {

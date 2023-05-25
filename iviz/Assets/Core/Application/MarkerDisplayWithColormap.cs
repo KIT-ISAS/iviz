@@ -161,8 +161,9 @@ namespace Iviz.Displays
 
         protected void UpdateTransform()
         {
-            Properties.SetMatrix(ShaderIds.LocalToWorldId, transform.localToWorldMatrix);
-            Properties.SetMatrix(ShaderIds.WorldToLocalId, transform.worldToLocalMatrix);
+            var mTransform = Transform;
+            Properties.SetMatrix(ShaderIds.LocalToWorldId, mTransform.localToWorldMatrix);
+            Properties.SetMatrix(ShaderIds.WorldToLocalId, mTransform.worldToLocalMatrix);
             UpdateProperties();
         }
 

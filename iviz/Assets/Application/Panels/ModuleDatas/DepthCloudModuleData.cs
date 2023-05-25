@@ -28,7 +28,7 @@ namespace Iviz.App
         public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.DepthCloud;
         public override IConfiguration Configuration => controller.Config;
-        public override IController Controller => controller;
+        public override Controller Controller => controller;
 
         public DepthCloudModuleData(ModuleDataConstructor constructor)
         {

@@ -8,15 +8,24 @@ public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB>, ICollec
 {
     readonly TC a;
     readonly Func<TA, TB> f;
+    public readonly int Count;
 
     public struct Enumerator : IEnumerator<TB>
     {
         readonly TC a;
         readonly Func<TA, TB> f;
+        readonly int count;
         int index;
 
-        internal Enumerator(TC na, Func<TA, TB> nf) => (a, f, index) = (na, nf, -1);
-        public bool MoveNext() => ++index < a.Count;
+        internal Enumerator(TC a, Func<TA, TB> f, int count)
+        {
+            this.a = a;
+            this.f = f;
+            this.count = count;
+            index = -1;
+        }
+
+        public bool MoveNext() => ++index < count;
         public void Reset() => index = -1;
         public TB Current => f(a[index]);
         object? IEnumerator.Current => Current;
@@ -26,16 +35,16 @@ public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB>, ICollec
         }
     }
 
-    public int Count => a.Count;
     public TB this[int index] => f(a[index]);
 
     public SelectEnumerable(TC a, Func<TA, TB> f)
     {
         this.a = a;
         this.f = f;
+        Count = a.Count;
     }
 
-    public Enumerator GetEnumerator() => new(a, f);
+    public Enumerator GetEnumerator() => new(a, f, Count);
 
     public SelectEnumerable<SelectEnumerable<TC, TA, TB>, TB, TD> Select<TD>(Func<TB, TD> ff)
     {
@@ -44,14 +53,13 @@ public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB>, ICollec
 
     public TB[] ToArray()
     {
-        int count = a.Count;
-        if (count == 0)
+        if (Count == 0)
         {
             return Array.Empty<TB>();
         }
 
-        TB[] array = new TB[count];
-        for (int i = 0; i < count; i++)
+        TB[] array = new TB[Count];
+        for (int i = 0; i < Count; i++)
         {
             array[i] = f(a[i]);
         }
@@ -61,13 +69,14 @@ public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB>, ICollec
 
     public void CopyTo(TB[] array, int arrayIndex)
     {
-        int count = a.Count;
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < Count; i++)
         {
             array[i + arrayIndex] = f(a[i]);
         }
     }
 
+    int IReadOnlyCollection<TB>.Count => Count;
+    int ICollection<TB>.Count => Count;
     void ICollection<TB>.Add(TB item) => throw new NotSupportedException();
     void ICollection<TB>.Clear() => throw new NotSupportedException();
     bool ICollection<TB>.Contains(TB item) => throw new NotSupportedException();

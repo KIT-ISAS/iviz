@@ -16,7 +16,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public sealed class DepthCloudController : IController, IHasFrame
+    public sealed class DepthCloudController : Controller, IHasFrame
     {
         readonly DepthCloudConfiguration config = new();
         readonly FrameNode node;
@@ -129,7 +129,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool Visible
+        public override bool Visible
         {
             get => config.Visible;
             set
@@ -528,7 +528,7 @@ namespace Iviz.Controllers
             node.Dispose();
         }
 
-        public void ResetController()
+        public override void ResetController()
         {
             ColorListener?.Reset();
             DepthListener?.Reset();

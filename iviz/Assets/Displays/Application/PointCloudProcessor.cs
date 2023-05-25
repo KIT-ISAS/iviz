@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,22 +12,23 @@ using Iviz.Msgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
+using Iviz.Roslib.Utils;
 using Unity.Mathematics;
 using UnityEngine;
+using Time = Iviz.Msgs.StdMsgs.Time;
 
 namespace Iviz.Displays.Helpers
 {
     public sealed class PointCloudProcessor
     {
         readonly List<string> fieldNames = new() { "x", "y", "z" };
-        readonly FrameNode node;
         readonly PointListDisplay pointCloud;
         readonly MeshListDisplay meshCloud;
+        readonly SelfClearingBuffer pointBuffer = new();
 
         string intensityChannel = "";
         PointCloudType pointCloudType;
         PointCloud2? lastMessage;
-        float4[] pointBuffer = Array.Empty<float4>();
 
         float minIntensity, maxIntensity;
 
@@ -35,10 +37,7 @@ namespace Iviz.Displays.Helpers
 
         public event Action<bool>? IsProcessingChanged;
 
-        public string Name
-        {
-            set => node.Name = value;
-        }
+        public FrameNode Node { get; }
 
         public Vector2 MeasuredIntensityBounds =>
             pointCloudType == PointCloudType.Points
@@ -46,8 +45,6 @@ namespace Iviz.Displays.Helpers
                 : meshCloud.MeasuredIntensityBounds;
 
         public int NumValidPoints { get; private set; }
-
-        public TfFrame? Frame => node.Parent;
 
         public bool Visible
         {
@@ -91,13 +88,13 @@ namespace Iviz.Displays.Helpers
             {
                 overrideMinMax = value;
                 pointCloud.OverrideIntensityBounds = value;
-                pointCloud.IntensityBounds = value
-                    ? new Vector2(minIntensity, maxIntensity)
-                    : MeasuredIntensityBounds;
                 meshCloud.OverrideIntensityBounds = value;
-                meshCloud.IntensityBounds = value
+
+                var intensityBounds = value
                     ? new Vector2(minIntensity, maxIntensity)
                     : MeasuredIntensityBounds;
+                pointCloud.IntensityBounds = intensityBounds;
+                meshCloud.IntensityBounds = intensityBounds;
             }
         }
 
@@ -116,11 +113,14 @@ namespace Iviz.Displays.Helpers
             set
             {
                 minIntensity = value;
-                if (overrideMinMax)
+                if (!overrideMinMax)
                 {
-                    pointCloud.IntensityBounds = new Vector2(minIntensity, maxIntensity);
-                    meshCloud.IntensityBounds = new Vector2(minIntensity, maxIntensity);
+                    return;
                 }
+
+                var intensityBounds = new Vector2(minIntensity, maxIntensity);
+                pointCloud.IntensityBounds = intensityBounds;
+                meshCloud.IntensityBounds = intensityBounds;
             }
         }
 
@@ -129,11 +129,14 @@ namespace Iviz.Displays.Helpers
             set
             {
                 maxIntensity = value;
-                if (overrideMinMax)
+                if (!overrideMinMax)
                 {
-                    pointCloud.IntensityBounds = new Vector2(minIntensity, maxIntensity);
-                    meshCloud.IntensityBounds = new Vector2(minIntensity, maxIntensity);
+                    return;
                 }
+
+                var intensityBounds = new Vector2(minIntensity, maxIntensity);
+                pointCloud.IntensityBounds = intensityBounds;
+                meshCloud.IntensityBounds = intensityBounds;
             }
         }
 
@@ -168,15 +171,20 @@ namespace Iviz.Displays.Helpers
 
         public IEnumerable<string> FieldNames => fieldNames;
 
-        public PointCloudProcessor()
+        public PointCloudProcessor(Transform? parent = null)
         {
-            node = new FrameNode(nameof(PointCloudProcessor));
-            pointCloud = ResourcePool.RentDisplay<PointListDisplay>(node.Transform);
-            meshCloud = ResourcePool.RentDisplay<MeshListDisplay>(node.Transform);
+            Node = new FrameNode(nameof(PointCloudProcessor));
+            pointCloud = ResourcePool.RentDisplay<PointListDisplay>(Node.Transform);
+            meshCloud = ResourcePool.RentDisplay<MeshListDisplay>(Node.Transform);
             meshCloud.EnableShadows = false;
             isProcessing.Changed = IsProcessingChanged;
+
+            if (parent != null)
+            {
+                Node.Transform.SetParentLocal(parent);
+            }
         }
-        
+
         public bool Handle(PointCloud2 msg, IRosConnection? _ = null)
         {
             if (!isProcessing.TrySet())
@@ -219,7 +227,7 @@ namespace Iviz.Displays.Helpers
 
         bool ProcessMessage(PointCloud2 msg)
         {
-            if (!node.IsAlive)
+            if (!Node.IsAlive)
             {
                 // we're dead
                 return false;
@@ -236,13 +244,13 @@ namespace Iviz.Displays.Helpers
 
 
             bool rgbaHint;
-            int pointBufferLength;
+            ReadOnlyMemory<float4> pointBufferToUse;
 
             try
             {
-                if (!PointCloudHelper.GeneratePointBuffer(ref pointBuffer, msg, intensityChannel,
+                if (!PointCloudHelper.GeneratePointBuffer(pointBuffer, msg, intensityChannel,
                         out rgbaHint,
-                        out pointBufferLength))
+                        out pointBufferToUse))
                 {
                     return false;
                 }
@@ -253,7 +261,6 @@ namespace Iviz.Displays.Helpers
                 return false; // unreachable
             }
 
-            var pointBufferToUse = new ReadOnlyMemory<float4>(pointBuffer, 0, pointBufferLength);
             var header = msg.Header;
             bool useColormap = !rgbaHint;
 
@@ -274,13 +281,13 @@ namespace Iviz.Displays.Helpers
 
         void ProcessInListenerQueue(ReadOnlySpan<float4> pointBufferToUse, in Header header, bool useColormap)
         {
-            if (!node.IsAlive)
+            if (!Node.IsAlive)
             {
                 // we're dead
                 return;
             }
 
-            node.AttachTo(header);
+            Node.AttachTo(header);
 
             int numValidPoints = pointBufferToUse.Length;
 
@@ -315,36 +322,12 @@ namespace Iviz.Displays.Helpers
             pointCloud.ReturnToPool();
             meshCloud.ReturnToPool();
 
-            node.Dispose();
-            pointBuffer = Array.Empty<float4>();
+            Node.Dispose();
+            pointBuffer.Dispose();
 
             IsProcessingChanged = null;
         }
 
-        public override string ToString() => $"[{nameof(PointCloudProcessor)} '{node.Name}']";
-    }
-
-    public struct InterlockedBoolean
-    {
-        int value;
-        
-        public Action<bool>? Changed;
-
-        public bool TrySet()
-        {
-            bool result = Interlocked.CompareExchange(ref value, 1, 0) == 0;
-            if (result)
-            {
-                Changed?.Invoke(true);
-            }
-
-            return result;
-        }
-
-        public void Reset()
-        {
-            value = 0;
-            Changed?.Invoke(false);
-        }
+        public override string ToString() => $"[{nameof(PointCloudProcessor)} '{Node.Name}']";
     }
 }

@@ -25,7 +25,7 @@ namespace Iviz.Ros
         static TopicNameType[] EmptyTopics => Array.Empty<TopicNameType>();
         static readonly Random Random = Defaults.Random;
 
-        readonly IRosPublisher?[] publishers = new IRosPublisher[256];
+        readonly BaseRosPublisher?[] publishers = new BaseRosPublisher[256];
         readonly Dictionary<string, AdvertisedTopic> publishersByTopic = new();
         readonly Dictionary<string, AdvertisedService> servicesByTopic = new();
         readonly Dictionary<string, ISubscribedTopic> subscribersByTopic = new();
@@ -575,7 +575,7 @@ namespace Iviz.Ros
             await topic.AdvertiseAsync(newClient, token);
             int id = GetFreeId();
             topic.Id = id;
-            publishers[id] = topic.Publisher;
+            publishers[id] = (BaseRosPublisher?)topic.Publisher;
         }
 
         static async ValueTask ReSubscribe(IRosClient newClient, ISubscribedTopic topic, CancellationToken token)
@@ -621,7 +621,7 @@ namespace Iviz.Ros
                 entry.Invalidate();
             }
 
-            publishers.AsSpan().Fill(null);
+            Array.Fill(publishers, null);
 
             RosLogger.Internal("Disconnecting...");
             await DisposeClientAsync();
@@ -644,7 +644,7 @@ namespace Iviz.Ros
             {
                 try
                 {
-                    await AdvertiseCore(advertiser, token);
+                    await AdvertiseCore<T>(advertiser, token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -657,7 +657,7 @@ namespace Iviz.Ros
             });
         }
 
-        async ValueTask AdvertiseCore<T>(Sender<T> advertiser, CancellationToken token) where T : IMessage, new()
+        async ValueTask AdvertiseCore<T>(Sender advertiser, CancellationToken token) where T : IMessage, new()
         {
             if (publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
@@ -759,8 +759,9 @@ namespace Iviz.Ros
             }
             catch (RoslibException e)
             {
-                modelServiceBlacklistTime = currentTime + 5;
-                throw new NoModelLoaderServiceException("Failed to reach the iviz model loader service", e);
+                const int blacklistDurationInSec = 5;
+                modelServiceBlacklistTime = currentTime + blacklistDurationInSec;
+                throw new NoModelLoaderServiceException(e);
             }
         }
 
@@ -791,14 +792,14 @@ namespace Iviz.Ros
             }
         }
 
-        internal void Publish<T>(int? advertiserId, T msg) where T : IMessage, new()
+        internal void Publish(int? advertiserId, IMessage msg)
         {
-            if (advertiserId is not { } id)
+            if (runningTs.IsCancellationRequested)
             {
                 return;
             }
 
-            if (runningTs.IsCancellationRequested)
+            if (advertiserId is not { } id)
             {
                 return;
             }
@@ -811,18 +812,11 @@ namespace Iviz.Ros
 
             try
             {
-                switch (basePublisher)
-                {
-                    case RosPublisher<T> publisher1:
-                        publisher1.Publish(msg);
-                        break;
-                    case Ros2Publisher<T> publisher2:
-                        publisher2.Publish(msg);
-                        break;
-                    default:
-                        LogPublisherWrongType(basePublisher, msg);
-                        break;
-                }
+                basePublisher.Publish(msg);
+            }
+            catch (RosInvalidMessageTypeException)
+            {
+                LogPublisherWrongType(basePublisher, msg);
             }
             catch (OperationCanceledException)
             {
@@ -885,9 +879,9 @@ namespace Iviz.Ros
             Post(() =>
             {
                 if (subscribersByTopic.TryGetValue(listener.Topic, out var subscribedTopic) &&
-                    subscribedTopic.Subscriber != null)
+                    subscribedTopic.Subscriber is { } subscriber)
                 {
-                    subscribedTopic.Subscriber.IsPaused = value;
+                    subscriber.IsPaused = value;
                 }
 
                 return default;

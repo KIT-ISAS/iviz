@@ -31,22 +31,23 @@ namespace Iviz.Displays
 
         static int? maxSegmentsForMesh;
 
-        static int MaxSegmentsForMesh => maxSegmentsForMesh is { } validatedMaxSegmentsForMesh
-            ? validatedMaxSegmentsForMesh
-            : (maxSegmentsForMesh = Settings.SupportsComputeBuffers ? 30 : int.MaxValue).Value;
+        static int MaxSegmentsForMesh => maxSegmentsForMesh ??
+                                         (maxSegmentsForMesh = Settings.SupportsComputeBuffers ? 30 : int.MaxValue)
+                                         .Value;
 
         const float MinLineLength = 1E-06f;
         const float MaxPositionMagnitude = 1e3f;
 
-
         readonly NativeList<float4x2> lineBuffer = new();
+        ComputeBuffer? lineComputeBuffer;
+        Mesh? mesh;
+        Material[]? cachedMaterials;
+        Material[]? cachedMeshMaterials;
+        bool linesNeedAlpha;
 
         [SerializeField] MeshRenderer? meshRenderer;
         [SerializeField] MeshFilter? meshFilter;
 
-        ComputeBuffer? lineComputeBuffer;
-        Mesh? mesh;
-        bool linesNeedAlpha;
 
         Mesh Mesh => mesh != null ? mesh : (mesh = new Mesh { name = "Line Capsules" });
         MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
@@ -84,8 +85,9 @@ namespace Iviz.Displays
 
         int Size => lineBuffer.Length;
 
-        bool UseCapsuleLines => (RenderType == LineRenderType.Auto && Size <= MaxSegmentsForMesh) ||
-                                (RenderType == LineRenderType.AlwaysCapsule);
+        bool UseCapsuleLines => !Settings.SupportsComputeBuffers ||
+                                (RenderType == LineRenderType.Auto && Size <= MaxSegmentsForMesh) ||
+                                RenderType == LineRenderType.AlwaysCapsule;
 
         public LineRenderType RenderType { get; set; }
 
@@ -108,6 +110,15 @@ namespace Iviz.Displays
         {
             lineBuffer.Clear();
             lineBuffer.AddRange(lines);
+            UpdateLines(needsAlpha);
+        }
+
+        public void Set(Action<NativeList<float4x2>> callback, int reserve, bool? needsAlpha)
+        {
+            ThrowHelper.ThrowIfNull(callback, nameof(callback));
+            lineBuffer.EnsureCapacity(reserve);
+            lineBuffer.Clear();
+            callback(lineBuffer);
             UpdateLines(needsAlpha);
         }
 
@@ -231,6 +242,13 @@ namespace Iviz.Displays
         {
             Mesh.MarkDynamic();
             MeshFilter.sharedMesh = Mesh;
+
+            if (Settings.SupportsComputeBuffers)
+            {
+                lineComputeBuffer = new ComputeBuffer(1, Unsafe.SizeOf<float4x2>());
+                Properties.SetBuffer(ShaderIds.LinesId, lineComputeBuffer);
+            }
+
             MeshRenderer.SetPropertyBlock(Properties);
 
             base.Awake();
@@ -251,16 +269,7 @@ namespace Iviz.Displays
             Properties.SetFloat(ShaderIds.ScaleId, ElementScale);
 
             var worldBounds = Collider.bounds;
-
-            var material = MaterialOverride != null
-                ? MaterialOverride
-                : (UseColormap, UsesAlpha) switch
-                {
-                    (true, false) => Resource.Materials.LineWithColormap.Object,
-                    (true, true) => Resource.Materials.TransparentLineWithColormap.Object,
-                    (false, false) => Resource.Materials.Line.Object,
-                    _ => Resource.Materials.TransparentLine.Object
-                };
+            var material = GetMaterial();
 
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 2 * 4, Size,
                 null, Properties, ShadowCastingMode.Off, false, gameObject.layer);
@@ -316,21 +325,56 @@ namespace Iviz.Displays
             UpdateMeshMaterial();
         }
 
-        Material GetMeshMaterial()
+        Material GetMaterial()
         {
-            if (MaterialOverride != null)
+            if (materialOverride != null)
             {
-                return MaterialOverride;
+                return materialOverride;
             }
 
-            return (UseColormap, UsesAlpha) switch
+            cachedMaterials ??= new[]
             {
-                (true, false) => Resource.Materials.LineSimpleWithColormap.Object,
-                (true, true) => Resource.Materials.TransparentLineSimpleWithColormap.Object,
-                (false, false) => Resource.Materials.LineSimple.Object,
-                _ => Resource.Materials.TransparentLineSimple.Object
+                Resource.Materials.LineWithColormap.Object,
+                Resource.Materials.TransparentLineWithColormap.Object,
+                Resource.Materials.Line.Object,
+                Resource.Materials.TransparentLine.Object
             };
+
+            int index = GetMaterialIndex();
+            return cachedMaterials[index];
         }
+
+        Material GetMeshMaterial()
+        {
+            if (materialOverride != null)
+            {
+                return materialOverride;
+            }
+
+            cachedMeshMaterials ??= new[]
+            {
+                Resource.Materials.LineSimpleWithColormap.Object,
+                Resource.Materials.TransparentLineSimpleWithColormap.Object,
+                Resource.Materials.LineSimple.Object,
+                Resource.Materials.TransparentLineSimple.Object
+            };
+
+            int index = GetMaterialIndex();
+            return cachedMeshMaterials[index];
+        }
+
+
+        /*
+        int GetMaterialIndex() => (base.UseColormap, UsesAlpha) switch
+        {
+            (true, false) => 0,
+            (true, true) => 1,
+            (false, false) => 2,
+            _ => 3
+        };
+        */
+
+        int GetMaterialIndex() => (base.UseColormap ? 0 : 2) | (UsesAlpha ? 1 : 0);
 
         void UpdateMeshMaterial()
         {

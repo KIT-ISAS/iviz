@@ -69,40 +69,43 @@ namespace Iviz.App
                 ButtonHeight = BaseButtonHeight;
             }
 
-            if (value.Count == itemEntries.Count)
+            int valueCount = value.Count;
+            int itemEntriesCount = itemEntries.Count;
+            
+            if (valueCount == itemEntriesCount)
             {
-                foreach (int i in ..value.Count)
+                for (int i = 0; i < valueCount; i++)
                 {
                     itemEntries[i].Text = value[i];
                 }
             }
-            else if (value.Count < itemEntries.Count)
+            else if (valueCount < itemEntriesCount)
             {
                 Canvas.enabled = false;
 
-                foreach (int i in ..value.Count)
+                for (int i = 0; i < valueCount; i++)
                 {
                     itemEntries[i].Text = value[i];
                 }
 
-                foreach (int i in value.Count..itemEntries.Count)
+                for (int i = valueCount; i < itemEntriesCount; i++)
                 {
                     itemEntries[i].Dispose();
                 }
 
-                itemEntries.RemoveRange(value.Count, itemEntries.Count - value.Count);
+                itemEntries.RemoveRange(valueCount, itemEntriesCount - valueCount);
                 UpdateSize();
                 Canvas.enabled = true;
             }
             else
             {
                 Canvas.enabled = false;
-                foreach (int i in ..value.Count)
+                for (int i = 0; i < valueCount; i++)
                 {
-                    if (i >= itemEntries.Count)
+                    if (i >= itemEntriesCount)
                     {
-                        itemEntries.Add(new ItemEntry(i, ContentObject, ButtonHeight, VerticalOffset, ButtonType,
-                            RaiseClicked));
+                        itemEntries.Add(
+                            new ItemEntry(i, ContentObject, ButtonHeight, VerticalOffset, ButtonType, RaiseClicked));
                     }
 
                     itemEntries[i].Text = value[i];

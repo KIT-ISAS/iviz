@@ -27,14 +27,14 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
     static RosCallback<TMessage>[] EmptyCallback => Array.Empty<RosCallback<TMessage>>();
 
     internal RosCallback<TMessage>[] callbacks = EmptyCallback;
-    
+
     public string Topic => topicInfo.Topic;
     public string TopicType => topicInfo.Type;
     public int NumConnections => receiversByUri.Count;
     public int NumActiveConnections => receiversByUri.Count(pair => pair.Value.IsConnected);
     public bool RequestNoDelay { get; }
     public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
-    
+
     public bool IsPaused
     {
         get => isPaused;
@@ -145,26 +145,25 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
         var token = subscriber.CancellationToken;
         try
         {
-            using (await mutex.LockAsync(token))
+            using var _ = await mutex.LockAsync(token);
+
+            if (connectorsByUri.TryGetValue(remoteUri, out var existingConnector))
             {
-                if (connectorsByUri.TryGetValue(remoteUri, out var existingConnector))
-                {
-                    await existingConnector.DisposeAsync(token);
-                }
-
-                token.ThrowIfCancellationRequested();
-
-                var udpTopicRequest = transportHint != RosTransportHint.OnlyTcp
-                    ? UdpReceiver.CreateRequest(client.CallerUri.Host, remoteUri.Host, topicInfo)
-                    : null;
-
-                var rosNodeClient = client.CreateNodeClient(remoteUri);
-                var receiverConnector = new ReceiverConnector(rosNodeClient, topicInfo.Topic, transportHint,
-                    udpTopicRequest, OnConnectionSucceeded);
-
-                connectorsByUri[remoteUri] = receiverConnector;
-                Logger.LogDebugFormat("{0}: Adding connector for '{1}' (retry!)", this, remoteUri);
+                await existingConnector.DisposeAsync(token);
             }
+
+            token.ThrowIfCancellationRequested();
+
+            var udpTopicRequest = transportHint != RosTransportHint.OnlyTcp
+                ? UdpReceiver.CreateRequest(client.CallerUri.Host, remoteUri.Host, topicInfo)
+                : null;
+
+            var rosNodeClient = client.CreateNodeClient(remoteUri);
+            var receiverConnector = new ReceiverConnector(rosNodeClient, topicInfo.Topic, transportHint,
+                udpTopicRequest, OnConnectionSucceeded);
+
+            connectorsByUri[remoteUri] = receiverConnector;
+            Logger.LogDebugFormat("{0}: Adding connector for '{1}' (retry!)", this, remoteUri);
         }
         catch (OperationCanceledException)
         {
@@ -174,7 +173,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
             Logger.LogDebugFormat("{0}: Failed to retry connection for uri {1}: {2}", this, remoteUri, e);
         }
     }
-    
+
     public bool TryGetLoopbackReceiver(Endpoint endPoint, out LoopbackReceiver<TMessage>? receiver)
     {
         var newReceiver = receiversByUri.FirstOrDefault(pair => endPoint.Equals(pair.Value.Endpoint)).Value;
@@ -237,7 +236,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
         int receiverIndex = 0;
 
         void Add(Ros1ReceiverState state) => states[receiverIndex++] = state;
-        
+
         foreach (Uri uri in publisherUris)
         {
             if (receivers.TryGetValue(uri, out var receiver))

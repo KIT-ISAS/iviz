@@ -167,8 +167,7 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{ToString()}: " +
-                                $"Error during {nameof(RaiseBoundsChanged)}", e);
+                RosLogger.Error($"{ToString()}: Error during {nameof(RaiseBoundsChanged)}", e);
             }                          
         }          
         

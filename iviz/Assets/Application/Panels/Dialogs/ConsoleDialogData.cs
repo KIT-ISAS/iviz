@@ -1,7 +1,9 @@
 ﻿#nullable enable
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Iviz.Core;
@@ -51,7 +53,7 @@ namespace Iviz.App
         readonly ConcurrentQueue<LogMessage> messageQueue = new();
         int messageQueueCount;
             
-        readonly Core.ConcurrentSet<string> ids = new();
+        readonly ConcurrentStringSet ids = new();
 
         bool isPaused;
         bool queueIsDirty;
@@ -59,7 +61,7 @@ namespace Iviz.App
         FromIdCode idCode = FromIdCode.All;
         string id = AllString;
 
-        bool UseUnixTimestamps => false;
+        const bool UseUnixTimestamps = false; // TODO!
 
         public override IDialogPanel Panel => dialog;
 
@@ -325,5 +327,13 @@ namespace Iviz.App
             dialog.Text.text = "";
             queueIsDirty = false;
         }
+        
+        sealed class ConcurrentStringSet : IEnumerable<string>
+        {
+            readonly ConcurrentDictionary<string, object?> backend = new();
+            public IEnumerator<string> GetEnumerator() => backend.Keys.GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public void Add(string s) => backend[s] = null;
+        }          
     }
 }

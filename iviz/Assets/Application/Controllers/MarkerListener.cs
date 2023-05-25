@@ -223,7 +223,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                foreach (int i in ..value.Count)
+                for (int i = 0; i < value.Count; i++)
                 {
                     config.VisibleMask[i] = value[i];
                 }
@@ -258,7 +258,7 @@ namespace Iviz.Controllers
             {
                 Marker.MessageType => new Listener<Marker>(Config.Topic, Handle, rosTransportHint),
                 MarkerArray.MessageType => new Listener<MarkerArray>(Config.Topic, Handle, rosTransportHint),
-                _ => Ros.Listener.ThrowUnsupportedMessageType(Config.Type)
+                _ => Listener.ThrowUnsupportedMessageType(Config.Type)
             };
 
             GameThread.EverySecond += CheckDeadMarkers;
@@ -307,7 +307,6 @@ namespace Iviz.Controllers
 
         public override void ResetController()
         {
-            base.ResetController();
             DisposeAllMarkers();
         }
 
@@ -381,9 +380,11 @@ namespace Iviz.Controllers
                 if (newMarkerBuffer.Count <= MaxMarkersPerFrame)
                 {
                     newMarkers = new RentAndClear<Marker>(newMarkerBuffer.Count);
-                    foreach (var (marker, i) in newMarkerBuffer.Values.WithIndex())
+
+                    int i = 0;
+                    foreach (var marker in newMarkerBuffer.Values)
                     {
-                        newMarkers[i] = marker;
+                        newMarkers[i++] = marker;
                     }
 
                     newMarkerBuffer.Clear();
@@ -393,10 +394,11 @@ namespace Iviz.Controllers
                     using var ids = new RentAndClear<(string, int)>(MaxMarkersPerFrame);
                     newMarkers = new RentAndClear<Marker>(MaxMarkersPerFrame);
 
-                    foreach (var ((key, value), i) in newMarkerBuffer.Take(MaxMarkersPerFrame).WithIndex())
+                    int i = 0;
+                    foreach (var (key, value) in newMarkerBuffer.Take(MaxMarkersPerFrame))
                     {
                         ids[i] = key;
-                        newMarkers[i] = value;
+                        newMarkers[i++] = value;
                     }
 
                     foreach (var id in ids)

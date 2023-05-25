@@ -134,13 +134,22 @@ namespace Iviz.Displays
         {
             base.Awake();
 
+            // this test is moot. if compute buffers are not supported,
+            // this display shouldn't have been created at all
+            if (Settings.SupportsComputeBuffers)
+            {
+                pointComputeBuffer = new ComputeBuffer(1, Unsafe.SizeOf<float4>());
+                Properties.SetBuffer(ShaderIds.PointsId, pointComputeBuffer);
+
+                argsComputeBuffer =
+                    new ComputeBuffer(1, BufferSize * sizeof(uint), ComputeBufferType.IndirectArguments);
+                argsComputeBuffer.SetData(argsBuffer);
+            }
+
             UseColormap = true;
             MeshResource = Resource.Displays.Sphere;
             ElementScale3 = Vector3.one;
             Colormap = ColormapId.gray;
-
-            argsComputeBuffer = new ComputeBuffer(1, BufferSize * sizeof(uint), ComputeBufferType.IndirectArguments);
-            argsComputeBuffer.SetData(argsBuffer);
 
             OcclusionOnly = false;
         }

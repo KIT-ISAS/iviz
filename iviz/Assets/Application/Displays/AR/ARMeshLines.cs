@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Iviz.Controllers;
 using Iviz.Controllers.XR;
 using Iviz.Core;
@@ -16,7 +17,6 @@ using UnityEngine.XR.ARFoundation;
 
 namespace Iviz.Displays
 {
-    // disabled until I can find a way to make it work in mobile suspend without crashing!
     [RequireComponent(typeof(MeshFilter))]
     public sealed class ARMeshLines : DisplayWrapper, IRecyclable
     {
@@ -63,12 +63,6 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            if (Settings.IsHololens)
-            {
-                enabled = false;
-                return;
-            }
-
             pulseMaterialSet = ARController.IsPulseActive;
             MeshFilter.sharedMesh = new Mesh { name = "AR Mesh" };
             Resource.Visible = Visible;
@@ -81,11 +75,17 @@ namespace Iviz.Displays
             {
                 RosLogger.Warn($"{nameof(ARMeshLines)}: No mesh manager found!");
             }
-
-            ARController.ARCameraViewChanged += OnARCameraViewChanged;
-            GameThread.EveryTenthOfASecond += CheckMesh;
-
-            OnARCameraViewChanged(ARController.IsXRVisible);
+            
+            if (ARController.EnableMeshingSubsystem)
+            {
+                GameThread.EveryTenthOfASecond += CheckMesh;
+            }
+            
+            if (!Settings.IsHololens)
+            {
+                ARController.ARCameraViewChanged += OnARCameraViewChanged;
+                OnARCameraViewChanged(ARController.IsXRVisible);
+            }
         }
 
         void OnARCameraViewChanged(bool value)
@@ -158,35 +158,65 @@ namespace Iviz.Displays
                 return;
             }
 
-            int numLines = indices.Count;  // 3 indices per triangle, 3 lines per triangle => 1 line per index
-            using var output =
-                new NativeArray<float4x2>(numLines, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            ARController.Instance?.ProcessMeshChange(indices, vertices, gameObject);
 
-            /*
-            await new CopyTriangles
+            // TODO: check if need to send to another thread
+            void UpdateLines(NativeList<float4x2> lines)
             {
-                triangles = indices.AsNativeArray().Cast<int, int3>(),
-                vertices = vertices.AsNativeArray().Cast<Vector3, float3>(),
-                output = output
-            }.Schedule().AsTask();
+                int numLines = indices.Count; // 3 indices per triangle, 3 lines per triangle => 1 line per index
+                lines.Resize(numLines);
+                BurstUtils.ConvertTrianglesToLines(indices.AsReadOnlySpan(), vertices.AsReadOnlySpan(), lines);
+            }
 
-            // we're in a different frame now!
-            Resource.Set(output.AsReadOnlySpan(), false);
-            */
+            Resource.Set(UpdateLines, indices.Count, false);
+        }
+        
+        public void SplitForRecycle()
+        {
+            resource.ReturnToPool();
+            resource = null;
         }
 
-        [BurstCompile(CompileSynchronously = true)]
-        struct CopyTriangles : IJob
+        void OnDestroy()
         {
-            [ReadOnly] public NativeArray<int3> triangles;
-            [ReadOnly] public NativeArray<float3> vertices;
-            [WriteOnly] public NativeArray<float4x2> output;
+            resource.ReturnToPool();
 
-            public void Execute()
+            ARController.ARCameraViewChanged -= OnARCameraViewChanged;
+            
+            if (ARController.EnableMeshingSubsystem)
             {
-                var output3 = output.Cast<float4x2, Float4x2x3>();
+                GameThread.EveryTenthOfASecond -= CheckMesh;
+            }
 
-                for (int i = 0; i < triangles.Length; i++)
+            Destroy(MeshFilter.sharedMesh);
+
+            if (XRUtils.TryGetMeshManager(out var meshManager))
+            {
+                meshManager.meshesChanged -= OnMeshChanged;
+            }
+        }
+
+        [BurstCompile]
+        static unsafe class BurstUtils
+        {
+            public static void ConvertTrianglesToLines(ReadOnlySpan<int> indices, ReadOnlySpan<Vector3> vertices,
+                Span<float4x2> output)
+            {
+                int numTriangles = output.Length / 3;
+                
+                fixed (int* indicesPtr = indices)
+                fixed (Vector3* verticesPtr = vertices)
+                fixed (float4x2* outputPtr = output)
+                {
+                    Execute((int3*)indicesPtr, (float3*)verticesPtr, (Float4x2x3*)outputPtr, numTriangles);
+                }
+            }
+
+            [BurstCompile(CompileSynchronously = true)]
+            static void Execute([NoAlias] int3* triangles, [NoAlias] float3* vertices, [NoAlias] Float4x2x3* output,
+                int numTriangles)
+            {
+                for (int i = 0; i < numTriangles; i++)
                 {
                     int ia = triangles[i].x;
                     var a = vertices[ia];
@@ -202,11 +232,10 @@ namespace Iviz.Displays
                     Write(out f.b, b, c);
                     Write(out f.c, c, a);
 
-                    output3[i] = f;
+                    output[i] = f;
                 }
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static void Write(out float4x2 f, in float3 a, in float3 b)
             {
                 f.c0.x = a.x;
@@ -220,30 +249,10 @@ namespace Iviz.Displays
                 f.c1.w = b.z; // unused
             }
 
+            [StructLayout(LayoutKind.Sequential)]
             struct Float4x2x3
             {
                 public float4x2 a, b, c;
-            }
-        }
-
-        public void SplitForRecycle()
-        {
-            resource.ReturnToPool();
-            resource = null;
-        }
-
-        void OnDestroy()
-        {
-            resource.ReturnToPool();
-
-            ARController.ARCameraViewChanged -= OnARCameraViewChanged;
-            GameThread.EveryTenthOfASecond -= CheckMesh;
-
-            Destroy(MeshFilter.sharedMesh);
-
-            if (XRUtils.TryGetMeshManager(out var meshManager))
-            {
-                meshManager.meshesChanged -= OnMeshChanged;
             }
         }
     }

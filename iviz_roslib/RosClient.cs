@@ -803,7 +803,7 @@ public sealed class RosClient : IRosClient
         RosTransportHint transportHint = RosTransportHint.PreferTcp, CancellationToken token = default)
         where T : IMessage, new()
     {
-        return SubscribeAsyncCore(topic, new DirectRosCallback<T>(callback), requestNoDelay, transportHint, token);
+        return SubscribeAsyncCore(topic, new ActionRosCallback<T>(callback), requestNoDelay, transportHint, token);
     }
 
     /// <inheritdoc cref="IRosClient.SubscribeAsync{T}(string,System.Action{T},Iviz.Roslib.RosTransportHint,System.Threading.CancellationToken)"/>
@@ -832,7 +832,7 @@ public sealed class RosClient : IRosClient
         string resolvedTopic = ResolveResourceName(topic);
         if (!TryGetSubscriberImpl(resolvedTopic, out var existingSubscriber))
         {
-            return CreateSubscriberAsync(resolvedTopic, new DirectRosCallback<IMessage>(callback), requestNoDelay,
+            return CreateSubscriberAsync(resolvedTopic, new ActionRosCallback<IMessage>(callback), requestNoDelay,
                 new DynamicMessage(), transportHint, token);
         }
 

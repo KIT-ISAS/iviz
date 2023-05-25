@@ -149,7 +149,7 @@ namespace Iviz.MarkerDetection
             var srcCorners = MemoryMarshal.Cast<float, Vector2f>(corners);
 
             var markers = new DetectedMarker[numDetected];
-            foreach (int i in ..numDetected)
+            for (int i = 0; i < numDetected; i++)
             {
                 var strBytes = pointers[i].AsSpan(pointerLengths[i]);
                 string code = BuiltIns.UTF8.GetString(strBytes);
@@ -188,7 +188,7 @@ namespace Iviz.MarkerDetection
             }
 
             var markers = new DetectedMarker[numDetected];
-            foreach (int i in ..numDetected)
+            for (int i = 0; i < numDetected; i++)
             {
                 var vectorCorners = new Vector2f[4];
                 srcCorners.Slice(4 * i, 4).CopyTo(vectorCorners);

@@ -11,6 +11,7 @@ namespace Iviz.Ros
     {
         int? id;
         protected readonly HashSet<Sender> senders = new();
+        protected string? publisherId;
 
         public int? Id
         {
@@ -24,13 +25,28 @@ namespace Iviz.Ros
                 }
             }
         }
-        public IRosPublisher? Publisher { get; protected set; }
+        public BaseRosPublisher? Publisher { get; protected set; }
         public int Count => senders.Count;
 
         public abstract void Add(Sender subscriber);
         public abstract void Remove(Sender subscriber);
         public abstract ValueTask AdvertiseAsync(IRosClient? client, CancellationToken token);
-        public abstract ValueTask UnadvertiseAsync(CancellationToken token);
-        public abstract void Invalidate();
+
+        public async ValueTask UnadvertiseAsync(CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            if (Publisher != null && publisherId != null)
+            {
+                await Publisher.UnadvertiseAsync(publisherId, token);
+            }
+        }
+
+        public void Invalidate()
+        {
+            Id = null;
+            Publisher = null;
+            publisherId = null;
+        }
+        
     }
 }

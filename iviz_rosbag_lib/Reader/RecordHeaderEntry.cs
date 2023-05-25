@@ -20,7 +20,7 @@ public readonly struct RecordHeaderEntry
     T ReadValue<T>() where T : unmanaged
     {
         Span<byte> span = stackalloc byte[Unsafe.SizeOf<T>()];
-        if (span.Length > valueSize)
+        if (Unsafe.SizeOf<T>() > valueSize)
         {
             throw new IndexOutOfRangeException();
         }
@@ -30,7 +30,7 @@ public readonly struct RecordHeaderEntry
         return Unsafe.ReadUnaligned<T>(ref span[0]);
     }
 
-    public byte ValueAsByte
+    public int ValueAsByte
     {
         get
         {
@@ -40,7 +40,7 @@ public readonly struct RecordHeaderEntry
             }
 
             reader.Seek(valueStart, SeekOrigin.Begin);
-            return (byte)reader.ReadByte();
+            return reader.ReadByte();
         }
     }
 

@@ -147,11 +147,14 @@ namespace Iviz.App
                 DataPanelCanvas.SetActive(value);
                 DialogPanelManager.Active = value;
                 ARToolbarPanel.Visible = !value;
+                
+                /*
                 if (safeAreaPanel != null)
                 {
                     safeAreaPanel.LeftBlack.gameObject.SetActive(value);
                     safeAreaPanel.RightBlack.gameObject.SetActive(value);
                 }
+                */
             }
         }
 
@@ -302,6 +305,9 @@ namespace Iviz.App
 
             var connectionData = Dialogs.ConnectionData;
             UpperCanvas.MasterUriButton.Clicked += connectionData.Show;
+            
+            connectionData.MasterUriChanged += _ => OnRosInfoChanged();
+            connectionData.MyUriChanged += _ => OnRosInfoChanged();
             connectionData.MyIdChanged += _ => OnRosInfoChanged();
             connectionData.RosVersionChanged += _ => OnRosInfoChanged();
 

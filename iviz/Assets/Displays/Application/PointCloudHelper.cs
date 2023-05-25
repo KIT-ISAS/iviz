@@ -14,9 +14,10 @@ namespace Iviz.Displays.Helpers
 {
     public static class PointCloudHelper
     {
-        public static bool GeneratePointBuffer(ref float4[] pointBuffer, PointCloud2 msg, string intensityChannel,
+        public static bool GeneratePointBuffer(SelfClearingBuffer pointBuffer, PointCloud2 msg,
+            string intensityChannel,
             out bool rgbaHint,
-            out int pointBufferLength)
+            out ReadOnlyMemory<float4> points)
         {
             int numPoints;
             uint pointStep = msg.PointStep;
@@ -55,7 +56,7 @@ namespace Iviz.Displays.Helpers
                 PointCloudHelperException.Throw("Unsupported point cloud! " +
                                                 "Expected three float data fields 'x', 'y', and 'z'.");
                 rgbaHint = false; // unreachable
-                pointBufferLength = 0;
+                points = default;
                 return false;
             }
 
@@ -73,7 +74,7 @@ namespace Iviz.Displays.Helpers
             {
                 // nothing to do, unknown intensity field
                 rgbaHint = false;
-                pointBufferLength = 0;
+                points = default;
                 return false;
             }
 
@@ -104,15 +105,10 @@ namespace Iviz.Displays.Helpers
             int iOffset = (int)iField.Offset;
             rgbaHint = iFieldSize == 4 && iField.Name is "rgb" or "rgba";
 
-            if (pointBuffer.Length < numPoints)
-            {
-                int desiredLength = Mathf.Max(pointBuffer.Length, 128);
-                while (desiredLength < numPoints) desiredLength *= 2;
-                pointBuffer = new float4[desiredLength];
-            }
-
-            pointBufferLength = GeneratePointBuffer(pointBuffer, msg, xOffset, yOffset, zOffset, iOffset,
+            var pointArray = pointBuffer.EnsureCapacity(numPoints);
+            int numUsedPoints = GeneratePointBuffer(pointArray, msg, xOffset, yOffset, zOffset, iOffset,
                 iField.Datatype, rgbaHint);
+            points = new ReadOnlyMemory<float4>(pointArray, 0, numUsedPoints);
             return true;
         }
 

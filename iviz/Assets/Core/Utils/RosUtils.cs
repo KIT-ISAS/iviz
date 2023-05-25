@@ -71,7 +71,13 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UnityEngine.Quaternion RosRpy2Unity(this in Vector3 v) =>
-            UnityEngine.Quaternion.Euler(v.Ros2Unity() * -Mathf.Rad2Deg);
+            UnityUtils.FromEulerRad(-v.Ros2Unity());
+
+        //public static UnityEngine.Quaternion RosRpy2Unity(this in Vector3 v) =>
+        //    Euler(v.Ros2Unity() * -Mathf.Rad2Deg);
+
+        //static UnityEngine.Quaternion Euler(in Vector3 euler) =>
+        //    UnityUtils.FromEulerRad(euler * Mathf.Deg2Rad);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UnityEngine.Quaternion RosRpy2Unity(this in Msgs.GeometryMsgs.Vector3 v) =>
@@ -89,7 +95,7 @@ namespace Iviz.Core
             q.z = (float)p.Z;
             return q;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 ToUnity(this in Point p)
         {
@@ -478,6 +484,11 @@ namespace Iviz.Core
         public static void SerializeTo(this IMessage msg, Span<byte> span)
         {
             WriteBuffer.Serialize(msg, span);
+        }
+        
+        public static void Dispose(IMessage msg)
+        {
+            ((IDisposable)msg).Dispose();
         }
     }
 }

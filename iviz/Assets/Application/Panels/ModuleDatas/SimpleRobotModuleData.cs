@@ -29,7 +29,7 @@ namespace Iviz.App
         public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.Robot;
         public override IConfiguration Configuration => RobotController.Config;
-        public override IController Controller => RobotController;
+        public override Controller Controller => RobotController;
 
         public SimpleRobotController RobotController { get; }
 

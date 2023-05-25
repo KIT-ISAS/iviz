@@ -48,25 +48,25 @@ public unsafe struct ReadBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string DeserializeString()
     {
-        int count = ReadInt();
-        if (count == 0)
+        int length = ReadInt();
+        if (length == 0)
         {
             return EmptyString;
         }
 
-        ThrowIfOutOfRange(count);
-        string val = BuiltIns.GetString(cursor, count);
+        ThrowIfOutOfRange(length);
+        string val = BuiltIns.GetString(cursor, length);
 
-        Advance(count);
+        Advance(length);
         return val;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string SkipString()
     {
-        int count = ReadInt();
-        ThrowIfOutOfRange(count);
-        Advance(count);
+        int length = ReadInt();
+        ThrowIfOutOfRange(length);
+        Advance(length);
         return EmptyString;
     }
 

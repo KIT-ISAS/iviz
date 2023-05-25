@@ -32,9 +32,9 @@ public static class EnumeratorUtils
         return new SelectEnumerable<TA[], TA, TB>(a, f);
     }
 
-    public static RangeEnumerable<TA> Take<TA>(this IReadOnlyList<TA> a, int count) => new(a, 0, count);
+    public static RangeEnumerable<TA> Take<TA>(this List<TA> a, int count) => new(a, 0, count);
 
-    public static RangeEnumerable<TA> Skip<TA>(this IReadOnlyList<TA> a, int start) => new(a, start, a.Count);
+    public static RangeEnumerable<TA> Skip<TA>(this List<TA> a, int start) => new(a, start, a.Count);
 
     public static Rent<T> ToRent<T>(this IReadOnlyCollection<T> ts) where T : unmanaged
     {

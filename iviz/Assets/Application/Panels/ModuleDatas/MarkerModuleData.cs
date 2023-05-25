@@ -79,7 +79,7 @@ namespace Iviz.App
         {
             var masks = listener.VisibleMask;
             yield return "---";
-            foreach (int i in ..masks.Count)
+            for (int i = 0; i < masks.Count; i++)
             {
                 string name = ((MarkerType) i).ToString();
                 yield return masks[i] ? name : $"<color=#A0A0A0>({name})</color>";

@@ -16,7 +16,6 @@ namespace Iviz.Ros
         const int WaitBetweenRetriesInMs = 500;
 
         readonly string topic;
-        string? publisherId;
 
         public AdvertisedTopic(string topic)
         {
@@ -58,7 +57,9 @@ namespace Iviz.Ros
             {
                 try
                 {
-                    (publisherId, Publisher) = await client.AdvertiseAsync<T>(topic, token: token);
+                    IRosPublisher<T> publisher;
+                    (publisherId, publisher) = await client.AdvertiseAsync<T>(topic, token: token);
+                    Publisher = (BaseRosPublisher)publisher;
                     return;
                 }
                 catch (RoslibException e)
@@ -70,22 +71,6 @@ namespace Iviz.Ros
 
             publisherId = null;
             Publisher = null;
-        }
-
-        public override async ValueTask UnadvertiseAsync(CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-            if (Publisher != null && publisherId != null)
-            {
-                await Publisher.UnadvertiseAsync(publisherId, token);
-            }
-        }
-
-        public override void Invalidate()
-        {
-            Id = null;
-            Publisher = null;
-            publisherId = null;
         }
 
         public override string ToString()

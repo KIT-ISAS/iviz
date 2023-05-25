@@ -13,7 +13,7 @@ using Iviz.Tools;
 namespace Iviz.Roslib;
 
 /// <summary>
-/// Base class with common functionality for <see cref="RosChannelReader"/> and <see cref="RosChannelReader{T}"/>.
+/// Base class with common functionality for <see cref="RosChannelReader{T}"/>.
 /// </summary>
 /// <typeparam name="T">The ROS message type</typeparam>
 public abstract class BaseRosChannelReader<T> : RosCallback<T>, IEnumerable<T>, IRosChannelReader, IAsyncEnumerable<T>

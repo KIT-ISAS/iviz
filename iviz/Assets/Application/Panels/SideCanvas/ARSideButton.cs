@@ -49,14 +49,14 @@ namespace Iviz.App
         {
             if (image != null)
             {
-                image.color = Interactable
+                image.color = Enabled && Interactable
                     ? Resource.Colors.EnabledSideFont
                     : Resource.Colors.DisabledSideFont;
             }
 
             if (text != null)
             {
-                text.color = Interactable
+                text.color = Enabled && Interactable
                     ? Resource.Colors.EnabledSideFont
                     : Resource.Colors.DisabledSideFont;
             }

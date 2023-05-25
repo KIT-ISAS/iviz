@@ -9,7 +9,7 @@ namespace Iviz.Controllers
     /// <summary>
     /// Parent class for all listener controllers, i.e., controllers that subscribe and process data from a ROS topic.
     /// </summary>
-    public abstract class ListenerController : IController, IHasFrame
+    public abstract class ListenerController : Controller, IHasFrame
     {
         /// <summary>
         /// The ROS subscriber of this controller.
@@ -26,11 +26,9 @@ namespace Iviz.Controllers
             Listener.Dispose();
         }
 
-        public virtual void ResetController()
+        public override void ResetController()
         {
         }
-
-        public abstract bool Visible { get; set; }
 
         public override string ToString() => $"[{GetType().Name} '{Listener.Topic}']";
     }

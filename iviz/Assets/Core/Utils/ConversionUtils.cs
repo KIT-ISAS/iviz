@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Tools;
 using Iviz.Urdf;
 using Unity.Burst;
@@ -14,6 +15,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Core
 {
@@ -378,10 +380,11 @@ namespace Iviz.Core
 
                 return numValid switch
                 {
-                    < 2 => -1,
+                    0 or 1 => -1,
                     2 => sum >> 1, // sum / 2
-                    3 => (sum * 21845) >> 16, // sum * (65536/3) / 65536
-                    _ => sum >> 2
+                    3 => (sum * (65536/3)) >> 16,
+                    4 => sum >> 2,
+                    _ => 0
                 };
             }
 
@@ -468,10 +471,10 @@ namespace Iviz.Core
             {
                 ThrowHelper.ThrowArgument("Sizes do not match!", nameof(src));
             }
-            
+
             var src3 = MemoryMarshal.Cast<Msgs.GeometryMsgs.Point, double3>(src);
             var dst3 = MemoryMarshal.Cast<Vector3, float3>(dst);
-            
+
             fixed (double3* srcPtr = src3)
             fixed (float3* dstPtr = dst3)
             {
@@ -502,7 +505,7 @@ namespace Iviz.Core
             return false;
         }
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
     public struct Rgba
     {
@@ -527,5 +530,67 @@ namespace Iviz.Core
     {
         readonly byte high;
         public readonly byte low;
+    }
+
+    [BurstCompile]
+    public static unsafe class MeshBurstUtils
+    {
+        [BurstCompile(CompileSynchronously = true)]
+        static void ToPoint4([NoAlias] float3x4* input, [NoAlias] double3x4* output, int inputLength)
+        {
+            for (int i = 0; i < inputLength; i++)
+            {
+                float3x4 input3 = input[i];
+
+                double3x4 output3;
+                output3.c0.x = input3.c0.z;
+                output3.c0.y = -input3.c0.x;
+                output3.c0.z = input3.c0.y;
+
+                output3.c1.x = input3.c1.z;
+                output3.c1.y = -input3.c1.x;
+                output3.c1.z = input3.c1.y;
+
+                output3.c2.x = input3.c2.z;
+                output3.c2.y = -input3.c2.x;
+                output3.c2.z = input3.c2.y;
+
+                output3.c3.x = input3.c3.z;
+                output3.c3.y = -input3.c3.x;
+                output3.c3.z = input3.c3.y;
+
+                output[i] = output3;
+            }
+        }
+
+        [BurstCompile(CompileSynchronously = true)]
+        static void ToPoint([NoAlias] float3* input, [NoAlias] double3* output, int inputLength)
+        {
+            for (int i = 0; i < inputLength; i++)
+            {
+                float3 input3 = input[i];
+
+                double3 output3;
+                output3.x = input3.z;
+                output3.y = -input3.x;
+                output3.z = input3.y;
+
+                output[i] = output3;
+            }
+        }
+
+        public static void ToPoint(Span<Vector3> input, Point[] output)
+        {
+            fixed (Vector3* inputPtr = input)
+            fixed (Point* outputPtr = output)
+            {
+                int length = input.Length;
+                int length4 = length / 4;
+                ToPoint4((float3x4*)inputPtr, (double3x4*)outputPtr, length4);
+
+                int offset = length4 * 4;
+                ToPoint((float3*)(inputPtr + offset), (double3*)(outputPtr + offset), length - offset);
+            }
+        }
     }
 }

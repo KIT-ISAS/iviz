@@ -31,7 +31,7 @@ namespace Iviz.Controllers
 
         public int NumValidPoints => processor.NumValidPoints;
 
-        public override TfFrame? Frame => processor.Frame;
+        public override TfFrame? Frame => processor.Node.Parent;
 
         public PointCloudConfiguration Config
         {
@@ -156,7 +156,7 @@ namespace Iviz.Controllers
                 Topic = topic,
             };
             
-            processor.Name = Config.Topic;
+            processor.Node.Name = Config.Topic;
             
             Listener = new Listener<PointCloud2>(Config.Topic, processor.Handle);
             processor.IsProcessingChanged += Listener.SetPause;

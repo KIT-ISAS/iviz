@@ -13,10 +13,7 @@ namespace Iviz.Rosbag.Writer;
 /// Usage: Construct, call <see cref="Write"/> to add messages, and close it with <see cref="Dispose"/>.
 /// Don't forget to dispose, the file cannot be read by other apps without it.
 /// </summary>
-public sealed class RosbagFileWriter : IDisposable
-#if !NETSTANDARD2_0
-    , IAsyncDisposable
-#endif
+public sealed class RosbagFileWriter : IDisposable, IAsyncDisposable
 {
     const int MaxChunkSize = int.MaxValue / 2; // 1 GB
 
@@ -200,7 +197,7 @@ public sealed class RosbagFileWriter : IDisposable
 
         int dataLength = 4 * headerData.Count + headerData.Sum(entry => BuiltIns.UTF8.GetByteCount(entry));
         await writer.WriteValueAsync(dataLength);
-        foreach (var entry in headerData)
+        foreach (string entry in headerData)
         {
             int length = BuiltIns.UTF8.GetByteCount(entry);
             await writer.WriteValueAsync(length);
@@ -695,17 +692,13 @@ public sealed class RosbagFileWriter : IDisposable
         }
         catch (Exception e)
         {
-            Logger.LogErrorFormat("{0}: Exception in DisposeAsync: {1}", this, e);
+            Logger.LogErrorFormat("{0}: Exception in " + nameof(DisposeAsync) + ": {1}", this, e);
         }
 
         cachedLastLength = writer.Length;
         if (!leaveOpen)
         {
-#if NETSTANDARD2_0
-                writer.Dispose();
-#else
             await writer.DisposeAsync();
-#endif
         }
     }
 }

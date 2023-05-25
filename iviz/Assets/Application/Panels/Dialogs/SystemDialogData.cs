@@ -532,7 +532,7 @@ namespace Iviz.App
                 HostAliases = hostAliases;
             }
 
-            foreach (int i in ..HostAliases.Length)
+            for (int i = 0; i < HostAliases.Length; i++)
             {
                 if (HostAliases[i] is not ({ } hostname, { } address))
                 {

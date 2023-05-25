@@ -22,7 +22,7 @@ public class RoslibException : RosException
 /// </summary>
 public sealed class RosInvalidMessageTypeException : RoslibException
 {
-    public RosInvalidMessageTypeException(string message) : base(message)
+    public RosInvalidMessageTypeException(string message, Exception? e = null) : base(message, e)
     {
     }
 

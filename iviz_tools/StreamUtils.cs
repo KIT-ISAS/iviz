@@ -16,7 +16,8 @@ public static class StreamUtils
     public static ValueTask<bool> ReadChunkAsync(this TcpClient client, byte[] buffer, int toRead,
         CancellationToken token)
     {
-        var socket = client.Client;
+        if (client.Client is not { } socket) return default;
+
         if (socket.Available < toRead)
         {
             return DoReadChunkAsync(socket, buffer, toRead, token);
@@ -70,9 +71,11 @@ public static class StreamUtils
         }
     }
 
-    public static ValueTask<int> ReadChunkAsync(this UdpClient udpClient, Rent buffer, CancellationToken token)
+    public static ValueTask<int> ReadChunkAsync(this UdpClient client, Rent buffer, CancellationToken token)
     {
-        return ReadSubChunkAsync(udpClient.Client, buffer.Array, 0, buffer.Length, token);
+        return client.Client is { } socket
+            ? ReadSubChunkAsync(socket, buffer.Array, 0, buffer.Length, token)
+            : default;
     }
 
     static ValueTask<int> ReadSubChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
@@ -115,7 +118,8 @@ public static class StreamUtils
     public static async ValueTask WriteChunkAsync(this TcpClient client, byte[] buffer, int toWrite,
         CancellationToken token)
     {
-        var socket = client.Client;
+        if (client.Client is not { } socket) return;
+
         int numWritten = 0;
         while (numWritten < toWrite)
         {
@@ -129,8 +133,11 @@ public static class StreamUtils
         }
     }
 
-    public static ValueTask<int> WriteChunkAsync(this UdpClient udpClient, Rent buffer, int toWrite,
-        CancellationToken token) => DoWriteChunkAsync(udpClient.Client, buffer.Array, 0, toWrite, token);
+    public static ValueTask<int> WriteChunkAsync(this UdpClient client, Rent buffer, int toWrite,
+        CancellationToken token) =>
+        client.Client is { } socket
+            ? DoWriteChunkAsync(socket, buffer.Array, 0, toWrite, token)
+            : default;
 
     static ValueTask<int> DoWriteChunkAsync(Socket socket, byte[] buffer, int offset, int toWrite,
         CancellationToken token)
@@ -266,7 +273,7 @@ public static class StreamUtils
             Logger.LogDebugFormat("{0}: Listener threw while disposing", caller);
         }
     }
-    
+
     static int SumLengths(this string[] contents)
     {
         int sum = 4 * contents.Length;
@@ -276,7 +283,7 @@ public static class StreamUtils
         }
 
         return sum;
-    }    
+    }
 }
 
 public static class CallbackHelpers

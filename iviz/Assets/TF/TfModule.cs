@@ -260,9 +260,7 @@ namespace Iviz.Controllers.TF
 
         public void Process(TransformStamped transform, bool isStatic)
         {
-            ref readonly var rosTransform = ref transform.Transform;
-
-            var unityPose = rosTransform.Ros2Unity();
+            var unityPose = transform.Transform.Ros2Unity();
 
             if (unityPose.IsInvalid())
             {

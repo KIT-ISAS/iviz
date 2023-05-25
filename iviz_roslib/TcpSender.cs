@@ -34,7 +34,7 @@ internal sealed class TcpSender<TMessage> : ProtocolSender<TMessage>, ITcpSender
     public Endpoint RemoteEndpoint { get; }
     public TransportType TransportType => TransportType.Tcp;
     public TcpClient TcpClient { get; }
-    
+
     public LoopbackReceiver<TMessage>? LoopbackReceiver;
 
     bool KeepRunning => !runningTs.IsCancellationRequested;
@@ -76,8 +76,16 @@ internal sealed class TcpSender<TMessage> : ProtocolSender<TMessage>, ITcpSender
         serializer = ((TMessage)topicInfo.Generator).CreateSerializer();
         senderQueue = new SenderQueue<TMessage>(this, serializer);
         TcpClient = client;
-        Endpoint = new Endpoint((IPEndPoint)TcpClient.Client.LocalEndPoint!);
-        RemoteEndpoint = new Endpoint((IPEndPoint)TcpClient.Client.RemoteEndPoint!);
+
+        if (client.Client is not { RemoteEndPoint: IPEndPoint localEndPoint, LocalEndPoint: IPEndPoint remoteEndPoint })
+        {
+            // shouldn't happen
+            BuiltIns.ThrowArgument(nameof(client), "Client argument is not connected");
+            return; // unreachable
+        }
+
+        Endpoint = new Endpoint(localEndPoint);
+        RemoteEndpoint = new Endpoint(remoteEndPoint);
         task = TaskUtils.Run(() => StartSession(provider).AwaitNoThrow(this), runningTs.Token);
     }
 
@@ -315,7 +323,7 @@ internal sealed class TcpSender<TMessage> : ProtocolSender<TMessage>, ITcpSender
                     numSent++;
                     bytesSent += msgLength + 4;
                     msgSignal?.TrySetResult();
-                }                
+                }
             }
             catch (Exception e)
             {

@@ -2,8 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using Iviz.Displays;
 using Iviz.Msgs;
 using UnityEngine;
 
@@ -11,12 +9,6 @@ namespace Iviz.Core
 {
     public static class BoundsUtils
     {
-        [return: NotNullIfNotNull("resource")]
-        public static Transform? GetTransform(this IDisplay? resource)
-        {
-            return ((MonoBehaviour?)resource)?.transform;
-        }
-
         static Vector3[]? cubePoints;
 
         static Vector3[] CubePoints => cubePoints ??= new[]

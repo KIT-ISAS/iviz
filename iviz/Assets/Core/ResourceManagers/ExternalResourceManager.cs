@@ -749,7 +749,7 @@ namespace Iviz.Displays
                 var child = new GameObject("Include");
 
                 var m = new Matrix4x4();
-                foreach (int i in ..16)
+                for (int i = 0; i < 16; i++)
                 {
                     m[i] = include.Pose.M[i];
                 }

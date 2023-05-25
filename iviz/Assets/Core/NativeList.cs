@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Iviz.Msgs;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
@@ -79,6 +80,14 @@ namespace Iviz.Core
             unsafePtr[length++] = t;
         }
 
+        public void Resize(int size)
+        {
+            if (size < 0) BuiltIns.ThrowArgumentOutOfRange(nameof(size));
+            
+            EnsureCapacity(size);
+            length = size;
+        }
+
         public void AddRange(ReadOnlySpan<T> otherArray)
         {
             int otherLength = otherArray.Length;
@@ -97,6 +106,7 @@ namespace Iviz.Core
 
         public NativeArray<T> AsArray() => length == 0 ? EmptyArray : array.GetSubArray(0, length); 
 
+        Span<T> AsSpan() => new(unsafePtr, length);
         ReadOnlySpan<T> AsReadOnlySpan() => new(unsafePtr, length);
 
         public void Clear()
@@ -144,6 +154,7 @@ namespace Iviz.Core
             Dispose();
         }
 
+        public static implicit operator Span<T>(NativeList<T> list) => list.AsSpan();
         public static implicit operator ReadOnlySpan<T>(NativeList<T> list) => list.AsReadOnlySpan();
         public static implicit operator NativeArray<T>(NativeList<T> list) => list.AsArray();
     }

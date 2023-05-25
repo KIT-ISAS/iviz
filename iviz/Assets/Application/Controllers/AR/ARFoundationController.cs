@@ -27,8 +27,6 @@ namespace Iviz.Controllers
     {
         const float AnchorPauseTimeInSec = 2;
 
-        const bool EnableMeshingSubsystem = false;
-
         static AnchorToggleButton ARStartSession => ModuleListPanel.Instance.AnchorCanvasPanel.ARStartSession;
         static GameObject ARMoveDevicePanel => ModuleListPanel.Instance.AnchorCanvasPanel.ARInfoPanel;
 
@@ -181,6 +179,8 @@ namespace Iviz.Controllers
             get => base.EnableMeshing;
             set
             {
+                if (!EnableMeshingSubsystem) return;
+                
                 base.EnableMeshing = value;
                 if (value)
                 {
@@ -210,8 +210,6 @@ namespace Iviz.Controllers
                 base.PinRootMarker = value;
             }
         }
-
-        public bool ProvidesMesh { get; }
 
         public ARFoundationController(ARConfiguration? config)
         {

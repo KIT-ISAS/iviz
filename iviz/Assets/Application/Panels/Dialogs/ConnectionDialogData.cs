@@ -327,10 +327,10 @@ namespace Iviz.App
                 if (newCallerUri != null)
                 {
                     panel.MyUri.Value = newCallerUri.ToString();
+                    MyUri = newCallerUri;
                 }
 
                 MasterUri = uri;
-                MyUri = newCallerUri;
             };
             panel.MyId.Submit += SetMyId;
             panel.MyId2.Submit += SetMyId;

@@ -6,12 +6,12 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib2;
 
-public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMessage> where TMessage : IMessage, new()
+public sealed class Ros2Publisher<TMessage> : BaseRosPublisher<TMessage>, IRos2Publisher
+    where TMessage : IMessage, new()
 {
     readonly Ros2Client client;
     readonly RclPublisher publisher;
     readonly List<string> ids = new();
-    readonly CancellationTokenSource runningTs = new();
     readonly Serializer<TMessage> serializer;
 
     readonly SemaphoreSlim signal = new(0);
@@ -24,11 +24,9 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
     int numSent;
     long bytesSent;
 
-    public CancellationToken CancellationToken => runningTs.Token;
-    public string Topic => publisher.Topic;
-    public string TopicType => publisher.TopicType;
-    public int NumSubscribers => publisher.GetNumSubscribers();
-    public bool IsAlive => !CancellationToken.IsCancellationRequested;
+    public override string Topic => publisher.Topic;
+    public override string TopicType => publisher.TopicType;
+    public override int NumSubscribers => publisher.GetNumSubscribers();
     public QosProfile Profile => publisher.Profile;
 
     internal Ros2Publisher(Ros2Client client, RclPublisher publisher)
@@ -37,14 +35,6 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
         this.publisher = publisher;
         serializer = new TMessage().CreateSerializer();
         task = Task.Run(() => Run().AwaitNoThrow(this));
-    }
-
-    void AssertIsAlive()
-    {
-        if (!IsAlive)
-        {
-            BuiltIns.ThrowObjectDisposed(nameof(Ros2Publisher<TMessage>), "This is not a valid publisher");
-        }
     }
 
     async Task Run()
@@ -69,7 +59,7 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
         }
     }
 
-    public string Advertise()
+    public override string Advertise()
     {
         AssertIsAlive();
 
@@ -78,7 +68,7 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
         return id;
     }
 
-    public bool Unadvertise(string id, CancellationToken token = default)
+    public override bool Unadvertise(string id, CancellationToken token = default)
     {
         if (id is null) BuiltIns.ThrowArgumentNull(nameof(id));
         if (!IsAlive)
@@ -95,7 +85,7 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
         return removed;
     }
 
-    public async ValueTask<bool> UnadvertiseAsync(string id, CancellationToken token = default)
+    public override async ValueTask<bool> UnadvertiseAsync(string id, CancellationToken token = default)
     {
         if (id is null) BuiltIns.ThrowArgumentNull(nameof(id));
         if (!IsAlive)
@@ -124,20 +114,15 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
         return ids.Remove(topicId);
     }
 
-    public bool ContainsId(string id)
+    public override bool ContainsId(string id)
     {
         if (id is null) BuiltIns.ThrowArgumentNull(nameof(id));
         return ids.Contains(id);
     }
 
-    public bool MessageTypeMatches(Type type)
-    {
-        return type == typeof(TMessage);
-    }
+    public override PublisherState GetState() => TaskUtils.RunSync(GetStateAsync);
 
-    public PublisherState GetState() => TaskUtils.RunSync(GetStateAsync);
-
-    public async ValueTask<PublisherState> GetStateAsync(CancellationToken token)
+    public override async ValueTask<PublisherState> GetStateAsync(CancellationToken token = default)
     {
         var subscribers = await client.Rcl.GetSubscriberInfoAsync(Topic, token);
 
@@ -154,7 +139,7 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
         return new Ros2PublisherState(Topic, TopicType, ids, senderStates, Profile);
     }
 
-    public void Publish(in TMessage message)
+    public override void Publish(in TMessage message)
     {
         AssertIsAlive();
         serializer.RosValidate(message);
@@ -163,41 +148,19 @@ public sealed class Ros2Publisher<TMessage> : IRos2Publisher, IRosPublisher<TMes
         signal.Release();
     }
 
-    public ValueTask PublishAsync(in TMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
+    public override ValueTask PublishAsync(in TMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
         CancellationToken token = default)
     {
         Publish(message);
         return default;
     }
 
-    void IRosPublisher.Publish(IMessage message)
-    {
-        if (message is TMessage tMessage)
-        {
-            Publish(tMessage);
-            return;
-        }
-
-        RosExceptionUtils.ThrowInvalidMessageType();
-    }
-
-    ValueTask IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
-    {
-        if (message is TMessage tMessage)
-        {
-            return PublishAsync(tMessage, policy, token);
-        }
-
-        RosExceptionUtils.ThrowInvalidMessageType();
-        return default; // unreachable
-    }
-
-    public void Dispose()
+    public override void Dispose()
     {
         TaskUtils.RunSync(DisposeAsync, default);
     }
 
-    public async ValueTask DisposeAsync(CancellationToken token = default)
+    public override async ValueTask DisposeAsync(CancellationToken token)
     {
         if (disposed) return;
         disposed = true;

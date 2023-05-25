@@ -34,6 +34,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
         var rclSubscriber = Subscriber;
         var deserializer = new TMessage().CreateDeserializer();
         var receiverInfo = new Ros2Receiver(Topic, TopicType);
+        var messageInfo = new MessageInfo(receiverInfo);
         var messageHandler = new RclDeserializeHandler<TMessage>(this, deserializer);
         using var gcHandle = new GCHandleWrapper(messageHandler);
 
@@ -59,7 +60,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
             {
                 try
                 {
-                    callback.Handle(msg, receiverInfo);
+                    callback.Handle(msg, messageInfo);
                 }
                 catch (Exception e)
                 {
@@ -104,18 +105,19 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
         return type == typeof(TMessage);
     }
 
-    string IRosSubscriber.Subscribe(Action<IMessage> callback) =>
-        Subscribe(msg => callback(msg));
-
-    string IRosSubscriber.Subscribe(Action<IMessage, IRosConnection> callback)
+    string IRosSubscriber.Subscribe(Action<IMessage> callback)
     {
-        void Callback(in TMessage msg, IRosConnection receiver) => callback(msg, receiver);
-        return Subscribe(new ActionRosCallback<TMessage>(Callback));
+        return Subscribe(new GenericRosCallback<TMessage>(callback));
+    }
+
+    string IRosSubscriber.Subscribe(Action<IMessage, MessageInfo> callback)
+    {
+        return Subscribe(new Generic2RosCallback<TMessage>(callback));
     }
 
     public string Subscribe(Action<TMessage> callback)
     {
-        return Subscribe(new DirectRosCallback<TMessage>(callback));
+        return Subscribe(new ActionRosCallback<TMessage>(callback));
     }
 
     public string Subscribe(RosCallback<TMessage> callback)
@@ -300,7 +302,7 @@ public class Ros2Subscriber : Signalizable
         var knownPublishers = publishers.ToDictionary(static info => info.Guid);
 
         var contactedPublishers =
-            publisherStats.Take(numPublishers).ToDictionary(static stats => stats.guid);
+            Enumerable.Take(publisherStats, numPublishers).ToDictionary(static stats => stats.guid);
 
         var receiverStates = new List<Ros2ReceiverState>(knownPublishers.Count);
 
