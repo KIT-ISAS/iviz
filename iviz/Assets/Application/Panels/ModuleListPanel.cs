@@ -1143,6 +1143,10 @@ namespace Iviz.App
         {
             // app unpausing needs to be handled carefully because in mobile,
             // getting suspended sends us to the background and kills all connections
+            if (!Settings.IsMobile || !Settings.IsStandalone)
+            {
+                return;
+            }
 
             if (!RosManager.HasInstance)
             {

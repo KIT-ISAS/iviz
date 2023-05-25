@@ -2,7 +2,7 @@
   "dependencies": {
     "com.microsoft.mixedreality.openxr": "file:MixedReality/com.microsoft.mixedreality.openxr-1.1.2.tgz",
     "com.unity.burst": "1.6.6",
-    "com.unity.ide.rider": "3.0.15",
+    "com.unity.ide.rider": "3.0.16",
     "com.unity.mathematics": "1.2.6",
     "com.unity.nuget.newtonsoft-json": "3.0.2",
     "com.unity.postprocessing": "3.2.2",
@@ -12,7 +12,8 @@
     "com.unity.xr.arfoundation": "4.2.6",
     "com.unity.xr.arkit": "4.2.6",
     "com.unity.xr.interaction.toolkit": "1.0.0-pre.8",
-    "com.unity.xr.openxr": "1.4.2",
+    "com.unity.xr.openxr": "1.5.3",
+
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",

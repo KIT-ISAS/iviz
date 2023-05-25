@@ -618,7 +618,7 @@ namespace Iviz.Ros
             throw new InvalidOperationException("Ran out of publishers!"); // NYI!
         }
 
-        static Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 100), token);
+        static Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 1000), token);
 
         async ValueTask ReAdvertise(IRosClient newClient, IAdvertisedTopic topic, CancellationToken token)
         {
@@ -689,10 +689,11 @@ namespace Iviz.Ros
         internal void Advertise<T>(Sender<T> advertiser) where T : IMessage, new()
         {
             ThrowHelper.ThrowIfNull(advertiser, nameof(advertiser));
-            advertiser.Id = null;
             CancellationToken token = runningTs.Token;
             Post(async () =>
             {
+                advertiser.Id = null;
+
                 try
                 {
                     await AdvertiseCore(advertiser, token);

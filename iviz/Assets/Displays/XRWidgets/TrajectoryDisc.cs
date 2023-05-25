@@ -68,7 +68,11 @@ namespace Iviz.Displays.XR
         public Color Color
         {
             get => Sphere.Color;
-            set => Sphere.Color = value;
+            set
+            {
+                Sphere.Color = value;
+                Sphere.EmissiveColor = value.ScaledBy(0.5f);
+            }
         }
 
         public Color SecondColor
@@ -136,7 +140,7 @@ namespace Iviz.Displays.XR
         {
             Holder.SetActive(true);
             Glow.Visible = false;
-            Sphere.EmissiveColor = Color.black;
+            Sphere.EmissiveColor = Color.ScaledBy(0.5f);
 
             GameThread.EveryFrame -= UpdateSegment;
 
@@ -273,7 +277,7 @@ namespace Iviz.Displays.XR
 
             Disc.Transform.localPosition = Vector3.zero;
             Glow.Visible = false;
-            Sphere.EmissiveColor = Color.black;
+            Sphere.EmissiveColor = Color.ScaledBy(0.5f);
         }
 
         public void SplitForRecycle()
