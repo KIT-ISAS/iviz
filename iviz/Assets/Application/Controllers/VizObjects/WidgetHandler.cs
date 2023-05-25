@@ -65,25 +65,25 @@ namespace Iviz.Controllers
         {
             if (string.IsNullOrWhiteSpace(msg.Id))
             {
-                RosLogger.Info($"{this}: Cannot add widget with empty id");
+                RosLogger.Info($"{ToString()}: Cannot add widget with empty id");
                 return;
             }
 
             if (msg.Color.IsInvalid() || msg.SecondColor.IsInvalid())
             {
-                RosLogger.Info($"{this}: Color of widget '{msg.Id}' contains invalid values");
+                RosLogger.Info($"{ToString()}: Color of widget '{msg.Id}' contains invalid values");
                 return;
             }
 
             if (msg.Scale.IsInvalid() || msg.SecondScale.IsInvalid())
             {
-                RosLogger.Info($"{this}: Scale of widget '{msg.Id}' contains invalid values");
+                RosLogger.Info($"{ToString()}: Scale of widget '{msg.Id}' contains invalid values");
                 return;
             }
 
             if (msg.Pose.IsInvalid())
             {
-                RosLogger.Info($"{this}: Pose of widget '{msg.Id}' contains invalid values");
+                RosLogger.Info($"{ToString()}: Pose of widget '{msg.Id}' contains invalid values");
                 return;
             }
 
@@ -97,7 +97,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                RosLogger.Info($"{this}: Widget '{msg.Id}' of type {widgetObject.Type} " +
+                RosLogger.Info($"{ToString()}: Widget '{msg.Id}' of type {widgetObject.Type} " +
                                $"is being replaced with type {widgetType}");
                 widgetObject.Dispose();
                 vizObjects.Remove(msg.Id);
@@ -120,7 +120,7 @@ namespace Iviz.Controllers
 
             if (resourceKey == null)
             {
-                RosLogger.Error($"{this}: Widget '{msg.Id}' has unknown type {msg.Type.ToString()}");
+                RosLogger.Error($"{ToString()}: Widget '{msg.Id}' has unknown type {msg.Type.ToString()}");
                 return;
             }
 
@@ -129,6 +129,8 @@ namespace Iviz.Controllers
 
             vizObjects[vizObject.id] = vizObject;
         }
+
+        public override string ToString() => $"[{nameof(WidgetHandler)}]";
 
         // ----------------------------------------------
 

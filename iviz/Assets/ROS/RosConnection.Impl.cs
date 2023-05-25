@@ -377,8 +377,10 @@ namespace Iviz.Ros
         static void SetEnvironmentVariable(string variable, string? value)
         {
             string valueStr = value != null ? $"\"{value}\"" : "(none)";
-
-            RosLogger.Info($"[{nameof(RosConnection)}]: Setting environment variable {variable}={valueStr}");
+            RosLogger.Info(
+                value == null 
+                    ? $"[{nameof(RosConnection)}]: Setting environment variable {variable}={valueStr}" 
+                    : $"[{nameof(RosConnection)}]: Skipping environment variable {variable}");
 
             try
             {

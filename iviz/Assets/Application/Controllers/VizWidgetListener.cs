@@ -120,6 +120,13 @@ namespace Iviz.Controllers
                     Listener = new Listener<RobotPreview>(configTopic, handler.Handler, 50);
                     break;
                 }
+                case RobotPreviewArray.MessageType:
+                {
+                    var handler = new RobotPreviewHandler();
+                    vizHandler = handler;
+                    Listener = new Listener<RobotPreviewArray>(configTopic, handler.Handler, 50);
+                    break;
+                }
                 case Boundary.MessageType:
                 {
                     var handler = new BoundaryHandler(this);

@@ -16,10 +16,11 @@ internal sealed class RosNodeServer
     static readonly XmlRpcArg DefaultOkResponse = OkResponse(0);
 
     readonly RosClient client;
-    readonly Dictionary<string, Func<RosValue[], CancellationToken, ValueTask>> lateCallbacks;
     readonly HttpListener listener;
 
-    readonly Dictionary<string, Func<RosValue[], XmlRpcArg>> methods;
+    readonly Dictionary<string, Func<RosValue[], XmlRpcArg>> callbacks;
+    readonly Dictionary<string, Func<RosValue[], CancellationToken, ValueTask>> lateCallbacks;
+
     readonly CancellationTokenSource runningTs = new();
 
     Task? task;
@@ -34,7 +35,7 @@ internal sealed class RosNodeServer
 
         listener = new HttpListener(client.CallerUri.Port);
 
-        methods = new Dictionary<string, Func<RosValue[], XmlRpcArg>>
+        callbacks = new Dictionary<string, Func<RosValue[], XmlRpcArg>>
         {
             ["getBusStats"] = GetBusStats,
             ["getBusInfo"] = GetBusInfo,
@@ -93,7 +94,7 @@ internal sealed class RosNodeServer
         using var linkedTs = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
         try
         {
-            await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks, linkedTs.Token);
+            await XmlRpcService.MethodResponseAsync(context, callbacks, lateCallbacks, linkedTs.Token);
         }
         catch (OperationCanceledException)
         {
@@ -404,7 +405,7 @@ internal sealed class RosNodeServer
                 return ErrorResponse("'methodname' or 'params' missing");
             }
 
-            if (!methods.TryGetValue(methodName, out var method))
+            if (!callbacks.TryGetValue(methodName, out var method))
             {
                 return ErrorResponse("Method not found");
             }
