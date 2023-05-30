@@ -23,6 +23,8 @@ namespace Iviz.Ros
     {
         public const bool IsRos2VersionSupported = RosConnection.IsRos2VersionSupported;
 
+        public static bool OwnMasterEnabledByDefault => Settings.IsMacOS || Settings.IsMobile; 
+
         protected IRosClient? client;
 
         // ROS1 stuff
@@ -90,10 +92,10 @@ namespace Iviz.Ros
         }
 
         public bool KeepReconnecting { get; set; }
-        
+
         public abstract BagListener? BagListener { get; set; }
         public abstract RosVersion RosVersion { get; set; }
-        
+
         public abstract void SetHostAliases(IEnumerable<(string hostname, string address)> newHostAliases);
         public abstract void TryOnceToConnect();
         public abstract TopicNameType[] GetSystemPublishedTopicTypes(bool withRefresh = true);
@@ -114,28 +116,12 @@ namespace Iviz.Ros
 
         internal static void RaiseConnectionStateChanged(ConnectionState c)
         {
-            try
-            {
-                ConnectionStateChanged?.Invoke(c);
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{nameof(RosProvider)}: " +
-                                $"Error during {nameof(RaiseConnectionStateChanged)}", e);
-            }
+            ConnectionStateChanged.TryRaise(c, nameof(RosProvider));
         }
 
         internal static void RaiseConnectionWarningStateChanged(bool c)
         {
-            try
-            {
-                ConnectionWarningStateChanged?.Invoke(c);
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{nameof(RosProvider)}: " +
-                                $"Error during {nameof(RaiseConnectionWarningStateChanged)}", e);
-            }
+            ConnectionWarningStateChanged.TryRaise(c, nameof(RosProvider));
         }
 
         internal static void ClearEvents()

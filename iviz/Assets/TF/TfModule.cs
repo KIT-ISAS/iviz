@@ -404,14 +404,7 @@ namespace Iviz.Controllers.TF
 
         void RaiseResetFrames()
         {
-            try
-            {
-                ResetFrames?.Invoke();
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{ToString()}: Error during {nameof(RaiseResetFrames)}", e);
-            }
+            ResetFrames.TryRaise(this);
         }
 
         TfFrame Add(TfFrame t)

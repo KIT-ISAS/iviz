@@ -137,7 +137,7 @@ namespace Iviz.Displays.XR
 
         void Start()
         {
-            BoundsChanged?.Invoke();
+            BoundsChanged.TryRaise(this);
         }
 
         void OnPointerDown()
@@ -151,7 +151,7 @@ namespace Iviz.Displays.XR
             pointerDown = false;
             UpdateLayout();
             Resource.Audio.PlayAt(Transform.position, AudioClipType.Click);
-            Clicked?.Invoke();
+            Clicked.TryRaise(this);
         }
 
         public void SplitForRecycle()
@@ -211,7 +211,7 @@ namespace Iviz.Displays.XR
 
             BoxCollider.SetLocalBounds(fullBounds);
             //Bounds = fullBounds;
-            BoundsChanged?.Invoke();
+            BoundsChanged.TryRaise(this);
         }
     }
 }

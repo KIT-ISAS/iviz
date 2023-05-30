@@ -165,7 +165,7 @@ namespace Iviz.Controllers
                     markerDetector.DelayBetweenCapturesInMs = 3000;
                 }
 
-                SetupModeChanged?.Invoke(value);
+                SetupModeChanged.TryRaise(value, this);
             }
         }
 

@@ -274,7 +274,7 @@ namespace Iviz.Displays.XR
             Connector.Reset();
             Connector.Visible = false;
 
-            Expired?.Invoke();
+            Expired.TryRaise(this);
             Expired = null;
 
             GameThread.AfterFramesUpdatedLate -= UpdatePose;

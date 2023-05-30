@@ -56,7 +56,7 @@ namespace Iviz.App
                         : $"Changing master uri to '{value}'.");
                 }
 
-                MasterUriChanged?.Invoke(value);
+                MasterUriChanged.TryRaise(value, this);
             }
         }
 
@@ -74,7 +74,7 @@ namespace Iviz.App
                     RosLogger.Internal($"Changing caller uri to '{value}'.");
                 }
                 
-                MyUriChanged?.Invoke(value);
+                MyUriChanged.TryRaise(value, this);
             }
         }
 
@@ -93,7 +93,7 @@ namespace Iviz.App
                     RosLogger.Internal($"Changing my ROS id to '{value}'.");
                 }
 
-                MyIdChanged?.Invoke(value);
+                MyIdChanged.TryRaise(value, this);
             }
         }
 
@@ -142,7 +142,7 @@ namespace Iviz.App
                     ? $"Setting ROS2 discovery server to {endpoint.Description()}."
                     : "Disabling ROS2 discovery server.");
                 
-                DiscoveryServerChanged?.Invoke(value);
+                DiscoveryServerChanged.TryRaise(value, this);
             }
         }
 
@@ -156,7 +156,7 @@ namespace Iviz.App
                 RosManager.Connection.DomainId = value;
                 RosLogger.Internal($"Setting ROS2 domain id to {value.ToString()}.");
                 
-                DomainIdChanged?.Invoke(value);
+                DomainIdChanged.TryRaise(value, this);
             }
         }
 
@@ -199,7 +199,7 @@ namespace Iviz.App
                 }
 
                 RosManager.Connection.RosVersion = value;
-                RosVersionChanged?.Invoke(value);
+                RosVersionChanged.TryRaise(value, this);
             }
         }
 
@@ -215,12 +215,12 @@ namespace Iviz.App
         {
             panel = DialogPanelManager.GetPanelByType<ConnectionDialogPanel>(DialogPanelType.Connection);
             panel.LineLog.Text.vertexBufferAutoSizeReduction = false;
-            RosLogger.LogInternal += OnLogInternal;
+            RosLogger.LogInternal = OnLogInternal;
         }
 
         public override void Dispose()
         {
-            RosLogger.LogInternal -= OnLogInternal;
+            RosLogger.LogInternal = null;
         }
 
         void OnLogInternal(string msg)
@@ -435,7 +435,7 @@ namespace Iviz.App
             panel.ServerMode.State = false;
             panel.MasterUri.Interactable = true;
             RosManager.Connection.Disconnect();
-            MasterActiveChanged?.Invoke(false);
+            MasterActiveChanged.TryRaise(false, this);
         }
 
         public async Task TryCreateMasterAsync()
@@ -477,7 +477,7 @@ namespace Iviz.App
             panel.ServerMode.State = true;
             panel.MasterUri.Interactable = false;
             RosLogger.Internal($"Created <b>master node</b> using my uri {ownMasterUriStr}.");
-            MasterActiveChanged?.Invoke(true);
+            MasterActiveChanged.TryRaise(true, this);
 
             RosManager.Connection.TryOnceToConnect();
         }
@@ -500,7 +500,8 @@ namespace Iviz.App
                 RosLogger.Internal(ownHost
                         ? "Trying to connect to local ROS server."
                         : "Trying to connect to previous ROS server.");
-                if ((Settings.IsMacOS || Settings.IsMobile) && ownHost)
+
+                if (RosProvider.OwnMasterEnabledByDefault && ownHost)
                 {
                     _ = TryCreateMasterAsync().AwaitNoThrow(this); // create master and connect
                     return;

@@ -538,14 +538,7 @@ namespace Iviz.Displays
         
         void RaiseTextureChanged(Texture2D? texture)
         {
-            try
-            {
-                TextureChanged?.Invoke(texture);
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{ToString()}: Error during {nameof(RaiseTextureChanged)}", e);
-            }
+            TextureChanged.TryRaise(texture, this);
         }        
         
 

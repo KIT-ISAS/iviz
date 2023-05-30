@@ -30,7 +30,7 @@ namespace Iviz.Displays
         {
             if (args.updated.Contains(Anchor))
             {
-                Moved?.Invoke(Pose);
+                Moved.TryRaise(Pose, this);
             }
         }
 

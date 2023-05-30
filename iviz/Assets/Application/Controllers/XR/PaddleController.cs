@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using Iviz.Core;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
 using UnityEngine.XR;
@@ -92,7 +93,7 @@ namespace Iviz.Controllers.XR
             {
                 if (newSecondaryState && !secondaryState)
                 {
-                    SecondaryClicked?.Invoke();
+                    SecondaryClicked.TryRaise(this);
                 }
 
                 secondaryState = newSecondaryState;

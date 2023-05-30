@@ -595,15 +595,7 @@ namespace Iviz.Controllers
 
         void RaiseBoundsChanged()
         {
-            try
-            {
-                BoundsChanged?.Invoke();
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{ToString()}: " +
-                                $"Error during {nameof(RaiseBoundsChanged)}", e);
-            }
+            BoundsChanged.TryRaise(this);
         }
 
         void UpdateTransform(Marker msg)

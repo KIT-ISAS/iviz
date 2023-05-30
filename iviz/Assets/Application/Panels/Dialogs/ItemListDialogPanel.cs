@@ -128,7 +128,7 @@ namespace Iviz.App
 
         void RaiseClose()
         {
-            CloseClicked?.Invoke();
+            CloseClicked.TryRaise(this);
         }
 
         void UpdateSize()

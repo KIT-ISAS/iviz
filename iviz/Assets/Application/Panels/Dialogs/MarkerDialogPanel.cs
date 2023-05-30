@@ -54,10 +54,10 @@ namespace Iviz.App
 
         void Awake()
         {
-            Reset.onClick.AddListener(() => ResetAll?.Invoke());
-            LinkResolver.LinkClicked += s => LinkClicked?.Invoke(s);
-            Left.onClick.AddListener(() => Flipped?.Invoke(-1));
-            Right.onClick.AddListener(() => Flipped?.Invoke(1));
+            Reset.onClick.AddListener(() => ResetAll.TryRaise(this));
+            LinkResolver.LinkClicked += s => LinkClicked.TryRaise(s, this);
+            Left.onClick.AddListener(() => Flipped.TryRaise(-1, this));
+            Right.onClick.AddListener(() => Flipped.TryRaise(1, this));
         }
         
         public override void ClearSubscribers()

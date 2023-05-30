@@ -17,7 +17,7 @@ namespace Iviz.App
 
         void Awake()
         {
-            button.onClick.AddListener(() => Clicked?.Invoke());
+            button.onClick.AddListener(() => Clicked.TryRaise(this));
         }
 
         public bool Interactable

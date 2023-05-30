@@ -28,7 +28,7 @@ namespace Iviz.App
 
         void Awake()
         {
-            CameraButton.onClick.AddListener(() => CameraButtonClicked?.Invoke());
+            CameraButton.onClick.AddListener(() => CameraButtonClicked.TryRaise(this));
         }
     }
 }

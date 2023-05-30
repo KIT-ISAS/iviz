@@ -236,15 +236,7 @@ namespace Iviz.Displays
 
         void RaiseBoundsChanged()
         {
-            try
-            {
-                BoundsChanged?.Invoke();
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{ToString()}: " +
-                                $"Error during {nameof(RaiseBoundsChanged)}", e);
-            }
+            BoundsChanged.TryRaise(this);
         }
 
         public override void Suspend()

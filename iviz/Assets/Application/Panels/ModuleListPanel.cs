@@ -232,7 +232,7 @@ namespace Iviz.App
             TryLoadDefaultStateConfiguration();
 
             initialized = true;
-            InitFinished?.Invoke();
+            InitFinished.TryRaise(this);
             InitFinished = null;
 
             Dialogs.ConnectionData.TryStartupConnection();

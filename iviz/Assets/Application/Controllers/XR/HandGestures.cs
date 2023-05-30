@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using Iviz.Core;
 using UnityEngine;
 
 namespace Iviz.Controllers.XR
@@ -37,7 +38,7 @@ namespace Iviz.Controllers.XR
                 IsIndexPointing = false;
                 if (hasGesture)
                 {
-                    GestureChanged?.Invoke();
+                    GestureChanged.TryRaise(this);
                 }
 
                 return;
@@ -57,7 +58,7 @@ namespace Iviz.Controllers.XR
                 IsPalmUp = CheckPalmUp(45 * Mathf.Deg2Rad);
                 IsHandOpen = CheckPalmOpen(0.08f, 0.105f);
                 IsIndexPointing = CheckIndexPointing(0.10f, 0.05f);
-                GestureChanged?.Invoke();
+                GestureChanged.TryRaise(this);
                 firstState = false;
                 return;
             }
@@ -97,7 +98,7 @@ namespace Iviz.Controllers.XR
 
             if (triggerStateChanged)
             {
-                GestureChanged?.Invoke();
+                GestureChanged.TryRaise(this);
             }
 
             bool CheckPalmUp(float threshold) => -state.Palm.up.y > Mathf.Sin(threshold);
@@ -134,7 +135,7 @@ namespace Iviz.Controllers.XR
             else if (!isPalmClicking)
             {
                 isPalmClicking = true;
-                PalmClicked?.Invoke();
+                PalmClicked.TryRaise(this);
             }
 
             bool CheckPalmClicking() => IsPalmUp &&

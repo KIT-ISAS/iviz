@@ -51,20 +51,21 @@ namespace Iviz.App
             }
             else
             {
-                callback?.Invoke(entry.Id);
+                callback.TryRaise(entry.Id, this);
                 Close();
             }
         }
 
         static string DescriptionToString(MenuEntryDescription description)
         {
+            string title = description.Title;
             return description.Type switch
             {
-                MenuEntryType.Forward => $"<b>{description.Title}  →</b>",
-                MenuEntryType.Off => $"<b>{description.Title}</b>\nOff",
-                MenuEntryType.On => $"<b>{description.Title}</b>\nOn",
-                MenuEntryType.Default => $"<b>{description.Title}</b>",
-                MenuEntryType.Back => $"<b>← {description.Title}</b>",
+                MenuEntryType.Forward => $"<b>{title}  →</b>",
+                MenuEntryType.Off => $"<b>{title}</b>\nOff",
+                MenuEntryType.On => $"<b>{title}</b>\nOn",
+                MenuEntryType.Default => $"<b>{title}</b>",
+                MenuEntryType.Back => $"<b>← {title}</b>",
                 _ => throw new ArgumentOutOfRangeException()
             };
         }

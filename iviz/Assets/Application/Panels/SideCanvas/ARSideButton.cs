@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using Iviz.Core;
 using Iviz.Resources;
 using TMPro;
 using UnityEngine;
@@ -78,7 +79,7 @@ namespace Iviz.App
 
         void OnClick()
         {
-            Clicked?.Invoke();
+            Clicked.TryRaise(this);
         }
 
         void OnDestroy()

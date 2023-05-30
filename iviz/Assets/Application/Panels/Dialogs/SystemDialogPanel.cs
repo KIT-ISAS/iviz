@@ -72,7 +72,7 @@ namespace Iviz.App
                 TextForMode(mode).fontStyle = FontStyles.Normal;
                 mode = value;
                 TextForMode(mode).fontStyle = FontStyles.Bold;
-                ModeChanged?.Invoke(mode);
+                ModeChanged.TryRaise(mode, this);
 
                 AliasesTab.SetActive(mode == ModeType.Aliases);
                 InfoTab.SetActive(mode != ModeType.Aliases);
@@ -87,7 +87,7 @@ namespace Iviz.App
         void Awake()
         {
             Mode = ModeType.Topics;
-            Link.LinkClicked += l => LinkClicked?.Invoke(l);
+            Link.LinkClicked += l => LinkClicked.TryRaise(l, this);
             Topics.onClick.AddListener(() => Mode = ModeType.Topics);
             Services.onClick.AddListener(() => Mode = ModeType.Services);
             Params.onClick.AddListener(() => Mode = ModeType.Params);

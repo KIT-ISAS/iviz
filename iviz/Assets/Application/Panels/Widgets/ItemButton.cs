@@ -22,7 +22,7 @@ namespace Iviz.App
 
         public void RaiseClicked(int subIndex)
         {
-            Clicked?.Invoke(subIndex);
+            Clicked.TryRaise(subIndex, this);
         }
 
         public Vector2 AnchoredPosition

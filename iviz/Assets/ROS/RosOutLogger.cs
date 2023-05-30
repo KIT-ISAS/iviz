@@ -1,5 +1,6 @@
 #nullable enable
 
+using System;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
@@ -16,7 +17,7 @@ namespace Iviz.Ros
 
         public delegate void LogDelegate(in LogMessage log);
 
-        public static event LogDelegate? MessageArrived;
+        public static LogDelegate? MessageArrived;
 
         public LogLevel MinLogLevel { get; set; } = LogLevel.Info;
         public Listener Listener { get; private set; }
@@ -51,13 +52,29 @@ namespace Iviz.Ros
 
         static bool Handle(Msgs.RosgraphMsgs.Log msg, IRosConnection _)
         {
-            MessageArrived?.Invoke(new LogMessage(msg));
+            try
+            {
+                MessageArrived?.Invoke(new LogMessage(msg));
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{nameof(RosOutLogger)}: Error during {nameof(Handle)}", e);
+            }
+
             return true;
         }
 
         static bool Handle(Msgs.RclInterfaces.Log msg, IRosConnection _)
         {
-            MessageArrived?.Invoke(new LogMessage(msg));
+            try
+            {
+                MessageArrived?.Invoke(new LogMessage(msg));
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{nameof(RosOutLogger)}: Error during {nameof(Handle)}", e);
+            }
+
             return true;
         }
 

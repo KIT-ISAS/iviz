@@ -47,9 +47,9 @@ namespace Iviz.App
 
         void Awake()
         {
-            ClearModelCache.onClick.AddListener(() => ClearModelCacheClicked?.Invoke());
-            ClearSavedFiles.onClick.AddListener(() => ClearSavedFilesClicked?.Invoke());
-            ClearHostHistory.onClick.AddListener(() => ClearHostHistoryClicked?.Invoke());
+            ClearModelCache.onClick.AddListener(() => ClearModelCacheClicked.TryRaise(this));
+            ClearSavedFiles.onClick.AddListener(() => ClearSavedFilesClicked.TryRaise(this));
+            ClearHostHistory.onClick.AddListener(() => ClearHostHistoryClicked.TryRaise(this));
         }
 
         public override void ClearSubscribers()

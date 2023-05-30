@@ -62,8 +62,8 @@ namespace Iviz.App
             
             AdjustSize();
 
-            CloseButton.Clicked += () => Closed?.Invoke();
-            CursorHandler.Clicked += c => Clicked?.Invoke(c);
+            CloseButton.Clicked += () => Closed.TryRaise(this);
+            CursorHandler.Clicked += c => Clicked.TryRaise(c, this);
             ScalerWidget.ScaleChanged += AdjustSize;
         }        
 

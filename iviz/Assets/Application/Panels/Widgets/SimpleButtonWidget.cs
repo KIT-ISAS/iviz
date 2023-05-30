@@ -31,7 +31,7 @@ namespace Iviz.App
 
         public void OnClicked()
         {
-            Clicked?.Invoke();
+            Clicked.TryRaise(this);
         }
 
         public void ClearSubscribers()

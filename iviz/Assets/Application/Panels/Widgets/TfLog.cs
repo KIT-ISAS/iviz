@@ -407,7 +407,7 @@ namespace Iviz.App
                     : SelectedFrame;
 
             UpdateFrameButtons();
-            Close?.Invoke();
+            Close.TryRaise(this);
         }
 
         void OnLock1PVClicked()
@@ -418,7 +418,7 @@ namespace Iviz.App
                     : SelectedFrame;
 
             UpdateFrameButtons();
-            Close?.Invoke();
+            Close.TryRaise(this);
         }
 
         public void ClearSubscribers()
