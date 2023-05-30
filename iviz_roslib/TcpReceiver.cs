@@ -407,7 +407,7 @@ internal static class TcpReceiverUtils
         const int maxMessageLength = 64 * 1024 * 1024;
         if (length is < 0 or > maxMessageLength)
         {
-            throw new RosInvalidPackageSizeException($"Invalid packet size {length}. Disconnecting.");
+            throw new RosInvalidPacketSizeException(length);
         }
 
         readBuffer.EnsureCapacity(length);

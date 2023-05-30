@@ -24,7 +24,7 @@ namespace Iviz.App
         public DropdownWidget PointCloudType { get; private set; }
 
 
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("PointCloud");

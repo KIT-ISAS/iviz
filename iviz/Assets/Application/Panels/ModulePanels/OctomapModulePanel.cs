@@ -11,7 +11,7 @@
         public ColorPickerWidget Tint { get; private set; }
         public ToggleWidget OcclusionOnlyMode { get; private set; }
 
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Octomap");

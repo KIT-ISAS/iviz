@@ -210,13 +210,12 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
         while (KeepRunning)
         {
-
             int received = await udpClient.ReadChunkAsync(readBuffer, runningTs.Token);
             if (received > maxPacketSize)
             {
-                throw new RosConnectionException("Udp socket received " + received +
-                                                 " bytes, but the agreed maximum was " + maxPacketSize +
-                                                 ". Dropping connection.");
+                throw new RosConnectionException(
+                    $"Udp socket received {received.ToString()} bytes, " +
+                    $"but the agreed maximum was {maxPacketSize.ToString()}");
             }
 
             byte opCode = readBuffer[4];
@@ -233,14 +232,14 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
             switch (opCode)
             {
                 case UdpRosParams.OpCodeErr:
-                    Logger.LogFormat("{0}: Partner sent UDPROS error code. Disconnecting.", this);
+                    Logger.LogFormat("{0}: Partner sent UDPROS error code. Disconnecting", this);
                     return;
                 case UdpRosParams.OpCodeData0 when blockNr <= 1:
                     if (totalBlocks != 0)
                     {
                         Logger.LogDebugFormat(
                             "{0}: Partner started new UDPROS packet, but I was expecting {1}/{2} (id {3})." +
-                            " Dropping old packet.", this, expectedBlockNr, totalBlocks, expectedMsgId);
+                            " Dropping old packet", this, expectedBlockNr, totalBlocks, expectedMsgId);
                         MarkDropped();
                     }
 
@@ -252,7 +251,7 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
                     {
                         Logger.LogDebugFormat(
                             "{0}: Partner started new UDPROS packet, but I was expecting {1}/{2} (id {3})." +
-                            " Dropping packet.", this, expectedBlockNr, totalBlocks, expectedMsgId);
+                            " Dropping packet", this, expectedBlockNr, totalBlocks, expectedMsgId);
                         MarkDropped();
                     }
 

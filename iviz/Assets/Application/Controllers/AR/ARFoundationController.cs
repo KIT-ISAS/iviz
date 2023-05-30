@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.TF;
+using Iviz.Controllers.XR;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
@@ -583,7 +584,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            string frameId = TfModule.ResolveFrameId(CameraFrameId);
+            string frameId = TfModule.ResolveFrameId(XRNames.CameraFrameId);
 
             if (color != null)
             {

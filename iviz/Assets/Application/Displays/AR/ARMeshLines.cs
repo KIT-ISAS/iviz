@@ -110,6 +110,8 @@ namespace Iviz.Displays
         
         void Update()
         {
+            if (Settings.IsHololens) return;
+            
             if (Resource.Visible)
             {
                 var unityPose = ARController.ARPoseToUnity(Transform.AsPose());
@@ -161,10 +163,9 @@ namespace Iviz.Displays
                 return;
             }
 
-            ARController.Instance?.ProcessMeshChange(indices, vertices, gameObject);
+            XRUtils.ProcessMeshChange(indices, vertices, gameObject);
 
-            // TODO: check if need to send to another thread
-            void UpdateLines(NativeList<float4x2> lines)
+            void UpdateLines(NativeList<float4x2> lines) // TODO: check if need to send to another thread
             {
                 int numLines = indices.Count; // 3 indices per triangle, 3 lines per triangle => 1 line per index
                 lines.Resize(numLines);
@@ -224,8 +225,11 @@ namespace Iviz.Displays
                     int ia = triangles[i].x;
                     var a = vertices[ia];
 
-                    int ic = trianglesPtr[i].z;
-                    var c = verticesPtr[ic];
+                    int ib = triangles[i].y;
+                    var b = vertices[ib];
+
+                    int ic = triangles[i].z;
+                    var c = vertices[ic];
 
                     Float4x2x3 f;
                     Write(out f.a, a, b);
@@ -253,17 +257,6 @@ namespace Iviz.Displays
             struct Float4x2x3
             {
                 public float4x2 a, b, c;
-            }
-
-            public static void CopyTriangles(Span<int> triangles, Span<Vector3> vertices, Span<float4x2> output)
-            {
-                fixed (int* trianglesPtr = triangles)
-                fixed (Vector3* verticesPtr = vertices)
-                fixed (float4x2* outputPtr = output)
-                {
-                    CopyTriangles((int3*)trianglesPtr, (float3*)verticesPtr, (Float4x2x3*)outputPtr,
-                        triangles.Length / 3);
-                }
             }
         }
     }

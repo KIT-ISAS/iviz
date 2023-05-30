@@ -301,7 +301,7 @@ namespace Iviz.App
                     config.SourceParameter = "";
                 }
 
-                RobotController.ProcessRobotSource(config.SavedRobotName, config.SourceParameter);
+                _ = RobotController.ProcessRobotSourceAsync(config.SavedRobotName, config.SourceParameter);
 
                 if (IsPanelSelected)
                 {

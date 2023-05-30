@@ -2,17 +2,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.TF;
+using Iviz.Controllers.XR;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.MarkerDetection;
-using Iviz.Msgs;
-using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.MeshMsgs;
 using Iviz.Msgs.SensorMsgs;
@@ -25,7 +22,6 @@ using Newtonsoft.Json.Converters;
 using UnityEngine;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
-using Time = UnityEngine.Time;
 using Transform = Iviz.Msgs.GeometryMsgs.Transform;
 using Vector3 = UnityEngine.Vector3;
 
@@ -63,18 +59,7 @@ namespace Iviz.Controllers
     {
         public const bool EnableMeshingSubsystem =
             //true ||
-            Settings.IsAndroid || Settings.IsHololens || Settings.IsIPhone;
-
-        const string HeadFrameId = "~xr/head";
-        protected const string CameraFrameId = "~xr/camera";
-
-        const string ColorTopic = "~xr/color/image_color";
-        const string CameraInfoTopic = "~xr/color/camera_info";
-        const string DepthImageTopic = "~xr/depth/image";
-        const string DepthConfidenceTopic = "~xr/depth/image_confidence";
-        const string DepthCameraInfoTopic = "~xr/depth/camera_info";
-        const string MeshesTopic = "~xr/meshes";
-        const string MarkersTopic = "~xr/markers";
+            Settings.IsAndroid || Settings.IsWSA || Settings.IsIPhone;
 
         public enum RootMover
         {
@@ -267,11 +252,11 @@ namespace Iviz.Controllers
 
             Settings.SettingsManager.UpdateQualityLevel();
 
-            ColorSender = new Sender<Image>(ColorTopic);
-            colorInfoSender = new Sender<CameraInfo>(CameraInfoTopic);
+            ColorSender = new Sender<Image>(XRNames.ColorTopic);
+            colorInfoSender = new Sender<CameraInfo>(XRNames.CameraInfoTopic);
 
-            headFrame = TfPublisher.Instance.GetOrCreate(HeadFrameId, isInternal: true);
-            cameraFrame = TfPublisher.Instance.GetOrCreate(CameraFrameId, isInternal: true);
+            headFrame = TfPublisher.Instance.GetOrCreate(XRNames.HeadFrameId, isInternal: true);
+            cameraFrame = TfPublisher.Instance.GetOrCreate(XRNames.CameraFrameId, isInternal: true);
 
             markerDetector.MarkerDetected += OnMarkerDetected;
             pulseManager = new PulseManager();
@@ -281,19 +266,19 @@ namespace Iviz.Controllers
         {
             if (ProvidesOcclusion)
             {
-                DepthSender = new Sender<Image>(DepthImageTopic);
-                DepthConfidenceSender = new Sender<Image>(DepthConfidenceTopic);
-                depthInfoSender = new Sender<CameraInfo>(DepthCameraInfoTopic);
+                DepthSender = new Sender<Image>(XRNames.DepthImageTopic);
+                DepthConfidenceSender = new Sender<Image>(XRNames.DepthConfidenceTopic);
+                depthInfoSender = new Sender<CameraInfo>(XRNames.DepthCameraInfoTopic);
             }
 
             if (ProvidesMesh)
             {
-                MeshSender = new Sender<MeshGeometryStamped>(MeshesTopic);
+                MeshSender = new Sender<MeshGeometryStamped>(XRNames.MeshesTopic);
             }
 
             if (MarkerDetector.IsEnabled)
             {
-                MarkerSender = new Sender<XRMarkerArray>(MarkersTopic);
+                MarkerSender = new Sender<XRMarkerArray>(XRNames.MarkersTopic);
             }
         }
 
@@ -522,45 +507,7 @@ namespace Iviz.Controllers
             var unityPoseToFixed = rosPoseToFixed.Ros2Unity();
             return TfModule.FixedFrameToAbsolute(unityPoseToFixed);
         }
-
-        public void ProcessMeshChange(List<int> indices, List<Vector3> vertices, GameObject source)
-        {
-            if (!EnableMeshingSubsystem) return;
-
-            if (MeshSender is not { NumSubscribers: not 0 } meshSender)
-            {
-                return;
-            }
-
-            Task.Run(PublishMeshChangeImpl);
-
-            void PublishMeshChangeImpl()
-            {
-                if (source == null)
-                {
-                    return; // dead!
-                }
-
-                var meshIndices = MemoryMarshal.Cast<int, TriangleIndices>(indices.AsSpan()).ToArray();
-                var meshVertices = new Point[vertices.Count];
-
-                MeshBurstUtils.ToPoint(vertices.AsSpan(), meshVertices);
-
-                var msg = new MeshGeometryStamped
-                {
-                    Header = new Header(meshSeq++, time.Now(), "map"),
-                    Uuid = source.name,
-                    MeshGeometry = new MeshGeometry
-                    {
-                        Faces = meshIndices,
-                        Vertices = meshVertices
-                    }
-                };
-
-                meshSender.Publish(msg);
-            }
-        }
-
+        
         public virtual void Dispose()
         {
             ARStateChanged?.Invoke(false);
@@ -591,8 +538,8 @@ namespace Iviz.Controllers
 
             pulseManager.Dispose();
 
-            TfPublisher.Instance.Remove(HeadFrameId, true);
-            TfPublisher.Instance.Remove(CameraFrameId, true);
+            TfPublisher.Instance.Remove(XRNames.HeadFrameId, true);
+            TfPublisher.Instance.Remove(XRNames.CameraFrameId, true);
         }
 
         public override void ResetController()

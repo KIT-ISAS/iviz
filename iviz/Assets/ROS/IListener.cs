@@ -17,23 +17,43 @@ namespace Iviz.Ros
     /// </summary>
     public abstract class Listener
     {
+        protected int droppedMsgCounter;
+        protected int lastMsgBytes;
+        protected int totalMsgCounter;
+        protected int recentMsgCounter;
+        RosTransportHint transportHint;
+
         public string Topic { get; }
         public string Type { get; }
-        public RosListenerStats Stats { get; protected set; }
+        public RosListenerStats Stats { get; private set; }
         public bool Subscribed { get; protected set; }
 
-        public abstract RosTransportHint TransportHint { get; set; }
+        public RosTransportHint TransportHint
+        {
+            get => transportHint;
+            set
+            {
+                if (transportHint == value)
+                {
+                    return;
+                }
 
-        protected Listener(string topic, string type)
+                transportHint = value;
+                Reset();
+            }
+        }
+
+        protected Listener(string topic, string type, RosTransportHint transportHint)
         {
             ThrowHelper.ThrowIfNullOrEmpty(topic, nameof(topic));
             ThrowHelper.ThrowIfNullOrEmpty(type, nameof(type));
 
             Topic = topic;
             Type = type;
-        }
+            this.transportHint = transportHint;
 
-        public abstract void Dispose();
+            GameThread.EverySecond += UpdateStats;
+        }
 
         /// <summary>
         /// Sets the suspended state of the listener.
@@ -54,6 +74,44 @@ namespace Iviz.Ros
         {
             Connection.SetPause(this, value);
         }
+        
+        /// <summary>
+        /// Unsubscribes from the topic.
+        /// </summary>
+        public void Unsubscribe()
+        {
+            if (!Subscribed)
+            {
+                return;
+            }
+
+            Connection.Unsubscribe(this);
+            Subscribed = false;
+        }
+        
+        void UpdateStats()
+        {
+            if (recentMsgCounter == 0)
+            {
+                Stats = default;
+                return;
+            }
+
+            Stats = new RosListenerStats(
+                totalMsgCounter,
+                recentMsgCounter,
+                lastMsgBytes,
+                droppedMsgCounter
+            );
+
+            RosManager.ReportBandwidthDown(lastMsgBytes);
+
+            lastMsgBytes = 0;
+            droppedMsgCounter = 0;
+            recentMsgCounter = 0;
+        }
+
+        
 
         /// <summary>
         /// Writes the number of publishers and message frequency to the <see cref="StringBuilder"/> argument.
@@ -73,9 +131,33 @@ namespace Iviz.Ros
                 description.Append(numPublishers.ToString()).Append(" pub");
             }
         }
+        
+        public virtual void Dispose()
+        {
+            GameThread.EverySecond -= UpdateStats;
 
-        public override string ToString() => $"[{nameof(Listener)} {Topic} [{Type}]]";
+            try
+            {
+                Unsubscribe();
+            }
+            catch (ObjectDisposedException)
+            {
+                // ROS already shut down, so ignore
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{ToString()}: Exception while disposing", e);
+            }
+            
+            Subscribed = false;
+        }
 
+
+        public override string ToString() => $"[{nameof(Listener)} '{Topic}' [{Type}]]";
+
+        
+        // -------------------------
+        
         private protected static RosConnection Connection => RosManager.RosConnection;
 
         public static Listener Create(string topicName, Func<IMessage, IRosConnection, bool> handler, Type csType)

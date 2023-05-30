@@ -13,6 +13,8 @@ namespace Iviz.Msgs;
 
 public static class BuiltIns
 {
+    const int FastUnicodeCheckMaxLength = 64;
+
     public static UTF8Encoding UTF8 => Defaults.UTF8;
 
     public static CultureInfo Culture => Defaults.Culture;
@@ -196,12 +198,12 @@ public static class BuiltIns
     [MethodImpl(MethodImplOptions.AggressiveInlining), SkipLocalsInit]
     internal static unsafe string GetString(byte* srcPtr, int length)
     {
-        if (length > 64 || StringHasUnicode(srcPtr, length))
+        if (length > FastUnicodeCheckMaxLength || StringHasUnicode(srcPtr, length))
         {
             return UTF8.GetString(srcPtr, length);
         }
 
-        char* strPtr = stackalloc char[64];
+        char* strPtr = stackalloc char[FastUnicodeCheckMaxLength];
         ConvertToChar(srcPtr, strPtr, length);
         return new string(strPtr, 0, length);
     }
@@ -215,7 +217,7 @@ public static class BuiltIns
         ulong* ptrUlong = (ulong*)ptr;
         while (remaining >= 8)
         {
-            result |= *ptrUlong++;
+            result |= Unsafe.ReadUnaligned<ulong>(ptrUlong++);
             remaining -= 8;
         }
 
@@ -223,27 +225,27 @@ public static class BuiltIns
         switch (remaining)
         {
             case 7:
-                result |= (ulong)*(uint*)ptrUlong
-                          | *(ushort*)(ptrRemaining + 4)
+                result |= (ulong)Unsafe.ReadUnaligned<uint>(ptrRemaining)
+                          | Unsafe.ReadUnaligned<ushort>(ptrRemaining + 4)
                           | *(ptrRemaining + 6);
                 break;
             case 6:
-                result |= (ulong)*(uint*)ptrUlong
-                          | *(ushort*)(ptrRemaining + 4);
+                result |= (ulong)Unsafe.ReadUnaligned<uint>(ptrRemaining)
+                          | Unsafe.Read<ushort>(ptrRemaining + 4);
                 break;
             case 5:
-                result |= (ulong)*(uint*)ptrUlong
+                result |= (ulong)Unsafe.ReadUnaligned<uint>(ptrRemaining)
                           | *(ptrRemaining + 4);
                 break;
             case 4:
-                result |= *(uint*)ptrUlong;
+                result |= Unsafe.ReadUnaligned<uint>(ptrRemaining);
                 break;
             case 3:
-                result |= (ulong)*(ushort*)ptrRemaining
+                result |= (ulong)Unsafe.ReadUnaligned<ushort>(ptrRemaining)
                           | *(ptrRemaining + 2);
                 break;
             case 2:
-                result |= *(ushort*)ptrRemaining;
+                result |= Unsafe.ReadUnaligned<ushort>(ptrRemaining);
                 break;
             case 1:
                 result |= *ptrRemaining;
@@ -252,26 +254,29 @@ public static class BuiltIns
                 break;
         }
 
-        return (result & 0x8080808080808080) != 0;
+        return (result & 0x80808080_80808080) != 0;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static unsafe void ConvertToChar(byte* srcPtr, char* strPtr, int size)
     {
-        ulong* dstPtrUlong = (ulong*)strPtr;
+        ulong* dstPtrUlong = (ulong*)strPtr; 
 
         while (size >= 4)
         {
-            ulong a0 = *srcPtr++;
-            ulong a1 = *srcPtr++;
-            ulong a2 = *srcPtr++;
-            ulong a3 = *srcPtr++;
+            ulong a0 = Unsafe.ReadUnaligned<ulong>(srcPtr++);
+            ulong a1 = Unsafe.ReadUnaligned<ulong>(srcPtr++);
+            ulong a2 = Unsafe.ReadUnaligned<ulong>(srcPtr++);
+            ulong a3 = Unsafe.ReadUnaligned<ulong>(srcPtr++);
 
-            *dstPtrUlong++ = (a3 << 48) | (a2 << 32) | (a1 << 16) | a0;
+            Unsafe.WriteUnaligned(
+                dstPtrUlong,
+                (a3 << 48) | (a2 << 32) | (a1 << 16) | a0
+            );
             size -= 4;
         }
 
-        ushort* dstPtr = (ushort*)dstPtrUlong;
+        ushort* dstPtr = (ushort*)dstPtrUlong; // alignment should match here
         switch (size)
         {
             case 3:
@@ -296,7 +301,7 @@ public static class BuiltIns
     internal static unsafe int GetByteCount(string str)
     {
         int length = str.Length;
-        if (length <= 64)
+        if (length <= FastUnicodeCheckMaxLength)
         {
             fixed (char* strPtr = str)
             {
@@ -313,14 +318,15 @@ public static class BuiltIns
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static unsafe bool CanWriteStringSimple(char* strPtr, int length)
     {
-        return length <= 64 && !StringHasUnicode((ushort*)strPtr, length);
+        return length <= FastUnicodeCheckMaxLength && !StringHasUnicode((ushort*)strPtr, length);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static unsafe void WriteStringSimple(char* strPtr, byte* dstPtr, int size)
     {
         ushort* srcPtr = (ushort*)strPtr;
-        for (int i = 0; i < size; i++) dstPtr[i] = (byte)srcPtr[i];
+        for (int i = 0; i < size; i++) dstPtr[i] = (byte) srcPtr[i];
+        // no ReadUnaligned, strPtr is aligned 
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -330,11 +336,11 @@ public static class BuiltIns
         uint* halfPtr = (uint*)ptr;
 
         uint result = 0;
-        for (int i = 0; i < halfSize; i++)
+        for (int i = halfSize; i > 0; i--)
         {
             // overflows if size is odd!
             // but ptr (as all C# strings) has an extra ushort \0 at position [size] 
-            result |= halfPtr[i];
+            result |= Unsafe.ReadUnaligned<uint>(halfPtr++);
         }
 
         return (result & 0xff80ff80) != 0;
@@ -396,9 +402,6 @@ public static class BuiltIns
         throw new NullReferenceException($"{arg}[{i.ToString()}] cannot be null");
 
     [DoesNotReturn, AssertionMethod]
-    public static void ThrowNullReference() => throw new NullReferenceException("Message fields cannot be null.");
-
-    [DoesNotReturn, AssertionMethod]
     public static void ThrowBufferOverflow(int off, int remaining) =>
         throw new RosBufferException($"Requested {off.ToString()} bytes, but only {remaining.ToString()} remain!");
 
@@ -426,11 +429,7 @@ public static class BuiltIns
         throw new RosInvalidSizeForFixedArrayException(arg, size, expected);
 
     [DoesNotReturn]
-    public static void ThrowObjectDisposed(string name) =>
-        throw new ObjectDisposedException(name);
-
-    [DoesNotReturn]
-    public static void ThrowObjectDisposed(string name, string message) =>
+    public static void ThrowObjectDisposed(string name, string? message = null) =>
         throw new ObjectDisposedException(name, message);
 
     [DoesNotReturn]

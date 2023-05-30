@@ -591,7 +591,7 @@ namespace Iviz.Core
             }
         }
 
-        public static void ToPoint(Span<Vector3> input, Point[] output)
+        public static void ToPoint(ReadOnlySpan<Vector3> input, Point[] output)
         {
             fixed (Vector3* inputPtr = input)
             fixed (Point* outputPtr = output)

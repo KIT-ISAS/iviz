@@ -15,7 +15,7 @@ namespace Iviz.App
         public SliderWidget EquatorIntensity { get; private set; }
         public ToggleWidget EnableShadows { get; private set; }
 
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Camera");

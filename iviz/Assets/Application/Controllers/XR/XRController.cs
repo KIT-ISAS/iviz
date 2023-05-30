@@ -1,16 +1,14 @@
 ﻿#nullable enable
 
 using System;
-using System.Linq;
 using System.Threading;
 using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Displays.XR;
-using Iviz.Displays.XRDialogs;
 using Iviz.Msgs.IvizMsgs;
+using Iviz.Msgs.MeshMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
@@ -24,14 +22,14 @@ namespace Iviz.Controllers.XR
 {
     public sealed class XRController : Controller, IHasFrame
     {
-        const string HeadFrameId = "~xr/head";
-        const string LeftControllerFrameId = "~xr/left_controller";
-        const string RightControllerFrameId = "~xr/right_controller";
-        const string GazeFrameId = "~xr/gaze";
+        public Sender<XRGazeState> GazeSender { get; } = new(XRNames.GazeTopic);
+        public Sender<XRHandState> LeftHandSender { get; } = new(XRNames.LeftHandTopic);
+        public Sender<XRHandState> RightHandSender { get; } = new(XRNames.RightHandTopic);
 
-        public Sender<XRGazeState> GazeSender { get; } = new("~xr/gaze");
-        public Sender<XRHandState> LeftHandSender { get; } = new("~xr/left_hand");
-        public Sender<XRHandState> RightHandSender { get; } = new("~xr/right_hand");
+        public Sender<MeshGeometryStamped>? MeshSender { get; } =
+            ARController.EnableMeshingSubsystem && Settings.IsHololens 
+                ? new(XRNames.MeshesTopic) 
+                : null;
 
         public const float NearDistance = 0.05f;
 
@@ -126,13 +124,14 @@ namespace Iviz.Controllers.XR
             //leftHand.gameObject.SetActive(Settings.IsHololens);
             //rightHand.gameObject.SetActive(Settings.IsHololens);
 
-            headFrame = TfPublisher.Instance.GetOrCreate(HeadFrameId, isInternal: true);
-            leftControllerFrame = TfPublisher.Instance.GetOrCreate(LeftControllerFrameId, isInternal: true);
-            rightControllerFrame = TfPublisher.Instance.GetOrCreate(RightControllerFrameId, isInternal: true);
+            var tfPublisher = TfPublisher.Instance;
+            headFrame = tfPublisher.GetOrCreate(XRNames.HeadFrameId, isInternal: true);
+            leftControllerFrame = tfPublisher.GetOrCreate(XRNames.LeftControllerFrameId, isInternal: true);
+            rightControllerFrame = tfPublisher.GetOrCreate(XRNames.RightControllerFrameId, isInternal: true);
 
             if (Settings.IsHololens)
             {
-                gazeFrame = TfPublisher.Instance.GetOrCreate(GazeFrameId, isInternal: true);
+                gazeFrame = tfPublisher.GetOrCreate(XRNames.GazeFrameId, isInternal: true);
             }
 
             GameThread.EveryFrame += Update;
@@ -197,7 +196,6 @@ namespace Iviz.Controllers.XR
             Instance = this;
 
             ModuleListPanel.CallAfterInitialized(() => mainCanvasHolder.Visible = false);
-            
         }
 
 
@@ -348,7 +346,7 @@ namespace Iviz.Controllers.XR
 
             bool isPalmUp = leftGestures.IsPalmUp;
             bool isPalmCompassVisible = palmCompass.Visible;
-            
+
             if (isPalmUp)
             {
                 if (isPalmCompassVisible || leftHand.PalmTransform is not { } palmTransform)
@@ -373,6 +371,7 @@ namespace Iviz.Controllers.XR
                 {
                     return;
                 }
+
                 //var oldPalmCompass = palmCompass;
                 //float baseScale = 0.125f / oldPalmCompass.transform.parent.localScale.x;
                 //palmCompass = null;

@@ -2,6 +2,10 @@
 {
     public class DefaultPanel : ModulePanel
     {
+        protected override void Initialize()
+        {
+        }
+
         void Start()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();

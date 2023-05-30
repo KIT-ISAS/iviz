@@ -5,7 +5,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Iviz.Msgs;
 using Unity.Collections;
 using UnityEngine;
 using JetBrains.Annotations;
@@ -32,12 +31,6 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<T> AsSpan<T>(this in NativeArray<T> array, int start, int length) where T : unmanaged
-        {
-            return array.AsSpan().Slice(start, length);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
             return new ReadOnlySpan<T>(array.GetUnsafePtr(), array.Length);
@@ -46,7 +39,10 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this List<T> list) where T : unmanaged
         {
-            return new Span<T>((T[]?)ExtractArray(list), 0, list.Count);
+            int count = list.Count;
+            return count == 0
+                ? default
+                : new Span<T>((T[]?)ExtractArray(list), 0, count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -56,7 +52,6 @@ namespace Iviz.Core
             return count == 0
                 ? default
                 : new ReadOnlySpan<T>((T[]?)ExtractArray(list), 0, count);
-            return new ReadOnlySpan<T>((T[]?)ExtractArray(list), 0, list.Count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -118,8 +113,6 @@ namespace Iviz.Core
         public static ReadOnlySpan<T> Cast<T>(this ReadOnlySpan<byte> src) where T : unmanaged =>
             MemoryMarshal.Cast<byte, T>(src);
 
-        public static Span<T> Cast<T>(this Span<byte> src) where T : unmanaged =>
-            MemoryMarshal.Cast<byte, T>(src);
         public static Span<T> Cast<T>(this Span<byte> src) where T : unmanaged => MemoryMarshal.Cast<byte, T>(src);
 
         public static T Read<T>(this ReadOnlySpan<byte> span) where T : unmanaged => MemoryMarshal.Read<T>(span);

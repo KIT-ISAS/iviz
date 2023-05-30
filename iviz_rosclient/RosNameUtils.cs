@@ -60,13 +60,13 @@ public static class RosNameUtils
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new RosInvalidResourceNameException("Resource name is empty");
+            ThrowInvalidResourceName("Resource name is empty");
         }
 
         char c0 = name[0];
         if (!char.IsLetter(c0) && c0 is not ('/' or '~'))
         {
-            throw new RosInvalidResourceNameException(
+            ThrowInvalidResourceName(
                 $"Resource name '{name}' is not valid. It must start with an alphanumeric character, " +
                 $"'/' or '~'. Current start is '{c0}'");
         }
@@ -76,17 +76,14 @@ public static class RosNameUtils
             char c = name[i];
             if (!char.IsLetterOrDigit(c) && c is not ('_' or '/'))
             {
-                throw new RosInvalidResourceNameException(
+                ThrowInvalidResourceName(
                     $"Resource name '{name}' is not valid. It must only contain alphanumeric characters, " +
                     $"'/' or '_'. Character at position {i} is '{c}'");
             }
         }
     }
+    
+    [DoesNotReturn]
+    static void ThrowInvalidResourceName(string message) => throw new RosInvalidResourceNameException(message);
 }
 
-public static class RosExceptionUtils
-{
-    [DoesNotReturn]
-    public static void ThrowInvalidMessageType(Exception? e = null) =>
-        throw new RosInvalidMessageTypeException("Message does not match the expected type", e);
-}

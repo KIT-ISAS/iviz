@@ -18,7 +18,7 @@
         public MarkerWidget Marker { get; private set; }
         CollapsibleWidget Visuals { get; set; }
 
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Markers");

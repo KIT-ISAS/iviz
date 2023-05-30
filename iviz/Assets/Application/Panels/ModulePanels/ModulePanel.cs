@@ -13,6 +13,7 @@ namespace Iviz.App
     {
         List<IWidget>? cachedWidgets;
         ToggleButtonWidget? hideButton;
+        bool initialized;
 
         public ToggleButtonWidget HideButton
         {
@@ -28,6 +29,20 @@ namespace Iviz.App
             set => gameObject.SetActive(value);
         }
 
+        void Awake()
+        {
+            EnsureInitialized();
+        }
+
+        internal void EnsureInitialized()
+        {
+            if (initialized) return;
+            Initialize();
+            initialized = true;
+        }
+
+        protected abstract void Initialize();
+        
         public void ClearSubscribers()
         {
             cachedWidgets ??= FindWidgets();
@@ -47,7 +62,7 @@ namespace Iviz.App
 
         public static ModulePanel AddResourceToDataPanel(GameObject o, ModuleType resource)
         {
-            return resource switch
+            ModulePanel panel = resource switch
             {
                 ModuleType.Invalid => throw new ArgumentException(
                     "Cannot create module panel for resource Invalid",
@@ -75,6 +90,9 @@ namespace Iviz.App
                 ModuleType.TFPublisher => o.AddComponent<PublishedFramePanel>(),
                 _ => throw new IndexOutOfRangeException()
             };
+            
+            panel.EnsureInitialized();
+            return panel;
         }
     }
 }

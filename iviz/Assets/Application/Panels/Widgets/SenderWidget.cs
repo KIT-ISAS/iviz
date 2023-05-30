@@ -51,7 +51,7 @@ namespace Iviz.App
             Sender = newSender;
             if (newSender == null)
             {
-                Text.text = "<i>Empty</i>\n" +
+                Text.text = "<i>[Sender Disabled]</i>\n" +
                             "<b>Off</b>";
             }
         }
@@ -61,7 +61,7 @@ namespace Iviz.App
             Sender = newSender;
             if (newSender == null)
             {
-                Text.text = "<i>Empty</i>\n"  +
+                Text.text = "<i>[Sender Disabled]</i>\n"  +
                             $"<b>{BuiltIns.GetMessageType<T>()}</b>";
             }
         }

@@ -8,7 +8,7 @@
         public SliderWidget TrimFromEnd { get; private set; }
         public SimpleButtonWidget CloseButton { get; private set; }
 
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("JointState");

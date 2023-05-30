@@ -221,6 +221,9 @@ public static class StreamUtils
         }
     }
 
+    /// <summary>
+    /// Returns the error message of the exception, but fixes a Mono bug with SocketException returning trash messages.   
+    /// </summary>
     public static string CheckMessage(this Exception e)
     {
         if (e is not SocketException se)
