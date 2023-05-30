@@ -344,15 +344,7 @@ namespace Iviz.Core
 
             if (IsGameThread)
             {
-                try
-                {
-                    action();
-                }
-                catch (Exception e)
-                {
-                    RosLogger.Error($"{nameof(GameThread)}: Error during {nameof(PostImmediate)}", e);
-                }
-                
+                action.TryRaise(nameof(GameThread));
                 return;
             }
 
