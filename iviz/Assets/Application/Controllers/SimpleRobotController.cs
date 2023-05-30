@@ -318,7 +318,7 @@ namespace Iviz.Controllers
             config.SourceParameter = sourceParameter ?? "";
             Robot = null;
 
-            if (value.IsNullOrEmpty())
+            if (sourceParameter.IsNullOrEmpty())
             {
                 config.SavedRobotName = "";
                 HelpText = "[No Robot Loaded]";

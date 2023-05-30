@@ -56,7 +56,7 @@ namespace Iviz.App
                         : $"Changing master uri to '{value}'.");
                 }
 
-                MasterUriChanged.TryRaise(value, this);
+                MasterUriChanged.TryRaise(this);
             }
         }
 
@@ -74,7 +74,7 @@ namespace Iviz.App
                     RosLogger.Internal($"Changing caller uri to '{value}'.");
                 }
                 
-                MyUriChanged.TryRaise(value, this);
+                MyUriChanged.TryRaise(this);
             }
         }
 
@@ -93,7 +93,7 @@ namespace Iviz.App
                     RosLogger.Internal($"Changing my ROS id to '{value}'.");
                 }
 
-                MyIdChanged.TryRaise(value, this);
+                MyIdChanged.TryRaise(this);
             }
         }
 
@@ -142,7 +142,7 @@ namespace Iviz.App
                     ? $"Setting ROS2 discovery server to {endpoint.Description()}."
                     : "Disabling ROS2 discovery server.");
                 
-                DiscoveryServerChanged.TryRaise(value, this);
+                DiscoveryServerChanged.TryRaise(this);
             }
         }
 
@@ -156,7 +156,7 @@ namespace Iviz.App
                 RosManager.Connection.DomainId = value;
                 RosLogger.Internal($"Setting ROS2 domain id to {value.ToString()}.");
                 
-                DomainIdChanged.TryRaise(value, this);
+                DomainIdChanged.TryRaise(this);
             }
         }
 
@@ -199,7 +199,7 @@ namespace Iviz.App
                 }
 
                 RosManager.Connection.RosVersion = value;
-                RosVersionChanged.TryRaise(value, this);
+                RosVersionChanged.TryRaise(this);
             }
         }
 
@@ -446,7 +446,7 @@ namespace Iviz.App
             panel.ServerMode.State = false;
             panel.MasterUri.Interactable = true;
             RosManager.Connection.Disconnect();
-            MasterActiveChanged.TryRaise(false, this);
+            MasterActiveChanged.TryRaise(this);
         }
 
         public async Task TryCreateMasterAsync()
@@ -488,7 +488,7 @@ namespace Iviz.App
             panel.ServerMode.State = true;
             panel.MasterUri.Interactable = false;
             RosLogger.Internal($"Created <b>master node</b> using my uri {ownMasterUriStr}.");
-            MasterActiveChanged.TryRaise(true, this);
+            MasterActiveChanged.TryRaise(this);
 
             RosManager.Connection.TryOnceToConnect();
         }
