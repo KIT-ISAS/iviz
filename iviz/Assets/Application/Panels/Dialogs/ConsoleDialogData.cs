@@ -69,14 +69,14 @@ namespace Iviz.App
         {
             dialog = DialogPanelManager.GetPanelByType<ConsoleDialogPanel>(DialogPanelType.Console);
             dialog.Text.vertexBufferAutoSizeReduction = false;
-            RosOutLogger.MessageArrived += HandleExternalMessage;
-            RosLogger.LogExternal += HandleOwnMessage;
+            RosOutLogger.MessageArrived = HandleExternalMessage;
+            RosLogger.LogExternal = HandleOwnMessage;
         }
 
         public override void Dispose()
         {
-            RosOutLogger.MessageArrived -= HandleExternalMessage;
-            RosLogger.LogExternal -= HandleOwnMessage;
+            RosOutLogger.MessageArrived = null;
+            RosLogger.LogExternal = null;
         }
 
         public override void SetupPanel()

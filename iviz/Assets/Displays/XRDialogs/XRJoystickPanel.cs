@@ -41,14 +41,14 @@ namespace Iviz.Displays.XRDialogs
 
         void Awake()
         {
-            CloseButton.Clicked += () => Close?.Invoke();
+            CloseButton.Clicked += () => Close.TryRaise(this);
 
-            JoystickX.Changed += f => ChangedPosition?.Invoke(new Vector3(f, 0, 0));
-            JoystickY.Changed += f => ChangedPosition?.Invoke(new Vector3(0, f, 0));
-            JoystickZ.Changed += f => ChangedPosition?.Invoke(new Vector3(0, 0, f));
+            JoystickX.Changed += f => ChangedPosition.TryRaise(new Vector3(f, 0, 0), this);
+            JoystickY.Changed += f => ChangedPosition.TryRaise(new Vector3(0, f, 0), this);
+            JoystickZ.Changed += f => ChangedPosition.TryRaise(new Vector3(0, 0, f), this);
             
-            JoystickA.Changed += f => ChangedAngle?.Invoke(f);
-            JoystickS.Changed += f => ChangedScale?.Invoke(f);
+            JoystickA.Changed += f => ChangedAngle.TryRaise(f, this);
+            JoystickS.Changed += f => ChangedScale.TryRaise(f, this);
 
             Action onPointerUp = OnPointerUp;
             JoystickX.PointerUp += onPointerUp;
@@ -57,7 +57,7 @@ namespace Iviz.Displays.XRDialogs
             JoystickA.PointerUp += onPointerUp;
             JoystickS.PointerUp += onPointerUp;
             
-            void OnPointerUp() => PointerUp?.Invoke();
+            void OnPointerUp() => PointerUp.TryRaise(this);
             
             if (backgroundVisible)
             {

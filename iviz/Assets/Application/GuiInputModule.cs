@@ -600,7 +600,7 @@ namespace Iviz.App
                 }
                 else if (timeDown > longClickTime)
                 {
-                    LongClick?.Invoke(clickInfo);
+                    LongClick.TryRaise(clickInfo, this);
                     OnClick(clickInfo, false);
                 }
             }

@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static Iviz.Core.UnityUtils;
 
 namespace Iviz.App
 {
@@ -26,7 +27,7 @@ namespace Iviz.App
 
         void OnClicked()
         {
-            Clicked?.Invoke();
+            Clicked.TryRaise(this);
         }
 
         void IWidget.ClearSubscribers()
@@ -41,7 +42,7 @@ namespace Iviz.App
         {
             if (dragged)
             {
-                Dragged?.Invoke();
+                Dragged.TryRaise(this);
                 dragged = false;
             }
         }

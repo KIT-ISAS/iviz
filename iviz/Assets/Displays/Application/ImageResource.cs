@@ -151,7 +151,7 @@ namespace Iviz.Displays
                     : billboardStartPose.rotation;
             }
 
-            BoundsChanged?.Invoke();
+            BoundsChanged.TryRaise(this);
         }
 
         void OnTextureChanged(Texture2D? newTexture)

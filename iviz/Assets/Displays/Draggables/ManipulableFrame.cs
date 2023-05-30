@@ -135,9 +135,9 @@ namespace Iviz.Displays
 
             control.StartDragging += () => OnStartDragging(control);
             control.EndDragging += OnEndDragging;
-            control.PointerDown += () => PointerDown?.Invoke();
-            control.PointerUp += () => PointerUp?.Invoke();
-            control.Moved += () => Moved?.Invoke();
+            control.PointerDown += () => PointerDown.TryRaise(this);
+            control.PointerUp += () => PointerUp.TryRaise(this);
+            control.Moved += () => Moved.TryRaise(this);
 
             foreach (var wrapper in wrappers)
             {
@@ -163,7 +163,7 @@ namespace Iviz.Displays
                 }
             }
 
-            StartDragging?.Invoke();
+            StartDragging.TryRaise(this);
         }
 
         void OnEndDragging()
@@ -178,7 +178,7 @@ namespace Iviz.Displays
                 wrapper.Interactable = showHandles;
             }
 
-            EndDragging?.Invoke();
+            EndDragging.TryRaise(this);
         }
 
         public Bounds Bounds
@@ -190,7 +190,7 @@ namespace Iviz.Displays
                     wrapper.Bounds = value;
                 }
 
-                BoundsChanged?.Invoke();
+                BoundsChanged.TryRaise(this);
             }
         }
 

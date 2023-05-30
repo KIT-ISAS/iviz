@@ -83,14 +83,7 @@ namespace Iviz.Core
 
         void TryCallDispose()
         {
-            try
-            {
-                dispose?.Invoke();
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{this}: Error during Animator dispose", e);
-            }            
+            dispose.TryRaise(this);
         }
 
         public static void Spawn(CancellationToken token, float durationInSec, Action<float> update, Action? dispose = null)

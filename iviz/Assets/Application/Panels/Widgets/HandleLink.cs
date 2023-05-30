@@ -1,4 +1,5 @@
 using System;
+using Iviz.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -10,7 +11,7 @@ namespace Iviz.App
 
         void IPointerUpHandler.OnPointerUp(PointerEventData _)
         {
-            Clicked?.Invoke();
+            Clicked.TryRaise(this);
         }
     }
 }

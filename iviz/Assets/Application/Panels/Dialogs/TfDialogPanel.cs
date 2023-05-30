@@ -27,7 +27,7 @@ namespace Iviz.App
 
         void Awake()
         {
-            CreateFrame.onClick.AddListener(() => CreateFrameClicked?.Invoke());
+            CreateFrame.onClick.AddListener(() => CreateFrameClicked.TryRaise(this));
         }
         
         public override void ClearSubscribers()

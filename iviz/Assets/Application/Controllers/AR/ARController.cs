@@ -285,29 +285,13 @@ namespace Iviz.Controllers
 
         protected static void RaiseARStateChanged()
         {
-            try
-            {
-                ARStateChanged?.Invoke(true);
-                ARCameraViewChanged?.Invoke(true);
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{nameof(ARController)}: " +
-                                $"Error during {nameof(RaiseARStateChanged)}", e);
-            }
+            ARStateChanged.TryRaise(true, nameof(ARController));
+            ARCameraViewChanged.TryRaise(true, nameof(ARController));
         }
 
         protected static void RaiseARCameraViewChanged(bool value)
         {
-            try
-            {
-                ARCameraViewChanged?.Invoke(value);
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{nameof(ARController)}: " +
-                                $"Error during {nameof(RaiseARCameraViewChanged)}", e);
-            }
+            ARCameraViewChanged.TryRaise(value, nameof(ARController));
         }
 
         void OnARJoystickChangedAngle(float dA)
@@ -415,7 +399,7 @@ namespace Iviz.Controllers
                 TfModule.RootFrame.Transform.SetPose(pose);
             }
 
-            WorldPoseChanged?.Invoke(mover);
+            WorldPoseChanged.TryRaise(mover, this);
         }
 
         protected static float AngleFromPose(in Pose unityPose)
@@ -511,8 +495,8 @@ namespace Iviz.Controllers
 
         public virtual void Dispose()
         {
-            ARStateChanged?.Invoke(false);
-            ARCameraViewChanged?.Invoke(false);
+            ARStateChanged.TryRaise(false, this);
+            ARCameraViewChanged.TryRaise(false, this);
 
             Visible = false;
             WorldScale = 1;

@@ -52,8 +52,8 @@ namespace Iviz.App
             Visible = false;
             IsGlobal = true;
             GlobalButton.onClick.AddListener(OnButtonClick);
-            CloseButton.onClick.AddListener(() => Close?.Invoke());
-            ResetScaleButton.onClick.AddListener(() => ResetScale?.Invoke());
+            CloseButton.onClick.AddListener(() => Close.TryRaise(this));
+            ResetScaleButton.onClick.AddListener(() => ResetScale.TryRaise(this));
 
             Action<Vector2> onChangedPosition = OnChangedPosition;
             JoystickX.Changed += onChangedPosition;
@@ -80,22 +80,22 @@ namespace Iviz.App
         void OnChangedPosition(Vector2 _)
         {
             var deltaPosition = new Vector3(JoystickX.Direction.x, JoystickY.Direction.x, JoystickZ.Direction.x);
-            ChangedPosition?.Invoke(deltaPosition);
+            ChangedPosition.TryRaise(deltaPosition, this);
         }
 
         void OnChangedAngle(Vector2 _)
         {
-            ChangedAngle?.Invoke(JoystickA.Direction.x);
+            ChangedAngle.TryRaise(JoystickA.Direction.x, this);
         }
 
         void OnChangedScale(Vector2 _)
         {
-            ChangedScale?.Invoke(JoystickS.Direction.x);
+            ChangedScale.TryRaise(JoystickS.Direction.x, this);
         }
 
         void OnPointerUp()
         {
-            PointerUp?.Invoke();
+            PointerUp.TryRaise(this);
         }
     }
 }

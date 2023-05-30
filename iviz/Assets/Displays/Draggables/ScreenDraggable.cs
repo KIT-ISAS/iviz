@@ -91,15 +91,15 @@ namespace Iviz.Displays
         {
             ReferencePointLocal = null;
             IsDragging = true;
-            StartDragging?.Invoke();
-            StateChanged?.Invoke();
+            StartDragging.TryRaise(this);
+            StateChanged.TryRaise(this);
         }
 
         void IScreenDraggable.OnEndDragging()
         {
             IsDragging = false;
-            EndDragging?.Invoke();
-            StateChanged?.Invoke();
+            EndDragging.TryRaise(this);
+            StateChanged.TryRaise(this);
         }
 
         void IPointerDownHandler.OnPointerDown(PointerEventData _)
@@ -111,7 +111,7 @@ namespace Iviz.Displays
         protected void StartSelected()
         {
             Settings.DragHandler.TrySetDraggedObject(this);
-            PointerDown?.Invoke();
+            PointerDown.TryRaise(this);
         }
 
         void IPointerUpHandler.OnPointerUp(PointerEventData _)
@@ -123,7 +123,7 @@ namespace Iviz.Displays
         protected void EndSelected()
         {
             TryUnsetDraggedObject(this);
-            PointerUp?.Invoke();
+            PointerUp.TryRaise(this);
         }
 
         void IScreenDraggable.OnPointerMove(in Ray pointerRay)
@@ -135,7 +135,7 @@ namespace Iviz.Displays
 
         protected void RaiseMoved()
         {
-            Moved?.Invoke();
+            Moved.TryRaise(this);
         }
 
         void IPointerEnterHandler.OnPointerEnter(PointerEventData _)
@@ -156,7 +156,7 @@ namespace Iviz.Displays
             }
             
             IsHovering = true;
-            StateChanged?.Invoke();
+            StateChanged.TryRaise(this);
         }
 
         protected void EndHover()
@@ -167,7 +167,7 @@ namespace Iviz.Displays
             }
             
             IsHovering = false;
-            StateChanged?.Invoke();
+            StateChanged.TryRaise(this);
         }
 
         void OnDisable()
@@ -180,7 +180,7 @@ namespace Iviz.Displays
                 {
                     IsHovering = false;
                     IsDragging = false;
-                    StateChanged?.Invoke();
+                    StateChanged.TryRaise(this);
                 }
             });
         }

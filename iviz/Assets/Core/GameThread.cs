@@ -119,34 +119,12 @@ namespace Iviz.Core
             nowFormatted = null;
             GameTime = Time.time;
 
-            try
-            {
-                EveryFrame?.Invoke();
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{ToString()}: Error during {nameof(EveryFrame)}", e);
-            }
+            EveryFrame.TryRaise(this, nameof(EveryFrame));
 
             if (GameTime - lastSecondRunTime > 1)
             {
-                try
-                {
-                    EverySecond?.Invoke();
-                }
-                catch (Exception e)
-                {
-                    RosLogger.Error($"{ToString()}: Error during {nameof(EverySecond)}", e);
-                }
-
-                try
-                {
-                    LateEverySecond?.Invoke();
-                }
-                catch (Exception e)
-                {
-                    RosLogger.Error($"{ToString()}: Error during {nameof(LateEverySecond)}", e);
-                }
+                EverySecond.TryRaise(this, nameof(EverySecond));
+                LateEverySecond.TryRaise(this, nameof(LateEverySecond));
 
                 RosLogger.ResetCounter();
                 lastSecondRunTime = GameTime;
@@ -154,15 +132,7 @@ namespace Iviz.Core
 
             if (GameTime - lastTickRunTime > 0.1f)
             {
-                try
-                {
-                    EveryTenthOfASecond?.Invoke();
-                }
-                catch (Exception e)
-                {
-                    RosLogger.Error($"{ToString()}: Error during {nameof(EveryTenthOfASecond)}", e);
-                }
-
+                EveryTenthOfASecond.TryRaise(this, nameof(EveryTenthOfASecond));
                 lastTickRunTime = GameTime;
             }
 
@@ -174,14 +144,7 @@ namespace Iviz.Core
                     break;
                 }
 
-                try
-                {
-                    action();
-                }
-                catch (Exception e)
-                {
-                    RosLogger.Error($"{ToString()}: Error during {nameof(Post)}", e);
-                }
+                action.TryRaise(this, nameof(Post));
             }
 
             frameCounter++;
@@ -190,14 +153,7 @@ namespace Iviz.Core
                 return;
             }
 
-            try
-            {
-                ListenersEveryFrame?.Invoke();
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{ToString()}: Error during {nameof(ListenersEveryFrame)}", e);
-            }
+            ListenersEveryFrame.TryRaise(this, nameof(ListenersEveryFrame));
 
             int listenerCount = listenerQueue.Count;
             for (int i = 0; i < listenerCount; i++)
@@ -207,14 +163,7 @@ namespace Iviz.Core
                     break;
                 }
 
-                try
-                {
-                    action();
-                }
-                catch (Exception e)
-                {
-                    RosLogger.Error($"{ToString()}: Error during {nameof(PostInListenerQueue)}", e);
-                }
+                action.TryRaise(this, nameof(PostInListenerQueue));
             }
 
             frameCounter = 0;
@@ -224,19 +173,12 @@ namespace Iviz.Core
 
         void LateUpdate()
         {
-            try
-            {
-                LateEveryFrame?.Invoke();
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{ToString()}: Error during {nameof(LateEveryFrame)}", e);
-            }
+            LateEveryFrame.TryRaise(this, nameof(LateEveryFrame));
         }
 
         void OnApplicationPause(bool pauseStatus)
         {
-            ApplicationPaused?.Invoke(pauseStatus);
+            ApplicationPaused.TryRaise(pauseStatus, this);
         }
 
         void OnDestroy()
@@ -470,16 +412,8 @@ namespace Iviz.Core
 
         public static void InvokeAfterFramesUpdated()
         {
-            try
-            {
-                AfterFramesUpdated?.Invoke();
-                AfterFramesUpdatedLate?.Invoke();
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{nameof(GameThread)}: " +
-                                $"Error during {nameof(InvokeAfterFramesUpdated)}", e);
-            }
+            AfterFramesUpdated.TryRaise(nameof(GameThread));
+            AfterFramesUpdatedLate.TryRaise(nameof(GameThread));
         }
     }
 }

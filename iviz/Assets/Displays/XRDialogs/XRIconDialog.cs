@@ -61,11 +61,11 @@ namespace Iviz.Displays.XR
             Button3.BackgroundVisible = false;
 
             // button 1 only appears alone
-            Button1.Clicked += () => Clicked?.Invoke(0);
+            Button1.Clicked += () => Clicked.TryRaise(0, this);
 
             // button 2 and 3 only appear in pairs
-            Button2.Clicked += () => Clicked?.Invoke(0);
-            Button3.Clicked += () => Clicked?.Invoke(1);
+            Button2.Clicked += () => Clicked.TryRaise(0, this);
+            Button3.Clicked += () => Clicked.TryRaise(1,  this);
         }
 
         public ButtonSetup ButtonSetup

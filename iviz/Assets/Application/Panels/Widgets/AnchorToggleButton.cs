@@ -76,7 +76,7 @@ namespace Iviz.App
             Button.onClick.AddListener(() =>
             {
                 State = !State;
-                Clicked?.Invoke();
+                Clicked.TryRaise(this);
             });
         }
     }

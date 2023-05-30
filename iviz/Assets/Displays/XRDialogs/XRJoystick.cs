@@ -46,12 +46,12 @@ namespace Iviz.Displays.XRDialogs
         {
             Disc.Moved += f =>
             {
-                Changed?.Invoke(f.z);
+                Changed.TryRaise(f.z, this);
             };
 
             Disc.PointerUp += () =>
             {
-                PointerUp?.Invoke();
+                PointerUp.TryRaise(this);
             };
 
             if (backgroundVisible)

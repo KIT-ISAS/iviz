@@ -27,8 +27,8 @@ namespace Iviz.App
 
         void Awake()
         {
-            Reset.onClick.AddListener(() => ResetAll?.Invoke());
-            LinkResolver.LinkClicked += s => LinkClicked?.Invoke(s);
+            Reset.onClick.AddListener(() => ResetAll.TryRaise(this));
+            LinkResolver.LinkClicked += s => LinkClicked.TryRaise(s, this);
         }
         
         public override void ClearSubscribers()

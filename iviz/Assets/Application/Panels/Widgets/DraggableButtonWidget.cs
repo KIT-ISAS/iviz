@@ -204,17 +204,17 @@ namespace Iviz.App
 
         protected virtual void OnClicked()
         {
-            Clicked?.Invoke();
+            Clicked.TryRaise(this);
         }
 
         protected virtual void OnRevealedLeft()
         {
-            RevealedLeft?.Invoke();
+            RevealedLeft.TryRaise(this);
         }
 
         protected virtual void OnRevealedRight()
         {
-            RevealedRight?.Invoke();
+            RevealedRight.TryRaise(this);
         }
 
         public virtual void ClearSubscribers()

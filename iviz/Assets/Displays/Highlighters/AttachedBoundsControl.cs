@@ -82,11 +82,11 @@ namespace Iviz.Displays.Highlighters
                 draggable.TargetTransform = source.BoundsTransform;
             }
 
-            draggable.PointerDown += () => PointerDown?.Invoke();
-            draggable.PointerUp += () => PointerUp?.Invoke();
-            draggable.Moved += () => Moved?.Invoke();
-            draggable.StartDragging += () => StartDragging?.Invoke();
-            draggable.EndDragging += () => EndDragging?.Invoke();
+            draggable.PointerDown += () => PointerDown.TryRaise(this);
+            draggable.PointerUp += () => PointerUp.TryRaise(this);
+            draggable.Moved += () => Moved.TryRaise(this);
+            draggable.StartDragging += () => StartDragging.TryRaise(this);
+            draggable.EndDragging += () => EndDragging.TryRaise(this);
 
             draggable.StateChanged += () =>
             {

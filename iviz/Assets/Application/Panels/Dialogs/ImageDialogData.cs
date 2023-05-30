@@ -41,7 +41,7 @@ namespace Iviz.App
             }
 
             panel = canvas.GetComponentInChildren<ImageDialogPanel>();
-            panel.Closed += () => Closed?.Invoke();
+            panel.Closed += () => Closed.TryRaise(this);
             
             panel.Clicked += rawUV =>
             {

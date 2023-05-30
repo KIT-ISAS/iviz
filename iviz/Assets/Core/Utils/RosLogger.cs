@@ -18,8 +18,9 @@ namespace Iviz.Core
 
         public delegate void ExternalLogDelegate(in LogMessage msg);
 
-        public static event Action<string>? LogInternal;
-        public static event ExternalLogDelegate? LogExternal;
+        public static Action<string>? LogInternal;
+        
+        public static ExternalLogDelegate? LogExternal;
 
         public static void ResetCounter()
         {
@@ -122,7 +123,7 @@ namespace Iviz.Core
         {
             try
             {
-                LogInternal?.Invoke(message);
+                LogInternal?.Invoke(message); // don't replace with TryRaise!
             }
             catch (Exception e)
             {
@@ -260,7 +261,7 @@ namespace Iviz.Core
         {
             try
             {
-                LogExternal?.Invoke(message);
+                LogExternal?.Invoke(message);  // don't replace with TryRaise!
             }
             catch (Exception e)
             {

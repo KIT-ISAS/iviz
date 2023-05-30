@@ -895,6 +895,36 @@ namespace Iviz.Core
 
             return false;
         }
+
+        public static void TryRaise(this Action? action, object callerName,
+            [CallerMemberName] string? methodName = null)
+        {
+            if (action == null) return;
+            
+            try
+            {
+                action();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{callerName}: Error during {methodName}", e);
+            }
+        }
+
+        public static void TryRaise<T>(this Action<T>? action, T arg, object callerName,
+            [CallerMemberName] string? methodName = null)
+        {
+            if (action == null) return;
+
+            try
+            {
+                action(arg);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{callerName}: Error during {methodName}", e);
+            }
+        }
     }
 
     public struct WithIndexEnumerable<T>
@@ -946,7 +976,7 @@ namespace Iviz.Core
             bool result = Interlocked.CompareExchange(ref value, 1, 0) == 0;
             if (result)
             {
-                Changed?.Invoke(true);
+                Changed.TryRaise(true, nameof(InterlockedBoolean));
             }
 
             return result;
@@ -955,7 +985,7 @@ namespace Iviz.Core
         public void Reset()
         {
             value = 0;
-            Changed?.Invoke(false);
+            Changed.TryRaise(false, nameof(InterlockedBoolean));
         }
     }
 }

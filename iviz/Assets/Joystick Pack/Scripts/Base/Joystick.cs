@@ -106,7 +106,7 @@ namespace External
             HandleInput(input.magnitude, input.normalized, radius);
             handle.anchoredPosition = input * radius * handleRange;
 
-            Changed?.Invoke(Direction);
+            Changed.TryRaise(Direction, this);
         }
 
         protected virtual void HandleInput(float magnitude, Vector2 normalised, Vector2 radius)
@@ -172,7 +172,7 @@ namespace External
             handle.anchoredPosition = Vector2.zero;
             touchId = null;
             GameThread.EveryFrame -= OnDrag;
-            PointerUp?.Invoke();
+            PointerUp.TryRaise(this);
         }
 
         protected Vector2 ScreenPointToAnchoredPosition(Vector2 screenPosition)

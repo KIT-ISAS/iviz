@@ -22,7 +22,7 @@ namespace Iviz.Displays
                     MeshCollider mesh => mesh.sharedMesh is { } subMesh ? subMesh.bounds : null,
                     _ => null
                 };
-                BoundsChanged?.Invoke();
+                BoundsChanged.TryRaise(this);
             }
         }
 

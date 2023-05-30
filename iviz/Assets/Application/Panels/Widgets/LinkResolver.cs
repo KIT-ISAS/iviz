@@ -31,7 +31,7 @@ namespace Iviz.App
             var eventToInvoke = eventData.clickCount == 1
                 ? LinkClicked
                 : LinkDoubleClicked;
-            eventToInvoke?.Invoke(linkInfo.GetLinkID());
+            eventToInvoke.TryRaise(linkInfo.GetLinkID(), this);
         }
     }
 }

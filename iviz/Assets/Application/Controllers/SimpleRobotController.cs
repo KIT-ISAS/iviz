@@ -313,9 +313,9 @@ namespace Iviz.Controllers
             return TryLoadFromSourceParameterAsync(null).AwaitNoThrow(this);
         }
 
-        public async ValueTask TryLoadFromSourceParameterAsync(string? value)
+        public async ValueTask TryLoadFromSourceParameterAsync(string? sourceParameter)
         {
-            config.SourceParameter = value ?? "";
+            config.SourceParameter = sourceParameter ?? "";
             Robot = null;
 
             if (value.IsNullOrEmpty())
@@ -331,17 +331,18 @@ namespace Iviz.Controllers
             {
                 HelpText = "- Requesting parameter -";
                 (parameterValue, errorMsg) =
-                    await RosManager.Connection.GetParameterAsync(value, timeoutInMs: ParameterTimeoutInMs);
+                    await RosManager.Connection.GetParameterAsync(sourceParameter, timeoutInMs: ParameterTimeoutInMs);
             }
             catch (OperationCanceledException)
             {
                 HelpText = "Error: Task cancelled";
-                RosLogger.Debug($"{ToString()}: Error while loading parameter '{value}': Task cancelled or timed out");
+                RosLogger.Debug($"{ToString()}: Error while loading parameter '{sourceParameter}': " +
+                                $"Task cancelled or timed out");
                 return;
             }
             catch (Exception e)
             {
-                RosLogger.Debug($"{ToString()}: Error while loading parameter '{value}'", e);
+                RosLogger.Debug($"{ToString()}: Error while loading parameter '{sourceParameter}'", e);
                 HelpText = "Error: Failed to retrieve parameter";
                 return;
             }
@@ -349,13 +350,13 @@ namespace Iviz.Controllers
             if (errorMsg != null)
             {
                 HelpText = $"Error: {errorMsg}";
-                RosLogger.Debug($"{ToString()}: Error while loading parameter '{value}': {errorMsg}");
+                RosLogger.Debug($"{ToString()}: Error while loading parameter '{sourceParameter}': {errorMsg}");
                 return;
             }
 
             if (!parameterValue.TryGet(out string robotDescription))
             {
-                RosLogger.Debug($"{ToString()}: Parameter '{value}' was not string!");
+                RosLogger.Debug($"{ToString()}: Parameter '{sourceParameter}' was not string!");
                 HelpText = "Error: Parameter contains no string";
                 return;
             }
@@ -499,28 +500,12 @@ namespace Iviz.Controllers
 
         void RaiseStopped()
         {
-            try
-            {
-                Stopped?.Invoke();
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{ToString()}: " +
-                                $"Error during {nameof(RaiseStopped)}", e);
-            }
+            Stopped.TryRaise(this);
         }
 
         void RaiseRobotFinishedLoading()
         {
-            try
-            {
-                RobotFinishedLoading?.Invoke();
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{ToString()}: " +
-                                $"Error during {nameof(RaiseRobotFinishedLoading)}", e);
-            }
+            RobotFinishedLoading.TryRaise(this);
         }
 
         [return: NotNullIfNotNull("jointName")]

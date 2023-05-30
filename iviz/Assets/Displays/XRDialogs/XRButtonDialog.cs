@@ -37,7 +37,7 @@ namespace Iviz.Displays.XR
         protected override void Awake()
         {
             base.Awake();
-            Button.Clicked += () => Clicked?.Invoke(0);
+            Button.Clicked += () => Clicked.TryRaise(0, this);
             Background.MakeHalfLitAlwaysVisible();
         }
 

@@ -80,7 +80,7 @@ namespace Iviz.Ros
                 KeepReconnecting = false;
 
                 version = value;
-                RosVersionChanged?.Invoke(version);
+                RosVersionChanged.TryRaise(value, this);
             }
         }
 
@@ -573,7 +573,7 @@ namespace Iviz.Ros
             await topic.AdvertiseAsync(newClient, token);
             int id = GetFreeId();
             topic.Id = id;
-            publishers[id] = (BaseRosPublisher?)topic.Publisher;
+            publishers[id] = topic.Publisher;
         }
 
         static async ValueTask ReSubscribe(IRosClient newClient, ISubscribedTopic topic, CancellationToken token)
