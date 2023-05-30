@@ -107,7 +107,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable,
             BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
-        if (!string.IsNullOrEmpty(actionName))
+        if (!actionName.IsNullOrEmpty())
         {
             throw new InvalidOperationException("Action client has already been started!");
         }

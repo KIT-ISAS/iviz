@@ -87,7 +87,7 @@ public unsafe struct WriteBuffer2
     public static int AddLength(int c, string? s)
     {
         int size = c + (sizeof(int) + 1); // trailing '\0'
-        return s is not { Length: not 0 }
+        return s.IsNullOrEmpty()
             ? size
             : size + BuiltIns.GetByteCount(s);
     }

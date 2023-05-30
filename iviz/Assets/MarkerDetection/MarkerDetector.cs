@@ -136,7 +136,7 @@ namespace Iviz.MarkerDetection
 
             if (enableQr && (!enableAruco || lastTypeFound == ARMarkerType.QrCode))
             {
-                if (context.DetectQrMarkers() is not { Length: > 0 } qrMarkers)
+                if (context.DetectQrMarkers() is not { Length: not 0 } qrMarkers)
                 {
                     return null;
                 }
@@ -147,7 +147,7 @@ namespace Iviz.MarkerDetection
 
             if (enableAruco && (!enableQr || lastTypeFound == ARMarkerType.Aruco))
             {
-                if (context.DetectArucoMarkers() is not { Length: > 0 } arucoMarkers)
+                if (context.DetectArucoMarkers() is not { Length: not 0 } arucoMarkers)
                 {
                     return null;
                 }

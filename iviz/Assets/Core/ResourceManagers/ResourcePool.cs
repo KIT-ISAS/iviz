@@ -15,7 +15,7 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class ResourcePool : MonoBehaviour
     {
-        static bool CheckDuplicates => !Settings.IsStandalone;
+        const bool CheckDuplicates = !Settings.IsStandalone;
         const int TimeToDestroyInSec = 60;
 
         [SerializeField] AssetHolder? assetHolder;
@@ -206,9 +206,9 @@ namespace Iviz.Displays
 
             foreach (var queue in disposedObjectPool.Values)
             {
-                while (queue.Count != 0 && queue.Peek().expirationTime < now)
+                while (queue.Count != 0 && queue.Peek().ExpirationTime < now)
                 {
-                    objectsToDestroy.Add(queue.Dequeue().gameObject);
+                    objectsToDestroy.Add(queue.Dequeue().GameObject);
                 }
             }
 
@@ -232,7 +232,7 @@ namespace Iviz.Displays
                 return Instantiate(resource.Object, parent);
             }
 
-            var newObject = instanceQueue.Dequeue().gameObject;
+            var newObject = instanceQueue.Dequeue().GameObject;
             newObject.transform.SetParentLocal(parent);
             if (enable)
             {
@@ -287,13 +287,13 @@ namespace Iviz.Displays
 
         readonly struct ObjectWithExpirationTime
         {
-            public readonly float expirationTime;
-            public readonly GameObject gameObject;
+            public readonly GameObject GameObject;
+            public readonly float ExpirationTime;
 
             public ObjectWithExpirationTime(GameObject o)
             {
-                gameObject = o;
-                expirationTime = GameThread.GameTime + TimeToDestroyInSec;
+                GameObject = o;
+                ExpirationTime = GameThread.GameTime + TimeToDestroyInSec;
             }
         }
     }

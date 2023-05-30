@@ -137,7 +137,7 @@ namespace VNC
                 int charOff = 0;
                 foreach (var child in row.Cast<Transform>().ToArray())
                 {
-                    if (charsRow[charOff++] is not { Length: > 0 } chars)
+                    if (charsRow[charOff++] is not { Length: not 0 } chars)
                     {
                         continue;
                     }

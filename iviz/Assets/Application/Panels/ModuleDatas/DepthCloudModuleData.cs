@@ -9,6 +9,7 @@ using Iviz.Core;
 using Iviz.Core.Configurations;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
+using Iviz.Tools;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -82,8 +83,8 @@ namespace Iviz.App
             panel.HideButton.Clicked += ToggleVisible;
 
             var topics = GetImageTopics();
-            panel.Color.SetHints(topics);
-            panel.Depth.SetHints(topics);
+            panel.Color.Hints = topics;
+            panel.Depth.Hints = topics;
 
             panel.Color.Submit += f =>
             {
@@ -151,7 +152,7 @@ namespace Iviz.App
             };
         }
 
-        static string SanitizeTitle(string? topic) => topic is null or "" ? "[Empty]" : topic;
+        static string SanitizeTitle(string? topic) => topic.IsNullOrEmpty() ? "[Empty]" : topic;
 
         public override void UpdatePanel()
         {
@@ -174,10 +175,10 @@ namespace Iviz.App
         static List<string> GetImageTopics()
         {
             var topics = new List<string> { NoneStr };
-            topics.AddRange(RosManager.Connection.GetSystemPublishedTopicTypes()
+            var imageTopics = RosManager.Connection.GetSystemPublishedTopicTypes()
                 .Where(topicInfo => topicInfo.Type is Image.MessageType or CompressedImage.MessageType)
-                .Select(topicInfo => topicInfo.Topic)
-            );
+                .Select(topicInfo => topicInfo.Topic);
+            topics.AddRange(imageTopics);
             return topics;
         }
 

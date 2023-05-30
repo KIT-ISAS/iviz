@@ -129,6 +129,8 @@ namespace Iviz.Controllers.XR
 
             void PublishMeshChangeImpl()
             {
+                if (sender == null) return; // shouldn't happen
+                
                 try
                 {
                     var meshIndices = MemoryMarshal.Cast<int, TriangleIndices>(indices.AsReadOnlySpan()).ToArray();

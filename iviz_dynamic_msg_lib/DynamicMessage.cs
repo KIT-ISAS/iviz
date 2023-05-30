@@ -55,7 +55,7 @@ public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMe
 
     public FieldType Type => FieldType.DynamicMessage;
 
-    public bool IsInitialized => !string.IsNullOrEmpty(RosMessageType);
+    public bool IsInitialized => !RosMessageType.IsNullOrEmpty();
 
     public DynamicMessage()
     {

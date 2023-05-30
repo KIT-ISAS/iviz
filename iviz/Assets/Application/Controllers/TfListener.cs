@@ -24,11 +24,9 @@ namespace Iviz.Controllers
 
         readonly TfConfiguration config = new();
 
-        //readonly Channel<(TransformStamped[] frame, bool isStatic)> incomingMessages;
         readonly ChannelReader<(TransformStamped[] frame, bool isStatic)> incomingReader;
         readonly ChannelWriter<(TransformStamped[] frame, bool isStatic)> incomingWriter;
 
-        //readonly Channel<TransformStamped> outgoingMessages;
         readonly ChannelReader<TransformStamped> outgoingReader;
         readonly ChannelWriter<TransformStamped> outgoingWriter;
         

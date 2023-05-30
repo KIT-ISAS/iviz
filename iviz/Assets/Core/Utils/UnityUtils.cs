@@ -669,7 +669,7 @@ namespace Iviz.Core
         public static Vector3 Forward(this in Pose pose) => pose.rotation.Forward();
 
         public static Vector3 Up(this in Pose pose) => pose.rotation.Up();
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Quaternion FromEulerRad(in Vector3 euler)
         {
@@ -797,7 +797,7 @@ namespace Iviz.Core
 
         public static void SetTextRent(this TMP_Text text, in BuilderPool.BuilderRent rent, int start, int count)
         {
-            if (!MemoryMarshal.TryGetArray(rent.Chunk, out var segment))
+            if (!MemoryMarshal.TryGetArray(rent.Chunk, out var segment) || segment.Array == null)
             {
                 // shouldn't happen
                 RosLogger.Debug(
@@ -805,7 +805,53 @@ namespace Iviz.Core
                 return;
             }
 
-            text.SetCharArray(segment.Array, start, count);
+            int end = start + count;
+            char[] array = segment.Array;
+
+            if (NeedsFixing())
+            {
+                SetFixed();
+            }
+            else
+            {
+                text.SetCharArray(segment.Array, start, count);
+            }
+
+
+            bool NeedsFixing()
+            {
+                for (int i = start; i < end; i++)
+                {
+                    if (array[i] < '\n') return true;
+                }
+
+                return false;
+            }
+
+            void SetFixed()
+            {
+                using var buffer = BuilderPool.Rent();
+                for (int i = start; i < end; i++)
+                {
+                    char c = array[i];
+                    if (c is (< ' ' and not ('\r' or '\n')) or > '~')
+                    {
+                        buffer.Append("\\u").Append(((int)c).ToString("X4"));
+                    }
+                    else
+                    {
+                        buffer.Append(c);
+                    }
+                }
+
+                if (!MemoryMarshal.TryGetArray(buffer.Chunk, out var bufferSegment) || bufferSegment.Array == null)
+                {
+                    // shouldn't happen either
+                    return;
+                }
+
+                text.SetCharArray(bufferSegment.Array, 0, buffer.Length);
+            }
         }
 
         public static TransformEnumerator GetChildren(this Transform t) => new(t);
@@ -837,6 +883,17 @@ namespace Iviz.Core
         public static void MakeHalfLitAlwaysVisible(this ISupportsOverrideMaterial display)
         {
             display.OverrideMaterial(Resource.Materials.LitHalfVisible.Object);
+        }
+
+        public static bool HasOnlyValidIdentifierChars(string id)
+        {
+            int length = id.Length;
+            for (int i = 0; i < length; i++)
+            {
+                if (id[i] < ' ') return true;
+            }
+
+            return false;
         }
     }
 
@@ -877,11 +934,11 @@ namespace Iviz.Core
                    throw new JsonException("Object could not be deserialized");
         }
     }
-    
+
     public struct InterlockedBoolean
     {
         int value;
-        
+
         public Action<bool>? Changed;
 
         public bool TrySet()
@@ -900,5 +957,5 @@ namespace Iviz.Core
             value = 0;
             Changed?.Invoke(false);
         }
-    }    
+    }
 }

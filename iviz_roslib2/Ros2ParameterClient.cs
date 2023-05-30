@@ -18,8 +18,8 @@ public sealed class Ros2ParameterClient
 
     public async ValueTask<RosValue> GetParameterAsync(string node, string key, CancellationToken token = default)
     {
-        if (string.IsNullOrEmpty(node)) BuiltIns.ThrowArgumentNull(nameof(node));
-        if (key == null) BuiltIns.ThrowArgumentNull(nameof(key));
+        if (node.IsNullOrEmpty()) BuiltIns.ThrowArgumentNull(nameof(node));
+        if (key.IsNullOrEmpty()) BuiltIns.ThrowArgumentNull(nameof(key));
         if (!RosNameUtils.IsValidResourceName(node) || node[0] is '/' or '~')
             BuiltIns.ThrowArgument(nameof(node), "Invalid node name");
 
@@ -42,7 +42,7 @@ public sealed class Ros2ParameterClient
     
     public async ValueTask<string[]> GetParameterNamesAsync(string node, CancellationToken token = default)
     {
-        if (string.IsNullOrEmpty(node)) BuiltIns.ThrowArgumentNull(nameof(node));
+        if (node.IsNullOrEmpty()) BuiltIns.ThrowArgumentNull(nameof(node));
         if (!RosNameUtils.IsValidResourceName(node) || node[0] is '/' or '~')
             BuiltIns.ThrowArgument(nameof(node), "Invalid node name");
 

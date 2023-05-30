@@ -33,7 +33,7 @@
 
         void surf(Input __, inout SurfaceOutput o)
         {
-            o.Albedo = _Tint;
+            o.Albedo = float4(1, 1, 1, 1);
             o.Alpha = 1;
         }
         ENDCG

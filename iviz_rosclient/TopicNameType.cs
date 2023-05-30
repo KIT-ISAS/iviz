@@ -12,12 +12,12 @@ public readonly struct TopicNameType : IComparable<TopicNameType>, IEquatable<To
     /// <summary>
     /// Topic name
     /// </summary>
-    [DataMember] public string Topic { get; }
+    [DataMember] public readonly string Topic;
 
     /// <summary>
     /// Topic type
     /// </summary>
-    [DataMember] public string Type { get; }
+    [DataMember] public readonly string Type;
 
     public TopicNameType(string topic, string type) => (Topic, Type) = (topic, type);
         

@@ -9,6 +9,7 @@ using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Ros;
+using Iviz.Tools;
 using UnityEngine;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
@@ -262,6 +263,18 @@ namespace Iviz.Controllers.TF
         {
             var unityPose = transform.Transform.Ros2Unity();
 
+            if (!ValidateName(transform.ChildFrameId))
+            {
+                SetFailedForName(transform.ChildFrameId);
+                return;
+            }
+
+            if (!ValidateName(transform.Header.FrameId))
+            {
+                SetFailedForName(transform.Header.FrameId);
+                return;
+            }
+            
             if (unityPose.IsInvalid())
             {
                 SetFailedForInvalid(transform.ChildFrameId);
@@ -336,6 +349,11 @@ namespace Iviz.Controllers.TF
             }
         }
 
+        static bool ValidateName(string name)
+        {
+            return !UnityUtils.HasOnlyValidIdentifierChars(name); // TODO: more sanity tests
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool CheckIfWithinThreshold(in Vector3 t)
         {
@@ -362,6 +380,19 @@ namespace Iviz.Controllers.TF
 
             RosLogger.Info($"{nameof(TfModule)}: Ignoring transform '{childId}' with too large values");
             warningTimestamps[childId] = GameThread.GameTime + WarningBlacklistTimeInSec;
+        }
+
+
+        void SetFailedForName(string id)
+        {
+            if (warningTimestamps.TryGetValue(id, out float expirationTimestamp)
+                && expirationTimestamp >= GameThread.GameTime)
+            {
+                return;
+            }
+
+            RosLogger.Info($"{nameof(TfModule)}: Ignoring transform id '{id}' with unknown characters");
+            warningTimestamps[id] = GameThread.GameTime + WarningBlacklistTimeInSec;
         }
 
         void SetFailedForInvalid(string childId)

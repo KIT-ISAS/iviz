@@ -318,7 +318,7 @@ namespace Iviz.Controllers
             config.SourceParameter = value ?? "";
             Robot = null;
 
-            if (value is not { Length: not 0 })
+            if (value.IsNullOrEmpty())
             {
                 config.SavedRobotName = "";
                 HelpText = "[No Robot Loaded]";
@@ -373,7 +373,7 @@ namespace Iviz.Controllers
             config.SavedRobotName = "";
             Robot = null;
 
-            if (robotName is null or "")
+            if (robotName.IsNullOrEmpty())
             {
                 config.SourceParameter = "";
                 HelpText = "[No Robot Loaded]";
@@ -395,7 +395,7 @@ namespace Iviz.Controllers
 
         bool LoadRobotFromDescription(string? description)
         {
-            if (description is null or "")
+            if (description.IsNullOrEmpty())
             {
                 RosLogger.Debug($"{ToString()}: Empty parameter '{description}'");
                 HelpText = "[Robot Description is Empty]";

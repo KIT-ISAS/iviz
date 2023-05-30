@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Core;
@@ -93,22 +94,7 @@ namespace Iviz.App
                 CheckPreferredWidth();
             }
         }
-
-        public void SetHints<T>(T hints) where T : IReadOnlyList<string>
-        {
-            optionDatas.Clear();
-            
-            int count = hints.Count;
-            for (int i = 0; i < count; i++)
-            {
-                optionDatas.Add(new TMP_Dropdown.OptionData(hints[i]));
-            }
-
-            Dropdown.options = optionDatas;
-
-            CheckPreferredWidth();
-        }
-
+        
         void CheckPreferredWidth()
         {
             // this is really hackish, go to the spawned item list, traverse all texts and find the preferred width

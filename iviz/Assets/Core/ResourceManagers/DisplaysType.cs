@@ -82,7 +82,6 @@ namespace Iviz.Resources
             MeshList = Create(assetHolder.MeshList, nameof(assetHolder.MeshList));
             PointList = Create(assetHolder.PointList, nameof(assetHolder.PointList));
             MeshTriangles = Create(assetHolder.MeshTriangles, nameof(assetHolder.MeshTriangles));
-            //TfFrame = Create(appAssetHolder.TFFrame);
             Image = Create(appAssetHolder.Image, nameof(appAssetHolder.Image));
             Square = Create(assetHolder.Plane, nameof(assetHolder.Plane));
             Line = Create(assetHolder.Line, nameof(assetHolder.Line));

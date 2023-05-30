@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.App;
@@ -61,7 +62,7 @@ namespace Iviz.Controllers
             connection.AdvertiseService<ResetModule>("~reset_module", ResetModuleAsync);
             connection.AdvertiseService<GetModules>("~get_modules", GetModulesAsync);
             connection.AdvertiseService<SetFixedFrame>("~set_fixed_frame", SetFixedFrameAsync);
-            
+
             //connection.AdvertiseService<GetFramePose>("get_frame_poses", GetFramePoseAsync);
             //connection.AdvertiseService<GetCaptureResolutions>("get_capture_resolutions", GetCaptureResolutions);
             //connection.AdvertiseService<StartCapture>("start_capture", StartCaptureAsync);
@@ -100,7 +101,7 @@ namespace Iviz.Controllers
         }
         */
 
-        static async ValueTask AwaitAndLog(this ValueTask task, string name)
+        static async ValueTask AwaitAndLog(this ValueTask task, [CallerMemberName] string? name = null)
         {
             try
             {
@@ -111,8 +112,8 @@ namespace Iviz.Controllers
                 RosLogger.Error($"{nameof(ControllerService)}: Error in {name}!", e);
             }
         }
-        
-        static async ValueTask<T?> AwaitAndLog<T>(this ValueTask<T> task, string name)
+
+        static async ValueTask<T?> AwaitAndLog<T>(this ValueTask<T> task, [CallerMemberName] string? name = null)
         {
             try
             {
@@ -128,7 +129,7 @@ namespace Iviz.Controllers
         static async ValueTask AddModuleAsync(AddModule srv)
         {
             var (id, success, message) = await TryAddModuleAsync(srv.Request.ModuleType, srv.Request.Id)
-                .AwaitAndLog(nameof(AddModuleAsync));
+                .AwaitAndLog();
             srv.Response.Success = success;
             srv.Response.Message = message ?? "";
             srv.Response.Id = id ?? "";
@@ -227,8 +228,7 @@ namespace Iviz.Controllers
         static async ValueTask AddModuleFromTopicAsync(AddModuleFromTopic srv)
         {
             var (id, success, message) =
-                await TryAddModuleFromTopicAsync(srv.Request.Topic, srv.Request.Id)
-                    .AwaitAndLog(nameof(AddModuleFromTopicAsync));
+                await TryAddModuleFromTopicAsync(srv.Request.Topic, srv.Request.Id).AwaitAndLog();
             srv.Response.Success = success;
             srv.Response.Message = message ?? "";
             srv.Response.Id = id ?? "";
@@ -302,36 +302,13 @@ namespace Iviz.Controllers
             }
 
             return result;
-            /*
-            using var signal = new SemaphoreSlim(0);
-            GameThread.Post(() =>
-            {
-                try
-                {
-                    result.id = ModuleListPanel.Instance.CreateModule(resource, topic, type,
-                        requestedId: requestedId.Length != 0 ? requestedId : null).Configuration.Id;
-                    result.message = "";
-                    result.success = true;
-                }
-                catch (Exception e)
-                {
-                    result.message = $"An exception was raised: {e.Message}";
-                    RosLogger.Error($"{nameof(ControllerService)}: Failed to create module for topic '{topic}'", e);
-                }
-                finally
-                {
-                    signal.Release();
-                }
-            });
-        
-            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : ("", false, "Request timed out!");
-            */
         }
 
         static async ValueTask UpdateModuleAsync(UpdateModule srv)
         {
-            var (success, message) = await TryUpdateModuleAsync(srv.Request.Id, srv.Request.Fields, srv.Request.Config)
-                .AwaitAndLog(nameof(UpdateModuleAsync));
+            var (success, message) =
+                await TryUpdateModuleAsync(srv.Request.Id, srv.Request.Fields, srv.Request.Config)
+                    .AwaitAndLog();
             srv.Response.Success = success;
             srv.Response.Message = message ?? "";
         }
@@ -440,7 +417,7 @@ namespace Iviz.Controllers
 
         static async ValueTask ResetModuleAsync(ResetModule srv)
         {
-            var (success, message) = await TryResetModuleAsync(srv.Request.Id).AwaitAndLog(nameof(ResetModuleAsync));
+            var (success, message) = await TryResetModuleAsync(srv.Request.Id).AwaitAndLog();
             srv.Response.Success = success;
             srv.Response.Message = message ?? "";
         }
@@ -482,7 +459,7 @@ namespace Iviz.Controllers
         static async ValueTask GetModulesAsync(GetModules srv)
         {
             srv.Response.Configs =
-                await GetModulesAsync().AwaitAndLog(nameof(GetModulesAsync)) ?? Array.Empty<string>();
+                await GetModulesAsync().AwaitAndLog() ?? Array.Empty<string>();
         }
 
         static async ValueTask<string[]> GetModulesAsync()
@@ -793,9 +770,9 @@ namespace Iviz.Controllers
             switch (srv.Request.Operation)
             {
                 case 0:
-                    return AddRobotAsync(srv).AwaitAndLog(nameof(UpdateRobotAsync));
+                    return AddRobotAsync(srv).AwaitAndLog();
                 case 1:
-                    return RemoveRobotAsync(srv).AwaitAndLog(nameof(UpdateRobotAsync));
+                    return RemoveRobotAsync(srv).AwaitAndLog();
                 default:
                     srv.Response.Success = false;
                     srv.Response.Message = "Unknown operation";
@@ -915,12 +892,12 @@ namespace Iviz.Controllers
 
         static ValueTask LaunchDialogAsync(LaunchDialog srv)
         {
-            return TryLaunchDialogAsync(srv).AwaitAndLog(nameof(LaunchDialogAsync));
+            return TryLaunchDialogAsync(srv).AwaitAndLog();
         }
 
         static async ValueTask TryLaunchDialogAsync(LaunchDialog srv)
         {
-            if (string.IsNullOrEmpty(srv.Request.Dialog.Id))
+            if (srv.Request.Dialog.Id.IsNullOrEmpty())
             {
                 srv.Response.Success = false;
                 srv.Response.Message = "Dialog Id is null or empty";

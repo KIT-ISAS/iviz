@@ -45,7 +45,7 @@ public static class BaseUtils
 
         int suffixLength = suffix.Length;
         int checkLength = check.Length;
-        
+
         if (checkLength < suffixLength)
         {
             return false;
@@ -64,12 +64,10 @@ public static class BaseUtils
     }
 
     public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t) => new(t);
-    
+
     /// <summary>
     /// Copies the content of the string into a byte <see cref="Rent"/>.
     /// </summary>
-    /// <param name="s"></param>
-    /// <returns></returns>
     public static Rent AsRent(this string s)
     {
         var bytes = new Rent(Defaults.UTF8.GetMaxByteCount(s.Length));
@@ -119,25 +117,33 @@ public static class BaseUtils
         return sBuilder.ToString();
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ReadInt(this Span<byte> span) => span.Length >= sizeof(int)
         ? Unsafe.ReadUnaligned<int>(ref span[0])
         : ThrowIndexOutOfRange();
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ReadInt(this byte[] array) => array.Length >= sizeof(int)
         ? Unsafe.ReadUnaligned<int>(ref array[0])
         : ThrowIndexOutOfRange();
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void WriteInt(this byte[] span, int t)
     {
         if (span.Length < sizeof(int)) ThrowIndexOutOfRange();
         Unsafe.WriteUnaligned(ref span[0], t);
     }
-    
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void WriteInt(this Span<byte> span, int t)
     {
         if (span.Length < sizeof(int)) ThrowIndexOutOfRange();
         Unsafe.WriteUnaligned(ref span[0], t);
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsNullOrEmpty([NotNullWhen(false)] this string? str) => 
+        str is null || str.Length is 0;
 
     [DoesNotReturn, AssertionMethod]
     public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);

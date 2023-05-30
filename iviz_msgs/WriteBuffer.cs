@@ -168,7 +168,7 @@ public unsafe struct WriteBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetStringSize(string? s)
     {
-        return s is not { Length: not 0 } ? 0 : BuiltIns.GetByteCount(s);
+        return s.IsNullOrEmpty() ? 0 : BuiltIns.GetByteCount(s);
     }
 
     /// <summary>

@@ -16,7 +16,6 @@ Shader "iviz/LineMesh"
 
 			float4x4 _LocalToWorld;
 			float4x4 _WorldToLocal;
-			fixed4 _Tint;
 			
 			float _Scale;
 
@@ -92,7 +91,7 @@ Shader "iviz/LineMesh"
 
 			fixed4 frag() : SV_Target
 			{
-				return _Tint;
+				return float4(1, 1, 1, 1);
 			}
 
 			ENDCG

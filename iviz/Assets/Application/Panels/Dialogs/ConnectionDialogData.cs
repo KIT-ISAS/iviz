@@ -56,7 +56,7 @@ namespace Iviz.App
                         : $"Changing master uri to '{value}'.");
                 }
 
-                MasterUriChanged?.Invoke(value);
+                MasterUriChanged?.Invoke();
             }
         }
 
@@ -74,7 +74,7 @@ namespace Iviz.App
                     RosLogger.Internal($"Changing caller uri to '{value}'.");
                 }
                 
-                MyUriChanged?.Invoke(value);
+                MyUriChanged?.Invoke();
             }
         }
 
@@ -93,7 +93,7 @@ namespace Iviz.App
                     RosLogger.Internal($"Changing my ROS id to '{value}'.");
                 }
 
-                MyIdChanged?.Invoke(value);
+                MyIdChanged?.Invoke();
             }
         }
 
@@ -142,7 +142,7 @@ namespace Iviz.App
                     ? $"Setting ROS2 discovery server to {endpoint.Description()}."
                     : "Disabling ROS2 discovery server.");
                 
-                DiscoveryServerChanged?.Invoke(value);
+                DiscoveryServerChanged?.Invoke();
             }
         }
 
@@ -156,7 +156,7 @@ namespace Iviz.App
                 RosManager.Connection.DomainId = value;
                 RosLogger.Internal($"Setting ROS2 domain id to {value.ToString()}.");
                 
-                DomainIdChanged?.Invoke(value);
+                DomainIdChanged?.Invoke();
             }
         }
 
@@ -199,28 +199,30 @@ namespace Iviz.App
                 }
 
                 RosManager.Connection.RosVersion = value;
-                RosVersionChanged?.Invoke(value);
+                RosVersionChanged?.Invoke();
             }
         }
 
-        public event Action<Uri?>? MasterUriChanged;
-        public event Action<Uri?>? MyUriChanged;
-        public event Action<string?>? MyIdChanged;
-        public event Action<bool>? MasterActiveChanged;
-        public event Action<RosVersion>? RosVersionChanged;
-        public event Action<int>? DomainIdChanged;
-        public event Action<Endpoint?>? DiscoveryServerChanged;
+        public event Action? MasterUriChanged;
+        public event Action? MyUriChanged;
+        public event Action? MyIdChanged;
+        public event Action? MasterActiveChanged;
+        public event Action? RosVersionChanged;
+        public event Action? DomainIdChanged;
+        public event Action? DiscoveryServerChanged;
 
         public ConnectionDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<ConnectionDialogPanel>(DialogPanelType.Connection);
             panel.LineLog.Text.vertexBufferAutoSizeReduction = false;
             RosLogger.LogInternal += OnLogInternal;
+            GameThread.ApplicationPaused += OnPaused;
         }
 
         public override void Dispose()
         {
             RosLogger.LogInternal -= OnLogInternal;
+            GameThread.ApplicationPaused -= OnPaused;
         }
 
         void OnLogInternal(string msg)
@@ -263,21 +265,21 @@ namespace Iviz.App
             const string noneStr = "(none)";
 
             panel.MyUri.Value = MyUri == null ? "" : MyUri.ToString();
-            panel.MyUri.SetHints(RosClient.GetCallerUriCandidates(DefaultPort).Select(uri => uri.ToString()));
+            panel.MyUri.Hints = GetUriHints();
             panel.MyId.Value = MyId ?? "";
             panel.MyId2.Value = MyId ?? "";
             panel.MyId.Hints = new[] { DefaultMyId };
             panel.MyId2.Hints = new[] { DefaultMyId };
             panel.MasterUri.Value = MasterUri == null ? "" : MasterUri.ToString();
             panel.MasterUri.Interactable = !RosManager.Server.IsActive;
-            panel.MasterUri.SetHints(LastMasterUris.Select(uri => uri.ToString()));
+            panel.MasterUri.Hints = LastMasterUris.Select(uri => uri.ToString());
             panel.LineLog.Active = true;
             panel.ServerMode.State = RosManager.Server.IsActive;
 
             panel.DomainId.Index = DomainId;
             panel.DiscoveryServer.Value = DiscoveryServer?.Description() ?? "";
-            panel.DiscoveryServer.SetHints(LastDiscoveryServers.Select(
-                endpoint => endpoint?.Description() ?? noneStr));
+            panel.DiscoveryServer.Hints = LastDiscoveryServers.Select(
+                endpoint => endpoint?.Description() ?? noneStr);
 
             if (!RosProvider.IsRos2VersionSupported)
             {
@@ -411,6 +413,15 @@ namespace Iviz.App
             panel.RosVersion2.Clicked += () => RosVersion = RosVersion.ROS1;
         }
 
+        void OnPaused(bool pauseStatus)
+        {
+            if (pauseStatus) return;
+            panel.MyUri.Hints = GetUriHints();
+        }
+
+        static IEnumerable<string> GetUriHints() =>
+            RosClient.GetCallerUriCandidates(DefaultPort).Select(uri => uri.ToString());
+
         async Task TryDisposeMasterAsync()
         {
             if (RosManager.IsConnected)
@@ -435,7 +446,7 @@ namespace Iviz.App
             panel.ServerMode.State = false;
             panel.MasterUri.Interactable = true;
             RosManager.Connection.Disconnect();
-            MasterActiveChanged?.Invoke(false);
+            MasterActiveChanged?.Invoke();
         }
 
         public async Task TryCreateMasterAsync()
@@ -477,7 +488,7 @@ namespace Iviz.App
             panel.ServerMode.State = true;
             panel.MasterUri.Interactable = false;
             RosLogger.Internal($"Created <b>master node</b> using my uri {ownMasterUriStr}.");
-            MasterActiveChanged?.Invoke(true);
+            MasterActiveChanged?.Invoke();
 
             RosManager.Connection.TryOnceToConnect();
         }

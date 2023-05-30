@@ -101,7 +101,7 @@ namespace Iviz.Controllers.TF
         {
             ThrowHelper.ThrowIfNull(frame, nameof(frame));
 
-            if (listeners is not { Count: not 0 })
+            if (listeners == null)
             {
                 return;
             }
@@ -129,10 +129,7 @@ namespace Iviz.Controllers.TF
 
         void RemoveChild(TfFrame frame)
         {
-            if (children is { Count: not 0 })
-            {
-                children.Remove(frame.Id);
-            }
+            children?.Remove(frame.Id);
         }
 
         void CheckIfDead()
@@ -142,8 +139,8 @@ namespace Iviz.Controllers.TF
                 Debug.LogWarning($"{ToString()}: Frame has a listener that was previously destroyed.");
             }
 
-            bool noListeners = listeners is not { Count: not 0 };
-            bool noChildren = children is not { Count: not 0 };
+            bool noListeners = listeners == null || listeners.Count == 0;
+            bool noChildren = children == null || children.Count == 0;
             if (noListeners && noChildren)
             {
                 TfModule.Instance.MarkAsDead(this);

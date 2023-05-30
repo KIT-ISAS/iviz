@@ -55,6 +55,7 @@ namespace Iviz.Controllers
         ControlMarker,
         Setup
     }
+
     public abstract class ARController : Controller, IHasFrame
     {
         public const bool EnableMeshingSubsystem =
@@ -95,7 +96,7 @@ namespace Iviz.Controllers
         uint markerSeq;
         uint meshSeq;
 
-        public static bool IsPulseActive => Instance?.pulseManager.HasPulse is true;
+        public static bool IsPulseActive => Instance?.pulseManager.HasPulse ?? false;
 
         public Sender<XRMarkerArray>? MarkerSender { get; private set; }
         public Sender<Image> ColorSender { get; }
@@ -507,7 +508,7 @@ namespace Iviz.Controllers
             var unityPoseToFixed = rosPoseToFixed.Ros2Unity();
             return TfModule.FixedFrameToAbsolute(unityPoseToFixed);
         }
-        
+
         public virtual void Dispose()
         {
             ARStateChanged?.Invoke(false);
@@ -538,8 +539,9 @@ namespace Iviz.Controllers
 
             pulseManager.Dispose();
 
-            TfPublisher.Instance.Remove(XRNames.HeadFrameId, true);
-            TfPublisher.Instance.Remove(XRNames.CameraFrameId, true);
+            var tfPublisher = TfPublisher.Instance;
+            tfPublisher.Remove(XRNames.HeadFrameId, true);
+            tfPublisher.Remove(XRNames.CameraFrameId, true);
         }
 
         public override void ResetController()
@@ -574,7 +576,7 @@ namespace Iviz.Controllers
                         var material = Resource.Materials.LinePulse.Object;
                         material.SetFloat(ShaderIds.PulseTimeId, (timeDiff - 0.5f));
                     },
-                    () => pulseTokenSource.Cancel()
+                    pulseTokenSource.Cancel
                 );
             }
 

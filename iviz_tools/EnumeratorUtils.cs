@@ -55,9 +55,4 @@ public static class EnumeratorUtils
     public static IndexRangeEnumerator GetEnumerator(this Range range) =>
         // GetHashCode returns the value without additional validation
         new(range.Start.GetHashCode(), range.End.GetHashCode());
-
-    public static Span<T> Slice<T>(this T[] t, Range range)
-    {
-        return t.AsSpan(range);
-    }
 }

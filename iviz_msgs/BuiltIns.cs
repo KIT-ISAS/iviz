@@ -260,17 +260,17 @@ public static class BuiltIns
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static unsafe void ConvertToChar(byte* srcPtr, char* strPtr, int size)
     {
-        ulong* dstPtrUlong = (ulong*)strPtr; 
+        ulong* dstPtrUlong = (ulong*)strPtr;
 
         while (size >= 4)
         {
-            ulong a0 = Unsafe.ReadUnaligned<ulong>(srcPtr++);
-            ulong a1 = Unsafe.ReadUnaligned<ulong>(srcPtr++);
-            ulong a2 = Unsafe.ReadUnaligned<ulong>(srcPtr++);
-            ulong a3 = Unsafe.ReadUnaligned<ulong>(srcPtr++);
+            ulong a0 = *srcPtr++;
+            ulong a1 = *srcPtr++;
+            ulong a2 = *srcPtr++;
+            ulong a3 = *srcPtr++;
 
             Unsafe.WriteUnaligned(
-                dstPtrUlong,
+                dstPtrUlong++,
                 (a3 << 48) | (a2 << 32) | (a1 << 16) | a0
             );
             size -= 4;
@@ -325,7 +325,7 @@ public static class BuiltIns
     internal static unsafe void WriteStringSimple(char* strPtr, byte* dstPtr, int size)
     {
         ushort* srcPtr = (ushort*)strPtr;
-        for (int i = 0; i < size; i++) dstPtr[i] = (byte) srcPtr[i];
+        for (int i = 0; i < size; i++) dstPtr[i] = (byte)srcPtr[i];
         // no ReadUnaligned, strPtr is aligned 
     }
 

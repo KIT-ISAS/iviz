@@ -147,7 +147,7 @@ namespace Iviz.App
                 DataPanelCanvas.SetActive(value);
                 DialogPanelManager.Active = value;
                 ARToolbarPanel.Visible = !value;
-                
+
                 /*
                 if (safeAreaPanel != null)
                 {
@@ -303,20 +303,22 @@ namespace Iviz.App
             UpperCanvas.RecordBag.onClick.AddListener(OnStartRecordBag);
             UpperCanvas.ShowSystem.onClick.AddListener(Dialogs.SystemData.Show);
 
-            var connectionData = Dialogs.ConnectionData;
-            UpperCanvas.MasterUriButton.Clicked += connectionData.Show;
-            
-            connectionData.MasterUriChanged += _ => OnRosInfoChanged();
-            connectionData.MyUriChanged += _ => OnRosInfoChanged();
-            connectionData.MyIdChanged += _ => OnRosInfoChanged();
-            connectionData.RosVersionChanged += _ => OnRosInfoChanged();
+            {
+                var connectionData = Dialogs.ConnectionData;
+
+                Action onRosInfoChanged = OnRosInfoChanged;
+                connectionData.MasterUriChanged += onRosInfoChanged;
+                connectionData.MyUriChanged += onRosInfoChanged;
+                connectionData.MyIdChanged += onRosInfoChanged;
+                connectionData.RosVersionChanged += onRosInfoChanged;
+
+                UpperCanvas.MasterUriButton.Clicked += connectionData.Show;
+                UpperCanvas.StopButton.Clicked += () => connectionData.ToggleConnection(false);
+                UpperCanvas.ConnectButton.Clicked += () => connectionData.ToggleConnection(true);
+            }
 
             OnRosInfoChanged();
-
             KeepReconnecting = false;
-
-            UpperCanvas.StopButton.Clicked += () => connectionData.ToggleConnection(false);
-            UpperCanvas.ConnectButton.Clicked += () => connectionData.ToggleConnection(true);
 
             BottomCanvas.CameraButtonClicked += CameraModuleData.ToggleShowPanel;
 
@@ -325,6 +327,7 @@ namespace Iviz.App
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
             GameThread.EveryTenthOfASecond += UpdateCameraStats;
+            GameThread.ApplicationPaused += OnPaused;
         }
 
         void InitMenuObject()
@@ -1133,8 +1136,7 @@ namespace Iviz.App
             (long downB, long upB) = RosManager.CollectBandwidthReport();
             BottomCanvas.Bandwidth.text = $"{FormatBandwidth(downB)} ^{FormatBandwidth(upB)}";
 
-            var bagListener = Connection.BagListener;
-            if (bagListener != null)
+            if (Connection.BagListener is { } bagListener)
             {
                 long bagSizeMb = bagListener.Length / (1024 * 1024);
                 UpperCanvas.RecordBagText.text = $"{bagSizeMb.ToString()} MB";
@@ -1171,9 +1173,9 @@ namespace Iviz.App
             frameCounter++;
         }
 
-        void OnApplicationPause(bool pauseStatus)
+        void OnPaused(bool pauseStatus)
         {
-            // app unpausing needs to be handled carefully because in mobile,
+            // app (un-)pausing needs to be handled carefully because in mobile,
             // getting suspended sends us to the background and kills all connections
             if (!Settings.IsMobile || !Settings.IsStandalone)
             {
@@ -1182,7 +1184,7 @@ namespace Iviz.App
 
             if (!RosManager.HasInstance)
             {
-                // not a real unpausing, just initializing. out!
+                // ros not initialized => we're just starting up. out!
                 return;
             }
 

@@ -109,7 +109,7 @@ internal static class Rcl
     public static void PrintErrorMessage(IntPtr context)
     {
         string msg = ToString(Impl.GetErrorString(context));
-        if (!string.IsNullOrEmpty(msg))
+        if (!msg.IsNullOrEmpty())
             Logger.LogError("[Rcl]: " + msg);
     }
 

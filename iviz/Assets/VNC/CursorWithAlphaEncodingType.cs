@@ -32,7 +32,7 @@ namespace VNC.Extensions
             byte[]? dataBuffer = null;
             Span<byte> data = dataSize < 512
                 ? stackalloc byte[dataSize]
-                : (dataBuffer = ArrayPool<byte>.Shared.Rent(dataSize)).Slice(..dataSize);
+                : (dataBuffer = ArrayPool<byte>.Shared.Rent(dataSize)).AsSpan(..dataSize);
 
             try
             {

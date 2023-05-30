@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Iviz.Core;
+using Iviz.Tools;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -32,7 +33,7 @@ namespace Iviz.Resources
         public InternalResourceManager()
         {
             string? robotsFile = UnityEngine.Resources.Load<TextAsset>("Package/iviz/resources")?.text;
-            if (robotsFile is null or "")
+            if (robotsFile.IsNullOrEmpty())
             {
                 RosLogger.Warn($"{ToString()}: Empty resource file!");
                 robotDescriptions = new Dictionary<string, string>();
@@ -45,7 +46,7 @@ namespace Iviz.Resources
             {
                 string? robotDescription =
                     UnityEngine.Resources.Load<TextAsset>("Package/iviz/robots/" + value)?.text;
-                if (robotDescription is null or "")
+                if (robotDescription.IsNullOrEmpty())
                 {
                     RosLogger.Info($"{ToString()}: Empty or null description file '{value}'!");
                     continue;

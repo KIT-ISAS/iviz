@@ -89,7 +89,7 @@ namespace Iviz.Core
         /// </summary>
         public static event Action? LateEverySecond;
 
-        public static event Action? ApplicationPause;
+        public static event Action<bool>? ApplicationPaused;
 
         /// Called after all the TFs of the frame have been processed, but before <see cref="AfterFramesUpdatedLate"/>
         public static event Action? AfterFramesUpdated; // camera
@@ -236,7 +236,7 @@ namespace Iviz.Core
 
         void OnApplicationPause(bool pauseStatus)
         {
-            ApplicationPause?.Invoke();
+            ApplicationPaused?.Invoke(pauseStatus);
         }
 
         void OnDestroy()

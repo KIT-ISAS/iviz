@@ -286,7 +286,7 @@ public sealed class RosClient : IRosClient
         get
         {
             string? ns = Environment.GetEnvironmentVariable("ROS_NAMESPACE");
-            if (string.IsNullOrEmpty(ns))
+            if (ns.IsNullOrEmpty())
             {
                 return null;
             }

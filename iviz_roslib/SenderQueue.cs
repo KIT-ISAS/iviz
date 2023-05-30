@@ -27,10 +27,8 @@ internal class SenderQueue
     protected static async ValueTask WaitForSignal(TaskCompletionSource msgSignal, CancellationToken token)
     {
         // ReSharper disable once UseAwaitUsing
-        using (token.Register(CallbackHelpers.OnCanceled, msgSignal))
-        {
-            await msgSignal.Task;
-        }
+        using var _ = token.Register(CallbackHelpers.OnCanceled, msgSignal);
+        await msgSignal.Task;
     }
 
     public async ValueTask WaitAsync(CancellationToken token)
@@ -40,7 +38,7 @@ internal class SenderQueue
             await signal.WaitAsync(token);
         }
     }
-    
+
     protected RosQueueOverflowException CreateOverflowException() =>
         new($"Message could not be sent to node '{sender.RemoteCallerId}'");
 
@@ -208,7 +206,7 @@ internal sealed class SenderQueue<TMessage> : SenderQueue where TMessage : IMess
         }
     }
 
-    public void DirectSendToLoopback(in RangeEnumerable<Entry?> queue, 
+    public void DirectSendToLoopback(in RangeEnumerable<Entry?> queue,
         LoopbackReceiver<TMessage> loopbackReceiver,
         ref long numSent, ref long bytesSent)
     {

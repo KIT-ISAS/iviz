@@ -19,10 +19,10 @@ namespace Iviz.Controllers.TF
         static TfPublisher? instance;
 
         public static TfPublisher Instance =>
-            instance ?? throw new NullReferenceException("TfPublisher has not been set!");
+            instance ?? throw new NullReferenceException(nameof(TfPublisher) + " has not been set!");
 
         readonly Dictionary<string, TfPublishedFrame> frames = new();
-        
+
         PublishedFramePanelData? panelData;
         int secondsCounter;
 
@@ -47,7 +47,7 @@ namespace Iviz.Controllers.TF
         public void UpdateConfiguration(TfPublisherConfiguration config)
         {
             ResetNonInternal();
-                
+
             foreach (var frameConfig in config.Frames)
             {
                 var frame = GetOrCreate(frameConfig.Id);
@@ -60,7 +60,7 @@ namespace Iviz.Controllers.TF
 
         public void UpdateConfiguration(string configAsJson, string[] fields)
         {
-            
+            // TODO!
         }
 
         void OnConnectionStateChanged(ConnectionState state)
@@ -181,19 +181,19 @@ namespace Iviz.Controllers.TF
         {
             return $"[{nameof(TfPublisher)}]";
         }
-        
+
         void ResetNonInternal()
         {
             var toDelete = frames.Values
                 .Where(frame => !frame.isInternal)
                 .ToList();
-                
+
             foreach (var frame in toDelete)
             {
                 frame.Dispose();
                 frames.Remove(frame.id);
-            }                
-        }        
+            }
+        }
 
         sealed class TfPublishedFrame : IPublishedFrame
         {
@@ -276,7 +276,7 @@ namespace Iviz.Controllers.TF
                 AssertIsAlive();
                 tfFrame.Parent = TfModule.FixedFrame;
             }
-            
+
             public void UpdateFrame()
             {
                 AssertIsAlive();
