@@ -282,7 +282,11 @@ namespace Iviz.Core
         /// The function returns immediately.
         /// </summary>
         /// <param name="action">Action to be run.</param>
-        public static void Post(Func<ValueTask> action) => Post(() => { action(); });
+        public static void Post(Func<ValueTask> action)
+        {
+            void Action() => _ = action();
+            Post(Action);  
+        } 
 
         /// <summary>
         /// Puts this async action in a queue to be run on the main thread,

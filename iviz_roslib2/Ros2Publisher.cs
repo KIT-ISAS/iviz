@@ -24,12 +24,10 @@ public sealed class Ros2Publisher<TMessage> : BaseRosPublisher<TMessage>, IRos2P
     int numSent;
     long bytesSent;
 
-    public override string Topic => publisher.Topic;
-    public override string TopicType => publisher.TopicType;
     public override int NumSubscribers => publisher.GetNumSubscribers();
     public QosProfile Profile => publisher.Profile;
 
-    internal Ros2Publisher(Ros2Client client, RclPublisher publisher)
+    internal Ros2Publisher(Ros2Client client, RclPublisher publisher) : base(publisher.Topic, publisher.TopicType)
     {
         this.client = client;
         this.publisher = publisher;

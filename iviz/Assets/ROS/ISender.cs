@@ -49,7 +49,7 @@ namespace Iviz.Ros
             description.Append(numSubscribers).Append(" sub");
         }
         
-        public void Publish(IMessage msg)
+        protected void Publish(IMessage msg)
         {
             Connection.Publish(Id, msg);
 
@@ -57,21 +57,7 @@ namespace Iviz.Ros
             lastMsgBytes += serializer.RosMessageLength(msg);
         }
 
-        public override string ToString() => $"[{nameof(Sender)} {Topic} [{Type}]]";
-
-        public void Dispose()
-        {
-            GameThread.EverySecond -= UpdateStats;
-            
-            try
-            {
-                Connection.Unadvertise(this);
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{ToString()}: Exception while disposing", e);
-            }
-        }
+        public override string ToString() => $"[{nameof(Sender)} '{Topic}' [{Type}]]";
 
         void UpdateStats()
         {
@@ -89,7 +75,25 @@ namespace Iviz.Ros
 
             recentMsgs = 0;
             lastMsgBytes = 0;
-        }        
+        }
+        
+        public void Dispose()
+        {
+            GameThread.EverySecond -= UpdateStats;
+
+            try
+            {
+                Connection.Unadvertise(this);
+            }
+            catch (ObjectDisposedException)
+            {
+                // ROS already shut down, so ignore
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{ToString()}: Exception while disposing", e);
+            }
+        }
         
         private protected static RosConnection Connection => RosManager.RosConnection;
     }

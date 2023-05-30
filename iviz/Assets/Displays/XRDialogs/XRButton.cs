@@ -26,22 +26,26 @@ namespace Iviz.Displays.XR
         Color color = new(0.47f, 0.68f, 1);
         StaticBoundsControl? boundsControl;
         RoundedPlaneDisplay? background;
+        Bounds visibleBounds;
+        bool pointerDown;
 
         RoundedPlaneDisplay Background => ResourcePool.RentChecked(ref background, Transform);
         TMP_Text Text => text.AssertNotNull(nameof(text));
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
         Transform IHasBounds.BoundsTransform => BoxCollider.transform;
         Bounds? IHasBounds.Bounds => Bounds;
+        Bounds? IHasBounds.VisibleBounds => visibleBounds;
         MeshMarkerDisplay Cylinder => cylinder.AssertNotNull(nameof(cylinder));
         XRIconPlane IconObject => iconPlane.AssertNotNull(nameof(iconPlane));
 
         StaticBoundsControl BoundsControl =>
             boundsControl ??= new StaticBoundsControl(this) { FrameColumnWidth = 0.01f };
 
-        public Bounds Bounds => BoxCollider.GetLocalBounds();
         public Transform Transform => this.EnsureHasTransform(ref m_Transform);
         public event Action? BoundsChanged;
         public event Action? Clicked;
+        
+        public Bounds Bounds => BoxCollider.GetLocalBounds();
 
         public Color BackgroundColor
         {
@@ -77,7 +81,7 @@ namespace Iviz.Displays.XR
             {
                 caption = value;
                 Text.text = value;
-                UpdateSize();
+                UpdateLayout();
             }
         }
 
@@ -109,7 +113,8 @@ namespace Iviz.Displays.XR
             IconObject.Color = Color.white;
             IconObject.EmissiveColor = Color.white.ScaledBy(0.5f);
 
-            BoundsControl.PointerUp += OnClick;
+            BoundsControl.PointerUp += OnPointerUp;
+            BoundsControl.PointerDown += OnPointerDown;
 
             BoundsControl.StartDragging += () =>
             {
@@ -135,8 +140,16 @@ namespace Iviz.Displays.XR
             BoundsChanged?.Invoke();
         }
 
-        void OnClick()
+        void OnPointerDown()
         {
+            pointerDown = true;
+            UpdateLayout();
+        }
+
+        void OnPointerUp()
+        {
+            pointerDown = false;
+            UpdateLayout();
             Resource.Audio.PlayAt(Transform.position, AudioClipType.Click);
             Clicked?.Invoke();
         }
@@ -160,26 +173,44 @@ namespace Iviz.Displays.XR
             Clicked = null;
         }
 
-        void UpdateSize()
+        void UpdateLayout()
         {
+            const float pointerUpSize = 0.25f;
+            const float pointerDownSize = 0.1f;
+            const float padding = 0.1f;
+
+            float baseSize = pointerDown ? pointerDownSize : pointerUpSize;
+            float baseZ = -(baseSize - 0.05f);
+
+            Text.transform.localPosition = Text.transform.localPosition.WithZ(baseZ - 0.05f);
+            IconObject.Transform.localPosition = IconObject.Transform.localPosition.WithZ(baseZ - 0.05f);
+            Cylinder.Transform.localPosition = Cylinder.Transform.localPosition.WithZ(baseZ);
+
             Span<Rect> bounds = stackalloc[]
             {
                 XRDialog.GetIconBounds(Cylinder),
                 XRDialog.GetCaptionBounds(Text),
             };
 
-            const float padding = 0.1f;
             var (center, size) = bounds.Combine(padding);
-            var newBounds = new Bounds(center, size.WithZ(0.1f));
+            var fullBounds = new Bounds(center, size.WithZ(0.1f));
 
-            if (Background.Visible)
+            //if (Background.Visible)
             {
-                var bgCenter = new Vector3(0, 0, -0.125f);
-                var bgSize = new Vector3(1, 1, 0.25f);
-                newBounds.Encapsulate(new Bounds(bgCenter, bgSize));
+                var bgCenter = new Vector3(0, 0, -pointerUpSize / 2);
+                var bgSize = new Vector3(1, 1, pointerUpSize);
+                fullBounds.Encapsulate(new Bounds(bgCenter, bgSize));
             }
 
-            BoxCollider.SetLocalBounds(newBounds);
+            visibleBounds = pointerDown
+                ? new Bounds(
+                    fullBounds.center.WithZ(-pointerDownSize / 2),
+                    fullBounds.size.WithZ(pointerDownSize)
+                )
+                : fullBounds;
+
+            BoxCollider.SetLocalBounds(fullBounds);
+            //Bounds = fullBounds;
             BoundsChanged?.Invoke();
         }
     }

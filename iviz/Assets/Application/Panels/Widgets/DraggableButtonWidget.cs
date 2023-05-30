@@ -98,6 +98,11 @@ namespace Iviz.App
 
         void IDragHandler.OnDrag(PointerEventData eventData)
         {
+            if (Settings.IsHololens)
+            {
+                return;
+            }
+            
             float scale = Settings.IsXR ? 1 : ModuleListPanel.CanvasScale;
             movedX += eventData.delta.x / scale;
             movedY += eventData.delta.y / scale;
@@ -165,6 +170,11 @@ namespace Iviz.App
 
         void IEndDragHandler.OnEndDrag(PointerEventData eventData)
         {
+            if (Settings.IsHololens)
+            {
+                return;
+            }
+
             movedX = 0;
             movedY = 0;
 
@@ -218,7 +228,6 @@ namespace Iviz.App
                 isDragging = false;
                 stuckLeft = false;
                 stuckRight = false;
-                //targetTransform.position = targetTransform.position.WithX(startX);
                 TargetTransform.anchoredPosition = TargetTransform.anchoredPosition.WithX(startX);
             }
         }

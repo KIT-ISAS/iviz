@@ -167,7 +167,6 @@ namespace Iviz.Controllers
             get => config.AngleColor.ToUnity();
             set
             {
-                // Color.yellow.WithSaturation(0.75f)
                 config.AngleColor = value.ToRos();
                 if (angleAxis != null)
                 {

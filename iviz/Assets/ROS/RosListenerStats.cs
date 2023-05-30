@@ -27,21 +27,15 @@ namespace Iviz.Ros
         [DataMember] public long BytesPerSecond { get; }
 
         /// <summary>
-        /// The number of messages currently in queue.
-        /// </summary>
-        [DataMember] public int MessagesInQueue { get; }
-
-        /// <summary>
         /// The number of messages that were received but weren't processed by iviz.
         /// </summary>
         [DataMember] public int Dropped { get; }
 
-        public RosListenerStats(int totalMessages, int messagesPerSecond, long bytesPerSecond, int messagesInQueue, int dropped)
+        public RosListenerStats(int totalMessages, int messagesPerSecond, long bytesPerSecond, int dropped)
         {
             TotalMessages = totalMessages;
             MessagesPerSecond = messagesPerSecond;
             BytesPerSecond = bytesPerSecond;
-            MessagesInQueue = messagesInQueue;
             Dropped = dropped;
         }
 

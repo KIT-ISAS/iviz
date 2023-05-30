@@ -4,10 +4,17 @@ using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit;
 
 namespace Iviz.Controllers.XR
 {
+    public interface IControllerCanStick
+    {
+        bool CanStick(UnityEngine.Object? obj);
+        Vector3 StickyPosition { set; }
+    }
+
     public sealed class XRLeashVisual : MonoBehaviour
     {
         [SerializeField] XRRayInteractor? interactor;
@@ -47,12 +54,14 @@ namespace Iviz.Controllers.XR
             draggable = null;
         }
 
+        const float InteractingLeashWidth = 0.005f;
+        const float HoveringLeashWidth = 0.0025f;
+        const float NoHitLeashWidth = 0.0006f;
+        const float HoverHeightNoUI = 0.001f;
+        const float HoverHeightUI = 0.015f;
+
         void Update()
         {
-            const float interactingWidth = 0.005f;
-            const float hoveringWidth = 0.0025f;
-            const float noHitWidth = 0.0006f;
-
             bool leashActive = Controller.IsActiveInFrame && Controller.HasCursor;
             Leash.Visible = leashActive || draggable != null;
             if (!leashActive)
@@ -70,7 +79,7 @@ namespace Iviz.Controllers.XR
                 Leash.Color = Color.cyan;
                 Leash.ReticleColor = Color.white;
                 Leash.ReticleEmissiveColor = Color.white;
-                Leash.Width = interactingWidth;
+                Leash.Width = InteractingLeashWidth;
                 //Controller.IsNearInteraction = (currentPosition - referencePoint).Magnitude() < XRController.NearDistance;
 
                 if (draggable.ReferenceNormal is { } referenceNormal)
@@ -85,7 +94,8 @@ namespace Iviz.Controllers.XR
                 return;
             }
 
-            bool hitExists = TryGetHitInfo(out var hitPosition, out var hitNormal, out bool isUIHitClosest);
+            bool hitExists = TryGetHitInfo(out var hitPosition, out var hitNormal, out bool isUIHitClosest,
+                out var target);
 
             //Controller.IsNearInteraction = (currentPosition - hitPosition).Magnitude() < XRController.NearDistance;
 
@@ -98,29 +108,34 @@ namespace Iviz.Controllers.XR
             {
                 Leash.Color = Color.white;
                 Leash.ReticleColor = Color.white;
-                Leash.Width = hoveringWidth;
-                Leash.Set(transformRay, hitPosition, hitNormal, isUIHitClosest ? 0.005f : 0.001f);
+                Leash.Width = HoveringLeashWidth;
+                Leash.Set(transformRay, hitPosition, hitNormal, isUIHitClosest ? HoverHeightUI : HoverHeightNoUI);
 
-                if (isUIHitClosest && Controller.ButtonDown && Controller is HandController handController)
+                if (isUIHitClosest
+                    && Controller.ButtonDown
+                    && Controller is IControllerCanStick stickyController
+                    && stickyController.CanStick(target))
                 {
-                    handController.StickyPosition = hitPosition;
+                    stickyController.StickyPosition = hitPosition;
                 }
 
                 return;
             }
 
             Leash.Color = Color.white;
-            Leash.Width = noHitWidth;
+            Leash.Width = NoHitLeashWidth;
             Leash.Set(transformRay, Transform.TransformPoint(Vector3.forward * noHitLength));
         }
 
-        bool TryGetHitInfo(out Vector3 position, out Vector3 normal, out bool isUIHitClosest)
+        bool TryGetHitInfo(out Vector3 position, out Vector3 normal, out bool isUIHitClosest,
+            out UnityEngine.Object? target)
         {
             if (!Interactor.TryGetCurrentRaycast(out var raycastHit, out _,
                     out var raycastResult, out _, out isUIHitClosest))
             {
                 position = default;
                 normal = default;
+                target = null;
                 return false;
             }
 
@@ -128,6 +143,7 @@ namespace Iviz.Controllers.XR
             {
                 position = result.worldPosition;
                 normal = result.worldNormal;
+                target = result.gameObject;
                 return true;
             }
 
@@ -135,11 +151,13 @@ namespace Iviz.Controllers.XR
             {
                 position = hit.point;
                 normal = hit.normal;
+                target = hit.collider;
                 return true;
             }
 
             position = default;
             normal = default;
+            target = null;
             return false;
         }
     }

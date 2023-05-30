@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Core.XR;
+using Iviz.Displays;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
 using UnityEngine.XR;
@@ -16,18 +17,16 @@ namespace Iviz.Controllers.XR
         XRDirectInteractor SphereInteractor => sphereInteractor.AssertNotNull(nameof(sphereInteractor));
         Collider? interactable;
 
-        public bool IsHovering { get; private set; }
+        public bool IsHovering => interactable != null;
         public bool HandButtonState { get; set; }
 
         void OnHoverEntered(HoverEnterEventArgs args)
         {
-            IsHovering = true;
             args.interactable.TryGetComponent(out interactable);
         }
 
         void OnHoverExited(HoverExitEventArgs _)
         {
-            IsHovering = false;
             interactable = null;
         }
 
@@ -51,17 +50,26 @@ namespace Iviz.Controllers.XR
             }
 
             controllerState.ResetFrameDependentStates();
-            if (!IsHovering)
+
+            if (!IsActiveInFrame || !IsHovering)
             {
                 controllerState.selectInteractionState.SetFrameState(false);
                 controllerState.uiPressInteractionState.SetFrameState(false);
+
+                if (interactable != null && interactable.TryGetComponent<XRScreenDraggable>(out var draggable))
+                {
+                    // force unregister hover when device stops tracking, for some reason this does not happen automatically 
+                    draggable.UnregisterHover(gameObject);
+                    interactable = null;
+                }
+
                 return;
             }
 
             bool buttonState = HandButtonState;
             if (interactable != null)
             {
-                const float minDistanceToClick = 0.02f;
+                const float minDistanceToClick = 0.04f;
                 var myPosition = transform.position;
                 var closestPoint = interactable.ClosestPoint(myPosition);
                 buttonState |= (closestPoint - myPosition).sqrMagnitude < minDistanceToClick * minDistanceToClick;

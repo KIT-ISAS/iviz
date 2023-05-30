@@ -56,6 +56,14 @@ namespace Iviz.Core
 #else
             false;
 #endif
+        
+        public const bool IsWSA =
+#if UNITY_WSA
+            true;
+#else
+            false;
+#endif
+
 
         public const bool IsLinux =
 #if UNITY_EDITOR_LINUX || UNITY_STANDALONE_LINUX
@@ -95,22 +103,19 @@ namespace Iviz.Core
         static bool? isHololens;
         static bool? isXR;
 
-        static bool TryReadXRInfo()
+        static bool TryReadXRInfo(out bool newIsHololens, out bool newIsXR)
         {
-            if (isHololens != null && isXR != null)
-            {
-                return true;
-            }
-
             if (GameObject.Find("iviz") is not { } ivizObject
                 || !ivizObject.TryGetComponent<XRStatusInfo>(out var info))
 
             {
+                newIsHololens = false;
+                newIsXR = false;
                 return false;
             }
 
-            isHololens = info.IsHololens;
-            isXR = info.IsXREnabled;
+            isHololens = newIsHololens = info.IsHololens;
+            isXR = newIsXR = info.IsXREnabled;
             return true;
         }
 
@@ -118,14 +123,19 @@ namespace Iviz.Core
         /// Is this being run in a Hololens?
         /// </summary>
         public static bool IsHololens =>
-            TryReadXRInfo() && (isHololens ??
-                                throw new InvalidOperationException("Could not check if we are running in a Hololens"));
+            isHololens ?? 
+            (TryReadXRInfo(out bool newIsHololens, out _) 
+                ? newIsHololens 
+                : throw new InvalidOperationException("Could not check if we are running in a Hololens"));
 
         /// <summary>
         /// Is this being run on an XR platform? (VR or Hololens)
         /// </summary>
         public static bool IsXR =>
-            TryReadXRInfo() && (isXR ?? throw new InvalidOperationException("Could not check if we are running in XR"));
+            isXR ?? 
+            (TryReadXRInfo(out _, out bool newIsXR) 
+                ? newIsXR
+                : throw new InvalidOperationException("Could not check if we are running in XR"));
 #endif
 
         public static void ClearResources()

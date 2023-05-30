@@ -19,34 +19,8 @@ namespace Iviz.Ros
         readonly Action<T>? handlerOnGameThread;
         readonly Func<T, IRosConnection, bool>? directHandler;
 
-        int droppedMsgCounter;
-        int lastMsgBytes;
-        int totalMsgCounter;
-        int recentMsgCounter;
-        RosTransportHint transportHint;
-
-        public override RosTransportHint TransportHint
-        {
-            get => transportHint;
-            set
-            {
-                if (transportHint == value)
-                {
-                    return;
-                }
-
-                transportHint = value;
-                Reset();
-            }
-        }
-
-        Listener(string topic, RosTransportHint transportHint, T generator) : base(topic, generator.RosMessageType)
-        {
-            this.transportHint = transportHint;
-            GameThread.EverySecond += UpdateStats;
-        }
-        
-        Listener(string topic, RosTransportHint transportHint) :  this(topic, transportHint, new T())
+        Listener(string topic, RosTransportHint transportHint) : 
+            base(topic, BuiltIns.GetMessageType<T>(), transportHint)
         {
         }
 
@@ -70,9 +44,9 @@ namespace Iviz.Ros
             var options = new BoundedChannelOptions(maxQueueSize)
                 { SingleReader = true, FullMode = BoundedChannelFullMode.DropOldest };
             void OnItemDropped((T, int) _) => droppedMsgCounter++;
-            
+
             var messageQueue = Channel.CreateBounded<(T, int)>(options, OnItemDropped);
-            
+
             messageReader = messageQueue.Reader;
             messageWriter = messageQueue.Writer;
         }
@@ -109,42 +83,10 @@ namespace Iviz.Ros
         {
         }
 
-        public override void Dispose()
-        {
-            GameThread.EverySecond -= UpdateStats;
-            if (handlerOnGameThread != null)
-            {
-                GameThread.ListenersEveryFrame -= CallHandlerOnGameThread;
-            }
-
-            try
-            {
-                Unsubscribe();
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{ToString()}: Exception while disposing", e);
-            }
-        }
-
-        /// <summary>
-        /// Unsubscribes from the topic.
-        /// </summary>
-        public void Unsubscribe()
-        {
-            if (!Subscribed)
-            {
-                return;
-            }
-
-            Connection.Unsubscribe(this);
-            Subscribed = false;
-        }
-
         /// <summary>
         /// Subscribes to the topic.
         /// </summary>
-        public void Subscribe()
+        void Subscribe()
         {
             if (Subscribed)
             {
@@ -193,7 +135,7 @@ namespace Iviz.Ros
             }
 
             // -----
-            
+
             if (directHandler == null) // shouldn't happen
             {
                 return;
@@ -253,27 +195,14 @@ namespace Iviz.Ros
             recentMsgCounter += messageCount;
         }
 
-        void UpdateStats()
+        public override void Dispose()
         {
-            if (recentMsgCounter == 0)
+            base.Dispose();
+
+            if (handlerOnGameThread != null)
             {
-                Stats = default;
-                return;
+                GameThread.ListenersEveryFrame -= CallHandlerOnGameThread;
             }
-
-            Stats = new RosListenerStats(
-                totalMsgCounter,
-                recentMsgCounter,
-                lastMsgBytes,
-                messageReader?.Count ?? 0,
-                droppedMsgCounter
-            );
-
-            RosManager.ReportBandwidthDown(lastMsgBytes);
-
-            lastMsgBytes = 0;
-            droppedMsgCounter = 0;
-            recentMsgCounter = 0;
         }
     }
 }

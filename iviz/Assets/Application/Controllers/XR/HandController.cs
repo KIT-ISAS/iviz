@@ -8,6 +8,7 @@ using Iviz.Resources;
 using Iviz.Tools;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
+using UnityEngine.UI;
 using UnityEngine.XR;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -41,7 +42,7 @@ namespace Iviz.Controllers.XR
         static readonly Func<Pose[], Pose> GetTip = finger => finger[^1];
     }
 
-    public sealed class HandController : CustomController
+    public sealed class HandController : CustomController, IControllerCanStick
     {
         static readonly InputFeatureUsage<Hand> HandData = CommonUsages.handData;
         static readonly InputFeatureUsage HandDataBase = (InputFeatureUsage)HandData;
@@ -56,6 +57,9 @@ namespace Iviz.Controllers.XR
         [SerializeField] IndexController? indexController;
 
         GameObject? modelRoot;
+        Vector3? stickyPosition;
+        Pose? filteredPose;
+        bool modelVisible;
 
         IndexController IndexController => indexController.AssertNotNull(nameof(indexController));
 
@@ -77,11 +81,24 @@ namespace Iviz.Controllers.XR
 
         bool ModelVisible
         {
-            set => RootTransform.gameObject.SetActive(value);
+            set
+            {
+                if (modelVisible == value) return;
+                modelVisible = value;
+                RootTransform.gameObject.SetActive(value);   
+            }
         }
 
         public HandState? State { get; private set; }
         public Transform? PalmTransform => fingerTips[2].CheckedNull()?.Transform;
+
+        Vector3 IControllerCanStick.StickyPosition
+        {
+            set => stickyPosition = value;
+        }
+
+        bool IControllerCanStick.CanStick(UnityEngine.Object? obj) =>
+            obj is GameObject go && go.GetComponentInParent(typeof(Button)) != null;
 
         protected override bool MatchesDevice(InputDeviceCharacteristics characteristics,
             List<InputFeatureUsage> usages)
@@ -98,20 +115,31 @@ namespace Iviz.Controllers.XR
         {
             base.UpdateTrackingInput(controllerState);
             State = null;
-            ModelVisible = false;
             IsActiveInFrame = false;
+            IndexController.IsActiveInFrame = false;
             HasCursor = false;
 
+            void EarlyExit()
+            {
+                stickyPosition = null;
+                ModelVisible = false;
+            }
+            
             if (controllerState == null)
             {
+                EarlyExit();
                 return;
             }
 
             //controllerState.inputTrackingState = InputTrackingState.None;
             controllerState.poseDataFlags = PoseDataFlags.NoData;
 
-            if (!TryGetDevice(out var device) || !device.TryGetFeatureValue(HandData, out var hand))
+            if (!TryGetDevice(out var device)
+                || !device.TryGetFeatureValue(CommonUsages.isTracked, out bool isTracking)
+                || !isTracking
+                || !device.TryGetFeatureValue(HandData, out var hand))
             {
+                EarlyExit();
                 return;
             }
 
@@ -119,11 +147,13 @@ namespace Iviz.Controllers.XR
 
             if (!TryGetHandData(hand, referenceTransform))
             {
+                EarlyExit();
                 return;
             }
 
             ModelVisible = true;
             IsActiveInFrame = true;
+            IndexController.IsActiveInFrame = true;
             State = cachedHandState;
 
             if (cameraTransform == null)
@@ -139,18 +169,18 @@ namespace Iviz.Controllers.XR
             var palmResource = HandleBoneMesh(fingerTips[2], cachedHandState.Palm);
             fingerTips[2] = palmResource;
 
-            //var (palmPosition, palmRotation) = cachedHandState.Palm;
-            var (palmPosition, palmRotation) = palmResource.Transform.AsPose();
+            var (palmPosition, palmRotation) = UpdateFilteredPose(palmResource.Transform.AsPose());
 
             const float palmOffset = 0.03f;
             var controllerPosition = palmPosition + palmRotation *
                 ((handType == HandType.Left ? palmOffset : -palmOffset) * Vector3.right);
+
             var pivot = cameraTransform.TransformPoint(shoulderToCamera);
 
             controllerState.poseDataFlags = PoseDataFlags.Position | PoseDataFlags.Rotation;
             //controllerState.inputTrackingState = InputTrackingState.Position | InputTrackingState.Rotation; 
 
-            var controllerForward = EnableSticky && StickyPosition is { } lockedPosition
+            var controllerForward = stickyPosition is { } lockedPosition
                 ? lockedPosition - controllerPosition
                 : controllerPosition - pivot;
 
@@ -164,12 +194,27 @@ namespace Iviz.Controllers.XR
                 ? new Ray(controllerPosition, controllerForward.normalized)
                 : null;
 
-            //Debug.Log(uiPressInteractionState.active + "         " + controllerState.uiPressInteractionState.active);
-
             if (ButtonUp)
             {
-                StickyPosition = null;
+                stickyPosition = null;
             }
+        }
+
+        Pose UpdateFilteredPose(Pose inputPose)
+        {
+            /*
+            if (filteredPose is not { } currentPose)
+            {
+                filteredPose = inputPose;
+                return inputPose;
+            }
+
+            float t = 0.15f;
+            var nextPose = currentPose.Lerp(inputPose, t);
+            filteredPose = nextPose;
+            return nextPose;
+            */
+            return inputPose;
         }
 
         bool TryGetHandData(Hand hand, Transform referenceTransform)
@@ -224,9 +269,10 @@ namespace Iviz.Controllers.XR
             const float distanceTransitionToOpen = 0.04f;
             const float distanceTransitionToClose = 0.025f;
 
-            //base.UpdateInput(controllerState);
+            base.UpdateInput(controllerState);
             if (controllerState == null)
             {
+                //Debug.Log("returned: controller state is null");
                 return;
             }
 
@@ -240,13 +286,16 @@ namespace Iviz.Controllers.XR
 
                 controllerState.selectInteractionState.SetFrameState(false);
                 controllerState.uiPressInteractionState.SetFrameState(false);
-                StickyPosition = null;
+                stickyPosition = null;
+
+                //Debug.Log("returned: not active in frame");
                 return;
             }
 
             if (fingerTips[0] is not { } thumb
                 || fingerTips[1] is not { } index)
             {
+                //Debug.Log("returned: no hand");
                 return;
             }
 
@@ -256,6 +305,9 @@ namespace Iviz.Controllers.XR
             ButtonDown = newButtonState && !ButtonState;
             ButtonUp = !newButtonState && ButtonState;
             ButtonState = newButtonState;
+
+            //if (ButtonDown) Debug.Log("Button down!");
+            //if (ButtonUp) Debug.Log("Button up!");
 
             if (IndexController.IsHovering)
             {
@@ -268,6 +320,7 @@ namespace Iviz.Controllers.XR
                 IndexController.HandButtonState = false;
                 controllerState.selectInteractionState.SetFrameState(ButtonState);
                 controllerState.uiPressInteractionState.SetFrameState(ButtonState);
+                //Debug.Log("returned: ok");
             }
 
 
@@ -290,13 +343,18 @@ namespace Iviz.Controllers.XR
             if (resource == null)
             {
                 result = CreateBoneObject();
-                result.transform.SetPose(pose);
+                result.Transform.SetPose(pose);
             }
             else
             {
                 result = resource;
-                var currentPose = result.transform.AsPose();
-                result.transform.SetPose(currentPose.Lerp(pose, 0.25f)); // TODO: better filtering
+                var currentPose = result.Transform.AsPose();
+
+                const float timePerFrame = 0.015f;
+                const float baseStep = 0.25f;
+
+                float t = Mathf.Clamp01(baseStep / timePerFrame * Time.deltaTime);
+                result.Transform.SetPose(currentPose.Lerp(pose, t)); // TODO: better filtering
             }
 
             return result;

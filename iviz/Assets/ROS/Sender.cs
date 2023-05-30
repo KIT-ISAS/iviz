@@ -20,6 +20,9 @@ namespace Iviz.Ros
         public Sender(string topic) : this(topic, new T())
         {
         }
+        
+        public void Publish(T msg) => Publish((IMessage) msg);
+
 
         public void Reset()
         {

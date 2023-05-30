@@ -410,7 +410,7 @@ public sealed class RosClient : IRosClient
         }
         catch (SocketException e)
         {
-            throw new RosUriBindingException($"Failed to bind to local URI '{CallerUri}'", e);
+            throw new RosUriBindingException(CallerUri, e);
         }
 
         // Start the XmlRpc server.
@@ -494,7 +494,7 @@ public sealed class RosClient : IRosClient
         }
         catch (SocketException e)
         {
-            throw new RosUriBindingException($"Failed to bind to local URI '{ownUri}'", e);
+            throw new RosUriBindingException(client.CallerUri, e);
         }
 
         client.listener.Start();
@@ -1368,8 +1368,7 @@ public sealed class RosClient : IRosClient
                     existingCaller.Dispose();
                     callersByService.TryRemove(resolvedServiceName, out _);
                     if (e is OperationCanceledException or RosServiceCallFailed) throw;
-                    throw new RoslibException($"Service call '{resolvedServiceName}' to " +
-                                              $"{existingCaller.RemoteUri?.ToString() ?? "[unknown]"} failed", e);
+                    throw new RosServiceCallFailed(resolvedServiceName, existingCaller.RemoteUri, e);
                 }
             }
 
@@ -1400,18 +1399,8 @@ public sealed class RosClient : IRosClient
             {
                 serviceCaller.Dispose();
                 callersByService.TryRemove(resolvedServiceName, out _);
-                switch (e)
-                {
-                    case OperationCanceledException or RosServiceCallFailed:
-                        throw;
-                    case SocketException or IOException:
-                        throw new RoslibException(
-                            $"Service call '{resolvedServiceName}' failed. Reason: " +
-                            $"Cannot connect to {serviceUri.ToString() ?? "[unknown]"}", e);
-                    default:
-                        throw new RoslibException($"Service call '{resolvedServiceName}' to " +
-                                                  $"{serviceUri.ToString() ?? "[unknown]"} failed", e);
-                }
+                if (e is OperationCanceledException or RosServiceCallFailed) throw;
+                throw new RosServiceCallFailed(resolvedServiceName, serviceUri, e);
             }
         }
 
@@ -1421,15 +1410,9 @@ public sealed class RosClient : IRosClient
             await serviceCaller.StartAsync(serviceUri, persistent, token);
             await serviceCaller.ExecuteAsync(service, token);
         }
-        catch (Exception e) when (e is SocketException or IOException)
-        {
-            throw new RoslibException(
-                $"Service call '{resolvedServiceName}' failed. Reason: " +
-                $"Cannot connect to {serviceUri.ToString() ?? "[unknown]"}", e);
-        }
         catch (Exception e) when (e is not (OperationCanceledException or RosServiceCallFailed))
         {
-            throw new RoslibException($"Service call '{resolvedServiceName}' to {serviceUri} failed", e);
+            throw new RosServiceCallFailed(resolvedServiceName, serviceUri, e);
         }
     }
 
@@ -1623,7 +1606,7 @@ public sealed class RosClient : IRosClient
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: " + nameof(RosServiceCaller) + "." + 
+                Logger.LogErrorFormat("{0}: " + nameof(RosServiceCaller) + "." +
                                       nameof(RosServiceCaller.Dispose) + " threw! {1}", this, e);
             }
         }

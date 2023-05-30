@@ -5,11 +5,7 @@ namespace Iviz.Roslib2;
 
 public class Roslib2Exception : RoslibException
 {
-    protected Roslib2Exception(string message) : base(message)
-    {
-    }
-
-    public Roslib2Exception(string message, Exception innerException) : base(message, innerException)
+    public Roslib2Exception(string message, Exception? innerException = null) : base(message, innerException)
     {
     }
 }

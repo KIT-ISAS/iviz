@@ -36,8 +36,6 @@ public sealed class RosPublisher<TMessage> : BaseRosPublisher<TMessage>, IRos1Pu
         set => manager.MaxQueueSizeInBytes = value;
     }
 
-    public override string Topic => manager.Topic;
-    public override string TopicType => manager.TopicType;
     public override int NumSubscribers => manager.NumConnections;
 
     public int TimeoutInMs
@@ -71,7 +69,7 @@ public sealed class RosPublisher<TMessage> : BaseRosPublisher<TMessage>, IRos1Pu
     /// </summary>
     public event Action<RosPublisher<TMessage>>? NumSubscribersChanged;
 
-    internal RosPublisher(RosClient client, TopicInfo topicInfo)
+    internal RosPublisher(RosClient client, TopicInfo topicInfo) : base(topicInfo.Topic, topicInfo.Type)
     {
         this.client = client;
         serializer = ((TMessage)topicInfo.Generator).CreateSerializer();

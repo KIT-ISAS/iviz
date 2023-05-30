@@ -25,7 +25,7 @@ namespace Iviz.App
         //public SliderWidget Metallic { get; private set; }
         CollapsibleWidget Material { get; set; }
 
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("GridMap");

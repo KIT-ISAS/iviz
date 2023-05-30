@@ -3,6 +3,8 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using Iviz.Roslib;
+using Iviz.Core;
+using Iviz.Msgs;
 
 namespace Iviz.Ros
 {
@@ -13,8 +15,8 @@ namespace Iviz.Ros
     {
         static RosManager? instance;
 
-        static object ThrowDisposeException() =>
-            throw new ObjectDisposedException("The ROS manager has already been disposed");
+        static object ThrowDisposeException() => 
+            ThrowHelper.ThrowObjectDisposed(nameof(RosManager), "The ROS manager has already been disposed");
 
         public static string? MyId => instance?.connection.MyId;
         public static bool IsConnected => instance?.connection.IsConnected ?? false;

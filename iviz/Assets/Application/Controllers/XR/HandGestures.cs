@@ -9,6 +9,7 @@ namespace Iviz.Controllers.XR
     {
         readonly HandType handType;
         bool isPalmClicking;
+        bool firstState = true;
 
         public bool IsPalmUp { get; private set; }
         public bool IsHandOpen { get; private set; }
@@ -19,7 +20,14 @@ namespace Iviz.Controllers.XR
 
         public HandGestures(HandType handType) => this.handType = handType;
 
-        public void Process(HandState? state)
+        public void Process(HandState? leftState, HandState? rightState)
+        {
+            var (selfState, otherState) = handType == HandType.Left ? (leftState, rightState) : (rightState, leftState);
+            ProcessSelf(selfState);
+            ProcessBoth(selfState, otherState);
+        }
+
+        void ProcessSelf(HandState? state)
         {
             if (state == null)
             {
@@ -43,6 +51,16 @@ namespace Iviz.Controllers.XR
             float middleDistance = Vector3.Distance(palmPosition, state.Fingertips[2].position);
             float ringDistance = Vector3.Distance(palmPosition, state.Fingertips[3].position);
             float pinkyDistance = Vector3.Distance(palmPosition, state.Fingertips[4].position);
+
+            if (firstState)
+            {
+                IsPalmUp = CheckPalmUp(45 * Mathf.Deg2Rad);
+                IsHandOpen = CheckPalmOpen(0.08f, 0.105f);
+                IsIndexPointing = CheckIndexPointing(0.10f, 0.05f);
+                GestureChanged?.Invoke();
+                firstState = false;
+                return;
+            }
 
             if (!IsPalmUp && CheckPalmUp(45 * Mathf.Deg2Rad))
             {
@@ -101,7 +119,7 @@ namespace Iviz.Controllers.XR
             }
         }
 
-        public void Process(HandState? state, HandState? otherState)
+        void ProcessBoth(HandState? state, HandState? otherState)
         {
             if (state == null || otherState == null)
             {

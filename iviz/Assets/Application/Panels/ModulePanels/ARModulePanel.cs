@@ -28,7 +28,7 @@ namespace Iviz.App
         public SenderWidget DepthConfidenceSender { get; private set; }
         public SenderWidget MeshSender { get; private set; }
 
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("AR");

@@ -22,7 +22,7 @@ namespace Iviz.App
 
         public SimpleButtonWidget CloseButton { get; private set; }
 
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("DepthCloud");

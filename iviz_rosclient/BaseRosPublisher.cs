@@ -8,11 +8,27 @@ public abstract class BaseRosPublisher : IRosPublisher
 {
     protected readonly CancellationTokenSource runningTs = new();
 
+    public string Topic { get; }
+    public string TopicType { get; }
+    
     /// <summary>
     ///     Whether this publisher is valid.
     /// </summary>
     public bool IsAlive => !runningTs.IsCancellationRequested;
 
+    /// <summary>
+    ///     A cancellation token that gets canceled when the publisher is disposed.
+    /// </summary>
+    public CancellationToken CancellationToken => runningTs.Token;
+
+    public abstract int NumSubscribers { get; }
+
+    protected BaseRosPublisher(string topic, string topicType)
+    {
+        Topic = topic;
+        TopicType = topicType;
+    }
+    
     protected void AssertIsAlive()
     {
         if (!IsAlive)
@@ -21,14 +37,6 @@ public abstract class BaseRosPublisher : IRosPublisher
         }
     }
 
-    /// <summary>
-    ///     A cancellation token that gets canceled when the publisher is disposed.
-    /// </summary>
-    public CancellationToken CancellationToken => runningTs.Token;
-
-    public abstract string Topic { get; }
-    public abstract string TopicType { get; }
-    public abstract int NumSubscribers { get; }
     public abstract void Publish(IMessage message);
 
     public abstract ValueTask PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
@@ -46,6 +54,10 @@ public abstract class BaseRosPublisher : IRosPublisher
 
 public abstract class BaseRosPublisher<T> : BaseRosPublisher, IRosPublisher<T> where T : IMessage
 {
+    protected BaseRosPublisher(string topic, string topicType) : base(topic, topicType)
+    {
+    }
+
     public abstract void Publish(in T message);
 
     public abstract ValueTask PublishAsync(in T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
@@ -59,7 +71,7 @@ public abstract class BaseRosPublisher<T> : BaseRosPublisher, IRosPublisher<T> w
             return;
         }
 
-        RosExceptionUtils.ThrowInvalidMessageType();
+        RosExceptionUtils.ThrowInvalidMessageType(TopicType, message);
     }
 
     public override ValueTask PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
@@ -70,7 +82,7 @@ public abstract class BaseRosPublisher<T> : BaseRosPublisher, IRosPublisher<T> w
             return PublishAsync(tMessage, policy, token);
         }
 
-        RosExceptionUtils.ThrowInvalidMessageType();
+        RosExceptionUtils.ThrowInvalidMessageType(TopicType, message);
         return default; // unreachable
     }
 }

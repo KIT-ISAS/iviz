@@ -405,7 +405,6 @@ namespace Iviz.Controllers
                 MousePointValid = position != null
             };
             Publisher?.Publish(msg);
-            //RosLogger.Debug($"{this}: {nameof(OnControlMouseEvent)} Marker:{interactiveMarkerId} Type:{eventType}");
         }
 
         internal void OnControlMoved(
@@ -438,8 +437,6 @@ namespace Iviz.Controllers
                 MenuEntryId = menuEntryId
             };
             Publisher?.Publish(msg);
-            //RosLogger.Debug($"{this}: {nameof(OnControlMenuSelect)} " +
-            //                $"Marker:{interactiveMarkerId} Entry:{menuEntryId.ToString()}");
         }
 
         void DestroyAllMarkers()

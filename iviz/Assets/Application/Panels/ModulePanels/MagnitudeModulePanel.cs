@@ -19,7 +19,7 @@ namespace Iviz.App
         public SliderWidgetWithScale VectorScale { get; private set; }
         public ColorPickerWidget VectorColor { get; private set; }
 
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Magnitude");

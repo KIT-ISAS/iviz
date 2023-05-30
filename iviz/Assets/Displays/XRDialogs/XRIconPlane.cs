@@ -13,8 +13,11 @@ namespace Iviz.Displays.XR
         [SerializeField] MeshRenderer? meshRenderer;
         [SerializeField] Color color = Color.white;
         [SerializeField] Color emissiveColor = Color.white;
+        [SerializeField] Transform? mTransform;
 
         MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
+        
+        public Transform Transform => this.EnsureHasTransform(ref mTransform);
 
         public Color Color
         {

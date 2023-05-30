@@ -23,15 +23,11 @@ namespace Iviz.Controllers.XR
         protected abstract bool MatchesDevice(InputDeviceCharacteristics characteristics,
             List<InputFeatureUsage> usages);
 
-        public bool IsActiveInFrame { get; protected set; }
+        public bool IsActiveInFrame { get; set; }
         public bool HasCursor { get; protected set; }
         public bool ButtonState { get; protected set; }
         public bool ButtonUp { get; protected set; }
         public bool ButtonDown { get; protected set; }
-        //public bool IsNearInteraction { get; internal set; }
-
-        public bool EnableSticky { get; set; } = false;
-        public Vector3? StickyPosition { get; internal set; }
 
         protected bool TryGetDevice(out InputDevice outDevice)
         {

@@ -56,13 +56,20 @@ namespace Iviz.Displays
         public string? BaseLink { get; private set; }
         public string Description { get; }
 
-        public IReadOnlyDictionary<string, string> LinkParents => linkParents;
+        public Dictionary<string, string> LinkParents =>
+            !disposed
+                ? linkParents
+                : (Dictionary<string, string>)ThrowHelper.ThrowObjectDisposed(nameof(RobotModel));
 
         public GameObject BaseLinkObject =>
-            !disposed ? baseLinkObject : throw new ObjectDisposedException(nameof(RobotModel));
+            !disposed
+                ? baseLinkObject
+                : (GameObject)ThrowHelper.ThrowObjectDisposed(nameof(RobotModel));
 
-        public IReadOnlyDictionary<string, GameObject> LinkObjects =>
-            !disposed ? linkObjects : throw new ObjectDisposedException(nameof(RobotModel));
+        public Dictionary<string, GameObject> LinkObjects =>
+            !disposed
+                ? linkObjects
+                : (Dictionary<string, GameObject>)ThrowHelper.ThrowObjectDisposed(nameof(RobotModel));
 
         public bool OcclusionOnly
         {
@@ -687,8 +694,8 @@ namespace Iviz.Displays
                 if (value < lower || value > upper)
                 {
                     RosLogger.Warn($"{ToString()}: " +
-                                    $"Joint value for {jointName} is outside the range " +
-                                    $"[{lower.ToString(BuiltIns.Culture)}..{upper.ToString(BuiltIns.Culture)}].");
+                                   $"Joint value for {jointName} is outside the range " +
+                                   $"[{lower.ToString(BuiltIns.Culture)}..{upper.ToString(BuiltIns.Culture)}].");
                     //return false;
                 }
             }
@@ -702,7 +709,7 @@ namespace Iviz.Displays
                     Pose.identity.WithPosition(axis * value),
                 _ => (Pose?)null
             };
-            
+
             if (unityPose is not { } validatedPose)
             {
                 RosLogger.Error($"{ToString()}: Failed to set value for joint {jointName}. " +
@@ -828,7 +835,7 @@ namespace Iviz.Displays
                 builder.Append(' ', level).Append("(No visuals or colliders)").AppendLine();
                 return;
             }
-            
+
             foreach (var visual in link.Visuals)
             {
                 builder.Append(' ', level)

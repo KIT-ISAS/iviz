@@ -21,7 +21,7 @@ namespace Iviz.App
         public ToggleWidget OcclusionOnlyMode { get; private set; }
         public DataLabelWidget Description { get; private set; }
 
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Occupancy\nGrid");

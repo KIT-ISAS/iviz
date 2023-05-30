@@ -272,8 +272,8 @@ namespace Iviz.Ros
 
                     if (ros1Client != null)
                     {
-                        watchdogTask = WatchdogTask(ros1Client.RosMasterClient, token);
-                        ntpTask = NtpCheckerTask(ros1Client.MasterUri.Host, token);
+                        watchdogTask = WatchdogTask(ros1Client.RosMasterClient, token).AsTask();
+                        ntpTask = NtpCheckerTask(ros1Client.MasterUri.Host, token).AsTask();
                     }
                 });
 
@@ -432,9 +432,7 @@ namespace Iviz.Ros
             }
         }
 
-        static async Task WatchdogTask(
-            RosMasterClient masterApi,
-            CancellationToken token)
+        static async ValueTask WatchdogTask(RosMasterClient masterApi, CancellationToken token)
         {
             const int maxTimeMasterUnseenInMs = 10000;
             const int delayBetweenPingsInMs = 5000;
@@ -512,7 +510,7 @@ namespace Iviz.Ros
             SetConnectionWarningState(false);
         }
 
-        static async Task NtpCheckerTask(string hostname, CancellationToken token)
+        static async ValueTask NtpCheckerTask(string hostname, CancellationToken token)
         {
             const string ntpCheckerName = "[NtpChecker]";
 
@@ -567,7 +565,7 @@ namespace Iviz.Ros
             throw new InvalidOperationException("Ran out of publishers!"); // NYI!
         }
 
-        static Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 100), token);
+        static Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 1000), token);
 
         async ValueTask ReAdvertise(IRosClient newClient, AdvertisedTopic topic, CancellationToken token)
         {
@@ -638,10 +636,11 @@ namespace Iviz.Ros
         internal void Advertise<T>(Sender<T> advertiser) where T : IMessage, new()
         {
             ThrowHelper.ThrowIfNull(advertiser, nameof(advertiser));
-            advertiser.Id = null;
             CancellationToken token = runningTs.Token;
             Post(async () =>
             {
+                advertiser.Id = null;
+
                 try
                 {
                     await AdvertiseCore<T>(advertiser, token);
@@ -1042,8 +1041,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemTopicTypesAsync)}",
-                    e);
+                RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemTopicTypesAsync)}", e);
             }
         }
 

@@ -23,7 +23,7 @@ namespace Iviz.App
         public InputFieldWithHintsWidget AttachToFrame { get; private set; }
         public SenderWidget TwistSender { get; private set; }
 
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Joystick");

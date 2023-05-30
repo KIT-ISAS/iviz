@@ -29,9 +29,8 @@
         public InputFieldWidget Prefix { get; private set; }
         public InputFieldWidget Suffix { get; private set; }
 
-
-
-        void Awake()
+        
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Robot");

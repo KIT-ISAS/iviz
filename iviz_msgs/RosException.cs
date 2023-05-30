@@ -11,12 +11,12 @@ public class RosException : Exception
 
 public class RosInvalidMessageException : RosException
 {
-    public RosInvalidMessageException(string msg) : base(msg)
+    protected RosInvalidMessageException(string msg) : base(msg)
     {
     }
 }
 
-public class RosInvalidSizeForFixedArrayException : RosInvalidMessageException
+public sealed class RosInvalidSizeForFixedArrayException : RosInvalidMessageException
 {
     public RosInvalidSizeForFixedArrayException() : base(
         "Array size does not match the fixed size of the message definition")

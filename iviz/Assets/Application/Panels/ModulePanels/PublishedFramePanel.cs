@@ -10,7 +10,7 @@
         public Vector3MultiWidget Position { get; private set; }
 
         
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Published Frame");

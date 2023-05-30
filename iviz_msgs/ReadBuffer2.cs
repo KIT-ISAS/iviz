@@ -53,8 +53,11 @@ public unsafe struct ReadBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     int ReadInt()
     {
-        Deserialize(out int i);
-        return i;
+        byte* next = cursor + sizeof(int);
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        int t = Unsafe.ReadUnaligned<int>(cursor);
+        cursor = next;
+        return t;
     }
 
     #region strings
@@ -134,115 +137,127 @@ public unsafe struct ReadBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out bool t)
     {
-        ThrowIfOutOfRange(1);
-        t = *cursor != 0;
-        Advance(1);
+        byte* next = cursor + 1;
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = *(bool*)cursor;
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out byte t)
     {
-        ThrowIfOutOfRange(1);
+        byte* next = cursor + sizeof(byte);
+        if (next > end) BuiltIns.ThrowBufferOverflow();
         t = *cursor;
-        Advance(1);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out sbyte t)
     {
-        ThrowIfOutOfRange(1);
-        t = (sbyte)*cursor;
-        Advance(1);
+        byte* next = cursor + sizeof(sbyte);
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = *(sbyte*)cursor;
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out short t)
     {
-        const int size = sizeof(short);
-        ThrowIfOutOfRange(size);
-        t = *(short*)cursor;
-        Advance(size);
+        byte* next = cursor + sizeof(short);
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<short>(cursor);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out ushort t)
     {
-        const int size = sizeof(ushort);
-        ThrowIfOutOfRange(size);
-        t = *(ushort*)cursor;
-        Advance(size);
+        byte* next = cursor + sizeof(ushort);
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<ushort>(cursor);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out int t)
     {
-        const int size = sizeof(int);
-        ThrowIfOutOfRange(size);
-        t = *(int*)cursor;
-        Advance(size);
+        byte* next = cursor + sizeof(int);
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<int>(cursor);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out uint t)
     {
-        const int size = sizeof(uint);
-        ThrowIfOutOfRange(size);
-        t = *(uint*)cursor;
-        Advance(size);
+        byte* next = cursor + sizeof(uint);
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<uint>(cursor);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out time t)
     {
-        const int size = 2 * sizeof(uint);
-        ThrowIfOutOfRange(size);
-        t = *(time*)cursor;
-        Advance(size);
+        byte* next = cursor + 2 * sizeof(uint);
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<time>(cursor);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out duration t)
     {
-        const int size = 2 * sizeof(int);
-        ThrowIfOutOfRange(size);
-        t = *(duration*)cursor;
-        Advance(size);
+        byte* next = cursor + 2 * sizeof(int);
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<duration>(cursor);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out float t)
     {
-        const int size = sizeof(float);
-        ThrowIfOutOfRange(size);
-        t = *(float*)cursor;
-        Advance(size);
+        byte* next = cursor + sizeof(float);
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<float>(cursor);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out double t)
     {
-        const int size = sizeof(double);
-        ThrowIfOutOfRange(size);
-        t = *(double*)cursor;
-        Advance(size);
+        byte* next = cursor + sizeof(double);
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<double>(cursor);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out long t)
     {
-        const int size = sizeof(long);
-        ThrowIfOutOfRange(size);
-        t = *(long*)cursor;
-        Advance(size);
+        byte* next = cursor + sizeof(long);
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<long>(cursor);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out ulong t)
     {
-        const int size = sizeof(ulong);
-        ThrowIfOutOfRange(size);
-        t = *(ulong*)cursor;
-        Advance(size);
+        byte* next = cursor + sizeof(ulong);
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<ulong>(cursor);
+        cursor = next;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Deserialize<T>(out T t) where T : unmanaged
+    {
+        byte* next = cursor + sizeof(T);
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<T>(cursor);
+        cursor = next;
     }
 
     #endregion
@@ -350,80 +365,79 @@ public unsafe struct ReadBuffer2
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Vector3 t)
     {
-        const int size = Vector3.Ros2FixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Vector3*)cursor;
-        Advance(size);
+        const int size = Vector3.RosFixedMessageLength;
+        byte* next = cursor + size;
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<Vector3>(cursor);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Point t)
     {
-        const int size = Point.Ros2FixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Point*)cursor;
-        Advance(size);
+        const int size = Point.RosFixedMessageLength;
+        byte* next = cursor + size;
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<Point>(cursor);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Quaternion t)
     {
-        const int size = Quaternion.Ros2FixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Quaternion*)cursor;
-        Advance(size);
+        const int size = Quaternion.RosFixedMessageLength;
+        byte* next = cursor + size;
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<Quaternion>(cursor);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Pose t)
     {
-        const int size = Pose.Ros2FixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Pose*)cursor;
-        Advance(size);
+        const int size = Pose.RosFixedMessageLength;
+        byte* next = cursor + size;
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<Pose>(cursor);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out Transform t)
     {
-        const int size = Transform.Ros2FixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Transform*)cursor;
-        Advance(size);
-    }
-    
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize(out Color32 t)
-    {
-        const int size = Color32.Ros2FixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(Color32*)cursor;
-        Advance(size);
+        const int size = Transform.RosFixedMessageLength;
+        byte* next = cursor + size;
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<Transform>(cursor);
+        cursor = next;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Deserialize(out ColorRGBA t)
     {
-        const int size = ColorRGBA.Ros2FixedMessageLength;
-        ThrowIfOutOfRange(size);
-        t = *(ColorRGBA*)cursor;
-        Advance(size);
+        const int size = ColorRGBA.RosFixedMessageLength;
+        byte* next = cursor + size;
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<ColorRGBA>(cursor);
+        cursor = next;
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Deserialize<T>(out T t) where T : unmanaged
+    public void Deserialize(out Color32 t)
     {
-        int size = sizeof(T);
-        ThrowIfOutOfRange(size);
-        t = *(T*)cursor;
-        Advance(size);
-    }    
+        const int size = Color32.RosFixedMessageLength;
+        byte* next = cursor + size;
+        if (next > end) BuiltIns.ThrowBufferOverflow();
+        t = Unsafe.ReadUnaligned<Color32>(cursor);
+        cursor = next;
+    }
+
+    #endregion
+    
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void DeserializeStructArray<T>(T[] array) where T : unmanaged
     {
         DeserializeStructArray(ref Unsafe.As<T, byte>(ref array[0]), array.Length * sizeof(T));
     }
-
-    #endregion
 }

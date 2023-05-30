@@ -9,7 +9,7 @@ namespace Iviz.App
         public SenderWidget RightSender { get; private set; }
         public SenderWidget GazeSender { get; private set; }
         
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("XR");

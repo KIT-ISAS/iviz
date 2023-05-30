@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Iviz.Common;
@@ -64,7 +65,7 @@ namespace Iviz.Controllers
                 KeepMeshMaterials = value.KeepMeshMaterials;
                 Interactable = value.Interactable;
 
-                ProcessRobotSource(value.SavedRobotName, value.SourceParameter);
+                _ = ProcessRobotSourceAsync(value.SavedRobotName, value.SourceParameter);
             }
         }
 
@@ -93,8 +94,8 @@ namespace Iviz.Controllers
                 {
                     config.FramePrefix = value;
                 }
-                
-                node.AttachTo(Robot.BaseLink != null ? Decorate(Robot.BaseLink) : null);
+
+                node.AttachTo(Decorate(Robot.BaseLink));
             }
         }
 
@@ -108,7 +109,7 @@ namespace Iviz.Controllers
                     config.FrameSuffix = value;
                     return;
                 }
-                
+
                 if (AttachedToTf)
                 {
                     AttachedToTf = false;
@@ -120,7 +121,7 @@ namespace Iviz.Controllers
                     config.FrameSuffix = value;
                 }
 
-                node.AttachTo(Robot.BaseLink != null ? Decorate(Robot.BaseLink) : null);
+                node.AttachTo(Decorate(Robot.BaseLink));
             }
         }
 
@@ -246,7 +247,7 @@ namespace Iviz.Controllers
                 return Robot.LinkObjects.Count == 0 ? "[Empty Robot]" : "[Empty Name]";
             }
         }
-        
+
         public bool AttachedToTf
         {
             get => config.AttachedToTf;
@@ -275,7 +276,7 @@ namespace Iviz.Controllers
                     RosLogger.Error($"{ToString()}: Error while attaching to TF", e);
                 }
             }
-        }        
+        }
 
         public event Action? Stopped;
 
@@ -292,7 +293,7 @@ namespace Iviz.Controllers
             return Robot.TryWriteJoint(joint, value);
         }
 
-        public void ProcessRobotSource(string? savedRobotName, string? sourceParameter)
+        public Task ProcessRobotSourceAsync(string? savedRobotName, string? sourceParameter)
         {
             if (!string.IsNullOrWhiteSpace(savedRobotName))
             {
@@ -300,17 +301,16 @@ namespace Iviz.Controllers
                 {
                     config.SourceParameter = "";
                 }
-                
-                _ = TryLoadSavedRobotAsync(savedRobotName).AwaitNoThrow(this);
+
+                return TryLoadSavedRobotAsync(savedRobotName).AwaitNoThrow(this);
             }
-            else if (!string.IsNullOrWhiteSpace(sourceParameter))
+
+            if (!string.IsNullOrWhiteSpace(sourceParameter))
             {
-                _ = TryLoadFromSourceParameterAsync(sourceParameter).AwaitNoThrow(this);
+                return TryLoadFromSourceParameterAsync(sourceParameter).AwaitNoThrow(this);
             }
-            else
-            {
-                _ = TryLoadFromSourceParameterAsync(null).AwaitNoThrow(this);
-            }
+
+            return TryLoadFromSourceParameterAsync(null).AwaitNoThrow(this);
         }
 
         public async ValueTask TryLoadFromSourceParameterAsync(string? value)
@@ -318,7 +318,7 @@ namespace Iviz.Controllers
             config.SourceParameter = value ?? "";
             Robot = null;
 
-            if (value is null or "")
+            if (value is not { Length: not 0 })
             {
                 config.SavedRobotName = "";
                 HelpText = "[No Robot Loaded]";
@@ -496,7 +496,7 @@ namespace Iviz.Controllers
                 RosLogger.Error($"{ToString()}: Error during {nameof(UpdateStartTaskStatus)}", e);
             }
         }
-        
+
         void RaiseStopped()
         {
             try
@@ -507,9 +507,9 @@ namespace Iviz.Controllers
             {
                 RosLogger.Error($"{ToString()}: " +
                                 $"Error during {nameof(RaiseStopped)}", e);
-            }                          
-        }         
-        
+            }
+        }
+
         void RaiseRobotFinishedLoading()
         {
             try
@@ -520,19 +520,22 @@ namespace Iviz.Controllers
             {
                 RosLogger.Error($"{ToString()}: " +
                                 $"Error during {nameof(RaiseRobotFinishedLoading)}", e);
-            }                          
-        }           
+            }
+        }
 
-        string Decorate(string jointName)
+        [return: NotNullIfNotNull("jointName")]
+        string? Decorate(string? jointName)
         {
+            if (jointName == null) return null;
+
             string framePrefix = config.FramePrefix;
             string frameSuffix = config.FrameSuffix;
-            
+
             if (framePrefix.Length == 0 && frameSuffix.Length == 0)
             {
                 return jointName;
             }
-            
+
             return $"{framePrefix}{jointName}{frameSuffix}";
         }
 
@@ -560,19 +563,22 @@ namespace Iviz.Controllers
             Robot.ResetLinkParents();
             Robot.ApplyAnyValidConfiguration();
 
-            node.AttachTo(Robot.BaseLink != null ? Decorate(Robot.BaseLink) : null);
+            node.AttachTo(Decorate(Robot.BaseLink));
             Robot.BaseLinkObject.transform.SetParentLocal(node.Transform);
         }
 
         void AttachToTf()
         {
-            if (Robot == null || RobotObject == null)
+            var mRobot = Robot;
+            var mRobotObject = RobotObject;
+
+            if (mRobot == null || mRobotObject == null)
             {
                 return;
             }
 
-            RobotObject.transform.SetParentLocal(TfModule.RootFrame.Transform);
-            foreach (var (link, linkObject) in Robot.LinkObjects)
+            mRobotObject.transform.SetParentLocal(TfModule.RootFrame.Transform);
+            foreach (var (link, linkObject) in mRobot.LinkObjects)
             {
                 var frame = TfModule.GetOrCreateFrame(Decorate(link), node);
                 linkObject.transform.SetParentLocal(frame.Transform);
@@ -580,7 +586,7 @@ namespace Iviz.Controllers
             }
 
             // fill in missing frame parents, but only they don't already have one
-            foreach (var (link, parentLink) in Robot.LinkParents)
+            foreach (var (link, parentLink) in mRobot.LinkParents)
             {
                 var frame = TfModule.GetOrCreateFrame(Decorate(link), node);
                 if (frame.Parent == TfModule.OriginFrame)
@@ -589,8 +595,8 @@ namespace Iviz.Controllers
                 }
             }
 
-            node.AttachTo(Robot.BaseLink != null ? Decorate(Robot.BaseLink) : null);
-            Robot.BaseLinkObject.transform.SetParentLocal(node.Transform);
+            node.AttachTo(Decorate(mRobot.BaseLink));
+            mRobot.BaseLinkObject.transform.SetParentLocal(node.Transform);
         }
 
         public void Dispose()
@@ -610,21 +616,25 @@ namespace Iviz.Controllers
         {
             Robot = null;
 
-            if (!string.IsNullOrWhiteSpace(SavedRobotName))
+            string savedRobotName = SavedRobotName;
+            string sourceParameter = SourceParameter;
+
+            if (!string.IsNullOrWhiteSpace(savedRobotName))
             {
-                if (!string.IsNullOrWhiteSpace(SourceParameter))
+                if (!string.IsNullOrWhiteSpace(sourceParameter))
                 {
                     config.SourceParameter = "";
                 }
 
-                _ = TryLoadSavedRobotAsync(SavedRobotName).AwaitNoThrow(this);
+                _ = TryLoadSavedRobotAsync(savedRobotName).AwaitNoThrow(this);
             }
 
-            if (!string.IsNullOrWhiteSpace(SourceParameter))
+            if (!string.IsNullOrWhiteSpace(sourceParameter))
             {
-                _ = TryLoadFromSourceParameterAsync(SourceParameter).AwaitNoThrow(this);
+                _ = TryLoadFromSourceParameterAsync(sourceParameter).AwaitNoThrow(this);
             }
-            
+
+
             if (AttachedToTf)
             {
                 AttachedToTf = false;
@@ -632,6 +642,6 @@ namespace Iviz.Controllers
             }
         }
 
-        public override string ToString() => $"[{nameof(SimpleRobotController)} Robot: {(robot?.Name ?? "none")}]";
+        public override string ToString() => $"[{nameof(SimpleRobotController)} '{(robot?.Name ?? "(none)")}']";
     }
 }

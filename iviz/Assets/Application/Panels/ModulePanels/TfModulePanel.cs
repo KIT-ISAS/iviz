@@ -20,7 +20,7 @@
         public SenderWidget Sender { get; private set; }
         //public SenderWidget TapSender { get; private set; }
 
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("TF");

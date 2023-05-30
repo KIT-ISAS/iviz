@@ -13,6 +13,7 @@ namespace Iviz.Displays
     {
         float columnWidth = 0.002f;
         Vector3 size = Vector3.one;
+        float? lastAdjustedColumnWidth;
 
         public Vector3 Size
         {
@@ -39,8 +40,8 @@ namespace Iviz.Displays
                 RebuildColumnWidth();
             }
         }
-        
-        float AdjustedColumnWidth => columnWidth / Mathf.Min(Transform.lossyScale.MaxAbsCoeff(), 0.5f);
+
+        float AdjustedColumnWidth => columnWidth / Mathf.Clamp(Transform.lossyScale.MaxAbsCoeff(), 0.1f, 0.5f);
 
         static MeshMarkerDisplay[] CreateObjects(Transform transform)
         {
@@ -100,7 +101,7 @@ namespace Iviz.Displays
         void RebuildColumnWidth()
         {
             if (Children.Length == 0)
-            { 
+            {
                 Children = CreateObjects(Transform);
             }
 
@@ -158,10 +159,20 @@ namespace Iviz.Displays
             base.Suspend();
             columnWidth = 0.002f;
             Transform.localScale = Vector3.one;
+            lastAdjustedColumnWidth = null;
         }
 
         public void UpdateColumnWidth()
         {
+            lastAdjustedColumnWidth = null;
+            RebuildColumnWidth();
+        }
+
+        void Update()
+        {
+            float adjustedColumnWidth = AdjustedColumnWidth;
+            if (lastAdjustedColumnWidth is { } width &&
+                Mathf.Approximately(adjustedColumnWidth, width)) return;
             RebuildColumnWidth();
         }
     }

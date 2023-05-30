@@ -49,11 +49,11 @@ namespace Iviz.Displays
 
                 resource = ResourcePool.RentDisplay<LineDisplay>(container.transform);
                 resource.ElementScale = 0.001f;
-                resource.Visible = ARController.IsXRVisible;
+                //resource.Visible = ARController.IsXRVisible;
                 //resource.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
-                resource.MaterialOverride = ARController.IsPulseActive
-                    ? Resources.Resource.Materials.LinePulse.Object
-                    : Resources.Resource.Materials.LineMesh.Object;
+                //resource.MaterialOverride = ARController.IsPulseActive
+                //    ? Resources.Resource.Materials.LinePulse.Object
+                //    : Resources.Resource.Materials.LineMesh.Object;
 
                 return resource;
             }
@@ -102,12 +102,16 @@ namespace Iviz.Displays
 
             if (args.removed.Contains(MeshFilter))
             {
+                Debug.Log("removing!");
                 Resource.Reset();
             }
         }
 
+        
         void Update()
         {
+            if (Settings.IsHololens) return;
+            
             if (Resource.Visible)
             {
                 var unityPose = ARController.ARPoseToUnity(Transform.AsPose());
@@ -128,6 +132,7 @@ namespace Iviz.Displays
                 Resource.Visible = !ARController.IsXRVisible;
             }
         }
+        
 
         void CheckMesh()
         {
@@ -158,10 +163,9 @@ namespace Iviz.Displays
                 return;
             }
 
-            ARController.Instance?.ProcessMeshChange(indices, vertices, gameObject);
+            XRUtils.ProcessMeshChange(indices, vertices, gameObject);
 
-            // TODO: check if need to send to another thread
-            void UpdateLines(NativeList<float4x2> lines)
+            void UpdateLines(NativeList<float4x2> lines) // TODO: check if need to send to another thread
             {
                 int numLines = indices.Count; // 3 indices per triangle, 3 lines per triangle => 1 line per index
                 lines.Resize(numLines);

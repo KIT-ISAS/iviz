@@ -38,11 +38,15 @@ namespace Iviz.Core
             return CreateWrapper((byte*)ptr.AddrOfPinnedObject(), length);
         }
 
+        public static NativeArray<T> CreateWrapper<T>(this Span<T> span) where T : unmanaged
+        {
+            return CreateWrapper((T*)Unsafe.AsPointer(ref span[0]), span.Length);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeArray<TU> Cast<TT, TU>(this NativeArray<TT> ptr) where TT : unmanaged where TU : unmanaged
         {
             return ptr.Reinterpret<TU>(Unsafe.SizeOf<TT>());
         }
     }
-    }
-    
+}

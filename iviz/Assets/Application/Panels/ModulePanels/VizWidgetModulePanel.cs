@@ -11,7 +11,7 @@ namespace Iviz.App
         public MarkerWidget Marker { get; private set; }
         public SenderWidget FeedbackSender { get; private set; }
 
-        void Awake()
+        protected override void Initialize()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Viz Widgets");

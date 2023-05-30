@@ -1,10 +1,12 @@
 using System;
+using System.IO;
+using System.Net.Sockets;
 
 namespace Iviz.Roslib;
 
 public class Roslib1Exception : RoslibException
 {
-    public Roslib1Exception(string message, Exception? innerException = null) : base(message, innerException)
+    protected Roslib1Exception(string message, Exception? innerException = null) : base(message, innerException)
     {
     }
 }
@@ -24,7 +26,8 @@ public class RosConnectionException : Roslib1Exception
 /// </summary>
 public sealed class RosUriBindingException : RosConnectionException
 {
-    public RosUriBindingException(string message, Exception innerException) : base(message, innerException)
+    public RosUriBindingException(Uri uri, Exception? innerException = null) : base(
+        $"Failed to bind to local URI '{uri}'", innerException)
     {
     }
 }
@@ -71,20 +74,24 @@ public sealed class RosServiceNotFoundException : Roslib1Exception
 
 public sealed class RosServiceCallFailed : Roslib1Exception
 {
-    public string ServiceName { get; }
-    public string ServerMessage { get; }
-
-    public RosServiceCallFailed(string service, string message) : base(
-        $"Server failed to execute call to '{service}'. Reason given: {(message.Length == 0 ? "(empty)" : message)}")
+    public RosServiceCallFailed(string service, Uri? uri, Exception? e = null) : base(
+        e is SocketException or IOException
+            ? $"Service call '{service}' failed. Reason: Cannot connect to {uri?.ToString() ?? "[unknown]"}"
+            : $"Service call '{service}' to {uri?.ToString() ?? "[unknown]"} failed",
+        e)
     {
-        ServiceName = service;
-        ServerMessage = message;
+    }
+
+    public RosServiceCallFailed(string service, string message, Exception? e = null) : base(
+        $"Remote server failed to execute call to '{service}'. Reason given: {(message.Length == 0 ? "(empty)" : message)}",
+        e)
+    {
     }
 }
 
-public sealed class RosInvalidPackageSizeException : Roslib1Exception
+public sealed class RosInvalidPacketSizeException : Roslib1Exception
 {
-    public RosInvalidPackageSizeException(string message) : base(message)
+    public RosInvalidPacketSizeException(int length) : base($"Invalid packet size {length}. Disconnecting.")
     {
     }
 }

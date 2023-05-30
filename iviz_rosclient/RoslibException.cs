@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Iviz.Msgs;
 
 namespace Iviz.Roslib;
@@ -8,11 +9,7 @@ namespace Iviz.Roslib;
 /// </summary>
 public class RoslibException : RosException
 {
-    protected RoslibException(string message) : base(message)
-    {
-    }
-
-    public RoslibException(string message, Exception? innerException) : base(message, innerException)
+    protected RoslibException(string message, Exception? e = null) : base(message, e)
     {
     }
 }
@@ -33,20 +30,25 @@ public sealed class RosInvalidMessageTypeException : RoslibException
     }
 }
 
+public static class RosExceptionUtils
+{
+    [DoesNotReturn]
+    public static void ThrowInvalidMessageType(string expectedType, IMessage wrongType, Exception? e = null) =>
+        throw new RosInvalidMessageTypeException("Message does not match the expected type. " +
+                                                 $"Expected [{expectedType}], received [{wrongType.RosMessageType}] instead",
+            e);
+}
+
 public sealed class RosInvalidResourceNameException : RoslibException
 {
-    public RosInvalidResourceNameException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
-
-    public RosInvalidResourceNameException(string message) : base(message)
+    public RosInvalidResourceNameException(string message, Exception? e = null) : base(message, e)
     {
     }
 }
 
-public class RosDynamicMessageException : RoslibException
+public sealed class RosDynamicMessageException : RoslibException
 {
-    public RosDynamicMessageException(string message, Exception innerException) : base(message, innerException)
+    public RosDynamicMessageException(string message, Exception e) : base(message, e)
     {
     }
 
@@ -57,7 +59,7 @@ public class RosDynamicMessageException : RoslibException
 
 public sealed class RosParameterNotFoundException : RoslibException
 {
-    public RosParameterNotFoundException(string message, Exception innerException) : base(message, innerException)
+    public RosParameterNotFoundException(string message, Exception? e = null) : base(message, e)
     {
     }
 
