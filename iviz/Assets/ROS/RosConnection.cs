@@ -2,9 +2,11 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
+using Iviz.Roslib;
 using Iviz.Tools;
 
 namespace Iviz.Ros
@@ -18,9 +20,9 @@ namespace Iviz.Ros
         const int TaskWaitTimeInMs = 2000;
         const int ConnectionRetryTimeInMs = TaskWaitTimeInMs;
 
-        bool disposed;
+        internal const bool HasRos2Implementation = Settings.IsAndroid || Settings.IsIPhone || Settings.IsMacOS;
 
-        public new const bool IsRos2VersionSupported = Settings.IsAndroid || Settings.IsIPhone || Settings.IsMacOS;
+        bool disposed;
 
         readonly SemaphoreSlim signal = new(0);
         readonly Task task;
@@ -37,6 +39,19 @@ namespace Iviz.Ros
         {
             task = TaskUtils.Run(() => Run().AwaitNoThrow(this));
         }
+
+        internal bool TryGetClient([NotNullWhen(true)] out IRosClient? conn)
+        {
+            if (IsConnected && client != null)
+            {
+                conn = client;
+                return true;
+            }
+
+            conn = null;
+            return false;
+        }
+
 
         void DisposeBase()
         {

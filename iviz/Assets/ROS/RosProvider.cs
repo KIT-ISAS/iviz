@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
@@ -21,9 +22,7 @@ namespace Iviz.Ros
 
     public abstract class RosProvider : Displays.ServiceProvider
     {
-        public const bool IsRos2VersionSupported = RosConnection.IsRos2VersionSupported;
-
-        protected IRosClient? client;
+        public const bool IsRos2VersionSupported = RosConnection.HasRos2Implementation;
 
         // ROS1 stuff
         Uri? masterUri;
@@ -34,10 +33,11 @@ namespace Iviz.Ros
         int domainId;
         Endpoint? discoveryServer;
 
+        protected IRosClient? client;
+        protected IRosClient Client => client ?? throw new InvalidOperationException("Client not connected");
+        
         public static event Action<ConnectionState>? ConnectionStateChanged;
         public static event Action<bool>? ConnectionWarningStateChanged;
-
-        public IRosClient Client => client ?? throw new InvalidOperationException("Client not connected");
 
         public Uri? MasterUri
         {

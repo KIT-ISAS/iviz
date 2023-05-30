@@ -345,14 +345,14 @@ namespace Iviz.App
                     return;
                 }
 
-                if (RosManager.Connection.Client is not RosClient client)
+                if (!RosManager.TryGetRosClient(out var client) || client is not RosClient ros1Client)
                 {
                     return;
                 }
 
                 try
                 {
-                    var response = await client.RosMasterClient.LookupServiceAsync(service, token);
+                    var response = await ros1Client.RosMasterClient.LookupServiceAsync(service, token);
                     if (response.ServiceUri == null)
                     {
                         return;
@@ -497,19 +497,14 @@ namespace Iviz.App
 
         async ValueTask GetNodeInfoAsync(string node, CancellationToken token)
         {
-            if (!RosManager.IsConnected)
-            {
-                return;
-            }
-
-            if (RosManager.Connection.Client is not RosClient client)
+            if (!RosManager.TryGetRosClient(out var client) || client is not RosClient ros1Client)
             {
                 return;
             }
 
             try
             {
-                var response = await client.RosMasterClient.LookupNodeAsync(node, token);
+                var response = await ros1Client.RosMasterClient.LookupNodeAsync(node, token);
                 if (response.Uri == null)
                 {
                     return;
@@ -549,16 +544,11 @@ namespace Iviz.App
 
         void UpdateAliases()
         {
-            if (!RosManager.IsConnected)
+            if (!RosManager.TryGetRosClient(out var client))
             {
                 return;
             }
-
-            if (RosManager.Connection.Client is not RosClient client)
-            {
-                return;
-            }
-
+            
             var state = client.GetSubscriberStatistics();
             var hostsEnum = state
                 .SelectMany(topic => topic.Receivers)

@@ -869,7 +869,7 @@ namespace Iviz.Ros
 
             var newSubscribedTopic = new SubscribedTopic<T>(listener.Topic, listener.TransportHint);
             subscribersByTopic.Add(listener.Topic, newSubscribedTopic);
-            await newSubscribedTopic.SubscribeAsync(Connected ? Client : null, listener, token);
+            await newSubscribedTopic.SubscribeAsync(Connected ? client : null, listener, token);
         }
 
         internal void SetPause(Listener listener, bool value)

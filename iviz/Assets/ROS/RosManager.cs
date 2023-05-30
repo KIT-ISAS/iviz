@@ -1,6 +1,8 @@
 ﻿#nullable enable
 
 using System;
+using System.Diagnostics.CodeAnalysis;
+using Iviz.Roslib;
 
 namespace Iviz.Ros
 {
@@ -21,6 +23,17 @@ namespace Iviz.Ros
         public static RosOutLogger Logger => instance?.logger ?? (RosOutLogger)ThrowDisposeException();
         public static RosServerManager Server => instance?.server ?? (RosServerManager)ThrowDisposeException();
         internal static RosConnection RosConnection => instance?.connection ?? (RosConnection)ThrowDisposeException();
+
+        public static bool TryGetRosClient([NotNullWhen(true)] out IRosClient? client)
+        {
+            if (instance != null)
+            {
+                return instance.connection.TryGetClient(out client);
+            }
+            
+            client = null;
+            return false;
+        }
 
         readonly RosConnection connection;
         readonly RosOutLogger logger;

@@ -33,7 +33,7 @@ namespace Iviz.App
         public override void UpdatePanel()
         {
             using var description = BuilderPool.Rent();
-            if (!RosManager.IsConnected)
+            if (!RosManager.TryGetRosClient(out var client))
             {
                 description.Append("<b>State: </b> Disconnected. Nothing to show!").AppendLine();
             }
@@ -41,10 +41,10 @@ namespace Iviz.App
             {
                 try
                 {
-                    switch (RosManager.Connection.Client)
+                    switch (client)
                     {
-                        case RosClient client:
-                            GenerateReportRos1(description, client);
+                        case RosClient client1:
+                            GenerateReportRos1(description, client1);
                             break;
                         case Ros2Client client2:
                             GenerateReportRos2(description, client2);
