@@ -53,9 +53,9 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (Transform is null) BuiltIns.ThrowNullReference(nameof(Transform));
+            BuiltIns.ThrowIfNull(Transform, nameof(Transform));
             Transform.RosValidate();
-            if (Error is null) BuiltIns.ThrowNullReference(nameof(Error));
+            BuiltIns.ThrowIfNull(Error, nameof(Error));
             Error.RosValidate();
         }
     

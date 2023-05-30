@@ -31,16 +31,17 @@ public unsafe struct WriteBuffer
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void ThrowIfWrongSize(Array array, int size)
+    static void ThrowIfWrongSize(Array array, int expectedLength)
     {
         if (array is null)
         {
             BuiltIns.ThrowArgumentNull(nameof(array));
         }
 
-        if (array.Length != size)
+        int length = array.Length;
+        if (length != expectedLength)
         {
-            BuiltIns.ThrowInvalidSizeForFixedArray(array.Length, size);
+            BuiltIns.ThrowInvalidSizeForFixedArray(length, expectedLength);
         }
     }
 
@@ -103,10 +104,10 @@ public unsafe struct WriteBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SerializeArray(string[] val)
     {
-        WriteInt(val.Length);
-        foreach (string str in val)
+        int length = val.Length;
+        for (int i = 0; i < length; i++)
         {
-            Serialize(str);
+            Serialize(val[i]);
         }
     }
 
@@ -153,10 +154,11 @@ public unsafe struct WriteBuffer
             return 0;
         }
 
-        int size = 4 * array.Length;
-        foreach (string t in array)
+        int length = array.Length;
+        int size = 4 * length;
+        for (int i = 0; i < length; i++)
         {
-            size += BuiltIns.UTF8.GetByteCount(t);
+            size += BuiltIns.UTF8.GetByteCount(array[i]);
         }
 
         return size;

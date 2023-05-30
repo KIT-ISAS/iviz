@@ -61,7 +61,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (ErrorString is null) BuiltIns.ThrowNullReference(nameof(ErrorString));
+            BuiltIns.ThrowIfNull(ErrorString, nameof(ErrorString));
         }
     
         public int RosMessageLength

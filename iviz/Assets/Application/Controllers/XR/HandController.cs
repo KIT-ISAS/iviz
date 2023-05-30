@@ -228,7 +228,7 @@ namespace Iviz.Controllers.XR
 
             cachedHandState.Palm = referenceTransform.TransformPose(new Pose(palmPosition, palmRotation));
 
-            foreach (int i in ..5)
+            for (int i = 0; i < 5; i++)
             {
                 var finger = (HandFinger)i;
                 if (!hand.TryGetFingerBones(finger, cachedBoneList))
@@ -247,7 +247,7 @@ namespace Iviz.Controllers.XR
                     fingers = cachedHandState.Fingers[i];
                 }
 
-                foreach (int j in ..cachedBoneList.Count)
+                for (int j = 0; j < cachedBoneList.Count; j++)
                 {
                     if (!cachedBoneList[j].TryGetPosition(out var fingerPosition)
                         || !cachedBoneList[j].TryGetRotation(out var fingerRotation))

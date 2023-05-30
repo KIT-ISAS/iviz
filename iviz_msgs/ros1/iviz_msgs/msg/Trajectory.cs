@@ -42,7 +42,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n == 0) array = EmptyArray<duration>.Value;
                 else
                 {
-                     array = new duration[n];
+                    array = new duration[n];
                     b.DeserializeStructArray(array);
                 }
                 Timestamps = array;
@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n == 0) array = EmptyArray<duration>.Value;
                 else
                 {
-                     array = new duration[n];
+                    array = new duration[n];
                     b.DeserializeStructArray(array);
                 }
                 Timestamps = array;
@@ -101,8 +101,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
-            if (Timestamps is null) BuiltIns.ThrowNullReference(nameof(Timestamps));
+            BuiltIns.ThrowIfNull(Poses, nameof(Poses));
+            BuiltIns.ThrowIfNull(Timestamps, nameof(Timestamps));
         }
     
         public int RosMessageLength

@@ -7,9 +7,21 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public sealed class WidgetHandler : VizHandler
+    internal interface IHandles<in T>
+    {
+        void Handle(T msg);
+    }
+
+    internal interface IHandlesArray<in T>
+    {
+        void Handle(T msg);
+    }
+
+    public sealed class WidgetHandler : VizHandler, IHandles<Widget>, IHandlesArray<WidgetArray>
     {
         readonly IWidgetFeedback feedback;
+
+        public override string Title => "Widgets";
 
         public override string BriefDescription
         {
@@ -33,15 +45,15 @@ namespace Iviz.Controllers
             this.feedback = feedback;
         }
 
-        public void Handler(WidgetArray msg)
+        public void Handle(WidgetArray msg)
         {
             foreach (var widget in msg.Widgets)
             {
-                Handler(widget);
+                Handle(widget);
             }
         }
 
-        public void Handler(Widget msg)
+        public void Handle(Widget msg)
         {
             switch ((ActionType)msg.Action)
             {

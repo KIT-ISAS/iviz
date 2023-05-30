@@ -1,27 +1,26 @@
 #nullable enable
 
 using System;
-using System.Buffers;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Tools;
-using Iviz.Urdf;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using TMPro;
-using Unity.Collections;
-using Unity.IL2CPP.CompilerServices;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -564,6 +563,11 @@ namespace Iviz.Core
             return null;
         }
 
+        public static void IncreaseRefCount(this PointCloud2 msg)
+        {
+            msg.Data.Share();
+        }
+
         public static float RegularizeAngle(float angleInDeg) =>
             angleInDeg switch
             {
@@ -665,6 +669,30 @@ namespace Iviz.Core
         public static Vector3 Forward(this in Pose pose) => pose.rotation.Forward();
 
         public static Vector3 Up(this in Pose pose) => pose.rotation.Up();
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Quaternion FromEulerRad(in Vector3 euler)
+        {
+            // stolen from https://gist.github.com/HelloKitty/91b7af87aac6796c3da9
+            float yaw = euler.x;
+            float pitch = euler.y;
+            float roll = euler.z;
+            float rollOver2 = roll * 0.5f;
+            float sinRollOver2 = Mathf.Sin(rollOver2);
+            float cosRollOver2 = Mathf.Cos(rollOver2);
+            float pitchOver2 = pitch * 0.5f;
+            float sinPitchOver2 = Mathf.Sin(pitchOver2);
+            float cosPitchOver2 = Mathf.Cos(pitchOver2);
+            float yawOver2 = yaw * 0.5f;
+            float sinYawOver2 = Mathf.Sin(yawOver2);
+            float cosYawOver2 = Mathf.Cos(yawOver2);
+            Quaternion result;
+            result.x = cosYawOver2 * cosPitchOver2 * cosRollOver2 + sinYawOver2 * sinPitchOver2 * sinRollOver2;
+            result.y = cosYawOver2 * cosPitchOver2 * sinRollOver2 - sinYawOver2 * sinPitchOver2 * cosRollOver2;
+            result.z = cosYawOver2 * sinPitchOver2 * cosRollOver2 + sinYawOver2 * cosPitchOver2 * sinRollOver2;
+            result.w = sinYawOver2 * cosPitchOver2 * cosRollOver2 - cosYawOver2 * sinPitchOver2 * sinRollOver2;
+            return result;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ApproximatelyZero(this float f) => Mathf.Abs(f) < 8 * float.Epsilon;
@@ -677,11 +705,6 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ApproximatelyZero(this in Msgs.GeometryMsgs.Vector3 f) => f.ToUnity().ApproximatelyZero();
-
-        public static ReadOnlyDictionary<T, TU> AsReadOnly<T, TU>(this Dictionary<T, TU> t)
-        {
-            return new ReadOnlyDictionary<T, TU>(t);
-        }
 
         public static WithIndexEnumerable<T> WithIndex<T>(this IEnumerable<T> source)
         {
@@ -739,15 +762,16 @@ namespace Iviz.Core
             }
         }
 
-        public static bool TryGetFirst<T>(this IEnumerable<T> ts, [NotNullWhen(true)] out T? tp)
+        public static bool TryGetFirst(this HashSet<string> ts, [NotNullWhen(true)] out string? tp)
         {
-            foreach (T t in ts)
+            using var enumerator = ts.GetEnumerator();
+            if (enumerator.MoveNext())
             {
-                tp = t!;
+                tp = enumerator.Current;
                 return true;
             }
 
-            tp = default;
+            tp = null;
             return false;
         }
 
@@ -773,7 +797,7 @@ namespace Iviz.Core
 
         public static void SetTextRent(this TMP_Text text, in BuilderPool.BuilderRent rent, int start, int count)
         {
-            if (!MemoryMarshal.TryGetArray(rent.Chunk, out ArraySegment<char> segment))
+            if (!MemoryMarshal.TryGetArray(rent.Chunk, out var segment))
             {
                 // shouldn't happen
                 RosLogger.Debug(
@@ -821,12 +845,7 @@ namespace Iviz.Core
         readonly IEnumerator<T> a;
         int index;
 
-        public bool MoveNext()
-        {
-            ++index;
-            return a.MoveNext();
-        }
-
+        public bool MoveNext() => (++index, Success: a.MoveNext()).Success;
         public (T value, int index) Current => (a.Current, index);
         public WithIndexEnumerable(IEnumerable<T> a) => (this.a, index) = (a.GetEnumerator(), -1);
         public WithIndexEnumerable<T> GetEnumerator() => this;
@@ -835,23 +854,19 @@ namespace Iviz.Core
     public struct TransformEnumerator
     {
         readonly Transform transform;
+        readonly int childCount;
         int currentIndex;
 
-        public TransformEnumerator(Transform transform) => (this.transform, currentIndex) = (transform, -1);
-        public Transform Current => transform.GetChild(currentIndex);
-        public bool MoveNext() => ++currentIndex < transform.childCount;
-        public TransformEnumerator GetEnumerator() => this;
-
-        public Transform[] ToArray()
+        public TransformEnumerator(Transform transform)
         {
-            var array = new Transform[transform.childCount];
-            for (int i = 0; i < array.Length; i++)
-            {
-                array[i] = transform.GetChild(i);
-            }
-
-            return array;
+            this.transform = transform;
+            childCount = transform.childCount;
+            currentIndex = -1;
         }
+
+        public Transform Current => transform.GetChild(currentIndex);
+        public bool MoveNext() => ++currentIndex < childCount;
+        public TransformEnumerator GetEnumerator() => this;
     }
 
     public static class JsonUtils
@@ -862,4 +877,28 @@ namespace Iviz.Core
                    throw new JsonException("Object could not be deserialized");
         }
     }
+    
+    public struct InterlockedBoolean
+    {
+        int value;
+        
+        public Action<bool>? Changed;
+
+        public bool TrySet()
+        {
+            bool result = Interlocked.CompareExchange(ref value, 1, 0) == 0;
+            if (result)
+            {
+                Changed?.Invoke(true);
+            }
+
+            return result;
+        }
+
+        public void Reset()
+        {
+            value = 0;
+            Changed?.Invoke(false);
+        }
+    }    
 }

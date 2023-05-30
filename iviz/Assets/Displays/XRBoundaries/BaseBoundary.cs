@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public abstract class BaseBoundary : MonoBehaviour, IBoundary, IRecyclable
+    public abstract class BaseBoundary : MonoBehaviour, IRecyclable, IDisplay
     {
         Tooltip? tooltip;
         Transform? mTransform;
@@ -14,7 +14,7 @@ namespace Iviz.Displays.XR
         
         [SerializeField] BoxCollider? boxCollider;
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
-        protected Transform Transform => this.EnsureHasTransform(ref mTransform);
+        public Transform Transform => this.EnsureHasTransform(ref mTransform);
 
         public string Id { get; set; } = "";
         public event Action<string>? EnteredCollision;
@@ -74,6 +74,8 @@ namespace Iviz.Displays.XR
         
         public abstract Color SecondColor { set; }
 
+        public abstract float FrameWidth { set; }
+        
         static Tooltip CreateTooltip(Transform transform)
         {
             var tooltip = ResourcePool.RentDisplay<Tooltip>(transform);
@@ -116,9 +118,13 @@ namespace Iviz.Displays.XR
 
             if (collision.gameObject.TryGetComponent<BaseBoundary>(out var boundary))
             {
-                Debug.Log( this + ": Exit " + boundary.Id);
+                //Debug.Log( this + ": Exit " + boundary.Id);
                 ExitedCollision(boundary.Id ?? "");
             }
+        }
+
+        public void Initialize()
+        {
         }
         
         public virtual void Suspend()
@@ -135,7 +141,12 @@ namespace Iviz.Displays.XR
 
         public override string ToString()
         {
-            return $"[Boundary Id='{Id}']";
+            return $"[{nameof(BaseBoundary)} Id='{Id}']";
+        }
+
+        public bool Visible
+        {
+            set => gameObject.SetActive(value);
         }
     }
 }

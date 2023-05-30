@@ -97,7 +97,9 @@ namespace Iviz.App
         public void SetHints<T>(T hints) where T : IReadOnlyList<string>
         {
             optionDatas.Clear();
-            foreach (int i in ..hints.Count)
+            
+            int count = hints.Count;
+            for (int i = 0; i < count; i++)
             {
                 optionDatas.Add(new TMP_Dropdown.OptionData(hints[i]));
             }

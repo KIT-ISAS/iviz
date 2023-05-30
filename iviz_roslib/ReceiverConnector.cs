@@ -12,7 +12,7 @@ namespace Iviz.Roslib;
 /// <summary>
 /// Class in charge of trying to connect and reconnect to a ROS publisher 
 /// </summary>
-internal class ReceiverConnector
+internal sealed class ReceiverConnector
 {
     const int MaxConnectionRetries = 120;
     const int DisposeTimeoutInMs = 2000;
@@ -172,12 +172,12 @@ internal class ReceiverConnector
 
     public override string ToString() => $"[{nameof(ReceiverConnector)} '{topic}' Uri='{RemoteUri}']";
 
-    static int WaitTimeInMsFromTry(int numTry) => BaseUtils.Random.Next(0, 1000) +
+    static int WaitTimeInMsFromTry(int numTry) => Defaults.Random.Next(0, 1000) +
                                                   numTry switch
                                                   {
-                                                      < 5 => 3000,
-                                                      < 50 => 5000,
-                                                      _ => 10000
+                                                      < 5 => 3000,  // retry every 3 secs
+                                                      < 50 => 5000, // retry every 5 secs
+                                                      _ => 10000    // retry every 10 secs
                                                   };
 }
 

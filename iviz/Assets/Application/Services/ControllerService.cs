@@ -31,7 +31,7 @@ namespace Iviz.Controllers
     {
         const int DefaultTimeoutInMs = 5000;
 
-        static IRosProvider Connection => RosManager.Connection;
+        static RosProvider Connection => RosManager.Connection;
         static IReadOnlyCollection<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
 
         static readonly Dictionary<ModuleType, string> ModuleNames =

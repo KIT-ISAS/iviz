@@ -121,12 +121,15 @@ namespace Iviz.Msgs.IvizMsgs
             Message = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Vector2i>.Value
-                    : new Vector2i[n];
-                for (int i = 0; i < n; i++)
+                Vector2i[] array;
+                if (n == 0) array = EmptyArray<Vector2i>.Value;
+                else
                 {
-                    array[i] = new Vector2i(ref b);
+                    array = new Vector2i[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Vector2i(ref b);
+                    }
                 }
                 Resolutions = array;
             }
@@ -140,12 +143,15 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Vector2i>.Value
-                    : new Vector2i[n];
-                for (int i = 0; i < n; i++)
+                Vector2i[] array;
+                if (n == 0) array = EmptyArray<Vector2i>.Value;
+                else
                 {
-                    array[i] = new Vector2i(ref b);
+                    array = new Vector2i[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Vector2i(ref b);
+                    }
                 }
                 Resolutions = array;
             }
@@ -181,13 +187,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
-            if (Resolutions is null) BuiltIns.ThrowNullReference(nameof(Resolutions));
-            for (int i = 0; i < Resolutions.Length; i++)
-            {
-                if (Resolutions[i] is null) BuiltIns.ThrowNullReference(nameof(Resolutions), i);
-                Resolutions[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Message, nameof(Message));
+            BuiltIns.ThrowIfNull(Resolutions, nameof(Resolutions));
         }
     
         public int RosMessageLength

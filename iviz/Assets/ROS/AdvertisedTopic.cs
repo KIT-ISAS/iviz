@@ -10,18 +10,12 @@ using Iviz.Tools;
 
 namespace Iviz.Ros
 {
-    internal sealed class AdvertisedTopic<T> : IAdvertisedTopic where T : IMessage, new()
+    internal sealed class AdvertisedTopic<T> : AdvertisedTopic where T : IMessage, new()
     {
         const int NumRetries = 3;
         const int WaitBetweenRetriesInMs = 500;
 
-        readonly HashSet<Sender<T>> senders = new();
         readonly string topic;
-        string? publisherId;
-        
-        int? id;
-
-        public IRosPublisher? Publisher { get; private set; }
 
         public AdvertisedTopic(string topic)
         {
@@ -29,32 +23,27 @@ namespace Iviz.Ros
             this.topic = topic;
         }
 
-        public int? Id
+        public override void Add(Sender publisher)
         {
-            get => id;
-            set
+            if (publisher is not Sender<T>)
             {
-                id = value;
-                foreach (var sender in senders)
-                {
-                    sender.Id = value;
-                }
+                BuiltIns.ThrowArgument(nameof(publisher), "Message type does not match");
             }
+
+            senders.Add(publisher);
         }
 
-        public void Add(ISender publisher)
+        public override void Remove(Sender publisher)
         {
-            senders.Add((Sender<T>) publisher);
+            if (publisher is not Sender<T>)
+            {
+                BuiltIns.ThrowArgument(nameof(publisher), "Message type does not match");
+            }
+
+            senders.Remove(publisher);
         }
 
-        public void Remove(ISender publisher)
-        {
-            senders.Remove((Sender<T>) publisher);
-        }
-
-        public int Count => senders.Count;
-
-        public async ValueTask AdvertiseAsync(IRosClient? client, CancellationToken token)
+        public override async ValueTask AdvertiseAsync(IRosClient? client, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
             if (client == null)
@@ -64,13 +53,13 @@ namespace Iviz.Ros
                 return;
             }
 
-            foreach (int t in ..NumRetries)
+            for (int t = 0; t < NumRetries; t++)
             {
                 try
                 {
-                    IRosPublisher publisher;
+                    IRosPublisher<T> publisher;
                     (publisherId, publisher) = await client.AdvertiseAsync<T>(topic, token: token);
-                    Publisher = publisher;
+                    Publisher = (BaseRosPublisher)publisher;
                     return;
                 }
                 catch (RoslibException e)
@@ -82,22 +71,6 @@ namespace Iviz.Ros
 
             publisherId = null;
             Publisher = null;
-        }
-
-        public async ValueTask UnadvertiseAsync(CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-            if (Publisher != null && publisherId != null)
-            {
-                await Publisher.UnadvertiseAsync(publisherId, token);
-            }
-        }
-
-        public void Invalidate()
-        {
-            Id = null;
-            Publisher = null;
-            publisherId = null;
         }
 
         public override string ToString()

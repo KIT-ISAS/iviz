@@ -58,7 +58,7 @@ namespace Iviz.Resources
 
         public static ValueTask<ResourceKey<GameObject>?> GetGameObjectResourceAsync(
             string uriString,
-            IServiceProvider? provider,
+            ServiceProvider? provider,
             CancellationToken token) =>
             Internal.TryGet(uriString, out ResourceKey<GameObject>? info)
                 ? info.AsTaskResultMaybeNull()
@@ -66,7 +66,7 @@ namespace Iviz.Resources
 
         internal static ValueTask<ResourceKey<Texture2D>?> GetTextureResourceAsync(
             string uriString,
-            IServiceProvider? provider,
+            ServiceProvider? provider,
             CancellationToken token) =>
             Internal.TryGet(uriString, out ResourceKey<Texture2D>? info)
                 ? info.AsTaskResultMaybeNull()
@@ -119,6 +119,8 @@ namespace Iviz.Resources
                 { RobotPreviewArray.MessageType, ModuleType.VizWidget },
                 { Boundary.MessageType, ModuleType.VizWidget },
                 { BoundaryArray.MessageType, ModuleType.VizWidget },
+                { DetectionBox.MessageType, ModuleType.VizWidget },
+                { DetectionBoxArray.MessageType, ModuleType.VizWidget },
 
                 // these are already implemented, but need refinement
                 //{ JointState.MessageType, ModuleType.JointState },

@@ -1,4 +1,7 @@
-﻿namespace Iviz.App
+﻿using Iviz.Controllers;
+using JetBrains.Annotations;
+
+namespace Iviz.App
 {
     /// <summary>
     /// <see cref="ARModuleData"/> 
@@ -23,6 +26,7 @@
         public SenderWidget ColorSender { get; private set; }
         public SenderWidget DepthSender { get; private set; }
         public SenderWidget DepthConfidenceSender { get; private set; }
+        public SenderWidget MeshSender { get; private set; }
 
         void Awake()
         {
@@ -48,7 +52,7 @@
                 "30 FPS",
                 "Max FPS"
             };
-            
+
             OcclusionQuality = p.AddDropdown("Occlusion Quality");
             OcclusionQuality.Options = new[]
             {
@@ -63,12 +67,14 @@
             ColorSender = p.AddSender();
             DepthSender = p.AddSender();
             DepthConfidenceSender = p.AddSender();
+            MeshSender = p.AddSender();
 
             p.AddCollapsibleWidget("Publishers")
                 .Attach(MarkerSender)
                 .Attach(ColorSender)
                 .Attach(DepthSender)
                 .Attach(DepthConfidenceSender)
+                .Attach(MeshSender)
                 .FinishAttaching();
 
             p.UpdateSize();

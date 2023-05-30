@@ -65,7 +65,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            if (Label is null) BuiltIns.ThrowNullReference(nameof(Label));
+            BuiltIns.ThrowIfNull(Label, nameof(Label));
         }
     
         public int RosMessageLength

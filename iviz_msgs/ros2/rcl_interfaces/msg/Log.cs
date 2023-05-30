@@ -120,10 +120,10 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Msg is null) BuiltIns.ThrowNullReference(nameof(Msg));
-            if (File is null) BuiltIns.ThrowNullReference(nameof(File));
-            if (Function is null) BuiltIns.ThrowNullReference(nameof(Function));
+            BuiltIns.ThrowIfNull(Name, nameof(Name));
+            BuiltIns.ThrowIfNull(Msg, nameof(Msg));
+            BuiltIns.ThrowIfNull(File, nameof(File));
+            BuiltIns.ThrowIfNull(Function, nameof(Function));
         }
     
         public int RosMessageLength

@@ -65,7 +65,7 @@ internal abstract class TaskExecutor
     {
         if (task is { IsCompleted: true })
         {
-            return Task.FromException(new ObjectDisposedException(ToString()));
+            return Task.FromException(new ObjectDisposedException(nameof(TaskExecutor)));
         }
 
         if (token.IsCancellationRequested)
@@ -101,7 +101,7 @@ internal abstract class TaskExecutor
     {
         if (task is { IsCompleted: true })
         {
-            return Task.FromException<T>(new ObjectDisposedException(ToString()));
+            return Task.FromException<T>(new ObjectDisposedException(nameof(TaskExecutor)));
         }
 
         if (token.IsCancellationRequested)

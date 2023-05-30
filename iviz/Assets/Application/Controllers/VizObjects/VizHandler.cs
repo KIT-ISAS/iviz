@@ -22,6 +22,8 @@ namespace Iviz.Controllers
 
         public int Count => vizObjects.Count;
 
+        public abstract string Title { get; }
+
         public abstract string BriefDescription { get; }
 
         public bool Visible
@@ -139,7 +141,7 @@ namespace Iviz.Controllers
 
             public virtual void Dispose()
             {
-                if (disposed) throw new ObjectDisposedException(ToString());
+                if (disposed) return;
                 disposed = true;
                 
                 Interactable = true;

@@ -28,12 +28,15 @@ namespace Iviz.Msgs.NavMsgs
             Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.PoseStamped>.Value
-                    : new GeometryMsgs.PoseStamped[n];
-                for (int i = 0; i < n; i++)
+                GeometryMsgs.PoseStamped[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.PoseStamped>.Value;
+                else
                 {
-                    array[i] = new GeometryMsgs.PoseStamped(ref b);
+                    array = new GeometryMsgs.PoseStamped[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new GeometryMsgs.PoseStamped(ref b);
+                    }
                 }
                 Poses = array;
             }
@@ -45,12 +48,15 @@ namespace Iviz.Msgs.NavMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.PoseStamped>.Value
-                    : new GeometryMsgs.PoseStamped[n];
-                for (int i = 0; i < n; i++)
+                GeometryMsgs.PoseStamped[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.PoseStamped>.Value;
+                else
                 {
-                    array[i] = new GeometryMsgs.PoseStamped(ref b);
+                    array = new GeometryMsgs.PoseStamped[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new GeometryMsgs.PoseStamped(ref b);
+                    }
                 }
                 Poses = array;
             }
@@ -83,12 +89,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
-            for (int i = 0; i < Poses.Length; i++)
-            {
-                if (Poses[i] is null) BuiltIns.ThrowNullReference(nameof(Poses), i);
-                Poses[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Poses, nameof(Poses));
         }
     
         public int RosMessageLength

@@ -8,10 +8,9 @@ using Iviz.Roslib;
 
 namespace Iviz.Ros
 {
-    internal interface IAdvertisedService
+    internal abstract class AdvertisedService
     {
-        ValueTask AdvertiseAsync(IRosClient? client, CancellationToken token);
-        ValueTask UnadvertiseAsync(IRosClient? client, CancellationToken token);
-        bool TrySetCallback<TU>(Func<TU, ValueTask> callback) where TU : IService;
+        public abstract ValueTask AdvertiseAsync(IRosClient? client, CancellationToken token);
+        public abstract bool TrySetCallback(Delegate callback);
     }
 }

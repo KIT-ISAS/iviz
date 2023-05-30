@@ -93,7 +93,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info($"{this}: Disposing!");
+            RosLogger.Info($"{ToString()}: Disposing!");
             server.Dispose();
 
             // should return immediately, the waiting happened in server.Dispose()
@@ -119,7 +119,7 @@ namespace Iviz.Ros
 
         static async ValueTask<bool> PingMaster(Uri masterUri)
         {
-            using var tokenSource = new CancellationTokenSource(200);
+            using var tokenSource = new CancellationTokenSource(1000);
             var connection = new XmlRpcConnection("pingConnection", masterUri);
             var callerUri = masterUri;
             const string callerId = "iviz_ping";
@@ -131,7 +131,7 @@ namespace Iviz.Ros
             }
             catch (OperationCanceledException)
             {
-                RosLogger.Info($"{nameof(RosServerManager)}: Failed to ping master.");
+                RosLogger.Info($"{nameof(RosServerManager)}: Failed to ping master. Reason: Timeout");
                 return false;
             }
             catch (Exception e)

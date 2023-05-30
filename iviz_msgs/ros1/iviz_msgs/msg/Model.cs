@@ -32,34 +32,43 @@ namespace Iviz.Msgs.IvizMsgs
             OrientationHint = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ModelMesh>.Value
-                    : new ModelMesh[n];
-                for (int i = 0; i < n; i++)
+                ModelMesh[] array;
+                if (n == 0) array = EmptyArray<ModelMesh>.Value;
+                else
                 {
-                    array[i] = new ModelMesh(ref b);
+                    array = new ModelMesh[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ModelMesh(ref b);
+                    }
                 }
                 Meshes = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ModelMaterial>.Value
-                    : new ModelMaterial[n];
-                for (int i = 0; i < n; i++)
+                ModelMaterial[] array;
+                if (n == 0) array = EmptyArray<ModelMaterial>.Value;
+                else
                 {
-                    array[i] = new ModelMaterial(ref b);
+                    array = new ModelMaterial[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ModelMaterial(ref b);
+                    }
                 }
                 Materials = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ModelNode>.Value
-                    : new ModelNode[n];
-                for (int i = 0; i < n; i++)
+                ModelNode[] array;
+                if (n == 0) array = EmptyArray<ModelNode>.Value;
+                else
                 {
-                    array[i] = new ModelNode(ref b);
+                    array = new ModelNode[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ModelNode(ref b);
+                    }
                 }
                 Nodes = array;
             }
@@ -76,36 +85,45 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ModelMesh>.Value
-                    : new ModelMesh[n];
-                for (int i = 0; i < n; i++)
+                ModelMesh[] array;
+                if (n == 0) array = EmptyArray<ModelMesh>.Value;
+                else
                 {
-                    array[i] = new ModelMesh(ref b);
+                    array = new ModelMesh[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ModelMesh(ref b);
+                    }
                 }
                 Meshes = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ModelMaterial>.Value
-                    : new ModelMaterial[n];
-                for (int i = 0; i < n; i++)
+                ModelMaterial[] array;
+                if (n == 0) array = EmptyArray<ModelMaterial>.Value;
+                else
                 {
-                    array[i] = new ModelMaterial(ref b);
+                    array = new ModelMaterial[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ModelMaterial(ref b);
+                    }
                 }
                 Materials = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ModelNode>.Value
-                    : new ModelNode[n];
-                for (int i = 0; i < n; i++)
+                ModelNode[] array;
+                if (n == 0) array = EmptyArray<ModelNode>.Value;
+                else
                 {
-                    array[i] = new ModelNode(ref b);
+                    array = new ModelNode[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ModelNode(ref b);
+                    }
                 }
                 Nodes = array;
             }
@@ -167,27 +185,12 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Filename is null) BuiltIns.ThrowNullReference(nameof(Filename));
-            if (OrientationHint is null) BuiltIns.ThrowNullReference(nameof(OrientationHint));
-            if (Meshes is null) BuiltIns.ThrowNullReference(nameof(Meshes));
-            for (int i = 0; i < Meshes.Length; i++)
-            {
-                if (Meshes[i] is null) BuiltIns.ThrowNullReference(nameof(Meshes), i);
-                Meshes[i].RosValidate();
-            }
-            if (Materials is null) BuiltIns.ThrowNullReference(nameof(Materials));
-            for (int i = 0; i < Materials.Length; i++)
-            {
-                if (Materials[i] is null) BuiltIns.ThrowNullReference(nameof(Materials), i);
-                Materials[i].RosValidate();
-            }
-            if (Nodes is null) BuiltIns.ThrowNullReference(nameof(Nodes));
-            for (int i = 0; i < Nodes.Length; i++)
-            {
-                if (Nodes[i] is null) BuiltIns.ThrowNullReference(nameof(Nodes), i);
-                Nodes[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Name, nameof(Name));
+            BuiltIns.ThrowIfNull(Filename, nameof(Filename));
+            BuiltIns.ThrowIfNull(OrientationHint, nameof(OrientationHint));
+            BuiltIns.ThrowIfNull(Meshes, nameof(Meshes));
+            BuiltIns.ThrowIfNull(Materials, nameof(Materials));
+            BuiltIns.ThrowIfNull(Nodes, nameof(Nodes));
         }
     
         public int RosMessageLength

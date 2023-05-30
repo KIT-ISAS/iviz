@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Coords is null) BuiltIns.ThrowNullReference(nameof(Coords));
+            BuiltIns.ThrowIfNull(Coords, nameof(Coords));
         }
     
         public int RosMessageLength

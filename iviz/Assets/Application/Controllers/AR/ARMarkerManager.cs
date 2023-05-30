@@ -13,6 +13,7 @@ using Iviz.MarkerDetection;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Tools;
+using Unity.Mathematics;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Quaternion = UnityEngine.Quaternion;
@@ -142,7 +143,7 @@ namespace Iviz.Controllers
             var intrinsic = new Intrinsic(marker.CameraIntrinsic);
 
             Span<Vector3> dirs = stackalloc Vector3[4];
-            foreach (int i in ..4)
+            for (int i = 0; i < 4; i++)
             {
                 var (cornerX, cornerY, _) = marker.Corners[i];
                 var (dirX, dirY, dirZ) = intrinsic.Unproject(cornerX, cornerY);
@@ -165,7 +166,6 @@ namespace Iviz.Controllers
             };
 
             Span<Vector3> hitPoints = stackalloc Vector3[4];
-            Span<float> sizes = stackalloc float[4];
             foreach (var (hitPosition, hitNormal) in arHits)
             {
                 var planeAsRay = new Ray(hitPosition, hitNormal);
@@ -175,17 +175,23 @@ namespace Iviz.Controllers
                 UnityUtils.PlaneIntersection(planeAsRay, rays[2], out hitPoints[2], out _);
                 UnityUtils.PlaneIntersection(planeAsRay, rays[3], out hitPoints[3], out _);
 
-                sizes[0] = (hitPoints[1] - hitPoints[0]).Magnitude();
-                sizes[1] = (hitPoints[2] - hitPoints[1]).Magnitude();
-                sizes[2] = (hitPoints[3] - hitPoints[2]).Magnitude();
-                sizes[3] = (hitPoints[0] - hitPoints[3]).Magnitude();
+                float4 sizes;
+                sizes.x = (hitPoints[1] - hitPoints[0]).Magnitude();
+                sizes.y = (hitPoints[2] - hitPoints[1]).Magnitude();
+                sizes.z = (hitPoints[3] - hitPoints[2]).Magnitude();
+                sizes.w = (hitPoints[0] - hitPoints[3]).Magnitude();
 
-                float averageSize = (sizes[0] + sizes[1] + sizes[2] + sizes[3]) / 4;
+                //float averageSize = (sizes.x + sizes.y + sizes.z + sizes.w) / 4;
+                float averageSize = math.csum(sizes) / 4;
                 float distanceThreshold = averageSize * distanceMultiplier;
+
+                /*                    
                 if (Mathf.Abs(sizes[0] - averageSize) > distanceThreshold ||
                     Mathf.Abs(sizes[1] - averageSize) > distanceThreshold ||
                     Mathf.Abs(sizes[2] - averageSize) > distanceThreshold ||
                     Mathf.Abs(sizes[3] - averageSize) > distanceThreshold)
+                    */
+                if (math.any(math.abs(sizes - averageSize) > distanceThreshold))
                 {
                     continue;
                 }

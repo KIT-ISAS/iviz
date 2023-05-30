@@ -27,12 +27,15 @@ namespace Iviz.Msgs.MeshMsgs
             b.Deserialize(out Location);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<StdMsgs.Float32>.Value
-                    : new StdMsgs.Float32[n];
-                for (int i = 0; i < n; i++)
+                StdMsgs.Float32[] array;
+                if (n == 0) array = EmptyArray<StdMsgs.Float32>.Value;
+                else
                 {
-                    array[i] = new StdMsgs.Float32(ref b);
+                    array = new StdMsgs.Float32[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new StdMsgs.Float32(ref b);
+                    }
                 }
                 Descriptor = array;
             }
@@ -44,12 +47,15 @@ namespace Iviz.Msgs.MeshMsgs
             b.Deserialize(out Location);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<StdMsgs.Float32>.Value
-                    : new StdMsgs.Float32[n];
-                for (int i = 0; i < n; i++)
+                StdMsgs.Float32[] array;
+                if (n == 0) array = EmptyArray<StdMsgs.Float32>.Value;
+                else
                 {
-                    array[i] = new StdMsgs.Float32(ref b);
+                    array = new StdMsgs.Float32[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new StdMsgs.Float32(ref b);
+                    }
                 }
                 Descriptor = array;
             }
@@ -82,12 +88,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Descriptor is null) BuiltIns.ThrowNullReference(nameof(Descriptor));
-            for (int i = 0; i < Descriptor.Length; i++)
-            {
-                if (Descriptor[i] is null) BuiltIns.ThrowNullReference(nameof(Descriptor), i);
-                Descriptor[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Descriptor, nameof(Descriptor));
         }
     
         public int RosMessageLength

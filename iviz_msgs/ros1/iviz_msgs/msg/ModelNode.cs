@@ -39,7 +39,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n == 0) array = EmptyArray<int>.Value;
                 else
                 {
-                     array = new int[n];
+                    array = new int[n];
                     b.DeserializeStructArray(array);
                 }
                 Meshes = array;
@@ -60,7 +60,7 @@ namespace Iviz.Msgs.IvizMsgs
                 if (n == 0) array = EmptyArray<int>.Value;
                 else
                 {
-                     array = new int[n];
+                    array = new int[n];
                     b.DeserializeStructArray(array);
                 }
                 Meshes = array;
@@ -94,10 +94,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Transform is null) BuiltIns.ThrowNullReference(nameof(Transform));
+            BuiltIns.ThrowIfNull(Name, nameof(Name));
+            BuiltIns.ThrowIfNull(Transform, nameof(Transform));
             Transform.RosValidate();
-            if (Meshes is null) BuiltIns.ThrowNullReference(nameof(Meshes));
+            BuiltIns.ThrowIfNull(Meshes, nameof(Meshes));
         }
     
         public int RosMessageLength

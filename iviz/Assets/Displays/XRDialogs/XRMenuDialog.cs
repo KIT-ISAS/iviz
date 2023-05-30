@@ -51,7 +51,7 @@ namespace Iviz.Displays.XR
                 menuPage = value;
                 int offset = menuPage * Buttons.Length;
                 int numActives = Mathf.Min(menuEntries.Length - offset, Buttons.Length);
-                foreach (int i in ..numActives)
+                for (int i = 0; i < numActives; i++)
                 {
                     Buttons[i].Caption = menuEntries[i + offset];
                     Buttons[i].Visible = true;
@@ -97,9 +97,10 @@ namespace Iviz.Displays.XR
             CloseButton.Clicked += () => Clicked?.Invoke(0);
             UpButton.Clicked += OnScrollUpClick;
             DownButton.Clicked += OnScrollDownClick;
-            foreach (int i in ..Buttons.Length)
+            for (int i = 0; i < Buttons.Length; i++)
             {
-                Buttons[i].Clicked += () => MenuClicked?.Invoke(i);
+                int j = i;
+                Buttons[i].Clicked += () => MenuClicked?.Invoke(j);
             }
         }
 

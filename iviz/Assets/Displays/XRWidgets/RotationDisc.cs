@@ -86,7 +86,7 @@ namespace Iviz.Displays.XR
 
             {
                 Span<LineWithColor> ringBuffer = stackalloc LineWithColor[RingElements];
-                foreach (int i in ..RingElements)
+                for (int i = 0; i < RingElements; i++)
                 {
                     float a0 = 2 * Mathf.PI * i / RingElements;
                     float a1 = 2 * Mathf.PI * (i + 1) / RingElements;
@@ -151,7 +151,7 @@ namespace Iviz.Displays.XR
             Span<float4x2> lineBuffer = stackalloc float4x2[RingElements];
             
             (a.x, a.z) = (0, 1);
-            foreach (int i in ..RingElements)
+            for (int i = 0; i < RingElements; i++)
             {
                 float angle = currentAngle * (i + 1) / RingElements;
                 float scale = 1 - Mathf.Abs(angle) * 0.01f;

@@ -53,7 +53,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Twist is null) BuiltIns.ThrowNullReference(nameof(Twist));
+            BuiltIns.ThrowIfNull(Twist, nameof(Twist));
             Twist.RosValidate();
         }
     

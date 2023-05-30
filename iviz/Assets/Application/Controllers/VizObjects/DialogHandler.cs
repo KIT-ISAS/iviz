@@ -16,9 +16,11 @@ namespace Iviz.Controllers
         void OnDialogExpired(string id, string frameId);
     }
 
-    public sealed class DialogHandler : VizHandler
+    public sealed class DialogHandler : VizHandler, IHandles<Dialog>, IHandlesArray<DialogArray>
     {
         readonly IDialogFeedback feedback;
+
+        public override string Title => "Dialogs";
 
         public override string BriefDescription
         {
@@ -44,15 +46,15 @@ namespace Iviz.Controllers
             GameThread.EveryFrame += CheckDeadDialogs;
         }
 
-        public void Handler(DialogArray msg)
+        public void Handle(DialogArray msg)
         {
             foreach (var dialog in msg.Dialogs)
             {
-                Handler(dialog);
+                Handle(dialog);
             }
         }
 
-        public void Handler(Dialog msg)
+        public void Handle(Dialog msg)
         {
             switch ((ActionType)msg.Action)
             {
@@ -176,7 +178,7 @@ namespace Iviz.Controllers
 
         public IDialog? AddDialog(Dialog msg)
         {
-            Handler(msg);
+            Handle(msg);
             return (ActionType)msg.Action == ActionType.Add
                 ? ((DialogObject)vizObjects[msg.Id]).AsDialog()
                 : null;

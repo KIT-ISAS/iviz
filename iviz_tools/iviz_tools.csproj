@@ -4,7 +4,7 @@
         <AssemblyName>Iviz.Tools</AssemblyName>
         <RootNamespace>Iviz.Tools</RootNamespace>
         <Nullable>enable</Nullable>
-        <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>net6.0;net7.0;netstandard2.1</TargetFrameworks>
         <LangVersion>default</LangVersion>
         <IsTrimmable>true</IsTrimmable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

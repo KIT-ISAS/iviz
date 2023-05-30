@@ -77,8 +77,8 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            if (Incremental is null) BuiltIns.ThrowNullReference(nameof(Incremental));
-            if (Final is null) BuiltIns.ThrowNullReference(nameof(Final));
+            BuiltIns.ThrowIfNull(Incremental, nameof(Incremental));
+            BuiltIns.ThrowIfNull(Final, nameof(Final));
         }
     
         public int RosMessageLength

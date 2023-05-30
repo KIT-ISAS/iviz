@@ -62,9 +62,9 @@ public sealed class IvizController
             BuiltIns.ThrowArgumentNull(nameof(topic));
         }
 
-        if (requestedId == "")
+        if (requestedId is { Length: 0 })
         {
-            BuiltIns.ThrowArgumentNull("Requested id name cannot be empty");
+            BuiltIns.ThrowArgumentNull(nameof(requestedId), "Requested id name cannot be empty");
         }
 
         var addModuleResponse =

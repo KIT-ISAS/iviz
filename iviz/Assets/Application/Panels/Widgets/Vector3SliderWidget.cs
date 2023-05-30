@@ -16,7 +16,6 @@ namespace Iviz.App
         [SerializeField] TMP_Text label;
 
         [SerializeField] Image panel;
-        //bool disableUpdates;
 
         public string Label
         {

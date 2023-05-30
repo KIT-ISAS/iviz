@@ -24,12 +24,15 @@ namespace Iviz.Msgs.IvizMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<RobotPreview>.Value
-                    : new RobotPreview[n];
-                for (int i = 0; i < n; i++)
+                RobotPreview[] array;
+                if (n == 0) array = EmptyArray<RobotPreview>.Value;
+                else
                 {
-                    array[i] = new RobotPreview(ref b);
+                    array = new RobotPreview[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new RobotPreview(ref b);
+                    }
                 }
                 Previews = array;
             }
@@ -40,12 +43,15 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<RobotPreview>.Value
-                    : new RobotPreview[n];
-                for (int i = 0; i < n; i++)
+                RobotPreview[] array;
+                if (n == 0) array = EmptyArray<RobotPreview>.Value;
+                else
                 {
-                    array[i] = new RobotPreview(ref b);
+                    array = new RobotPreview[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new RobotPreview(ref b);
+                    }
                 }
                 Previews = array;
             }
@@ -66,6 +72,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
+            b.Align4();
             b.Serialize(Previews.Length);
             foreach (var t in Previews)
             {
@@ -75,12 +82,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Previews is null) BuiltIns.ThrowNullReference();
-            for (int i = 0; i < Previews.Length; i++)
-            {
-                if (Previews[i] is null) BuiltIns.ThrowNullReference(nameof(Previews), i);
-                Previews[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Previews, nameof(Previews));
         }
     
         public int RosMessageLength

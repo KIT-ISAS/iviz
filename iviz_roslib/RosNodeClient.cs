@@ -130,7 +130,7 @@ public sealed class RequestTopicResponse : BaseResponse
 
         if (protocolInfo.Length == 0)
         {
-            Logger.LogDebugFormat($"[{nameof(RequestTopicResponse)}]: Request for topic yielded no valid protocols");
+            Logger.LogDebug($"[{nameof(RequestTopicResponse)}]: Request for topic yielded no valid protocols");
             responseCode = StatusCode.Error;
             return;
         }

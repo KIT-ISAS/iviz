@@ -52,7 +52,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Mesh is null) BuiltIns.ThrowNullReference(nameof(Mesh));
+            BuiltIns.ThrowIfNull(Mesh, nameof(Mesh));
             Mesh.RosValidate();
         }
     

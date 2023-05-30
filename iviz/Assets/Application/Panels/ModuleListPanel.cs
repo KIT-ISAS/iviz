@@ -119,7 +119,7 @@ namespace Iviz.App
         ModuleListButtons Buttons =>
             buttons ??= new ModuleListButtons(contentObject.AssertNotNull(nameof(contentObject)));
 
-        static IRosProvider Connection => RosManager.Connection;
+        static RosProvider Connection => RosManager.Connection;
 
         public AnchorCanvasPanel AnchorCanvasPanel => anchorCanvasPanel.AssertNotNull(nameof(anchorCanvasPanel));
         public Button UnlockButton => AnchorCanvasPanel.Unlock;
@@ -147,11 +147,14 @@ namespace Iviz.App
                 DataPanelCanvas.SetActive(value);
                 DialogPanelManager.Active = value;
                 ARToolbarPanel.Visible = !value;
+                
+                /*
                 if (safeAreaPanel != null)
                 {
                     safeAreaPanel.LeftBlack.gameObject.SetActive(value);
                     safeAreaPanel.RightBlack.gameObject.SetActive(value);
                 }
+                */
             }
         }
 
@@ -196,7 +199,10 @@ namespace Iviz.App
             tfModule = new TfModule(id => new TfFrameDisplay(id));
 
             Directory.CreateDirectory(Settings.SavedFolder);
-            LoadSimpleConfiguration();
+            if (!LoadSimpleConfiguration())
+            {
+                LoadDefaultSimpleConfiguration();
+            }
 
             cameraPanelData = new CameraModuleData();
 
@@ -299,6 +305,9 @@ namespace Iviz.App
 
             var connectionData = Dialogs.ConnectionData;
             UpperCanvas.MasterUriButton.Clicked += connectionData.Show;
+            
+            connectionData.MasterUriChanged += _ => OnRosInfoChanged();
+            connectionData.MyUriChanged += _ => OnRosInfoChanged();
             connectionData.MyIdChanged += _ => OnRosInfoChanged();
             connectionData.RosVersionChanged += _ => OnRosInfoChanged();
 
@@ -311,8 +320,8 @@ namespace Iviz.App
 
             BottomCanvas.CameraButtonClicked += CameraModuleData.ToggleShowPanel;
 
-            IRosProvider.ConnectionStateChanged += OnConnectionStateChanged;
-            IRosProvider.ConnectionWarningStateChanged += OnConnectionWarningChanged;
+            RosProvider.ConnectionStateChanged += OnConnectionStateChanged;
+            RosProvider.ConnectionWarningStateChanged += OnConnectionWarningChanged;
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
             GameThread.EveryTenthOfASecond += UpdateCameraStats;
@@ -351,10 +360,12 @@ namespace Iviz.App
         void OnRosInfoChanged()
         {
             var connectionData = Dialogs.ConnectionData;
-            string rosId = (connectionData.RosVersion == RosVersion.ROS1 ? "ROS1" : "ROS2");
-            UpperCanvas.MasterUriStr.Text = connectionData.MyId == null
-                ? $"<u>(?)</u>\n<color=grey>{rosId}</color>"
-                : $"<u>{connectionData.MyId}</u>\n<color=grey>{rosId}</color>";
+
+            string uriStrMyId = connectionData.MyId ?? "?";
+            string uriStrMaster = connectionData.RosVersion == RosVersion.ROS1
+                ? connectionData.MasterUri?.Host ?? "?"
+                : "ROS2";
+            UpperCanvas.MasterUriStr.Text = $"<u>{uriStrMyId}</u>\n<color=grey>{uriStrMaster}</color>";
 
             if (connectionData.RosVersion == RosVersion.ROS1)
             {
@@ -547,7 +558,8 @@ namespace Iviz.App
             string fullPath = $"{Settings.SavedFolder}/{defaultConfigPrefix}{LoadConfigDialogData.Suffix}";
             if (File.Exists(fullPath))
             {
-                _ = LoadStateConfigurationAsync($"{defaultConfigPrefix}{LoadConfigDialogData.Suffix}").AwaitNoThrow(this);
+                _ = LoadStateConfigurationAsync($"{defaultConfigPrefix}{LoadConfigDialogData.Suffix}")
+                    .AwaitNoThrow(this);
             }
         }
 
@@ -617,7 +629,16 @@ namespace Iviz.App
             }
         }
 
-        void LoadSimpleConfiguration()
+        void LoadDefaultSimpleConfiguration()
+        {
+            var connectionData = Dialogs.ConnectionData;
+            connectionData.RosVersion = RosVersion.ROS1;
+            connectionData.MasterUri = ConnectionDialogData.DefaultMasterUri;
+            connectionData.MyUri = ConnectionDialogData.DefaultMyUri;
+            connectionData.MyId = ConnectionDialogData.DefaultMyId;
+        }
+
+        bool LoadSimpleConfiguration()
         {
             string path = Settings.SimpleConfigurationPath;
 
@@ -625,7 +646,7 @@ namespace Iviz.App
             {
                 if (!File.Exists(path))
                 {
-                    return;
+                    return false;
                 }
 
                 RosLogger.Debug($"{ToString()}: Using settings from {path}");
@@ -634,15 +655,24 @@ namespace Iviz.App
                 var config = JsonUtils.DeserializeObject<ConnectionConfiguration?>(text);
                 if (config == null)
                 {
-                    return; // empty text
+                    return false; // empty text
                 }
 
                 var connectionData = Dialogs.ConnectionData;
                 connectionData.RosVersion = config.RosVersion;
                 connectionData.MasterUri =
-                    string.IsNullOrWhiteSpace(config.MasterUri) ? null : new Uri(config.MasterUri);
-                connectionData.MyUri = string.IsNullOrWhiteSpace(config.MyUri) ? null : new Uri(config.MyUri);
-                connectionData.MyId = config.MyId;
+                    !string.IsNullOrWhiteSpace(config.MasterUri) &&
+                    Uri.TryCreate(config.MasterUri, UriKind.Absolute, out Uri masterUri)
+                        ? masterUri
+                        : ConnectionDialogData.DefaultMasterUri;
+                connectionData.MyUri =
+                    !string.IsNullOrWhiteSpace(config.MyUri) &&
+                    Uri.TryCreate(config.MyUri, UriKind.Absolute, out Uri myUri)
+                        ? myUri
+                        : ConnectionDialogData.DefaultMyUri;
+                connectionData.MyId = !string.IsNullOrWhiteSpace(config.MyId)
+                    ? config.MyId
+                    : ConnectionDialogData.DefaultMyId;
                 if (config.LastMasterUris.Count != 0)
                 {
                     connectionData.LastMasterUris = config.LastMasterUris;
@@ -658,7 +688,7 @@ namespace Iviz.App
                 Settings.SettingsManager.Config = config.Settings;
 
                 var validHostAliases = config.HostAliases
-                    .Where(alias => alias is { Hostname: { }, Address: { } })
+                    .Where(alias => alias is { Hostname: not null, Address: not null })
                     .ToArray();
                 Dialogs.SystemData.HostAliases = validHostAliases;
 
@@ -667,7 +697,7 @@ namespace Iviz.App
                     .ToArray();
                 Connection.SetHostAliases(validHostPairs);
 
-                return;
+                return true;
             }
             catch (Exception e) when
                 (e is IOException or SecurityException or JsonException)
@@ -684,6 +714,8 @@ namespace Iviz.App
             {
                 RosLogger.Debug($"{ToString()}: Failed to reset simple configuration", e);
             }
+
+            return false;
         }
 
         async ValueTask SaveSimpleConfigurationAsync()
@@ -1018,7 +1050,7 @@ namespace Iviz.App
             ThrowHelper.ThrowIfNull(caller, nameof(caller));
             Dialogs.MarkerData.Show(caller);
         }
-        
+
         public void ShowMarkerDialog(SimpleRobotModuleData caller)
         {
             ThrowHelper.ThrowIfNull(caller, nameof(caller));
@@ -1155,7 +1187,7 @@ namespace Iviz.App
             }
 
             // try to recover!
-            _ =  Dialogs.ConnectionData.TryResetConnectionsAsync().AwaitNoThrow(this);
+            _ = Dialogs.ConnectionData.TryResetConnectionsAsync().AwaitNoThrow(this);
         }
 
         public override string ToString() => $"[{nameof(ModuleListPanel)}]";

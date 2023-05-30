@@ -46,23 +46,29 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out Scale);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MenuEntry>.Value
-                    : new MenuEntry[n];
-                for (int i = 0; i < n; i++)
+                MenuEntry[] array;
+                if (n == 0) array = EmptyArray<MenuEntry>.Value;
+                else
                 {
-                    array[i] = new MenuEntry(ref b);
+                    array = new MenuEntry[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MenuEntry(ref b);
+                    }
                 }
                 MenuEntries = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<InteractiveMarkerControl>.Value
-                    : new InteractiveMarkerControl[n];
-                for (int i = 0; i < n; i++)
+                InteractiveMarkerControl[] array;
+                if (n == 0) array = EmptyArray<InteractiveMarkerControl>.Value;
+                else
                 {
-                    array[i] = new InteractiveMarkerControl(ref b);
+                    array = new InteractiveMarkerControl[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new InteractiveMarkerControl(ref b);
+                    }
                 }
                 Controls = array;
             }
@@ -80,24 +86,30 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out Scale);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MenuEntry>.Value
-                    : new MenuEntry[n];
-                for (int i = 0; i < n; i++)
+                MenuEntry[] array;
+                if (n == 0) array = EmptyArray<MenuEntry>.Value;
+                else
                 {
-                    array[i] = new MenuEntry(ref b);
+                    array = new MenuEntry[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MenuEntry(ref b);
+                    }
                 }
                 MenuEntries = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<InteractiveMarkerControl>.Value
-                    : new InteractiveMarkerControl[n];
-                for (int i = 0; i < n; i++)
+                InteractiveMarkerControl[] array;
+                if (n == 0) array = EmptyArray<InteractiveMarkerControl>.Value;
+                else
                 {
-                    array[i] = new InteractiveMarkerControl(ref b);
+                    array = new InteractiveMarkerControl[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new InteractiveMarkerControl(ref b);
+                    }
                 }
                 Controls = array;
             }
@@ -151,20 +163,10 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Description is null) BuiltIns.ThrowNullReference(nameof(Description));
-            if (MenuEntries is null) BuiltIns.ThrowNullReference(nameof(MenuEntries));
-            for (int i = 0; i < MenuEntries.Length; i++)
-            {
-                if (MenuEntries[i] is null) BuiltIns.ThrowNullReference(nameof(MenuEntries), i);
-                MenuEntries[i].RosValidate();
-            }
-            if (Controls is null) BuiltIns.ThrowNullReference(nameof(Controls));
-            for (int i = 0; i < Controls.Length; i++)
-            {
-                if (Controls[i] is null) BuiltIns.ThrowNullReference(nameof(Controls), i);
-                Controls[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Name, nameof(Name));
+            BuiltIns.ThrowIfNull(Description, nameof(Description));
+            BuiltIns.ThrowIfNull(MenuEntries, nameof(MenuEntries));
+            BuiltIns.ThrowIfNull(Controls, nameof(Controls));
         }
     
         public int RosMessageLength

@@ -22,6 +22,7 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
     readonly CancellationTokenSource runningTs = new();
     readonly Task task;
     readonly ReceiverManager<TMessage> manager;
+    readonly MessageInfo cachedInfo;
 
     long numReceived;
     long numDropped;
@@ -58,6 +59,8 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
     {
         this.manager = manager;
 
+        cachedInfo = new MessageInfo(this);
+
         var (remoteHostname, remotePort, _, newMaxPacketSize, header) = response;
 
         RemoteEndpoint = new Endpoint(remoteHostname, remotePort);
@@ -91,7 +94,8 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
             return;
         }
 
-        RosHeader = responseHeader.ToArray();
+        string[] rosHeader = responseHeader.ToArray(); 
+        RosHeader = rosHeader;
 
         var dictionary = RosUtils.CreateHeaderDictionary(responseHeader);
         if (dictionary.TryGetValue("callerid", out string? remoteCallerId))
@@ -101,7 +105,7 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
         if (dictionary.TryGetValue("error", out string? message)) // TODO: improve error handling here
         {
-            ErrorDescription = new ErrorMessage($"Partner sent error message: [{message}]");
+            ErrorDescription = new ErrorMessage($"Partner sent the following error message: [{message}]");
             Status = ReceiverStatus.Dead;
             client.Dispose();
             return;
@@ -112,7 +116,7 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
             try
             {
                 this.topicInfo =
-                    RosUtils.GenerateDynamicTopicInfo(topicInfo.CallerId, topicInfo.Topic, RosHeader, false);
+                    RosUtils.GenerateDynamicTopicInfo(topicInfo.CallerId, topicInfo.Topic, rosHeader);
             }
             catch (RosHandshakeException e)
             {
@@ -192,7 +196,9 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
         var deserializer = ((TMessage)topicInfo.Generator).CreateDeserializer();
 
         Status = ReceiverStatus.Running;
-        using var readBuffer = new Rent(MaxPacketSize);
+        int maxPacketSize = MaxPacketSize;
+        
+        using var readBuffer = new Rent(maxPacketSize);
         using var resizableBuffer = new ResizableRent();
 
         int expectedBlockNr = 0;
@@ -200,13 +206,16 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
         int totalBlocks = 0;
         int offset = 0;
 
+        var udpClient = UdpClient;
+
         while (KeepRunning)
         {
-            int received = await UdpClient.ReadChunkAsync(readBuffer, runningTs.Token);
-            if (received > MaxPacketSize)
+
+            int received = await udpClient.ReadChunkAsync(readBuffer, runningTs.Token);
+            if (received > maxPacketSize)
             {
                 throw new RosConnectionException("Udp socket received " + received +
-                                                 " bytes, but the agreed maximum was " + MaxPacketSize +
+                                                 " bytes, but the agreed maximum was " + maxPacketSize +
                                                  ". Dropping connection.");
             }
 
@@ -249,7 +258,7 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
                     totalBlocks = blockNr;
                     expectedMsgId = msgId;
-                    resizableBuffer.EnsureCapacity(MaxPacketSize * totalBlocks);
+                    resizableBuffer.EnsureCapacity(maxPacketSize * totalBlocks);
 
                     blockNr = 0;
                     goto case UdpRosParams.OpCodeDataN;
@@ -328,8 +337,8 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
                 deserializer.RosDeserialize(ref b, out message);
             }
         }
-
-        MessageCallback(message);
+        
+        MessageCallback(message, rcvLength);
 
         CheckBufferSize(rcvLength);
     }
@@ -363,18 +372,19 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
         if (!isPaused)
         {
-            MessageCallback(message);
+            MessageCallback(message, rcvLength);
         }
     }
     
-    void MessageCallback(TMessage message)
+    void MessageCallback(TMessage message, int rcvLength)
     {
+        cachedInfo.MessageSize = rcvLength;
         var callbacks = manager.callbacks;
         foreach (var callback in callbacks)
         {
             try
             {
-                callback.Handle(message, this);
+                callback.Handle(message, cachedInfo);
             }
             catch (Exception e)
             {

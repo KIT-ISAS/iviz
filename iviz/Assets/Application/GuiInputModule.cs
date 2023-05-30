@@ -38,7 +38,6 @@ namespace Iviz.App
 
         static bool IsDraggingAllowed =>
             Settings.IsXR || (Settings.IsPhone
-                //? Input.touchCount == 1
                 ? Touch.activeTouches.Count == 1
                 : Mouse.current.rightButton.isPressed);
 

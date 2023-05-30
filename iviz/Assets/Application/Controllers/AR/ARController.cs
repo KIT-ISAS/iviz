@@ -2,14 +2,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.MarkerDetection;
+using Iviz.Msgs;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
+using Iviz.Msgs.MeshMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
@@ -18,8 +23,11 @@ using Iviz.Tools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
+using Pose = UnityEngine.Pose;
+using Quaternion = UnityEngine.Quaternion;
 using Time = UnityEngine.Time;
 using Transform = Iviz.Msgs.GeometryMsgs.Transform;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
@@ -51,11 +59,30 @@ namespace Iviz.Controllers
         ControlMarker,
         Setup
     }
-
-    public abstract class ARController : IController, IHasFrame
+    public abstract class ARController : Controller, IHasFrame
     {
+        public const bool EnableMeshingSubsystem =
+            //true ||
+            Settings.IsAndroid || Settings.IsHololens || Settings.IsIPhone;
+
         const string HeadFrameId = "~xr/head";
         protected const string CameraFrameId = "~xr/camera";
+
+        const string ColorTopic = "~xr/color/image_color";
+        const string CameraInfoTopic = "~xr/color/camera_info";
+        const string DepthImageTopic = "~xr/depth/image";
+        const string DepthConfidenceTopic = "~xr/depth/image_confidence";
+        const string DepthCameraInfoTopic = "~xr/depth/camera_info";
+        const string MeshesTopic = "~xr/meshes";
+        const string MarkersTopic = "~xr/markers";
+
+        public enum RootMover
+        {
+            Anchor,
+            Executor,
+            ControlMarker,
+            Setup
+        }
 
         static Camera ARCamera => Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
         static ARJoystickPanel ARJoystickPanel => ModuleListPanel.Instance.ARJoystickPanel;
@@ -81,17 +108,21 @@ namespace Iviz.Controllers
         Vector3? joyVelocityPos;
         float? joyVelocityScale;
         uint markerSeq;
+        uint meshSeq;
 
-
-        public static bool IsPulseActive => Instance != null && Instance.pulseManager.HasPulse;
+        public static bool IsPulseActive => Instance?.pulseManager.HasPulse is true;
 
         public Sender<XRMarkerArray>? MarkerSender { get; private set; }
         public Sender<Image> ColorSender { get; }
         public Sender<Image>? DepthSender { get; private set; }
         public Sender<Image>? DepthConfidenceSender { get; private set; }
+        public Sender<MeshGeometryStamped>? MeshSender { get; private set; }
+
         public bool ProvidesOcclusion { get; protected set; }
+        public bool ProvidesMesh { get; protected set; }
+
         public PublicationFrequency PublicationFrequency { get; set; } = PublicationFrequency.Off;
-        
+
         public ARConfiguration Config
         {
             get => config;
@@ -141,7 +172,7 @@ namespace Iviz.Controllers
         /// <summary>
         /// Is the AR View enabled?
         /// </summary>
-        public virtual bool Visible
+        public override bool Visible
         {
             get => config.Visible;
             set
@@ -236,8 +267,8 @@ namespace Iviz.Controllers
 
             Settings.SettingsManager.UpdateQualityLevel();
 
-            ColorSender = new Sender<Image>("~xr/color/image_color");
-            colorInfoSender = new Sender<CameraInfo>("~xr/color/camera_info");
+            ColorSender = new Sender<Image>(ColorTopic);
+            colorInfoSender = new Sender<CameraInfo>(CameraInfoTopic);
 
             headFrame = TfPublisher.Instance.GetOrCreate(HeadFrameId, isInternal: true);
             cameraFrame = TfPublisher.Instance.GetOrCreate(CameraFrameId, isInternal: true);
@@ -250,26 +281,47 @@ namespace Iviz.Controllers
         {
             if (ProvidesOcclusion)
             {
-                DepthSender = new Sender<Image>("~xr/depth/image");
-                DepthConfidenceSender = new Sender<Image>("~xr/depth/image_confidence");
-                depthInfoSender = new Sender<CameraInfo>("~xr/depth/camera_info");
+                DepthSender = new Sender<Image>(DepthImageTopic);
+                DepthConfidenceSender = new Sender<Image>(DepthConfidenceTopic);
+                depthInfoSender = new Sender<CameraInfo>(DepthCameraInfoTopic);
+            }
+
+            if (ProvidesMesh)
+            {
+                MeshSender = new Sender<MeshGeometryStamped>(MeshesTopic);
             }
 
             if (MarkerDetector.IsEnabled)
             {
-                MarkerSender = new Sender<XRMarkerArray>("~xr/markers");
+                MarkerSender = new Sender<XRMarkerArray>(MarkersTopic);
             }
         }
 
         protected static void RaiseARStateChanged()
         {
-            ARStateChanged?.Invoke(true);
-            ARCameraViewChanged?.Invoke(true);
+            try
+            {
+                ARStateChanged?.Invoke(true);
+                ARCameraViewChanged?.Invoke(true);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{nameof(ARController)}: " +
+                                $"Error during {nameof(RaiseARStateChanged)}", e);
+            }
         }
 
         protected static void RaiseARCameraViewChanged(bool value)
         {
-            ARCameraViewChanged?.Invoke(value);
+            try
+            {
+                ARCameraViewChanged?.Invoke(value);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{nameof(ARController)}: " +
+                                $"Error during {nameof(RaiseARCameraViewChanged)}", e);
+            }
         }
 
         void OnARJoystickChangedAngle(float dA)
@@ -471,6 +523,44 @@ namespace Iviz.Controllers
             return TfModule.FixedFrameToAbsolute(unityPoseToFixed);
         }
 
+        public void ProcessMeshChange(List<int> indices, List<Vector3> vertices, GameObject source)
+        {
+            if (!EnableMeshingSubsystem) return;
+
+            if (MeshSender is not { NumSubscribers: not 0 } meshSender)
+            {
+                return;
+            }
+
+            Task.Run(PublishMeshChangeImpl);
+
+            void PublishMeshChangeImpl()
+            {
+                if (source == null)
+                {
+                    return; // dead!
+                }
+
+                var meshIndices = MemoryMarshal.Cast<int, TriangleIndices>(indices.AsSpan()).ToArray();
+                var meshVertices = new Point[vertices.Count];
+
+                MeshBurstUtils.ToPoint(vertices.AsSpan(), meshVertices);
+
+                var msg = new MeshGeometryStamped
+                {
+                    Header = new Header(meshSeq++, time.Now(), "map"),
+                    Uuid = source.name,
+                    MeshGeometry = new MeshGeometry
+                    {
+                        Faces = meshIndices,
+                        Vertices = meshVertices
+                    }
+                };
+
+                meshSender.Publish(msg);
+            }
+        }
+
         public virtual void Dispose()
         {
             ARStateChanged?.Invoke(false);
@@ -493,10 +583,11 @@ namespace Iviz.Controllers
             MarkerSender?.Dispose();
             markerDetector.Dispose();
 
-            colorInfoSender?.Dispose();
-            ColorSender?.Dispose();
+            colorInfoSender.Dispose();
+            ColorSender.Dispose();
             DepthSender?.Dispose();
             DepthConfidenceSender?.Dispose();
+            MeshSender?.Dispose();
 
             pulseManager.Dispose();
 
@@ -504,7 +595,7 @@ namespace Iviz.Controllers
             TfPublisher.Instance.Remove(CameraFrameId, true);
         }
 
-        void IController.ResetController()
+        public override void ResetController()
         {
         }
 

@@ -94,11 +94,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Names is null) BuiltIns.ThrowNullReference(nameof(Names));
-            for (int i = 0; i < Names.Length; i++)
-            {
-                if (Names[i] is null) BuiltIns.ThrowNullReference(nameof(Names), i);
-            }
+            BuiltIns.ThrowIfNull(Names, nameof(Names));
         }
     
         public int RosMessageLength
@@ -151,7 +147,7 @@ namespace Iviz.Msgs.RclInterfaces
                 if (n == 0) array = EmptyArray<byte>.Value;
                 else
                 {
-                     array = new byte[n];
+                    array = new byte[n];
                     b.DeserializeStructArray(array);
                 }
                 Types = array;
@@ -167,7 +163,7 @@ namespace Iviz.Msgs.RclInterfaces
                 if (n == 0) array = EmptyArray<byte>.Value;
                 else
                 {
-                     array = new byte[n];
+                    array = new byte[n];
                     b.DeserializeStructArray(array);
                 }
                 Types = array;
@@ -193,7 +189,7 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Types is null) BuiltIns.ThrowNullReference(nameof(Types));
+            BuiltIns.ThrowIfNull(Types, nameof(Types));
         }
     
         public int RosMessageLength

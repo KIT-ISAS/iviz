@@ -24,7 +24,7 @@ namespace Iviz.App
         public override ModuleType ModuleType => ModuleType.Grid;
         public override ModulePanel Panel => panel;
         public override IConfiguration Configuration => GridController.Config;
-        public override IController Controller => GridController;
+        public override Controller Controller => GridController;
 
         public GridModuleData(ModuleDataConstructor constructor)
         {

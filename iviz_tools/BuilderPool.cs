@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using JetBrains.Annotations;
@@ -263,25 +264,16 @@ public static class BuilderPool
         }
 
 #if NETSTANDARD2_1
-        [StructLayout(LayoutKind.Explicit)]
-        struct StringBuilderConverter
+        [UsedImplicitly]
+        sealed class OpenStringBuilder
         {
-            [UsedImplicitly]
-            class OpenStringBuilder
-            {
-                [UsedImplicitly]
-                public readonly char[]? chunkChars = null;
-            }
-
-            [FieldOffset(0)] public StringBuilder builder;
-            [FieldOffset(0)] readonly OpenStringBuilder openBuilder;
-
-            public char[] ExtractChars() => openBuilder.chunkChars ?? Array.Empty<char>();
+            public readonly char[]? chunkChars = null;
         }
 
         ReadOnlyMemory<char> GetMainChunk()
         {
-            return new StringBuilderConverter { builder = builder }.ExtractChars();
+            var builderCopy = builder;
+            return Unsafe.As<StringBuilder, OpenStringBuilder>(ref builderCopy).chunkChars;
         }
 #else
         ReadOnlyMemory<char> GetMainChunk()

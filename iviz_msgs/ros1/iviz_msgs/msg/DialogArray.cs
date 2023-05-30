@@ -24,12 +24,15 @@ namespace Iviz.Msgs.IvizMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Dialog>.Value
-                    : new Dialog[n];
-                for (int i = 0; i < n; i++)
+                Dialog[] array;
+                if (n == 0) array = EmptyArray<Dialog>.Value;
+                else
                 {
-                    array[i] = new Dialog(ref b);
+                    array = new Dialog[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Dialog(ref b);
+                    }
                 }
                 Dialogs = array;
             }
@@ -40,12 +43,15 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Dialog>.Value
-                    : new Dialog[n];
-                for (int i = 0; i < n; i++)
+                Dialog[] array;
+                if (n == 0) array = EmptyArray<Dialog>.Value;
+                else
                 {
-                    array[i] = new Dialog(ref b);
+                    array = new Dialog[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Dialog(ref b);
+                    }
                 }
                 Dialogs = array;
             }
@@ -76,12 +82,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Dialogs is null) BuiltIns.ThrowNullReference(nameof(Dialogs));
-            for (int i = 0; i < Dialogs.Length; i++)
-            {
-                if (Dialogs[i] is null) BuiltIns.ThrowNullReference(nameof(Dialogs), i);
-                Dialogs[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Dialogs, nameof(Dialogs));
         }
     
         public int RosMessageLength

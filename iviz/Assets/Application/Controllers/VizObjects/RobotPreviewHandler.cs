@@ -12,9 +12,11 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public sealed class RobotPreviewHandler : VizHandler
+    public sealed class RobotPreviewHandler : VizHandler, IHandles<RobotPreview>, IHandlesArray<RobotPreviewArray>
     {
         readonly Dictionary<string, RobotModel> cachedRobots = new();
+
+        public override string Title => "Robot Previews";
 
         public override string BriefDescription
         {
@@ -33,15 +35,15 @@ namespace Iviz.Controllers
             }
         }
 
-        public void Handler(RobotPreviewArray msg)
+        public void Handle(RobotPreviewArray msg)
         {
             foreach (var widget in msg.Previews)
             {
-                Handler(widget);
+                Handle(widget);
             }
         }
         
-        public void Handler(RobotPreview msg)
+        public void Handle(RobotPreview msg)
         {
             switch ((ActionType)msg.Action)
             {
@@ -130,8 +132,6 @@ namespace Iviz.Controllers
                 RosLogger.Error($"{ToString()}: Preview '{msg.Id}' failed to load robot. All parameters were empty.");
                 return;
             }
-
-            //robot.Visible = false;
 
             var vizObject = new PreviewObject(msg, robot, $"{nameof(RobotPreview)} - {robot.Name}")
                 { Interactable = Interactable, Visible = Visible };

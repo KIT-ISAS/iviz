@@ -98,7 +98,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 CellVoltage = array;
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 CellTemperature = array;
@@ -140,7 +140,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 CellVoltage = array;
@@ -151,7 +151,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 CellTemperature = array;
@@ -214,10 +214,10 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (CellVoltage is null) BuiltIns.ThrowNullReference(nameof(CellVoltage));
-            if (CellTemperature is null) BuiltIns.ThrowNullReference(nameof(CellTemperature));
-            if (Location is null) BuiltIns.ThrowNullReference(nameof(Location));
-            if (SerialNumber is null) BuiltIns.ThrowNullReference(nameof(SerialNumber));
+            BuiltIns.ThrowIfNull(CellVoltage, nameof(CellVoltage));
+            BuiltIns.ThrowIfNull(CellTemperature, nameof(CellTemperature));
+            BuiltIns.ThrowIfNull(Location, nameof(Location));
+            BuiltIns.ThrowIfNull(SerialNumber, nameof(SerialNumber));
         }
     
         public int RosMessageLength

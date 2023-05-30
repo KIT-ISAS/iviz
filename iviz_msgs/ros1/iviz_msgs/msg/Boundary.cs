@@ -100,8 +100,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Caption is null) BuiltIns.ThrowNullReference(nameof(Caption));
+            BuiltIns.ThrowIfNull(Id, nameof(Id));
+            BuiltIns.ThrowIfNull(Caption, nameof(Caption));
         }
     
         public int RosMessageLength

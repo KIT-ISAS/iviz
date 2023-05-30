@@ -16,7 +16,9 @@ namespace Iviz.App
 
         public ToggleButtonWidget HideButton
         {
-            get => hideButton != null ? hideButton : throw new NullReferenceException("Hide button has not been set!");
+            get => hideButton != null 
+                ? hideButton 
+                : throw new NullReferenceException("Hide button has not been set!");
             protected set => hideButton = value.CheckedNull() ?? throw new ArgumentNullException(nameof(value));
         }
 
@@ -47,7 +49,8 @@ namespace Iviz.App
         {
             return resource switch
             {
-                ModuleType.Invalid => throw new ArgumentException("Cannot create module panel for resource Invalid",
+                ModuleType.Invalid => throw new ArgumentException(
+                    "Cannot create module panel for resource Invalid",
                     nameof(resource)),
                 ModuleType.TF => o.AddComponent<TfModulePanel>(),
                 ModuleType.PointCloud => o.AddComponent<PointCloudModulePanel>(),

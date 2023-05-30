@@ -6,6 +6,8 @@ using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Tools;
+using Unity.Burst;
+using Unity.Burst.CompilerServices;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -19,7 +21,8 @@ namespace Iviz.Displays
         [SerializeField] int numCellsY;
         [SerializeField] float cellSize;
 
-        readonly List<float4> pointBuffer = new();
+        float4[] pointBuffer = Array.Empty<float4>();
+
         MeshListDisplay? resource;
 
         MeshListDisplay Resource => ResourcePool.RentChecked(ref resource, Transform);
@@ -126,18 +129,27 @@ namespace Iviz.Displays
 
         public override void Suspend()
         {
-            pointBuffer.Clear();
+            pointBuffer = Array.Empty<float4>();
         }
 
-        public void SetOccupancy(ReadOnlySpan<sbyte> values, RectInt? inBounds, Pose pose)
+        public void SetOccupancy(sbyte[] values, RectInt? inBounds, Pose pose)
         {
-            var bounds = inBounds ?? new RectInt(0,  0, numCellsX, numCellsY);
+            var bounds = inBounds ?? new RectInt(0, 0, numCellsX, numCellsY);
 
-            pointBuffer.Clear();
+            int maxPointBufferLength = bounds.width * bounds.height;
+            if (pointBuffer.Length < maxPointBufferLength)
+            {
+                int desiredLength = Mathf.Max(pointBuffer.Length, 128);
+                while (desiredLength < maxPointBufferLength) desiredLength *= 2;
+                pointBuffer = new float4[desiredLength];
+            }
 
+            /*
+            float4[] mPointBuffer = pointBuffer;
+            int pointBufferLength = 0;
             float size = cellSize;
 
-            foreach (int v in bounds.y..bounds.yMax)
+            for (int v = bounds.y; v < bounds.yMax; v++)
             {
                 var row = values[(v * numCellsX)..];
                 float y = -v * size;
@@ -150,27 +162,80 @@ namespace Iviz.Displays
                         continue;
                     }
 
-                    
+
                     float4 p;
-                    /*
-                    p.x = u * size;
-                    p.y = y;
-                    p.z = 0;
-                    */
                     p.x = y;
                     p.y = 0;
                     p.z = u * size;
                     p.w = val * 0.01f;
-                    pointBuffer.Add(p);
+
+                    mPointBuffer[pointBufferLength++] = p;
+                }
+            }
+            */
+
+            int pointBufferLength;
+            unsafe
+            {
+                fixed (sbyte* valuesPtr = values)
+                fixed (float4* pointBufferPtr = pointBuffer)
+                {
+                    pointBufferLength = BurstUtils.AddToBuffer(valuesPtr, pointBufferPtr,
+                        cellSize, bounds.y, bounds.yMax, bounds.x, bounds.xMax, numCellsX);
                 }
             }
 
+            var pointBufferToUse = new ReadOnlyMemory<float4>(pointBuffer, 0, pointBufferLength);
+            
             GameThread.PostImmediate(() =>
             {
                 Resource.Transform.SetLocalPose(pose);
-                Resource.Set(pointBuffer.AsReadOnlySpan());
+                Resource.Set(pointBufferToUse.Span);
             });
         }
+
+        [BurstCompile]
+        static unsafe class BurstUtils
+        {
+            [BurstCompile(CompileSynchronously = true)]
+            public static int AddToBuffer([NoAlias] sbyte* input, [NoAlias] float4* output,
+                float size, int vMin, int vMax, int uMin, int uMax, int stride)
+            {
+                int length = 0;
+
+                for (int v = vMin; v < vMax; v++)
+                {
+                    sbyte* row = input + v * stride;
+                    float y = -v * size;
+
+                    for (int u = uMin; u < uMax; u++)
+                    {
+                        sbyte val = row[u];
+                        if (val <= 0)
+                        {
+                            continue;
+                        }
+
+
+                        float4 p;
+                        /*
+                        p.x = u * size;
+                        p.y = y;
+                        p.z = 0;
+                        */
+                        p.x = y;
+                        p.y = 0;
+                        p.z = u * size;
+                        p.w = val * 0.01f;
+
+                        output[length++] = p;
+                    }
+                }
+
+                return length;
+            }
+        }
+
 
         public void SplitForRecycle()
         {

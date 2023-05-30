@@ -102,13 +102,6 @@ public interface IRosPublisher : IDisposable
     public bool ContainsId(string id);
 
     /// <summary>
-    /// Checks whether this publisher's message type corresponds to the given type
-    /// </summary>
-    /// <param name="type">The type to check.</param>
-    /// <returns>Whether the class type matches.</returns>        
-    public bool MessageTypeMatches(Type type);
-
-    /// <summary>
     /// Returns a structure that represents the internal state of the publisher. 
     /// </summary>        
     public PublisherState GetState();
@@ -146,3 +139,4 @@ public interface IRosPublisher<T> : IRosPublisher where T : IMessage
     public ValueTask PublishAsync(in T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
         CancellationToken token = default);
 }
+

@@ -48,23 +48,29 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out Type);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<InteractiveMarker>.Value
-                    : new InteractiveMarker[n];
-                for (int i = 0; i < n; i++)
+                InteractiveMarker[] array;
+                if (n == 0) array = EmptyArray<InteractiveMarker>.Value;
+                else
                 {
-                    array[i] = new InteractiveMarker(ref b);
+                    array = new InteractiveMarker[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new InteractiveMarker(ref b);
+                    }
                 }
                 Markers = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<InteractiveMarkerPose>.Value
-                    : new InteractiveMarkerPose[n];
-                for (int i = 0; i < n; i++)
+                InteractiveMarkerPose[] array;
+                if (n == 0) array = EmptyArray<InteractiveMarkerPose>.Value;
+                else
                 {
-                    array[i] = new InteractiveMarkerPose(ref b);
+                    array = new InteractiveMarkerPose[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new InteractiveMarkerPose(ref b);
+                    }
                 }
                 Poses = array;
             }
@@ -81,24 +87,30 @@ namespace Iviz.Msgs.VisualizationMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<InteractiveMarker>.Value
-                    : new InteractiveMarker[n];
-                for (int i = 0; i < n; i++)
+                InteractiveMarker[] array;
+                if (n == 0) array = EmptyArray<InteractiveMarker>.Value;
+                else
                 {
-                    array[i] = new InteractiveMarker(ref b);
+                    array = new InteractiveMarker[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new InteractiveMarker(ref b);
+                    }
                 }
                 Markers = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<InteractiveMarkerPose>.Value
-                    : new InteractiveMarkerPose[n];
-                for (int i = 0; i < n; i++)
+                InteractiveMarkerPose[] array;
+                if (n == 0) array = EmptyArray<InteractiveMarkerPose>.Value;
+                else
                 {
-                    array[i] = new InteractiveMarkerPose(ref b);
+                    array = new InteractiveMarkerPose[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new InteractiveMarkerPose(ref b);
+                    }
                 }
                 Poses = array;
             }
@@ -155,24 +167,10 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (ServerId is null) BuiltIns.ThrowNullReference(nameof(ServerId));
-            if (Markers is null) BuiltIns.ThrowNullReference(nameof(Markers));
-            for (int i = 0; i < Markers.Length; i++)
-            {
-                if (Markers[i] is null) BuiltIns.ThrowNullReference(nameof(Markers), i);
-                Markers[i].RosValidate();
-            }
-            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
-            for (int i = 0; i < Poses.Length; i++)
-            {
-                if (Poses[i] is null) BuiltIns.ThrowNullReference(nameof(Poses), i);
-                Poses[i].RosValidate();
-            }
-            if (Erases is null) BuiltIns.ThrowNullReference(nameof(Erases));
-            for (int i = 0; i < Erases.Length; i++)
-            {
-                if (Erases[i] is null) BuiltIns.ThrowNullReference(nameof(Erases), i);
-            }
+            BuiltIns.ThrowIfNull(ServerId, nameof(ServerId));
+            BuiltIns.ThrowIfNull(Markers, nameof(Markers));
+            BuiltIns.ThrowIfNull(Poses, nameof(Poses));
+            BuiltIns.ThrowIfNull(Erases, nameof(Erases));
         }
     
         public int RosMessageLength

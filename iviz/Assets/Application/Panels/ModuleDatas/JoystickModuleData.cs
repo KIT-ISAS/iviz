@@ -27,7 +27,7 @@ namespace Iviz.App
         public override ModuleType ModuleType => ModuleType.Joystick;
         public override ModulePanel Panel => panel;
         public override IConfiguration Configuration => controller.Config;
-        public override IController Controller => controller;
+        public override Controller Controller => controller;
 
         public JoystickModuleData(ModuleDataConstructor constructor)
         {

@@ -152,7 +152,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 D = array;
@@ -191,7 +191,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -258,15 +258,15 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (DistortionModel is null) BuiltIns.ThrowNullReference(nameof(DistortionModel));
-            if (D is null) BuiltIns.ThrowNullReference(nameof(D));
-            if (K is null) BuiltIns.ThrowNullReference(nameof(K));
-            if (K.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(K), K.Length, 9);
-            if (R is null) BuiltIns.ThrowNullReference(nameof(R));
-            if (R.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(R), R.Length, 9);
-            if (P is null) BuiltIns.ThrowNullReference(nameof(P));
-            if (P.Length != 12) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(P), P.Length, 12);
-            if (Roi is null) BuiltIns.ThrowNullReference(nameof(Roi));
+            BuiltIns.ThrowIfNull(DistortionModel, nameof(DistortionModel));
+            BuiltIns.ThrowIfNull(D, nameof(D));
+            BuiltIns.ThrowIfNull(K, nameof(K));
+            BuiltIns.ThrowIfWrongSize(K, nameof(K), 9);
+            BuiltIns.ThrowIfNull(R, nameof(R));
+            BuiltIns.ThrowIfWrongSize(R, nameof(R), 9);
+            BuiltIns.ThrowIfNull(P, nameof(P));
+            BuiltIns.ThrowIfWrongSize(P, nameof(P), 12);
+            BuiltIns.ThrowIfNull(Roi, nameof(Roi));
             Roi.RosValidate();
         }
     

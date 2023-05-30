@@ -29,12 +29,15 @@ namespace Iviz.Msgs.ActionlibMsgs
             Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GoalStatus>.Value
-                    : new GoalStatus[n];
-                for (int i = 0; i < n; i++)
+                GoalStatus[] array;
+                if (n == 0) array = EmptyArray<GoalStatus>.Value;
+                else
                 {
-                    array[i] = new GoalStatus(ref b);
+                    array = new GoalStatus[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new GoalStatus(ref b);
+                    }
                 }
                 StatusList = array;
             }
@@ -46,12 +49,15 @@ namespace Iviz.Msgs.ActionlibMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GoalStatus>.Value
-                    : new GoalStatus[n];
-                for (int i = 0; i < n; i++)
+                GoalStatus[] array;
+                if (n == 0) array = EmptyArray<GoalStatus>.Value;
+                else
                 {
-                    array[i] = new GoalStatus(ref b);
+                    array = new GoalStatus[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new GoalStatus(ref b);
+                    }
                 }
                 StatusList = array;
             }
@@ -84,12 +90,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         public void RosValidate()
         {
-            if (StatusList is null) BuiltIns.ThrowNullReference(nameof(StatusList));
-            for (int i = 0; i < StatusList.Length; i++)
-            {
-                if (StatusList[i] is null) BuiltIns.ThrowNullReference(nameof(StatusList), i);
-                StatusList[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(StatusList, nameof(StatusList));
         }
     
         public int RosMessageLength

@@ -91,7 +91,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Cells is null) BuiltIns.ThrowNullReference(nameof(Cells));
+            BuiltIns.ThrowIfNull(Cells, nameof(Cells));
         }
     
         public int RosMessageLength

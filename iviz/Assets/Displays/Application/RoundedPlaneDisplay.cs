@@ -85,7 +85,7 @@ namespace Iviz.Displays
         MeshMarkerDisplay[] CreateObjects()
         {
             var objects = new MeshMarkerDisplay[7];
-            foreach (int i in ..3)
+            for (int i = 0; i < 3; i++)
             {
                 var o = new GameObject { name = "Frame" };
                 var resource = o.AddComponent<MeshMarkerDisplay>();
@@ -97,7 +97,7 @@ namespace Iviz.Displays
                 objects[i] = resource;
             }
 
-            foreach (int i in 3..7)
+            for (int i = 3; i < 7; i++)
             {
                 var o = new GameObject { name = "Corner" };
                 var resource = o.AddComponent<MeshMarkerDisplay>();

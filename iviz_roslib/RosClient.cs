@@ -400,7 +400,7 @@ public sealed class RosClient : IRosClient
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
-            throw new RosConnectionException($"Failed to contact the master URI at '{masterUri}'", e);
+            throw new RosConnectionException($"Failed to contact the master URI at '{MasterUri}'", e);
         }
 
         try
@@ -410,7 +410,7 @@ public sealed class RosClient : IRosClient
         }
         catch (SocketException e)
         {
-            throw new RosUriBindingException($"Failed to bind to local URI '{ownUri}'", e);
+            throw new RosUriBindingException($"Failed to bind to local URI '{CallerUri}'", e);
         }
 
         // Start the XmlRpc server.
@@ -803,7 +803,7 @@ public sealed class RosClient : IRosClient
         RosTransportHint transportHint = RosTransportHint.PreferTcp, CancellationToken token = default)
         where T : IMessage, new()
     {
-        return SubscribeAsyncCore(topic, new DirectRosCallback<T>(callback), requestNoDelay, transportHint, token);
+        return SubscribeAsyncCore(topic, new ActionRosCallback<T>(callback), requestNoDelay, transportHint, token);
     }
 
     /// <inheritdoc cref="IRosClient.SubscribeAsync{T}(string,System.Action{T},Iviz.Roslib.RosTransportHint,System.Threading.CancellationToken)"/>
@@ -832,7 +832,7 @@ public sealed class RosClient : IRosClient
         string resolvedTopic = ResolveResourceName(topic);
         if (!TryGetSubscriberImpl(resolvedTopic, out var existingSubscriber))
         {
-            return CreateSubscriberAsync(resolvedTopic, new DirectRosCallback<IMessage>(callback), requestNoDelay,
+            return CreateSubscriberAsync(resolvedTopic, new ActionRosCallback<IMessage>(callback), requestNoDelay,
                 new DynamicMessage(), transportHint, token);
         }
 
@@ -1571,7 +1571,6 @@ public sealed class RosClient : IRosClient
         var closeConnectionsTask = CloseConnectionsAsync().AsTask();
         if (token.IsCancellationRequested)
         {
-            Logger.LogFormat("{0}: Pre-cancelled token passed to " + nameof(CloseAsync), this);
             return; // closeConnectionsTask will keep running in the background
         }
 
@@ -1624,7 +1623,8 @@ public sealed class RosClient : IRosClient
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: " + nameof(RosServiceCaller) + ".Dispose() threw! {1}", this, e);
+                Logger.LogErrorFormat("{0}: " + nameof(RosServiceCaller) + "." + 
+                                      nameof(RosServiceCaller.Dispose) + " threw! {1}", this, e);
             }
         }
 
@@ -1636,7 +1636,8 @@ public sealed class RosClient : IRosClient
         }
         catch (Exception e)
         {
-            Logger.LogErrorFormat("{0}: " + nameof(RosMasterClient) + ".Dispose() threw! {1}", this, e);
+            Logger.LogErrorFormat("{0}: " + nameof(RosMasterClient) + "." +
+                                  nameof(RosMasterClient.Dispose) + "() threw! {1}", this, e);
         }
     }
 

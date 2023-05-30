@@ -11,8 +11,8 @@ namespace Iviz.Roslib;
 [DataContract]
 public readonly struct Endpoint : IEquatable<Endpoint>
 {
-    [DataMember] public string Hostname { get; }
-    [DataMember] public int Port { get; }
+    [DataMember] public readonly string Hostname;
+    [DataMember] public readonly int Port;
 
     [JsonConstructor]
     public Endpoint(string hostname, int port) =>

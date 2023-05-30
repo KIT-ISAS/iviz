@@ -67,7 +67,7 @@ public sealed class RosMasterClient : IDisposable
 
     public override string ToString()
     {
-        return $"{nameof(RosMasterClient)} masterUri={MasterUri} callerUri={CallerUri} callerId={CallerId}]";
+        return $"[{nameof(RosMasterClient)} masterUri={MasterUri} callerUri={CallerUri} callerId={CallerId}]";
     }
 
     public async ValueTask<GetUriResponse> GetUriAsync(CancellationToken token = default)

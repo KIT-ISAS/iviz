@@ -138,7 +138,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (FrameYaml is null) BuiltIns.ThrowNullReference(nameof(FrameYaml));
+            BuiltIns.ThrowIfNull(FrameYaml, nameof(FrameYaml));
         }
     
         public int RosMessageLength

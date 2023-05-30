@@ -115,12 +115,12 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (OrientationCovariance is null) BuiltIns.ThrowNullReference(nameof(OrientationCovariance));
-            if (OrientationCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(OrientationCovariance), OrientationCovariance.Length, 9);
-            if (AngularVelocityCovariance is null) BuiltIns.ThrowNullReference(nameof(AngularVelocityCovariance));
-            if (AngularVelocityCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(AngularVelocityCovariance), AngularVelocityCovariance.Length, 9);
-            if (LinearAccelerationCovariance is null) BuiltIns.ThrowNullReference(nameof(LinearAccelerationCovariance));
-            if (LinearAccelerationCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(LinearAccelerationCovariance), LinearAccelerationCovariance.Length, 9);
+            BuiltIns.ThrowIfNull(OrientationCovariance, nameof(OrientationCovariance));
+            BuiltIns.ThrowIfWrongSize(OrientationCovariance, nameof(OrientationCovariance), 9);
+            BuiltIns.ThrowIfNull(AngularVelocityCovariance, nameof(AngularVelocityCovariance));
+            BuiltIns.ThrowIfWrongSize(AngularVelocityCovariance, nameof(AngularVelocityCovariance), 9);
+            BuiltIns.ThrowIfNull(LinearAccelerationCovariance, nameof(LinearAccelerationCovariance));
+            BuiltIns.ThrowIfWrongSize(LinearAccelerationCovariance, nameof(LinearAccelerationCovariance), 9);
         }
     
         public int RosMessageLength

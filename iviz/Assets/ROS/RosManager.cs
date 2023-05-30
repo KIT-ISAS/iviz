@@ -11,16 +11,16 @@ namespace Iviz.Ros
     {
         static RosManager? instance;
 
-        static Exception NewDisposeException() =>
-            new ObjectDisposedException("The ROS manager has already been disposed");
+        static object ThrowDisposeException() =>
+            throw new ObjectDisposedException("The ROS manager has already been disposed");
 
         public static string? MyId => instance?.connection.MyId;
         public static bool IsConnected => instance?.connection.IsConnected ?? false;
         public static bool HasInstance => instance != null;
-        public static IRosProvider Connection => RosConnection;
-        public static RosOutLogger Logger => instance?.logger ?? throw NewDisposeException();
-        public static RosServerManager Server => instance?.server ?? throw NewDisposeException();
-        internal static RosConnection RosConnection => instance?.connection ?? throw NewDisposeException();
+        public static RosProvider Connection => RosConnection;
+        public static RosOutLogger Logger => instance?.logger ?? (RosOutLogger)ThrowDisposeException();
+        public static RosServerManager Server => instance?.server ?? (RosServerManager)ThrowDisposeException();
+        internal static RosConnection RosConnection => instance?.connection ?? (RosConnection)ThrowDisposeException();
 
         readonly RosConnection connection;
         readonly RosOutLogger logger;

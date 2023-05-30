@@ -9,18 +9,18 @@ namespace Iviz.Common
     /// A controller manages visualization displays, and, for listener controllers, the ROS communication.
     /// It exposes its variables with an <see cref="IConfiguration"/>.
     /// </summary>
-    public interface IController
+    public abstract class Controller
     {
         /// <summary>
         /// Tells the controller to 'reset' itself.
         /// What this means is dependent on the controller.
         /// For example, it can erase its cache or removed stored information.
         /// </summary>
-        void ResetController();
+        public abstract void ResetController();
         
         /// <summary>
         /// Whether the controller's visualization is visible. 
         /// </summary>
-        bool Visible { get; set; }
+        public abstract bool Visible { get; set; }
     }
 }

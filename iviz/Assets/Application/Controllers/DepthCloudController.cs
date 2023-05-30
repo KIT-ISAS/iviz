@@ -7,6 +7,7 @@ using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.Configurations;
 using Iviz.Displays;
+using Iviz.Displays.Helpers;
 using Iviz.Msgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
@@ -15,7 +16,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public sealed class DepthCloudController : IController, IHasFrame
+    public sealed class DepthCloudController : Controller, IHasFrame
     {
         readonly DepthCloudConfiguration config = new();
         readonly FrameNode node;
@@ -23,14 +24,14 @@ namespace Iviz.Controllers
         readonly ImageTexture depthImageTexture;
         readonly ImageTexture colorImageTexture;
 
-        bool depthIsProcessing;
-        bool colorIsProcessing;
+        InterlockedBoolean depthIsProcessing;
+        InterlockedBoolean colorIsProcessing;
         TextureFormat? lastDepthFormat;
         Listener<CameraInfo>? depthInfoListener;
 
         public TfFrame? Frame => node.Parent;
-        public IListener? DepthListener { get; private set; }
-        public IListener? ColorListener { get; private set; }
+        public Listener? DepthListener { get; private set; }
+        public Listener? ColorListener { get; private set; }
         public Material ColorMaterial => colorImageTexture.Material;
         public Material DepthMaterial => depthImageTexture.Material;
 
@@ -41,27 +42,7 @@ namespace Iviz.Controllers
         public Vector2Int DepthImageSize => depthImageTexture.Texture != null
             ? new Vector2Int(depthImageTexture.Texture.width, depthImageTexture.Texture.height)
             : Vector2Int.zero;
-
-        bool DepthIsProcessing
-        {
-            get => depthIsProcessing;
-            set
-            {
-                depthIsProcessing = value;
-                DepthListener?.SetPause(value);
-            }
-        }
-
-        bool ColorIsProcessing
-        {
-            get => colorIsProcessing;
-            set
-            {
-                colorIsProcessing = value;
-                ColorListener?.SetPause(value);
-            }
-        }
-
+        
         public DepthCloudConfiguration Config
         {
             get => config;
@@ -148,7 +129,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool Visible
+        public override bool Visible
         {
             get => config.Visible;
             set
@@ -297,6 +278,9 @@ namespace Iviz.Controllers
             projector.DepthImage = depthImageTexture;
             projector.ColorImage = colorImageTexture;
             Config = config ?? new DepthCloudConfiguration();
+
+            depthIsProcessing.Changed = b => DepthListener?.SetPause(b);
+            colorIsProcessing.Changed = b => ColorListener?.SetPause(b);
         }
 
         bool DepthHandler(Image msg, IRosConnection _)
@@ -323,12 +307,10 @@ namespace Iviz.Controllers
                 return true;
             }
 
-            if (DepthIsProcessing)
+            if (!depthIsProcessing.TrySet())
             {
                 return false;
             }
-
-            DepthIsProcessing = true;
 
             var shared = msg.Data.Share();
             GameThread.PostInListenerQueue(() =>
@@ -348,7 +330,7 @@ namespace Iviz.Controllers
                 finally
                 {
                     shared.TryReturn();
-                    DepthIsProcessing = false;
+                    depthIsProcessing.Reset();
                 }
             });
 
@@ -369,12 +351,10 @@ namespace Iviz.Controllers
                 return true;
             }
 
-            if (DepthIsProcessing)
+            if (!depthIsProcessing.TrySet())
             {
                 return false;
             }
-
-            DepthIsProcessing = true;
 
             var shared = msg.Data.Share();
 
@@ -393,7 +373,7 @@ namespace Iviz.Controllers
                 finally
                 {
                     shared.TryReturn();
-                    DepthIsProcessing = false;
+                    depthIsProcessing.Reset();
                 }
             }
 
@@ -446,12 +426,10 @@ namespace Iviz.Controllers
                 return true;
             }
 
-            if (ColorIsProcessing)
+            if (!colorIsProcessing.TrySet())
             {
                 return false;
             }
-
-            ColorIsProcessing = true;
 
             var shared = msg.Data.Share();
             GameThread.PostInListenerQueue(() =>
@@ -468,7 +446,7 @@ namespace Iviz.Controllers
                 finally
                 {
                     shared.TryReturn();
-                    ColorIsProcessing = false;
+                    colorIsProcessing.Reset();
                 }
             });
 
@@ -489,19 +467,17 @@ namespace Iviz.Controllers
                 return true;
             }
 
-            if (ColorIsProcessing)
+            if (!colorIsProcessing.TrySet())
             {
                 return false;
             }
-
-            ColorIsProcessing = true;
 
             var shared = msg.Data.Share();
 
             void PostProcess()
             {
                 shared.TryReturn();
-                ColorIsProcessing = false;
+                colorIsProcessing.Reset();
             }
 
             switch (msg.Format.ToUpperInvariant())
@@ -552,7 +528,7 @@ namespace Iviz.Controllers
             node.Dispose();
         }
 
-        public void ResetController()
+        public override void ResetController()
         {
             ColorListener?.Reset();
             DepthListener?.Reset();

@@ -109,7 +109,7 @@ namespace Iviz.App
         {
             Initialize();
 
-            foreach (int id in ..Codes.Count)
+            for (int id = 0; id < Codes.Count; id++)
             {
                 Types[id].Index = (int) ARMarkerType.Aruco;
                 Codes[id].Interactable = false;

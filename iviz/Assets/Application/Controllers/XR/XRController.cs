@@ -22,7 +22,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 namespace Iviz.Controllers.XR
 {
-    public sealed class XRController : IController, IHasFrame
+    public sealed class XRController : Controller, IHasFrame
     {
         const string HeadFrameId = "~xr/head";
         const string LeftControllerFrameId = "~xr/left_controller";
@@ -507,11 +507,11 @@ namespace Iviz.Controllers.XR
             Instance = null;
         }
 
-        public void ResetController()
+        public override void ResetController()
         {
         }
 
-        public bool Visible { get; set; }
+        public override bool Visible { get; set; }
 
         public void ToggleMainCanvas(CustomController controller)
         {

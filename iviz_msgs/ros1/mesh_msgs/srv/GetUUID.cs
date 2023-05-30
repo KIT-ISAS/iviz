@@ -138,7 +138,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
+            BuiltIns.ThrowIfNull(Uuid, nameof(Uuid));
         }
     
         public int RosMessageLength

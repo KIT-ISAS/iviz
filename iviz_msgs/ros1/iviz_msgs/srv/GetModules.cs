@@ -142,11 +142,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Configs is null) BuiltIns.ThrowNullReference(nameof(Configs));
-            for (int i = 0; i < Configs.Length; i++)
-            {
-                if (Configs[i] is null) BuiltIns.ThrowNullReference(nameof(Configs), i);
-            }
+            BuiltIns.ThrowIfNull(Configs, nameof(Configs));
         }
     
         public int RosMessageLength

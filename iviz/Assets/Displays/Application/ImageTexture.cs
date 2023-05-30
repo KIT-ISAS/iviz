@@ -532,9 +532,22 @@ namespace Iviz.Displays
 
             Texture = new Texture2D(width, height, format, false);
             Material.SetTexture(ShaderIds.MainTexId, Texture);
-            TextureChanged?.Invoke(Texture);
+            RaiseTextureChanged(Texture);
             return Texture;
         }
+        
+        void RaiseTextureChanged(Texture2D? texture)
+        {
+            try
+            {
+                TextureChanged?.Invoke(texture);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{ToString()}: Error during {nameof(RaiseTextureChanged)}", e);
+            }
+        }        
+        
 
         public bool TrySampleColor(in Vector2 rawUV, out Vector2Int uv, out TextureFormat format, out Vector4 color)
         {
@@ -594,12 +607,12 @@ namespace Iviz.Displays
             Texture = null;
             Material.SetTexture(ShaderIds.MainTexId, Texture2D.whiteTexture);
             Material.DisableKeyword("USE_INTENSITY");
-            TextureChanged?.Invoke(null);
+            RaiseTextureChanged(null);
         }
 
         public void Dispose()
         {
-            TextureChanged?.Invoke(null);
+            RaiseTextureChanged(null);
             TextureChanged = null;
 
             if (Texture != null)

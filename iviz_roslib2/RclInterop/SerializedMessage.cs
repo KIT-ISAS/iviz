@@ -13,7 +13,7 @@ internal sealed class SerializedMessage : IDisposable
         ref Unsafe.As<byte, RclSerializedMessage>(ref Rcl.GetReference(Handle));
 
     internal IntPtr Handle => disposed
-        ? throw new ObjectDisposedException(ToString())
+        ? BuiltIns.ThrowPointerDisposed(nameof(SerializedMessage)) 
         : handle;
 
     public SerializedMessage()

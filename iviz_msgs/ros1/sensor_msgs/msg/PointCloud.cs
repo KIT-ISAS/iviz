@@ -49,12 +49,15 @@ namespace Iviz.Msgs.SensorMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ChannelFloat32>.Value
-                    : new ChannelFloat32[n];
-                for (int i = 0; i < n; i++)
+                ChannelFloat32[] array;
+                if (n == 0) array = EmptyArray<ChannelFloat32>.Value;
+                else
                 {
-                    array[i] = new ChannelFloat32(ref b);
+                    array = new ChannelFloat32[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ChannelFloat32(ref b);
+                    }
                 }
                 Channels = array;
             }
@@ -77,12 +80,15 @@ namespace Iviz.Msgs.SensorMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ChannelFloat32>.Value
-                    : new ChannelFloat32[n];
-                for (int i = 0; i < n; i++)
+                ChannelFloat32[] array;
+                if (n == 0) array = EmptyArray<ChannelFloat32>.Value;
+                else
                 {
-                    array[i] = new ChannelFloat32(ref b);
+                    array = new ChannelFloat32[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ChannelFloat32(ref b);
+                    }
                 }
                 Channels = array;
             }
@@ -119,13 +125,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Points is null) BuiltIns.ThrowNullReference(nameof(Points));
-            if (Channels is null) BuiltIns.ThrowNullReference(nameof(Channels));
-            for (int i = 0; i < Channels.Length; i++)
-            {
-                if (Channels[i] is null) BuiltIns.ThrowNullReference(nameof(Channels), i);
-                Channels[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Points, nameof(Points));
+            BuiltIns.ThrowIfNull(Channels, nameof(Channels));
         }
     
         public int RosMessageLength

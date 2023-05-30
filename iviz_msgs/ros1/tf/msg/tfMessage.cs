@@ -24,12 +24,15 @@ namespace Iviz.Msgs.Tf
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.TransformStamped>.Value
-                    : new GeometryMsgs.TransformStamped[n];
-                for (int i = 0; i < n; i++)
+                GeometryMsgs.TransformStamped[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.TransformStamped>.Value;
+                else
                 {
-                    array[i] = new GeometryMsgs.TransformStamped(ref b);
+                    array = new GeometryMsgs.TransformStamped[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new GeometryMsgs.TransformStamped(ref b);
+                    }
                 }
                 Transforms = array;
             }
@@ -40,12 +43,15 @@ namespace Iviz.Msgs.Tf
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.TransformStamped>.Value
-                    : new GeometryMsgs.TransformStamped[n];
-                for (int i = 0; i < n; i++)
+                GeometryMsgs.TransformStamped[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.TransformStamped>.Value;
+                else
                 {
-                    array[i] = new GeometryMsgs.TransformStamped(ref b);
+                    array = new GeometryMsgs.TransformStamped[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new GeometryMsgs.TransformStamped(ref b);
+                    }
                 }
                 Transforms = array;
             }
@@ -76,12 +82,7 @@ namespace Iviz.Msgs.Tf
         
         public void RosValidate()
         {
-            if (Transforms is null) BuiltIns.ThrowNullReference(nameof(Transforms));
-            for (int i = 0; i < Transforms.Length; i++)
-            {
-                if (Transforms[i] is null) BuiltIns.ThrowNullReference(nameof(Transforms), i);
-                Transforms[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Transforms, nameof(Transforms));
         }
     
         public int RosMessageLength

@@ -30,11 +30,7 @@ internal sealed class AsyncRclClient : TaskExecutor
     public long GraphChangedTicks { get; private set; }
 
     public string FullName => client.FullName;
-
-    public static bool IsMessageTypeSupported(string _) => true;
-
-    public static bool IsServiceTypeSupported(string _) => true;
-
+    
     public AsyncRclClient(string name, string @namespace, int domainId)
     {
         client = new RclClient(name, @namespace, domainId);

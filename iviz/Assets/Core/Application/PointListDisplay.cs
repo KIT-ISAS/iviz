@@ -9,6 +9,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
 using Iviz.Tools;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -67,7 +68,12 @@ namespace Iviz.Displays
 
         protected override void Awake()
         {
-            if (!Settings.SupportsComputeBuffers)
+            if (Settings.SupportsComputeBuffers)
+            {
+                pointComputeBuffer = new ComputeBuffer(1, Unsafe.SizeOf<float4>());
+                Properties.SetBuffer(ShaderIds.PointsId, pointComputeBuffer);
+            }
+            else
             {
                 RosLogger.Info($"{this}: Device does not support compute buffers in vertices. " +
                                "Point clouds may not appear correctly.");
@@ -102,7 +108,9 @@ namespace Iviz.Displays
                 return;
             }
 
-            Properties.SetFloat(ShaderIds.ScaleId, ElementScale * transform.lossyScale.x);
+            // ReSharper disable once RedundantBaseQualifier
+            float scaleX = base.ElementScale * Transform.lossyScale.x;
+            Properties.SetFloat(ShaderIds.ScaleId, scaleX);
 
             if (Settings.SupportsComputeBuffers)
             {
@@ -123,7 +131,7 @@ namespace Iviz.Displays
                 isDirty = false;
             }
 
-            Bounds worldBounds = WorldBounds;
+            var worldBounds = WorldBounds;
             if (!worldBounds.IsVisibleFromMainCamera())
             {
                 return;
@@ -247,6 +255,7 @@ namespace Iviz.Displays
             }
 
             pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
+            //pointBuffer.AsArray().AsSpan().Fill(default);
         }
 
         void CalculateBounds()
@@ -257,7 +266,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            MinMaxJobs.CalculateBounds(pointBuffer, out Bounds bounds, out Vector2 span);
+            MinMaxJobs.CalculateBounds(pointBuffer, out var bounds, out var span);
             Collider.center = bounds.center;
             Collider.size = bounds.size + ElementScale * Vector3.one;
             MeasuredIntensityBounds = span;
@@ -266,7 +275,7 @@ namespace Iviz.Displays
                 IntensityBounds = span;
             }
 
-            BoundsChanged?.Invoke();
+            RaiseBoundsChanged();
         }
 
         void CalculateBoundsEmpty()
@@ -278,8 +287,21 @@ namespace Iviz.Displays
                 IntensityBounds = Vector2.zero;
             }
 
-            BoundsChanged?.Invoke();
+            RaiseBoundsChanged();
         }
+        
+        void RaiseBoundsChanged()
+        {
+            try
+            {
+                BoundsChanged?.Invoke();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{ToString()}: " +
+                                $"Error during {nameof(RaiseBoundsChanged)}", e);
+            }                          
+        }        
 
         protected override void Rebuild()
         {

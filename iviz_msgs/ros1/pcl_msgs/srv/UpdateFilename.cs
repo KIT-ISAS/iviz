@@ -90,7 +90,7 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            if (Filename is null) BuiltIns.ThrowNullReference(nameof(Filename));
+            BuiltIns.ThrowIfNull(Filename, nameof(Filename));
         }
     
         public int RosMessageLength

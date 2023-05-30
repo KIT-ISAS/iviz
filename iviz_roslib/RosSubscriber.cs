@@ -100,7 +100,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
     {
         if (!IsAlive)
         {
-            throw new ObjectDisposedException(nameof(RosSubscriber<TMessage>), "This is not a valid subscriber");
+            BuiltIns.ThrowObjectDisposed(nameof(RosSubscriber<TMessage>), "This is not a valid subscriber");
         }
     }
 
@@ -126,7 +126,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
     {
         if (disposed) return;
         disposed = true;
-        
+
         runningTs.Cancel();
         callbacksById.Clear();
         NumPublishersChanged = null;
@@ -137,7 +137,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
     {
         if (disposed) return default;
         disposed = true;
-        
+
         runningTs.Cancel();
         callbacksById.Clear();
         NumPublishersChanged = null;
@@ -149,13 +149,14 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
         return type == typeof(TMessage);
     }
 
-    string IRosSubscriber.Subscribe(Action<IMessage> callback) =>
-        Subscribe(msg => callback(msg));
-
-    string IRosSubscriber.Subscribe(Action<IMessage, IRosConnection> callback)
+    string IRosSubscriber.Subscribe(Action<IMessage> callback)
     {
-        void Callback(in TMessage msg, IRosConnection receiver) => callback(msg, receiver);
-        return Subscribe(new ActionRosCallback<TMessage>(Callback));
+        return Subscribe(new GenericRosCallback<TMessage>(callback));
+    }
+
+    string IRosSubscriber.Subscribe(Action<IMessage, MessageInfo> callback)
+    {
+        return Subscribe(new Generic2RosCallback<TMessage>(callback));
     }
 
 
@@ -168,7 +169,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
     /// <exception cref="ArgumentNullException">The callback is null.</exception>
     public string Subscribe(Action<TMessage> callback)
     {
-        return Subscribe(new DirectRosCallback<TMessage>(callback));
+        return Subscribe(new ActionRosCallback<TMessage>(callback));
     }
 
     public string Subscribe(RosCallback<TMessage> callback)

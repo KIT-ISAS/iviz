@@ -279,25 +279,19 @@ public static class TaskUtils
         using (tokenSource.Token.Register(CallbackHelpers.SetResult, timeout))
         {
             var result = await Task.WhenAny(task, timeoutTask);
-            if (result != task)
+            if (result == task)
             {
-                /*
-                if (!token.IsCancellationRequested)
-                {
-                    Logger.LogErrorFormat(GenericExceptionFormat, caller, new TimeoutException());
-                }
-                */
-
-                return;
+                await task.AwaitNoThrow(caller).ConfigureAwait(false);
             }
-
-            await task.AwaitNoThrow(caller).ConfigureAwait(false);
         }
     }
 
     public static Task WhenAll<TA, TB>(this SelectEnumerable<TB, TA, Task> ts) where TB : IReadOnlyList<TA>
     {
-        if (ts.Count == 0) return Task.CompletedTask;
+        if (ts.Count == 0)
+        {
+            return Task.CompletedTask;
+        }
 
         ICollection<Task> boxedTs = ts;
         return Task.WhenAll(boxedTs);
@@ -306,9 +300,20 @@ public static class TaskUtils
     public static async ValueTask<TB[]> WhenAll<TA, TB, TC>(this SelectEnumerable<TC, TA, ValueTask<TB>> ts)
         where TC : IReadOnlyList<TA>
     {
-        var tasks = ts.ToArray(); // evaluate to start tasks in parallel
-        TB[] values = new TB[tasks.Length];
-        for (int i = 0; i < tasks.Length; i++)
+        int tsCount = ts.Count;
+        if (tsCount == 0)
+        {
+            return Array.Empty<TB>();
+        }
+
+        using var tasks = new RentAndClear<ValueTask<TB>>(tsCount); 
+        for (int i = 0; i < tsCount; i++) // evaluate to start tasks in parallel
+        {
+            tasks[i] = ts[i];
+        }
+
+        var values = new TB[tsCount];
+        for (int i = 0; i < tsCount; i++)
         {
             values[i] = await tasks[i];
         }

@@ -90,14 +90,13 @@ namespace Iviz.Core
         public static event Action? LateEverySecond;
 
         public static event Action? ApplicationPause;
-        
+
         /// Called after all the TFs of the frame have been processed, but before <see cref="AfterFramesUpdatedLate"/>
         public static event Action? AfterFramesUpdated; // camera
-        
+
         /// Called after all the TFs of the frame have been processed, but after <see cref="AfterFramesUpdated"/>
         public static event Action? AfterFramesUpdatedLate; // sprites
 
-        
 
         readonly ConcurrentQueue<Action> actionsQueue = new();
         readonly ConcurrentQueue<Action> listenerQueue = new();
@@ -181,7 +180,7 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{ToString()}: Error during {nameof(Post)} call", e);
+                    RosLogger.Error($"{ToString()}: Error during {nameof(Post)}", e);
                 }
             }
 
@@ -214,7 +213,7 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{ToString()}: Error during {nameof(PostInListenerQueue)} call", e);
+                    RosLogger.Error($"{ToString()}: Error during {nameof(PostInListenerQueue)}", e);
                 }
             }
 
@@ -301,7 +300,7 @@ namespace Iviz.Core
             Post(() => TrySetAsync(ts, action()));
             return ts.Task;
         }
-        
+
         static async ValueTask TrySetAsync(TaskCompletionSource ts, ValueTask task)
         {
             try
@@ -331,7 +330,7 @@ namespace Iviz.Core
             Post(() => TrySetAsync(ts, action()));
             return ts.Task;
         }
-        
+
         static async ValueTask TrySetAsync<T>(TaskCompletionSource<T> ts, ValueTask<T> task)
         {
             try
@@ -346,7 +345,7 @@ namespace Iviz.Core
             {
                 ts.TrySetException(e);
             }
-        }        
+        }
 
         /// <summary>
         /// Puts this async action in a queue to be run on the main thread,
@@ -360,7 +359,7 @@ namespace Iviz.Core
             Post(() => TrySet(ts, action));
             return ts.Task;
         }
-        
+
         static void TrySet(TaskCompletionSource ts, Action action)
         {
             try
@@ -372,7 +371,7 @@ namespace Iviz.Core
             {
                 ts.TrySetException(e);
             }
-        }        
+        }
 
         /// <summary>
         /// Puts this action in a queue to be run on the main thread.
@@ -403,7 +402,15 @@ namespace Iviz.Core
 
             if (IsGameThread)
             {
-                action();
+                try
+                {
+                    action();
+                }
+                catch (Exception e)
+                {
+                    RosLogger.Error($"{nameof(GameThread)}: Error during {nameof(PostImmediate)}", e);
+                }
+                
                 return;
             }
 
@@ -417,7 +424,17 @@ namespace Iviz.Core
 
         public static Task WaitUntilAsync(Func<bool> predicate)
         {
-            if (predicate())
+            bool b0;
+            try
+            {
+                b0 = predicate();
+            }
+            catch (Exception e)
+            {
+                return Task.FromException(e);
+            }
+
+            if (b0)
             {
                 return Task.CompletedTask;
             }
@@ -425,10 +442,23 @@ namespace Iviz.Core
             var ts = new TaskCompletionSource(TaskCreationOptions.None);
             EveryFrame += KeepChecking;
             return ts.Task;
-            
+
             void KeepChecking()
             {
-                if (!predicate())
+                bool b1;
+
+                try
+                {
+                    b1 = predicate();
+                }
+                catch (Exception e)
+                {
+                    EveryFrame -= KeepChecking;
+                    ts.TrySetException(e);
+                    return;
+                }
+                
+                if (!b1)
                 {
                     return;
                 }
@@ -440,8 +470,16 @@ namespace Iviz.Core
 
         public static void InvokeAfterFramesUpdated()
         {
-            AfterFramesUpdated?.Invoke();
-            AfterFramesUpdatedLate?.Invoke();
+            try
+            {
+                AfterFramesUpdated?.Invoke();
+                AfterFramesUpdatedLate?.Invoke();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{nameof(GameThread)}: " +
+                                $"Error during {nameof(InvokeAfterFramesUpdated)}", e);
+            }
         }
     }
 }

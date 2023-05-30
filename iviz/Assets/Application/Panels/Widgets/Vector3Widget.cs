@@ -37,11 +37,30 @@ namespace Iviz.App
             {
                 if ((this.value - value).ApproximatelyZero())
                 {
+                    ValidateValues();
                     return;
                 }
 
                 this.value = value;
                 UpdateInputLabels();
+            }
+        }
+
+        void ValidateValues()
+        {
+            if (!UnityUtils.TryParse(inputX.Value, out _))
+            {
+                inputX.Value = "0";
+            }
+
+            if (!UnityUtils.TryParse(inputY.Value, out _))
+            {
+                inputY.Value = "0";
+            }
+
+            if (!UnityUtils.TryParse(inputZ.Value, out _))
+            {
+                inputZ.Value = "0";
             }
         }
 
@@ -68,21 +87,9 @@ namespace Iviz.App
         void ParseValue()
         {
             Vector3 v;
-            if (!float.TryParse(inputX.Value, out v.x))
-            {
-                v.x = 0;
-            }
-
-            if (!float.TryParse(inputY.Value, out v.y))
-            {
-                v.y = 0;
-            }
-
-            if (!float.TryParse(inputZ.Value, out v.z))
-            {
-                v.z = 0;
-            }
-
+            UnityUtils.TryParse(inputX.Value, out v.x);
+            UnityUtils.TryParse(inputY.Value, out v.y);
+            UnityUtils.TryParse(inputZ.Value, out v.z);
             value = v;
         }
 
@@ -94,7 +101,6 @@ namespace Iviz.App
             }
 
             ParseValue();
-            
             ValueChanged?.Invoke(value);
         }
 
@@ -113,10 +119,13 @@ namespace Iviz.App
         void UpdateInputLabels()
         {
             disableUpdates = true;
-            inputX.Value = value.x.ToString("0.###", UnityUtils.Culture);
-            inputY.Value = value.y.ToString("0.###", UnityUtils.Culture);
-            inputZ.Value = value.z.ToString("0.###", UnityUtils.Culture);
+            inputX.Value = FloatToString(value.x);
+            inputY.Value = FloatToString(value.y);
+            inputZ.Value = FloatToString(value.z);
             disableUpdates = false;
+            
+            [NotNull]
+            static string FloatToString(float f) =>f.ToString("0.###", UnityUtils.Culture);
         }
 
         public void ClearSubscribers()
@@ -163,13 +172,15 @@ namespace Iviz.App
 
             UpdateInputLabels();
 
-            inputX.SubscribeValueChanged(_ => OnValueChanged());
-            inputY.SubscribeValueChanged(_ => OnValueChanged());
-            inputZ.SubscribeValueChanged(_ => OnValueChanged());
+            void ValueCallback(string _) => OnValueChanged();
+            inputX.SubscribeValueChanged(ValueCallback);
+            inputY.SubscribeValueChanged(ValueCallback);
+            inputZ.SubscribeValueChanged(ValueCallback);
 
-            inputX.SubscribeEndEdit(_ => OnEndEdit());
-            inputY.SubscribeEndEdit(_ => OnEndEdit());
-            inputZ.SubscribeEndEdit(_ => OnEndEdit());
+            void EndEditCallback(string _) => OnEndEdit();
+            inputX.SubscribeEndEdit(EndEditCallback);
+            inputY.SubscribeEndEdit(EndEditCallback);
+            inputZ.SubscribeEndEdit(EndEditCallback);
         }
     }
 }

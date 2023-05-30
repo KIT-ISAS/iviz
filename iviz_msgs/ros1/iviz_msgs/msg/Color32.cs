@@ -77,6 +77,9 @@ namespace Iviz.Msgs.IvizMsgs
                 
         public override string ToString() => Extensions.ToString(this);
     
+        /// Custom iviz code
+        public static implicit operator Color32(in StdMsgs.ColorRGBA p) => new((byte)(p.R * 255), (byte)(p.G * 255), (byte)(p.B * 255), (byte)(p.A * 255));
+    
         public Serializer<Color32> CreateSerializer() => new Serializer();
         public Deserializer<Color32> CreateDeserializer() => new Deserializer();
     

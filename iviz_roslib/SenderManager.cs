@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -11,23 +12,21 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
-internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage> where TMessage : IMessage
+internal sealed class SenderManager<TMessage> : LatchedMessageProvider<TMessage> where TMessage : IMessage
 {
     const int DefaultTimeoutInMs = 5000;
 
     readonly AsyncLock mutex = new();
-    readonly HashSet<IProtocolSender<TMessage>> senders = new();
+    readonly HashSet<ProtocolSender<TMessage>> senders = new();
     readonly RosPublisher<TMessage> publisher;
     readonly TopicInfo topicInfo;
     readonly CancellationTokenSource tokenSource = new();
     readonly TcpListener listener;
     readonly Task task;
 
-    IProtocolSender<TMessage>[] cachedSenders = Array.Empty<IProtocolSender<TMessage>>();
-    NullableMessage<TMessage> latchedMessage;
+    ProtocolSender<TMessage>[] cachedSenders = Array.Empty<ProtocolSender<TMessage>>();
 
     int maxQueueSizeInBytes;
-    bool latchingEnabled;
     bool forceTcpNoDelay;
     bool disposed;
 
@@ -58,16 +57,6 @@ internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage
         }
     }
 
-    public bool LatchingEnabled
-    {
-        get => latchingEnabled;
-        set
-        {
-            latchingEnabled = value;
-            latchedMessage = default;
-        }
-    }
-
     public int MaxQueueSizeInBytes
     {
         get => maxQueueSizeInBytes;
@@ -85,13 +74,6 @@ internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage
             }
         }
     }
-
-    public TMessage LatchedMessage
-    {
-        set => latchedMessage = value ?? throw new NullReferenceException("Latched message cannot be null");
-    }
-    
-    NullableMessage<TMessage> ILatchedMessageProvider<TMessage>.GetLatchedMessage() => latchedMessage;
 
     public SenderManager(RosPublisher<TMessage> publisher, TopicInfo topicInfo)
     {
@@ -119,7 +101,7 @@ internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage
                     break;
                 }
 
-                if (client.Client.RemoteEndPoint == null || client.Client.LocalEndPoint == null)
+                if (client.Client is not { RemoteEndPoint: IPEndPoint, LocalEndPoint: IPEndPoint })
                 {
                     Logger.LogFormat("{0}: Received a request, but failed to initialize connection.", this);
                     continue;
@@ -209,9 +191,9 @@ internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage
 
     public void Publish(in TMessage msg)
     {
-        if (LatchingEnabled)
+        if (latchingEnabled)
         {
-            latchedMessage = msg;
+            latchedMessage = new NullableMessage(msg);
         }
 
         foreach (var sender in cachedSenders)
@@ -222,9 +204,9 @@ internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage
 
     public ValueTask PublishAndWaitAsync(in TMessage msg, CancellationToken token)
     {
-        if (LatchingEnabled)
+        if (latchingEnabled)
         {
-            latchedMessage = msg;
+            latchedMessage = new NullableMessage(msg);
         }
 
         var localSenders = cachedSenders;
@@ -254,21 +236,21 @@ internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage
     {
         if (disposed) return;
         disposed = true;
-        
+
         tokenSource.Cancel();
 
         // try to make the listener come out
         await StreamUtils.EnqueueLocalConnectionAsync(Endpoint.Port, this, token);
         listener.Stop();
-        
+
         await task.AwaitNoThrow(2000, this, token);
 
         var tasks = senders.Select(sender => sender.DisposeAsync(token).AsTask());
         await Task.WhenAll(tasks).AwaitNoThrow(this);
-        
+
         senders.Clear();
 
-        cachedSenders = Array.Empty<IProtocolSender<TMessage>>();
+        cachedSenders = Array.Empty<ProtocolSender<TMessage>>();
         latchedMessage = default;
     }
 
@@ -285,22 +267,50 @@ internal sealed class SenderManager<TMessage> : ILatchedMessageProvider<TMessage
     }
 }
 
-internal readonly struct NullableMessage<TMessage>
+internal class LatchedMessageProvider<TMessage>
 {
-    public readonly TMessage? value;
-    public readonly bool hasValue;
+    protected NullableMessage latchedMessage;
+    protected bool latchingEnabled;
 
-    NullableMessage(in TMessage element)
+    public TMessage LatchedMessage
     {
-        value = element;
-        hasValue = true;
+        set => latchedMessage =
+            new NullableMessage(value ?? throw new NullReferenceException("Latched message cannot be null"));
     }
 
-    public static implicit operator NullableMessage<TMessage>(in TMessage message) => new(message);
-}
+    public bool LatchingEnabled
+    {
+        get => latchingEnabled;
+        set
+        {
+            latchingEnabled = value;
+            latchedMessage = default;
+        }
+    }
 
-internal interface ILatchedMessageProvider<TMessage>
-{
-    bool HasLatchedMessage() => GetLatchedMessage().hasValue;
-    NullableMessage<TMessage> GetLatchedMessage();
+    public bool HasLatchedMessage => latchedMessage.hasValue;
+
+    public bool TryGetLatchedMessage([NotNullWhen(true)] out TMessage? v)
+    {
+        if (latchedMessage is { hasValue: true, value: not null })
+        {
+            v = latchedMessage.value;
+            return true;
+        }
+
+        v = default;
+        return false;
+    }
+
+    protected readonly struct NullableMessage
+    {
+        public readonly TMessage? value;
+        public readonly bool hasValue;
+
+        public NullableMessage(in TMessage element)
+        {
+            value = element;
+            hasValue = true;
+        }
+    }
 }

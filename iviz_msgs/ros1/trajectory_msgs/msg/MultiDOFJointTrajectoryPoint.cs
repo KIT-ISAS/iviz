@@ -46,23 +46,29 @@ namespace Iviz.Msgs.TrajectoryMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Twist>.Value
-                    : new GeometryMsgs.Twist[n];
-                for (int i = 0; i < n; i++)
+                GeometryMsgs.Twist[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Twist>.Value;
+                else
                 {
-                    array[i] = new GeometryMsgs.Twist(ref b);
+                    array = new GeometryMsgs.Twist[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new GeometryMsgs.Twist(ref b);
+                    }
                 }
                 Velocities = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Twist>.Value
-                    : new GeometryMsgs.Twist[n];
-                for (int i = 0; i < n; i++)
+                GeometryMsgs.Twist[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Twist>.Value;
+                else
                 {
-                    array[i] = new GeometryMsgs.Twist(ref b);
+                    array = new GeometryMsgs.Twist[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new GeometryMsgs.Twist(ref b);
+                    }
                 }
                 Accelerations = array;
             }
@@ -86,24 +92,30 @@ namespace Iviz.Msgs.TrajectoryMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Twist>.Value
-                    : new GeometryMsgs.Twist[n];
-                for (int i = 0; i < n; i++)
+                GeometryMsgs.Twist[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Twist>.Value;
+                else
                 {
-                    array[i] = new GeometryMsgs.Twist(ref b);
+                    array = new GeometryMsgs.Twist[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new GeometryMsgs.Twist(ref b);
+                    }
                 }
                 Velocities = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<GeometryMsgs.Twist>.Value
-                    : new GeometryMsgs.Twist[n];
-                for (int i = 0; i < n; i++)
+                GeometryMsgs.Twist[] array;
+                if (n == 0) array = EmptyArray<GeometryMsgs.Twist>.Value;
+                else
                 {
-                    array[i] = new GeometryMsgs.Twist(ref b);
+                    array = new GeometryMsgs.Twist[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new GeometryMsgs.Twist(ref b);
+                    }
                 }
                 Accelerations = array;
             }
@@ -155,19 +167,9 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public void RosValidate()
         {
-            if (Transforms is null) BuiltIns.ThrowNullReference(nameof(Transforms));
-            if (Velocities is null) BuiltIns.ThrowNullReference(nameof(Velocities));
-            for (int i = 0; i < Velocities.Length; i++)
-            {
-                if (Velocities[i] is null) BuiltIns.ThrowNullReference(nameof(Velocities), i);
-                Velocities[i].RosValidate();
-            }
-            if (Accelerations is null) BuiltIns.ThrowNullReference(nameof(Accelerations));
-            for (int i = 0; i < Accelerations.Length; i++)
-            {
-                if (Accelerations[i] is null) BuiltIns.ThrowNullReference(nameof(Accelerations), i);
-                Accelerations[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Transforms, nameof(Transforms));
+            BuiltIns.ThrowIfNull(Velocities, nameof(Velocities));
+            BuiltIns.ThrowIfNull(Accelerations, nameof(Accelerations));
         }
     
         public int RosMessageLength

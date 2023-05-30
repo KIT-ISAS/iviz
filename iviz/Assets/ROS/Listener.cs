@@ -1,52 +1,31 @@
 ﻿#nullable enable
 
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
-using System.Threading;
 using System.Threading.Channels;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Roslib;
-using Iviz.Tools;
 using JetBrains.Annotations;
-using UnityEngine;
-using UnityEngine.Scripting;
 
 namespace Iviz.Ros
 {
-    /// <inheritdoc cref="IListener"/>
+    /// <inheritdoc cref="Listener"/>
     /// <typeparam name="T">The ROS message type</typeparam>
-    public sealed class Listener<T> : IListener where T : IMessage, new()
+    public sealed class Listener<T> : Listener where T : IMessage, new()
     {
-        static RosConnection Connection => RosManager.RosConnection;
-
-        readonly ChannelWriter<T>? messageWriter;
-        readonly ChannelReader<T>? messageReader;
+        readonly ChannelWriter<(T msg, int messageSize)>? messageWriter;
+        readonly ChannelReader<(T msg, int messageSize)>? messageReader;
 
         readonly Action<T>? handlerOnGameThread;
         readonly Func<T, IRosConnection, bool>? directHandler;
-        readonly Serializer<T> serializer;
 
         int droppedMsgCounter;
         int lastMsgBytes;
         int totalMsgCounter;
         int recentMsgCounter;
         RosTransportHint transportHint;
-        bool subscribed;
 
-        int? NumPublishers => Connection.GetNumPublishers(Topic);
-
-        public string Topic { get; }
-        public string Type { get; }
-        public RosListenerStats Stats { get; private set; }
-
-        // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
-        public bool Subscribed => subscribed;
-
-        public RosTransportHint TransportHint
+        public override RosTransportHint TransportHint
         {
             get => transportHint;
             set
@@ -61,17 +40,14 @@ namespace Iviz.Ros
             }
         }
 
-        Listener(string topic, RosTransportHint transportHint)
+        Listener(string topic, RosTransportHint transportHint, T generator) : base(topic, generator.RosMessageType)
         {
-            ThrowHelper.ThrowIfNullOrEmpty(topic, nameof(topic));
-            Topic = topic;
-
-            var generator = new T();
-            Type = generator.RosMessageType;
-            serializer = generator.CreateSerializer();
-
             this.transportHint = transportHint;
             GameThread.EverySecond += UpdateStats;
+        }
+        
+        Listener(string topic, RosTransportHint transportHint) :  this(topic, transportHint, new T())
+        {
         }
 
         /// <summary>
@@ -89,12 +65,14 @@ namespace Iviz.Ros
             handlerOnGameThread = handler;
             GameThread.ListenersEveryFrame += CallHandlerOnGameThread;
             Connection.Subscribe(this);
-            subscribed = true;
+            Subscribed = true;
 
             var options = new BoundedChannelOptions(maxQueueSize)
                 { SingleReader = true, FullMode = BoundedChannelFullMode.DropOldest };
-
-            var messageQueue = Channel.CreateBounded<T>(options);
+            void OnItemDropped((T, int) _) => droppedMsgCounter++;
+            
+            var messageQueue = Channel.CreateBounded<(T, int)>(options, OnItemDropped);
+            
             messageReader = messageQueue.Reader;
             messageWriter = messageQueue.Writer;
         }
@@ -118,7 +96,7 @@ namespace Iviz.Ros
             ThrowHelper.ThrowIfNull(handler, nameof(handler));
             directHandler = handler;
             Connection.Subscribe(this);
-            subscribed = true;
+            Subscribed = true;
         }
 
         /// <summary>
@@ -131,7 +109,7 @@ namespace Iviz.Ros
         {
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             GameThread.EverySecond -= UpdateStats;
             if (handlerOnGameThread != null)
@@ -160,7 +138,7 @@ namespace Iviz.Ros
             }
 
             Connection.Unsubscribe(this);
-            subscribed = false;
+            Subscribed = false;
         }
 
         /// <summary>
@@ -174,10 +152,10 @@ namespace Iviz.Ros
             }
 
             Connection.Subscribe(this);
-            subscribed = true;
+            Subscribed = true;
         }
 
-        public void SetSuspend(bool value)
+        public override void SetSuspend(bool value)
         {
             if (value)
             {
@@ -189,40 +167,60 @@ namespace Iviz.Ros
             }
         }
 
-        public void SetPause(bool value)
-        {
-            Connection.SetPause(this, value);
-        }
-
-        public void Reset()
+        public override void Reset()
         {
             Unsubscribe();
             Subscribe();
         }
 
-        internal void EnqueueMessage(T msg, IRosConnection receiver)
+        internal void EnqueueMessage(T msg, MessageInfo messageInfo)
         {
-            if (!subscribed)
+            if (!Subscribed)
             {
                 return;
             }
 
-            if (messageWriter == null)
+            int messageSize = messageInfo.MessageSize;
+            if (messageWriter is not null)
             {
-                CallHandlerDirect(msg, receiver);
+                if (!messageWriter.TryWrite((msg, messageSize)))
+                {
+                    droppedMsgCounter++;
+                }
+
+                // messageWriter gets handled in CallHandlerOnGameThread()
                 return;
             }
 
-            if (!messageWriter.TryWrite(msg))
+            // -----
+            
+            if (directHandler == null) // shouldn't happen
             {
-                droppedMsgCounter++;
+                return;
+            }
+
+            totalMsgCounter++;
+            recentMsgCounter++;
+            lastMsgBytes += messageSize;
+
+            try
+            {
+                if (!directHandler(msg, messageInfo.Connection))
+                {
+                    droppedMsgCounter++;
+                }
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{ToString()}: Error during callback handler", e); // happens with annoying frequency
             }
         }
 
         void CallHandlerOnGameThread()
         {
-            if (!subscribed || handlerOnGameThread == null || messageReader == null)
+            if (!Subscribed || handlerOnGameThread == null || messageReader == null)
             {
+                // shouldn't happen
                 return;
             }
 
@@ -234,52 +232,25 @@ namespace Iviz.Ros
 
             for (int i = 0; i < messageCount; i++)
             {
-                if (!messageReader.TryRead(out var msg))
+                if (!messageReader.TryRead(out var info))
                 {
-                    break; // shouldn't happen, single reader
+                    break; // shouldn't fail, single reader
                 }
+
+                lastMsgBytes += info.messageSize;
 
                 try
                 {
-                    lastMsgBytes += serializer.RosMessageLength(msg);
-                    handlerOnGameThread(msg);
+                    handlerOnGameThread(info.msg);
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{ToString()}: Error during callback", e);
+                    RosLogger.Error($"{ToString()}: Error during callback handler", e);
                 }
             }
 
             totalMsgCounter += messageCount;
             recentMsgCounter += messageCount;
-        }
-
-        void CallHandlerDirect(T msg, IRosConnection receiver)
-        {
-            if (directHandler == null) // shouldn't happen
-            {
-                return;
-            }
-
-            totalMsgCounter++;
-            recentMsgCounter++;
-
-            bool processed;
-            try
-            {
-                lastMsgBytes += serializer.RosMessageLength(msg);
-                processed = directHandler(msg, receiver);
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{ToString()}: Error during callback", e); // happens with annoying frequency
-                processed = false;
-            }
-
-            if (!processed)
-            {
-                droppedMsgCounter++;
-            }
         }
 
         void UpdateStats()
@@ -304,37 +275,5 @@ namespace Iviz.Ros
             droppedMsgCounter = 0;
             recentMsgCounter = 0;
         }
-
-        public void WriteDescriptionTo(StringBuilder description)
-        {
-            if (NumPublishers is not { } numPublishers)
-            {
-                description.Append("Off");
-            }
-            else if (!Subscribed)
-            {
-                description.Append("PAUSED");
-            }
-            else
-            {
-                description.Append(numPublishers.ToString()).Append(" pub");
-            }
-        }
-
-        public override string ToString() => $"[{nameof(Listener<T>)} {Topic} [{Type}]]";
-    }
-
-    public static class Listener
-    {
-        public static IListener Create(string topicName, Func<IMessage, IRosConnection, bool> handler, Type csType)
-        {
-            Type listenerType = typeof(Listener<>).MakeGenericType(csType);
-            return (IListener)Activator.CreateInstance(listenerType,
-                topicName, handler, RosTransportHint.PreferTcp);
-        }
-
-        [DoesNotReturn]
-        public static IListener ThrowUnsupportedMessageType(string message) =>
-            throw new InvalidOperationException($"Type {message} is not supported!");
     }
 }

@@ -17,7 +17,20 @@
           "Iviz.Rosmaster.Lib": "1.0.0",
           "Iviz.TfManager": "1.0.0",
           "Iviz.Urdf": "1.0.0",
-          "Iviz.XmlRpc": "1.0.0"
+          "Iviz.XmlRpc": "1.0.0",
+          "Iviz.Msgs.Reference": "1.0.0.0",
+          "Iviz.MsgsGen.Dynamic.Lib.Reference": "1.0.0.0",
+          "Iviz.MsgsGen.Lib.Reference": "1.0.0.0",
+          "Iviz.Ntp.Reference": "1.0.0.0",
+          "Iviz.Rosbag.Lib.Reference": "1.0.0.0",
+          "Iviz.RosClient.Reference": "1.0.0.0",
+          "Iviz.Roslib.Reference": "1.0.0.0",
+          "Iviz.Roslib2.Reference": "1.0.0.0",
+          "Iviz.Rosmaster.Lib.Reference": "1.0.0.0",
+          "Iviz.TfManager.Reference": "1.0.0.0",
+          "Iviz.Tools.Reference": "1.0.0.0",
+          "Iviz.Urdf.Reference": "1.0.0.0",
+          "Iviz.XmlRpc.Reference": "1.0.0.0"
         },
         "runtime": {
           "Iviz.Utils.dll": {}
@@ -51,7 +64,7 @@
         "runtime": {
           "lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll": {
             "assemblyVersion": "4.0.4.1",
-            "fileVersion": "4.6.28619.1"
+            "fileVersion": "4.0.0.0"
           }
         }
       },
@@ -193,6 +206,110 @@
         "runtime": {
           "Iviz.XmlRpc.dll": {}
         }
+      },
+      "Iviz.Msgs.Reference/1.0.0.0": {
+        "runtime": {
+          "Iviz.Msgs.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Iviz.MsgsGen.Dynamic.Lib.Reference/1.0.0.0": {
+        "runtime": {
+          "Iviz.MsgsGen.Dynamic.Lib.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Iviz.MsgsGen.Lib.Reference/1.0.0.0": {
+        "runtime": {
+          "Iviz.MsgsGen.Lib.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Iviz.Ntp.Reference/1.0.0.0": {
+        "runtime": {
+          "Iviz.Ntp.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Iviz.Rosbag.Lib.Reference/1.0.0.0": {
+        "runtime": {
+          "Iviz.Rosbag.Lib.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Iviz.RosClient.Reference/1.0.0.0": {
+        "runtime": {
+          "Iviz.RosClient.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Iviz.Roslib.Reference/1.0.0.0": {
+        "runtime": {
+          "Iviz.Roslib.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Iviz.Roslib2.Reference/1.0.0.0": {
+        "runtime": {
+          "Iviz.Roslib2.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Iviz.Rosmaster.Lib.Reference/1.0.0.0": {
+        "runtime": {
+          "Iviz.Rosmaster.Lib.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Iviz.TfManager.Reference/1.0.0.0": {
+        "runtime": {
+          "Iviz.TfManager.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Iviz.Tools.Reference/1.0.0.0": {
+        "runtime": {
+          "Iviz.Tools.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Iviz.Urdf.Reference/1.0.0.0": {
+        "runtime": {
+          "Iviz.Urdf.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Iviz.XmlRpc.Reference/1.0.0.0": {
+        "runtime": {
+          "Iviz.XmlRpc.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
       }
     }
   },
@@ -306,6 +423,71 @@
     },
     "Iviz.XmlRpc/1.0.0": {
       "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.Msgs.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.MsgsGen.Dynamic.Lib.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.MsgsGen.Lib.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.Ntp.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.Rosbag.Lib.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.RosClient.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.Roslib.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.Roslib2.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.Rosmaster.Lib.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.TfManager.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.Tools.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.Urdf.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.XmlRpc.Reference/1.0.0.0": {
+      "type": "reference",
       "serviceable": false,
       "sha512": ""
     }

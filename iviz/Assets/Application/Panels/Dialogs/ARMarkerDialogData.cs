@@ -67,7 +67,8 @@ namespace Iviz.App
         void WritePanelToConfiguration()
         {
             var markers = new List<ARSeenMarker>();
-            foreach (int index in ..panel.Types.Count)
+            int typesCount = panel.Types.Count;
+            for (int index = 0; index < typesCount; index++)
             {
                 var type = (ARMarkerType) panel.Types[index].Index;
                 if (type == ARMarkerType.Aruco)

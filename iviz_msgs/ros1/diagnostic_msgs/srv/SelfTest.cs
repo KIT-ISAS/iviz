@@ -121,12 +121,15 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.Deserialize(out Passed);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<DiagnosticStatus>.Value
-                    : new DiagnosticStatus[n];
-                for (int i = 0; i < n; i++)
+                DiagnosticStatus[] array;
+                if (n == 0) array = EmptyArray<DiagnosticStatus>.Value;
+                else
                 {
-                    array[i] = new DiagnosticStatus(ref b);
+                    array = new DiagnosticStatus[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new DiagnosticStatus(ref b);
+                    }
                 }
                 Status = array;
             }
@@ -140,12 +143,15 @@ namespace Iviz.Msgs.DiagnosticMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<DiagnosticStatus>.Value
-                    : new DiagnosticStatus[n];
-                for (int i = 0; i < n; i++)
+                DiagnosticStatus[] array;
+                if (n == 0) array = EmptyArray<DiagnosticStatus>.Value;
+                else
                 {
-                    array[i] = new DiagnosticStatus(ref b);
+                    array = new DiagnosticStatus[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new DiagnosticStatus(ref b);
+                    }
                 }
                 Status = array;
             }
@@ -181,13 +187,8 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Status is null) BuiltIns.ThrowNullReference(nameof(Status));
-            for (int i = 0; i < Status.Length; i++)
-            {
-                if (Status[i] is null) BuiltIns.ThrowNullReference(nameof(Status), i);
-                Status[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Id, nameof(Id));
+            BuiltIns.ThrowIfNull(Status, nameof(Status));
         }
     
         public int RosMessageLength

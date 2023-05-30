@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using Iviz.Msgs;
 
 namespace Iviz.Roslib.Utils;
 
@@ -7,7 +8,7 @@ namespace Iviz.Roslib.Utils;
 /// Class used by the senders and listeners. Basically keeps a rented array,
 /// and if the rent is too small, releases it and rents a larger one.
 /// </summary>
-internal sealed class ResizableRent : IDisposable
+public sealed class ResizableRent : IDisposable
 {
     static ArrayPool<byte> Pool => ArrayPool<byte>.Shared;
 
@@ -19,16 +20,16 @@ internal sealed class ResizableRent : IDisposable
     public Span<byte> this[Range range] => Array.AsSpan(range);
     public Span<byte> Slice(int start, int count) => AsSpan().Slice(start, count);
 
-    public ResizableRent()
+    public ResizableRent(int startSize = 16)
     {
-        Array = Pool.Rent(16);
+        Array = Pool.Rent(startSize);
     }
 
-    public void EnsureCapacity(int size)
+    public void EnsureCapacity(int size, bool retain = false)
     {
         if (disposed)
         {
-            throw new ObjectDisposedException("this", "Dispose() has already been called on this object.");
+            BuiltIns.ThrowObjectDisposed(nameof(ResizableRent));
         }
 
         if (Array.Length >= size)
@@ -36,8 +37,14 @@ internal sealed class ResizableRent : IDisposable
             return;
         }
 
+        byte[] newArray = Pool.Rent(size);
+        if (retain)
+        {
+            Buffer.BlockCopy(Array, 0, newArray, 0, Array.Length);
+        }
+
         Pool.Return(Array);
-        Array = Pool.Rent(size);
+        Array = newArray;
     }
 
     public void Dispose()

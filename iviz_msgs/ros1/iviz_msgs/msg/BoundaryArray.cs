@@ -24,12 +24,15 @@ namespace Iviz.Msgs.IvizMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Boundary>.Value
-                    : new Boundary[n];
-                for (int i = 0; i < n; i++)
+                Boundary[] array;
+                if (n == 0) array = EmptyArray<Boundary>.Value;
+                else
                 {
-                    array[i] = new Boundary(ref b);
+                    array = new Boundary[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Boundary(ref b);
+                    }
                 }
                 Boundaries = array;
             }
@@ -40,12 +43,15 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Boundary>.Value
-                    : new Boundary[n];
-                for (int i = 0; i < n; i++)
+                Boundary[] array;
+                if (n == 0) array = EmptyArray<Boundary>.Value;
+                else
                 {
-                    array[i] = new Boundary(ref b);
+                    array = new Boundary[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Boundary(ref b);
+                    }
                 }
                 Boundaries = array;
             }
@@ -76,12 +82,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Boundaries is null) BuiltIns.ThrowNullReference(nameof(Boundaries));
-            for (int i = 0; i < Boundaries.Length; i++)
-            {
-                if (Boundaries[i] is null) BuiltIns.ThrowNullReference(nameof(Boundaries), i);
-                Boundaries[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Boundaries, nameof(Boundaries));
         }
     
         public int RosMessageLength

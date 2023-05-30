@@ -223,7 +223,9 @@ namespace Iviz.MsgsGen
                     }
                     else
                     {
-                        result = $"public {CsClassType}[/*{ArraySize}*/] {CsFieldName};";
+                        result = isInStruct
+                            ? $"public fixed {CsClassType} {CsFieldName}[{ArraySize}];"
+                            : $"public {CsClassType}[/*{ArraySize}*/] {CsFieldName};";
                     }
 
                     break;

@@ -61,17 +61,19 @@ internal sealed class Ros2ServiceCaller : Signalizable
     void ProcessResponses(SerializedMessage serializedBuffer)
     {
         var rclServiceClient = ServiceClient;
-        while (rclServiceClient.TryTakeResponse(serializedBuffer, out var span, out long sequenceNumber))
+        if (!rclServiceClient.TryTakeResponse(serializedBuffer, out var span, out long sequenceNumber))
         {
-            var response = ReadBuffer2.Deserialize(generator, span);
-            if (!queue.TryRemove(sequenceNumber, out var responseTcs))
-            {
-                Logger.LogErrorFormat("{0}: Could not find request with sequence number {1}!", this, sequenceNumber);
-                continue;
-            }
-
-            responseTcs.TrySetResult(response);
+            return;
         }
+
+        var response = ReadBuffer2.Deserialize(generator, span);
+        if (!queue.TryRemove(sequenceNumber, out var responseTcs))
+        {
+            Logger.LogErrorFormat("{0}: Could not find request with sequence number {1}!", this, sequenceNumber);
+            return;
+        }
+
+        responseTcs.TrySetResult(response);
     }
 
     public async ValueTask DisposeAsync(CancellationToken token)

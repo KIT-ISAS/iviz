@@ -67,8 +67,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Covariance is null) BuiltIns.ThrowNullReference(nameof(Covariance));
-            if (Covariance.Length != 36) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(Covariance), Covariance.Length, 36);
+            BuiltIns.ThrowIfNull(Covariance, nameof(Covariance));
+            BuiltIns.ThrowIfWrongSize(Covariance, nameof(Covariance), 36);
         }
     
         public const int RosFixedMessageLength = 344;

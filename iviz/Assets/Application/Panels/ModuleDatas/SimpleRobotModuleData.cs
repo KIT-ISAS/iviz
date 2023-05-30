@@ -29,7 +29,7 @@ namespace Iviz.App
         public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.Robot;
         public override IConfiguration Configuration => RobotController.Config;
-        public override IController Controller => RobotController;
+        public override Controller Controller => RobotController;
 
         public SimpleRobotController RobotController { get; }
 
@@ -42,7 +42,7 @@ namespace Iviz.App
             UpdateModuleButton();
 
             RobotController.RobotFinishedLoading += OnRobotFinishedLoading;
-            IRosProvider.ConnectionStateChanged += OnConnectionStateChanged;
+            RosProvider.ConnectionStateChanged += OnConnectionStateChanged;
         }
 
         void OnConnectionStateChanged(ConnectionState state)
@@ -68,7 +68,7 @@ namespace Iviz.App
             {
                 RobotController.RobotFinishedLoading -= OnRobotFinishedLoading;
                 RobotController.Dispose();
-                IRosProvider.ConnectionStateChanged -= OnConnectionStateChanged;
+                RosProvider.ConnectionStateChanged -= OnConnectionStateChanged;
             }
             catch (Exception e)
             {

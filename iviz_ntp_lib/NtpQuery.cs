@@ -76,7 +76,7 @@ namespace Iviz.Ntp
                 throw new ArgumentNullException(nameof(ntpServer));
             }
 
-            using var ntpDataRent = new Rent<byte>(48);
+            using var ntpDataRent = new Rent(48);
             byte[] ntpData = ntpDataRent.Array;
             var ntpDataSegment = new ArraySegment<byte>(ntpData, 0, 48);
 

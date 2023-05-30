@@ -10,9 +10,9 @@ namespace Iviz.Ros
     {
         IRosSubscriber? Subscriber { get; }
         int Count { get; }
-        void Add(IListener subscriber);
-        void Remove(IListener subscriber);
-        ValueTask SubscribeAsync(IRosClient? client, IListener? listener = null, CancellationToken token = default);
+        void Add(Listener subscriber);
+        void Remove(Listener subscriber);
+        ValueTask SubscribeAsync(IRosClient? client, Listener? listener = null, CancellationToken token = default);
         ValueTask UnsubscribeAsync(CancellationToken token);
         void Invalidate();
         BagListener? BagListener { set; }

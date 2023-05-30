@@ -1737,7 +1737,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 91.23, y: 22.003021}
+  m_AnchoredPosition: {x: 91.23, y: 22.003052}
   m_SizeDelta: {x: 160, y: 34.693}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7703763062443363513
@@ -2023,6 +2023,7 @@ MonoBehaviour:
   scalerWidget: {fileID: 5801668422599994420}
   close: {fileID: 2288635148822782293}
   reset: {fileID: 5039433018750340199}
+  title: {fileID: 4591299535221156280}
   label: {fileID: 3995529945578263402}
   text: {fileID: 7289046693392530036}
   linkResolver: {fileID: 1740622445515295497}
@@ -2621,6 +2622,18 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 8626418458400541246}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4591299535221156280 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5188326523275551622, guid: a4a8590ebbf694fdca0a0d67674f3307,
+    type: 3}
+  m_PrefabInstance: {fileID: 8626418458400541246}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &8682521506341812505
 PrefabInstance:
   m_ObjectHideFlags: 0

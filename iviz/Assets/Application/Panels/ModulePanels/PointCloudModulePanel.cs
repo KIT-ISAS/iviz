@@ -9,7 +9,7 @@ namespace Iviz.App
     /// </summary>
     public sealed class PointCloudModulePanel : ListenerModulePanel
     {
-        static readonly List<string> DefaultChannels = new List<string> {"x", "y", "z"};
+        static readonly List<string> DefaultChannels = new() { "x", "y", "z" };
         public FrameWidget Frame { get; private set; }
         public DataLabelWidget NumPoints { get; private set; }
         public SliderWidgetWithScale PointSize { get; private set; }
@@ -35,17 +35,17 @@ namespace Iviz.App
             IntensityChannel = p.AddInputFieldWithHints("Intensity Channel")
                 .SetOptions(DefaultChannels);
 
-            PointCloudType = p.AddDropdown("Show as").SetOptions(new[] {"Points", "Cubes", "Spheres"});
+            PointCloudType = p.AddDropdown("Show as").SetOptions(new[] { "Points", "Cubes", "Spheres" });
 
             Colormap = p.AddDropdown("Colormap")
                 .SetOptions(Resource.Colormaps.Names)
-                .SetIndex((int) ColormapId.hsv);
+                .SetIndex((int)ColormapId.hsv);
             ForceMinMax = p.AddToggle("Colormap Override Min/Max");
             MinIntensity = p.AddSliderWidgetWithScale("Colormap Min");
             MaxIntensity = p.AddSliderWidgetWithScale("Colormap Max");
             FlipMinMax = p.AddToggle("Flip Min/Max");
 
-            
+
             p.AddCollapsibleWidget("Colormap")
                 .Attach(Colormap)
                 .Attach(ForceMinMax)
@@ -53,7 +53,7 @@ namespace Iviz.App
                 .Attach(MaxIntensity)
                 .Attach(FlipMinMax)
                 .FinishAttaching();
-            
+
 
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();

@@ -30,12 +30,15 @@ namespace Iviz.Msgs.ShapeMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MeshTriangle>.Value
-                    : new MeshTriangle[n];
-                for (int i = 0; i < n; i++)
+                MeshTriangle[] array;
+                if (n == 0) array = EmptyArray<MeshTriangle>.Value;
+                else
                 {
-                    array[i] = new MeshTriangle(ref b);
+                    array = new MeshTriangle[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MeshTriangle(ref b);
+                    }
                 }
                 Triangles = array;
             }
@@ -57,12 +60,15 @@ namespace Iviz.Msgs.ShapeMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MeshTriangle>.Value
-                    : new MeshTriangle[n];
-                for (int i = 0; i < n; i++)
+                MeshTriangle[] array;
+                if (n == 0) array = EmptyArray<MeshTriangle>.Value;
+                else
                 {
-                    array[i] = new MeshTriangle(ref b);
+                    array = new MeshTriangle[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MeshTriangle(ref b);
+                    }
                 }
                 Triangles = array;
             }
@@ -112,13 +118,8 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public void RosValidate()
         {
-            if (Triangles is null) BuiltIns.ThrowNullReference(nameof(Triangles));
-            for (int i = 0; i < Triangles.Length; i++)
-            {
-                if (Triangles[i] is null) BuiltIns.ThrowNullReference(nameof(Triangles), i);
-                Triangles[i].RosValidate();
-            }
-            if (Vertices is null) BuiltIns.ThrowNullReference(nameof(Vertices));
+            BuiltIns.ThrowIfNull(Triangles, nameof(Triangles));
+            BuiltIns.ThrowIfNull(Vertices, nameof(Vertices));
         }
     
         public int RosMessageLength

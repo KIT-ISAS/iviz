@@ -116,7 +116,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Path is null) BuiltIns.ThrowNullReference(nameof(Path));
+            BuiltIns.ThrowIfNull(Path, nameof(Path));
         }
     
         public int RosMessageLength

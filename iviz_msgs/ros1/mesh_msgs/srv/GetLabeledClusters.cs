@@ -90,7 +90,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
+            BuiltIns.ThrowIfNull(Uuid, nameof(Uuid));
         }
     
         public int RosMessageLength
@@ -135,12 +135,15 @@ namespace Iviz.Msgs.MeshMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MeshFaceCluster>.Value
-                    : new MeshFaceCluster[n];
-                for (int i = 0; i < n; i++)
+                MeshFaceCluster[] array;
+                if (n == 0) array = EmptyArray<MeshFaceCluster>.Value;
+                else
                 {
-                    array[i] = new MeshFaceCluster(ref b);
+                    array = new MeshFaceCluster[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MeshFaceCluster(ref b);
+                    }
                 }
                 Clusters = array;
             }
@@ -151,12 +154,15 @@ namespace Iviz.Msgs.MeshMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MeshFaceCluster>.Value
-                    : new MeshFaceCluster[n];
-                for (int i = 0; i < n; i++)
+                MeshFaceCluster[] array;
+                if (n == 0) array = EmptyArray<MeshFaceCluster>.Value;
+                else
                 {
-                    array[i] = new MeshFaceCluster(ref b);
+                    array = new MeshFaceCluster[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MeshFaceCluster(ref b);
+                    }
                 }
                 Clusters = array;
             }
@@ -187,12 +193,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Clusters is null) BuiltIns.ThrowNullReference(nameof(Clusters));
-            for (int i = 0; i < Clusters.Length; i++)
-            {
-                if (Clusters[i] is null) BuiltIns.ThrowNullReference(nameof(Clusters), i);
-                Clusters[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Clusters, nameof(Clusters));
         }
     
         public int RosMessageLength

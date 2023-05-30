@@ -58,8 +58,8 @@ namespace Iviz.Msgs.UniqueIdentifierMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
-            if (Uuid.Length != 16) BuiltIns.ThrowInvalidSizeForFixedArray(nameof(Uuid), Uuid.Length, 16);
+            BuiltIns.ThrowIfNull(Uuid, nameof(Uuid));
+            BuiltIns.ThrowIfWrongSize(Uuid, nameof(Uuid), 16);
         }
     
         public const int RosFixedMessageLength = 16;

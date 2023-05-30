@@ -38,7 +38,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Axes = array;
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<int>.Value;
                 else
                 {
-                     array = new int[n];
+                    array = new int[n];
                     b.DeserializeStructArray(array);
                 }
                 Buttons = array;
@@ -66,7 +66,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 Axes = array;
@@ -77,7 +77,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<int>.Value;
                 else
                 {
-                     array = new int[n];
+                    array = new int[n];
                     b.DeserializeStructArray(array);
                 }
                 Buttons = array;
@@ -109,8 +109,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Axes is null) BuiltIns.ThrowNullReference(nameof(Axes));
-            if (Buttons is null) BuiltIns.ThrowNullReference(nameof(Buttons));
+            BuiltIns.ThrowIfNull(Axes, nameof(Axes));
+            BuiltIns.ThrowIfNull(Buttons, nameof(Buttons));
         }
     
         public int RosMessageLength

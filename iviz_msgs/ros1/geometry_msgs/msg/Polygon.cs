@@ -71,7 +71,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Points is null) BuiltIns.ThrowNullReference(nameof(Points));
+            BuiltIns.ThrowIfNull(Points, nameof(Points));
         }
     
         public int RosMessageLength

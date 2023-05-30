@@ -37,7 +37,7 @@ namespace Iviz.Controllers
 
         public override TfFrame Frame => TfModule.FixedFrame;
         public Sender<Feedback>? FeedbackSender { get; }
-        public override IListener Listener { get; }
+        public override Listener Listener { get; }
 
         public VizWidgetConfiguration Config
         {
@@ -72,6 +72,8 @@ namespace Iviz.Controllers
             }
         }
 
+        public string Title => vizHandler.Title;
+
         public string Topic => Config.Topic;
 
         public int NumEntriesForLog => vizHandler.Count;
@@ -83,68 +85,26 @@ namespace Iviz.Controllers
             string configTopic = configuration?.Topic ?? topic;
             string configType = configuration?.Type ?? type;
 
-            switch (configType)
+            (vizHandler, Listener) = configType switch
             {
-                case Widget.MessageType:
-                {
-                    var handler = new WidgetHandler(this);
-                    vizHandler = handler;
-                    Listener = new Listener<Widget>(configTopic, handler.Handler, 50);
-                    break;
-                }
-                case WidgetArray.MessageType:
-                {
-                    var handler = new WidgetHandler(this);
-                    vizHandler = handler;
-                    Listener = new Listener<WidgetArray>(configTopic, handler.Handler, 50);
-                    break;
-                }
-                case Dialog.MessageType:
-                {
-                    var handler = new DialogHandler(this);
-                    vizHandler = handler;
-                    Listener = new Listener<Dialog>(configTopic, handler.Handler, 50);
-                    break;
-                }
-                case DialogArray.MessageType:
-                {
-                    var handler = new DialogHandler(this);
-                    vizHandler = handler;
-                    Listener = new Listener<DialogArray>(configTopic, handler.Handler, 50);
-                    break;
-                }
-                case RobotPreview.MessageType:
-                {
-                    var handler = new RobotPreviewHandler();
-                    vizHandler = handler;
-                    Listener = new Listener<RobotPreview>(configTopic, handler.Handler, 50);
-                    break;
-                }
-                case RobotPreviewArray.MessageType:
-                {
-                    var handler = new RobotPreviewHandler();
-                    vizHandler = handler;
-                    Listener = new Listener<RobotPreviewArray>(configTopic, handler.Handler, 50);
-                    break;
-                }
-                case Boundary.MessageType:
-                {
-                    var handler = new BoundaryHandler(this);
-                    vizHandler = handler;
-                    Listener = new Listener<Boundary>(configTopic, handler.Handler, 50);
-                    break;
-                }
-                case BoundaryArray.MessageType:
-                {
-                    var handler = new BoundaryHandler(this);
-                    vizHandler = handler;
-                    Listener = new Listener<BoundaryArray>(configTopic, handler.Handler, 50);
-                    break;
-                }
-                default:
-                    Ros.Listener.ThrowUnsupportedMessageType(configTopic);
-                    break; // unreachable
-            }
+                Widget.MessageType => Create(new WidgetHandler(this)),
+                WidgetArray.MessageType => CreateForArray(new WidgetHandler(this)),
+
+                Dialog.MessageType => Create(new DialogHandler(this)),
+                DialogArray.MessageType => CreateForArray(new DialogHandler(this)),
+
+                RobotPreview.MessageType => Create(new RobotPreviewHandler()),
+                RobotPreviewArray.MessageType => CreateForArray(new RobotPreviewHandler()),
+
+                Boundary.MessageType => Create(new BoundaryHandler(this)),
+                BoundaryArray.MessageType => CreateForArray(new BoundaryHandler(this)),
+
+                DetectionBox.MessageType => Create(new DetectionHandler()),
+                DetectionBoxArray.MessageType => CreateForArray(new DetectionHandler()),
+                
+                _ =>
+                    ((VizHandler)null!, Listener.ThrowUnsupportedMessageType(configType)),
+            };
 
             Config = configuration ?? new VizWidgetConfiguration
             {
@@ -154,11 +114,20 @@ namespace Iviz.Controllers
             };
 
             FeedbackSender = new Sender<Feedback>($"{config.Topic}/feedback");
+            
+            
+            // -----
+            const int maxQueueSize = 50;
+
+            (VizHandler, Listener<T>) Create<T>(IHandles<T> handler) where T : class, IMessage, new() =>
+                ((VizHandler)handler, new(configTopic, handler.Handle, maxQueueSize));
+
+            (VizHandler, Listener<T>) CreateForArray<T>(IHandlesArray<T> handler) where T : class, IMessage, new() =>
+                ((VizHandler)handler, new(configTopic, handler.Handle, maxQueueSize));
         }
 
         public override void ResetController()
         {
-            base.ResetController();
             vizHandler.RemoveAll();
         }
 

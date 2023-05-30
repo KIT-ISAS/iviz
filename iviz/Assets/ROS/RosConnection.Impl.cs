@@ -23,12 +23,11 @@ namespace Iviz.Ros
     internal sealed partial class RosConnection
     {
         static TopicNameType[] EmptyTopics => Array.Empty<TopicNameType>();
-        static string[] EmptyParameters => Array.Empty<string>();
         static readonly Random Random = Defaults.Random;
 
-        readonly IRosPublisher?[] publishers = new IRosPublisher[256];
-        readonly Dictionary<string, IAdvertisedTopic> publishersByTopic = new();
-        readonly Dictionary<string, IAdvertisedService> servicesByTopic = new();
+        readonly BaseRosPublisher?[] publishers = new BaseRosPublisher[256];
+        readonly Dictionary<string, AdvertisedTopic> publishersByTopic = new();
+        readonly Dictionary<string, AdvertisedService> servicesByTopic = new();
         readonly Dictionary<string, ISubscribedTopic> subscribersByTopic = new();
         readonly List<(string hostname, string address)> hostAliases = new();
 
@@ -36,7 +35,6 @@ namespace Iviz.Ros
         TopicNameType[] cachedPublishedTopics = EmptyTopics;
         TopicNameType[] cachedTopics = EmptyTopics;
         SystemState? cachedSystemState;
-        IRosClient? client;
         BagListener? bagListener;
 
         float? modelServiceBlacklistTime;
@@ -49,20 +47,12 @@ namespace Iviz.Ros
 
         RosVersion version = RosVersion.ROS1;
 
-        // ROS1 stuff
-        Uri? masterUri;
-        string? myId;
-        Uri? myUri;
 
-        // ROS2 stuff
-        int domainId;
-        Endpoint? discoveryServer;
-
-        bool Connected => client != null;
+        bool Connected => client is not null;
 
         public static event Action<RosVersion>? RosVersionChanged;
 
-        public RosVersion RosVersion
+        public override RosVersion RosVersion
         {
             get => version;
             set
@@ -94,59 +84,7 @@ namespace Iviz.Ros
             }
         }
 
-        public IRosClient Client => client ?? throw new InvalidOperationException("Client not connected");
-
-        public Uri? MasterUri
-        {
-            get => masterUri;
-            set
-            {
-                masterUri = value;
-                Disconnect();
-            }
-        }
-
-        public string? MyId
-        {
-            get => myId;
-            set
-            {
-                myId = value;
-                Disconnect();
-            }
-        }
-
-        public Uri? MyUri
-        {
-            get => myUri;
-            set
-            {
-                myUri = value;
-                Disconnect();
-            }
-        }
-
-        public Endpoint? DiscoveryServer
-        {
-            get => discoveryServer;
-            set
-            {
-                discoveryServer = value;
-                Disconnect();
-            }
-        }
-
-        public int DomainId
-        {
-            get => domainId;
-            set
-            {
-                domainId = value;
-                Disconnect();
-            }
-        }
-
-        public BagListener? BagListener
+        public override BagListener? BagListener
         {
             get => bagListener;
             set
@@ -172,7 +110,7 @@ namespace Iviz.Ros
             }
         }
 
-        public void SetHostAliases(IEnumerable<(string hostname, string address)> newHostAliases)
+        public override void SetHostAliases(IEnumerable<(string hostname, string address)> newHostAliases)
         {
             hostAliases.Clear();
             hostAliases.AddRange(newHostAliases);
@@ -191,31 +129,36 @@ namespace Iviz.Ros
             client = null;
         }
 
-        internal async ValueTask<bool> ConnectAsync()
+        bool ValidateCanConnect()
         {
             if (MyId == null)
             {
-                RosLogger.Internal("Connection request failed. Invalid id.");
+                RosLogger.Internal("Connection request failed! Own id has not been set or is invalid.");
                 return false;
             }
 
-            if (version == RosVersion.ROS1)
+            if (version != RosVersion.ROS1)
             {
-                if (MasterUri == null ||
-                    MasterUri.Scheme != "http")
-                {
-                    RosLogger.Internal("Connection request failed. Invalid master uri.");
-                    return false;
-                }
-
-                if (MyUri == null ||
-                    MyUri.Scheme != "http")
-                {
-                    RosLogger.Internal("Connection request failed. Invalid own uri.");
-                    return false;
-                }
+                return true;
             }
 
+            if (MasterUri == null || MasterUri.Scheme != "http")
+            {
+                RosLogger.Internal("Connection request failed! Master uri has not been set or is invalid.");
+                return false;
+            }
+
+            if (MyUri == null || MyUri.Scheme != "http")
+            {
+                RosLogger.Internal("Connection request failed! Own uri has not been set or is invalid.");
+                return false;
+            }
+
+            return true;
+        }
+
+        internal async ValueTask<bool> ConnectAsync()
+        {
             if (Connected)
             {
                 Debug.LogWarning("Warning: New client requested, but old client still running?!");
@@ -258,12 +201,14 @@ namespace Iviz.Ros
 
                     case RosVersion.ROS2:
                         if (!IsRos2VersionSupported)
+#pragma warning disable CS0162
                         {
                             // do not replace with throw helper!
                             // we need the remaining lines to be clearly unreachable so they get stripped
                             // otherwise standalone will fail because the ros2 lib cannot be found
                             throw new InvalidOperationException("ROS2 not supported!");
                         }
+#pragma warning restore CS0162
 
                         SetEnvironmentVariable("FASTRTPS_DEFAULT_PROFILES_FILE", Settings.Ros2Folder + "/profiles.xml");
                         SetEnvironmentVariable("ROS_DISCOVERY_SERVER", DiscoveryServer?.Description());
@@ -378,8 +323,8 @@ namespace Iviz.Ros
         {
             string valueStr = value != null ? $"\"{value}\"" : "(none)";
             RosLogger.Info(
-                value == null 
-                    ? $"[{nameof(RosConnection)}]: Setting environment variable {variable}={valueStr}" 
+                value == null
+                    ? $"[{nameof(RosConnection)}]: Setting environment variable {variable}={valueStr}"
                     : $"[{nameof(RosConnection)}]: Skipping environment variable {variable}");
 
             try
@@ -567,7 +512,9 @@ namespace Iviz.Ros
 
         static async ValueTask NtpCheckerTask(string hostname, CancellationToken token)
         {
-            RosLogger.Debug("[NtpChecker]: Starting NTP task.");
+            const string ntpCheckerName = "[NtpChecker]";
+
+            RosLogger.Debug($"{ntpCheckerName}: Starting NTP task.");
             time.GlobalTimeOffset = TimeSpan.Zero;
 
             TimeSpan offset;
@@ -579,11 +526,11 @@ namespace Iviz.Ros
             {
                 if (e is OperationCanceledException or IOException)
                 {
-                    RosLogger.Debug("[NtpChecker]: Master does not appear to have an NTP clock running.");
+                    RosLogger.Debug($"{ntpCheckerName}: Master does not appear to have an NTP clock running.");
                 }
                 else
                 {
-                    RosLogger.Error("[NtpChecker]: Failed to read NTP clock from the master.", e);
+                    RosLogger.Error($"{ntpCheckerName}: Failed to read NTP clock from the master.", e);
                 }
 
                 return;
@@ -592,7 +539,7 @@ namespace Iviz.Ros
             const int minOffsetInMs = 2;
             if (Mathf.Abs((float)offset.TotalMilliseconds) < minOffsetInMs)
             {
-                RosLogger.Info("[NtpChecker]: No significant time offset detected from master clock.");
+                RosLogger.Info($"{ntpCheckerName}: No significant time offset detected from master clock.");
             }
             else
             {
@@ -600,7 +547,7 @@ namespace Iviz.Ros
                 string offsetStr = Mathf.Abs((float)offset.TotalSeconds) >= 1
                     ? offset.TotalSeconds.ToString("#,0.###") + " sec"
                     : offset.TotalMilliseconds.ToString("#,0.###") + " ms";
-                RosLogger.Info($"[NtpChecker]: Master clock appears to have a time offset of {offsetStr}. " +
+                RosLogger.Info($"{ntpCheckerName}: Master clock appears to have a time offset of {offsetStr}. " +
                                "Local published messages will use this offset.");
             }
         }
@@ -620,13 +567,13 @@ namespace Iviz.Ros
 
         static Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 1000), token);
 
-        async ValueTask ReAdvertise(IRosClient newClient, IAdvertisedTopic topic, CancellationToken token)
+        async ValueTask ReAdvertise(IRosClient newClient, AdvertisedTopic topic, CancellationToken token)
         {
             await RandomDelay(token);
             await topic.AdvertiseAsync(newClient, token);
             int id = GetFreeId();
             topic.Id = id;
-            publishers[id] = topic.Publisher;
+            publishers[id] = (BaseRosPublisher?)topic.Publisher;
         }
 
         static async ValueTask ReSubscribe(IRosClient newClient, ISubscribedTopic topic, CancellationToken token)
@@ -635,14 +582,14 @@ namespace Iviz.Ros
             await topic.SubscribeAsync(newClient, token: token);
         }
 
-        static async ValueTask ReAdvertiseService(IRosClient newClient, IAdvertisedService service,
+        static async ValueTask ReAdvertiseService(IRosClient newClient, AdvertisedService service,
             CancellationToken token)
         {
             await RandomDelay(token);
             await service.AdvertiseAsync(newClient, token);
         }
 
-        public void Disconnect()
+        public override void Disconnect()
         {
             runningTs.Cancel();
 
@@ -672,7 +619,7 @@ namespace Iviz.Ros
                 entry.Invalidate();
             }
 
-            publishers.AsSpan().Fill(null);
+            Array.Fill(publishers, null);
 
             RosLogger.Internal("Disconnecting...");
             await DisposeClientAsync();
@@ -696,7 +643,7 @@ namespace Iviz.Ros
 
                 try
                 {
-                    await AdvertiseCore(advertiser, token);
+                    await AdvertiseCore<T>(advertiser, token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -709,7 +656,7 @@ namespace Iviz.Ros
             });
         }
 
-        async ValueTask AdvertiseCore<T>(Sender<T> advertiser, CancellationToken token) where T : IMessage, new()
+        async ValueTask AdvertiseCore<T>(Sender advertiser, CancellationToken token) where T : IMessage, new()
         {
             if (publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
@@ -725,8 +672,6 @@ namespace Iviz.Ros
             int? id;
             if (Connected)
             {
-                int newId = GetFreeId();
-
                 await newAdvertisedTopic.AdvertiseAsync(Client, token);
                 var publisher = newAdvertisedTopic.Publisher;
                 if (publisher == null)
@@ -735,6 +680,7 @@ namespace Iviz.Ros
                     return;
                 }
 
+                int newId = GetFreeId();
                 publishers[newId] = publisher;
                 id = newId;
             }
@@ -750,7 +696,7 @@ namespace Iviz.Ros
             advertiser.Id = newAdvertisedTopic.Id;
         }
 
-        public void AdvertiseService<T>(string service, Func<T, ValueTask> callback) where T : class, IService, new()
+        public override void AdvertiseService<T>(string service, Func<T, ValueTask> callback)
         {
             ThrowHelper.ThrowIfNull(service, nameof(service));
             ThrowHelper.ThrowIfNull(callback, nameof(callback));
@@ -794,8 +740,8 @@ namespace Iviz.Ros
             }
         }
 
-        public async ValueTask<bool> CallModelServiceAsync<T>(string service, T srv, int timeoutInMs,
-            CancellationToken token) where T : class, IService, new()
+        public override async ValueTask<bool> CallModelServiceAsync<T>(string service, T srv, int timeoutInMs,
+            CancellationToken token)
         {
             using var myLock = await modelServiceLock.LockAsync(token);
 
@@ -812,8 +758,9 @@ namespace Iviz.Ros
             }
             catch (RoslibException e)
             {
-                modelServiceBlacklistTime = currentTime + 5;
-                throw new NoModelLoaderServiceException("Failed to reach the iviz model loader service", e);
+                const int blacklistDurationInSec = 5;
+                modelServiceBlacklistTime = currentTime + blacklistDurationInSec;
+                throw new NoModelLoaderServiceException(e);
             }
         }
 
@@ -844,33 +791,31 @@ namespace Iviz.Ros
             }
         }
 
-        internal void Publish<T>(int? advertiserId, T msg) where T : IMessage, new()
+        internal void Publish(int? advertiserId, IMessage msg)
         {
-            if (advertiserId is not { } id || runningTs.IsCancellationRequested)
+            if (runningTs.IsCancellationRequested)
+            {
+                return;
+            }
+
+            if (advertiserId is not { } id)
             {
                 return;
             }
 
             var basePublisher = publishers[id];
-            if (basePublisher == null || basePublisher.NumSubscribers == 0)
+            if (basePublisher == null)
             {
                 return;
             }
 
             try
             {
-                switch (basePublisher)
-                {
-                    case RosPublisher<T> publisher1:
-                        publisher1.Publish(msg);
-                        break;
-                    case Ros2Publisher<T> publisher2:
-                        publisher2.Publish(msg);
-                        break;
-                    default:
-                        LogPublisherWrongType(basePublisher, msg);
-                        break;
-                }
+                basePublisher.Publish(msg);
+            }
+            catch (RosInvalidMessageTypeException)
+            {
+                LogPublisherWrongType(basePublisher, msg);
             }
             catch (OperationCanceledException)
             {
@@ -911,7 +856,7 @@ namespace Iviz.Ros
             });
         }
 
-        async ValueTask SubscribeCore<T>(IListener listener, CancellationToken token) where T : IMessage, new()
+        async ValueTask SubscribeCore<T>(Listener listener, CancellationToken token) where T : IMessage, new()
         {
             if (subscribersByTopic.TryGetValue(listener.Topic, out var subscribedTopic))
             {
@@ -926,7 +871,7 @@ namespace Iviz.Ros
             await newSubscribedTopic.SubscribeAsync(Connected ? Client : null, listener, token);
         }
 
-        internal void SetPause(IListener listener, bool value)
+        internal void SetPause(Listener listener, bool value)
         {
             ThrowHelper.ThrowIfNull(listener, nameof(listener));
 
@@ -942,7 +887,7 @@ namespace Iviz.Ros
             });
         }
 
-        internal void Unadvertise(ISender advertiser)
+        internal void Unadvertise(Sender advertiser)
         {
             ThrowHelper.ThrowIfNull(advertiser, nameof(advertiser));
 
@@ -964,8 +909,11 @@ namespace Iviz.Ros
             });
         }
 
-        ValueTask UnadvertiseCore(ISender advertiser, CancellationToken token)
+        ValueTask UnadvertiseCore(Sender advertiser, CancellationToken token)
         {
+            int? advertiserId = advertiser.Id;
+            advertiser.Id = null;
+
             if (!publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
                 return default;
@@ -978,7 +926,7 @@ namespace Iviz.Ros
             }
 
             publishersByTopic.Remove(advertiser.Topic);
-            if (advertiser.Id is { } id)
+            if (advertiserId is { } id)
             {
                 publishers[id] = null;
             }
@@ -988,7 +936,7 @@ namespace Iviz.Ros
                 : default;
         }
 
-        internal void Unsubscribe(IListener subscriber)
+        internal void Unsubscribe(Listener subscriber)
         {
             ThrowHelper.ThrowIfNull(subscriber, nameof(subscriber));
 
@@ -1010,7 +958,7 @@ namespace Iviz.Ros
             });
         }
 
-        ValueTask UnsubscribeCore(IListener subscriber, CancellationToken token)
+        ValueTask UnsubscribeCore(Listener subscriber, CancellationToken token)
         {
             if (!subscribersByTopic.TryGetValue(subscriber.Topic, out var subscribedTopic))
             {
@@ -1029,7 +977,7 @@ namespace Iviz.Ros
                 : default;
         }
 
-        public TopicNameType[] GetSystemPublishedTopicTypes(bool withRefresh)
+        public override TopicNameType[] GetSystemPublishedTopicTypes(bool withRefresh = true)
         {
             if (withRefresh)
             {
@@ -1039,7 +987,7 @@ namespace Iviz.Ros
             return cachedPublishedTopics;
         }
 
-        public async ValueTask<TopicNameType[]> GetSystemPublishedTopicTypesAsync(int timeoutInMs = 2000,
+        public override async ValueTask<TopicNameType[]> GetSystemPublishedTopicTypesAsync(int timeoutInMs = 2000,
             CancellationToken token = default)
         {
             if (!Connected || token.IsCancellationRequested || runningTs.Token.IsCancellationRequested)
@@ -1067,7 +1015,7 @@ namespace Iviz.Ros
             return cachedPublishedTopics;
         }
 
-        public TopicNameType[] GetSystemTopicTypes()
+        public override TopicNameType[] GetSystemTopicTypes()
         {
             TaskUtils.Run(() => GetSystemTopicTypesAsync().AsTask(), runningTs.Token);
             return cachedTopics;
@@ -1097,7 +1045,7 @@ namespace Iviz.Ros
             }
         }
 
-        public string[] GetSystemParameterList(string? node)
+        public override string[] GetSystemParameterList(string? node = null)
         {
             var token = runningTs.Token;
             string nodeId = node ?? "";
@@ -1121,13 +1069,11 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    if (e is OperationCanceledException or TimeoutException)
+                    if (e is not (OperationCanceledException or TimeoutException))
                     {
-                        // ignore
+                        RosLogger.Error($"[{nameof(RosConnection)}]: Exception during " +
+                                        $"{nameof(GetSystemParameterList)}", e);
                     }
-
-                    RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemParameterList)}",
-                        e);
                 }
             }, token);
 
@@ -1136,8 +1082,8 @@ namespace Iviz.Ros
                 : Array.Empty<string>();
         }
 
-        public async ValueTask<(RosValue result, string? errorMsg)> GetParameterAsync(string parameter,
-            string? nodeName, int timeoutInMs, CancellationToken token)
+        public override async ValueTask<(RosValue result, string? errorMsg)> GetParameterAsync(string parameter,
+            string? nodeName = null, int timeoutInMs = 2000, CancellationToken token = default)
         {
             ThrowHelper.ThrowIfNull(parameter, nameof(parameter));
 
@@ -1190,7 +1136,7 @@ namespace Iviz.Ros
             }
         }
 
-        public SystemState? GetSystemState(bool withRefresh)
+        public override SystemState? GetSystemState(bool withRefresh = true)
         {
             if (withRefresh)
             {
@@ -1233,12 +1179,12 @@ namespace Iviz.Ros
             return subscribedTopic?.Subscriber?.NumPublishers;
         }
 
-        internal int GetNumSubscribers(int? senderId)
+        internal int? GetNumSubscribers(int? senderId)
         {
             return senderId is { } id
                    && publishers[id] is { } basePublisher
                 ? basePublisher.NumSubscribers
-                : 0;
+                : null;
         }
 
         internal void Dispose()

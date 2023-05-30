@@ -41,7 +41,7 @@ public static class RosNameUtils
             return false;
         }
 
-        foreach (int i in 1..name.Length)
+        for (int i = 1; i < name.Length; i++)
         {
             char c = name[i];
             if (!char.IsLetterOrDigit(c) && c is not ('_' or '/'))
@@ -71,7 +71,7 @@ public static class RosNameUtils
                 $"'/' or '~'. Current start is '{c0}'");
         }
 
-        foreach (int i in 1..name.Length)
+        for (int i = 1; i < name.Length; i++)
         {
             char c = name[i];
             if (!char.IsLetterOrDigit(c) && c is not ('_' or '/'))
@@ -87,6 +87,6 @@ public static class RosNameUtils
 public static class RosExceptionUtils
 {
     [DoesNotReturn]
-    public static void ThrowInvalidMessageType() =>
-        throw new RosInvalidMessageTypeException("Message does not match the expected type");
+    public static void ThrowInvalidMessageType(Exception? e = null) =>
+        throw new RosInvalidMessageTypeException("Message does not match the expected type", e);
 }

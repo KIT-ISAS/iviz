@@ -121,12 +121,8 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            if (FrameId is null) BuiltIns.ThrowNullReference(nameof(FrameId));
-            if (Layers is null) BuiltIns.ThrowNullReference(nameof(Layers));
-            for (int i = 0; i < Layers.Length; i++)
-            {
-                if (Layers[i] is null) BuiltIns.ThrowNullReference(nameof(Layers), i);
-            }
+            BuiltIns.ThrowIfNull(FrameId, nameof(FrameId));
+            BuiltIns.ThrowIfNull(Layers, nameof(Layers));
         }
     
         public int RosMessageLength
@@ -201,7 +197,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            if (Map is null) BuiltIns.ThrowNullReference(nameof(Map));
+            BuiltIns.ThrowIfNull(Map, nameof(Map));
             Map.RosValidate();
         }
     

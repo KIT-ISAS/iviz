@@ -15,7 +15,7 @@ namespace Iviz.App
         public string TopicType => Listener.Listener.Type;
         /// ROS topic name
         public string Topic { get; }
-        public override IController Controller => Listener;
+        public override Controller Controller => Listener;
 
         protected ListenerModuleData(string topic)
         {

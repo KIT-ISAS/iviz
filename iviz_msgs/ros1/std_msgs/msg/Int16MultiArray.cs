@@ -36,7 +36,7 @@ namespace Iviz.Msgs.StdMsgs
                 if (n == 0) array = EmptyArray<short>.Value;
                 else
                 {
-                     array = new short[n];
+                    array = new short[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.StdMsgs
                 if (n == 0) array = EmptyArray<short>.Value;
                 else
                 {
-                     array = new short[n];
+                    array = new short[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -81,9 +81,9 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            if (Layout is null) BuiltIns.ThrowNullReference(nameof(Layout));
+            BuiltIns.ThrowIfNull(Layout, nameof(Layout));
             Layout.RosValidate();
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            BuiltIns.ThrowIfNull(Data, nameof(Data));
         }
     
         public int RosMessageLength

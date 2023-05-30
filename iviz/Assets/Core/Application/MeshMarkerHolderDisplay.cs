@@ -156,9 +156,21 @@ namespace Iviz.Displays
             var markerChildren = children.Select(resource =>
                 BoundsUtils.TransformBoundsUntil(resource.Bounds, resource.Transform, Transform));
             Collider.SetLocalBounds(markerChildren.CombineBounds() ?? default);
-            BoundsChanged?.Invoke();
+            RaiseBoundsChanged();
         }
 
+        void RaiseBoundsChanged()
+        {
+            try
+            {
+                BoundsChanged?.Invoke();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{ToString()}: Error during {nameof(RaiseBoundsChanged)}", e);
+            }                          
+        }          
+        
         public void OverrideMaterial(Material? material)
         {
             overrideMaterial = material;

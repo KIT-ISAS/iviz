@@ -36,12 +36,15 @@ namespace Iviz.Msgs.TrajectoryMsgs
             JointNames = b.DeserializeStringArray();
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MultiDOFJointTrajectoryPoint>.Value
-                    : new MultiDOFJointTrajectoryPoint[n];
-                for (int i = 0; i < n; i++)
+                MultiDOFJointTrajectoryPoint[] array;
+                if (n == 0) array = EmptyArray<MultiDOFJointTrajectoryPoint>.Value;
+                else
                 {
-                    array[i] = new MultiDOFJointTrajectoryPoint(ref b);
+                    array = new MultiDOFJointTrajectoryPoint[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MultiDOFJointTrajectoryPoint(ref b);
+                    }
                 }
                 Points = array;
             }
@@ -55,12 +58,15 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MultiDOFJointTrajectoryPoint>.Value
-                    : new MultiDOFJointTrajectoryPoint[n];
-                for (int i = 0; i < n; i++)
+                MultiDOFJointTrajectoryPoint[] array;
+                if (n == 0) array = EmptyArray<MultiDOFJointTrajectoryPoint>.Value;
+                else
                 {
-                    array[i] = new MultiDOFJointTrajectoryPoint(ref b);
+                    array = new MultiDOFJointTrajectoryPoint[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MultiDOFJointTrajectoryPoint(ref b);
+                    }
                 }
                 Points = array;
             }
@@ -98,17 +104,8 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public void RosValidate()
         {
-            if (JointNames is null) BuiltIns.ThrowNullReference(nameof(JointNames));
-            for (int i = 0; i < JointNames.Length; i++)
-            {
-                if (JointNames[i] is null) BuiltIns.ThrowNullReference(nameof(JointNames), i);
-            }
-            if (Points is null) BuiltIns.ThrowNullReference(nameof(Points));
-            for (int i = 0; i < Points.Length; i++)
-            {
-                if (Points[i] is null) BuiltIns.ThrowNullReference(nameof(Points), i);
-                Points[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(JointNames, nameof(JointNames));
+            BuiltIns.ThrowIfNull(Points, nameof(Points));
         }
     
         public int RosMessageLength

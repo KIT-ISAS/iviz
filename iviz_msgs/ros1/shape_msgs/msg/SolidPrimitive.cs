@@ -59,7 +59,7 @@ namespace Iviz.Msgs.ShapeMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.DeserializeStructArray(array);
                 }
                 Dimensions = array;
@@ -76,7 +76,7 @@ namespace Iviz.Msgs.ShapeMsgs
                 if (n == 0) array = EmptyArray<double>.Value;
                 else
                 {
-                     array = new double[n];
+                    array = new double[n];
                     b.Align8();
                     b.DeserializeStructArray(array);
                 }
@@ -106,7 +106,7 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public void RosValidate()
         {
-            if (Dimensions is null) BuiltIns.ThrowNullReference(nameof(Dimensions));
+            BuiltIns.ThrowIfNull(Dimensions, nameof(Dimensions));
         }
     
         public int RosMessageLength

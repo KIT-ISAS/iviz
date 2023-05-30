@@ -385,12 +385,12 @@ public sealed class ModelServer : IDisposable
                 orientationHint = node.InnerText ?? "";
             }
         }
-        
+
         importer.SetConfig(new IntegerPropertyConfig(
             AiConfigs.AI_CONFIG_PP_RVC_FLAGS,
             (int)ExcludeComponent.Normals
         ));
-        
+
         importer.SetConfig(new NormalSmoothingAngleConfig(60));
 
         var scene = importer.ImportFile(fileName,
@@ -398,7 +398,7 @@ public sealed class ModelServer : IDisposable
             PostProcessPreset.TargetRealTimeMaximumQuality |
             PostProcessPreset.ConvertToLeftHanded |
             PostProcessSteps.PreTransformVertices);
-        
+
         var msg = new Model
         {
             Meshes = new ModelMesh[scene.Meshes.Count],
@@ -414,30 +414,32 @@ public sealed class ModelServer : IDisposable
             for (int j = 0; j < srcMesh.FaceCount; j++)
             {
                 Face face = srcMesh.Faces[j];
-                switch (face.IndexCount)
+                int indexCount = face.IndexCount;
+                if (indexCount == 3)
                 {
-                    case 3:
-                        faces.Add(new Triangle(
-                            (uint)face.Indices[0],
-                            (uint)face.Indices[1],
-                            (uint)face.Indices[2]
-                        ));
-                        break;
-                    case 4:
-                        faces.Add(new Triangle(
-                            (uint)face.Indices[0],
-                            (uint)face.Indices[1],
-                            (uint)face.Indices[2]
-                        ));
-                        faces.Add(new Triangle(
-                            (uint)face.Indices[0],
-                            (uint)face.Indices[2],
-                            (uint)face.Indices[3]
-                        ));
-                        break;
-                    default:
-                        Logger.LogDebugFormat("{0}: Got mesh face with {1} vertices!", this, face.IndexCount);
-                        break;
+                    faces.Add(new Triangle(
+                        (uint)face.Indices[0],
+                        (uint)face.Indices[1],
+                        (uint)face.Indices[2]
+                    ));
+                }
+                else if (indexCount == 4)
+                {
+                    faces.Add(new Triangle(
+                        (uint)face.Indices[0],
+                        (uint)face.Indices[1],
+                        (uint)face.Indices[2]
+                    ));
+                    faces.Add(new Triangle(
+                        (uint)face.Indices[0],
+                        (uint)face.Indices[2],
+                        (uint)face.Indices[3]
+                    ));
+                }
+                else
+                {
+                    Logger.LogDebugFormat("{0}: Got mesh face with {1} vertices!", this, indexCount);
+                    break;
                 }
             }
 

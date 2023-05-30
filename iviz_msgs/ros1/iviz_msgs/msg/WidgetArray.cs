@@ -24,12 +24,15 @@ namespace Iviz.Msgs.IvizMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Widget>.Value
-                    : new Widget[n];
-                for (int i = 0; i < n; i++)
+                Widget[] array;
+                if (n == 0) array = EmptyArray<Widget>.Value;
+                else
                 {
-                    array[i] = new Widget(ref b);
+                    array = new Widget[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Widget(ref b);
+                    }
                 }
                 Widgets = array;
             }
@@ -40,12 +43,15 @@ namespace Iviz.Msgs.IvizMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<Widget>.Value
-                    : new Widget[n];
-                for (int i = 0; i < n; i++)
+                Widget[] array;
+                if (n == 0) array = EmptyArray<Widget>.Value;
+                else
                 {
-                    array[i] = new Widget(ref b);
+                    array = new Widget[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new Widget(ref b);
+                    }
                 }
                 Widgets = array;
             }
@@ -76,12 +82,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Widgets is null) BuiltIns.ThrowNullReference(nameof(Widgets));
-            for (int i = 0; i < Widgets.Length; i++)
-            {
-                if (Widgets[i] is null) BuiltIns.ThrowNullReference(nameof(Widgets), i);
-                Widgets[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Widgets, nameof(Widgets));
         }
     
         public int RosMessageLength

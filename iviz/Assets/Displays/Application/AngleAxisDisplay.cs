@@ -123,7 +123,7 @@ namespace Iviz.Displays
             const float scaleFromAngle = 0.02f;
 
             (v0.x, v0.y, v0.z) = dirX;
-            foreach (int i in 1..(n + 1))
+            for (int i = 1; i < n + 1; i++)
             {
                 float a = i / (float)n * angle;
                 float segmentScale = 1 + a * scaleFromAngle;

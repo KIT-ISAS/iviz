@@ -181,7 +181,7 @@ namespace Iviz.Displays
         /// of replacing them with the provided colors.
         /// </param>
         /// <param name="loadColliders">Whether collider models should be loaded.</param>
-        public async ValueTask StartAsync(IServiceProvider? provider = null,
+        public async ValueTask StartAsync(ServiceProvider? provider = null,
             bool keepMeshMaterials = false,
             bool loadColliders = true)
         {
@@ -323,7 +323,7 @@ namespace Iviz.Displays
         IEnumerable<Task> ProcessLinkAsync(bool keepMeshMaterials,
             Link link,
             IReadOnlyDictionary<string, Material> rootMaterials,
-            IServiceProvider? provider,
+            ServiceProvider? provider,
             bool loadColliders,
             CancellationToken token)
         {
@@ -360,7 +360,7 @@ namespace Iviz.Displays
         async ValueTask ProcessCollisionAsync(
             Urdf.Collision collision,
             GameObject linkObject,
-            IServiceProvider? provider,
+            ServiceProvider? provider,
             CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
@@ -445,7 +445,7 @@ namespace Iviz.Displays
             Visual visual,
             GameObject linkObject,
             IReadOnlyDictionary<string, Material> rootMaterials,
-            IServiceProvider? provider,
+            ServiceProvider? provider,
             CancellationToken token)
         {
             token.ThrowIfCancellationRequested();

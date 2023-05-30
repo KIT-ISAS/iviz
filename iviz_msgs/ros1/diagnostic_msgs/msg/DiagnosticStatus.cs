@@ -42,12 +42,15 @@ namespace Iviz.Msgs.DiagnosticMsgs
             HardwareId = b.DeserializeString();
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<KeyValue>.Value
-                    : new KeyValue[n];
-                for (int i = 0; i < n; i++)
+                KeyValue[] array;
+                if (n == 0) array = EmptyArray<KeyValue>.Value;
+                else
                 {
-                    array[i] = new KeyValue(ref b);
+                    array = new KeyValue[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new KeyValue(ref b);
+                    }
                 }
                 Values = array;
             }
@@ -65,12 +68,15 @@ namespace Iviz.Msgs.DiagnosticMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<KeyValue>.Value
-                    : new KeyValue[n];
-                for (int i = 0; i < n; i++)
+                KeyValue[] array;
+                if (n == 0) array = EmptyArray<KeyValue>.Value;
+                else
                 {
-                    array[i] = new KeyValue(ref b);
+                    array = new KeyValue[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new KeyValue(ref b);
+                    }
                 }
                 Values = array;
             }
@@ -112,15 +118,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
-            if (HardwareId is null) BuiltIns.ThrowNullReference(nameof(HardwareId));
-            if (Values is null) BuiltIns.ThrowNullReference(nameof(Values));
-            for (int i = 0; i < Values.Length; i++)
-            {
-                if (Values[i] is null) BuiltIns.ThrowNullReference(nameof(Values), i);
-                Values[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Name, nameof(Name));
+            BuiltIns.ThrowIfNull(Message, nameof(Message));
+            BuiltIns.ThrowIfNull(HardwareId, nameof(HardwareId));
+            BuiltIns.ThrowIfNull(Values, nameof(Values));
         }
     
         public int RosMessageLength

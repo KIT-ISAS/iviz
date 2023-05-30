@@ -13,10 +13,9 @@ namespace Iviz.Msgs.IvizMsgs
     
         public BoundingBoxStamped()
         {
-            Boundary = new BoundingBox();
         }
         
-        public BoundingBoxStamped(in StdMsgs.Header Header, BoundingBox Boundary)
+        public BoundingBoxStamped(in StdMsgs.Header Header, in BoundingBox Boundary)
         {
             this.Header = Header;
             this.Boundary = Boundary;
@@ -25,13 +24,14 @@ namespace Iviz.Msgs.IvizMsgs
         public BoundingBoxStamped(ref ReadBuffer b)
         {
             Header = new StdMsgs.Header(ref b);
-            Boundary = new BoundingBox(ref b);
+            b.Deserialize(out Boundary);
         }
         
         public BoundingBoxStamped(ref ReadBuffer2 b)
         {
             Header = new StdMsgs.Header(ref b);
-            Boundary = new BoundingBox(ref b);
+            b.Align8();
+            b.Deserialize(out Boundary);
         }
         
         public BoundingBoxStamped RosDeserialize(ref ReadBuffer b) => new BoundingBoxStamped(ref b);
@@ -41,19 +41,18 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
-            Boundary.RosSerialize(ref b);
+            b.Serialize(in Boundary);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             Header.RosSerialize(ref b);
-            Boundary.RosSerialize(ref b);
+            b.Align8();
+            b.Serialize(in Boundary);
         }
         
         public void RosValidate()
         {
-            if (Boundary is null) BuiltIns.ThrowNullReference(nameof(Boundary));
-            Boundary.RosValidate();
         }
     
         public int RosMessageLength

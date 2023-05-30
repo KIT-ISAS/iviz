@@ -15,9 +15,11 @@ namespace Iviz.Controllers
         void OnBoundaryColliderExited(string id, string otherId);
     }
 
-    public sealed class BoundaryHandler : VizHandler
+    public sealed class BoundaryHandler : VizHandler, IHandles<Boundary>, IHandlesArray<BoundaryArray>
     {
         readonly IBoundaryFeedback feedback;
+
+        public override string Title => "Boundaries";
 
         public override string BriefDescription
         {
@@ -41,15 +43,15 @@ namespace Iviz.Controllers
             this.feedback = feedback;
         }
 
-        public void Handler(BoundaryArray msg)
+        public void Handle(BoundaryArray msg)
         {
             foreach (var boundary in msg.Boundaries)
             {
-                Handler(boundary);
+                Handle(boundary);
             }
         }
 
-        public void Handler(Boundary msg)
+        public void Handle(Boundary msg)
         {
             switch ((ActionType)msg.Action)
             {
@@ -131,8 +133,9 @@ namespace Iviz.Controllers
                 return;
             }
 
-            var vizObject = new BoundaryObject(feedback, msg, resourceKey, "Widget." + (BoundaryType)msg.Type)
-                { Interactable = Interactable, Visible = Visible };
+            var vizObject =
+                new BoundaryObject(feedback, msg, resourceKey, nameof(Boundary) + "." + (BoundaryType)msg.Type)
+                    { Interactable = Interactable, Visible = Visible };
 
             vizObjects[vizObject.id] = vizObject;
         }
@@ -188,6 +191,8 @@ namespace Iviz.Controllers
                 boundary.Caption = msg.Caption;
                 boundary.Scale = msg.Scale.Ros2Unity().Abs();
                 boundary.Behavior = (BehaviorType)msg.Behavior;
+                boundary.FrameWidth = 0.015f;
+                boundary.Initialize();
 
                 var transform = node.Transform;
                 transform.SetLocalPose(msg.Pose.Ros2Unity());

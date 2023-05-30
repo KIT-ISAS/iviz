@@ -85,7 +85,7 @@ public readonly struct Record
         dataOffset = headerLength + 4;
         nextOffset = dataLength + dataOffset;
 
-        OpCode = OpCode.Unknown; // won't let me call TryGetHeaderEntry before all fields are initialized
+        OpCode = default; // won't let me call TryGetHeaderEntry before all fields are initialized
         OpCode = TryGetHeaderEntry("op", out var entry)
             ? (OpCode)entry.ValueAsByte
             : OpCode.Unknown;

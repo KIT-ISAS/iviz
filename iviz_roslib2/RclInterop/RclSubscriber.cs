@@ -11,7 +11,7 @@ internal sealed class RclSubscriber : IDisposable, IHasHandle
     bool disposed;
 
     public IntPtr Handle => disposed
-        ? throw new ObjectDisposedException(ToString())
+        ? BuiltIns.ThrowPointerDisposed(nameof(RclSubscriber)) 
         : subscriptionHandle;
 
     public string Topic { get; }

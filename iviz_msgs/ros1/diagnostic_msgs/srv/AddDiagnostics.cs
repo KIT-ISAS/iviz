@@ -105,7 +105,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (LoadNamespace is null) BuiltIns.ThrowNullReference(nameof(LoadNamespace));
+            BuiltIns.ThrowIfNull(LoadNamespace, nameof(LoadNamespace));
         }
     
         public int RosMessageLength
@@ -185,7 +185,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            BuiltIns.ThrowIfNull(Message, nameof(Message));
         }
     
         public int RosMessageLength

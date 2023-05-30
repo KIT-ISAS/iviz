@@ -42,10 +42,10 @@ internal class SenderQueue
     }
     
     protected RosQueueOverflowException CreateOverflowException() =>
-        new($"Message could not be sent to node '{sender.RemoteCallerId}'", sender);
+        new($"Message could not be sent to node '{sender.RemoteCallerId}'");
 
     protected RosQueueException CreateQueueException(Exception e) =>
-        new($"An unexpected exception was thrown while sending to node '{sender.RemoteCallerId}'", e, sender);
+        new($"An unexpected exception was thrown while sending to node '{sender.RemoteCallerId}'", e);
 }
 
 internal sealed class SenderQueue<TMessage> : SenderQueue where TMessage : IMessage
@@ -191,7 +191,7 @@ internal sealed class SenderQueue<TMessage> : SenderQueue where TMessage : IMess
         foreach (var entry in messageQueue)
         {
             entry?.signal?.TrySetException(new RosQueueException(
-                $"Connection for '{sender.RemoteCallerId}' is shutting down", sender));
+                $"Connection for '{sender.RemoteCallerId}' is shutting down"));
         }
     }
 
@@ -208,7 +208,8 @@ internal sealed class SenderQueue<TMessage> : SenderQueue where TMessage : IMess
         }
     }
 
-    public void DirectSendToLoopback(in RangeEnumerable<Entry?> queue, LoopbackReceiver<TMessage> loopbackReceiver,
+    public void DirectSendToLoopback(in RangeEnumerable<Entry?> queue, 
+        LoopbackReceiver<TMessage> loopbackReceiver,
         ref long numSent, ref long bytesSent)
     {
         if (loopbackReceiver == null) BuiltIns.ThrowArgumentNull(nameof(loopbackReceiver));

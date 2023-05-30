@@ -17,7 +17,7 @@ namespace Iviz.App
         public override ModuleType ModuleType => ModuleType.XR;
         public override ModulePanel Panel => panel;
         public override IConfiguration Configuration => controller.Config;
-        public override IController Controller => controller;
+        public override Controller Controller => controller;
 
         public XRModuleData(ModuleDataConstructor constructor)
         {

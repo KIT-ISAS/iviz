@@ -4,11 +4,7 @@ namespace Iviz.Roslib;
 
 public class Roslib1Exception : RoslibException
 {
-    protected Roslib1Exception(string message) : base(message)
-    {
-    }
-
-    public Roslib1Exception(string message, Exception innerException) : base(message, innerException)
+    public Roslib1Exception(string message, Exception? innerException = null) : base(message, innerException)
     {
     }
 }
@@ -18,11 +14,7 @@ public class Roslib1Exception : RoslibException
 /// </summary>
 public class RosConnectionException : Roslib1Exception
 {
-    public RosConnectionException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
-
-    public RosConnectionException(string message) : base(message)
+    public RosConnectionException(string message, Exception? innerException = null) : base(message, innerException)
     {
     }
 }
@@ -35,10 +27,6 @@ public sealed class RosUriBindingException : RosConnectionException
     public RosUriBindingException(string message, Exception innerException) : base(message, innerException)
     {
     }
-
-    public RosUriBindingException(string message) : base(message)
-    {
-    }
 }
 
 /// <summary>
@@ -46,11 +34,7 @@ public sealed class RosUriBindingException : RosConnectionException
 /// </summary>
 public sealed class RosUnreachableUriException : Roslib1Exception
 {
-    public RosUnreachableUriException(string message) : base(message)
-    {
-    }
-
-    public RosUnreachableUriException(string message, Exception innerException) : base(message, innerException)
+    public RosUnreachableUriException(string message, Exception? innerException = null) : base(message, innerException)
     {
     }
 }
@@ -60,22 +44,14 @@ public sealed class RosUnreachableUriException : Roslib1Exception
 /// </summary>
 public class RosRpcException : Roslib1Exception
 {
-    public RosRpcException(string message) : base(message)
-    {
-    }
-
-    public RosRpcException(string message, Exception innerException) : base(message, innerException)
+    public RosRpcException(string message, Exception? innerException = null) : base(message, innerException)
     {
     }
 }
 
 public class RosHandshakeException : RosRpcException
 {
-    public RosHandshakeException(string message) : base(message)
-    {
-    }
-
-    public RosHandshakeException(string message, Exception e) : base(message, e)
+    public RosHandshakeException(string message, Exception? e = null) : base(message, e)
     {
     }
 }
@@ -85,14 +61,7 @@ public sealed class RosServiceNotFoundException : Roslib1Exception
     public string ServiceName { get; }
     public string ErrorMessage { get; }
 
-    public RosServiceNotFoundException(string service, string message)
-        : base($"Failed to call service {service}. Reason: {message}")
-    {
-        ServiceName = service;
-        ErrorMessage = message;
-    }
-
-    public RosServiceNotFoundException(string service, string message, Exception innerException)
+    public RosServiceNotFoundException(string service, string message, Exception? innerException = null)
         : base($"Failed to call service {service}. Reason: {message}", innerException)
     {
         ServiceName = service;
@@ -122,35 +91,22 @@ public sealed class RosInvalidPackageSizeException : Roslib1Exception
 
 public sealed class RosInvalidHeaderException : RosHandshakeException
 {
-    public RosInvalidHeaderException(string message) : base(message)
-    {
-    }
-
-    public RosInvalidHeaderException(string message, Exception innerException) : base(message, innerException)
+    public RosInvalidHeaderException(string message, Exception? innerException = null) : base(message, innerException)
     {
     }
 }
 
 public sealed class RosQueueOverflowException : RosQueueException
 {
-    public RosQueueOverflowException(string message, IRosSender sender) : base(message, sender)
+    public RosQueueOverflowException(string message) : base(message)
     {
     }
 }
 
 public class RosQueueException : Roslib1Exception
 {
-    public IRosSender Sender { get; }
-
-    public RosQueueException(string message, IRosSender sender) : base(message)
+    public RosQueueException(string message, Exception? e = null) : base(message, e)
     {
-        Sender = sender;
-    }
-
-    public RosQueueException(string message, Exception innerException, IRosSender sender) : base(message,
-        innerException)
-    {
-        Sender = sender;
     }
 }
 
@@ -159,11 +115,8 @@ public class RosQueueException : Roslib1Exception
 /// </summary>
 public class RosServiceRequestTimeoutException : Roslib1Exception
 {
-    public RosServiceRequestTimeoutException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
-
-    public RosServiceRequestTimeoutException(string message) : base(message)
+    public RosServiceRequestTimeoutException(string message, Exception? innerException = null) :
+        base(message, innerException)
     {
     }
 }

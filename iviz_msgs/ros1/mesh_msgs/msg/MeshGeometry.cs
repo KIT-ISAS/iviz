@@ -53,12 +53,12 @@ namespace Iviz.Msgs.MeshMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MeshMsgs.TriangleIndices>.Value
-                    : new MeshMsgs.TriangleIndices[n];
-                for (int i = 0; i < n; i++)
+                MeshMsgs.TriangleIndices[] array;
+                if (n == 0) array = EmptyArray<MeshMsgs.TriangleIndices>.Value;
+                else
                 {
-                    array[i] = new MeshMsgs.TriangleIndices(ref b);
+                    array = new MeshMsgs.TriangleIndices[n];
+                    b.DeserializeStructArray(array);
                 }
                 Faces = array;
             }
@@ -93,12 +93,12 @@ namespace Iviz.Msgs.MeshMsgs
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MeshMsgs.TriangleIndices>.Value
-                    : new MeshMsgs.TriangleIndices[n];
-                for (int i = 0; i < n; i++)
+                MeshMsgs.TriangleIndices[] array;
+                if (n == 0) array = EmptyArray<MeshMsgs.TriangleIndices>.Value;
+                else
                 {
-                    array[i] = new MeshMsgs.TriangleIndices(ref b);
+                    array = new MeshMsgs.TriangleIndices[n];
+                    b.DeserializeStructArray(array);
                 }
                 Faces = array;
             }
@@ -115,10 +115,7 @@ namespace Iviz.Msgs.MeshMsgs
             b.Serialize(VertexNormals.Length);
             b.SerializeStructArray(VertexNormals);
             b.Serialize(Faces.Length);
-            foreach (var t in Faces)
-            {
-                t.RosSerialize(ref b);
-            }
+            b.SerializeStructArray(Faces);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
@@ -131,22 +128,14 @@ namespace Iviz.Msgs.MeshMsgs
             b.Align8();
             b.SerializeStructArray(VertexNormals);
             b.Serialize(Faces.Length);
-            foreach (var t in Faces)
-            {
-                t.RosSerialize(ref b);
-            }
+            b.SerializeStructArray(Faces);
         }
         
         public void RosValidate()
         {
-            if (Vertices is null) BuiltIns.ThrowNullReference(nameof(Vertices));
-            if (VertexNormals is null) BuiltIns.ThrowNullReference(nameof(VertexNormals));
-            if (Faces is null) BuiltIns.ThrowNullReference(nameof(Faces));
-            for (int i = 0; i < Faces.Length; i++)
-            {
-                if (Faces[i] is null) BuiltIns.ThrowNullReference(nameof(Faces), i);
-                Faces[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Vertices, nameof(Vertices));
+            BuiltIns.ThrowIfNull(VertexNormals, nameof(VertexNormals));
+            BuiltIns.ThrowIfNull(Faces, nameof(Faces));
         }
     
         public int RosMessageLength

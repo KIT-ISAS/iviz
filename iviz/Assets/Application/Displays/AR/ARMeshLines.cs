@@ -17,7 +17,6 @@ using UnityEngine.XR.ARFoundation;
 
 namespace Iviz.Displays
 {
-    // disabled until I can find a way to make it work in mobile suspend without crashing!
     [RequireComponent(typeof(MeshFilter))]
     public sealed class ARMeshLines : DisplayWrapper, IRecyclable
     {
@@ -76,11 +75,17 @@ namespace Iviz.Displays
             {
                 RosLogger.Warn($"{nameof(ARMeshLines)}: No mesh manager found!");
             }
-
-            //ARController.ARCameraViewChanged += OnARCameraViewChanged;
-            GameThread.EveryTenthOfASecond += CheckMesh;
-
-            //OnARCameraViewChanged(ARController.IsXRVisible);
+            
+            if (ARController.EnableMeshingSubsystem)
+            {
+                GameThread.EveryTenthOfASecond += CheckMesh;
+            }
+            
+            if (!Settings.IsHololens)
+            {
+                ARController.ARCameraViewChanged += OnARCameraViewChanged;
+                OnARCameraViewChanged(ARController.IsXRVisible);
+            }
         }
 
         void OnARCameraViewChanged(bool value)
@@ -102,7 +107,7 @@ namespace Iviz.Displays
             }
         }
 
-        /*
+        
         void Update()
         {
             if (Resource.Visible)
@@ -125,7 +130,7 @@ namespace Iviz.Displays
                 Resource.Visible = !ARController.IsXRVisible;
             }
         }
-        */
+        
 
         void CheckMesh()
         {
@@ -156,27 +161,68 @@ namespace Iviz.Displays
                 return;
             }
 
-            int numLines = indices.Count; // 3 indices per triangle, 3 lines per triangle => 1 line per index
-            using var output = new Rent<float4x2>(numLines);
+            ARController.Instance?.ProcessMeshChange(indices, vertices, gameObject);
 
-            BurstUtils.CopyTriangles(indices.AsSpan(), vertices.AsSpan(), output.AsSpan());
-            Resource.Set(output.AsReadOnlySpan(), false);
+            // TODO: check if need to send to another thread
+            void UpdateLines(NativeList<float4x2> lines)
+            {
+                int numLines = indices.Count; // 3 indices per triangle, 3 lines per triangle => 1 line per index
+                lines.Resize(numLines);
+                BurstUtils.ConvertTrianglesToLines(indices.AsReadOnlySpan(), vertices.AsReadOnlySpan(), lines);
+            }
+
+            Resource.Set(UpdateLines, indices.Count, false);
+        }
+        
+        public void SplitForRecycle()
+        {
+            resource.ReturnToPool();
+            resource = null;
+        }
+
+        void OnDestroy()
+        {
+            resource.ReturnToPool();
+
+            ARController.ARCameraViewChanged -= OnARCameraViewChanged;
+            
+            if (ARController.EnableMeshingSubsystem)
+            {
+                GameThread.EveryTenthOfASecond -= CheckMesh;
+            }
+
+            Destroy(MeshFilter.sharedMesh);
+
+            if (XRUtils.TryGetMeshManager(out var meshManager))
+            {
+                meshManager.meshesChanged -= OnMeshChanged;
+            }
         }
 
         [BurstCompile]
         static unsafe class BurstUtils
         {
-            [BurstCompile(CompileSynchronously = true)]
-            static void CopyTriangles([NoAlias] int3* trianglesPtr, [NoAlias] float3* verticesPtr,
-                [NoAlias] Float4x2x3* outputPtr, int trianglesLength)
+            public static void ConvertTrianglesToLines(ReadOnlySpan<int> indices, ReadOnlySpan<Vector3> vertices,
+                Span<float4x2> output)
             {
-                for (int i = 0; i < trianglesLength; i++)
+                int numTriangles = output.Length / 3;
+                
+                fixed (int* indicesPtr = indices)
+                fixed (Vector3* verticesPtr = vertices)
+                fixed (float4x2* outputPtr = output)
                 {
-                    int ia = trianglesPtr[i].x;
-                    var a = verticesPtr[ia];
+                    Execute((int3*)indicesPtr, (float3*)verticesPtr, (Float4x2x3*)outputPtr, numTriangles);
+                }
+            }
 
-                    int ib = trianglesPtr[i].y;
-                    var b = verticesPtr[ib];
+            [BurstCompile(CompileSynchronously = true)]
+            static void Execute([NoAlias] int3* triangles, [NoAlias] float3* vertices, [NoAlias] Float4x2x3* output,
+                int numTriangles)
+            {
+                for (int i = 0; i < numTriangles; i++)
+                {
+                    int ia = triangles[i].x;
+                    var a = vertices[ia];
 
                     int ic = trianglesPtr[i].z;
                     var c = verticesPtr[ic];
@@ -186,11 +232,10 @@ namespace Iviz.Displays
                     Write(out f.b, b, c);
                     Write(out f.c, c, a);
 
-                    outputPtr[i] = f;
+                    output[i] = f;
                 }
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static void Write(out float4x2 f, in float3 a, in float3 b)
             {
                 f.c0.x = a.x;
@@ -219,27 +264,6 @@ namespace Iviz.Displays
                     CopyTriangles((int3*)trianglesPtr, (float3*)verticesPtr, (Float4x2x3*)outputPtr,
                         triangles.Length / 3);
                 }
-            }
-        }
-        
-        public void SplitForRecycle()
-        {
-            resource.ReturnToPool();
-            resource = null;
-        }
-
-        void OnDestroy()
-        {
-            resource.ReturnToPool();
-
-            //ARController.ARCameraViewChanged -= OnARCameraViewChanged;
-            GameThread.EveryTenthOfASecond -= CheckMesh;
-
-            Destroy(MeshFilter.sharedMesh);
-
-            if (XRUtils.TryGetMeshManager(out var meshManager))
-            {
-                meshManager.meshesChanged -= OnMeshChanged;
             }
         }
     }

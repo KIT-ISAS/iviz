@@ -111,12 +111,15 @@ namespace Iviz.Msgs.HriMsgs
             Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<NormalizedPointOfInterest2D>.Value
-                    : new NormalizedPointOfInterest2D[n];
-                for (int i = 0; i < n; i++)
+                NormalizedPointOfInterest2D[] array;
+                if (n == 0) array = EmptyArray<NormalizedPointOfInterest2D>.Value;
+                else
                 {
-                    array[i] = new NormalizedPointOfInterest2D(ref b);
+                    array = new NormalizedPointOfInterest2D[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new NormalizedPointOfInterest2D(ref b);
+                    }
                 }
                 Landmarks = array;
             }
@@ -130,12 +133,15 @@ namespace Iviz.Msgs.HriMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<NormalizedPointOfInterest2D>.Value
-                    : new NormalizedPointOfInterest2D[n];
-                for (int i = 0; i < n; i++)
+                NormalizedPointOfInterest2D[] array;
+                if (n == 0) array = EmptyArray<NormalizedPointOfInterest2D>.Value;
+                else
                 {
-                    array[i] = new NormalizedPointOfInterest2D(ref b);
+                    array = new NormalizedPointOfInterest2D[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new NormalizedPointOfInterest2D(ref b);
+                    }
                 }
                 Landmarks = array;
             }
@@ -176,12 +182,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            if (Landmarks is null) BuiltIns.ThrowNullReference(nameof(Landmarks));
-            for (int i = 0; i < Landmarks.Length; i++)
-            {
-                if (Landmarks[i] is null) BuiltIns.ThrowNullReference(nameof(Landmarks), i);
-                Landmarks[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Landmarks, nameof(Landmarks));
         }
     
         public int RosMessageLength

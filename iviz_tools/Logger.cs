@@ -3,19 +3,31 @@ using JetBrains.Annotations;
 
 namespace Iviz.Tools;
 
-
 /// <summary>
 /// Class that processes logging information.
 /// </summary>
 public static class Logger
 {
-    public static Action<string>? LogDebugCallback { get; set; }
+    /// <summary>
+    /// Callback function when a log message of level 'debug' is produced. 
+    /// </summary>
+    public static Action<string>? LogDebugCallback;
+
+    /// <summary>
+    /// Callback function when a log message of level 'default' is produced. 
+    /// </summary>
+    public static Action<string>? LogCallback;
+
+    /// <summary>
+    /// Callback function when a log message of level 'error' is produced. 
+    /// </summary>
+    public static Action<string>? LogErrorCallback;
 
     public static void LogDebug(string arg1)
     {
         LogDebugCallback?.Invoke(arg1);
     }
-    
+
     [StringFormatMethod("format")]
     public static void LogDebugFormat(string format, object? arg1)
     {
@@ -29,11 +41,17 @@ public static class Logger
     }
 
     [StringFormatMethod("format")]
-    public static void LogDebugFormat<TU>(string format, object? arg1, TU? arg2)
+    public static void LogDebugFormat(string format, object? arg1, object? arg2)
     {
         LogDebugCallback?.Invoke(string.Format(format, arg1, arg2));
     }
 
+    [StringFormatMethod("format")]
+    public static void LogDebugFormat(string format, object? arg1, int arg2)
+    {
+        LogDebugCallback?.Invoke(string.Format(format, arg1, arg2));
+    }
+    
     [StringFormatMethod("format")]
     public static void LogDebugFormat(string format, object? arg1, string? arg2)
     {
@@ -47,19 +65,19 @@ public static class Logger
     }
 
     [StringFormatMethod("format")]
-    public static void LogDebugFormat<TU, TV>(string format, object? arg1, TU? arg2, TV? arg3)
+    public static void LogDebugFormat(string format, object? arg1, object? arg2, object? arg3)
     {
         LogDebugCallback?.Invoke(string.Format(format, arg1, arg2, arg3));
     }
 
     [StringFormatMethod("format")]
-    public static void LogDebugFormat<TU>(string format, object? arg1, TU? arg2, Exception? arg3)
+    public static void LogDebugFormat(string format, object? arg1, object? arg2, Exception? arg3)
     {
         LogDebugCallback?.Invoke(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
     }
 
     [StringFormatMethod("format")]
-    public static void LogDebugFormat<TU, TV, TW>(string format, object? arg1, TU? arg2, TV? arg3, TW? arg4)
+    public static void LogDebugFormat(string format, object? arg1, int arg2, int arg3, int arg4)
     {
         LogDebugCallback?.Invoke(string.Format(format, arg1, arg2, arg3, arg4));
     }
@@ -70,16 +88,11 @@ public static class Logger
         LogDebugCallback?.Invoke(string.Format(format, objs));
     }
 
-    /// <summary>
-    /// Callback function when a log message of level 'default' is produced. 
-    /// </summary>
-    public static Action<string>? LogCallback { get; set; }
-
     public static void Log(string arg1)
     {
         LogCallback?.Invoke(arg1);
     }
-    
+
     [StringFormatMethod("format")]
     public static void LogFormat(string format, object? arg1)
     {
@@ -93,17 +106,11 @@ public static class Logger
     }
 
     [StringFormatMethod("format")]
-    public static void LogFormat<TU>(string format, object? arg1, TU? arg2)
+    public static void LogFormat(string format, object? arg1, object? arg2)
     {
         LogCallback?.Invoke(string.Format(format, arg1, arg2));
     }
 
-    [StringFormatMethod("format")]
-    public static void LogFormat(string format, object? arg1, string? arg2)
-    {
-        LogCallback?.Invoke(string.Format(format, arg1, arg2));
-    }
-    
     [StringFormatMethod("format")]
     public static void LogFormat(string format, object? arg1, Exception? arg2)
     {
@@ -111,7 +118,7 @@ public static class Logger
     }
 
     [StringFormatMethod("format")]
-    public static void LogFormat<TU, TV>(string format, object? arg1, TU? arg2, TV? arg3)
+    public static void LogFormat(string format, object? arg1, object? arg2, object? arg3)
     {
         LogCallback?.Invoke(string.Format(format, arg1, arg2, arg3));
     }
@@ -127,11 +134,6 @@ public static class Logger
     {
         LogCallback?.Invoke(string.Format(format, objs));
     }
-
-    /// <summary>
-    /// Callback function when a log message of level 'error' is produced. 
-    /// </summary>
-    public static Action<string>? LogErrorCallback { get; set; }
 
     public static void LogError(string arg1)
     {
@@ -157,25 +159,19 @@ public static class Logger
     }
 
     [StringFormatMethod("format")]
-    public static void LogErrorFormat<TU>(string format, object? arg1, TU? arg2)
-    {
-        LogErrorCallback?.Invoke(string.Format(format, arg1, arg2));
-    }
-    
-    [StringFormatMethod("format")]
-    public static void LogErrorFormat(string format, object? arg1, string? arg2)
+    public static void LogErrorFormat(string format, object? arg1, object? arg2)
     {
         LogErrorCallback?.Invoke(string.Format(format, arg1, arg2));
     }
 
     [StringFormatMethod("format")]
-    public static void LogErrorFormat<TU, TV>(string format, object? arg1, TU? arg2, TV? arg3)
+    public static void LogErrorFormat(string format, object? arg1, object? arg2, object? arg3)
     {
         LogErrorCallback?.Invoke(string.Format(format, arg1, arg2, arg3));
     }
 
     [StringFormatMethod("format")]
-    public static void LogErrorFormat<TU>(string format, object? arg1, TU? arg2, Exception? arg3)
+    public static void LogErrorFormat(string format, object? arg1, object? arg2, Exception? arg3)
     {
         LogErrorCallback?.Invoke(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
     }

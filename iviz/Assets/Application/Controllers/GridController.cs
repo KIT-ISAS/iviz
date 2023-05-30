@@ -12,7 +12,7 @@ using UnityEngine.Rendering;
 
 namespace Iviz.Controllers
 {
-    public sealed class GridController : IController
+    public sealed class GridController : Controller
     {
         readonly FrameNode node;
         readonly ReflectionProbe reflectionProbe;
@@ -61,7 +61,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool Visible
+        public override bool Visible
         {
             get => config.Visible;
             set
@@ -256,7 +256,7 @@ namespace Iviz.Controllers
             Object.Destroy(reflectionProbe.gameObject);
         }
 
-        public void ResetController()
+        public override void ResetController()
         {
         }
 

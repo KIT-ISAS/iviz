@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Iviz.Tools;
 
@@ -23,17 +24,17 @@ internal static class Utils
 
     public static Stream WriteValue(this Stream stream, int value)
     {
-        Span<byte> bytes = stackalloc byte[4];
-        bytes.WriteInt(value);
-        stream.Write(bytes);
+        using var bytes = new Rent(4);
+        bytes.Array.WriteInt(value);
+        stream.Write(bytes.Array, 0, 4);
         return stream;
     }
 
     public static async ValueTask WriteValueAsync(this Stream stream, int value)
     {
         using var bytes = new Rent(4);
-        bytes.AsSpan().WriteInt(value);
-        await stream.WriteAsync(bytes);
+        bytes.Array.WriteInt(value);
+        await stream.WriteAsync(bytes.Array, 0, 4);
     }
 
     public static Stream WriteValue(this Stream stream, uint value) => stream.WriteValue((int) value);
@@ -49,7 +50,7 @@ internal static class Utils
             array[i] = (byte) value[i];
         }
 
-        stream.Write(bytes);
+        stream.Write(bytes.Array, 0, bytes.Length);
         return stream;
     }
 
@@ -62,19 +63,19 @@ internal static class Utils
             array[i] = (byte) value[i];
         }
 
-        await stream.WriteAsync(bytes);
+        await stream.WriteAsync(bytes.Array, 0, bytes.Length);
     }
 
     public static Stream WriteValueUtf8(this Stream stream, string value)
     {
         using var bytes = value.AsRent();
-        stream.Write(bytes);
+        stream.Write(bytes.Array, 0, bytes.Length);
         return stream;
     }
 
     public static async ValueTask WriteValueUtf8Async(this Stream stream, string value)
     {
         using var bytes = value.AsRent();
-        await stream.WriteAsync(bytes);
+        await stream.WriteAsync(bytes.Array, 0, bytes.Length);
     }
 }

@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Colors is null) BuiltIns.ThrowNullReference(nameof(Colors));
+            BuiltIns.ThrowIfNull(Colors, nameof(Colors));
         }
     
         public int RosMessageLength

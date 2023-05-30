@@ -217,7 +217,7 @@ namespace Iviz.Controllers
             set => config.VectorScale = value;
         }
 
-        public override IListener Listener { get; }
+        public override Listener Listener { get; }
 
         public Vector3 TrailPosition => frameNode.Transform.TransformPoint(cachedDirection * VectorScale);
 
@@ -246,7 +246,7 @@ namespace Iviz.Controllers
                 TwistStamped.MessageType => CreateListener<TwistStamped>(Handler),
                 Twist.MessageType => CreateListener<Twist>(Handler),
                 Odometry.MessageType => CreateListener<Odometry>(Handler),
-                _ => Ros.Listener.ThrowUnsupportedMessageType(Config.Type)
+                _ => Listener.ThrowUnsupportedMessageType(Config.Type)
             };
 
             Listener<T> CreateListener<T>(Action<T> a) where T : IMessage, new() =>
@@ -455,7 +455,6 @@ namespace Iviz.Controllers
 
         public override void ResetController()
         {
-            base.ResetController();
             if (arrow != null)
             {
                 arrow.Reset();

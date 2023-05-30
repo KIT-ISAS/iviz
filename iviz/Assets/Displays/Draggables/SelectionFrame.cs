@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Linq;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Tools;
@@ -116,7 +117,7 @@ namespace Iviz.Displays
                 child.Transform.localScale = new Vector3(size.x, adjustedColumnWidth, adjustedColumnWidth);
             }
 
-            foreach (var child in children.Skip(8))
+            foreach (var child in children.AsSpan(8..))
             {
                 child.Transform.localScale = new Vector3(adjustedColumnWidth, size.y, adjustedColumnWidth);
             }

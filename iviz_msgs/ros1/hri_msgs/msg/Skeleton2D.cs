@@ -51,12 +51,15 @@ namespace Iviz.Msgs.HriMsgs
             Header = new StdMsgs.Header(ref b);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<NormalizedPointOfInterest2D>.Value
-                    : new NormalizedPointOfInterest2D[n];
-                for (int i = 0; i < n; i++)
+                NormalizedPointOfInterest2D[] array;
+                if (n == 0) array = EmptyArray<NormalizedPointOfInterest2D>.Value;
+                else
                 {
-                    array[i] = new NormalizedPointOfInterest2D(ref b);
+                    array = new NormalizedPointOfInterest2D[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new NormalizedPointOfInterest2D(ref b);
+                    }
                 }
                 Skeleton = array;
             }
@@ -68,12 +71,15 @@ namespace Iviz.Msgs.HriMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<NormalizedPointOfInterest2D>.Value
-                    : new NormalizedPointOfInterest2D[n];
-                for (int i = 0; i < n; i++)
+                NormalizedPointOfInterest2D[] array;
+                if (n == 0) array = EmptyArray<NormalizedPointOfInterest2D>.Value;
+                else
                 {
-                    array[i] = new NormalizedPointOfInterest2D(ref b);
+                    array = new NormalizedPointOfInterest2D[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new NormalizedPointOfInterest2D(ref b);
+                    }
                 }
                 Skeleton = array;
             }
@@ -106,12 +112,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            if (Skeleton is null) BuiltIns.ThrowNullReference(nameof(Skeleton));
-            for (int i = 0; i < Skeleton.Length; i++)
-            {
-                if (Skeleton[i] is null) BuiltIns.ThrowNullReference(nameof(Skeleton), i);
-                Skeleton[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Skeleton, nameof(Skeleton));
         }
     
         public int RosMessageLength

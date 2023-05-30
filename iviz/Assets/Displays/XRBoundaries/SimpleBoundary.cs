@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public sealed class SimpleBoundary : BaseBoundary
+    public class SimpleBoundary : BaseBoundary
     {
         [SerializeField] MeshMarkerDisplay? cube;
         SelectionFrame? frame;
@@ -48,7 +48,7 @@ namespace Iviz.Displays.XR
             }
         }
 
-        public float SecondaryScale
+        public override float FrameWidth
         {
             set => Frame.ColumnWidth = value;
         }

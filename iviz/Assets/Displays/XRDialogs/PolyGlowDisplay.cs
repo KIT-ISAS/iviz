@@ -46,7 +46,7 @@ namespace Iviz.Displays.XR
             var outerColor = Color.white;
             var innerColor = Color.white.WithAlpha(0);
 
-            foreach (int i in ..numVertices)
+            for (int i = 0; i < numVertices; i++)
             {
                 float a0 = Mathf.PI * 2 / numVertices * i;
                 float a1 = Mathf.PI * 2 / numVertices * (i + 1);

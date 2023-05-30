@@ -41,7 +41,7 @@ namespace Iviz.Controllers.TF
         {
             instance = this;
             GameThread.EverySecond += OnEverySecond;
-            IRosProvider.ConnectionStateChanged += OnConnectionStateChanged;
+            RosProvider.ConnectionStateChanged += OnConnectionStateChanged;
         }
 
         public void UpdateConfiguration(TfPublisherConfiguration config)
@@ -172,7 +172,7 @@ namespace Iviz.Controllers.TF
         public void Dispose()
         {
             GameThread.EverySecond -= OnEverySecond;
-            IRosProvider.ConnectionStateChanged -= OnConnectionStateChanged;
+            RosProvider.ConnectionStateChanged -= OnConnectionStateChanged;
             panelData = null;
             instance = null;
         }

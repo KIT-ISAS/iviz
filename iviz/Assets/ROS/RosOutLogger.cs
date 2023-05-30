@@ -19,8 +19,8 @@ namespace Iviz.Ros
         public static event LogDelegate? MessageArrived;
 
         public LogLevel MinLogLevel { get; set; } = LogLevel.Info;
-        public IListener Listener { get; private set; }
-        public ISender Sender { get; private set; }
+        public Listener Listener { get; private set; }
+        public Sender Sender { get; private set; }
 
         public RosOutLogger()
         {
@@ -37,7 +37,7 @@ namespace Iviz.Ros
             (Sender, Listener) = CreateSenderAndListener(RosManager.Connection.RosVersion);
         }
 
-        static (ISender, IListener) CreateSenderAndListener(RosVersion version)
+        static (Sender, Listener) CreateSenderAndListener(RosVersion version)
         {
             return (
                 version == RosVersion.ROS1

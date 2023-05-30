@@ -4,7 +4,7 @@
         <LangVersion>default</LangVersion>
         <Nullable>enable</Nullable>
         <RootNamespace>Iviz.Rosbag</RootNamespace>
-        <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>net6.0;netstandard2.1;net7.0</TargetFrameworks>
         <AssemblyName>Iviz.Rosbag.Lib</AssemblyName>
     </PropertyGroup>
 

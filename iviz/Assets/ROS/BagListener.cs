@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Rosbag.Writer;
+using Iviz.Roslib;
 using Iviz.Tools;
 
 namespace Iviz.Ros
 {
     public sealed class BagListener
     {
-        readonly Channel<(IMessage, IRosConnection, time)> messageChannel;
+        readonly ChannelWriter<(IMessage, IRosConnection, time)> messageWriter;
 
         readonly Task task;
         readonly string path;
@@ -35,9 +36,11 @@ namespace Iviz.Ros
             }
 
             var options = new UnboundedChannelOptions { SingleReader = true };
-            messageChannel = Channel.CreateUnbounded<(IMessage, IRosConnection, time)>(options);
+            var messageChannel = Channel.CreateUnbounded<(IMessage, IRosConnection, time)>(options);
 
-            task = TaskUtils.Run(() => WriteMessagesAsync().AsTask());
+            var messageReader = messageChannel.Reader;
+            messageWriter = messageChannel.Writer;
+            task = TaskUtils.Run(() => WriteMessagesAsync(messageReader).AwaitNoThrow(this));
         }
 
         public async ValueTask DisposeAsync()
@@ -49,9 +52,9 @@ namespace Iviz.Ros
             }
 
             disposed = true;
-            messageChannel.Writer.Complete();
-            //messageQueue.CompleteAdding();
+            messageWriter.Complete();
             await task.AwaitNoThrow(this); // shouldn't throw
+
             if (Settings.IsMobile)
             {
                 string filename = Path.GetFileName(path);
@@ -63,12 +66,12 @@ namespace Iviz.Ros
             }
         }
 
-        internal void EnqueueMessage(IMessage msg, IRosConnection connection)
+        internal void EnqueueMessage(IMessage msg, MessageInfo messageInfo)
         {
             try
             {
                 //messageQueue.Add((msg, connection, time.Now()));
-                messageChannel.Writer.TryWrite((msg, connection, time.Now()));
+                messageWriter.TryWrite((msg, messageInfo.Connection, time.Now()));
             }
             catch (ChannelClosedException)
             {
@@ -80,23 +83,19 @@ namespace Iviz.Ros
             }
         }
 
-        async ValueTask WriteMessagesAsync()
+        async ValueTask WriteMessagesAsync(ChannelReader<(IMessage, IRosConnection, time)> reader)
         {
             // keep the writer within this function!
-            RosbagFileWriter? writer = null;
-            var reader = messageChannel.Reader;
-
+            await using var writer = await RosbagFileWriter.CreateAsync(path);
+            
             try
             {
-                await using (writer = await RosbagFileWriter.CreateAsync(path))
+                while (true)
                 {
-                    while (true)
-                    {
-                        //var (message, connection, time) = await messageQueue.TakeAsync();
-                        var (message, connection, time) = await reader.ReadAsync();
-                        await writer.WriteAsync(message, connection, time);
-                        Length = writer.Length;
-                    }
+                    //var (message, connection, time) = await messageQueue.TakeAsync();
+                    var (message, connection, time) = await reader.ReadAsync();
+                    await writer.WriteAsync(message, connection, time);
+                    Length = writer.Length;
                 }
             }
             catch (ChannelClosedException)
@@ -108,10 +107,7 @@ namespace Iviz.Ros
                 RosLogger.Debug($"{this}: Exception during {nameof(WriteMessagesAsync)}", e);
             }
 
-            if (writer != null)
-            {
-                Length = writer.Length;
-            }
+            Length = writer.Length;
         }
 
         public override string ToString() => $"[{nameof(BagListener)}]";

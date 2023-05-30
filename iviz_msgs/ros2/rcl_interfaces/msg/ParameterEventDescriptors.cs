@@ -33,34 +33,43 @@ namespace Iviz.Msgs.RclInterfaces
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ParameterDescriptor>.Value
-                    : new ParameterDescriptor[n];
-                for (int i = 0; i < n; i++)
+                ParameterDescriptor[] array;
+                if (n == 0) array = EmptyArray<ParameterDescriptor>.Value;
+                else
                 {
-                    array[i] = new ParameterDescriptor(ref b);
+                    array = new ParameterDescriptor[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ParameterDescriptor(ref b);
+                    }
                 }
                 NewParameters = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ParameterDescriptor>.Value
-                    : new ParameterDescriptor[n];
-                for (int i = 0; i < n; i++)
+                ParameterDescriptor[] array;
+                if (n == 0) array = EmptyArray<ParameterDescriptor>.Value;
+                else
                 {
-                    array[i] = new ParameterDescriptor(ref b);
+                    array = new ParameterDescriptor[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ParameterDescriptor(ref b);
+                    }
                 }
                 ChangedParameters = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ParameterDescriptor>.Value
-                    : new ParameterDescriptor[n];
-                for (int i = 0; i < n; i++)
+                ParameterDescriptor[] array;
+                if (n == 0) array = EmptyArray<ParameterDescriptor>.Value;
+                else
                 {
-                    array[i] = new ParameterDescriptor(ref b);
+                    array = new ParameterDescriptor[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ParameterDescriptor(ref b);
+                    }
                 }
                 DeletedParameters = array;
             }
@@ -71,36 +80,45 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ParameterDescriptor>.Value
-                    : new ParameterDescriptor[n];
-                for (int i = 0; i < n; i++)
+                ParameterDescriptor[] array;
+                if (n == 0) array = EmptyArray<ParameterDescriptor>.Value;
+                else
                 {
-                    array[i] = new ParameterDescriptor(ref b);
+                    array = new ParameterDescriptor[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ParameterDescriptor(ref b);
+                    }
                 }
                 NewParameters = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ParameterDescriptor>.Value
-                    : new ParameterDescriptor[n];
-                for (int i = 0; i < n; i++)
+                ParameterDescriptor[] array;
+                if (n == 0) array = EmptyArray<ParameterDescriptor>.Value;
+                else
                 {
-                    array[i] = new ParameterDescriptor(ref b);
+                    array = new ParameterDescriptor[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ParameterDescriptor(ref b);
+                    }
                 }
                 ChangedParameters = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<ParameterDescriptor>.Value
-                    : new ParameterDescriptor[n];
-                for (int i = 0; i < n; i++)
+                ParameterDescriptor[] array;
+                if (n == 0) array = EmptyArray<ParameterDescriptor>.Value;
+                else
                 {
-                    array[i] = new ParameterDescriptor(ref b);
+                    array = new ParameterDescriptor[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new ParameterDescriptor(ref b);
+                    }
                 }
                 DeletedParameters = array;
             }
@@ -153,24 +171,9 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (NewParameters is null) BuiltIns.ThrowNullReference(nameof(NewParameters));
-            for (int i = 0; i < NewParameters.Length; i++)
-            {
-                if (NewParameters[i] is null) BuiltIns.ThrowNullReference(nameof(NewParameters), i);
-                NewParameters[i].RosValidate();
-            }
-            if (ChangedParameters is null) BuiltIns.ThrowNullReference(nameof(ChangedParameters));
-            for (int i = 0; i < ChangedParameters.Length; i++)
-            {
-                if (ChangedParameters[i] is null) BuiltIns.ThrowNullReference(nameof(ChangedParameters), i);
-                ChangedParameters[i].RosValidate();
-            }
-            if (DeletedParameters is null) BuiltIns.ThrowNullReference(nameof(DeletedParameters));
-            for (int i = 0; i < DeletedParameters.Length; i++)
-            {
-                if (DeletedParameters[i] is null) BuiltIns.ThrowNullReference(nameof(DeletedParameters), i);
-                DeletedParameters[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(NewParameters, nameof(NewParameters));
+            BuiltIns.ThrowIfNull(ChangedParameters, nameof(ChangedParameters));
+            BuiltIns.ThrowIfNull(DeletedParameters, nameof(DeletedParameters));
         }
     
         public int RosMessageLength

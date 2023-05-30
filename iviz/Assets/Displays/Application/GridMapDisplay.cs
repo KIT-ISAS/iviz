@@ -209,9 +209,9 @@ namespace Iviz.Displays
                 float stepX = 1f / cellsX;
                 float stepY = 1f / cellsY;
                 int off = 0;
-                foreach (int v in ..(cellsY + 1))
+                for (int v = 0; v < cellsY + 1; v++)
                 {
-                    foreach (int u in ..(cellsX + 1))
+                    for (int u = 0; u < cellsX + 1; u++)
                     {
                         points[off] = new Vector3(
                             u * stepX,
@@ -226,11 +226,11 @@ namespace Iviz.Displays
                 }
 
                 int[] indices = indicesArray.Array;
-                foreach (int v in ..cellsY)
+                for (int v = 0; v < cellsY; v++)
                 {
                     int iOffset = v * cellsX * 4;
                     int pOffset = v * (cellsX + 1);
-                    foreach (int _ in ..cellsX)
+                    for (int u = 0; u < cellsX; u++)
                     {
                         indices[iOffset + 0] = pOffset + (cellsX + 1);
                         indices[iOffset + 1] = pOffset + (cellsX + 1) + 1;

@@ -167,6 +167,8 @@ namespace Iviz.Controllers
             }
         }
 
+        public string Title => "Interactive Markers";
+
         public string Topic => config.Topic;
 
         public int NumEntriesForLog => interactiveMarkers.Count;
@@ -226,7 +228,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public override IListener Listener { get; }
+        public override Listener Listener { get; }
 
         public InteractiveMarkerListener(InteractiveMarkerConfiguration? config, string topic)
         {
@@ -289,7 +291,6 @@ namespace Iviz.Controllers
 
         public override void ResetController()
         {
-            base.ResetController();
             DestroyAllMarkers();
             FullListener?.Reset();
             Publisher?.Reset();

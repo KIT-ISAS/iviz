@@ -51,23 +51,29 @@ namespace Iviz.Msgs.RclInterfaces
             b.Deserialize(out ReadOnly);
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<FloatingPointRange>.Value
-                    : new FloatingPointRange[n];
-                for (int i = 0; i < n; i++)
+                FloatingPointRange[] array;
+                if (n == 0) array = EmptyArray<FloatingPointRange>.Value;
+                else
                 {
-                    array[i] = new FloatingPointRange(ref b);
+                    array = new FloatingPointRange[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new FloatingPointRange(ref b);
+                    }
                 }
                 FloatingPointRange = array;
             }
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<IntegerRange>.Value
-                    : new IntegerRange[n];
-                for (int i = 0; i < n; i++)
+                IntegerRange[] array;
+                if (n == 0) array = EmptyArray<IntegerRange>.Value;
+                else
                 {
-                    array[i] = new IntegerRange(ref b);
+                    array = new IntegerRange[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new IntegerRange(ref b);
+                    }
                 }
                 IntegerRange = array;
             }
@@ -86,24 +92,30 @@ namespace Iviz.Msgs.RclInterfaces
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<FloatingPointRange>.Value
-                    : new FloatingPointRange[n];
-                for (int i = 0; i < n; i++)
+                FloatingPointRange[] array;
+                if (n == 0) array = EmptyArray<FloatingPointRange>.Value;
+                else
                 {
-                    array[i] = new FloatingPointRange(ref b);
+                    array = new FloatingPointRange[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new FloatingPointRange(ref b);
+                    }
                 }
                 FloatingPointRange = array;
             }
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<IntegerRange>.Value
-                    : new IntegerRange[n];
-                for (int i = 0; i < n; i++)
+                IntegerRange[] array;
+                if (n == 0) array = EmptyArray<IntegerRange>.Value;
+                else
                 {
-                    array[i] = new IntegerRange(ref b);
+                    array = new IntegerRange[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new IntegerRange(ref b);
+                    }
                 }
                 IntegerRange = array;
             }
@@ -158,21 +170,11 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Description is null) BuiltIns.ThrowNullReference(nameof(Description));
-            if (AdditionalConstraints is null) BuiltIns.ThrowNullReference(nameof(AdditionalConstraints));
-            if (FloatingPointRange is null) BuiltIns.ThrowNullReference(nameof(FloatingPointRange));
-            for (int i = 0; i < FloatingPointRange.Length; i++)
-            {
-                if (FloatingPointRange[i] is null) BuiltIns.ThrowNullReference(nameof(FloatingPointRange), i);
-                FloatingPointRange[i].RosValidate();
-            }
-            if (IntegerRange is null) BuiltIns.ThrowNullReference(nameof(IntegerRange));
-            for (int i = 0; i < IntegerRange.Length; i++)
-            {
-                if (IntegerRange[i] is null) BuiltIns.ThrowNullReference(nameof(IntegerRange), i);
-                IntegerRange[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Name, nameof(Name));
+            BuiltIns.ThrowIfNull(Description, nameof(Description));
+            BuiltIns.ThrowIfNull(AdditionalConstraints, nameof(AdditionalConstraints));
+            BuiltIns.ThrowIfNull(FloatingPointRange, nameof(FloatingPointRange));
+            BuiltIns.ThrowIfNull(IntegerRange, nameof(IntegerRange));
         }
     
         public int RosMessageLength

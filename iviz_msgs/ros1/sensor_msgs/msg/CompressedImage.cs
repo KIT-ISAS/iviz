@@ -46,7 +46,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<byte>.Value;
                 else
                 {
-                     array = new byte[n];
+                    array = new byte[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -65,7 +65,7 @@ namespace Iviz.Msgs.SensorMsgs
                 if (n == 0) array = EmptyArray<byte>.Value;
                 else
                 {
-                     array = new byte[n];
+                    array = new byte[n];
                     b.DeserializeStructArray(array);
                 }
                 Data = array;
@@ -96,8 +96,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Format is null) BuiltIns.ThrowNullReference(nameof(Format));
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            BuiltIns.ThrowIfNull(Format, nameof(Format));
+            BuiltIns.ThrowIfNull(Data, nameof(Data));
         }
     
         public int RosMessageLength

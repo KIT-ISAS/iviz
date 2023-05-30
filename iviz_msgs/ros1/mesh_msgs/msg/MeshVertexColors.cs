@@ -71,7 +71,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (VertexColors is null) BuiltIns.ThrowNullReference(nameof(VertexColors));
+            BuiltIns.ThrowIfNull(VertexColors, nameof(VertexColors));
         }
     
         public int RosMessageLength

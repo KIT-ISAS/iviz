@@ -25,7 +25,7 @@ namespace Iviz.Displays
     public static class SceneModel
     {
         public static async ValueTask<MeshMarkerHolderDisplay> CreateAsync(string uriString,
-            Model msg, IServiceProvider? provider, CancellationToken token)
+            Model msg, ServiceProvider? provider, CancellationToken token)
         {
             ThrowHelper.ThrowIfNull(uriString, nameof(uriString));
             ThrowHelper.ThrowIfNull(msg, nameof(msg));
@@ -54,7 +54,7 @@ namespace Iviz.Displays
         }
 
         static async ValueTask<MeshMarkerHolderDisplay> CreateImpl(string uriString, Model msg,
-            IServiceProvider? provider, CancellationToken token, GameObject root)
+            ServiceProvider? provider, CancellationToken token, GameObject root)
         {
             root.transform.localRotation =
                 msg.OrientationHint.ToUpperInvariant() == "Z_UP"
@@ -236,7 +236,7 @@ namespace Iviz.Displays
         }
 
         static ValueTask<ResourceKey<Texture2D>?> GetTextureResourceAsync(string uriString, string localPath,
-            IServiceProvider? provider, CancellationToken token)
+            ServiceProvider? provider, CancellationToken token)
         {
             var uri = new Uri(uriString);
             string uriPath = Uri.UnescapeDataString(uri.AbsolutePath);

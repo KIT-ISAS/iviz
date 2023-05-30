@@ -30,8 +30,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_rosbag_lib", "iviz_ros
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_utils_tests", "iviz_utils_tests\iviz_utils_tests.csproj", "{D426E606-432C-4314-B451-285C6AEA44F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_msgs_wrapper", "iviz_msgs_wrapper\iviz_msgs_wrapper.csproj", "{817471D7-0209-4429-98BA-44291B25384A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_tf_manager", "iviz_tf_manager\iviz_tf_manager.csproj", "{CD30D932-413D-47FA-8C2C-8957DC39415C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_ntp_lib", "iviz_ntp_lib\iviz_ntp_lib.csproj", "{C3689E94-527D-4D73-B9C7-1EAB8F59C375}"
@@ -45,6 +43,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_rosclient", "iviz_rosclient\iviz_rosclient.csproj", "{979E8C34-A7FA-4C5D-91DB-47435A07A1A4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_roslib2", "iviz_roslib2\iviz_roslib2.csproj", "{D4373A42-D598-4983-97D6-06751F24A519}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_bridge", "iviz_bridge\iviz_bridge.csproj", "{19C74D95-0A37-4192-8B33-3560E2BB98C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{9A637F4E-16F4-406D-AD47-D8C953B09CDD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -108,10 +110,6 @@ Global
 		{D426E606-432C-4314-B451-285C6AEA44F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D426E606-432C-4314-B451-285C6AEA44F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D426E606-432C-4314-B451-285C6AEA44F2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{817471D7-0209-4429-98BA-44291B25384A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{817471D7-0209-4429-98BA-44291B25384A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{817471D7-0209-4429-98BA-44291B25384A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{817471D7-0209-4429-98BA-44291B25384A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CD30D932-413D-47FA-8C2C-8957DC39415C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CD30D932-413D-47FA-8C2C-8957DC39415C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD30D932-413D-47FA-8C2C-8957DC39415C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -140,6 +138,18 @@ Global
 		{D4373A42-D598-4983-97D6-06751F24A519}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4373A42-D598-4983-97D6-06751F24A519}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4373A42-D598-4983-97D6-06751F24A519}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB2BEF9C-FBC8-470D-B623-7683E647864A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB2BEF9C-FBC8-470D-B623-7683E647864A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB2BEF9C-FBC8-470D-B623-7683E647864A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB2BEF9C-FBC8-470D-B623-7683E647864A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19C74D95-0A37-4192-8B33-3560E2BB98C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19C74D95-0A37-4192-8B33-3560E2BB98C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19C74D95-0A37-4192-8B33-3560E2BB98C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19C74D95-0A37-4192-8B33-3560E2BB98C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A637F4E-16F4-406D-AD47-D8C953B09CDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A637F4E-16F4-406D-AD47-D8C953B09CDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A637F4E-16F4-406D-AD47-D8C953B09CDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A637F4E-16F4-406D-AD47-D8C953B09CDD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

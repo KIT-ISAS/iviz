@@ -43,7 +43,7 @@ namespace Iviz.Msgs.HriMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 MFCC = array;
@@ -63,7 +63,7 @@ namespace Iviz.Msgs.HriMsgs
                 if (n == 0) array = EmptyArray<float>.Value;
                 else
                 {
-                     array = new float[n];
+                    array = new float[n];
                     b.DeserializeStructArray(array);
                 }
                 MFCC = array;
@@ -97,7 +97,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            if (MFCC is null) BuiltIns.ThrowNullReference(nameof(MFCC));
+            BuiltIns.ThrowIfNull(MFCC, nameof(MFCC));
         }
     
         public int RosMessageLength

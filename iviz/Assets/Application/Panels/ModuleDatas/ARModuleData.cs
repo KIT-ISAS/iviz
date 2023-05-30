@@ -21,7 +21,7 @@ namespace Iviz.App
         public override ModuleType ModuleType => ModuleType.AR;
         public override ModulePanel Panel => panel;
         public override IConfiguration Configuration => controller.Config;
-        public override IController Controller => controller;
+        public override Controller Controller => controller;
 
         public ARModuleData(ModuleDataConstructor constructor)
         {
@@ -69,6 +69,7 @@ namespace Iviz.App
             panel.ColorSender.Set(controller.ColorSender);
             panel.DepthSender.Set(controller.DepthSender);
             panel.DepthConfidenceSender.Set(controller.DepthConfidenceSender);
+            panel.MeshSender.Set(controller.MeshSender);
 
             panel.OcclusionQuality.Index = (int)controller.OcclusionQuality;
             panel.OcclusionQuality.ValueChanged += (f, _) => controller.OcclusionQuality = (OcclusionQualityType)f;

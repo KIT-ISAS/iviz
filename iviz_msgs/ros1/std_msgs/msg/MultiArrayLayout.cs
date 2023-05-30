@@ -50,12 +50,15 @@ namespace Iviz.Msgs.StdMsgs
         {
             {
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MultiArrayDimension>.Value
-                    : new MultiArrayDimension[n];
-                for (int i = 0; i < n; i++)
+                MultiArrayDimension[] array;
+                if (n == 0) array = EmptyArray<MultiArrayDimension>.Value;
+                else
                 {
-                    array[i] = new MultiArrayDimension(ref b);
+                    array = new MultiArrayDimension[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MultiArrayDimension(ref b);
+                    }
                 }
                 Dim = array;
             }
@@ -67,12 +70,15 @@ namespace Iviz.Msgs.StdMsgs
             {
                 b.Align4();
                 int n = b.DeserializeArrayLength();
-                var array = n == 0
-                    ? EmptyArray<MultiArrayDimension>.Value
-                    : new MultiArrayDimension[n];
-                for (int i = 0; i < n; i++)
+                MultiArrayDimension[] array;
+                if (n == 0) array = EmptyArray<MultiArrayDimension>.Value;
+                else
                 {
-                    array[i] = new MultiArrayDimension(ref b);
+                    array = new MultiArrayDimension[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        array[i] = new MultiArrayDimension(ref b);
+                    }
                 }
                 Dim = array;
             }
@@ -108,12 +114,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            if (Dim is null) BuiltIns.ThrowNullReference(nameof(Dim));
-            for (int i = 0; i < Dim.Length; i++)
-            {
-                if (Dim[i] is null) BuiltIns.ThrowNullReference(nameof(Dim), i);
-                Dim[i].RosValidate();
-            }
+            BuiltIns.ThrowIfNull(Dim, nameof(Dim));
         }
     
         public int RosMessageLength

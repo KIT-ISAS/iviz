@@ -60,7 +60,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            BuiltIns.ThrowIfNull(Id, nameof(Id));
         }
     
         public int RosMessageLength

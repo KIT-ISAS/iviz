@@ -36,7 +36,7 @@ namespace Iviz.App
         readonly ConcurrentQueue<(string DateTime, string? CallerId, IMessage Msg)> messageQueue = new();
         readonly List<TopicEntry> entries = new();
 
-        IListener? listener;
+        Listener? listener;
         bool queueIsDirty;
         bool isPaused;
 

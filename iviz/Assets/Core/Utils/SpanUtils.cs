@@ -56,23 +56,30 @@ namespace Iviz.Core
             return count == 0
                 ? default
                 : new ReadOnlySpan<T>((T[]?)ExtractArray(list), 0, count);
+            return new ReadOnlySpan<T>((T[]?)ExtractArray(list), 0, list.Count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyFrom(this Texture2D dst, ReadOnlySpan<byte> src)
+        public static void CopyFrom(this Texture2D dst, ReadOnlySpan<byte> srcSpan)
         {
-            fixed (byte* srcPtr = src)
+            uint length = (uint)srcSpan.Length;
+            if (length == 0) return;
+
+            fixed (byte* srcBytesPtr = &srcSpan[0])
             {
-                Unsafe.CopyBlock(dst.GetUnsafePtr(), srcPtr, (uint)src.Length);
+                Unsafe.CopyBlock(dst.GetUnsafePtr(), srcBytesPtr, length);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyFrom(this Texture2D dst, ReadOnlySpan<float> src)
+        public static void CopyFrom(this Texture2D dst, ReadOnlySpan<float> srcSpan)
         {
-            fixed (float* srcPtr = src)
+            uint length = (uint)srcSpan.Length;
+            if (length == 0) return;
+
+            fixed (float* srcBytesPtr = &srcSpan[0])
             {
-                Unsafe.CopyBlock(dst.GetUnsafePtr(), (byte*)srcPtr, (uint)(src.Length * sizeof(float)));
+                Unsafe.CopyBlock(dst.GetUnsafePtr(), srcBytesPtr, length * sizeof(float));
             }
         }
 
@@ -113,6 +120,7 @@ namespace Iviz.Core
 
         public static Span<T> Cast<T>(this Span<byte> src) where T : unmanaged =>
             MemoryMarshal.Cast<byte, T>(src);
+        public static Span<T> Cast<T>(this Span<byte> src) where T : unmanaged => MemoryMarshal.Cast<byte, T>(src);
 
         public static T Read<T>(this ReadOnlySpan<byte> span) where T : unmanaged => MemoryMarshal.Read<T>(span);
 
@@ -132,23 +140,5 @@ namespace Iviz.Core
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<byte> AsSpan(this IntPtr ptr, int size) => new(ptr.ToPointer(), size);
-
-
-        /*
-        ref struct GetLengthHelper
-        {
-            public Span<byte> span;
-            public int length;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining), Preserve, SkipLocalsInit]
-        public static int GetLength(this Span<byte> span)
-        {
-            GetLengthHelper h;
-            h.span = span;
-            h.length = 0;
-            return Unsafe.Subtract(ref h.length, 1);
-        }
-        */
     }
 }

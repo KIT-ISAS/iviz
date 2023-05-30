@@ -51,5 +51,8 @@ namespace Iviz.Core
 
         [DoesNotReturn, AssertionMethod]
         public static void ThrowArgumentNull(string arg, string message) => BuiltIns.ThrowArgumentNull(arg, message);
+        
+        [DoesNotReturn, AssertionMethod]
+        public static object ThrowObjectDisposed(string name) => throw new ObjectDisposedException(name);
     }
 }
