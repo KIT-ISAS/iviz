@@ -185,6 +185,7 @@ namespace Iviz.Msgs.HriMsgs
             BuiltIns.ThrowIfNull(Landmarks, nameof(Landmarks));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -196,7 +197,7 @@ namespace Iviz.Msgs.HriMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -212,14 +213,15 @@ namespace Iviz.Msgs.HriMsgs
     
         public const string MessageType = "hri_msgs/FacialLandmarks";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "c779d9fd02c1af8ab6a1712921ab9da5";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VXXU/jOBR9z6+w1AdgRT/yWUDyw85QhkqlrUrRaoVQ5SZua21iZ2MH6Pz6vXaaUII7" +
                 "2oddVInmHvvc6+Pr+qSDljsmUUalJFuKYsEVYVwiglImFRIbtCExIynaUKLKgkqUUEVjRRMkOIwClDod" +

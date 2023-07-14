@@ -91,6 +91,7 @@ namespace Iviz.Msgs.VisionMsgs
             BuiltIns.ThrowIfNull(Boxes, nameof(Boxes));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -102,7 +103,7 @@ namespace Iviz.Msgs.VisionMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -117,14 +118,15 @@ namespace Iviz.Msgs.VisionMsgs
     
         public const string MessageType = "vision_msgs/BoundingBox2DArray";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "583fadc917b98c913c8ed3ee2bf4514a";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VVTW/cNhC961cM4MPGhXeLOkUOBnKwYbT1oYDRpKcgMLjiaMWWIlWS2l311/fN0Fp7" +
                 "0RTIoTEWsCTOvPl685iLfRryLn//CxvLiXr91+xddjHUk7s4BevC7i4er+8/faZtPHJumvf/81/z64ef" +

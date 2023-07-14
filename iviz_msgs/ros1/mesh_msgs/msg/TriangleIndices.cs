@@ -52,25 +52,26 @@ namespace Iviz.Msgs.MeshMsgs
     
         public const int RosFixedMessageLength = 12;
         
-        public readonly int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public readonly int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 12;
         
-        public readonly int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public readonly int Ros2MessageLength => Ros2FixedMessageLength;
         
         public readonly int AddRos2MessageLength(int c) => WriteBuffer2.Align4(c) + Ros2FixedMessageLength;
         
     
         public const string MessageType = "mesh_msgs/TriangleIndices";
     
-        public readonly string RosMessageType => MessageType;
+        [IgnoreDataMember] public readonly string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "23688b2e6d2de3d32fe8af104a903253";
     
-        public readonly string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public readonly string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE1NWcElNy8zLLMnMz1PIT1NIVCgpykzMS89JVS9WKEstKslMTi3mKs3MKzE2ijaOBQul" +
                 "VsRn5qWAJbgAjDTRWEAAAAA=";

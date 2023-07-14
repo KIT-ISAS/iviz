@@ -79,6 +79,7 @@ namespace Iviz.Msgs.PclMsgs
             BuiltIns.ThrowIfNull(Values, nameof(Values));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -90,7 +91,7 @@ namespace Iviz.Msgs.PclMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -104,14 +105,15 @@ namespace Iviz.Msgs.PclMsgs
     
         public const string MessageType = "pcl_msgs/ModelCoefficients";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "ca27dea75e72cb894cd36f9e5005e93e";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61RTWvcMBC961cM7CFJYROS3hZ6K216KIQktxCWWWnWHpAlVyNv4n/fJy/5uuUQIxCW" +
                 "3pfeXAsHKdQvm9vHzPX71cMjHThOYs65H1/8ub93vzdkNWwH6+zi+mi8orvKKXAJNEjlwJVpn5FLu17K" +

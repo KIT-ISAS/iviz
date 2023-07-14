@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class GetVertexCosts : IService
+    public sealed class GetVertexCosts : IService<GetVertexCostsRequest, GetVertexCostsResponse>
     {
         /// Request message.
         [DataMember] public GetVertexCostsRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.MeshMsgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "d0fc06ce39b58884e8cdf147765b9d6b";
+        
+        public IService Generate() => new GetVertexCosts();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -93,6 +95,7 @@ namespace Iviz.Msgs.MeshMsgs
             BuiltIns.ThrowIfNull(Uuid, nameof(Uuid));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -103,7 +106,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -161,6 +164,7 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexCostsStamped.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -171,7 +175,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {

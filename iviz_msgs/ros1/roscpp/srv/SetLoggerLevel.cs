@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Roscpp
 {
     [DataContract]
-    public sealed class SetLoggerLevel : IService
+    public sealed class SetLoggerLevel : IService<SetLoggerLevelRequest, SetLoggerLevelResponse>
     {
         /// Request message.
         [DataMember] public SetLoggerLevelRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.Roscpp
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "51da076440d78ca1684d36c868df61ea";
+        
+        public IService Generate() => new SetLoggerLevel();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -103,6 +105,7 @@ namespace Iviz.Msgs.Roscpp
             BuiltIns.ThrowIfNull(Level, nameof(Level));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -114,7 +117,7 @@ namespace Iviz.Msgs.Roscpp
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -166,11 +169,11 @@ namespace Iviz.Msgs.Roscpp
     
         public const int RosFixedMessageLength = 0;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 0;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     

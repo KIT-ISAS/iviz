@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.StdSrvs
 {
     [DataContract]
-    public sealed class Trigger : IService
+    public sealed class Trigger : IService<TriggerRequest, TriggerResponse>
     {
         /// Request message.
         [DataMember] public TriggerRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.StdSrvs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "937c9679a518e3a18d831e57125ea522";
+        
+        public IService Generate() => new Trigger();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -84,11 +86,11 @@ namespace Iviz.Msgs.StdSrvs
     
         public const int RosFixedMessageLength = 0;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 0;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     
@@ -149,6 +151,7 @@ namespace Iviz.Msgs.StdSrvs
             BuiltIns.ThrowIfNull(Message, nameof(Message));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -159,7 +162,7 @@ namespace Iviz.Msgs.StdSrvs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {

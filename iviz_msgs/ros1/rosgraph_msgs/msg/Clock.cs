@@ -54,25 +54,26 @@ namespace Iviz.Msgs.RosgraphMsgs
     
         public const int RosFixedMessageLength = 8;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 8;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => WriteBuffer2.Align4(c) + Ros2FixedMessageLength;
         
     
         public const string MessageType = "rosgraph_msgs/Clock";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "a9c97c1d230cfc112e270351a944ee47";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAEyWOsQrDMBBD93yFIGux966FroW2P5C41/iI7Qs+G5O/r5NuAulJGpFFA8/2FsStYEVV" +
                 "+uArGVudA6vntEA51jCVbhSOBE54Pl4Gw4i370gk1WmhI7aFHU5irIldBxTFE1zNmVI5YdOhe2+Pko+i" +

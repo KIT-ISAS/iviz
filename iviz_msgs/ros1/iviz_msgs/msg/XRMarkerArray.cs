@@ -85,6 +85,7 @@ namespace Iviz.Msgs.IvizMsgs
             BuiltIns.ThrowIfNull(Markers, nameof(Markers));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -95,7 +96,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -108,14 +109,15 @@ namespace Iviz.Msgs.IvizMsgs
     
         public const string MessageType = "iviz_msgs/XRMarkerArray";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "bf6cdc9e7f0d5ddddaedaa788a1fcb50";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71V32/bNhB+nv6KA/zQZHC0tSkKLEAfgqTb8lA0cbOiXRAItHSWuEqkSlL+kb++35GW" +
                 "nRTBuoc1hmFTJO+7u+++O32cvVXuM7ubW+riwmfZ6//5k719/8cJ6aW+Kzpf+18+bn1m801guv50+aY4" +

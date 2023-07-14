@@ -76,25 +76,26 @@ namespace Iviz.Msgs.SensorMsgs
     
         public const int RosFixedMessageLength = 3;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 4;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c + Ros2FixedMessageLength;
         
     
         public const string MessageType = "sensor_msgs/NavSatStatus";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "331cdbddfa4bc96ffc3b9ad98900a54c";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE42RT0/DMAzF7/0UlnZmYgghLiB1MKZJY0OUfzeUtm5rKUumxNnYt8ehLWyMA7nV7vvZ" +
                 "fm8AC7WhWjFZA5li1JoYoaIP8Kw4eKisA2V2MNU2V/rv37OdZ1wlyQBeG+QGHbAFG3gdWLSgQr1Cw1h+" +

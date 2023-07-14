@@ -129,6 +129,7 @@ namespace Iviz.Msgs.SensorMsgs
             BuiltIns.ThrowIfNull(Channels, nameof(Channels));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -141,7 +142,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -157,14 +158,15 @@ namespace Iviz.Msgs.SensorMsgs
     
         public const string MessageType = "sensor_msgs/PointCloud";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "d8e9c3f5afbdd8a130fd1d2763945fca";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VWTW8bNxC9768YSIfIhazCSQ6FgR7atE5zKBAkvgWBMdod7RLhkmuSa1v99X1D7urD" +
                 "8aGHRhCg1ZJ8M/PmzQyXdNuZSL3EyK1Q520Tian21kqdjHfkd/SmocEbl+KaBjtG8oOusCVuGlMeqyUZ" +

@@ -77,6 +77,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -87,7 +88,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -101,14 +102,15 @@ namespace Iviz.Msgs.SensorMsgs
     
         public const string MessageType = "sensor_msgs/Illuminance";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "8cf5febb0952fca9d650c3d11a81a188";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61UTWvcMBC9+1cM7CFJ292kH/QQ6KEQ2gYSCEkOhVLCRJ61RWXJlUa72f76zsj2rnMI" +
                 "9FBj2NV49ObNeyPBAu6sbxxB3wYOHXG0BqxzubMevSHoCFOO1JHnFcCVbVqG1IbsangkwJRyRzVwkFUF" +

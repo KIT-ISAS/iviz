@@ -100,6 +100,7 @@ namespace Iviz.Msgs.HriMsgs
             BuiltIns.ThrowIfNull(MFCC, nameof(MFCC));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -110,7 +111,7 @@ namespace Iviz.Msgs.HriMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -127,14 +128,15 @@ namespace Iviz.Msgs.HriMsgs
     
         public const string MessageType = "hri_msgs/AudioFeatures";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "1942f4cd8b6bb147f1ccb9aded9b6535";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE1WR0UvDMBDG3/tXHOxFYRvdREEfLZUN3JR1T4pIll7aYJrrkiu6/fVeOzYRAgl33/3y" +
                 "5csItrWN0GCMqkJAr6nECFwjzO5AdaUlMKi4C1KN6FAzlskIrB80y/U23xSveZ4t5ml6D7pWzqGvcCoa" +

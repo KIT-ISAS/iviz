@@ -74,6 +74,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             BuiltIns.ThrowIfNull(Sequence, nameof(Sequence));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -84,7 +85,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -97,14 +98,15 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         public const string MessageType = "actionlib_tutorials/FibonacciFeedback";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "b81e37d2a31925a0e8ae261a8699cb79";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+PKzCsxNoqOVShOLSxNzUtO5eICAHPWhAoTAAAA";
                 

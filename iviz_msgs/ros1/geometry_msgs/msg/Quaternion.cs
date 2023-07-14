@@ -54,25 +54,26 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public const int RosFixedMessageLength = 32;
         
-        public readonly int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public readonly int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 32;
         
-        public readonly int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public readonly int Ros2MessageLength => Ros2FixedMessageLength;
         
         public readonly int AddRos2MessageLength(int c) => WriteBuffer2.Align8(c) + Ros2FixedMessageLength;
         
     
         public const string MessageType = "geometry_msgs/Quaternion";
     
-        public readonly string RosMessageType => MessageType;
+        [IgnoreDataMember] public readonly string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "a779879fadf0160734f906b8c19c7004";
     
-        public readonly string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public readonly string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAEz3JTQqAQAhA4b2nENq3ik7SBSQcEkonNfo5fbWZ3fd4HU6LBDpX52DNQFI0l4+UYoqi" +
                 "WJwZo9LMf+0HJbv+r5hvPUBZjXIc8Gq6m56mE+AFLI5yL20AAAA=";

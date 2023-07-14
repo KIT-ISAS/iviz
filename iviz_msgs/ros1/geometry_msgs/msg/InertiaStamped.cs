@@ -56,6 +56,7 @@ namespace Iviz.Msgs.GeometryMsgs
             Inertia.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -66,7 +67,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -79,14 +80,15 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public const string MessageType = "geometry_msgs/InertiaStamped";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "ddee48caeab5a966c5e8d166654a9ac7";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71UPW/bMBDd9SsO8JCksFU0KToEyNSijYcAQRN0CdzgLJ4lIhKpkpRtCfnxfaT8la1D" +
                 "W0GCqNO9d993K6zEUZVe2dyIC5pJj+8su/nLV3b38O2afFDPjS/9+9vR7IQeAhvFTlEjgRUHppWFV7qs" +

@@ -113,6 +113,7 @@ namespace Iviz.Msgs.SensorMsgs
             BuiltIns.ThrowIfNull(Buttons, nameof(Buttons));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -125,7 +126,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -141,14 +142,15 @@ namespace Iviz.Msgs.SensorMsgs
     
         public const string MessageType = "sensor_msgs/Joy";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "5a9ea5f83505693b71e785041e67a8bb";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61TTWvcMBC961cM+JCksCltbwu9lX4cCiXJLYRlVpq1ldiSq5E38b/vkxxnQw+hhwrh" +
                 "j/l4b/Rm1NCVjDFlpdwJaeYsFA/EdB9nzd4+KPGT4BEc7aecY9BL813YSaJueZ1WQ9kPApBhJB8q4nOM" +

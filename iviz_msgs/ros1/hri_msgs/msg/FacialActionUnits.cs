@@ -302,6 +302,7 @@ namespace Iviz.Msgs.HriMsgs
             BuiltIns.ThrowIfNull(Confidence, nameof(Confidence));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -315,7 +316,7 @@ namespace Iviz.Msgs.HriMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -333,14 +334,15 @@ namespace Iviz.Msgs.HriMsgs
     
         public const string MessageType = "hri_msgs/FacialActionUnits";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "7872c889685bdf665183ddf7f24a1dd9";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VYW2/iSBp951eUlIfprLqTDpfcVn5wwARPCGZt06jValmFKaAUY3tcduj8+zlfGRtD" +
                 "sqNdaabVUoA636W+67HPmL+Rim2FUnwtWL4RTMa5iJXM31iyYoKHG8bDXCaxYkUsc/bJnJ1/ZjuZbwgt" +

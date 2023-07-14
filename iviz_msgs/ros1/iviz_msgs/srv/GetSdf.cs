@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class GetSdf : IService
+    public sealed class GetSdf : IService<GetSdfRequest, GetSdfResponse>
     {
         /// Request message.
         [DataMember] public GetSdfRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.IvizMsgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "4268e0641c7ff6b587e46790f433e3ba";
+        
+        public IService Generate() => new GetSdf();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -95,6 +97,7 @@ namespace Iviz.Msgs.IvizMsgs
             BuiltIns.ThrowIfNull(Uri, nameof(Uri));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -105,7 +108,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -182,6 +185,7 @@ namespace Iviz.Msgs.IvizMsgs
             BuiltIns.ThrowIfNull(Message, nameof(Message));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -193,7 +197,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {

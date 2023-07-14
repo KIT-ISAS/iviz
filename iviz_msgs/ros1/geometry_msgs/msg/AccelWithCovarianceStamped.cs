@@ -57,6 +57,7 @@ namespace Iviz.Msgs.GeometryMsgs
             Accel.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -67,7 +68,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -80,14 +81,15 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public const string MessageType = "geometry_msgs/AccelWithCovarianceStamped";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "96adb295225031ec8d57fb4251b0a886";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71VTW/TQBC9+1eMlENblARBUQ+VOCAQ0ANSBYhPVdXEHttL7V0zu27i/nrerhOTqj2A" +
                 "BI0sxV7PvJl582Y8o4+18aTSqXixwRNbEh9My0EK4jyXhtYm1DApRcXmQrlzWhgLAyqVW4FLQfCAG7fd" +

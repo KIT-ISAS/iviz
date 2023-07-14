@@ -53,25 +53,26 @@ namespace Iviz.Msgs.IvizMsgs
     
         public const int RosFixedMessageLength = 4;
         
-        public readonly int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public readonly int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 4;
         
-        public readonly int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public readonly int Ros2MessageLength => Ros2FixedMessageLength;
         
         public readonly int AddRos2MessageLength(int c) => c + Ros2FixedMessageLength;
         
     
         public const string MessageType = "iviz_msgs/Color32";
     
-        public readonly string RosMessageType => MessageType;
+        [IgnoreDataMember] public readonly string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "3a89b17adab5bedef0b554f03235d9b3";
     
-        public readonly string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public readonly string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAEyvNzCuxUCjiKgXT6VA6CUoncnEBACHBa7shAAAA";
                 

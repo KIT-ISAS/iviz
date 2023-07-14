@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GridMapMsgs
 {
     [DataContract]
-    public sealed class GetGridMap : IService
+    public sealed class GetGridMap : IService<GetGridMapRequest, GetGridMapResponse>
     {
         /// Request message.
         [DataMember] public GetGridMapRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.GridMapMsgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "802c2cbc7b10fada2d44db75ddb8c738";
+        
+        public IService Generate() => new GetGridMap();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -125,6 +127,7 @@ namespace Iviz.Msgs.GridMapMsgs
             BuiltIns.ThrowIfNull(Layers, nameof(Layers));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -136,7 +139,7 @@ namespace Iviz.Msgs.GridMapMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -201,6 +204,7 @@ namespace Iviz.Msgs.GridMapMsgs
             Map.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -211,7 +215,7 @@ namespace Iviz.Msgs.GridMapMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {

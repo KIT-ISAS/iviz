@@ -56,6 +56,7 @@ namespace Iviz.Msgs.MeshMsgs
             VectorField.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -67,7 +68,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -79,14 +80,15 @@ namespace Iviz.Msgs.MeshMsgs
     
         public const string MessageType = "mesh_msgs/VectorFieldStamped";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "3d9fc2de2c0939ad4bbe0890ccb68ce5";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71UTWvcMBC9+1cM7CGbsnFpUnoI9FbS5lAITeglhGXWGtuisuRK8m7cX98neddNykJ7" +
                 "aGoMlqV5b958KUS17kITXn8SVuKpzZ+ik9BO+1+lis5faTGKtnm9rtNPUbz/x0/x+fbjJYXngooF3Ua2" +

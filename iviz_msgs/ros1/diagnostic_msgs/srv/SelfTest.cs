@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.DiagnosticMsgs
 {
     [DataContract]
-    public sealed class SelfTest : IService
+    public sealed class SelfTest : IService<SelfTestRequest, SelfTestResponse>
     {
         /// Request message.
         [DataMember] public SelfTestRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "ac21b1bab7ab17546986536c22eb34e9";
+        
+        public IService Generate() => new SelfTest();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -84,11 +86,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
     
         public const int RosFixedMessageLength = 0;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 0;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     
@@ -191,6 +193,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             BuiltIns.ThrowIfNull(Status, nameof(Status));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -202,7 +205,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {

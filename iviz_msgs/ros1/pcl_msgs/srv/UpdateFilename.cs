@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.PclMsgs
 {
     [DataContract]
-    public sealed class UpdateFilename : IService
+    public sealed class UpdateFilename : IService<UpdateFilenameRequest, UpdateFilenameResponse>
     {
         /// Request message.
         [DataMember] public UpdateFilenameRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.PclMsgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "93a4bc4c60dc17e2a69e3fcaaa25d69d";
+        
+        public IService Generate() => new UpdateFilename();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -93,6 +95,7 @@ namespace Iviz.Msgs.PclMsgs
             BuiltIns.ThrowIfNull(Filename, nameof(Filename));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -103,7 +106,7 @@ namespace Iviz.Msgs.PclMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -160,11 +163,11 @@ namespace Iviz.Msgs.PclMsgs
     
         public const int RosFixedMessageLength = 1;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 1;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c)
         {

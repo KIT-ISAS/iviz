@@ -51,25 +51,26 @@ namespace Iviz.Msgs.IvizMsgs
     
         public const int RosFixedMessageLength = 12;
         
-        public readonly int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public readonly int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 12;
         
-        public readonly int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public readonly int Ros2MessageLength => Ros2FixedMessageLength;
         
         public readonly int AddRos2MessageLength(int c) => WriteBuffer2.Align4(c) + Ros2FixedMessageLength;
         
     
         public const string MessageType = "iviz_msgs/Triangle";
     
-        public readonly string RosMessageType => MessageType;
+        [IgnoreDataMember] public readonly string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "7fbd9596e2fe5bfb3fb6622c0cdf3da9";
     
-        public readonly string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public readonly string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAEyvNzCsxNlJI5CqFMJJgjGQuLgA3MPMeHAAAAA==";
                 

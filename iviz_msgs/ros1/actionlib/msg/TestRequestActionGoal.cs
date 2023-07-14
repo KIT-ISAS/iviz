@@ -65,6 +65,7 @@ namespace Iviz.Msgs.Actionlib
             Goal.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -77,7 +78,7 @@ namespace Iviz.Msgs.Actionlib
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -90,14 +91,15 @@ namespace Iviz.Msgs.Actionlib
     
         public const string MessageType = "actionlib/TestRequestActionGoal";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "1889556d3fef88f821c7cb004e4251f3";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VUTW/bMAy9+1cQyKHtgKZru10K5NAlXpth/UCSAQOGwWAkxhYmS54kJ/W/HyUnabfs" +
                 "sMNqGBAsko+PfKRvCSU5qNKRoQjKGq2WRe1Lf3ZjUU8nUPJRKJktyIcZ/Wz5iJZ0n43+85PdzW+uwAfZ" +

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class GetModules : IService
+    public sealed class GetModules : IService<GetModulesRequest, GetModulesResponse>
     {
         /// Request message.
         [DataMember] public GetModulesRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.IvizMsgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "854d12ba02315a7b73d8ac45d1a68e74";
+        
+        public IService Generate() => new GetModules();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -85,11 +87,11 @@ namespace Iviz.Msgs.IvizMsgs
     
         public const int RosFixedMessageLength = 0;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 0;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     
@@ -145,6 +147,7 @@ namespace Iviz.Msgs.IvizMsgs
             BuiltIns.ThrowIfNull(Configs, nameof(Configs));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -155,7 +158,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {

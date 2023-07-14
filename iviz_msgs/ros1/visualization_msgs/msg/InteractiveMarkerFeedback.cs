@@ -122,6 +122,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             BuiltIns.ThrowIfNull(ControlName, nameof(ControlName));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -135,7 +136,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -159,14 +160,15 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         public const string MessageType = "visualization_msgs/InteractiveMarkerFeedback";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "ab0f1eee058667e28c19ff3ffc3f4b78";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71W227bRhB951cM4Ickha00cRoUBvLg2koixBc1ltqHoiBW5JBamNxldpdW1K/vmeXF" +
                 "VF0UfWhjGBC1nDkz58xldUQrXfPLwqmaSZvCzpKPrHJ2tI0fSXJEi5xN0MVem5J8cPiY0XXrA22YWqO/" +

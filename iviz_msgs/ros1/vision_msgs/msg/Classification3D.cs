@@ -107,6 +107,7 @@ namespace Iviz.Msgs.VisionMsgs
             SourceCloud.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -119,7 +120,7 @@ namespace Iviz.Msgs.VisionMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -135,14 +136,15 @@ namespace Iviz.Msgs.VisionMsgs
     
         public const string MessageType = "vision_msgs/Classification3D";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "2c0fe97799b60ee2995363b3fbf44715";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VXTW/cNhA9V79iEB9iB161ttPUCGAUaYw0BlInSNxeDMOgRO6KDUWqJLWu+uv7hhTl" +
                 "deJDD43heFcU53E+3rxh9uhcrbVVgQSdnFNrRAh6rVsRtbPkVRhNrKu9ao+uOh3mBZIOBtZFap2NQlsS" +

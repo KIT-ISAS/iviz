@@ -93,6 +93,7 @@ namespace Iviz.Msgs.NavMsgs
             BuiltIns.ThrowIfNull(Data, nameof(Data));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -104,7 +105,7 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -119,14 +120,15 @@ namespace Iviz.Msgs.NavMsgs
     
         public const string MessageType = "nav_msgs/OccupancyGrid";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "3381f2d731d4076ec5c71b0759edbe4e";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71VTW/TQBC9768YKQdalIQUEEKVOCBVfBwqytcpiqLJemIv2Ltmd91gfj1v13GSgoQ4" +
                 "UCqrsdfz8ebNm/GEPlUmkJfWSxAbAzE9nl1R6U1BDbdTMpZ2ldEVCeOflro+tY6VUOvdhjemNrEnt1UT" +

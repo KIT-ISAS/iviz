@@ -67,6 +67,7 @@ namespace Iviz.Msgs.MeshMsgs
             MeshGeometry.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -79,7 +80,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -93,14 +94,15 @@ namespace Iviz.Msgs.MeshMsgs
     
         public const string MessageType = "mesh_msgs/MeshGeometryStamped";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "2d62dc21b3d9b8f528e4ee7f76a77fb7";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VTTWvbQBC961cM6OCk4JQ2pQdDb6apD4HQ+GaCGWtH0sJqV91dOVZ/fd9KtmKCKT3U" +
                 "QiBp9d6bjzeT06OEmh7ENRJ9n74CV5KFqLZNqMLHH8JKPNXDA8de24q6TqusAXHEJIlJYTiujl9Z9u0/" +

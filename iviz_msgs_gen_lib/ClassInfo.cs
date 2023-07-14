@@ -426,7 +426,7 @@ public sealed class ClassInfo
             {
                 $"public const int Ros2FixedMessageLength = 0;",
                 "",
-                $"public {readOnlyId}int Ros2MessageLength => Ros2FixedMessageLength;",
+                $"[IgnoreDataMember] public {readOnlyId}int Ros2MessageLength => Ros2FixedMessageLength;",
                 "",
                 $"public {readOnlyId}int AddRos2MessageLength(int c) => c;"
             };
@@ -438,7 +438,7 @@ public sealed class ClassInfo
             {
                 $"public const int Ros2FixedMessageLength = {fixedSize};",
                 "",
-                $"public {readOnlyId}int Ros2MessageLength => Ros2FixedMessageLength;",
+                $"[IgnoreDataMember] public {readOnlyId}int Ros2MessageLength => Ros2FixedMessageLength;",
                 "",
                 ros2HeadAlignment != 1
                     ? $"public {readOnlyId}int AddRos2MessageLength(int c) => WriteBuffer2.Align{ros2HeadAlignment}(c) + Ros2FixedMessageLength;"
@@ -452,11 +452,11 @@ public sealed class ClassInfo
         {
             fields.Add($"public const int Ros2FixedMessageLength = {fixedSize};");
             fields.Add("");
-            fields.Add($"public {readOnlyId}int Ros2MessageLength => Ros2FixedMessageLength;");
+            fields.Add($"[IgnoreDataMember] public {readOnlyId}int Ros2MessageLength => Ros2FixedMessageLength;");
         }
         else
         {
-            fields.Add($"public {readOnlyId}int Ros2MessageLength => AddRos2MessageLength(0);");
+            fields.Add($"[IgnoreDataMember] public {readOnlyId}int Ros2MessageLength => AddRos2MessageLength(0);");
         }
 
         fields.Add("");
@@ -584,7 +584,7 @@ public sealed class ClassInfo
             {
                 $"public const int RosFixedMessageLength = {fixedSize};",
                 "",
-                $"public {readOnlyId}int RosMessageLength => RosFixedMessageLength;"
+                $"[IgnoreDataMember] public {readOnlyId}int RosMessageLength => RosFixedMessageLength;"
             };
         }
 
@@ -592,7 +592,7 @@ public sealed class ClassInfo
         {
             return new[]
             {
-                $"public {readOnlyId}int RosMessageLength => 0;"
+                $"[IgnoreDataMember] public {readOnlyId}int RosMessageLength => 0;"
             };
         }
 
@@ -677,6 +677,7 @@ public sealed class ClassInfo
         }
 
         var lines = new List<string>();
+        lines.Add("[IgnoreDataMember]");
         lines.Add($"public {readOnlyId}int RosMessageLength");
         lines.Add("{");
         lines.Add("    get");
@@ -1641,7 +1642,7 @@ public sealed class ClassInfo
         lines.Add($"    public const string MessageType = \"{RosPackage}/{Name}\";");
         lines.Add("");
         string readOnlyId = ForceStruct ? "readonly " : "";
-        lines.Add($"    public {readOnlyId}string RosMessageType => MessageType;");
+        lines.Add($"    [IgnoreDataMember] public {readOnlyId}string RosMessageType => MessageType;");
 
         lines.Add("");
 
@@ -1659,7 +1660,7 @@ public sealed class ClassInfo
 
             lines.Add($"    public const string Md5Sum = {md5Hash};");
             lines.Add("");
-            lines.Add($"    public {readOnlyId}string RosMd5Sum => Md5Sum;");
+            lines.Add($"    [IgnoreDataMember] public {readOnlyId}string RosMd5Sum => Md5Sum;");
 
             lines.Add("");
 
@@ -1671,11 +1672,12 @@ public sealed class ClassInfo
             if (compressedDeps == emptyDependenciesBase64)
             {
                 lines.Add(
-                    $"    public {readOnlyId}string RosDependenciesBase64 => BuiltIns.EmptyDependenciesBase64;");
+                    $"    [IgnoreDataMember] public {readOnlyId}string RosDependenciesBase64 => BuiltIns.EmptyDependenciesBase64;");
                 lines.Add("");
             }
             else
             {
+                lines.Add($"    [IgnoreDataMember]");
                 lines.Add($"    public {readOnlyId}string RosDependenciesBase64 =>");
                 var splitDeps = Split(compressedDeps);
                 foreach (string entry in splitDeps)

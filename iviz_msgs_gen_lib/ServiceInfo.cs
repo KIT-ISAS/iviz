@@ -139,7 +139,7 @@ namespace Iviz.MsgsGen
             {
                 lines.Add($"    {entry}");
             }
-
+            
             lines.Add("");
             lines.Add("    public override string ToString() => Extensions.ToString(this);");
 
@@ -259,6 +259,8 @@ namespace Iviz.MsgsGen
                 //$"[Preserve] public const string RosMd5Sum = {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};",
                 $"public string RosMd5Sum => {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};",
                 "",
+                $"public IService Generate() => new {Name}();",
+                "",
                 "public override string ToString() => Extensions.ToString(this);",
             };
         }
@@ -274,7 +276,7 @@ namespace Iviz.MsgsGen
             str.AppendNewLine($"namespace Iviz.Msgs.{CsPackage}");
             str.AppendNewLine("{");
             str.AppendNewLine($"    [DataContract]");
-            str.AppendNewLine($"    public sealed class {Name} : IService");
+            str.AppendNewLine($"    public sealed class {Name} : IService<{Name}Request, {Name}Response>");
             str.AppendNewLine("    {");
 
             IEnumerable<string> mainClassLines = CreateServiceContent();

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.MeshMsgs
 {
     [DataContract]
-    public sealed class GetLabeledClusters : IService
+    public sealed class GetLabeledClusters : IService<GetLabeledClustersRequest, GetLabeledClustersResponse>
     {
         /// Request message.
         [DataMember] public GetLabeledClustersRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.MeshMsgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "d4165053db3e9b1ffe9db49f0702734c";
+        
+        public IService Generate() => new GetLabeledClusters();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -93,6 +95,7 @@ namespace Iviz.Msgs.MeshMsgs
             BuiltIns.ThrowIfNull(Uuid, nameof(Uuid));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -103,7 +106,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -196,6 +199,7 @@ namespace Iviz.Msgs.MeshMsgs
             BuiltIns.ThrowIfNull(Clusters, nameof(Clusters));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -206,7 +210,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {

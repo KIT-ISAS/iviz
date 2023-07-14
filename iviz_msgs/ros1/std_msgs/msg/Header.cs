@@ -69,6 +69,7 @@ namespace Iviz.Msgs.StdMsgs
         {
         }
     
+        [IgnoreDataMember]
         public readonly int RosMessageLength
         {
             get
@@ -79,7 +80,7 @@ namespace Iviz.Msgs.StdMsgs
             }
         }
         
-        public readonly int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public readonly int Ros2MessageLength => AddRos2MessageLength(0);
         
         public readonly int AddRos2MessageLength(int c)
         {
@@ -92,14 +93,15 @@ namespace Iviz.Msgs.StdMsgs
     
         public const string MessageType = "std_msgs/Header";
     
-        public readonly string RosMessageType => MessageType;
+        [IgnoreDataMember] public readonly string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "2176decaecbce78abc3b96ef049fabed";
     
-        public readonly string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public readonly string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE42RT0sDMRDF7/kUA3toK7Sg3noWwZtobyJlmkx3B7LJOplt3W/vZItWb0Jg2eS935s/" +
                 "DbwqpoASoCfFgIpwzAIdtx3JOtKJIhTFfqAA86tOA5WNa2DXcQE7LSUSjHGCsZhIM/jc92Nij0qg3NMf" +

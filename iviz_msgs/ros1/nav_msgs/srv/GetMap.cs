@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetMap : IService
+    public sealed class GetMap : IService<GetMapRequest, GetMapResponse>
     {
         /// Request message.
         [DataMember] public GetMapRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.NavMsgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "6cdd0a18e0aff5b0a3ca2326a89b54ff";
+        
+        public IService Generate() => new GetMap();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -85,11 +87,11 @@ namespace Iviz.Msgs.NavMsgs
     
         public const int RosFixedMessageLength = 0;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 0;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     
@@ -141,6 +143,7 @@ namespace Iviz.Msgs.NavMsgs
             Map.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -151,7 +154,7 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {

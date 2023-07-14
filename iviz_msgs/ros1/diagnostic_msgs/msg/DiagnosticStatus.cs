@@ -124,6 +124,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             BuiltIns.ThrowIfNull(Values, nameof(Values));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -137,7 +138,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -157,14 +158,15 @@ namespace Iviz.Msgs.DiagnosticMsgs
     
         public const string MessageType = "diagnostic_msgs/DiagnosticStatus";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "d0ce08bc6e5ba34c7754f563a9cabaf1";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61STW+DMAy951dY6n3dx20Shx6qHfbRiVbbYZoqQzywCgmLDYh/PwJF62W3RYr8HL/n" +
                 "2E5WcChZoCYRLAhKX1kBLQlEUVsB/wXogJ3ljm2LFeS+brwjpzEUicFnXq/MCsy4X70IZxVBRR1Vk9w3" +

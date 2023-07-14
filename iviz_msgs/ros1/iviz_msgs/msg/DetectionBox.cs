@@ -116,6 +116,7 @@ namespace Iviz.Msgs.IvizMsgs
             PointCloud.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -130,7 +131,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -152,14 +153,15 @@ namespace Iviz.Msgs.IvizMsgs
     
         public const string MessageType = "iviz_msgs/DetectionBox";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "6827ec41cab2096a1051660738072ba9";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71XUW/bNhB+nn7FoXloUjjeknRdUCAY0qZdA6RJ12Z9KYqAls42UYl0SMqu+uv3HSnK" +
                 "dpahe1hqtIhE3h3v7vt4d2q1Ccd0+vL6/Ory5vTsjE7ol6LdXHz/6u3Vx1dYP7hv/fTiAluHReFDddP4" +

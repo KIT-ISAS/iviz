@@ -107,6 +107,7 @@ namespace Iviz.Msgs.VisionMsgs
             BuiltIns.ThrowIfNull(DatabaseLocation, nameof(DatabaseLocation));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -119,7 +120,7 @@ namespace Iviz.Msgs.VisionMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -136,14 +137,15 @@ namespace Iviz.Msgs.VisionMsgs
     
         public const string MessageType = "vision_msgs/VisionInfo";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "eee36f8dc558754ceb4ef619179d8b34";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61WTW/jNhC9+1cM4EOSwnHR9rZAL/1eYNMudtNFgaIIKGkssaBIlR923F/fN0NJTtIc" +
                 "emhgJLHIeZx58+ZRW3ofw9F2nGjkbG6tP4Q4mmyDJ9OEksnQ0aZiHE12Ymc97zfbzZbuByshKZmeKXE8" +

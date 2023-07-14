@@ -50,25 +50,26 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public const int RosFixedMessageLength = 56;
         
-        public readonly int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public readonly int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 56;
         
-        public readonly int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public readonly int Ros2MessageLength => Ros2FixedMessageLength;
         
         public readonly int AddRos2MessageLength(int c) => WriteBuffer2.Align8(c) + Ros2FixedMessageLength;
         
     
         public const string MessageType = "geometry_msgs/Transform";
     
-        public readonly string RosMessageType => MessageType;
+        [IgnoreDataMember] public readonly string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "ac9eff44abf714214112b05d54a3cf9b";
     
-        public readonly string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public readonly string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71SwUrDQBC971cM9KIQIqh4EDxLD4KieJVpMkkXk504OzXGr3e2aROrghcxp5fNvJc3" +
                 "7+0CHtY+glAnFCloBF0TqGCIFUsLK9KeKID2DAWzlD6gElSCLUXwwRARxA4Lyp17pEJZzkZ+g+o5uLuN" +

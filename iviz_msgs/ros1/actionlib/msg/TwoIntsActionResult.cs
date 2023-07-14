@@ -65,6 +65,7 @@ namespace Iviz.Msgs.Actionlib
             Result.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -76,7 +77,7 @@ namespace Iviz.Msgs.Actionlib
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -90,14 +91,15 @@ namespace Iviz.Msgs.Actionlib
     
         public const string MessageType = "actionlib/TwoIntsActionResult";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "3ba7dea8b8cddcae4528ade4ef74b6e7";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71WTXPbNhC981dgRofYnVppPpqmntFBlVVHHSfxyGovnY4HJFYkWhBUAVCy/n3fghRF" +
                 "OVajQxKNbNoS8Pbh7dvFviOpyIkiPhKZBV1Zo9P70uf++XUlzV2QofbCx0ey2FQzG/ycfG2CcPGRjL7w" +

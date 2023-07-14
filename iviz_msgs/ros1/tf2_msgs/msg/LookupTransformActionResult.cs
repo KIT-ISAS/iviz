@@ -65,6 +65,7 @@ namespace Iviz.Msgs.Tf2Msgs
             Result.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -77,7 +78,7 @@ namespace Iviz.Msgs.Tf2Msgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -90,14 +91,15 @@ namespace Iviz.Msgs.Tf2Msgs
     
         public const string MessageType = "tf2_msgs/LookupTransformActionResult";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "ac26ce75a41384fa8bb4dc10f491ab90";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71XbVPbRhD+rl9xUz4EOsQ0kKQpEzLjgkPcgk2NybTT6TBnaSVfkXTO3Qnj/vo+eyfJ" +
                 "Ni8JHwIesKW73b1n3/c+kUzIiKn/iWTslC5zNbksbGZ3jrXMz510lRXW/0QnWl9Vs7GRpU21KUZkq9wJ" +

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.Tf2Msgs
 {
     [DataContract]
-    public sealed class FrameGraph : IService
+    public sealed class FrameGraph : IService<FrameGraphRequest, FrameGraphResponse>
     {
         /// Request message.
         [DataMember] public FrameGraphRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.Tf2Msgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "437ea58e9463815a0d511c7326b686b0";
+        
+        public IService Generate() => new FrameGraph();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -84,11 +86,11 @@ namespace Iviz.Msgs.Tf2Msgs
     
         public const int RosFixedMessageLength = 0;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 0;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     
@@ -141,6 +143,7 @@ namespace Iviz.Msgs.Tf2Msgs
             BuiltIns.ThrowIfNull(FrameYaml, nameof(FrameYaml));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -151,7 +154,7 @@ namespace Iviz.Msgs.Tf2Msgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {

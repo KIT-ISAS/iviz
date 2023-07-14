@@ -60,6 +60,7 @@ namespace Iviz.Msgs.HriMsgs
         {
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -70,7 +71,7 @@ namespace Iviz.Msgs.HriMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -82,14 +83,15 @@ namespace Iviz.Msgs.HriMsgs
     
         public const string MessageType = "hri_msgs/BodyPosture";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "52f95070a71954a985e0ab92dd4d4eb9";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61RwW7bMAy96ysI5NB2QLK13WEI0EPRbE2ArR0S7zAMQ0BLjC3AljxRTue/HyXH3Xbr" +
                 "oYYAwU98j+R7M1gR62BLYog1QUWOAjZQejNA5zn2gcA6QOChLX1jNbTopGah1oSGAtT5Uqq3Ln6AXXH7" +

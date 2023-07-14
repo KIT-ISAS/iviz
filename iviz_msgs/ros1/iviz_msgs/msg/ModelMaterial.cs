@@ -138,6 +138,7 @@ namespace Iviz.Msgs.IvizMsgs
             BuiltIns.ThrowIfNull(Textures, nameof(Textures));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -149,7 +150,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -174,14 +175,15 @@ namespace Iviz.Msgs.IvizMsgs
     
         public const string MessageType = "iviz_msgs/ModelMaterial";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "dea645939e7a51f77d59181b714cdac1";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7WUXW/bIBSG7/kV/gfb0nbrJvWC2CRBMxj5I11UTYgkJEXylwzO2v364c8S9Xb1BTbP" +
                 "ewQvx5zTqtLce8sQ0YAHaAWzMPUevM+gdTgMApziLbLCFwC0aVR59kpRSOBXedXcLDxR7JUszTw/qtOp" +

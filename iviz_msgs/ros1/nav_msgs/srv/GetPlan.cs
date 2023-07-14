@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.NavMsgs
 {
     [DataContract]
-    public sealed class GetPlan : IService
+    public sealed class GetPlan : IService<GetPlanRequest, GetPlanResponse>
     {
         /// Request message.
         [DataMember] public GetPlanRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.NavMsgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "421c8ea4d21c6c9db7054b4bbdf1e024";
+        
+        public IService Generate() => new GetPlan();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -114,6 +116,7 @@ namespace Iviz.Msgs.NavMsgs
             Goal.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -125,7 +128,7 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -185,6 +188,7 @@ namespace Iviz.Msgs.NavMsgs
             Plan.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -195,7 +199,7 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {

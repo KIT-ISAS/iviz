@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract]
-    public sealed class LaunchDialog : IService
+    public sealed class LaunchDialog : IService<LaunchDialogRequest, LaunchDialogResponse>
     {
         /// Request message.
         [DataMember] public LaunchDialogRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.IvizMsgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "3e28f33adf4bc180b0c552d7317b5aa7";
+        
+        public IService Generate() => new LaunchDialog();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -92,6 +94,7 @@ namespace Iviz.Msgs.IvizMsgs
             Dialog.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -102,7 +105,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -175,6 +178,7 @@ namespace Iviz.Msgs.IvizMsgs
             Feedback.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -186,7 +190,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {

@@ -68,6 +68,7 @@ namespace Iviz.Msgs.SensorMsgs
             BuiltIns.ThrowIfNull(Source, nameof(Source));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -79,7 +80,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -93,14 +94,15 @@ namespace Iviz.Msgs.SensorMsgs
     
         public const string MessageType = "sensor_msgs/TimeReference";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "fded64a0265108ba86c3d38fb11c0c16";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61TwY7TMBC9+ytG6mFbpBYBt0rcVsAeVkLs3hCqpvY0tnDGwZ60hK9n7LSl7IkDVqQo" +
                 "yZv3Zt6bLOCRsIyZemKBQ049IAP9FMqMEST0BCWN2RJwEkAr4UhxgjKx9Tlx+EUOTkE8iFfkVIR6sDHZ" +

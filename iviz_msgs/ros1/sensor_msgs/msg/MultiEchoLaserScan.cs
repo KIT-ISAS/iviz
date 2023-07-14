@@ -189,6 +189,7 @@ namespace Iviz.Msgs.SensorMsgs
             BuiltIns.ThrowIfNull(Intensities, nameof(Intensities));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -201,7 +202,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -225,14 +226,15 @@ namespace Iviz.Msgs.SensorMsgs
     
         public const string MessageType = "sensor_msgs/MultiEchoLaserScan";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "6fefb0c6da89d7c8abe4b339f5c2f8fb";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VWTW8bNxC9768YQIfYraSizc1oe0raGmiMos6phmBQ3FktES65Jrn66K/vG+6H1oGt" +
                 "5JAuBNnUzrwh38y84YLujdtZpqiVoyr4hhQ1nU1mxbr21FrlVCCrIgcKyu14VRlXcigWxYJuKzr5jmq1" +

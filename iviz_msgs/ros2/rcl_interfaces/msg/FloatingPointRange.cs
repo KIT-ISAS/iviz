@@ -85,25 +85,26 @@ namespace Iviz.Msgs.RclInterfaces
     
         public const int RosFixedMessageLength = 24;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 24;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => WriteBuffer2.Align8(c) + Ros2FixedMessageLength;
         
     
         public const string MessageType = "rcl_interfaces/FloatingPointRange";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "9dbe716e5d84c837e6684202a37a25de";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE5WTz27bMAzG734Kor0aRlc0O+S+w67rAwxMRHsEFMmTqBjp0HcfabmOs3/oLkks6/v4" +
                 "8UfmHr7QmChTkAyHWILLgMEBQhYa4Yy+EPQx6UHvIwqHAcbIQUAuIzkYMeGJhFLXNPfwLJhkI9Jf7Opz" +

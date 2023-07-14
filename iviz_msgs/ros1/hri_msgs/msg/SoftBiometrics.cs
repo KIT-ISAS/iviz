@@ -72,6 +72,7 @@ namespace Iviz.Msgs.HriMsgs
         {
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -82,7 +83,7 @@ namespace Iviz.Msgs.HriMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -99,14 +100,15 @@ namespace Iviz.Msgs.HriMsgs
     
         public const string MessageType = "hri_msgs/SoftBiometrics";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "791877398420c10707c4d9a832b0e6ad";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61TQW7bMBC88xUL+JC4iNMmuQQGfChguwnQpEXinorCWJMriYBEqiTlVL/viLIdH3uo" +
                 "QIhacmd2OEtNaFPZSI3EyKWQkaiD3Umk6ItEO+sbScHqSJfDNjtDpTgjYaoehDFTlSelOuvSPSFJFbXn" +

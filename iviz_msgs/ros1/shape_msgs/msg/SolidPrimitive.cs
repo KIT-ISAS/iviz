@@ -109,6 +109,7 @@ namespace Iviz.Msgs.ShapeMsgs
             BuiltIns.ThrowIfNull(Dimensions, nameof(Dimensions));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -119,7 +120,7 @@ namespace Iviz.Msgs.ShapeMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -134,14 +135,15 @@ namespace Iviz.Msgs.ShapeMsgs
     
         public const string MessageType = "shape_msgs/SolidPrimitive";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "d8f8cbc74c5ff283fca29569ccefb45d";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE3WTbWsbMQzH39+nEPRFW3Yc3VZGGeRF29yWwGhH2kGSUYJ7p+QMF/uwfSX59pNs30Mz" +
                 "SiCcbEl/6Sf5DKa4lQrhVR9SsE2FBlMojrVUJRr60nSXnMFtXYOtRIMWhEEofVAJTkMl3hBchdJQjlaV" +

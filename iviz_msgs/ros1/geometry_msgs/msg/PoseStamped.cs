@@ -56,6 +56,7 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -66,7 +67,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -79,14 +80,15 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public const string MessageType = "geometry_msgs/PoseStamped";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "d3812c3cbc69362b77dc0b19b345f8f5";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71UTY/TMBC9+1eM1MPuIlrEhzhU4rAS4uOAtLB7Q6ia2pPEUmJnbafd8Ot5dkhKxQEO" +
                 "sFGUOPbMm/fmIyu6phsfhY42NRSkkiBOC2nvg7GOk1AVuBNiZyjZTmLirlcfhI0EaspLFYAeD6Xe/ONL" +

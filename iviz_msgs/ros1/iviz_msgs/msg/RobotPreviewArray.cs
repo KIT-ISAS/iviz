@@ -85,6 +85,7 @@ namespace Iviz.Msgs.IvizMsgs
             BuiltIns.ThrowIfNull(Previews, nameof(Previews));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -95,7 +96,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -108,14 +109,15 @@ namespace Iviz.Msgs.IvizMsgs
     
         public const string MessageType = "iviz_msgs/RobotPreviewArray";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "2993e476a743dae156a176dedc5c0eee";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VTwU7cMBC9+ytG2gNQCVropULisGUpRYKCFtQLQtHEnk1ceT3BdkLTr2ecdMMW9dBD" +
                 "iSLFeZ5582aeveSS002gztLT/QM04yoqpU7+86Oubs+PwXb2V7GOVXy/3KqsWuvTJ5if3l1cfyvmiwWc" +

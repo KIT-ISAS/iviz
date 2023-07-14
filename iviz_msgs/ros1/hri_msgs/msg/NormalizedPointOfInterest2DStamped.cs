@@ -71,6 +71,7 @@ namespace Iviz.Msgs.HriMsgs
         {
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -81,7 +82,7 @@ namespace Iviz.Msgs.HriMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -96,14 +97,15 @@ namespace Iviz.Msgs.HriMsgs
     
         public const string MessageType = "hri_msgs/NormalizedPointOfInterest2DStamped";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "f00d620d5791659f1cba63fdcb50f444";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61TPW/bMBDd+SsO0BC7qNW43Qx0C9p6KBo02YLAOFNniQBFKiRlR/31faQSO9k6VBAg" +
                 "UtK9u/fBiu47E0l7l9i4SKkTGnw0yXhH/kCMnXEpL/GQIDHRIk2D0WzthHfEjkzPrSxVVaq196ExjpNE" +

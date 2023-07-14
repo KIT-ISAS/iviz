@@ -69,6 +69,7 @@ namespace Iviz.Msgs.GridMapMsgs
         {
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -79,7 +80,7 @@ namespace Iviz.Msgs.GridMapMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -95,14 +96,15 @@ namespace Iviz.Msgs.GridMapMsgs
     
         public const string MessageType = "grid_map_msgs/GridMapInfo";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "43ee5430e1c253682111cb6bedac0ef9";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71Uy27bMBC88ysW8CFJUTvoAzkE6KFA0QfQAmmSWxA4G3ItEaBIhaQSq1/fIR3LMXpI" +
                 "D20MwZLI2eHMPjSjr8JGIh1m2wmxN7SK3MmRelxv602pGZ1LCm7INngKK8qtUBOtoavuWItz1wu1coHz" +

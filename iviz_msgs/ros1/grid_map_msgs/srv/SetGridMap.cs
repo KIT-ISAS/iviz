@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GridMapMsgs
 {
     [DataContract]
-    public sealed class SetGridMap : IService
+    public sealed class SetGridMap : IService<SetGridMapRequest, SetGridMapResponse>
     {
         /// Request message.
         [DataMember] public SetGridMapRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.GridMapMsgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "4f8e24cfd42bc1470fe765b7516ff7e5";
+        
+        public IService Generate() => new SetGridMap();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -93,6 +95,7 @@ namespace Iviz.Msgs.GridMapMsgs
             Map.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -103,7 +106,7 @@ namespace Iviz.Msgs.GridMapMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -152,11 +155,11 @@ namespace Iviz.Msgs.GridMapMsgs
     
         public const int RosFixedMessageLength = 0;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 0;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     

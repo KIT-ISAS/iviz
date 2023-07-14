@@ -105,6 +105,7 @@ namespace Iviz.Msgs.StereoMsgs
             ValidWindow.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -116,7 +117,7 @@ namespace Iviz.Msgs.StereoMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -136,14 +137,15 @@ namespace Iviz.Msgs.StereoMsgs
     
         public const string MessageType = "stereo_msgs/DisparityImage";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "04a177815f75271039fa21f16acad8c9";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71XbY/UNhD+nl9hcR+4hb09Cl8QFWrV0mtPogIdJ1UC0ZU3nmwMjh1sZ1/49X3GTrLZ" +
                 "5aV8oF0JbteZN88888zkTLyiVnoZSdQkFXlROS9K17Qy6pU2Ou7FVsdalJ33ZKO41Q292tuy9s7qj+QX" +

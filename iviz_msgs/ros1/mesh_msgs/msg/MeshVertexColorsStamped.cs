@@ -67,6 +67,7 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexColors.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -79,7 +80,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -93,14 +94,15 @@ namespace Iviz.Msgs.MeshMsgs
     
         public const string MessageType = "mesh_msgs/MeshVertexColorsStamped";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "9e3527729bbf26fabb162c58762b6739";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71Ty2ocMRC86ysa9mA7sA5Jbgs5+EEcHwzBNrkYs/RIvTMCjTTRY+35+5S0eGICITkk" +
                 "GQQjtaqqn1rRjaSBznKOtitZ6jFxLyplsx1Tn95+FjYSaWg/mKP1PZVijRrBPGCqxleJWZ4vggsxUbva" +

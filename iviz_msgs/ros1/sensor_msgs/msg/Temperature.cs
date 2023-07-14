@@ -66,6 +66,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -76,7 +77,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -90,14 +91,15 @@ namespace Iviz.Msgs.SensorMsgs
     
         public const string MessageType = "sensor_msgs/Temperature";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "ff71b307acdbe7c871a5a6d7ed359100";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61TTYvbMBC961cM5LC7haSf9BDoqUs/Dgulu7dSwsSe2KKy5GrGSfPv+yQ3m5RS6KHC" +
                 "YFl682bmvTEt6N7HLgiZDKNktikLZeEWpyvn6AO2kqmfX+e1IPODqPEwkleyXurBvLmgOrDSIKzYt47+" +

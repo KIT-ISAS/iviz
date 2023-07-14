@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.SensorMsgs
 {
     [DataContract]
-    public sealed class SetCameraInfo : IService
+    public sealed class SetCameraInfo : IService<SetCameraInfoRequest, SetCameraInfoResponse>
     {
         /// Request message.
         [DataMember] public SetCameraInfoRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.SensorMsgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "bef1df590ed75ed1f393692395e15482";
+        
+        public IService Generate() => new SetCameraInfo();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -100,6 +102,7 @@ namespace Iviz.Msgs.SensorMsgs
             CameraInfo.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -110,7 +113,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -176,6 +179,7 @@ namespace Iviz.Msgs.SensorMsgs
             BuiltIns.ThrowIfNull(StatusMessage, nameof(StatusMessage));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -186,7 +190,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {

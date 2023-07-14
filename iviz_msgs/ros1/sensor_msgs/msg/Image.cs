@@ -104,6 +104,7 @@ namespace Iviz.Msgs.SensorMsgs
             BuiltIns.ThrowIfNull(Data, nameof(Data));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -116,7 +117,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -136,14 +137,15 @@ namespace Iviz.Msgs.SensorMsgs
     
         public const string MessageType = "sensor_msgs/Image";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "060021388200f6f0f447d0fcd9c64743";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61VTW8bNxC9768goEPsxFLS9hIYKFqgaVofChSNb4EhjJajXbZccs0hJW9+fR9JrWTB" +
                 "dppDF/okOW8+3pvhQt32RtTAItSxar2LZJwociq51g9jwA5rZQZsNwt18e5KvbtUMKGooh+XlrcRZsFx" +

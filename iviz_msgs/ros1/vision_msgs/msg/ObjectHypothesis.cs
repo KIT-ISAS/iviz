@@ -63,25 +63,26 @@ namespace Iviz.Msgs.VisionMsgs
     
         public const int RosFixedMessageLength = 16;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 16;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => WriteBuffer2.Align8(c) + Ros2FixedMessageLength;
         
     
         public const string MessageType = "vision_msgs/ObjectHypothesis";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "abf73443e563396425a38201e9dacc73";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE02QzU4DMQyE7/sUI/XaLiAh7qBeeqbighDybrxdQxIv+anUt8cpLXBJbMn+PDMrPEbo" +
                 "8MFjwXxatMycJaPMVDBqLCQxIyoWzVJEIyROmgK1uu+6FfYzo0b5qoxYAycZsdtCpyvUcbGPXY+94sAF" +

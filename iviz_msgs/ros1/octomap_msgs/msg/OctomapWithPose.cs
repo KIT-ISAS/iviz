@@ -67,6 +67,7 @@ namespace Iviz.Msgs.OctomapMsgs
             Octomap.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -78,7 +79,7 @@ namespace Iviz.Msgs.OctomapMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -92,14 +93,15 @@ namespace Iviz.Msgs.OctomapMsgs
     
         public const string MessageType = "octomap_msgs/OctomapWithPose";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "20b380aca6a508a657e95526cddaf618";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71VW2sVMRB+z68YOA/2SHuKF0QKPoji5UFabd+KlDnJnN1ANlmTbNv11/sle3ZrUVBE" +
                 "XRY2m8x8M/PNJSt6SU9eU8c9WU9b6zmOtAux43xInOhU5yii3gkbidTWj1IrumiF+pCEwo4y1qHK0Y3N" +

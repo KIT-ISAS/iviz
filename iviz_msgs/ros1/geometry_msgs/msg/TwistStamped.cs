@@ -57,6 +57,7 @@ namespace Iviz.Msgs.GeometryMsgs
             Twist.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -67,7 +68,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -80,14 +81,15 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public const string MessageType = "geometry_msgs/TwistStamped";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "98d34b0043a2093cf9d9345ab6eef12e";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71UTW/UMBC9+1eMtIe2aBtEizhU4oCEgB6QKlpxQVU1G88mVhM72JNuw6/n2dlNqbhw" +
                 "AFaRNh8zb+a9eeMVvSPduaS0c9pSlK1E8bVQHUK0zrMKbSP3QuwtqeslKfeD+SRsJVJb/sxNQSg4xrz9" +

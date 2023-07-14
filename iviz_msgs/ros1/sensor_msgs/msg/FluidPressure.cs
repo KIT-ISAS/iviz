@@ -69,6 +69,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -79,7 +80,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -93,14 +94,15 @@ namespace Iviz.Msgs.SensorMsgs
     
         public const string MessageType = "sensor_msgs/FluidPressure";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "804dc5cea1c5306d6a2eb80b9833befe";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61UTW/TQBC9+1eMlENbRFO+xCESB6QK6AEJ0d4Qiibrib1ivWt2xg3597xdN0lFhcSB" +
                 "lSPH3pk3b96bNS3o1scuCI1ZVKcslIVbvFoS3fVeacBr7oTwl8cxpzF7NqFtythiZCCWrJeGFicMH9W3" +

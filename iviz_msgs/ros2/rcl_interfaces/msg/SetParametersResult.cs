@@ -61,6 +61,7 @@ namespace Iviz.Msgs.RclInterfaces
             BuiltIns.ThrowIfNull(Reason, nameof(Reason));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -71,7 +72,7 @@ namespace Iviz.Msgs.RclInterfaces
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -84,14 +85,15 @@ namespace Iviz.Msgs.RclInterfaces
     
         public const string MessageType = "rcl_interfaces/SetParametersResult";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "f25d8aed319fb6d8decc390bac218615";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE02PwY3DMAwE/6qCQP7uIS0crgFGWlkKFCkgqeTc/dEOAvizDy45u7zQlUwm6MXNdWSy" +
                 "AlJ+gGpP+Nu1RjaoG2yH+2Rx3yD0ZiWFhQvpjBGqeba2Lc7M3PQLPSNAsXBfcZwK7oiGtITbGO3ECE78" +

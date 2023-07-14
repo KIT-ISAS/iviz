@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.GridMapMsgs
 {
     [DataContract]
-    public sealed class ProcessFile : IService
+    public sealed class ProcessFile : IService<ProcessFileRequest, ProcessFileResponse>
     {
         /// Request message.
         [DataMember] public ProcessFileRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.GridMapMsgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "03f389710f49a6dd2a8b447bb2850cd6";
+        
+        public IService Generate() => new ProcessFile();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -105,6 +107,7 @@ namespace Iviz.Msgs.GridMapMsgs
             BuiltIns.ThrowIfNull(TopicName, nameof(TopicName));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -116,7 +119,7 @@ namespace Iviz.Msgs.GridMapMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -176,11 +179,11 @@ namespace Iviz.Msgs.GridMapMsgs
     
         public const int RosFixedMessageLength = 1;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 1;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c)
         {

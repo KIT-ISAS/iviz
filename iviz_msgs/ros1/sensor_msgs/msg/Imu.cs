@@ -123,6 +123,7 @@ namespace Iviz.Msgs.SensorMsgs
             BuiltIns.ThrowIfWrongSize(LinearAccelerationCovariance, nameof(LinearAccelerationCovariance), 9);
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -133,7 +134,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -151,14 +152,15 @@ namespace Iviz.Msgs.SensorMsgs
     
         public const string MessageType = "sensor_msgs/Imu";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "6a62c6daae103f4ff57a132d6f95cec2";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71W227bRhB951cMogdbhSTXThGgBvpQIGirBwNpLn0JEmFEjsiNyV1ld2lZ/vqe2RUl" +
                 "2knQAr0IAkSRO+fMnLlxQm8bEwhfpk5C4FooOmpcW1HFkWnjXUdsaXnzjs6XVnw03NKNcOi9dGIjvbMm" +

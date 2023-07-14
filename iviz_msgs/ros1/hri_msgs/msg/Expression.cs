@@ -105,6 +105,7 @@ namespace Iviz.Msgs.HriMsgs
             BuiltIns.ThrowIfNull(Expression_, nameof(Expression_));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -116,7 +117,7 @@ namespace Iviz.Msgs.HriMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -133,14 +134,15 @@ namespace Iviz.Msgs.HriMsgs
     
         public const string MessageType = "hri_msgs/Expression";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "20901229fa0011d84b0639c140e98214";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61VTW/jNhC961cQ9iG7bb42ewvgg2IriVrHNiR70W1RBLQ0sthQpMqPJOqv7wy1lrVA" +
                 "C/RQw4AgcubNmyfO45Rl0BqwoJxlnNW+4YpVvBBcMninHSu0OmcgXA2GCYVBBXdw0EYUGPPGu3OmTTRl" +

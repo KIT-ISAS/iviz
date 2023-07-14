@@ -85,6 +85,7 @@ namespace Iviz.Msgs.IvizMsgs
             BuiltIns.ThrowIfNull(Boundaries, nameof(Boundaries));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -95,7 +96,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -108,14 +109,15 @@ namespace Iviz.Msgs.IvizMsgs
     
         public const string MessageType = "iviz_msgs/BoundaryArray";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "a5cf0cef13788d109773a665d7ed35e7";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71VbW/aSBD+7l8xUj40OSXcNa1OVaR+IEATSyRQQiNVVYUWe7BXZ++6u2uo++vv2TUY" +
                 "aCP1PlyCeBlmZ56dZ958rWuVCtN8+UrLVpRso+j9//yK7h5urkiu5Y9FaTP75/X22qiWyr2j/mAeT+4X" +

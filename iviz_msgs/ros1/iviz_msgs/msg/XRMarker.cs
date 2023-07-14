@@ -121,6 +121,7 @@ namespace Iviz.Msgs.IvizMsgs
             BuiltIns.ThrowIfWrongSize(CameraIntrinsic, nameof(CameraIntrinsic), 9);
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -133,7 +134,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -155,14 +156,15 @@ namespace Iviz.Msgs.IvizMsgs
     
         public const string MessageType = "iviz_msgs/XRMarker";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "c8f6b41386c19105b6644958405c417b";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71VUW/bNhB+nn7FAXloMjja2hQDGqAPQdJteSiapFmBLigEWjpLXCVSJSnbyq/fd2Qk" +
                 "10Ww7mGLYdgUyfvu7rvvTssxMN1+vHpTnN38cf6OXtPP2XLeu745f3fxBpvPs+x3VhU7auJfuhPGnjMf" +

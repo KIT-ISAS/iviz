@@ -65,6 +65,7 @@ namespace Iviz.Msgs.NavMsgs
             Result.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -77,7 +78,7 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -90,14 +91,15 @@ namespace Iviz.Msgs.NavMsgs
     
         public const string MessageType = "nav_msgs/GetMapActionResult";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "ac66e5b9a79bb4bbd33dab245236c892";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71XUVPbOBB+96/QDA+FmySFttfrdYYHDnKUDrQc0HthGEa2N7FaW0olmZD79fetZDs2" +
                 "hZaH0kzAji3tfvr229XqHcmcrCjCJZGZV0aXKr2u3Nw9PzSyPPfS1064cEkOyZ/IxRm5uvTChkuy+5M/" +

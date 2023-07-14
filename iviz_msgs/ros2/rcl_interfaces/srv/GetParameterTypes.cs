@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RclInterfaces
 {
     [DataContract]
-    public sealed class GetParameterTypes : IService
+    public sealed class GetParameterTypes : IService<GetParameterTypesRequest, GetParameterTypesResponse>
     {
         /// Request message.
         [DataMember] public GetParameterTypesRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.RclInterfaces
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "ee0005694d9e1e7c4757ee697be4dcc5";
+        
+        public IService Generate() => new GetParameterTypes();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -97,6 +99,7 @@ namespace Iviz.Msgs.RclInterfaces
             BuiltIns.ThrowIfNull(Names, nameof(Names));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -107,7 +110,7 @@ namespace Iviz.Msgs.RclInterfaces
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -192,6 +195,7 @@ namespace Iviz.Msgs.RclInterfaces
             BuiltIns.ThrowIfNull(Types, nameof(Types));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -202,7 +206,7 @@ namespace Iviz.Msgs.RclInterfaces
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {

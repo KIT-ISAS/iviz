@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.OctomapMsgs
 {
     [DataContract]
-    public sealed class BoundingBoxQuery : IService
+    public sealed class BoundingBoxQuery : IService<BoundingBoxQueryRequest, BoundingBoxQueryResponse>
     {
         /// Request message.
         [DataMember] public BoundingBoxQueryRequest Request;
@@ -43,6 +43,8 @@ namespace Iviz.Msgs.OctomapMsgs
         public string RosServiceType => ServiceType;
         
         public string RosMd5Sum => "93aa3d73b866f04880927745f4aab303";
+        
+        public IService Generate() => new BoundingBoxQuery();
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -102,11 +104,11 @@ namespace Iviz.Msgs.OctomapMsgs
     
         public const int RosFixedMessageLength = 48;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 48;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c)
         {
@@ -157,11 +159,11 @@ namespace Iviz.Msgs.OctomapMsgs
     
         public const int RosFixedMessageLength = 0;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 0;
         
-        public int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public int Ros2MessageLength => Ros2FixedMessageLength;
         
         public int AddRos2MessageLength(int c) => c;
     

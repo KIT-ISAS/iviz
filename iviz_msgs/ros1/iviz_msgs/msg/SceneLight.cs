@@ -91,6 +91,7 @@ namespace Iviz.Msgs.IvizMsgs
             BuiltIns.ThrowIfNull(Name, nameof(Name));
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -101,7 +102,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -122,14 +123,15 @@ namespace Iviz.Msgs.IvizMsgs
     
         public const string MessageType = "iviz_msgs/SceneLight";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "c08cec0d4c9fe9b11d0596f99987e126";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VSTW/bMAy961cQ2GUFhm5rL8OAHoZsGAK0TbDmHsgWbROzRUOkm6W/fpSteJf1tulC" +
                 "8evx8UluoqifYL/bPh7gDj64xf+6/fFtc9juHr/cW/RjiT7td7noxjnRRLGF6AcsOT2P6CrmHmovepTO" +

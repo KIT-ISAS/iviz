@@ -20,12 +20,16 @@
         /// Full ROS name of the service.
         /// </summary>
         string RosServiceType { get; }
-        
+
         /// <summary>
-        /// MD5 hash of a compact representation of the service."
+        /// MD5 hash of a compact representation of the service.
         /// </summary>
         string RosMd5Sum { get; }
-        
+
+        /// <summary>
+        /// Creates an empty copy of this message.
+        /// </summary>
+        IService Generate();
     }
 
     /// <summary>
@@ -39,12 +43,16 @@
     public interface IRequest<TT, TU> : IRequest where TT : IService, new() where TU : IResponse
     {
     }
-    
+
     /// <summary>
     /// Interface for all ROS service responses.
     /// All classes representing ROS responses derive from this.
     /// </summary>
     public interface IResponse : ISerializable
+    {
+    }
+
+    public interface IService<TRequest, TResponse> : IService where TRequest : IRequest where TResponse : IResponse
     {
     }
 }

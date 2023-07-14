@@ -49,25 +49,26 @@ namespace Iviz.Msgs.IvizMsgs
     
         public const int RosFixedMessageLength = 80;
         
-        public readonly int RosMessageLength => RosFixedMessageLength;
+        [IgnoreDataMember] public readonly int RosMessageLength => RosFixedMessageLength;
         
         public const int Ros2FixedMessageLength = 80;
         
-        public readonly int Ros2MessageLength => Ros2FixedMessageLength;
+        [IgnoreDataMember] public readonly int Ros2MessageLength => Ros2FixedMessageLength;
         
         public readonly int AddRos2MessageLength(int c) => WriteBuffer2.Align8(c) + Ros2FixedMessageLength;
         
     
         public const string MessageType = "iviz_msgs/BoundingBox";
     
-        public readonly string RosMessageType => MessageType;
+        [IgnoreDataMember] public readonly string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "727c83f2b037373b8e968433d9c84ecb";
     
-        public readonly string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public readonly string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71SwUrDQBC971cM9KIQIqh4EDx4kh6EisWrTJPJZjHZibtbY/r1ziZtYrDQizSn2ey8" +
                 "t+/NPE1cU3Dde+21v1qxJ8jIBnJKz27eKAvsbsCbHSn18M+fen59ugf9R4tawCM4ahx5EYXBsAUuoIky" +

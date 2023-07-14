@@ -65,6 +65,7 @@ namespace Iviz.Msgs.TurtleActionlib
             Goal.RosValidate();
         }
     
+        [IgnoreDataMember]
         public int RosMessageLength
         {
             get
@@ -76,7 +77,7 @@ namespace Iviz.Msgs.TurtleActionlib
             }
         }
         
-        public int Ros2MessageLength => AddRos2MessageLength(0);
+        [IgnoreDataMember] public int Ros2MessageLength => AddRos2MessageLength(0);
         
         public int AddRos2MessageLength(int c)
         {
@@ -90,14 +91,15 @@ namespace Iviz.Msgs.TurtleActionlib
     
         public const string MessageType = "turtle_actionlib/ShapeActionGoal";
     
-        public string RosMessageType => MessageType;
+        [IgnoreDataMember] public string RosMessageType => MessageType;
     
         /// MD5 hash of a compact representation of the ROS1 message
         public const string Md5Sum = "dbfccd187f2ec9c593916447ffd6cc77";
     
-        public string RosMd5Sum => Md5Sum;
+        [IgnoreDataMember] public string RosMd5Sum => Md5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated ROS1 dependencies file
+        [IgnoreDataMember]
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VUwWobMRC96ysGfEhSsEPbW6C30CSHQmlyK8WMpfGuqFbaarR29+/7pHXcFHrooTEL" +
                 "i7Qzb97Me+N7YSeZ+vYybItPMfjddtBOr+8Sh4db6vDaemceex6l3rUb8+E//8ynx7sb0uKW4vcLpRU9" +
