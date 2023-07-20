@@ -81,9 +81,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public override string ToString() => Extensions.ToString(this);
     
         /// Custom iviz code
-        public static Transform Identity => new(Vector3.Zero, Quaternion.Identity);
         public static implicit operator Pose(in Transform p) => p.AsPose();
-        public readonly Transform Inverse => new(-(Rotation.Inverse * Translation), Rotation.Inverse);
         public static Transform operator *(in Transform t, in Transform q) =>
                 new Transform(t.Translation + t.Rotation * q.Translation, t.Rotation * q.Rotation);
         public static Vector3 operator *(in Transform t, in Vector3 q) => t.Rotation * q + t.Translation;
@@ -92,6 +90,8 @@ namespace Iviz.Msgs.GeometryMsgs
         public static Quaternion operator *(in Transform t, in Quaternion q) => t.Rotation * q;
         public static Transform RotateAround(in Quaternion q, in Point p) => new(p - q * p, q);
         public static implicit operator Transform(in (Vector3 translation, Quaternion rotation) p) => new(p.translation, p.rotation);
+        public static Transform Identity => new(Vector3.Zero, Quaternion.Identity);
+        [IgnoreDataMember] public readonly Transform Inverse => new(-(Rotation.Inverse * Translation), Rotation.Inverse);
     
         public Serializer<Transform> CreateSerializer() => new Serializer();
         public Deserializer<Transform> CreateDeserializer() => new Deserializer();

@@ -81,19 +81,19 @@ namespace Iviz.Msgs.GeometryMsgs
         public override string ToString() => Extensions.ToString(this);
     
         /// Custom iviz code
-        public readonly Quaternion Inverse => new(-X, -Y, -Z, W);
         public static Quaternion Identity => new(0, 0, 0, 1);
         public static Quaternion operator *(in Quaternion a, in Quaternion b) => Extensions.Multiply(a, b).Normalized;
         public static Vector3 operator *(in Quaternion q, in Vector3 v) => Extensions.Multiply(q, v);
         public static Point operator *(in Quaternion q, in (double X, double Y, double Z) v) => q * (Vector3) v;
         public static Point operator *(in Quaternion q, in Point v) => q * (Vector3) v;
-        public readonly Quaternion Normalized => Extensions.Normalize(this);
         public static implicit operator Quaternion(in (double X, double Y, double Z, double W) p) => new Quaternion(p.X, p.Y, p.Z, p.W);
         public static implicit operator Quaternion(in (Vector3 p, double W) q) => new Quaternion(q.p.X, q.p.Y, q.p.Z, q.W);
         public static Quaternion AngleAxis(double angleInRad, in Vector3 axis) => Extensions.AngleAxis(angleInRad, axis);
         public static Quaternion Rodrigues(in Vector3 rod) => Extensions.Rodrigues(rod);
         public static bool operator !=(in Quaternion a, in Quaternion b) => !(a == b);
         public static bool operator ==(in Quaternion a, in Quaternion b) => a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
+        [IgnoreDataMember] public readonly Quaternion Normalized => Extensions.Normalize(this);
+        [IgnoreDataMember] public readonly Quaternion Inverse => new(-X, -Y, -Z, W);
         public override bool Equals(object? b) => b is Quaternion pb && this == pb;
         public override int GetHashCode() => System.HashCode.Combine(X, Y, Z, W);
     

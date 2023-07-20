@@ -96,9 +96,9 @@ namespace Iviz.Msgs.GeometryMsgs
         public static Point operator /(in Point v, double f) => new(v.X / f, v.Y / f, v.Z / f);
         public static Point operator -(in Point v) => new(-v.X, -v.Y, -v.Z);
         public static implicit operator Point(in (double X, double Y, double Z) p) => new(p.X, p.Y, p.Z);
-        public readonly double SquaredNorm => X * X + Y * Y + Z * Z;
-        public readonly double Norm => System.Math.Sqrt(SquaredNorm);
-        public readonly Vector3 Normalized => this / Norm;
+        [IgnoreDataMember] public readonly double SquaredNorm => X * X + Y * Y + Z * Z;
+        [IgnoreDataMember] public readonly double Norm => System.Math.Sqrt(SquaredNorm);
+        [IgnoreDataMember] public readonly Vector3 Normalized => this / Norm;
         public override bool Equals(object? b) => b is Point pb && this == pb;
         public override int GetHashCode() => System.HashCode.Combine(X, Y, Z);
     
