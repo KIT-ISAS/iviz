@@ -134,9 +134,7 @@ namespace Iviz.Resources
                 ? assetHolder.LinePulse
                 : assetHolder.LinePulseSimple);
             LinePulse.Object.SetColor(ShaderIds.TintId, Color.white);
-            */
-
-            /*
+            
             LineMesh = Create(Settings.SupportsComputeBuffers
                 ? assetHolder.LineMesh
                 : assetHolder.LineMeshSimple);
