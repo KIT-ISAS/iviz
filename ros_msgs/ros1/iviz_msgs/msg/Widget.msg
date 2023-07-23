@@ -13,9 +13,9 @@ uint8 TYPE_POSITIONDISC = 7
 uint8 TYPE_POSITIONDISC3D = 8
 
 std_msgs/Header header
-byte action
+uint8 action
 string id
-byte type
+uint8 type
 geometry_msgs/Pose pose
 std_msgs/ColorRGBA color
 std_msgs/ColorRGBA second_color

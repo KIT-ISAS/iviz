@@ -31,18 +31,18 @@ uint8 ICON_DIALOGS  = 11
 uint8 ICON_QUESTION = 12
 
 std_msgs/Header header
-byte action
+uint8 action
 string id
 duration lifetime  # if not zero, the dialog will be removed after this time
 float64 scale
-byte type
-byte buttons
-byte icon
+uint8 type
+uint8 buttons
+uint8 icon
 std_msgs/ColorRGBA background_color
 string title
 string caption
 string[] menu_entries
-byte binding_type
+uint8 binding_type
 geometry_msgs/Vector3 tf_offset
 geometry_msgs/Vector3 dialog_displacement
 geometry_msgs/Vector3 tf_displacement

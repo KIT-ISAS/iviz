@@ -12,10 +12,10 @@ uint8 BEHAVIOR_NOTIFY_COLLISION = 2
 
 
 std_msgs/Header header
-byte action
+uint8 action
 string id
-byte type
-byte behavior
+uint8 type
+uint8 behavior
 geometry_msgs/Pose pose
 geometry_msgs/Vector3 scale
 std_msgs/ColorRGBA color
