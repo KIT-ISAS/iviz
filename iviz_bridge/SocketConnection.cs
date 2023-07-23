@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.WebSockets;
-using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Iviz.Roslib;
@@ -30,8 +29,8 @@ public sealed class SocketConnection : IAsyncDisposable
         this.socket = socket;
         var channel = Channel.CreateUnbounded<SubscriberMessage>(new UnboundedChannelOptions { SingleReader = true });
         msgQueueWriter = channel.Writer;
-        task = Task.Run(async () => await RunAsync(channel.Reader));
-        
+        task = Task.Run(async () => await RunAsync(channel.Reader).AwaitNoThrow(this));
+
         LogInfo("Starting!");
     }
 
@@ -70,19 +69,19 @@ public sealed class SocketConnection : IAsyncDisposable
         }
     }
 
-    async ValueTask ProcessMessageAsync(byte[] data)
+    ValueTask ProcessMessageAsync(byte[] data)
     {
         var msg = JsonSerializer.Deserialize<GenericMessage>(data);
         if (msg == null)
         {
             LogError("Failed to deserialize message!");
-            return;
+            return default;
         }
 
         if (string.IsNullOrWhiteSpace(msg.Topic))
         {
             LogError("Rejecting message. Reason: Topic is empty");
-            return;
+            return default;
         }
 
         switch (msg.Op)
@@ -137,8 +136,8 @@ public sealed class SocketConnection : IAsyncDisposable
                 subscription.RemoveId(msg.Id);
                 if (subscription.Empty)
                 {
-                    await subscription.DisposeAsync();
                     RemoveSubscription(msg.Topic);
+                    return subscription.DisposeAsync();
                 }
 
                 break;
@@ -184,8 +183,8 @@ public sealed class SocketConnection : IAsyncDisposable
                 advertisement.RemoveId(msg.Id);
                 if (advertisement.Empty)
                 {
-                    await advertisement.DisposeAsync();
                     RemoveAdvertisement(msg.Topic);
+                    return advertisement.DisposeAsync();
                 }
 
                 break;
@@ -194,6 +193,8 @@ public sealed class SocketConnection : IAsyncDisposable
                 LogError($"Unknown command '{msg.Op}' for '{msg.Topic}'");
                 break;
         }
+
+        return default;
     }
 
     public void MessageCallback(SubscriberMessage msg)
@@ -258,11 +259,11 @@ public sealed class SocketConnection : IAsyncDisposable
         advertisements.Remove(topic);
     }
 
-    void LogInfo(string msg) => Tools.Logger.LogFormat("** {0}: {1}", this, msg);
+    void LogInfo(string msg) => Logger.LogFormat("** {0}: {1}", this, msg);
 
-    internal void LogError(string msg) => Tools.Logger.LogErrorFormat("EE {0}: {1}", this, msg);
+    internal void LogError(string msg) => Logger.LogErrorFormat("EE {0}: {1}", this, msg);
 
-    void LogError(string msg, Exception e) => Tools.Logger.LogErrorFormat("EE {0}: {1}{2}", this, msg, e);
+    void LogError(string msg, Exception e) => Logger.LogErrorFormat("EE {0}: {1}{2}", this, msg, e);
 
     public override string ToString() => $"[{endPoint}]";
 }

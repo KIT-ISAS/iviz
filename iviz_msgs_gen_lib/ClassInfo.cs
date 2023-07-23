@@ -96,6 +96,18 @@ public sealed class ClassInfo
         { "char", 1 },
         { "byte", 1 }
     };
+    
+    public static readonly HashSet<string> IvizCsIdentifiers = new()
+    {
+        "ServiceType",
+        "MessageType",
+        "RosMessageLength",
+        "Ros2MessageLength",
+        "RosSerialize",
+        "RosDeserialize",
+        "AddRos2MessageLength",
+        "ToString"
+    };
 
     static readonly UTF8Encoding Utf8 = new(false);
 
@@ -1082,8 +1094,8 @@ public sealed class ClassInfo
                             lines.Add($"            for (int i = 0; i < n; i++)");
                             lines.Add($"            {{");
                             lines.Add(variable.ClassIsStruct && !isAction
-                                ?         $"                {variable.CsClassType}.Deserialize(ref b, out array[i]);"
-                                :         $"                array[i] = new {variable.CsClassType}(ref b);");
+                                ? $"                {variable.CsClassType}.Deserialize(ref b, out array[i]);"
+                                : $"                array[i] = new {variable.CsClassType}(ref b);");
                             lines.Add($"            }}");
                             lines.Add($"        }}");
                             lines.Add($"        {prefix}{variable.CsFieldName} = array;");
@@ -1412,7 +1424,7 @@ public sealed class ClassInfo
     static void CreateValidator(List<string> lines, IEnumerable<VariableElement> variables, bool forceStruct,
         bool isBlittable)
     {
-        string readOnlyId = forceStruct ? "readonly " : "";
+        string readOnlyId = isBlittable ? "readonly " : "";
 
         lines.Add($"public {readOnlyId}void RosValidate()");
         lines.Add("{");
@@ -1424,40 +1436,48 @@ public sealed class ClassInfo
 
         foreach (VariableElement variable in variables)
         {
-            if (variable.ArraySize > 0)
+            if (forceStruct)
             {
-                if (!forceStruct)
+                if (variable.RosClassType == "string")
                 {
-                    lines.Add($"    BuiltIns.ThrowIfNull({variable.CsFieldName}, nameof({variable.CsFieldName}));");
-                    lines.Add($"    BuiltIns.ThrowIfWrongSize({variable.CsFieldName}, " +
-                              $"nameof({variable.CsFieldName}), {variable.ArraySize});");
-                    //lines.Add(
-                    //    $"    if ({variable.CsFieldName} is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}));");
-                    //lines.Add(
-                    //    $"    if ({variable.CsFieldName}.Length != {variable.ArraySize}) " +
-                    //    $"BuiltIns.ThrowInvalidSizeForFixedArray(nameof({variable.CsFieldName}), " +
-                    //    $"{variable.CsFieldName}.Length, {variable.ArraySize});");
+                    lines.Add($"    {variable.CsFieldName} ??= \"\";");
+                }
+                else if (variable.IsDynamicSizeArray)
+                {
+                    lines.Add($"    {variable.CsFieldName} ??= System.Array.Empty<{variable.CsClassType}>();");
+                }
+                else if (!BuiltInTypes.Contains(variable.RosClassType))
+                {
+                    lines.Add($"    {variable.CsFieldName} ??= new();");
                 }
             }
-            else if (!variable.IsArray &&
-                     (BuiltInTypes.Contains(variable.RosClassType) && variable.RosClassType != "string" ||
-                      variable.ClassIsStruct))
+            else if (!variable.IsArray
+                     && BuiltInTypes.Contains(variable.RosClassType)
+                     && variable.RosClassType != "string")
             {
                 // do nothing
             }
-            else
+            else if (variable.IsArray)
             {
-                if (!forceStruct && (!variable.ClassIsStruct || variable.IsArray))
+                lines.Add($"    BuiltIns.ThrowIfNull({variable.CsFieldName}, nameof({variable.CsFieldName}));");
+                if (variable.ArraySize > 0)
                 {
-                    lines.Add($"    BuiltIns.ThrowIfNull({variable.CsFieldName}, nameof({variable.CsFieldName}));");
-                    //lines.Add(
-                    //    $"    if ({variable.CsFieldName} is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}));");
+                    lines.Add($"    BuiltIns.ThrowIfWrongSize({variable.CsFieldName}, " +
+                              $"nameof({variable.CsFieldName}), {variable.ArraySize});");
                 }
 
-                if (!variable.IsArray && !variable.ClassIsStruct && variable.RosClassType != "string")
+                if (variable.ClassIsBlittable || BuiltInTypes.Contains(variable.RosClassType))
                 {
-                    lines.Add($"    {variable.CsFieldName}.RosValidate();");
+                    // do nothing
                 }
+                else
+                {
+                    lines.Add($"    foreach (var msg in {variable.CsFieldName}) msg.RosValidate();");
+                }
+            }
+            else if (!variable.ClassIsBlittable && variable.RosClassType != "string")
+            {
+                lines.Add($"    {variable.CsFieldName}.RosValidate();");
             }
 
             /*

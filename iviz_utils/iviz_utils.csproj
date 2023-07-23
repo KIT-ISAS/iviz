@@ -15,6 +15,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\iviz_bridge_client_lib\iviz_bridge_client_lib.csproj" />
         <ProjectReference Include="..\iviz_msgs_gen_lib\iviz_msgs_gen_lib.csproj" />
         <ProjectReference Include="..\iviz_ntp_lib\iviz_ntp_lib.csproj" />
         <ProjectReference Include="..\iviz_rosbag_lib\iviz_rosbag_lib.csproj" />

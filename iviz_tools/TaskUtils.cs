@@ -334,6 +334,18 @@ public static class TaskUtils
     /// </summary>
     public static TaskCompletionSource<T> CreateCompletionSource<T>() =>
         new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    public static void CancelNoThrow(this CancellationTokenSource tcs, object caller)
+    {
+        try
+        {
+            tcs.Cancel();
+        }
+        catch (Exception e)
+        {
+            Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
+        }
+    }
 }
 
 public static class ValueTaskUtils

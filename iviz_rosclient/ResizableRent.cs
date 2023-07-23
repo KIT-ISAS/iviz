@@ -2,7 +2,7 @@
 using System.Buffers;
 using Iviz.Msgs;
 
-namespace Iviz.Roslib.Utils;
+namespace Iviz.Roslib;
 
 /// <summary>
 /// Class used by the senders and listeners. Basically keeps a rented array,

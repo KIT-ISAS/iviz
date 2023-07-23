@@ -46,15 +46,13 @@ internal sealed class ServiceInfo : JsonToString
         this.generator = generator;
     }
 
-    public static ServiceInfo Instantiate<T>(string callerId, string service)
-        where T : IService, new()
+    public static ServiceInfo Instantiate(IService generator, string callerId, string service)
     {
-        T generator = new T();
         return new ServiceInfo(
             callerId, service,
             generator.RosMd5Sum,
             generator.RosServiceType,
-            () => new T()
+            generator.Generate
         );
     }
 

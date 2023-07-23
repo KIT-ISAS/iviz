@@ -2,12 +2,10 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -184,17 +182,24 @@ public sealed class RosClient : IRosClient
     /// <returns>A caller uri</returns>
     public static Uri TryGetCallerUri(int usingPort = AnyPort)
     {
-        string? envHostname = RosNameUtils.EnvironmentCallerHostname;
-        if (envHostname != null)
-        {
-            return new Uri($"http://{envHostname}:{usingPort.ToString()}/");
-        }
-
         string portStr = usingPort.ToString();
 
-        return RosUtils.GetUriFromInterface(NetworkInterfaceType.Wireless80211, portStr) ??
-               RosUtils.GetUriFromInterface(NetworkInterfaceType.Ethernet, portStr) ??
-               new Uri($"http://{Dns.GetHostName()}:{portStr}/");
+        try
+        {
+            string? envHostname = RosNameUtils.EnvironmentCallerHostname;
+            if (envHostname != null)
+            {
+                return new Uri($"http://{envHostname}:{portStr}/");
+            }
+
+            return RosUtils.GetUriFromInterface(NetworkInterfaceType.Wireless80211, portStr) ??
+                   RosUtils.GetUriFromInterface(NetworkInterfaceType.Ethernet, portStr) ??
+                   new Uri($"http://{Dns.GetHostName()}:{portStr}/");
+        }
+        catch (UriFormatException)
+        {
+            return new Uri($"http://localhost:{portStr}/");
+        }
     }
 
 
@@ -281,21 +286,6 @@ public sealed class RosClient : IRosClient
         }
     }
 
-    static string? EnvironmentRosNamespace
-    {
-        get
-        {
-            string? ns = Environment.GetEnvironmentVariable("ROS_NAMESPACE");
-            if (ns.IsNullOrEmpty())
-            {
-                return null;
-            }
-
-            return !RosNameUtils.IsValidResourceName(ns) ? null : ns;
-        }
-    }
-
-
     /// <summary>
     /// Try to retrieve a valid master uri.
     /// </summary>        
@@ -343,27 +333,10 @@ public sealed class RosClient : IRosClient
             BuiltIns.ThrowArgument(nameof(ownUri), "URI scheme must be http");
         }
 
-        if (string.IsNullOrWhiteSpace(ownId))
-        {
-            ownId = RosNameUtils.CreateCallerId();
-        }
-
-        string? ns = namespaceOverride ?? EnvironmentRosNamespace;
+        string? ns = namespaceOverride ?? RosNameUtils.EnvironmentRosNamespace;
         namespacePrefix = ns == null ? "/" : $"/{ns}/";
 
-        if (ownId[0] != '/')
-        {
-            ownId = $"{namespacePrefix}{ownId}";
-        }
-
-        if (ownId[0] == '~')
-        {
-            throw new RosInvalidResourceNameException("ROS node names may not start with a '~'");
-        }
-
-        RosNameUtils.ValidateResourceName(ownId);
-
-        CallerId = ownId;
+        CallerId = RosNameUtils.CreateOwnIdFrom(namespacePrefix, ownId);
         CallerUri = ownUri;
 
         RosMasterClient = new RosMasterClient(masterUri, CallerId, CallerUri, 3);
@@ -806,10 +779,12 @@ public sealed class RosClient : IRosClient
         return SubscribeAsyncCore(topic, new ActionRosCallback<T>(callback), requestNoDelay, transportHint, token);
     }
 
-    /// <inheritdoc cref="IRosClient.SubscribeAsync{T}(string,System.Action{T},Iviz.Roslib.RosTransportHint,System.Threading.CancellationToken)"/>
     async ValueTask<(string id, IRosSubscriber<T> subscriber)> IRosClient.SubscribeAsync<T>(
-        string topic, Action<T> callback, RosTransportHint transportHint, CancellationToken token)
+        string topic, Action<T> callback, IRosSubscriptionProfile? profile, CancellationToken token)
     {
+        var transportHint = profile is IRos1SubscriptionProfile ros1Profile
+            ? ros1Profile.TransportHint
+            : RosTransportHint.PreferTcp;
         return await SubscribeAsyncCore(topic, callback, transportHint: transportHint, token: token);
     }
 
@@ -896,10 +871,13 @@ public sealed class RosClient : IRosClient
         return (validatedSubscriber.Subscribe(callback), validatedSubscriber).AsTaskResult();
     }
 
-    /// <inheritdoc cref="IRosClient.SubscribeAsync{T}(string,Iviz.Roslib.RosCallback{T},Iviz.Roslib.RosTransportHint,System.Threading.CancellationToken)"/>
     async ValueTask<(string id, IRosSubscriber<T> subscriber)> IRosClient.SubscribeAsync<T>(
-        string topic, RosCallback<T> callback, RosTransportHint transportHint, CancellationToken token)
+        string topic, RosCallback<T> callback, IRosSubscriptionProfile? profile, CancellationToken token)
     {
+        var transportHint = profile is IRos1SubscriptionProfile ros1Profile
+            ? ros1Profile.TransportHint
+            : RosTransportHint.PreferTcp;
+        
         return await SubscribeAsyncCore(topic, callback, transportHint: transportHint, token: token);
     }
 
@@ -1260,16 +1238,16 @@ public sealed class RosClient : IRosClient
         return TopicRequestRpcResult.NoSuchTopic;
     }
 
-    public IReadOnlyList<SubscriberState> GetSubscriberStatistics() =>
+    public SubscriberState[] GetSubscriberStatistics() =>
         subscribersByTopic.Values.Select(subscriber => subscriber.GetState()).ToArray();
 
-    public IReadOnlyList<PublisherState> GetPublisherStatistics() =>
+    public PublisherState[] GetPublisherStatistics() =>
         publishersByTopic.Values.Select(publisher => publisher.GetState()).ToArray();
 
-    public ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsAsync(CancellationToken token = default) =>
+    public ValueTask<SubscriberState[]> GetSubscriberStatisticsAsync(CancellationToken token = default) =>
         GetSubscriberStatistics().AsTaskResult();
 
-    public ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsAsync(CancellationToken token = default) =>
+    public ValueTask<PublisherState[]> GetPublisherStatisticsAsync(CancellationToken token = default) =>
         GetPublisherStatistics().AsTaskResult();
 
     internal List<BusInfo> GetBusInfoRpc()
@@ -1332,17 +1310,20 @@ public sealed class RosClient : IRosClient
     /// <returns>Whether the call succeeded.</returns>
     /// <exception cref="TaskCanceledException">Thrown if the operation timed out.</exception>
     /// <exception cref="RosServiceCallFailed">Thrown if the server could not process the call.</exception>
-    public void CallService<T>(string serviceName, T service, bool persistent = false,
+    public void CallService(string serviceName, IService service, bool persistent = false,
         CancellationToken token = default)
-        where T : IService, new()
     {
         TaskUtils.RunSync(() => CallServiceAsync(serviceName, service, persistent, token), token);
     }
 
-    /// <inheritdoc cref="IRosClient.CallServiceAsync{T}"/>
-    public async ValueTask CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
+    ValueTask IRosClient.CallServiceAsync<TRequest, TResponse>(string serviceName,
+        IService<TRequest, TResponse> service, bool persistent, CancellationToken token)
+    {
+        return CallServiceAsync(serviceName, service, persistent, token);
+    }
+
+    public async ValueTask CallServiceAsync(string serviceName, IService service, bool persistent = false,
         CancellationToken token = default)
-        where T : IService, new()
     {
         string resolvedServiceName = ResolveResourceName(serviceName);
 
@@ -1384,7 +1365,7 @@ public sealed class RosClient : IRosClient
         }
 
         var serviceUri = response.ServiceUri;
-        var serviceInfo = ServiceInfo.Instantiate<T>(CallerId, resolvedServiceName);
+        var serviceInfo = ServiceInfo.Instantiate(service.Generate(), CallerId, resolvedServiceName);
         if (persistent)
         {
             var serviceCaller = new RosServiceCaller(serviceInfo);
@@ -1459,7 +1440,7 @@ public sealed class RosClient : IRosClient
     {
         string resolvedServiceName = ResolveResourceName(serviceName);
 
-        var serviceInfo = ServiceInfo.Instantiate<T>(CallerId, resolvedServiceName);
+        var serviceInfo = ServiceInfo.Instantiate(new T(), CallerId, resolvedServiceName);
 
         if (ServiceAlreadyAdvertised(resolvedServiceName, serviceInfo.Type))
         {
@@ -1630,4 +1611,9 @@ public sealed class RosClient : IRosClient
     {
         return $"[{nameof(RosClient)} '{CallerId}' MasterUri='{MasterUri}']";
     }
+}
+
+public interface IRos1SubscriptionProfile : IRosSubscriptionProfile
+{
+    public RosTransportHint TransportHint { get; } 
 }

@@ -69,16 +69,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
             }
         }
     }
-
-
-    void AssertIsAlive()
-    {
-        if (!IsAlive)
-        {
-            BuiltIns.ThrowObjectDisposed(nameof(Ros2Subscriber<TMessage>), "This is not a valid subscriber");
-        }
-    }
-
+    
     string GenerateId()
     {
         int currentCount = Interlocked.Increment(ref totalSubscribers);
@@ -187,7 +178,7 @@ public sealed class Ros2Subscriber<TMessage> : Ros2Subscriber, IRos2Subscriber, 
         if (disposed) return;
         disposed = true;
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
 
         await task.AwaitNoThrow(2000, this, token);
         await client.Rcl.UnsubscribeAsync(Subscriber, default).AwaitNoThrow(this);
@@ -222,6 +213,13 @@ public class Ros2Subscriber : Signalizable
     public int NumPublishers => Subscriber.GetNumPublishers();
     public QosProfile Profile => Subscriber.Profile;
 
+    protected void AssertIsAlive()
+    {
+        if (!IsAlive)
+        {
+            BuiltIns.ThrowObjectDisposed(nameof(Ros2Subscriber), "This is not a valid subscriber");
+        }
+    }
     protected void UpdateReceiverInfo(in Guid guid, int lengthInBytes)
     {
         bool success = numPublishers <= 3
@@ -302,7 +300,7 @@ public class Ros2Subscriber : Signalizable
         var knownPublishers = publishers.ToDictionary(static info => info.Guid);
 
         var contactedPublishers =
-            Enumerable.Take(publisherStats, numPublishers).ToDictionary(static stats => stats.guid);
+            publisherStats.Take(numPublishers).ToDictionary(static stats => stats.guid);
 
         var receiverStates = new List<Ros2ReceiverState>(knownPublishers.Count);
 

@@ -292,7 +292,7 @@ public readonly struct RosValue
             Type.Double => $"[double:{ToDouble(l).ToString(Defaults.Culture)}]",
             Type.Boolean => l != 0 ? "[bool:true]" : "[bool:false]",
             Type.DateTime => $"[dateTime:{new DateTime(l).ToString(Defaults.Culture)}]",
-            Type.String => $"[string:{(string)o!}]",
+            Type.String => $"[string:\"{(string?)o}\"]",
             Type.Array => $"[array:{ArrayLengthAsString} elems]",
             Type.ByteArray => $"[byteArray:{ArrayLengthAsString} bytes]",
             Type.Struct => $"[struct:{ArrayLengthAsString} fields]",

@@ -7,13 +7,13 @@ namespace Iviz.Bridge;
 [DataContract]
 public sealed class PublishMessage<T>
 {
-    [DataMember(Name = "msg")] public T? Msg { get; set; }
+    [DataMember(Name = "msg")] public T? Msg;
 }
 
 [DataContract]
 public sealed class SubscriberMessage
 {
-    [DataMember(Name = "op")] public string? Op { get; } = "publish";
-    [DataMember(Name = "topic")] public string? Topic { get; set; }
-    [DataMember(Name = "msg")] public IMessage? Msg { get; set; }
+    [DataMember(Name = "op")] public readonly string? Op = "publish";
+    [DataMember(Name = "topic")] public string? Topic;
+    [DataMember(Name = "msg")] public IMessage? Msg;
 }

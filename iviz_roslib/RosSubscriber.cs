@@ -127,7 +127,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
         if (disposed) return;
         disposed = true;
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         callbacksById.Clear();
         NumPublishersChanged = null;
         manager.Stop();
@@ -138,7 +138,7 @@ public sealed class RosSubscriber<TMessage> : IRos1Subscriber, IRosSubscriber<TM
         if (disposed) return default;
         disposed = true;
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         callbacksById.Clear();
         NumPublishersChanged = null;
         return manager.StopAsync(token).AwaitNoThrow(this).AsValueTask();

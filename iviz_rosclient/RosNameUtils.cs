@@ -7,6 +7,42 @@ namespace Iviz.Roslib;
 
 public static class RosNameUtils
 {
+    public static string? EnvironmentRosNamespace
+    {
+        get
+        {
+            string? ns = Environment.GetEnvironmentVariable("ROS_NAMESPACE");
+            if (ns.IsNullOrEmpty())
+            {
+                return null;
+            }
+
+            return !IsValidResourceName(ns) ? null : ns;
+        }
+    }
+
+    public static string CreateOwnIdFrom(string namespacePrefix, string? ownId)
+    {
+        if (string.IsNullOrWhiteSpace(ownId))
+        {
+            ownId = RosNameUtils.CreateCallerId();
+        }
+
+        if (ownId[0] != '/')
+        {
+            ownId = $"{namespacePrefix}{ownId}";
+        }
+
+        if (ownId[0] == '~')
+        {
+            throw new RosInvalidResourceNameException("ROS node names may not start with a '~'");
+        }
+
+        RosNameUtils.ValidateResourceName(ownId);
+
+        return ownId;        
+    }    
+    
     /// <summary>
     /// Retrieves the environment variable ROS_HOSTNAME as a uri.
     /// If this fails, retrieves ROS_IP.

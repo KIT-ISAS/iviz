@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -6,7 +7,10 @@ namespace Iviz.Roslib;
 
 public abstract class BaseRosPublisher : IRosPublisher
 {
+    protected readonly List<string> ids = new();
     protected readonly CancellationTokenSource runningTs = new();
+
+    int totalPublishers;
 
     public string Topic { get; }
     public string TopicType { get; }
@@ -28,15 +32,43 @@ public abstract class BaseRosPublisher : IRosPublisher
         Topic = topic;
         TopicType = topicType;
     }
+
+    string GenerateId()
+    {
+        int currentCount = Interlocked.Increment(ref totalPublishers);
+        int lastId = currentCount - 1;
+        return lastId == 0 ? Topic : $"{Topic}-{lastId.ToString()}";
+    }
     
     protected void AssertIsAlive()
     {
         if (!IsAlive)
         {
-            BuiltIns.ThrowObjectDisposed(nameof(BaseRosPublisher), "This is not a valid publisher");
+            BuiltIns.ThrowObjectDisposed(nameof(IRosPublisher), "This publisher has been disposed " +
+                                                                "and its connection is no longer valid");
         }
     }
+    
+    public string Advertise()
+    {
+        AssertIsAlive();
 
+        string id = GenerateId();
+        ids.Add(id);
+        return id;
+    }    
+
+    protected bool RemoveId(string topicId)
+    {
+        return ids.Remove(topicId);
+    }
+
+    public bool ContainsId(string id)
+    {
+        if (id is null) BuiltIns.ThrowArgumentNull(nameof(id));
+        return ids.Contains(id);
+    }
+    
     public abstract void Publish(IMessage message);
 
     public abstract ValueTask PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
@@ -44,8 +76,6 @@ public abstract class BaseRosPublisher : IRosPublisher
 
     public abstract bool Unadvertise(string id, CancellationToken token = default);
     public abstract ValueTask<bool> UnadvertiseAsync(string id, CancellationToken token = default);
-    public abstract string Advertise();
-    public abstract bool ContainsId(string id);
     public abstract PublisherState GetState();
     public abstract ValueTask<PublisherState> GetStateAsync(CancellationToken token = default);
     public abstract void Dispose();

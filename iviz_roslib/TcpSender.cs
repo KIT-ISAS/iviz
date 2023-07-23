@@ -92,7 +92,7 @@ internal sealed class TcpSender<TMessage> : ProtocolSender<TMessage>, ITcpSender
         if (disposed) return;
         disposed = true;
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         TcpClient.Dispose();
 
         await task.AwaitNoThrow(5000, this, token);
@@ -262,7 +262,7 @@ internal sealed class TcpSender<TMessage> : ProtocolSender<TMessage>, ITcpSender
         }
 
         TcpClient.Dispose();
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         senderQueue.FlushRemaining();
     }
 

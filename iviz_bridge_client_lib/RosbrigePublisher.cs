@@ -1,22 +1,35 @@
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib;
 using Iviz.Tools;
 
-namespace iviz_bridge_client;
+namespace Iviz.Bridge.Client;
 
 public sealed class RosbridgePublisher<TMessage> : BaseRosPublisher<TMessage>
     where TMessage : IMessage, new()
 {
     readonly RosbridgeClient client;
+    readonly Serializer<TMessage> serializer;
     bool disposed;
+    
+    Cache<PublisherState> cachedState;
 
-    public override int NumSubscribers => 0;
+    public override int NumSubscribers
+    {
+        get
+        {
+            if (!cachedState.TryGet(out var state))
+            {
+                Task.Run(() => GetStateCoreAsync());
+            }
 
+            return state?.Senders.Length ?? 0;
+        }
+    }
     public RosbridgePublisher(RosbridgeClient client, string topic, string topicType) : base(topic, topicType)
     {
+        serializer = new TMessage().CreateSerializer();
         this.client = client;
     }
 
@@ -56,15 +69,24 @@ public sealed class RosbridgePublisher<TMessage> : BaseRosPublisher<TMessage>
 
     public override PublisherState GetState() => TaskUtils.RunSync(GetStateAsync);
 
-    public override async ValueTask<PublisherState> GetStateAsync(CancellationToken token = default)
+    async ValueTask<PublisherState> GetStateCoreAsync(CancellationToken token = default)
     {
         AssertIsAlive();
-        string[] subscribers = await client.GetSystemSubscribers(Topic, token);
-        return new PublisherState(Topic, TopicType, ids,
-            subscribers
-                .Select(subscriber => new SenderState { RemoteId = subscriber })
+        string[] publishers = await client.GetSystemPublishers(Topic, token);
+        var state = new PublisherState(Topic, TopicType, ids,
+            publishers
+                .Select(publisher => new SenderState { RemoteId = publisher })
                 .ToArray()
         );
+        cachedState.Value = state;
+        return state;
+    }
+    
+    public override ValueTask<PublisherState> GetStateAsync(CancellationToken token = default)
+    {
+        return cachedState.TryGet() is { } systemState
+            ? systemState.AsTaskResult()
+            : GetStateCoreAsync(token);
     }
 
     public override ValueTask DisposeAsync(CancellationToken token)
@@ -72,10 +94,10 @@ public sealed class RosbridgePublisher<TMessage> : BaseRosPublisher<TMessage>
         if (disposed) return default;
         disposed = true;
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
 
         ids.Clear();
-        return client.RemovePublisherAsync(Topic).AsValueTask();
+        return client.RemovePublisherAsync(Topic).AwaitNoThrow(this).AsValueTask();
     }
 
     public override void Dispose()
@@ -85,6 +107,9 @@ public sealed class RosbridgePublisher<TMessage> : BaseRosPublisher<TMessage>
 
     public override void Publish(in TMessage message)
     {
+        AssertIsAlive();
+        serializer.RosValidate(message);
+        
         var publishMessage = new PublishMessage<TMessage>
         {
             Topic = Topic,
@@ -98,6 +123,9 @@ public sealed class RosbridgePublisher<TMessage> : BaseRosPublisher<TMessage>
     public override ValueTask PublishAsync(in TMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
         CancellationToken token = default)
     {
+        AssertIsAlive();
+        serializer.RosValidate(message);
+        
         var publishMessage = new PublishMessage<TMessage>
         {
             Topic = Topic,
@@ -111,7 +139,7 @@ public sealed class RosbridgePublisher<TMessage> : BaseRosPublisher<TMessage>
         }
 
         return policy == RosPublishPolicy.WaitUntilSent
-            ? client.PostAsync(publishMessage).AsValueTask()
+            ? client.PostAsync(publishMessage, token).AsValueTask()
             : default;
     }
 }

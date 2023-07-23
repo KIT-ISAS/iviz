@@ -355,7 +355,7 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
         if (!shouldRetry)
         {
-            runningTs.Cancel();
+            runningTs.CancelNoThrow(this);
             return;
         }
 
@@ -366,7 +366,7 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
         }
         finally
         {
-            runningTs.Cancel();
+            runningTs.CancelNoThrow(this);
         }        
     }
 
@@ -374,7 +374,7 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
     {
         if (disposed) return;
         disposed = true;
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         TcpClient?.Dispose();
 
         await task.AwaitNoThrow(DisposeTimeoutInMs, this, token);

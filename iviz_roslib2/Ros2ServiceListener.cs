@@ -101,7 +101,7 @@ internal sealed class Ros2ServiceListener : Signalizable
 
         await client.Rcl.UnadvertiseServiceAsync(ServiceServer, default).AwaitNoThrow(this);
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         await task.AwaitNoThrow(2000, this, token);
 
         client.RemoveServiceListener(this);

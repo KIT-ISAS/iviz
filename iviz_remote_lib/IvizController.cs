@@ -67,16 +67,19 @@ public sealed class IvizController
             BuiltIns.ThrowArgumentNull(nameof(requestedId), "Requested id name cannot be empty");
         }
 
-        var addModuleResponse =
-            client.CallService($"{ivizId}/add_module_from_topic",
-                new AddModuleFromTopicRequest(topic, requestedId ?? topic));
-
-        if (!addModuleResponse.Success)
+        var addModule = new AddModuleFromTopic
         {
-            throw new RemoteException(addModuleResponse.Message);
+            Request = new AddModuleFromTopicRequest(topic, requestedId ?? topic)
+        };
+        
+        client.CallService($"{ivizId}/add_module_from_topic", addModule);
+
+        if (!addModule.Response.Success)
+        {
+            throw new RemoteException(addModule.Response.Message);
         }
 
-        return addModuleResponse.Id;
+        return addModule.Response.Id;
     }
 
     /// <summary>
@@ -99,15 +102,19 @@ public sealed class IvizController
             BuiltIns.ThrowArgumentNull(nameof(requestedId));
         }
 
-        var addModuleResponse =
-            client.CallService($"{ivizId}/add_module", new AddModuleRequest(type.ToString(), requestedId));
-
-        if (!addModuleResponse.Success)
+        var addModule = new AddModule
         {
-            throw new RemoteException(addModuleResponse.Message);
+            Request = new AddModuleRequest(type.ToString(), requestedId)
+        };
+
+        client.CallService($"{ivizId}/add_module", addModule);
+
+        if (!addModule.Response.Success)
+        {
+            throw new RemoteException(addModule.Response.Message);
         }
 
-        return addModuleResponse.Id;
+        return addModule.Response.Id;
     }
 
     public void UpdateModule(string id, IConfiguration config)

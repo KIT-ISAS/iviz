@@ -83,7 +83,7 @@ internal sealed class Ros2ServiceCaller : Signalizable
 
         await client.Rcl.DisposeServiceClientAsync(ServiceClient, default).AwaitNoThrow(this);
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         await task.AwaitNoThrow(2000, this, token);
 
         client.RemoveServiceCaller(this);

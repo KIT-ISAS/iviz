@@ -58,10 +58,10 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// <param name="transportHint">Specifies the policy of which protocol (TCP, UDP) to prefer</param>
     /// <returns>An identifier that can be used to unsubscribe from this topic.</returns>
     string Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
-        RosTransportHint transportHint = RosTransportHint.PreferTcp)
+        IRosSubscriptionProfile? profile = null)
         where T : IMessage, new()
     {
-        (string id, subscriber) = TaskUtils.RunSync(() => SubscribeAsync(topic, callback, transportHint));
+        (string id, subscriber) = TaskUtils.RunSync(() => SubscribeAsync(topic, callback, profile));
         return id;
     }
 
@@ -75,10 +75,10 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// <param name="transportHint">Specifies the policy of which protocol (TCP, UDP) to prefer</param>
     /// <returns>An identifier that can be used to unsubscribe from this topic.</returns>
     string Subscribe<T>(string topic, RosCallback<T> callback, out IRosSubscriber<T> subscriber,
-        RosTransportHint transportHint = RosTransportHint.PreferTcp)
+        IRosSubscriptionProfile? profile = null)
         where T : IMessage, new()
     {
-        (string id, subscriber) = TaskUtils.RunSync(() => SubscribeAsync(topic, callback, transportHint));
+        (string id, subscriber) = TaskUtils.RunSync(() => SubscribeAsync(topic, callback, profile));
         return id;
     }
 
@@ -88,11 +88,10 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// <typeparam name="T">Message type.</typeparam>
     /// <param name="topic">Name of the topic.</param>
     /// <param name="callback">Function to be called when a message arrives.</param>
-    /// <param name="transportHint">Specifies the policy of which protocol (TCP, UDP) to prefer</param>
     /// <param name="token">An optional cancellation token</param>
     /// <returns>A pair containing an identifier that can be used to unsubscribe from this topic, and the subscriber object.</returns>        
     ValueTask<(string id, IRosSubscriber<T> subscriber)>
-        SubscribeAsync<T>(string topic, Action<T> callback, RosTransportHint transportHint = RosTransportHint.PreferTcp,
+        SubscribeAsync<T>(string topic, Action<T> callback, IRosSubscriptionProfile? profile = null,
             CancellationToken token = default)
         where T : IMessage, new();
 
@@ -103,11 +102,10 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// <typeparam name="T">Message type.</typeparam>
     /// <param name="topic">Name of the topic.</param>
     /// <param name="callback">Function to be called when a message arrives.</param>
-    /// <param name="transportHint">Specifies the policy of which protocol (TCP, UDP) to prefer</param>
     /// <param name="token">An optional cancellation token</param>
     /// <returns>A pair containing an identifier that can be used to unsubscribe from this topic, and the subscriber object.</returns>
     ValueTask<(string id, IRosSubscriber<T> subscriber)> SubscribeAsync<T>(
-        string topic, RosCallback<T> callback, RosTransportHint transportHint = RosTransportHint.PreferTcp,
+        string topic, RosCallback<T> callback, IRosSubscriptionProfile? profile = null,
         CancellationToken token = default)
         where T : IMessage, new();
 
@@ -148,21 +146,14 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// <param name="service">Service message. The response will be written in the response field.</param>
     /// <param name="persistent">Whether a persistent connection with the provider should be maintained.</param>
     /// <param name="timeoutInMs">Maximal time to wait.</param>
-    /// <typeparam name="T">Service type.</typeparam>
-    void CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
-        where T : IService, new()
+    void CallService<TRequest, TResponse>(string serviceName, IService<TRequest, TResponse> service,
+        bool persistent = false, int timeoutInMs = 5000)
+        where TRequest : IRequest
+        where TResponse : IResponse
     {
         using var timeoutTs = new CancellationTokenSource(timeoutInMs);
         var token = timeoutTs.Token;
         TaskUtils.RunSync(() => CallServiceAsync(serviceName, service, persistent, token: token), token);
-    }
-
-    TU CallService<TT, TU>(string serviceName, IRequest<TT, TU> request, bool persistent = false)
-        where TT : IService, new() where TU : IResponse
-    {
-        var service = new TT { Request = request };
-        CallService(serviceName, service, persistent);
-        return (TU)service.Response;
     }
 
     /// <summary>
@@ -175,20 +166,11 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// The connection will be stopped if any exception is thrown or the token is canceled.
     /// </param>
     /// <param name="token">A cancellation token</param>
-    /// <typeparam name="T">Service type.</typeparam>
     /// <returns>Whether the call succeeded.</returns>
-    ValueTask CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
-        CancellationToken token = default)
-        where T : IService, new();
-
-    async ValueTask<TU> CallServiceAsync<TT, TU>(string serviceName, IRequest<TT, TU> request,
+    ValueTask CallServiceAsync<TRequest, TResponse>(string serviceName, IService<TRequest, TResponse> service,
         bool persistent = false, CancellationToken token = default)
-        where TT : IService, new() where TU : IResponse
-    {
-        TT service = new() { Request = request };
-        await CallServiceAsync(serviceName, service, persistent, token);
-        return (TU)service.Response;
-    }
+        where TRequest : IRequest
+        where TResponse : IResponse;
 
     /// <summary>
     /// Unadvertises the service.
@@ -209,13 +191,13 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// <exception cref="ArgumentException">Thrown if name is null</exception>        
     ValueTask UnadvertiseServiceAsync(string name, CancellationToken token = default);
 
-    IReadOnlyList<SubscriberState> GetSubscriberStatistics();
+    IReadOnlyList<SubscriberState> GetSubscriberStatistics() => TaskUtils.RunSync(GetSubscriberStatisticsAsync);
 
-    IReadOnlyList<PublisherState> GetPublisherStatistics();
+    IReadOnlyList<PublisherState> GetPublisherStatistics() => TaskUtils.RunSync(GetPublisherStatisticsAsync);
 
-    ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsAsync(CancellationToken token = default);
+    ValueTask<SubscriberState[]> GetSubscriberStatisticsAsync(CancellationToken token = default);
 
-    ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsAsync(CancellationToken token = default);
+    ValueTask<PublisherState[]> GetPublisherStatisticsAsync(CancellationToken token = default);
 
     bool IsServiceAvailable(string service) => TaskUtils.RunSync(() => IsServiceAvailableAsync(service));
 
@@ -267,7 +249,7 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// ROS2: The calling node.
     /// </summary>
     /// <returns>Array of parameter names.</returns>
-    string[] GetParameterNames();
+    string[] GetParameterNames() => TaskUtils.RunSync(GetParameterNamesAsync);
 
     /// <summary>
     /// Gets the parameter names from the default parameter server.
@@ -284,7 +266,7 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     /// </summary>
     /// <param name="key">The key of the parameter.</param>
     /// <returns>A value wrapping the parameter value.</returns>
-    RosValue GetParameter(string key);
+    RosValue GetParameter(string key) => TaskUtils.RunSync(() => GetParameterAsync(key));
 
     /// <summary>
     /// Gets a parameter from the default parameter server.
@@ -304,4 +286,8 @@ public interface IRosClient : IDisposable, IAsyncDisposable
     void IDisposable.Dispose() => TaskUtils.RunSync((Func<ValueTask>)DisposeAsync);
 
     ValueTask IAsyncDisposable.DisposeAsync() => DisposeAsync();
+}
+
+public interface IRosSubscriptionProfile
+{
 }

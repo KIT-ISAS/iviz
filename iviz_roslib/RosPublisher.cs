@@ -15,10 +15,8 @@ namespace Iviz.Roslib;
 public sealed class RosPublisher<TMessage> : BaseRosPublisher<TMessage>, IRos1Publisher where TMessage : IMessage
 {
     readonly RosClient client;
-    readonly List<string> ids = new();
     readonly SenderManager<TMessage> manager;
     readonly Serializer<TMessage> serializer;
-    int totalPublishers;
     bool disposed;
 
     /// <summary>
@@ -75,25 +73,7 @@ public sealed class RosPublisher<TMessage> : BaseRosPublisher<TMessage>, IRos1Pu
         serializer = ((TMessage)topicInfo.Generator).CreateSerializer();
         manager = new SenderManager<TMessage>(this, topicInfo) { ForceTcpNoDelay = true };
     }
-
-    string GenerateId()
-    {
-        int currentCount = Interlocked.Increment(ref totalPublishers);
-        int lastId = currentCount - 1;
-        return lastId == 0 ? Topic : $"{Topic}-{lastId.ToString()}";
-    }
-
-    bool RemoveId(string topicId)
-    {
-        return ids.Remove(topicId);
-    }
-
-    public override bool ContainsId(string id)
-    {
-        if (id is null) BuiltIns.ThrowArgumentNull(nameof(id));
-        return ids.Contains(id);
-    }
-
+    
     TopicRequestRpcResult IRos1Publisher.RequestTopicRpc(bool requestsTcp, RpcUdpTopicRequest? requestsUdp,
         out Endpoint? tcpResponse, out RpcUdpTopicResponse? udpResponse)
     {
@@ -171,21 +151,9 @@ public sealed class RosPublisher<TMessage> : BaseRosPublisher<TMessage>, IRos1Pu
             return default;
         }
 
-        if (policy == RosPublishPolicy.WaitUntilSent)
-        {
-            return manager.PublishAndWaitAsync(message, token);
-        }
-
-        return default;
-    }
-
-    public override string Advertise()
-    {
-        AssertIsAlive();
-
-        string id = GenerateId();
-        ids.Add(id);
-        return id;
+        return policy == RosPublishPolicy.WaitUntilSent 
+            ? manager.PublishAndWaitAsync(message, token) 
+            : default;
     }
 
     public override bool Unadvertise(string id, CancellationToken token = default)
@@ -208,9 +176,7 @@ public sealed class RosPublisher<TMessage> : BaseRosPublisher<TMessage>, IRos1Pu
 
         bool removed = RemoveId(id ?? throw new ArgumentNullException(nameof(id)));
 
-        {
-            await RemovePublisherAsync(token);
-        }
+        await RemovePublisherAsync(token);
 
         return removed;
     }
@@ -240,7 +206,7 @@ public sealed class RosPublisher<TMessage> : BaseRosPublisher<TMessage>, IRos1Pu
         if (disposed) return;
         disposed = true;
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         ids.Clear();
 
         await manager.DisposeAsync(token).AwaitNoThrow(this);
@@ -253,7 +219,7 @@ public sealed class RosPublisher<TMessage> : BaseRosPublisher<TMessage>, IRos1Pu
         if (disposed) return;
         disposed = true;
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         ids.Clear();
         manager.Dispose();
         NumSubscribersChanged = null;

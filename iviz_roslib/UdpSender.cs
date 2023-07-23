@@ -164,7 +164,7 @@ internal sealed class UdpSender<TMessage> : ProtocolSender<TMessage>, IUdpSender
         }
 
         UdpClient.Dispose();
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         senderQueue.FlushRemaining();
     }
 
@@ -357,7 +357,7 @@ internal sealed class UdpSender<TMessage> : ProtocolSender<TMessage>, IUdpSender
         if (disposed) return;
         disposed = true;
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         UdpClient.Dispose();
 
         await task.AwaitNoThrow(5000, this, token);

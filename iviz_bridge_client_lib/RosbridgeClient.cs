@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,71 +7,58 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using iviz_bridge_client_lib;
 using Iviz.Msgs;
 using Iviz.Msgs.RosapiMsgs;
 using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using Iviz.Tools;
+using Newtonsoft.Json;
 
-namespace iviz_bridge_client;
+namespace Iviz.Bridge.Client;
 
 public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
 {
-    readonly ClientWebSocket client;
+    readonly ClientWebSocket webSocket;
     readonly ChannelWriter<Command> outputWriter;
     readonly ChannelReader<Command> outputReader;
+    readonly CancellationTokenSource runningTs = new();
     readonly Task sendQueueTask;
     readonly Task receiveQueueTask;
 
     readonly Dictionary<string, RosbridgeSubscriber> subscribersByTopic = new();
     readonly Dictionary<string, BaseRosPublisher> publishersByTopic = new();
-    readonly Dictionary<(string, int), Action<byte[]?>> calledServices = new();
+    readonly ConcurrentDictionary<(string, int), Action<byte[]?, string?>> calledServices = new();
     readonly string namespacePrefix;
 
-    int currentServiceRequestId;
+    volatile int currentServiceRequestId;
     bool disposed;
 
     Cache<SystemState> cachedSystemState;
-    Cache<IReadOnlyList<SubscriberState>> cachedSubscriberStats;
-    Cache<IReadOnlyList<PublisherState>> cachedPublisherStats;
-    
+    Cache<SubscriberState[]> cachedSubscriberStats;
+    Cache<PublisherState[]> cachedPublisherStats;
+
     public string CallerId { get; }
+    public Uri BridgeUri { get; }
 
-    struct Cache<T> where T : class
+    RosbridgeClient(ClientWebSocket webSocket, Uri bridgeUri, string? ownId, string? namespaceOverride)
     {
-        T? value;
-        DateTime expiration;
+        CustomJsonFormatters.Initialize();
 
-        public T? TryGet() => DateTime.UtcNow > expiration ? null : value;
-        
-        public T Value
+        if (webSocket == null)
         {
-            set
-            {
-                this.value = value;
-                expiration = DateTime.UtcNow + TimeSpan.FromSeconds(3);
-            }
-        }
-    }
-
-    RosbridgeClient(ClientWebSocket client, string? ownId, string? namespaceOverride)
-    {
-        if (client == null)
-        {
-            BuiltIns.ThrowArgumentNull(nameof(client));
+            BuiltIns.ThrowArgumentNull(nameof(webSocket));
         }
 
-        this.client = client;
+        this.webSocket = webSocket;
+        BridgeUri = bridgeUri;
 
         string? ns = namespaceOverride ?? RosNameUtils.EnvironmentRosNamespace;
         namespacePrefix = ns == null ? "/" : $"/{ns}/";
 
         CallerId = RosNameUtils.CreateOwnIdFrom(namespacePrefix, ownId);
 
-        if (client.State != WebSocketState.Open)
+        if (webSocket.State != WebSocketState.Open)
         {
-            BuiltIns.ThrowArgument(nameof(client), "Client is not connected");
+            BuiltIns.ThrowArgument(nameof(webSocket), "Client is not connected");
         }
 
         var channel = Channel.CreateUnbounded<Command>(
@@ -87,7 +75,7 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
         receiveQueueTask = TaskUtils.Run(async () => await ReceiveQueue().AwaitNoThrow(this));
     }
 
-    public static async ValueTask<RosbridgeClient> Create(Uri uri, string? ownId = null,
+    public static async ValueTask<RosbridgeClient> CreateAsync(Uri uri, string? ownId = null,
         string? namespaceOverride = null, CancellationToken token = default)
     {
         if (uri == null)
@@ -99,18 +87,19 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
         {
             throw new RosbridgeException("Uri scheme must be 'ws'");
         }
-        
-        var client = new ClientWebSocket();
+
+        var webSocket = new ClientWebSocket();
         try
         {
-            await client.ConnectAsync(uri, token);
+            await webSocket.ConnectAsync(uri, token);
         }
         catch (Exception e)
         {
-            throw new RosConnectionException($"Failed to contact the bridge server at '{uri}'", e);
+            webSocket.Dispose();
+            throw new RosbridgeConnectionException($"Failed to contact the bridge at '{uri}'", e);
         }
 
-        return new RosbridgeClient(client, ownId, namespaceOverride);
+        return new RosbridgeClient(webSocket, uri, ownId, namespaceOverride);
     }
 
     #region queue
@@ -118,13 +107,14 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
     async ValueTask SendQueue()
     {
         using var stream = new MemoryStream();
+        var token = runningTs.Token;
 
         while (true)
         {
             Command entry;
             try
             {
-                entry = await outputReader.ReadAsync();
+                entry = await outputReader.ReadAsync(token);
             }
             catch (InvalidOperationException)
             {
@@ -143,12 +133,17 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
             try
             {
                 var segment = new ArraySegment<byte>(stream.GetBuffer(), 0, (int)stream.Length);
-                await client.SendAsync(segment, WebSocketMessageType.Text, true, entry.token);
+                await webSocket.SendAsync(segment, WebSocketMessageType.Text, true, entry.token);
                 entry.tcs?.TrySetResult();
             }
             catch (OperationCanceledException e)
             {
                 entry.tcs?.TrySetCanceled(e.CancellationToken);
+            }
+            catch (WebSocketException)
+            {
+                entry.tcs?.TrySetCanceled(default);
+                _ = Task.Run(() => DisposeAsync(default), default);
             }
             catch (Exception e)
             {
@@ -160,16 +155,35 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
     async ValueTask ReceiveQueue()
     {
         using var socketBuffer = new ResizableRent(2048);
+        var token = runningTs.Token;
 
-        while (client.State == WebSocketState.Open)
+        while (webSocket.State == WebSocketState.Open)
         {
             ValueWebSocketReceiveResult receiveResult;
 
             int offset = 0;
             while (true)
             {
-                receiveResult =
-                    await client.ReceiveAsync(socketBuffer.Array.AsMemory(offset), default);
+                try
+                {
+                    receiveResult =
+                        await webSocket.ReceiveAsync(socketBuffer.Array.AsMemory(offset), token);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                catch (WebSocketException)
+                {
+                    _ = Task.Run(() => DisposeAsync(default), default);
+                    return;
+                }
+                catch (Exception e)
+                {
+                    Logger.LogErrorFormat("{0}: Error in " + nameof(webSocket) + "." + nameof(ReceiveQueue) + "(): {1}",
+                        this, e);
+                    return;
+                }
 
                 if (receiveResult.EndOfMessage) break;
 
@@ -181,16 +195,13 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
             switch (receiveResult.MessageType)
             {
                 case WebSocketMessageType.Close:
-                    if (client.State is not (WebSocketState.Open or WebSocketState.Connecting))
-                    {
-                        return;
-                    }
-
-                    await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
-                    await DisposeAsync();
+                    _ = Task.Run(() => DisposeAsync(default), default);
                     return;
                 case WebSocketMessageType.Text:
                     OnReceive(socketBuffer.Array);
+                    break;
+                case WebSocketMessageType.Binary:
+                    FastDecodeCbor(socketBuffer.Array);
                     break;
             }
         }
@@ -205,7 +216,7 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
         }
         catch (Exception e)
         {
-            Logger.LogErrorFormat("{0}: Exception from " + nameof(OnReceive) + ": {1}", this, e);
+            Logger.LogErrorFormat("{0}: Failed to JSON-deserialize received message: {1}", this, e);
             return;
         }
 
@@ -220,11 +231,11 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
             case "publish":
                 if (!subscribersByTopic.TryGetValue(message.Topic, out var manager))
                 {
-                    Logger.LogFormat("{0}: Received unknown message from topic '{1}'", this, message.Topic);
+                    //Logger.LogFormat("{0}: Received unknown message from topic '{1}'", this, message.Topic);
                     return;
                 }
 
-                manager.Handle(array);
+                manager.HandleJson(array);
                 break;
 
             case "service_response":
@@ -236,13 +247,71 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
 
                 if (!calledServices.TryGetValue((message.Service, id), out var action))
                 {
-                    Logger.LogFormat("{0}: Received unknown response from service '{1}'", this, message.Service);
+                    //Logger.LogFormat("{0}: Received unknown response from service '{1}'", this, message.Service);
                     return;
                 }
 
-                action(message.Result ? array : null);
+                if (message.Result)
+                {
+                    action(array, null);
+                }
+                else
+                {
+                    try
+                    {
+                        var errorMessage = Utf8Json.JsonSerializer.Deserialize<ServiceResponseErrorMessage>(array);
+                        action(null, errorMessage.Values);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogErrorFormat("{0}: Failed to JSON-deserialize service response: {1}", this, e);
+                        action(null, null);
+                    }
+                }
+
                 break;
+            case "status":
+            {
+                try
+                {
+                    var errorMessage = Utf8Json.JsonSerializer.Deserialize<StatusMessage>(array);
+                    Logger.LogFormat("{0}: Received status message from server: {1}", this, errorMessage.Msg);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogErrorFormat("{0}: Exception from " + nameof(OnReceive) + ": {1}", this, e);
+                }
+
+                break;
+            }
         }
+    }
+
+    void FastDecodeCbor(byte[] array)
+    {
+        var d = new SimpleCborDecoder(array);
+
+        if (d.GetNextMapCount() != 3) return;
+
+        if (!d.CompareNextString("op") || !d.CompareNextString("publish")) return;
+
+        if (!d.CompareNextString("topic") || d.DecodeNextString() is not { } messageTopic) return;
+
+        if (!d.CompareNextString("msg") || d.GetNextMapCount() != 3) return;
+
+        if (!d.CompareNextString("secs") || d.GetNextInt() == null) return;
+
+        if (!d.CompareNextString("nsecs") || d.GetNextInt() == null) return;
+
+        if (!d.CompareNextString("bytes") || d.GetNextByteArraySegment() is not var (msgOffset, msgLength)) return;
+
+        if (!subscribersByTopic.TryGetValue(messageTopic, out var manager))
+        {
+            //Logger.LogFormat("{0}: Received unknown message from topic '{1}'", this, messageTopic);
+            return;
+        }
+
+        manager.HandleRaw(new ReadOnlySpan<byte>(array, msgOffset, msgLength));
     }
 
     internal Task PostAsync(SerializableMessage message, CancellationToken token = default)
@@ -282,6 +351,8 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
         where T : IMessage, new()
     {
         if (topic is null) BuiltIns.ThrowArgumentNull(nameof(topic));
+
+        AssertIsAlive();
 
         string resolvedTopic = ResolveResourceName(topic);
         string messageType = BuiltIns.GetMessageType<T>();
@@ -337,34 +408,40 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
         return PostAsync(message);
     }
 
-    public string Subscribe<T>(string topic, RosCallback<T> callback, out RosbridgeSubscriber<T> subscriber)
+    public string Subscribe<T>(string topic, RosCallback<T> callback, out RosbridgeSubscriber<T> subscriber,
+        IRosbridgeSubscriptionProfile? profile = null)
         where T : IMessage, new()
     {
-        (string id, subscriber) = TaskUtils.RunSync(() => SubscribeAsync(topic, callback));
+        (string id, subscriber) = TaskUtils.RunSync(() => SubscribeAsync(topic, callback, profile));
         return id;
     }
 
-    public string Subscribe<T>(string topic, Action<T> callback, out RosbridgeSubscriber<T> subscriber)
+    public string Subscribe<T>(string topic, Action<T> callback, out RosbridgeSubscriber<T> subscriber,
+        IRosbridgeSubscriptionProfile? profile = null)
         where T : IMessage, new()
     {
-        return Subscribe(topic, new ActionRosCallback<T>(callback), out subscriber);
+        return Subscribe(topic, new ActionRosCallback<T>(callback), out subscriber, profile);
     }
 
     public ValueTask<(string id, RosbridgeSubscriber<T> subscriber)>
-        SubscribeAsync<T>(string topic, Action<T> callback, CancellationToken token = default)
+        SubscribeAsync<T>(string topic, Action<T> callback, IRosbridgeSubscriptionProfile? profile = null,
+            CancellationToken token = default)
         where T : IMessage, new()
     {
-        return SubscribeAsync(topic, new ActionRosCallback<T>(callback), token);
+        return SubscribeAsync(topic, new ActionRosCallback<T>(callback), profile, token);
     }
 
     public async ValueTask<(string id, RosbridgeSubscriber<T> subscriber)>
-        SubscribeAsync<T>(string topic, RosCallback<T> callback, CancellationToken token = default)
+        SubscribeAsync<T>(string topic, RosCallback<T> callback, IRosbridgeSubscriptionProfile? profile = null,
+            CancellationToken token = default)
         where T : IMessage, new()
     {
         if (topic is null) BuiltIns.ThrowArgumentNull(nameof(topic));
         if (callback is null) BuiltIns.ThrowArgumentNull(nameof(callback));
+        AssertIsAlive();
 
-        string messageType = BuiltIns.GetMessageType<T>();
+        var generator = new T();
+        string messageType = generator.RosMessageType;
         string resolvedTopic = ResolveResourceName(topic);
 
         if (subscribersByTopic.TryGetValue(topic, out var existingSubscriber))
@@ -377,16 +454,23 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
             return (validatedSubscriber.Subscribe(callback), validatedSubscriber);
         }
 
-        var subscriber = new RosbridgeSubscriber<T>(this, topic, messageType);
+        var subscriber = new RosbridgeSubscriber<T>(this, topic, messageType, generator.CreateDeserializer());
         subscribersByTopic[resolvedTopic] = subscriber;
         string id = subscriber.Subscribe(callback);
 
-        var message = new GenericMessage
-        {
-            Op = "subscribe",
-            Topic = topic,
-            Type = BuiltIns.GetMessageType<T>()
-        };
+        SerializableMessage message = profile != null
+            ? new FullSubscribeMessage
+            {
+                Topic = topic,
+                Type = messageType,
+                ThrottleRate = profile.ThrottleRate,
+                QueueLength = profile.QueueLength
+            }
+            : new SubscribeMessage
+            {
+                Topic = topic,
+                Type = messageType
+            };
 
         try
         {
@@ -402,16 +486,18 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
     }
 
     async ValueTask<(string id, IRosSubscriber<T> subscriber)> IRosClient.SubscribeAsync<T>(string topic,
-        Action<T> callback, RosTransportHint transportHint, CancellationToken token)
+        Action<T> callback, IRosSubscriptionProfile? profile, CancellationToken token)
     {
-        var (id, subscriber) = await SubscribeAsync(topic, callback, token);
+        var rosbridgeProfile = profile as IRosbridgeSubscriptionProfile;
+        var (id, subscriber) = await SubscribeAsync(topic, callback, rosbridgeProfile, token);
         return (id, subscriber);
     }
 
     async ValueTask<(string id, IRosSubscriber<T> subscriber)> IRosClient.SubscribeAsync<T>(string topic,
-        RosCallback<T> callback, RosTransportHint transportHint, CancellationToken token)
+        RosCallback<T> callback, IRosSubscriptionProfile? profile, CancellationToken token)
     {
-        var (id, subscriber) = await SubscribeAsync(topic, callback, token);
+        var rosbridgeProfile = profile as IRosbridgeSubscriptionProfile;
+        var (id, subscriber) = await SubscribeAsync(topic, callback, rosbridgeProfile, token);
         return (id, subscriber);
     }
 
@@ -468,7 +554,9 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
         where TRequest : IRequest
         where TResponse : IResponse
     {
-        int currentId = currentServiceRequestId++;
+        AssertIsAlive();
+
+        int currentId = Interlocked.Increment(ref currentServiceRequestId);
         string currentIdStr = currentId.ToString();
         var message = new CallServiceMessage<TRequest>
         {
@@ -477,9 +565,9 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
             Args = (TRequest)service.Request
         };
 
-        var tcs = TaskUtils.CreateCompletionSource<IResponse>();
+        var tcs = TaskUtils.CreateCompletionSource<TResponse>();
 
-        void ProcessResponse(byte[]? array)
+        void ProcessResponse(byte[]? array, string? errorMessage)
         {
             if (token.IsCancellationRequested)
             {
@@ -487,9 +575,17 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
                 return;
             }
 
+            if (errorMessage != null)
+            {
+                tcs.TrySetException(new RosbridgeException(
+                    $"Service call to '{serviceName}' failed! Reason: {errorMessage}"));
+                return;
+            }
+
             if (array is null)
             {
-                tcs.TrySetException(new RosbridgeException($"Service call to '{serviceName}' failed!"));
+                tcs.TrySetException(new RosbridgeException(
+                    $"Service call to '{serviceName}' failed! Reason: Not given."));
                 return;
             }
 
@@ -500,7 +596,8 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
                 if (response is null || response.Values is not { } values)
                 {
                     tcs.TrySetException(new RosbridgeException(
-                        $"Service call [{currentIdStr}] returned a null response"));
+                        $"Service call to '{serviceName}' with id {currentIdStr} " +
+                        $"returned a null response"));
                     return;
                 }
 
@@ -508,27 +605,28 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
             }
             catch (Exception e)
             {
-                tcs.TrySetException(new RosbridgeException($"Service call '{serviceName}' failed", e));
+                tcs.TrySetException(new RosbridgeException($"Service call to '{serviceName}' failed!", e));
             }
         }
 
-        calledServices.Add((serviceName, currentId), ProcessResponse);
+        calledServices.TryAdd((serviceName, currentId), ProcessResponse);
 
         // ReSharper disable once UseAwaitUsing
-        using var _ = token.Register(() => tcs.TrySetCanceled(token));
-
-        try
+        using (token.Register(() => tcs.TrySetCanceled(token)))
         {
-            await PostAsync(message, token);
-            service.Response = await tcs.Task;
-        }
-        catch (Exception e)
-        {
-            throw new RosbridgeException($"Service call '{serviceName}' failed", e);
-        }
-        finally
-        {
-            calledServices.Remove((serviceName, currentId));
+            try
+            {
+                await PostAsync(message, token);
+                service.Response = await tcs.Task;
+            }
+            catch (Exception e) when (e is not (RosbridgeException or OperationCanceledException))
+            {
+                throw new RosbridgeException($"Service call '{serviceName}' failed", e);
+            }
+            finally
+            {
+                calledServices.TryRemove((serviceName, currentId), out _);
+            }
         }
     }
 
@@ -552,16 +650,16 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
         return service.Response.Subscribers_;
     }
 
-    async ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsCoreAsync(CancellationToken token)
+    async ValueTask<SubscriberState[]> GetSubscriberStatisticsCoreAsync(CancellationToken token)
     {
-        var tasks = subscribersByTopic.Values.Select(
-            subscriber => subscriber.GetStateAsync(token).AsTask());
+        var tasks = subscribersByTopic.Select(
+            pair => pair.Value.GetStateAsync(token).AsTask());
         var result = await Task.WhenAll(tasks);
         cachedSubscriberStats.Value = result;
         return result;
     }
 
-    public ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsAsync(
+    public ValueTask<SubscriberState[]> GetSubscriberStatisticsAsync(
         CancellationToken token = default)
     {
         return cachedSubscriberStats.TryGet() is { } systemState
@@ -569,21 +667,20 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
             : GetSubscriberStatisticsCoreAsync(token);
     }
 
-    async ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsCoreAsync(CancellationToken token)
+    async ValueTask<PublisherState[]> GetPublisherStatisticsCoreAsync(CancellationToken token)
     {
-        var tasks = publishersByTopic.Values.Select(
-            publisher => publisher.GetStateAsync(token).AsTask());
+        var tasks = publishersByTopic.Select(
+            pair => pair.Value.GetStateAsync(token).AsTask());
         var result = await Task.WhenAll(tasks);
         cachedPublisherStats.Value = result;
         return result;
     }
-    
-    public ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsAsync(CancellationToken token = default)
+
+    public ValueTask<PublisherState[]> GetPublisherStatisticsAsync(CancellationToken token = default)
     {
         return cachedPublisherStats.TryGet() is { } systemState
             ? systemState.AsTaskResult()
             : GetPublisherStatisticsCoreAsync(token);
-        
     }
 
     public async ValueTask<TopicNameType[]> GetSystemPublishedTopicsAsync(CancellationToken token = default)
@@ -641,7 +738,7 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
         return (await GetSystemServiceProvidersAsync(service, token)).Length != 0;
     }
 
-    async ValueTask<string[]> GetSystemNodesAsync(CancellationToken token = default)
+    public async ValueTask<string[]> GetSystemNodesAsync(CancellationToken token = default)
     {
         const string serviceName = "/rosapi/nodes";
         var service = new Nodes();
@@ -688,7 +785,7 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
             ToTopicTuples(subscribers),
             ToTopicTuples(providers)
         );
-        
+
         cachedSystemState.Value = systemState;
         return systemState;
 
@@ -715,6 +812,19 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
     }
     // ------------------
 
+    void AssertIsAlive()
+    {
+        if (runningTs.IsCancellationRequested)
+        {
+            BuiltIns.ThrowObjectDisposed(nameof(RosbridgeClient), "Client is no longer valid");
+        }
+    }
+
+    public override string ToString()
+    {
+        return $"[{nameof(RosbridgeClient)} BridgeUri='{BridgeUri}']";
+    }
+
     public async ValueTask DisposeAsync(CancellationToken token = default)
     {
         if (disposed) return;
@@ -733,9 +843,10 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
             tasks.Add(subscriber.DisposeAsync(token).AwaitNoThrow(this));
         }
 
-        foreach (var serviceCallbacks in calledServices.Values)
+        var serviceCallbacks = calledServices.Values.ToArray();
+        foreach (var serviceCallback in serviceCallbacks)
         {
-            serviceCallbacks(null);
+            serviceCallback(null, "Shutting down client!");
         }
 
         calledServices.Clear();
@@ -743,13 +854,18 @@ public sealed class RosbridgeClient : IRosClient, IAsyncDisposable
         await Task.WhenAll(tasks);
 
         outputWriter.Complete();
+        runningTs.CancelNoThrow(this);
 
-        await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+        if (webSocket.State is WebSocketState.Open or WebSocketState.Connecting)
+        {
+            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", default)
+                .AwaitNoThrow(this);
+        }
 
         await sendQueueTask;
         await receiveQueueTask;
 
-        client.Dispose();
+        webSocket.Dispose();
     }
 }
 
@@ -765,4 +881,10 @@ internal readonly struct Command
         this.tcs = tcs;
         this.token = token;
     }
+}
+
+public interface IRosbridgeSubscriptionProfile : IRosSubscriptionProfile
+{
+    public int ThrottleRate { get; }
+    public int QueueLength { get; }
 }

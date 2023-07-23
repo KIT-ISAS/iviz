@@ -66,6 +66,22 @@ public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB>, ICollec
 
         return array;
     }
+    
+    public List<TB> ToList()
+    {
+        if (Count == 0)
+        {
+            return new List<TB>();
+        }
+
+        var list = new List<TB>(Count);
+        for (int i = 0; i < Count; i++)
+        {
+            list.Add(f(a[i]));
+        }
+
+        return list;
+    }
 
     public void CopyTo(TB[] array, int arrayIndex)
     {

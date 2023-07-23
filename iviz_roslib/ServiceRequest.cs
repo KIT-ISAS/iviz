@@ -50,7 +50,7 @@ internal sealed class ServiceRequest
     public async ValueTask StopAsync(CancellationToken token)
     {
         tcpClient.Close();
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         await task.AwaitNoThrow(2000, this, token);
     }
 
@@ -206,7 +206,7 @@ internal sealed class ServiceRequest
                     break;
             }
 
-            runningTs.Cancel();
+            runningTs.CancelNoThrow(this);
             return;
         }
 

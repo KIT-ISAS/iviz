@@ -24,8 +24,8 @@ public sealed class Ros2Client : IRosClient
         public long ticks;
     }
 
-    Cache<IReadOnlyList<SubscriberState>> cachedSubscriberStats;
-    Cache<IReadOnlyList<PublisherState>> cachedPublisherStats;
+    Cache<SubscriberState[]> cachedSubscriberStats;
+    Cache<PublisherState[]> cachedPublisherStats;
     Cache<SystemState> cachedSystemState;
 
     internal AsyncRclClient Rcl { get; }
@@ -109,49 +109,53 @@ public sealed class Ros2Client : IRosClient
         return subscribersByTopic.TryGetValue(resolvedTopic, out subscriber);
     }
 
+
     public string Subscribe<T>(string topic, RosCallback<T> callback, out Ros2Subscriber<T> subscriber,
-        RosTransportHint transportHint = RosTransportHint.PreferTcp)
+        QosProfile? profile = null)
         where T : IMessage, new()
     {
-        (string id, subscriber) = TaskUtils.RunSync(() => SubscribeAsync(topic, callback, transportHint));
+        (string id, subscriber) = TaskUtils.RunSync(() => SubscribeAsync(topic, callback, profile));
         return id;
     }
 
     public string Subscribe<T>(string topic, Action<T> callback, out Ros2Subscriber<T> subscriber,
-        RosTransportHint transportHint = RosTransportHint.PreferTcp)
+        QosProfile? profile = null)
         where T : IMessage, new()
     {
-        return Subscribe(topic, new ActionRosCallback<T>(callback), out subscriber, transportHint);
+        return Subscribe(topic, new ActionRosCallback<T>(callback), out subscriber, profile);
     }
 
     public ValueTask<(string id, Ros2Subscriber<T> subscriber)>
         SubscribeAsync<T>(string topic, Action<T> callback,
-            RosTransportHint transportHint = RosTransportHint.PreferTcp,
+            QosProfile? profile = null,
             CancellationToken token = default)
         where T : IMessage, new()
     {
-        return SubscribeAsync(topic, new ActionRosCallback<T>(callback), transportHint, token);
+        return SubscribeAsync(topic, new ActionRosCallback<T>(callback), profile, token);
     }
 
-    public ValueTask<(string id, Ros2Subscriber<T> subscriber)>
-        SubscribeAsync<T>(string topic, RosCallback<T> callback,
-            RosTransportHint transportHint = RosTransportHint.PreferTcp,
-            CancellationToken token = default)
-        where T : IMessage, new()
+/*
+public ValueTask<(string id, Ros2Subscriber<T> subscriber)>
+    SubscribeAsync<T>(string topic, RosCallback<T> callback,
+        QosProfile? profile = null,
+        CancellationToken token = default)
+    where T : IMessage, new()
+{
+    var profile = transportHint switch
     {
-        var profile = transportHint switch
-        {
-            RosTransportHint.OnlyUdp or RosTransportHint.PreferUdp => QosProfile.SensorData,
-            RosTransportHint.OnlyTcp or RosTransportHint.PreferTcp => QosProfile.SubscriberDefault,
-            _ => throw new IndexOutOfRangeException()
-        };
+        RosTransportHint.OnlyUdp or RosTransportHint.PreferUdp => QosProfile.SensorData,
+        RosTransportHint.OnlyTcp or RosTransportHint.PreferTcp => QosProfile.SubscriberDefault,
+        _ => throw new IndexOutOfRangeException()
+    };
 
-        return SubscribeAsync(topic, callback, profile, token);
-    }
+    return SubscribeAsync(topic, callback, profile, token);
+}
+*/
+
 
     public async ValueTask<(string id, Ros2Subscriber<T> subscriber)>
         SubscribeAsync<T>(string topic, RosCallback<T> callback,
-            QosProfile profile, CancellationToken token = default)
+            QosProfile? profile = null, CancellationToken token = default)
         where T : IMessage, new()
     {
         if (topic is null) BuiltIns.ThrowArgumentNull(nameof(topic));
@@ -159,11 +163,12 @@ public sealed class Ros2Client : IRosClient
 
         string messageType = BuiltIns.GetMessageType<T>();
         string resolvedTopic = ResolveResourceName(topic);
-        
+
         if (!TryGetSubscriberImpl(resolvedTopic, out var baseSubscriber))
         {
             var subscriber = new Ros2Subscriber<T>(this);
-            var rclSubscriber = await Rcl.SubscribeAsync(resolvedTopic, messageType, subscriber, profile, token);
+            var rclSubscriber = await Rcl.SubscribeAsync(resolvedTopic, messageType, subscriber, 
+                profile ?? QosProfile.SubscriberDefault, token);
             subscriber.Subscriber = rclSubscriber;
 
             subscribersByTopic[resolvedTopic] = subscriber;
@@ -229,15 +234,21 @@ public sealed class Ros2Client : IRosClient
     }
 
     async ValueTask<(string id, IRosSubscriber<T> subscriber)> IRosClient.SubscribeAsync<T>(string topic,
-        Action<T> callback, RosTransportHint transportHint, CancellationToken token)
+        Action<T> callback, IRosSubscriptionProfile? profile, CancellationToken token)
     {
-        return await SubscribeAsync(topic, callback, transportHint, token);
+        var qosProfile = profile is IRos2SubscriptionProfile ros2Profile
+            ? ros2Profile.Profile
+            : QosProfile.SubscriberDefault;
+        return await SubscribeAsync(topic, callback, qosProfile, token);
     }
 
     async ValueTask<(string id, IRosSubscriber<T> subscriber)> IRosClient.SubscribeAsync<T>(string topic,
-        RosCallback<T> callback, RosTransportHint transportHint, CancellationToken token)
+        RosCallback<T> callback, IRosSubscriptionProfile? profile, CancellationToken token)
     {
-        return await SubscribeAsync(topic, callback, transportHint, token);
+        var qosProfile = profile is IRos2SubscriptionProfile ros2Profile
+            ? ros2Profile.Profile
+            : QosProfile.SubscriberDefault;
+        return await SubscribeAsync(topic, callback, qosProfile, token);
     }
 
     internal void RemoveSubscriber(IRosSubscriber subscriber)
@@ -250,13 +261,14 @@ public sealed class Ros2Client : IRosClient
         publishersByTopic.TryRemove(subscriber.Topic, out _);
     }
 
-    ValueTask IRosClient.CallServiceAsync<T>(string serviceName, T service, bool persistent, CancellationToken token)
+    ValueTask IRosClient.CallServiceAsync<TRequest, TResponse>(string serviceName,
+        IService<TRequest, TResponse> service, bool persistent, CancellationToken token)
     {
-        return CallServiceAsync(serviceName, service, persistent, token: token);
+        return CallServiceAsync(serviceName, (IService)service, persistent, token: token);
     }
 
-    public async ValueTask CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
-        QosProfile? profile = null, CancellationToken token = default) where T : IService, new()
+    public async ValueTask CallServiceAsync(string serviceName, IService service, bool persistent = false,
+        QosProfile? profile = null, CancellationToken token = default)
     {
         if (serviceName is null) BuiltIns.ThrowArgumentNull(nameof(serviceName));
         if (service is null) BuiltIns.ThrowArgumentNull(nameof(service));
@@ -267,13 +279,13 @@ public sealed class Ros2Client : IRosClient
 
         string resolvedServiceName = ResolveResourceName(serviceName);
         string serviceType = service.RosServiceType;
-        
+
         token.ThrowIfCancellationRequested();
 
         Ros2ServiceCaller serviceCaller;
         if (!callersByService.TryGetValue(resolvedServiceName, out var existingCaller))
         {
-            var generator = (IDeserializable<IResponse>)new T().Response;
+            var generator = (IDeserializable<IResponse>)service.Generate().Response;
             serviceCaller = new Ros2ServiceCaller(this, generator);
             var rclServiceClient =
                 await Rcl.CreateServiceClientAsync(resolvedServiceName, serviceType, serviceCaller,
@@ -374,18 +386,18 @@ public sealed class Ros2Client : IRosClient
             : default;
     }
 
-    public IReadOnlyList<SubscriberState> GetSubscriberStatistics() => TaskUtils.RunSync(GetSubscriberStatisticsAsync);
+    public SubscriberState[] GetSubscriberStatistics() => TaskUtils.RunSync(GetSubscriberStatisticsAsync);
 
-    public IReadOnlyList<PublisherState> GetPublisherStatistics() => TaskUtils.RunSync(GetPublisherStatisticsAsync);
+    public PublisherState[] GetPublisherStatistics() => TaskUtils.RunSync(GetPublisherStatisticsAsync);
 
-    public ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsAsync(CancellationToken token = default)
+    public ValueTask<SubscriberState[]> GetSubscriberStatisticsAsync(CancellationToken token = default)
     {
         return cachedSubscriberStats.ticks > Rcl.GraphChangedTicks && cachedSubscriberStats.cache is { } stats
             ? stats.AsTaskResult()
             : GetSubscriberStatisticsCoreAsync(token);
     }
 
-    async ValueTask<IReadOnlyList<SubscriberState>> GetSubscriberStatisticsCoreAsync(CancellationToken token)
+    async ValueTask<SubscriberState[]> GetSubscriberStatisticsCoreAsync(CancellationToken token)
     {
         var subscribers = subscribersByTopic.Values.ToArray();
         cachedSubscriberStats.ticks = DateTime.Now.Ticks;
@@ -393,14 +405,14 @@ public sealed class Ros2Client : IRosClient
         return cachedSubscriberStats.cache;
     }
 
-    public ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsAsync(CancellationToken token = default)
+    public ValueTask<PublisherState[]> GetPublisherStatisticsAsync(CancellationToken token = default)
     {
         return cachedPublisherStats.ticks > Rcl.GraphChangedTicks && cachedPublisherStats.cache is { } stats
             ? stats.AsTaskResult()
             : GetPublisherStatisticsCoreAsync(token);
     }
 
-    async ValueTask<IReadOnlyList<PublisherState>> GetPublisherStatisticsCoreAsync(CancellationToken token)
+    async ValueTask<PublisherState[]> GetPublisherStatisticsCoreAsync(CancellationToken token)
     {
         var publishers = publishersByTopic.Values.ToArray();
         cachedPublisherStats.ticks = DateTime.Now.Ticks;
@@ -528,7 +540,7 @@ public sealed class Ros2Client : IRosClient
 
         await Rcl.DisposeAsync(token);
     }
-    
+
     #region parameters
 
     string[] IRosClient.GetParameterNames() => GetParameterNames();
@@ -542,4 +554,9 @@ public sealed class Ros2Client : IRosClient
         GetParameterAsync(key, token: token);
 
     #endregion
+}
+
+public interface IRos2SubscriptionProfile : IRosSubscriptionProfile
+{
+    QosProfile Profile { get; }
 }

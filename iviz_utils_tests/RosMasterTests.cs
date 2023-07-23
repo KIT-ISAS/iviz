@@ -199,7 +199,7 @@ public class RosMasterTests
         await Task.Delay(1000);
 
         var state = subscriber.Subscriber.GetState();
-        Assert.True(state.Receivers.Count > 0);
+        Assert.True(state.Receivers.Length > 0);
 
         var receiverState = (Ros1ReceiverState)state.Receivers[0];
         Assert.False(receiverState.IsAlive);

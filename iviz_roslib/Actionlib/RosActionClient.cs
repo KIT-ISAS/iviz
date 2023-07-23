@@ -69,7 +69,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable,
             return; // not started
         }
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         goalPublisher!.Dispose();
         cancelPublisher!.Dispose();
         feedbackSubscriber!.Dispose();
@@ -86,7 +86,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable,
             return; // not started
         }
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         await goalPublisher.DisposeAsync();
         await cancelPublisher!.DisposeAsync();
         await feedbackSubscriber!.DisposeAsync();

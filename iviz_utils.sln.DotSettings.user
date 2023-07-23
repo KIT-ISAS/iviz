@@ -3,6 +3,9 @@
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003ASocket_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2021_002E2_003Fresharper_002Dhost_003FSourcesCache_003Fd3525442f0c2430f8599c032103e0deb8f000_003F1E_003FSocket_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/PredefinedNamingRules/=PrivateConstants/@EntryIndexedValue">&lt;Policy Inspect="True" Prefix="" Suffix="" Style="AaBb_AaBb" /&gt;</s:String>
+	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
+  &lt;Assembly Path="/Users/akzeac/.nuget/packages/jil/2.17.0/lib/netstandard2.0/Jil.dll" /&gt;
+&lt;/AssemblyExplorer&gt;</s:String>
 	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/CustomBuildToolPath/@EntryValue">C:\Program Files\dotnet\sdk\7.0.100-rc.1.22431.12\MSBuild.dll</s:String>
 	
 	
@@ -79,8 +82,11 @@
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/Initialized/@EntryValue">True</s:Boolean>
 	
 	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=817471d7_002D0209_002D4429_002D98ba_002D44291b25384a_0023iviz_005Fmsgs_005Fwrapper/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=eca2bafd_002Dc030_002D42b7_002D8742_002D3a072b6fb88f_0023iviz_005Fremote_005Flib/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=rosapi/@EntryIndexedValue">True</s:Boolean>
 	
 	
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Rosbag/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Rosbridge/@EntryIndexedValue">True</s:Boolean>
 	
 	</wpf:ResourceDictionary>

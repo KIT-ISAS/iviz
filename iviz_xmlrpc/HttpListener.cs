@@ -145,7 +145,7 @@ public sealed class HttpListener
         if (disposed) return;
         disposed = true;
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
 
         if (!started)
         {

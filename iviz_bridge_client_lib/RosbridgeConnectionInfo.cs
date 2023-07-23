@@ -1,7 +1,7 @@
 using System.Runtime.Serialization;
 using Iviz.Msgs;
 
-namespace iviz_bridge_client;
+namespace Iviz.Bridge.Client;
 
 [DataContract]
 internal sealed class RosbridgeConnectionInfo : IRosConnection

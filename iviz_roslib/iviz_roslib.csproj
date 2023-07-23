@@ -11,13 +11,13 @@
   </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\iviz_dynamic_msg_lib\iviz_dynamic_msg_lib.csproj"/>
-        <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj"/>
-        <ProjectReference Include="..\iviz_msgs_gen_lib\iviz_msgs_gen_lib.csproj"/>
-        <ProjectReference Include="..\iviz_rosclient\iviz_rosclient.csproj"/>
-        <ProjectReference Include="..\iviz_xmlrpc\iviz_xmlrpc.csproj"/>
+        <ProjectReference Include="..\iviz_dynamic_msg_lib\iviz_dynamic_msg_lib.csproj" />
+        <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
+        <ProjectReference Include="..\iviz_msgs_gen_lib\iviz_msgs_gen_lib.csproj" />
+        <ProjectReference Include="..\iviz_rosclient\iviz_rosclient.csproj" />
+        <ProjectReference Include="..\iviz_xmlrpc\iviz_xmlrpc.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <Folder Include="POCOs\"/>
+        <Folder Include="POCOs\" />
     </ItemGroup>
 </Project>

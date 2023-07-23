@@ -36,7 +36,7 @@ namespace Iviz.MsgsGen
         public bool ClassIsBlittable => ClassInfo?.IsBlittable ?? ClassInfo.IsClassBlittable(RosClassType);
         public bool ClassHasFixedSize => ClassInfo is { HasFixedSize: true };
 
-        static readonly HashSet<string> Keywords = new HashSet<string>
+        static readonly HashSet<string> Keywords = new()
         {
             "default",
             "byte",
@@ -74,9 +74,9 @@ namespace Iviz.MsgsGen
                 CsFieldName += "_"; // C# forbids fields with the same name as the class
             }
 
-            if (Keywords.Contains(fieldName))
+            if (Keywords.Contains(CsFieldName))
             {
-                CsFieldName = $"@{fieldName}";
+                CsFieldName = $"@{CsFieldName}";
             }
 
             int bracketLeft = rosClassToken.IndexOf('[');

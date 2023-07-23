@@ -8,7 +8,7 @@ namespace Iviz.Bridge;
 
 internal abstract class Subscription : IdCollection
 {
-    public abstract ValueTask<bool> DisposeAsync();
+    public abstract ValueTask DisposeAsync();
 
     public static Subscription? CreateForType(string msgType, string topic, IRosClient client, SocketConnection parent)
     {
@@ -43,8 +43,8 @@ internal sealed class Subscription<T> : Subscription where T : IMessage, new()
         parent.MessageCallback(subscriberMessage);
     }
 
-    public override ValueTask<bool> DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
-        return subscriber.UnsubscribeAsync(subscriberId);
+        await subscriber.UnsubscribeAsync(subscriberId);
     }
 }

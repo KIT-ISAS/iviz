@@ -8,7 +8,7 @@ namespace Iviz.Bridge;
 
 public abstract class Advertisement : IdCollection
 {
-    public abstract ValueTask<bool> DisposeAsync();
+    public abstract ValueTask DisposeAsync();
     public abstract void Publish(byte[] data);
 
     public static Advertisement? CreateForType(string msgType, string topic, IRosClient client, SocketConnection parent)
@@ -22,19 +22,20 @@ public abstract class Advertisement : IdCollection
 
 public sealed class Advertisement<T> : Advertisement where T : IMessage, new()
 {
-    readonly IRosPublisher<T> publisher;
+    readonly BaseRosPublisher<T> publisher;
     readonly string publisherId;
     readonly SocketConnection parent;
 
     public Advertisement(string topic, IRosClient client, SocketConnection parent)
     {
-        publisherId = client.Advertise(topic, out publisher);
+        publisherId = client.Advertise(topic, out IRosPublisher<T> newPublisher);
+        publisher = (BaseRosPublisher<T>) newPublisher;
         this.parent = parent;
     }
 
-    public override ValueTask<bool> DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
-        return publisher.UnadvertiseAsync(publisherId);
+        await publisher.UnadvertiseAsync(publisherId);
     }
 
     public override void Publish(byte[] data)

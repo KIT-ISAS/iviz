@@ -11,14 +11,12 @@ public sealed class Ros2Publisher<TMessage> : BaseRosPublisher<TMessage>, IRos2P
 {
     readonly Ros2Client client;
     readonly RclPublisher publisher;
-    readonly List<string> ids = new();
     readonly Serializer<TMessage> serializer;
 
     readonly SemaphoreSlim signal = new(0);
     readonly ConcurrentQueue<TMessage> queue = new();
     readonly Task task;
 
-    int totalPublishers;
     bool disposed;
 
     int numSent;
@@ -57,15 +55,6 @@ public sealed class Ros2Publisher<TMessage> : BaseRosPublisher<TMessage>, IRos2P
         }
     }
 
-    public override string Advertise()
-    {
-        AssertIsAlive();
-
-        string id = GenerateId();
-        ids.Add(id);
-        return id;
-    }
-
     public override bool Unadvertise(string id, CancellationToken token = default)
     {
         if (id is null) BuiltIns.ThrowArgumentNull(nameof(id));
@@ -98,24 +87,6 @@ public sealed class Ros2Publisher<TMessage> : BaseRosPublisher<TMessage>, IRos2P
         }
 
         return removed;
-    }
-
-    string GenerateId()
-    {
-        int currentCount = Interlocked.Increment(ref totalPublishers);
-        int lastId = currentCount - 1;
-        return lastId == 0 ? Topic : $"{Topic}-{lastId.ToString()}";
-    }
-
-    bool RemoveId(string topicId)
-    {
-        return ids.Remove(topicId);
-    }
-
-    public override bool ContainsId(string id)
-    {
-        if (id is null) BuiltIns.ThrowArgumentNull(nameof(id));
-        return ids.Contains(id);
     }
 
     public override PublisherState GetState() => TaskUtils.RunSync(GetStateAsync);
@@ -163,7 +134,7 @@ public sealed class Ros2Publisher<TMessage> : BaseRosPublisher<TMessage>, IRos2P
         if (disposed) return;
         disposed = true;
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
 
         await task.AwaitNoThrow(2000, this, token);
         await client.Rcl.DisposePublisher(publisher, default).AwaitNoThrow(this);

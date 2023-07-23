@@ -1,18 +1,19 @@
 using System;
 using System.Buffers;
+using System.Runtime.Serialization;
 using System.Threading;
 
 namespace Iviz.Tools;
 
-public sealed class SharedRent : IDisposable 
+public sealed class SharedRent : IDisposable
 {
     static SharedRent? empty;
     public static SharedRent Empty => empty ??= new SharedRent(0);
 
     volatile int refCount;
 
-    public readonly int Length;
-    public readonly byte[] Array;
+    [IgnoreDataMember] public readonly int Length;
+    [IgnoreDataMember] public readonly byte[] Array;
     readonly bool isOwn;
 
     public SharedRent(int length)
@@ -51,15 +52,11 @@ public sealed class SharedRent : IDisposable
 
     public void Dispose()
     {
-        if (Interlocked.Decrement(ref refCount) != 0)
-        {
-            return;
-        }
+        if (!isOwn || Array.Length == 0) return;
 
-        if (isOwn && Array.Length != 0)
-        {
-            ArrayPool<byte>.Shared.Return(Array);
-        }
+        if (Interlocked.Decrement(ref refCount) != 0) return;
+
+        ArrayPool<byte>.Shared.Return(Array);
     }
 
     public override string ToString() => $"[{nameof(SharedRent)} Type=byte Length={Length.ToString()}]";

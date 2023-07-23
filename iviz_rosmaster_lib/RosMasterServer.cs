@@ -94,7 +94,7 @@ public sealed class RosMasterServer : IDisposable
     {
         if (disposed) return;
         disposed = true;
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         backgroundTask?.WaitNoThrow(2000, this);
     }
 
@@ -103,7 +103,7 @@ public sealed class RosMasterServer : IDisposable
         if (disposed) return;
         disposed = true;
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         if (backgroundTask != null)
         {
             await backgroundTask.AwaitNoThrow(2000, this, default);
@@ -150,7 +150,7 @@ public sealed class RosMasterServer : IDisposable
         }
         finally
         {
-            runningTs.Cancel();
+            runningTs.CancelNoThrow(this);
             Logger.LogDebugFormat("{0}: Leaving thread.", this);
 
             if (startTask != null)

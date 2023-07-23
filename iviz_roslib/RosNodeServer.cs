@@ -61,7 +61,7 @@ internal sealed class RosNodeServer
         if (disposed) return;
         disposed = true;
 
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         await listener.DisposeAsync().AwaitNoThrow(this);
         await task.AwaitNoThrow(2000, this);
     }

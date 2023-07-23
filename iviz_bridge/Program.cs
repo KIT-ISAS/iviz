@@ -82,14 +82,10 @@ static class Program
         WebSocketContext? webSocketContext;
         try
         {
-            // When calling `AcceptWebSocketAsync` the negotiated subprotocol must be specified.
-            // This sample assumes that no subprotocol was requested. 
             webSocketContext = await listenerContext.AcceptWebSocketAsync(subProtocol: null);
         }
         catch
         {
-            // The upgrade process failed somehow.
-            // For simplicity lets assume it was a failure on the part of the server and indicate this using 500.
             listenerContext.Response.StatusCode = 500;
             listenerContext.Response.Close();
             return;
@@ -101,17 +97,11 @@ static class Program
 
         try
         {
-            //### Receiving
-            // Define a receive buffer to hold data received on the WebSocket connection. The buffer will be reused as we only need to hold on to the data
-            // long enough to send it back to the sender.
-
-            // While the WebSocket connection remains open run a simple loop that receives data and sends it back.
             while (webSocket.State == WebSocketState.Open)
             {
                 ValueWebSocketReceiveResult receiveResult;
 
                 int offset = 0;
-
                 while (true)
                 {
                     receiveResult =
@@ -139,9 +129,6 @@ static class Program
         }
         catch (Exception e)
         {
-            // Just log any exceptions to the console.
-            // Pretty much any exception that occurs when calling `SendAsync`/`ReceiveAsync`/`CloseAsync` is
-            // unrecoverable in that it will abort the connection and leave the `WebSocket` instance in an unusable state.
             Console.WriteLine("Exception: {0}", e);
         }
     }

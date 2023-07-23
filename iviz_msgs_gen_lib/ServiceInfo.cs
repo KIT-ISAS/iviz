@@ -22,6 +22,12 @@ namespace Iviz.MsgsGen
 
         string? md5;
 
+        public string RosPackage { get; }
+        public string CsPackage { get; }
+        public string Name { get; }
+        public string CsName { get; }
+        public string FullRosName => $"{RosPackage}/{Name}";
+        
         public ServiceInfo(string package, string path)
         {
             if (package == null)
@@ -43,7 +49,12 @@ namespace Iviz.MsgsGen
 
             RosPackage = package;
             CsPackage = MsgParser.CsIfy(package);
+            
             Name = Path.GetFileNameWithoutExtension(path);
+            
+            CsName = Name;
+            if (ClassInfo.IvizCsIdentifiers.Contains(Name)) CsName += "_";
+            
             string[] lines = File.ReadAllLines(path);
             //File.ReadAllText(path);
 
@@ -60,11 +71,6 @@ namespace Iviz.MsgsGen
             variablesReq = elementsReq.OfType<VariableElement>().ToArray();
             variablesResp = elementsResp.OfType<VariableElement>().ToArray();
         }
-
-        public string RosPackage { get; }
-        public string CsPackage { get; }
-        public string Name { get; }
-        public string FullRosName => $"{RosPackage}/{Name}";
 
         internal void ResolveClasses(PackageInfo packageInfo)
         {
@@ -210,41 +216,41 @@ namespace Iviz.MsgsGen
             return new[]
             {
                 "/// Request message.",
-                $"[DataMember] public {Name}Request Request;",
+                $"[DataMember] public {CsName}Request Request;",
                 "",
                 "/// Response message.",
-                $"[DataMember] public {Name}Response Response;",
+                $"[DataMember] public {CsName}Response Response;",
                 "",
                 "/// Empty constructor.",
-                $"public {Name}()",
+                $"public {CsName}()",
                 "{",
                 fixedSizeReq == 0
-                    ? $"    Request = {Name}Request.Singleton;"
-                    : $"    Request = new {Name}Request();",
+                    ? $"    Request = {CsName}Request.Singleton;"
+                    : $"    Request = new {CsName}Request();",
                 fixedSizeResp == 0
-                    ? $"    Response = {Name}Response.Singleton;"
-                    : $"    Response = new {Name}Response();",
+                    ? $"    Response = {CsName}Response.Singleton;"
+                    : $"    Response = new {CsName}Response();",
                 "}",
                 "",
                 "/// Setter constructor.",
-                $"public {Name}({Name}Request request)",
+                $"public {CsName}({CsName}Request request)",
                 "{",
                 "    Request = request;",
                 fixedSizeResp == 0
-                    ? $"    Response = {Name}Response.Singleton;"
-                    : $"    Response = new {Name}Response();",
+                    ? $"    Response = {CsName}Response.Singleton;"
+                    : $"    Response = new {CsName}Response();",
                 "}",
                 "",
                 "IRequest IService.Request",
                 "{",
                 "    get => Request;",
-                $"    set => Request = ({Name}Request)value;",
+                $"    set => Request = ({CsName}Request)value;",
                 "}",
                 "",
                 "IResponse IService.Response",
                 "{",
                 "    get => Response;",
-                $"    set => Response = ({Name}Response)value;",
+                $"    set => Response = ({CsName}Response)value;",
                 "}",
                 "",
                 //"string IService.RosType => RosServiceType;",
@@ -259,7 +265,7 @@ namespace Iviz.MsgsGen
                 //$"[Preserve] public const string RosMd5Sum = {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};",
                 $"public string RosMd5Sum => {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};",
                 "",
-                $"public IService Generate() => new {Name}();",
+                $"public IService Generate() => new {CsName}();",
                 "",
                 "public override string ToString() => Extensions.ToString(this);",
             };
@@ -276,7 +282,7 @@ namespace Iviz.MsgsGen
             str.AppendNewLine($"namespace Iviz.Msgs.{CsPackage}");
             str.AppendNewLine("{");
             str.AppendNewLine($"    [DataContract]");
-            str.AppendNewLine($"    public sealed class {Name} : IService<{Name}Request, {Name}Response>");
+            str.AppendNewLine($"    public sealed class {CsName} : IService<{CsName}Request, {CsName}Response>");
             str.AppendNewLine("    {");
 
             IEnumerable<string> mainClassLines = CreateServiceContent();
@@ -289,7 +295,7 @@ namespace Iviz.MsgsGen
             str.AppendNewLine();
 
             IEnumerable<string> linesReq =
-                CreateClassContent(elementsReq, variablesReq, Name, fixedSizeReq, fixedRos2SizeReq, true);
+                CreateClassContent(elementsReq, variablesReq, CsName, fixedSizeReq, fixedRos2SizeReq, true);
             foreach (string entry in linesReq)
             {
                 str.Append("    ").AppendNewLine(entry);
@@ -297,7 +303,7 @@ namespace Iviz.MsgsGen
 
             str.AppendNewLine();
 
-            IEnumerable<string> linesResp = CreateClassContent(elementsResp, variablesResp, Name, fixedSizeResp,
+            IEnumerable<string> linesResp = CreateClassContent(elementsResp, variablesResp, CsName, fixedSizeResp,
                 fixedRos2SizeResp, false);
             foreach (string entry in linesResp)
             {

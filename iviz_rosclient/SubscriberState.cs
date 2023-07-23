@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using Iviz.Roslib.Utils;
 
@@ -17,18 +18,14 @@ public class SubscriberState : JsonToString
 {
     [DataMember] public string Topic { get; }
     [DataMember] public string Type { get; }
-    [DataMember] public IReadOnlyList<string> SubscriberIds { get; }
-    [DataMember] public IReadOnlyList<ReceiverState> Receivers { get; }
+    [DataMember] public string[] SubscriberIds { get; }
+    [DataMember] public ReceiverState[] Receivers { get; }
 
-    public SubscriberState(string topic, string type, IReadOnlyList<string> topicIds, IReadOnlyList<ReceiverState> receivers)
+    public SubscriberState(string topic, string type, IEnumerable<string> topicIds, IEnumerable<ReceiverState> receivers)
     {
         Topic = topic;
         Type = type;
-        SubscriberIds = topicIds;
-        Receivers = receivers;
+        SubscriberIds = topicIds.ToArray();
+        Receivers = receivers.ToArray();
     }
-
-    public void Deconstruct(out string topic, out string type, out IReadOnlyList<string> subscriberIds,
-        out IReadOnlyList<ReceiverState> receivers)
-        => (topic, type, subscriberIds, receivers) = (Topic, Type, SubscriberIds, Receivers);
 }

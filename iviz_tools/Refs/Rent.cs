@@ -121,6 +121,7 @@ public readonly struct Rent : IDisposable
     public ReadOnlySpan<byte> AsReadOnlySpan() => new(Array, 0, Length);
     public Span<byte> Slice(int start, int count) => new(Array, start, count);
     public Memory<byte> AsMemory() => new(Array, 0, Length);
+    public ReadOnlyMemory<byte> AsReadOnlyMemory() => new(Array, 0, Length);
     public RentEnumerator<byte> GetEnumerator() => new(Array, Length);
     public Span<byte> this[Range range] => AsSpan()[range];
     public Rent Resize(int newLength) => new(Array, newLength);

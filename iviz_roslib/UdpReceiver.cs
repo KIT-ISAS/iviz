@@ -149,7 +149,7 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
         if (disposed) return;
         disposed = true;
         
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
         UdpClient.Dispose();
 
         await task.AwaitNoThrow(DisposeTimeoutInMs, this, token);
@@ -186,7 +186,7 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
 
         Status = ReceiverStatus.Dead;
         UdpClient.Dispose();
-        runningTs.Cancel();
+        runningTs.CancelNoThrow(this);
 
         Logger.LogDebugFormat("{0}: Stopped!", this);
     }
