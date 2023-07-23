@@ -58,6 +58,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
         }
     
         [IgnoreDataMember]

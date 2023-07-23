@@ -108,8 +108,6 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Title, nameof(Title));
-            BuiltIns.ThrowIfNull(Command, nameof(Command));
         }
     
         [IgnoreDataMember]

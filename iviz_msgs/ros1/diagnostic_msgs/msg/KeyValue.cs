@@ -59,8 +59,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Key, nameof(Key));
-            BuiltIns.ThrowIfNull(Value, nameof(Value));
         }
     
         [IgnoreDataMember]

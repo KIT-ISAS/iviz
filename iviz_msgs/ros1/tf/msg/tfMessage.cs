@@ -83,6 +83,7 @@ namespace Iviz.Msgs.Tf
         public void RosValidate()
         {
             BuiltIns.ThrowIfNull(Transforms, nameof(Transforms));
+            foreach (var msg in Transforms) msg.RosValidate();
         }
     
         [IgnoreDataMember]

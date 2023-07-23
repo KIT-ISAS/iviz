@@ -183,10 +183,13 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(JointNames, nameof(JointNames));
             BuiltIns.ThrowIfNull(Transforms, nameof(Transforms));
             BuiltIns.ThrowIfNull(Twist, nameof(Twist));
+            foreach (var msg in Twist) msg.RosValidate();
             BuiltIns.ThrowIfNull(Wrench, nameof(Wrench));
+            foreach (var msg in Wrench) msg.RosValidate();
         }
     
         [IgnoreDataMember]

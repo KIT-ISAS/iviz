@@ -91,8 +91,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(MapUuid, nameof(MapUuid));
             BuiltIns.ThrowIfNull(Features, nameof(Features));
+            foreach (var msg in Features) msg.RosValidate();
         }
     
         [IgnoreDataMember]

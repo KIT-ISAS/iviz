@@ -185,12 +185,12 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Name, nameof(Name));
-            BuiltIns.ThrowIfNull(Filename, nameof(Filename));
-            BuiltIns.ThrowIfNull(OrientationHint, nameof(OrientationHint));
             BuiltIns.ThrowIfNull(Meshes, nameof(Meshes));
+            foreach (var msg in Meshes) msg.RosValidate();
             BuiltIns.ThrowIfNull(Materials, nameof(Materials));
+            foreach (var msg in Materials) msg.RosValidate();
             BuiltIns.ThrowIfNull(Nodes, nameof(Nodes));
+            foreach (var msg in Nodes) msg.RosValidate();
         }
     
         [IgnoreDataMember]

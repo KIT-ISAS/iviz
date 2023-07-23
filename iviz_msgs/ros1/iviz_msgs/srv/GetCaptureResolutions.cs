@@ -189,8 +189,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Message, nameof(Message));
             BuiltIns.ThrowIfNull(Resolutions, nameof(Resolutions));
+            foreach (var msg in Resolutions) msg.RosValidate();
         }
     
         [IgnoreDataMember]

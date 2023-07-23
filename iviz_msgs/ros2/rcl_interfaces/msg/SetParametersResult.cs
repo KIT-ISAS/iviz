@@ -58,7 +58,6 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Reason, nameof(Reason));
         }
     
         [IgnoreDataMember]

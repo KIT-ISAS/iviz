@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MeshMsgs
         // Cluster
         [DataMember (Name = "cluster")] public MeshFaceCluster Cluster;
         // overwrite existing labeled faces
-        [DataMember (Name = "override")] public bool @override;
+        [DataMember (Name = "override")] public bool Override;
     
         public MeshFaceClusterStamped()
         {
@@ -23,12 +23,12 @@ namespace Iviz.Msgs.MeshMsgs
             Cluster = new MeshFaceCluster();
         }
         
-        public MeshFaceClusterStamped(in StdMsgs.Header Header, string Uuid, MeshFaceCluster Cluster, bool @override)
+        public MeshFaceClusterStamped(in StdMsgs.Header Header, string Uuid, MeshFaceCluster Cluster, bool Override)
         {
             this.Header = Header;
             this.Uuid = Uuid;
             this.Cluster = Cluster;
-            this.@override = @override;
+            this.Override = Override;
         }
         
         public MeshFaceClusterStamped(ref ReadBuffer b)
@@ -36,7 +36,7 @@ namespace Iviz.Msgs.MeshMsgs
             Header = new StdMsgs.Header(ref b);
             Uuid = b.DeserializeString();
             Cluster = new MeshFaceCluster(ref b);
-            b.Deserialize(out @override);
+            b.Deserialize(out Override);
         }
         
         public MeshFaceClusterStamped(ref ReadBuffer2 b)
@@ -45,7 +45,7 @@ namespace Iviz.Msgs.MeshMsgs
             b.Align4();
             Uuid = b.DeserializeString();
             Cluster = new MeshFaceCluster(ref b);
-            b.Deserialize(out @override);
+            b.Deserialize(out Override);
         }
         
         public MeshFaceClusterStamped RosDeserialize(ref ReadBuffer b) => new MeshFaceClusterStamped(ref b);
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.MeshMsgs
             Header.RosSerialize(ref b);
             b.Serialize(Uuid);
             Cluster.RosSerialize(ref b);
-            b.Serialize(@override);
+            b.Serialize(Override);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
@@ -66,13 +66,12 @@ namespace Iviz.Msgs.MeshMsgs
             b.Align4();
             b.Serialize(Uuid);
             Cluster.RosSerialize(ref b);
-            b.Serialize(@override);
+            b.Serialize(Override);
         }
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Uuid, nameof(Uuid));
-            BuiltIns.ThrowIfNull(Cluster, nameof(Cluster));
+            Header.RosValidate();
             Cluster.RosValidate();
         }
     
@@ -98,7 +97,7 @@ namespace Iviz.Msgs.MeshMsgs
             size = WriteBuffer2.Align4(size);
             size = WriteBuffer2.AddLength(size, Uuid);
             size = Cluster.AddRos2MessageLength(size);
-            size += 1; // @override
+            size += 1; // Override
             return size;
         }
     

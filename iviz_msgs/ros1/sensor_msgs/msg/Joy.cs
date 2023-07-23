@@ -109,6 +109,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Axes, nameof(Axes));
             BuiltIns.ThrowIfNull(Buttons, nameof(Buttons));
         }

@@ -104,8 +104,10 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(JointNames, nameof(JointNames));
             BuiltIns.ThrowIfNull(Points, nameof(Points));
+            foreach (var msg in Points) msg.RosValidate();
         }
     
         [IgnoreDataMember]

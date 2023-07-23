@@ -140,10 +140,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(VizId, nameof(VizId));
-            BuiltIns.ThrowIfNull(Id, nameof(Id));
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Trajectory, nameof(Trajectory));
-            BuiltIns.ThrowIfNull(ColliderId, nameof(ColliderId));
         }
     
         [IgnoreDataMember]

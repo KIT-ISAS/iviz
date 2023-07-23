@@ -84,6 +84,7 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosValidate()
         {
             BuiltIns.ThrowIfNull(Array, nameof(Array));
+            foreach (var msg in Array) msg.RosValidate();
         }
     
         [IgnoreDataMember]

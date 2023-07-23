@@ -140,7 +140,6 @@ namespace Iviz.Msgs.Tf
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(DotGraph, nameof(DotGraph));
         }
     
         [IgnoreDataMember]

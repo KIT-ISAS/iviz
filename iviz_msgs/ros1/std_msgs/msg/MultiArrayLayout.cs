@@ -115,6 +115,7 @@ namespace Iviz.Msgs.StdMsgs
         public void RosValidate()
         {
             BuiltIns.ThrowIfNull(Dim, nameof(Dim));
+            foreach (var msg in Dim) msg.RosValidate();
         }
     
         [IgnoreDataMember]

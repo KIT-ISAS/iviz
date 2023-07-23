@@ -52,7 +52,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(VectorField, nameof(VectorField));
+            Header.RosValidate();
             VectorField.RosValidate();
         }
     

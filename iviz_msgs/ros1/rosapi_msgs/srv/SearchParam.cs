@@ -4,90 +4,90 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosapiMsgs
 {
     [DataContract]
-    public sealed class TopicType : IService<TopicTypeRequest, TopicTypeResponse>
+    public sealed class SearchParam : IService<SearchParamRequest, SearchParamResponse>
     {
         /// Request message.
-        [DataMember] public TopicTypeRequest Request;
+        [DataMember] public SearchParamRequest Request;
         
         /// Response message.
-        [DataMember] public TopicTypeResponse Response;
+        [DataMember] public SearchParamResponse Response;
         
         /// Empty constructor.
-        public TopicType()
+        public SearchParam()
         {
-            Request = new TopicTypeRequest();
-            Response = new TopicTypeResponse();
+            Request = new SearchParamRequest();
+            Response = new SearchParamResponse();
         }
         
         /// Setter constructor.
-        public TopicType(TopicTypeRequest request)
+        public SearchParam(SearchParamRequest request)
         {
             Request = request;
-            Response = new TopicTypeResponse();
+            Response = new SearchParamResponse();
         }
         
         IRequest IService.Request
         {
             get => Request;
-            set => Request = (TopicTypeRequest)value;
+            set => Request = (SearchParamRequest)value;
         }
         
         IResponse IService.Response
         {
             get => Response;
-            set => Response = (TopicTypeResponse)value;
+            set => Response = (SearchParamResponse)value;
         }
         
-        public const string ServiceType = "rosapi_msgs/TopicType";
+        public const string ServiceType = "rosapi_msgs/SearchParam";
         
         public string RosServiceType => ServiceType;
         
-        public string RosMd5Sum => "0d30b3f53a0fd5036523a7141e524ddf";
+        public string RosMd5Sum => "dfadc39f113c1cc6d7759508d8461d5a";
         
-        public IService Generate() => new TopicType();
+        public IService Generate() => new SearchParam();
         
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class TopicTypeRequest : IRequest<TopicType, TopicTypeResponse>, IDeserializable<TopicTypeRequest>
+    public sealed class SearchParamRequest : IRequest<SearchParam, SearchParamResponse>, IDeserializable<SearchParamRequest>
     {
-        [DataMember (Name = "topic")] public string Topic;
+        [DataMember (Name = "name")] public string Name;
     
-        public TopicTypeRequest()
+        public SearchParamRequest()
         {
-            Topic = "";
+            Name = "";
         }
         
-        public TopicTypeRequest(string Topic)
+        public SearchParamRequest(string Name)
         {
-            this.Topic = Topic;
+            this.Name = Name;
         }
         
-        public TopicTypeRequest(ref ReadBuffer b)
+        public SearchParamRequest(ref ReadBuffer b)
         {
-            Topic = b.DeserializeString();
+            Name = b.DeserializeString();
         }
         
-        public TopicTypeRequest(ref ReadBuffer2 b)
+        public SearchParamRequest(ref ReadBuffer2 b)
         {
             b.Align4();
-            Topic = b.DeserializeString();
+            Name = b.DeserializeString();
         }
         
-        public TopicTypeRequest RosDeserialize(ref ReadBuffer b) => new TopicTypeRequest(ref b);
+        public SearchParamRequest RosDeserialize(ref ReadBuffer b) => new SearchParamRequest(ref b);
         
-        public TopicTypeRequest RosDeserialize(ref ReadBuffer2 b) => new TopicTypeRequest(ref b);
+        public SearchParamRequest RosDeserialize(ref ReadBuffer2 b) => new SearchParamRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(Topic);
+            b.Serialize(Name);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Align4();
-            b.Serialize(Topic);
+            b.Serialize(Name);
         }
         
         public void RosValidate()
@@ -100,7 +100,7 @@ namespace Iviz.Msgs.RosapiMsgs
             get
             {
                 int size = 4;
-                size += WriteBuffer.GetStringSize(Topic);
+                size += WriteBuffer.GetStringSize(Name);
                 return size;
             }
         }
@@ -111,7 +111,7 @@ namespace Iviz.Msgs.RosapiMsgs
         {
             int size = c;
             size = WriteBuffer2.Align4(size);
-            size = WriteBuffer2.AddLength(size, Topic);
+            size = WriteBuffer2.AddLength(size, Name);
             return size;
         }
     
@@ -119,44 +119,44 @@ namespace Iviz.Msgs.RosapiMsgs
     }
 
     [DataContract]
-    public sealed class TopicTypeResponse : IResponse, IDeserializable<TopicTypeResponse>
+    public sealed class SearchParamResponse : IResponse, IDeserializable<SearchParamResponse>
     {
-        [DataMember (Name = "type")] public string Type;
+        [DataMember (Name = "global_name")] public string GlobalName;
     
-        public TopicTypeResponse()
+        public SearchParamResponse()
         {
-            Type = "";
+            GlobalName = "";
         }
         
-        public TopicTypeResponse(string Type)
+        public SearchParamResponse(string GlobalName)
         {
-            this.Type = Type;
+            this.GlobalName = GlobalName;
         }
         
-        public TopicTypeResponse(ref ReadBuffer b)
+        public SearchParamResponse(ref ReadBuffer b)
         {
-            Type = b.DeserializeString();
+            GlobalName = b.DeserializeString();
         }
         
-        public TopicTypeResponse(ref ReadBuffer2 b)
+        public SearchParamResponse(ref ReadBuffer2 b)
         {
             b.Align4();
-            Type = b.DeserializeString();
+            GlobalName = b.DeserializeString();
         }
         
-        public TopicTypeResponse RosDeserialize(ref ReadBuffer b) => new TopicTypeResponse(ref b);
+        public SearchParamResponse RosDeserialize(ref ReadBuffer b) => new SearchParamResponse(ref b);
         
-        public TopicTypeResponse RosDeserialize(ref ReadBuffer2 b) => new TopicTypeResponse(ref b);
+        public SearchParamResponse RosDeserialize(ref ReadBuffer2 b) => new SearchParamResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(Type);
+            b.Serialize(GlobalName);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Align4();
-            b.Serialize(Type);
+            b.Serialize(GlobalName);
         }
         
         public void RosValidate()
@@ -169,7 +169,7 @@ namespace Iviz.Msgs.RosapiMsgs
             get
             {
                 int size = 4;
-                size += WriteBuffer.GetStringSize(Type);
+                size += WriteBuffer.GetStringSize(GlobalName);
                 return size;
             }
         }
@@ -180,7 +180,7 @@ namespace Iviz.Msgs.RosapiMsgs
         {
             int size = c;
             size = WriteBuffer2.Align4(size);
-            size = WriteBuffer2.AddLength(size, Type);
+            size = WriteBuffer2.AddLength(size, GlobalName);
             return size;
         }
     

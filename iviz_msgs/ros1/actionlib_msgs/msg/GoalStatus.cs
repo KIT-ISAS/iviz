@@ -89,9 +89,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(GoalId, nameof(GoalId));
             GoalId.RosValidate();
-            BuiltIns.ThrowIfNull(Text, nameof(Text));
         }
     
         [IgnoreDataMember]

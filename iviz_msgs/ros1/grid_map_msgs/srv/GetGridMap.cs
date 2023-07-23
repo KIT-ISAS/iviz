@@ -123,7 +123,6 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(FrameId, nameof(FrameId));
             BuiltIns.ThrowIfNull(Layers, nameof(Layers));
         }
     
@@ -200,7 +199,6 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Map, nameof(Map));
             Map.RosValidate();
         }
     

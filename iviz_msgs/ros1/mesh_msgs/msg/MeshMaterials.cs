@@ -199,9 +199,12 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosValidate()
         {
             BuiltIns.ThrowIfNull(Clusters, nameof(Clusters));
+            foreach (var msg in Clusters) msg.RosValidate();
             BuiltIns.ThrowIfNull(Materials, nameof(Materials));
+            foreach (var msg in Materials) msg.RosValidate();
             BuiltIns.ThrowIfNull(ClusterMaterials, nameof(ClusterMaterials));
             BuiltIns.ThrowIfNull(VertexTexCoords, nameof(VertexTexCoords));
+            foreach (var msg in VertexTexCoords) msg.RosValidate();
         }
     
         [IgnoreDataMember]

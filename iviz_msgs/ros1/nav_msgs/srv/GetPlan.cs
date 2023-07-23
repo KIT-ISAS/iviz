@@ -110,9 +110,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Start, nameof(Start));
             Start.RosValidate();
-            BuiltIns.ThrowIfNull(Goal, nameof(Goal));
             Goal.RosValidate();
         }
     
@@ -184,7 +182,6 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Plan, nameof(Plan));
             Plan.RosValidate();
         }
     

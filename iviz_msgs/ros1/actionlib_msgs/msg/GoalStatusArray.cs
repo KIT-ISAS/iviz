@@ -90,7 +90,9 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(StatusList, nameof(StatusList));
+            foreach (var msg in StatusList) msg.RosValidate();
         }
     
         [IgnoreDataMember]

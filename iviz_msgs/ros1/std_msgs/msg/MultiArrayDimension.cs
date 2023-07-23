@@ -65,7 +65,6 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Label, nameof(Label));
         }
     
         [IgnoreDataMember]

@@ -121,7 +121,6 @@ namespace Iviz.Msgs.RosapiMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Type, nameof(Type));
             BuiltIns.ThrowIfNull(Fieldnames, nameof(Fieldnames));
             BuiltIns.ThrowIfNull(Fieldtypes, nameof(Fieldtypes));
             BuiltIns.ThrowIfNull(Fieldarraylen, nameof(Fieldarraylen));

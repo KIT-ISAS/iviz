@@ -210,7 +210,6 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(StringValue, nameof(StringValue));
             BuiltIns.ThrowIfNull(ByteArrayValue, nameof(ByteArrayValue));
             BuiltIns.ThrowIfNull(BoolArrayValue, nameof(BoolArrayValue));
             BuiltIns.ThrowIfNull(IntegerArrayValue, nameof(IntegerArrayValue));

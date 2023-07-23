@@ -112,7 +112,9 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Skeleton, nameof(Skeleton));
+            foreach (var msg in Skeleton) msg.RosValidate();
         }
     
         [IgnoreDataMember]

@@ -83,7 +83,6 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Layout, nameof(Layout));
             Layout.RosValidate();
             BuiltIns.ThrowIfNull(Data, nameof(Data));
         }

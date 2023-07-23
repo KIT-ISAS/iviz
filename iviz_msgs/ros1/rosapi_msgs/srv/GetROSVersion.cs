@@ -146,7 +146,6 @@ namespace Iviz.Msgs.RosapiMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Distro, nameof(Distro));
         }
     
         [IgnoreDataMember]

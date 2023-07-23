@@ -123,11 +123,11 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Info, nameof(Info));
             Info.RosValidate();
             BuiltIns.ThrowIfNull(Layers, nameof(Layers));
             BuiltIns.ThrowIfNull(BasicLayers, nameof(BasicLayers));
             BuiltIns.ThrowIfNull(Data, nameof(Data));
+            foreach (var msg in Data) msg.RosValidate();
         }
     
         [IgnoreDataMember]

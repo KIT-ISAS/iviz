@@ -80,7 +80,6 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosValidate()
         {
             BuiltIns.ThrowIfNull(FaceIndices, nameof(FaceIndices));
-            BuiltIns.ThrowIfNull(Label, nameof(Label));
         }
     
         [IgnoreDataMember]

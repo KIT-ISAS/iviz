@@ -56,7 +56,6 @@ namespace Iviz.Msgs.RosbridgeMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(IpAddress, nameof(IpAddress));
         }
     
         [IgnoreDataMember]

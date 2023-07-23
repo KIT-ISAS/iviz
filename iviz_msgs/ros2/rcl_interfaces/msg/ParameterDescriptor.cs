@@ -170,11 +170,10 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Name, nameof(Name));
-            BuiltIns.ThrowIfNull(Description, nameof(Description));
-            BuiltIns.ThrowIfNull(AdditionalConstraints, nameof(AdditionalConstraints));
             BuiltIns.ThrowIfNull(FloatingPointRange, nameof(FloatingPointRange));
+            foreach (var msg in FloatingPointRange) msg.RosValidate();
             BuiltIns.ThrowIfNull(IntegerRange, nameof(IntegerRange));
+            foreach (var msg in IntegerRange) msg.RosValidate();
         }
     
         [IgnoreDataMember]

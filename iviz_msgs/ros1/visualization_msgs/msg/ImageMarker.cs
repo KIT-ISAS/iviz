@@ -175,7 +175,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Ns, nameof(Ns));
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Points, nameof(Points));
             BuiltIns.ThrowIfNull(OutlineColors, nameof(OutlineColors));
         }

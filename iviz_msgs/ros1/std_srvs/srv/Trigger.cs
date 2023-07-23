@@ -148,7 +148,6 @@ namespace Iviz.Msgs.StdSrvs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Message, nameof(Message));
         }
     
         [IgnoreDataMember]

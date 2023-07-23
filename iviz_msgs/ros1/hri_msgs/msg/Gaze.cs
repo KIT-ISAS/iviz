@@ -68,8 +68,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Sender, nameof(Sender));
-            BuiltIns.ThrowIfNull(Receiver, nameof(Receiver));
+            Header.RosValidate();
         }
     
         [IgnoreDataMember]

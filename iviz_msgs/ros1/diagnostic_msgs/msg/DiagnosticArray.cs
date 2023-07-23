@@ -91,7 +91,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Status, nameof(Status));
+            foreach (var msg in Status) msg.RosValidate();
         }
     
         [IgnoreDataMember]

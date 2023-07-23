@@ -114,7 +114,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Code, nameof(Code));
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Corners, nameof(Corners));
             BuiltIns.ThrowIfWrongSize(Corners, nameof(Corners), 4);
             BuiltIns.ThrowIfNull(CameraIntrinsic, nameof(CameraIntrinsic));

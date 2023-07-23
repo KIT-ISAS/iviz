@@ -69,7 +69,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(ChildFrameId, nameof(ChildFrameId));
+            Header.RosValidate();
         }
     
         [IgnoreDataMember]

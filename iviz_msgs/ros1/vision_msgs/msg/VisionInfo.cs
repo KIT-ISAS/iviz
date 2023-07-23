@@ -103,8 +103,7 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Method, nameof(Method));
-            BuiltIns.ThrowIfNull(DatabaseLocation, nameof(DatabaseLocation));
+            Header.RosValidate();
         }
     
         [IgnoreDataMember]

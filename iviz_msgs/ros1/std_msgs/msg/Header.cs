@@ -65,8 +65,9 @@ namespace Iviz.Msgs.StdMsgs
             b.Serialize(FrameId ?? "");
         }
         
-        public readonly void RosValidate()
+        public void RosValidate()
         {
+            FrameId ??= "";
         }
     
         [IgnoreDataMember]

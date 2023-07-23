@@ -92,7 +92,6 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Uri, nameof(Uri));
         }
     
         [IgnoreDataMember]
@@ -175,9 +174,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Image, nameof(Image));
             Image.RosValidate();
-            BuiltIns.ThrowIfNull(Message, nameof(Message));
         }
     
         [IgnoreDataMember]

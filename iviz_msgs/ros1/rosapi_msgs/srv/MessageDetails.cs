@@ -92,7 +92,6 @@ namespace Iviz.Msgs.RosapiMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Type, nameof(Type));
         }
     
         [IgnoreDataMember]
@@ -197,6 +196,7 @@ namespace Iviz.Msgs.RosapiMsgs
         public void RosValidate()
         {
             BuiltIns.ThrowIfNull(Typedefs, nameof(Typedefs));
+            foreach (var msg in Typedefs) msg.RosValidate();
         }
     
         [IgnoreDataMember]

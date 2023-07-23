@@ -163,10 +163,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Name, nameof(Name));
-            BuiltIns.ThrowIfNull(Description, nameof(Description));
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(MenuEntries, nameof(MenuEntries));
+            foreach (var msg in MenuEntries) msg.RosValidate();
             BuiltIns.ThrowIfNull(Controls, nameof(Controls));
+            foreach (var msg in Controls) msg.RosValidate();
         }
     
         [IgnoreDataMember]

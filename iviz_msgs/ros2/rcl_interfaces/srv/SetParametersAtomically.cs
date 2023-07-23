@@ -130,6 +130,7 @@ namespace Iviz.Msgs.RclInterfaces
         public void RosValidate()
         {
             BuiltIns.ThrowIfNull(Parameters, nameof(Parameters));
+            foreach (var msg in Parameters) msg.RosValidate();
         }
     
         [IgnoreDataMember]
@@ -199,7 +200,6 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Result, nameof(Result));
             Result.RosValidate();
         }
     

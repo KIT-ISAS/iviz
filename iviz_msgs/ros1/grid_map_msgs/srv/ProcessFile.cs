@@ -103,8 +103,6 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(FilePath, nameof(FilePath));
-            BuiltIns.ThrowIfNull(TopicName, nameof(TopicName));
         }
     
         [IgnoreDataMember]

@@ -98,9 +98,10 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Cloud, nameof(Cloud));
+            Header.RosValidate();
             Cloud.RosValidate();
             BuiltIns.ThrowIfNull(Polygons, nameof(Polygons));
+            foreach (var msg in Polygons) msg.RosValidate();
         }
     
         [IgnoreDataMember]

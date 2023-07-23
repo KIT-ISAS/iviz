@@ -61,7 +61,6 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(ErrorString, nameof(ErrorString));
         }
     
         [IgnoreDataMember]

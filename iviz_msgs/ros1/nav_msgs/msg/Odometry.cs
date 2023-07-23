@@ -71,10 +71,8 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(ChildFrameId, nameof(ChildFrameId));
-            BuiltIns.ThrowIfNull(Pose, nameof(Pose));
+            Header.RosValidate();
             Pose.RosValidate();
-            BuiltIns.ThrowIfNull(Twist, nameof(Twist));
             Twist.RosValidate();
         }
     

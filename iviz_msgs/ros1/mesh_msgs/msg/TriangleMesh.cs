@@ -346,8 +346,11 @@ namespace Iviz.Msgs.MeshMsgs
             BuiltIns.ThrowIfNull(TriangleColors, nameof(TriangleColors));
             BuiltIns.ThrowIfNull(VertexTextureCoords, nameof(VertexTextureCoords));
             BuiltIns.ThrowIfNull(FaceMaterials, nameof(FaceMaterials));
+            foreach (var msg in FaceMaterials) msg.RosValidate();
             BuiltIns.ThrowIfNull(Textures, nameof(Textures));
+            foreach (var msg in Textures) msg.RosValidate();
             BuiltIns.ThrowIfNull(Clusters, nameof(Clusters));
+            foreach (var msg in Clusters) msg.RosValidate();
         }
     
         [IgnoreDataMember]

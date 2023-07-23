@@ -158,13 +158,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Id, nameof(Id));
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(JointNames, nameof(JointNames));
             BuiltIns.ThrowIfNull(JointValues, nameof(JointValues));
-            BuiltIns.ThrowIfNull(RobotDescription, nameof(RobotDescription));
-            BuiltIns.ThrowIfNull(SourceNode, nameof(SourceNode));
-            BuiltIns.ThrowIfNull(SourceParameter, nameof(SourceParameter));
-            BuiltIns.ThrowIfNull(SavedRobotName, nameof(SavedRobotName));
         }
     
         [IgnoreDataMember]

@@ -117,9 +117,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(ClientId, nameof(ClientId));
-            BuiltIns.ThrowIfNull(MarkerName, nameof(MarkerName));
-            BuiltIns.ThrowIfNull(ControlName, nameof(ControlName));
+            Header.RosValidate();
         }
     
         [IgnoreDataMember]

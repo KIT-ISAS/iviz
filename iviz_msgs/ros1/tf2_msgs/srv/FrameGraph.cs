@@ -140,7 +140,6 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(FrameYaml, nameof(FrameYaml));
         }
     
         [IgnoreDataMember]

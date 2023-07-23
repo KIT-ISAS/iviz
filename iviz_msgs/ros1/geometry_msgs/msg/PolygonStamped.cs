@@ -53,7 +53,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Polygon, nameof(Polygon));
+            Header.RosValidate();
             Polygon.RosValidate();
         }
     

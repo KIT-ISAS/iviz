@@ -94,8 +94,6 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Name, nameof(Name));
-            BuiltIns.ThrowIfNull(Transform, nameof(Transform));
             Transform.RosValidate();
             BuiltIns.ThrowIfNull(Meshes, nameof(Meshes));
         }

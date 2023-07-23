@@ -223,7 +223,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Message, nameof(Message));
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Intrinsics, nameof(Intrinsics));
             BuiltIns.ThrowIfWrongSize(Intrinsics, nameof(Intrinsics), 9);
             BuiltIns.ThrowIfNull(Data, nameof(Data));

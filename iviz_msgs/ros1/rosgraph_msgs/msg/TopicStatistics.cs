@@ -127,9 +127,6 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Topic, nameof(Topic));
-            BuiltIns.ThrowIfNull(NodePub, nameof(NodePub));
-            BuiltIns.ThrowIfNull(NodeSub, nameof(NodeSub));
         }
     
         [IgnoreDataMember]

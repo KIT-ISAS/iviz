@@ -42,7 +42,7 @@ namespace Iviz.Msgs.RosapiMsgs
         
         public string RosServiceType => ServiceType;
         
-        public string RosMd5Sum => "4e1e229c08fb70602243287505293619";
+        public string RosMd5Sum => "e36fd90759dbac1c5159140a7fa8c644";
         
         public IService Generate() => new GetParam();
         
@@ -53,24 +53,24 @@ namespace Iviz.Msgs.RosapiMsgs
     public sealed class GetParamRequest : IRequest<GetParam, GetParamResponse>, IDeserializable<GetParamRequest>
     {
         [DataMember (Name = "name")] public string Name;
-        [DataMember (Name = "default_value")] public string DefaultValue;
+        [DataMember (Name = "default")] public string Default;
     
         public GetParamRequest()
         {
             Name = "";
-            DefaultValue = "";
+            Default = "";
         }
         
-        public GetParamRequest(string Name, string DefaultValue)
+        public GetParamRequest(string Name, string Default)
         {
             this.Name = Name;
-            this.DefaultValue = DefaultValue;
+            this.Default = Default;
         }
         
         public GetParamRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
-            DefaultValue = b.DeserializeString();
+            Default = b.DeserializeString();
         }
         
         public GetParamRequest(ref ReadBuffer2 b)
@@ -78,7 +78,7 @@ namespace Iviz.Msgs.RosapiMsgs
             b.Align4();
             Name = b.DeserializeString();
             b.Align4();
-            DefaultValue = b.DeserializeString();
+            Default = b.DeserializeString();
         }
         
         public GetParamRequest RosDeserialize(ref ReadBuffer b) => new GetParamRequest(ref b);
@@ -88,7 +88,7 @@ namespace Iviz.Msgs.RosapiMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Name);
-            b.Serialize(DefaultValue);
+            b.Serialize(Default);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
@@ -96,13 +96,11 @@ namespace Iviz.Msgs.RosapiMsgs
             b.Align4();
             b.Serialize(Name);
             b.Align4();
-            b.Serialize(DefaultValue);
+            b.Serialize(Default);
         }
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Name, nameof(Name));
-            BuiltIns.ThrowIfNull(DefaultValue, nameof(DefaultValue));
         }
     
         [IgnoreDataMember]
@@ -112,7 +110,7 @@ namespace Iviz.Msgs.RosapiMsgs
             {
                 int size = 8;
                 size += WriteBuffer.GetStringSize(Name);
-                size += WriteBuffer.GetStringSize(DefaultValue);
+                size += WriteBuffer.GetStringSize(Default);
                 return size;
             }
         }
@@ -125,7 +123,7 @@ namespace Iviz.Msgs.RosapiMsgs
             size = WriteBuffer2.Align4(size);
             size = WriteBuffer2.AddLength(size, Name);
             size = WriteBuffer2.Align4(size);
-            size = WriteBuffer2.AddLength(size, DefaultValue);
+            size = WriteBuffer2.AddLength(size, Default);
             return size;
         }
     
@@ -175,7 +173,6 @@ namespace Iviz.Msgs.RosapiMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Value, nameof(Value));
         }
     
         [IgnoreDataMember]

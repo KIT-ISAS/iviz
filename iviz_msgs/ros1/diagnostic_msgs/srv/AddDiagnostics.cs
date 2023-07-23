@@ -107,7 +107,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(LoadNamespace, nameof(LoadNamespace));
         }
     
         [IgnoreDataMember]
@@ -188,7 +187,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Message, nameof(Message));
         }
     
         [IgnoreDataMember]

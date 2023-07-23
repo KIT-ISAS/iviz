@@ -120,10 +120,6 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Name, nameof(Name));
-            BuiltIns.ThrowIfNull(Msg, nameof(Msg));
-            BuiltIns.ThrowIfNull(File, nameof(File));
-            BuiltIns.ThrowIfNull(Function, nameof(Function));
         }
     
         [IgnoreDataMember]

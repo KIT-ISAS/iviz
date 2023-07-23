@@ -88,7 +88,9 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Boxes, nameof(Boxes));
+            foreach (var msg in Boxes) msg.RosValidate();
         }
     
         [IgnoreDataMember]

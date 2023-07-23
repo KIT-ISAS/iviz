@@ -214,10 +214,9 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(CellVoltage, nameof(CellVoltage));
             BuiltIns.ThrowIfNull(CellTemperature, nameof(CellTemperature));
-            BuiltIns.ThrowIfNull(Location, nameof(Location));
-            BuiltIns.ThrowIfNull(SerialNumber, nameof(SerialNumber));
         }
     
         [IgnoreDataMember]

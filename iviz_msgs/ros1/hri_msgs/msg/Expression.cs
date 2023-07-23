@@ -102,7 +102,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Expression_, nameof(Expression_));
+            Header.RosValidate();
         }
     
         [IgnoreDataMember]

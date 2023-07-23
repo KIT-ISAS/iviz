@@ -64,7 +64,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Name, nameof(Name));
+            Header.RosValidate();
         }
     
         [IgnoreDataMember]

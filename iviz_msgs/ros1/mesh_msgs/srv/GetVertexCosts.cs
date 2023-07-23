@@ -92,7 +92,6 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Uuid, nameof(Uuid));
         }
     
         [IgnoreDataMember]
@@ -160,7 +159,6 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(MeshVertexCostsStamped, nameof(MeshVertexCostsStamped));
             MeshVertexCostsStamped.RosValidate();
         }
     

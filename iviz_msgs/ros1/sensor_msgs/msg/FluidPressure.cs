@@ -67,6 +67,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
         }
     
         [IgnoreDataMember]

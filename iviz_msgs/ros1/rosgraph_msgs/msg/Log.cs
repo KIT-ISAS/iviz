@@ -115,10 +115,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Name, nameof(Name));
-            BuiltIns.ThrowIfNull(Msg, nameof(Msg));
-            BuiltIns.ThrowIfNull(File, nameof(File));
-            BuiltIns.ThrowIfNull(Function, nameof(Function));
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Topics, nameof(Topics));
         }
     

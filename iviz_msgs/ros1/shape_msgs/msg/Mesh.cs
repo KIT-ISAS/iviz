@@ -119,6 +119,7 @@ namespace Iviz.Msgs.ShapeMsgs
         public void RosValidate()
         {
             BuiltIns.ThrowIfNull(Triangles, nameof(Triangles));
+            foreach (var msg in Triangles) msg.RosValidate();
             BuiltIns.ThrowIfNull(Vertices, nameof(Vertices));
         }
     

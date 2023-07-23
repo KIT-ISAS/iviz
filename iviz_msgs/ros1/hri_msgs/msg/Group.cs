@@ -66,7 +66,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(GroupId, nameof(GroupId));
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Members, nameof(Members));
         }
     

@@ -113,8 +113,6 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Id1, nameof(Id1));
-            BuiltIns.ThrowIfNull(Id2, nameof(Id2));
         }
     
         [IgnoreDataMember]

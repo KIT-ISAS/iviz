@@ -202,6 +202,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Thumb, nameof(Thumb));
             BuiltIns.ThrowIfNull(Index, nameof(Index));
             BuiltIns.ThrowIfNull(Middle, nameof(Middle));

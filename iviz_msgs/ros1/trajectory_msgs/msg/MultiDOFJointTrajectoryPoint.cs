@@ -169,7 +169,9 @@ namespace Iviz.Msgs.TrajectoryMsgs
         {
             BuiltIns.ThrowIfNull(Transforms, nameof(Transforms));
             BuiltIns.ThrowIfNull(Velocities, nameof(Velocities));
+            foreach (var msg in Velocities) msg.RosValidate();
             BuiltIns.ThrowIfNull(Accelerations, nameof(Accelerations));
+            foreach (var msg in Accelerations) msg.RosValidate();
         }
     
         [IgnoreDataMember]

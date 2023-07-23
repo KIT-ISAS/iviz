@@ -139,7 +139,6 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Map, nameof(Map));
             Map.RosValidate();
         }
     

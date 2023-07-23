@@ -89,7 +89,9 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Poses, nameof(Poses));
+            foreach (var msg in Poses) msg.RosValidate();
         }
     
         [IgnoreDataMember]

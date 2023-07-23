@@ -115,6 +115,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(OrientationCovariance, nameof(OrientationCovariance));
             BuiltIns.ThrowIfWrongSize(OrientationCovariance, nameof(OrientationCovariance), 9);
             BuiltIns.ThrowIfNull(AngularVelocityCovariance, nameof(AngularVelocityCovariance));

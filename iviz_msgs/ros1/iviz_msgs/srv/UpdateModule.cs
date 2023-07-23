@@ -116,9 +116,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Id, nameof(Id));
             BuiltIns.ThrowIfNull(Fields, nameof(Fields));
-            BuiltIns.ThrowIfNull(Config, nameof(Config));
         }
     
         [IgnoreDataMember]
@@ -202,7 +200,6 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Message, nameof(Message));
         }
     
         [IgnoreDataMember]

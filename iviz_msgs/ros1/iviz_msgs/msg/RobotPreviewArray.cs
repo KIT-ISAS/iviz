@@ -83,6 +83,7 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosValidate()
         {
             BuiltIns.ThrowIfNull(Previews, nameof(Previews));
+            foreach (var msg in Previews) msg.RosValidate();
         }
     
         [IgnoreDataMember]

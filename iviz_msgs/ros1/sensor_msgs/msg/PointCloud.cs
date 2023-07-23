@@ -125,8 +125,10 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Points, nameof(Points));
             BuiltIns.ThrowIfNull(Channels, nameof(Channels));
+            foreach (var msg in Channels) msg.RosValidate();
         }
     
         [IgnoreDataMember]

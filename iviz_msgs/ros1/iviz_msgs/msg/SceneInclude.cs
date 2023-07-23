@@ -75,12 +75,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Uri, nameof(Uri));
-            BuiltIns.ThrowIfNull(Pose, nameof(Pose));
             Pose.RosValidate();
-            BuiltIns.ThrowIfNull(Material, nameof(Material));
             Material.RosValidate();
-            BuiltIns.ThrowIfNull(Package, nameof(Package));
         }
     
         [IgnoreDataMember]

@@ -82,9 +82,6 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(TargetFrame, nameof(TargetFrame));
-            BuiltIns.ThrowIfNull(SourceFrame, nameof(SourceFrame));
-            BuiltIns.ThrowIfNull(FixedFrame, nameof(FixedFrame));
         }
     
         [IgnoreDataMember]

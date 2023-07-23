@@ -79,6 +79,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Poses, nameof(Poses));
         }
     

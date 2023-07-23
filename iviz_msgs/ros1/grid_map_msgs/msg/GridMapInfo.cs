@@ -67,6 +67,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
         }
     
         [IgnoreDataMember]

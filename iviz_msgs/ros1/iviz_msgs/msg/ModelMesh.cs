@@ -274,13 +274,14 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Name, nameof(Name));
             BuiltIns.ThrowIfNull(Vertices, nameof(Vertices));
             BuiltIns.ThrowIfNull(Normals, nameof(Normals));
             BuiltIns.ThrowIfNull(Tangents, nameof(Tangents));
             BuiltIns.ThrowIfNull(BiTangents, nameof(BiTangents));
             BuiltIns.ThrowIfNull(TexCoords, nameof(TexCoords));
+            foreach (var msg in TexCoords) msg.RosValidate();
             BuiltIns.ThrowIfNull(ColorChannels, nameof(ColorChannels));
+            foreach (var msg in ColorChannels) msg.RosValidate();
             BuiltIns.ThrowIfNull(Faces, nameof(Faces));
         }
     

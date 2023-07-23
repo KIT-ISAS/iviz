@@ -76,6 +76,7 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Indices, nameof(Indices));
         }
     

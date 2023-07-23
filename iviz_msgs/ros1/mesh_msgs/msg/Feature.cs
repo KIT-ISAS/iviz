@@ -89,6 +89,7 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosValidate()
         {
             BuiltIns.ThrowIfNull(Descriptor, nameof(Descriptor));
+            foreach (var msg in Descriptor) msg.RosValidate();
         }
     
         [IgnoreDataMember]

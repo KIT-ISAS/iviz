@@ -134,8 +134,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Name, nameof(Name));
             BuiltIns.ThrowIfNull(Textures, nameof(Textures));
+            foreach (var msg in Textures) msg.RosValidate();
         }
     
         [IgnoreDataMember]

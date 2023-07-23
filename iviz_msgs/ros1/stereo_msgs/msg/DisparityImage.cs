@@ -99,9 +99,8 @@ namespace Iviz.Msgs.StereoMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Image, nameof(Image));
+            Header.RosValidate();
             Image.RosValidate();
-            BuiltIns.ThrowIfNull(ValidWindow, nameof(ValidWindow));
             ValidWindow.RosValidate();
         }
     

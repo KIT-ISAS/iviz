@@ -113,10 +113,10 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Results, nameof(Results));
-            BuiltIns.ThrowIfNull(Bbox, nameof(Bbox));
+            foreach (var msg in Results) msg.RosValidate();
             Bbox.RosValidate();
-            BuiltIns.ThrowIfNull(SourceCloud, nameof(SourceCloud));
             SourceCloud.RosValidate();
         }
     

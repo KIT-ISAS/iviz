@@ -203,6 +203,7 @@ namespace Iviz.Msgs.RclInterfaces
         public void RosValidate()
         {
             BuiltIns.ThrowIfNull(Descriptors, nameof(Descriptors));
+            foreach (var msg in Descriptors) msg.RosValidate();
         }
     
         [IgnoreDataMember]

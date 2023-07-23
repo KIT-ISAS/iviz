@@ -98,7 +98,6 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(CameraInfo, nameof(CameraInfo));
             CameraInfo.RosValidate();
         }
     
@@ -176,7 +175,6 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(StatusMessage, nameof(StatusMessage));
         }
     
         [IgnoreDataMember]

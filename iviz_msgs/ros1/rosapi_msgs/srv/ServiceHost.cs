@@ -4,80 +4,80 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosapiMsgs
 {
     [DataContract]
-    public sealed class ServiceProviders : IService<ServiceProvidersRequest, ServiceProvidersResponse>
+    public sealed class ServiceHost : IService<ServiceHostRequest, ServiceHostResponse>
     {
         /// Request message.
-        [DataMember] public ServiceProvidersRequest Request;
+        [DataMember] public ServiceHostRequest Request;
         
         /// Response message.
-        [DataMember] public ServiceProvidersResponse Response;
+        [DataMember] public ServiceHostResponse Response;
         
         /// Empty constructor.
-        public ServiceProviders()
+        public ServiceHost()
         {
-            Request = new ServiceProvidersRequest();
-            Response = new ServiceProvidersResponse();
+            Request = new ServiceHostRequest();
+            Response = new ServiceHostResponse();
         }
         
         /// Setter constructor.
-        public ServiceProviders(ServiceProvidersRequest request)
+        public ServiceHost(ServiceHostRequest request)
         {
             Request = request;
-            Response = new ServiceProvidersResponse();
+            Response = new ServiceHostResponse();
         }
         
         IRequest IService.Request
         {
             get => Request;
-            set => Request = (ServiceProvidersRequest)value;
+            set => Request = (ServiceHostRequest)value;
         }
         
         IResponse IService.Response
         {
             get => Response;
-            set => Response = (ServiceProvidersResponse)value;
+            set => Response = (ServiceHostResponse)value;
         }
         
-        public const string ServiceType = "rosapi_msgs/ServiceProviders";
+        public const string ServiceType = "rosapi_msgs/ServiceHost";
         
         public string RosServiceType => ServiceType;
         
-        public string RosMd5Sum => "f30b41d5e347454ae5483ee95eef5cc6";
+        public string RosMd5Sum => "a1b60006f8ee69637c856c94dd192f5a";
         
-        public IService Generate() => new ServiceProviders();
+        public IService Generate() => new ServiceHost();
         
         public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
-    public sealed class ServiceProvidersRequest : IRequest<ServiceProviders, ServiceProvidersResponse>, IDeserializable<ServiceProvidersRequest>
+    public sealed class ServiceHostRequest : IRequest<ServiceHost, ServiceHostResponse>, IDeserializable<ServiceHostRequest>
     {
         [DataMember (Name = "service")] public string Service;
     
-        public ServiceProvidersRequest()
+        public ServiceHostRequest()
         {
             Service = "";
         }
         
-        public ServiceProvidersRequest(string Service)
+        public ServiceHostRequest(string Service)
         {
             this.Service = Service;
         }
         
-        public ServiceProvidersRequest(ref ReadBuffer b)
+        public ServiceHostRequest(ref ReadBuffer b)
         {
             Service = b.DeserializeString();
         }
         
-        public ServiceProvidersRequest(ref ReadBuffer2 b)
+        public ServiceHostRequest(ref ReadBuffer2 b)
         {
             b.Align4();
             Service = b.DeserializeString();
         }
         
-        public ServiceProvidersRequest RosDeserialize(ref ReadBuffer b) => new ServiceProvidersRequest(ref b);
+        public ServiceHostRequest RosDeserialize(ref ReadBuffer b) => new ServiceHostRequest(ref b);
         
-        public ServiceProvidersRequest RosDeserialize(ref ReadBuffer2 b) => new ServiceProvidersRequest(ref b);
+        public ServiceHostRequest RosDeserialize(ref ReadBuffer2 b) => new ServiceHostRequest(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -119,51 +119,48 @@ namespace Iviz.Msgs.RosapiMsgs
     }
 
     [DataContract]
-    public sealed class ServiceProvidersResponse : IResponse, IDeserializable<ServiceProvidersResponse>
+    public sealed class ServiceHostResponse : IResponse, IDeserializable<ServiceHostResponse>
     {
-        [DataMember (Name = "providers")] public string[] Providers;
+        [DataMember (Name = "host")] public string Host;
     
-        public ServiceProvidersResponse()
+        public ServiceHostResponse()
         {
-            Providers = EmptyArray<string>.Value;
+            Host = "";
         }
         
-        public ServiceProvidersResponse(string[] Providers)
+        public ServiceHostResponse(string Host)
         {
-            this.Providers = Providers;
+            this.Host = Host;
         }
         
-        public ServiceProvidersResponse(ref ReadBuffer b)
+        public ServiceHostResponse(ref ReadBuffer b)
         {
-            Providers = b.DeserializeStringArray();
+            Host = b.DeserializeString();
         }
         
-        public ServiceProvidersResponse(ref ReadBuffer2 b)
+        public ServiceHostResponse(ref ReadBuffer2 b)
         {
             b.Align4();
-            Providers = b.DeserializeStringArray();
+            Host = b.DeserializeString();
         }
         
-        public ServiceProvidersResponse RosDeserialize(ref ReadBuffer b) => new ServiceProvidersResponse(ref b);
+        public ServiceHostResponse RosDeserialize(ref ReadBuffer b) => new ServiceHostResponse(ref b);
         
-        public ServiceProvidersResponse RosDeserialize(ref ReadBuffer2 b) => new ServiceProvidersResponse(ref b);
+        public ServiceHostResponse RosDeserialize(ref ReadBuffer2 b) => new ServiceHostResponse(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(Providers.Length);
-            b.SerializeArray(Providers);
+            b.Serialize(Host);
         }
         
         public void RosSerialize(ref WriteBuffer2 b)
         {
             b.Align4();
-            b.Serialize(Providers.Length);
-            b.SerializeArray(Providers);
+            b.Serialize(Host);
         }
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Providers, nameof(Providers));
         }
     
         [IgnoreDataMember]
@@ -172,7 +169,7 @@ namespace Iviz.Msgs.RosapiMsgs
             get
             {
                 int size = 4;
-                size += WriteBuffer.GetArraySize(Providers);
+                size += WriteBuffer.GetStringSize(Host);
                 return size;
             }
         }
@@ -183,7 +180,7 @@ namespace Iviz.Msgs.RosapiMsgs
         {
             int size = c;
             size = WriteBuffer2.Align4(size);
-            size = WriteBuffer2.AddLength(size, Providers);
+            size = WriteBuffer2.AddLength(size, Host);
             return size;
         }
     

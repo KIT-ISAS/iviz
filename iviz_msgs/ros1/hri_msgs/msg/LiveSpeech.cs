@@ -77,8 +77,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Incremental, nameof(Incremental));
-            BuiltIns.ThrowIfNull(Final, nameof(Final));
+            Header.RosValidate();
         }
     
         [IgnoreDataMember]

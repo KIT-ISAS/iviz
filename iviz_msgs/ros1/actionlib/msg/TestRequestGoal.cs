@@ -95,7 +95,6 @@ namespace Iviz.Msgs.Actionlib
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(ResultText, nameof(ResultText));
         }
     
         [IgnoreDataMember]

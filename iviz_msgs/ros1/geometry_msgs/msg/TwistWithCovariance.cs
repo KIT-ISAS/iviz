@@ -68,7 +68,6 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Twist, nameof(Twist));
             Twist.RosValidate();
             BuiltIns.ThrowIfNull(Covariance, nameof(Covariance));
             BuiltIns.ThrowIfWrongSize(Covariance, nameof(Covariance), 36);

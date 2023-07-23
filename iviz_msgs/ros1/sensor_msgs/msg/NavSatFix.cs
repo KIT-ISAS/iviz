@@ -111,7 +111,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Status, nameof(Status));
+            Header.RosValidate();
             Status.RosValidate();
             BuiltIns.ThrowIfNull(PositionCovariance, nameof(PositionCovariance));
             BuiltIns.ThrowIfWrongSize(PositionCovariance, nameof(PositionCovariance), 9);

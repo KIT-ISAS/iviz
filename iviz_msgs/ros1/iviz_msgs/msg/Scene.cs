@@ -148,10 +148,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Name, nameof(Name));
-            BuiltIns.ThrowIfNull(Filename, nameof(Filename));
             BuiltIns.ThrowIfNull(Includes, nameof(Includes));
+            foreach (var msg in Includes) msg.RosValidate();
             BuiltIns.ThrowIfNull(Lights, nameof(Lights));
+            foreach (var msg in Lights) msg.RosValidate();
         }
     
         [IgnoreDataMember]

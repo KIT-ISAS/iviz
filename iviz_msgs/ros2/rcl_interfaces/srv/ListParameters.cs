@@ -179,7 +179,6 @@ namespace Iviz.Msgs.RclInterfaces
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Result, nameof(Result));
             Result.RosValidate();
         }
     

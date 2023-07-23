@@ -160,6 +160,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Name, nameof(Name));
             BuiltIns.ThrowIfNull(Position, nameof(Position));
             BuiltIns.ThrowIfNull(Velocity, nameof(Velocity));

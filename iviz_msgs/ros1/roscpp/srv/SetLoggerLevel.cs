@@ -101,8 +101,6 @@ namespace Iviz.Msgs.Roscpp
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Logger, nameof(Logger));
-            BuiltIns.ThrowIfNull(Level, nameof(Level));
         }
     
         [IgnoreDataMember]

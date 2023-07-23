@@ -96,7 +96,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Format, nameof(Format));
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Data, nameof(Data));
         }
     

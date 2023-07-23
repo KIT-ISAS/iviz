@@ -92,7 +92,6 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Filename, nameof(Filename));
         }
     
         [IgnoreDataMember]

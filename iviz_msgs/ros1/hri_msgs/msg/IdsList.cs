@@ -60,6 +60,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Ids, nameof(Ids));
         }
     

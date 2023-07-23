@@ -175,6 +175,7 @@ namespace Iviz.Msgs.Roscpp
         public void RosValidate()
         {
             BuiltIns.ThrowIfNull(Loggers, nameof(Loggers));
+            foreach (var msg in Loggers) msg.RosValidate();
         }
     
         [IgnoreDataMember]

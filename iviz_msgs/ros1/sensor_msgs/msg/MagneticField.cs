@@ -85,6 +85,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(MagneticFieldCovariance, nameof(MagneticFieldCovariance));
             BuiltIns.ThrowIfWrongSize(MagneticFieldCovariance, nameof(MagneticFieldCovariance), 9);
         }

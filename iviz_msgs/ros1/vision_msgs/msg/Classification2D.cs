@@ -104,8 +104,9 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Results, nameof(Results));
-            BuiltIns.ThrowIfNull(SourceImg, nameof(SourceImg));
+            foreach (var msg in Results) msg.RosValidate();
             SourceImg.RosValidate();
         }
     

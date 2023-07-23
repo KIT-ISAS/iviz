@@ -227,6 +227,12 @@ namespace Iviz.Msgs
         {
             return new ColorRGBA(c.R * scale, c.G * scale, c.B * scale, c.A);
         }
+        
+        public static ColorRGBA WithValue(this in ColorRGBA c, float value)
+        {
+            float cValue = MathF.Max(MathF.Max(c.R, c.G), c.B);
+            return cValue == 0 ? c : c.WithScale(value / cValue);
+        }
 
         public static ColorRGBA Interpolate(this in ColorRGBA c, in ColorRGBA v, float f)
         {

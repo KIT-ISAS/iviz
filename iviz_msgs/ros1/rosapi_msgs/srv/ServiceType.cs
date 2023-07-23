@@ -4,38 +4,38 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.RosapiMsgs
 {
     [DataContract]
-    public sealed class ServiceType_ : IService<ServiceTypeRequest, ServiceTypeResponse>
+    public sealed class ServiceType_ : IService<ServiceType_Request, ServiceType_Response>
     {
         /// Request message.
-        [DataMember] public ServiceTypeRequest Request;
+        [DataMember] public ServiceType_Request Request;
         
         /// Response message.
-        [DataMember] public ServiceTypeResponse Response;
+        [DataMember] public ServiceType_Response Response;
         
         /// Empty constructor.
         public ServiceType_()
         {
-            Request = new ServiceTypeRequest();
-            Response = new ServiceTypeResponse();
+            Request = new ServiceType_Request();
+            Response = new ServiceType_Response();
         }
         
         /// Setter constructor.
-        public ServiceType_(ServiceTypeRequest request)
+        public ServiceType_(ServiceType_Request request)
         {
             Request = request;
-            Response = new ServiceTypeResponse();
+            Response = new ServiceType_Response();
         }
         
         IRequest IService.Request
         {
             get => Request;
-            set => Request = (ServiceTypeRequest)value;
+            set => Request = (ServiceType_Request)value;
         }
         
         IResponse IService.Response
         {
             get => Response;
-            set => Response = (ServiceTypeResponse)value;
+            set => Response = (ServiceType_Response)value;
         }
         
         public const string ServiceType = "rosapi_msgs/ServiceType";
@@ -50,34 +50,34 @@ namespace Iviz.Msgs.RosapiMsgs
     }
 
     [DataContract]
-    public sealed class ServiceTypeRequest : IRequest<ServiceType_, ServiceTypeResponse>, IDeserializable<ServiceTypeRequest>
+    public sealed class ServiceType_Request : IRequest<ServiceType_, ServiceType_Response>, IDeserializable<ServiceType_Request>
     {
         [DataMember (Name = "service")] public string Service;
     
-        public ServiceTypeRequest()
+        public ServiceType_Request()
         {
             Service = "";
         }
         
-        public ServiceTypeRequest(string Service)
+        public ServiceType_Request(string Service)
         {
             this.Service = Service;
         }
         
-        public ServiceTypeRequest(ref ReadBuffer b)
+        public ServiceType_Request(ref ReadBuffer b)
         {
             Service = b.DeserializeString();
         }
         
-        public ServiceTypeRequest(ref ReadBuffer2 b)
+        public ServiceType_Request(ref ReadBuffer2 b)
         {
             b.Align4();
             Service = b.DeserializeString();
         }
         
-        public ServiceTypeRequest RosDeserialize(ref ReadBuffer b) => new ServiceTypeRequest(ref b);
+        public ServiceType_Request RosDeserialize(ref ReadBuffer b) => new ServiceType_Request(ref b);
         
-        public ServiceTypeRequest RosDeserialize(ref ReadBuffer2 b) => new ServiceTypeRequest(ref b);
+        public ServiceType_Request RosDeserialize(ref ReadBuffer2 b) => new ServiceType_Request(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -92,7 +92,6 @@ namespace Iviz.Msgs.RosapiMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Service, nameof(Service));
         }
     
         [IgnoreDataMember]
@@ -120,34 +119,34 @@ namespace Iviz.Msgs.RosapiMsgs
     }
 
     [DataContract]
-    public sealed class ServiceTypeResponse : IResponse, IDeserializable<ServiceTypeResponse>
+    public sealed class ServiceType_Response : IResponse, IDeserializable<ServiceType_Response>
     {
         [DataMember (Name = "type")] public string Type;
     
-        public ServiceTypeResponse()
+        public ServiceType_Response()
         {
             Type = "";
         }
         
-        public ServiceTypeResponse(string Type)
+        public ServiceType_Response(string Type)
         {
             this.Type = Type;
         }
         
-        public ServiceTypeResponse(ref ReadBuffer b)
+        public ServiceType_Response(ref ReadBuffer b)
         {
             Type = b.DeserializeString();
         }
         
-        public ServiceTypeResponse(ref ReadBuffer2 b)
+        public ServiceType_Response(ref ReadBuffer2 b)
         {
             b.Align4();
             Type = b.DeserializeString();
         }
         
-        public ServiceTypeResponse RosDeserialize(ref ReadBuffer b) => new ServiceTypeResponse(ref b);
+        public ServiceType_Response RosDeserialize(ref ReadBuffer b) => new ServiceType_Response(ref b);
         
-        public ServiceTypeResponse RosDeserialize(ref ReadBuffer2 b) => new ServiceTypeResponse(ref b);
+        public ServiceType_Response RosDeserialize(ref ReadBuffer2 b) => new ServiceType_Response(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -162,7 +161,6 @@ namespace Iviz.Msgs.RosapiMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Type, nameof(Type));
         }
     
         [IgnoreDataMember]

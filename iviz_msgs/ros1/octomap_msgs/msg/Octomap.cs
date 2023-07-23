@@ -93,7 +93,7 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Id, nameof(Id));
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Data, nameof(Data));
         }
     

@@ -297,6 +297,7 @@ namespace Iviz.Msgs.HriMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(FAU, nameof(FAU));
             BuiltIns.ThrowIfNull(Intensity, nameof(Intensity));
             BuiltIns.ThrowIfNull(Confidence, nameof(Confidence));

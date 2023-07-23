@@ -157,6 +157,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Ranges, nameof(Ranges));
             BuiltIns.ThrowIfNull(Intensities, nameof(Intensities));
         }

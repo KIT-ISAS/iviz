@@ -91,6 +91,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Cells, nameof(Cells));
         }
     

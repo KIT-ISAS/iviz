@@ -139,7 +139,9 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(Fields, nameof(Fields));
+            foreach (var msg in Fields) msg.RosValidate();
             BuiltIns.ThrowIfNull(Data, nameof(Data));
         }
     

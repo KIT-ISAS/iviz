@@ -42,7 +42,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public string RosServiceType => ServiceType;
         
-        public string RosMd5Sum => "3e28f33adf4bc180b0c552d7317b5aa7";
+        public string RosMd5Sum => "c80972db9dced84f25c0babb5df533ae";
         
         public IService Generate() => new LaunchDialog();
         
@@ -90,7 +90,6 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Dialog, nameof(Dialog));
             Dialog.RosValidate();
         }
     
@@ -173,8 +172,6 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Message, nameof(Message));
-            BuiltIns.ThrowIfNull(Feedback, nameof(Feedback));
             Feedback.RosValidate();
         }
     

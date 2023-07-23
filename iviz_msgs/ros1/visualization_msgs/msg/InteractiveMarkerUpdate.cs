@@ -167,9 +167,10 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(ServerId, nameof(ServerId));
             BuiltIns.ThrowIfNull(Markers, nameof(Markers));
+            foreach (var msg in Markers) msg.RosValidate();
             BuiltIns.ThrowIfNull(Poses, nameof(Poses));
+            foreach (var msg in Poses) msg.RosValidate();
             BuiltIns.ThrowIfNull(Erases, nameof(Erases));
         }
     

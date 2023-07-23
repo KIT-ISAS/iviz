@@ -68,7 +68,6 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Center, nameof(Center));
             Center.RosValidate();
         }
     

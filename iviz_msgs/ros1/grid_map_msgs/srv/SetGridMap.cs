@@ -91,7 +91,6 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Map, nameof(Map));
             Map.RosValidate();
         }
     

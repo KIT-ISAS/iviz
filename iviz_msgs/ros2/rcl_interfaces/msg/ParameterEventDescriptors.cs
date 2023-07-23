@@ -172,8 +172,11 @@ namespace Iviz.Msgs.RclInterfaces
         public void RosValidate()
         {
             BuiltIns.ThrowIfNull(NewParameters, nameof(NewParameters));
+            foreach (var msg in NewParameters) msg.RosValidate();
             BuiltIns.ThrowIfNull(ChangedParameters, nameof(ChangedParameters));
+            foreach (var msg in ChangedParameters) msg.RosValidate();
             BuiltIns.ThrowIfNull(DeletedParameters, nameof(DeletedParameters));
+            foreach (var msg in DeletedParameters) msg.RosValidate();
         }
     
         [IgnoreDataMember]

@@ -258,7 +258,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(DistortionModel, nameof(DistortionModel));
+            Header.RosValidate();
             BuiltIns.ThrowIfNull(D, nameof(D));
             BuiltIns.ThrowIfNull(K, nameof(K));
             BuiltIns.ThrowIfWrongSize(K, nameof(K), 9);
@@ -266,7 +266,6 @@ namespace Iviz.Msgs.SensorMsgs
             BuiltIns.ThrowIfWrongSize(R, nameof(R), 9);
             BuiltIns.ThrowIfNull(P, nameof(P));
             BuiltIns.ThrowIfWrongSize(P, nameof(P), 12);
-            BuiltIns.ThrowIfNull(Roi, nameof(Roi));
             Roi.RosValidate();
         }
     

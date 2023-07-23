@@ -52,7 +52,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Inertia, nameof(Inertia));
+            Header.RosValidate();
             Inertia.RosValidate();
         }
     

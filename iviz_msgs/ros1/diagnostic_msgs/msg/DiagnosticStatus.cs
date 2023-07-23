@@ -118,10 +118,8 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            BuiltIns.ThrowIfNull(Name, nameof(Name));
-            BuiltIns.ThrowIfNull(Message, nameof(Message));
-            BuiltIns.ThrowIfNull(HardwareId, nameof(HardwareId));
             BuiltIns.ThrowIfNull(Values, nameof(Values));
+            foreach (var msg in Values) msg.RosValidate();
         }
     
         [IgnoreDataMember]
