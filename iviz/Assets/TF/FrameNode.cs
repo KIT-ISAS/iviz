@@ -21,15 +21,19 @@ namespace Iviz.Controllers.TF
 
         public Transform Transform { get; }
 
-        public string? ParentId => parent?.Id;
-
-        public virtual TfFrame? Parent
+        public TfFrame? Parent
         {
             get => parent;
             set => SetParent(value);
         }
 
-        void SetParent(TfFrame? value)
+        protected virtual void SetParent(TfFrame? value)
+        {
+            SetParentCore(value);
+        }
+
+        // separate function so that call from constructor doesn't complain
+        void SetParentCore(TfFrame? value) 
         {
             if (parent == value || !IsAlive || value is { IsAlive: false })
             {
@@ -75,7 +79,7 @@ namespace Iviz.Controllers.TF
         {
             ThrowHelper.ThrowIfNull(name, nameof(name));
             Name = name;
-            SetParent(parent is { IsAlive: true } ? parent : TfModule.DefaultFrame);
+            SetParentCore(parent is { IsAlive: true } ? parent : TfModule.DefaultFrame);
         }
 
         public void AttachTo(in Msgs.StdMsgs.Header header)

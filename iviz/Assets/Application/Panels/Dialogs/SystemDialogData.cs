@@ -167,7 +167,8 @@ namespace Iviz.App
 
         void UpdateParameters()
         {
-            if (!RosManager.IsConnected)
+            var connection = RosManager.Connection;
+            if (!connection.IsConnected)
             {
                 descriptionHash = null;
                 panel.TextTop.text = EmptyTopText;
@@ -175,7 +176,7 @@ namespace Iviz.App
                 return;
             }
 
-            var parameters = RosManager.Connection.GetSystemParameterList().ToList();
+            var parameters = connection.GetSystemParameterList().ToList();
             parameters.Sort();
 
             using var description = BuilderPool.Rent();
@@ -409,7 +410,8 @@ namespace Iviz.App
 
         async ValueTask GetParamValueAsync(string param, CancellationToken token)
         {
-            if (!RosManager.IsConnected)
+            var connection = RosManager.Connection;
+            if (!connection.IsConnected)
             {
                 return;
             }
@@ -417,7 +419,7 @@ namespace Iviz.App
             try
             {
                 (paramValue, _) =
-                    await RosManager.Connection.GetParameterAsync(param, timeoutInMs: 5000, token: token)
+                    await connection.GetParameterAsync(param, timeoutInMs: 5000, token: token)
                         .ConfigureAwait(false);
                 GameThread.Post(() => UpdateParametersLink(param));
             }

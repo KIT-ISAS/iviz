@@ -123,6 +123,8 @@ MonoBehaviour:
   OccupancyGridMat: {fileID: 2100000, guid: e410ed67dcc4542b6bde372d33cd3c6f, type: 2}
   OccupancyGridClipMat: {fileID: 2100000, guid: 66c121943c904442598918986b422f44,
     type: 2}
+  FancyTransparentLitMat: {fileID: 2100000, guid: 54733810c92e141c3ad9a6c4a748d28e,
+    type: 2}
   RoundedPlane: {fileID: 1062175728900501377, guid: 9f41191ada4f64586a000ddcde7d2f40,
     type: 3}
   Leash: {fileID: 1765330239399484400, guid: a687d63da0fd54620b233547f451e179, type: 3}

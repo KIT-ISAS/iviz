@@ -68,6 +68,8 @@ namespace Iviz.Displays
         public Material OccupancyGridMat;
         public Material OccupancyGridClipMat;
 
+        public Material FancyTransparentLitMat;
+        
         public GameObject RoundedPlane;
         public GameObject Leash;
         public GameObject Reticle;

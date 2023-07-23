@@ -4,13 +4,15 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Iviz.Core;
+using Iviz.Displays.Helpers;
 using Iviz.Msgs.SensorMsgs;
+using JetBrains.Annotations;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Iviz.Displays.Helpers
+namespace Iviz.Displays.PointCloudHelpers
 {
     public static class PointCloudHelper
     {
@@ -31,14 +33,25 @@ namespace Iviz.Displays.Helpers
                     PointCloudHelperException.Throw("Invalid point step size!");
                 }
 
-                if (msg.RowStep < pointStep * msg.Width)
+                uint expectedRowStep = pointStep * msg.Width;
+                if (msg.RowStep < expectedRowStep)
                 {
-                    PointCloudHelperException.Throw("Row step size does not correspond to point step size and width!");
+                    if (msg.Data.Length == numPoints * pointStep)
+                    {
+                        // broken row_step, but everything else looks fine
+                        // fix it and move on
+                        msg.RowStep = expectedRowStep;
+                    }
+                    else
+                    {
+                        PointCloudHelperException.Throw(
+                            "Row step size does not correspond to point step size and width!");
+                    }
                 }
 
                 if (msg.Data.Length < msg.RowStep * msg.Height)
                 {
-                    PointCloudHelperException.Throw("Data length does not correspond to row step size and height!");
+                    PointCloudHelperException.Throw("Data length does not correspond to width, height, and pointStep!");
                 }
             }
 
@@ -53,8 +66,9 @@ namespace Iviz.Displays.Helpers
                 !TryGetField(msg.Fields, "y", out var yField) || yField.Datatype != PointField.FLOAT32 ||
                 !TryGetField(msg.Fields, "z", out var zField) || zField.Datatype != PointField.FLOAT32)
             {
-                PointCloudHelperException.Throw("Unsupported point cloud! " +
-                                                "Expected three float data fields 'x', 'y', and 'z'.");
+                PointCloudHelperException.Throw(
+                    "Unsupported point cloud! " +
+                    "Expected three float data fields 'x', 'y', and 'z'.");
                 rgbaHint = false; // unreachable
                 points = default;
                 return false;
@@ -82,15 +96,17 @@ namespace Iviz.Displays.Helpers
             if (iFieldSize < 0)
             {
                 PointCloudHelperException.Throw(
-                    $"Invalid or unsupported intensity field type {iField.Datatype.ToString()}");
+                    $"Invalid or unsupported intensity field " +
+                    $"type {iField.Datatype.ToString()}");
             }
 
             checked
             {
                 if (iField.Offset + iFieldSize > pointStep)
                 {
-                    PointCloudHelperException.Throw($"Invalid field properties iOffset={iField.Offset.ToString()} " +
-                                                    $"iFieldSize={iFieldSize.ToString()} dataType={iField.Datatype.ToString()}");
+                    PointCloudHelperException.Throw(
+                        $"Invalid field properties iOffset={iField.Offset.ToString()} " +
+                        $"iFieldSize={iFieldSize.ToString()} dataType={iField.Datatype.ToString()}");
                 }
             }
 
@@ -175,7 +191,7 @@ namespace Iviz.Displays.Helpers
 
             bool xyzAligned = xOffset == 0 && yOffset == 4 && zOffset == 8;
             return xyzAligned
-                ? GeneratePointBufferXYZ(pointBuffer, msg, iOffset, rgbaHint ? PointField.FLOAT32 : iType)
+                ? GeneratePointBufferFast(pointBuffer, msg, iOffset, rgbaHint ? PointField.FLOAT32 : iType)
                 : GeneratePointBufferSlow(pointBuffer, msg, xOffset, yOffset, zOffset, iOffset, iType, rgbaHint);
         }
 
@@ -187,55 +203,51 @@ namespace Iviz.Displays.Helpers
             int rowStep = (int)msg.RowStep;
             int pointStep = (int)msg.PointStep;
             bool isDense = msg.IsDense;
+            byte[] array = msg.Data.Array;
 
             if (rowStep > width * pointStep) ThrowHelper.ThrowArgumentOutOfRange();
 
             if (rgbaHint)
             {
-                return Process(new IFloatReader.FloatReader());
+                return ProcessSlow(new IFloatReader.FloatReader());
             }
 
             return iType switch
             {
-                PointField.FLOAT32 => Process(new IFloatReader.FloatReader()),
-                PointField.FLOAT64 => Process(new IFloatReader.DoubleReader()),
-                PointField.INT8 => Process(new IFloatReader.SbyteReader()),
-                PointField.UINT8 => Process(new IFloatReader.ByteReader()),
-                PointField.INT16 => Process(new IFloatReader.ShortReader()),
-                PointField.UINT16 => Process(new IFloatReader.UshortReader()),
-                PointField.INT32 => Process(new IFloatReader.IntReader()),
-                PointField.UINT32 => Process(new IFloatReader.UintReader()),
-                _ => Process(new IFloatReader.NullReader()),
+                PointField.FLOAT32 => ProcessSlow(new IFloatReader.FloatReader()),
+                PointField.FLOAT64 => ProcessSlow(new IFloatReader.DoubleReader()),
+                PointField.INT8 => ProcessSlow(new IFloatReader.SbyteReader()),
+                PointField.UINT8 => ProcessSlow(new IFloatReader.ByteReader()),
+                PointField.INT16 => ProcessSlow(new IFloatReader.ShortReader()),
+                PointField.UINT16 => ProcessSlow(new IFloatReader.UshortReader()),
+                PointField.INT32 => ProcessSlow(new IFloatReader.IntReader()),
+                PointField.UINT32 => ProcessSlow(new IFloatReader.UintReader()),
+                _ => ProcessSlow(new IFloatReader.NullReader()),
             };
 
-            int Process<TFloatReader>(TFloatReader t) where TFloatReader : struct, IFloatReader
+            int ProcessSlow<TFloatReader>(TFloatReader t) where TFloatReader : struct, IFloatReader
             {
                 return isDense
-                    ? ProcessImpl(t, new IBoolTrait.True())
-                    : ProcessImpl(t, new IBoolTrait.False());
+                    ? ProcessSlowImpl(t, new IBoolTrait.True())
+                    : ProcessSlowImpl(t, new IBoolTrait.False());
             }
 
-            int ProcessImpl<TFloatReader, TBoolTrait>(TFloatReader t, TBoolTrait denseTrait)
+            int ProcessSlowImpl<TFloatReader, TBoolTrait>(TFloatReader t, TBoolTrait denseTrait)
                 where TFloatReader : struct, IFloatReader where TBoolTrait : struct, IBoolTrait
             {
                 int dstOff = 0;
-                fixed (byte* dataPtr = msg.Data.Array)
+                fixed (byte* dataPtr = array)
                 {
                     byte* rowPtr = dataPtr;
                     for (int v = 0; v < height; v++)
                     {
                         byte* pointPtr = rowPtr;
-
                         for (int u = 0; u < width; u++, pointPtr += pointStep)
                         {
-                            float x = ReadFloat(pointPtr + xOffset);
-                            float y = ReadFloat(pointPtr + yOffset);
-                            float z = ReadFloat(pointPtr + zOffset);
-
                             ref var f = ref pointBuffer[dstOff];
-                            f.x = -y;
-                            f.y = z;
-                            f.z = x;
+                            f.x = Unsafe.ReadUnaligned<float>(pointPtr + xOffset);
+                            f.y = Unsafe.ReadUnaligned<float>(pointPtr + yOffset);
+                            f.z = Unsafe.ReadUnaligned<float>(pointPtr + zOffset);
                             f.w = t.Read(pointPtr + iOffset);
 
                             if (denseTrait.Value() || IsPointValid(f)) dstOff++;
@@ -249,9 +261,7 @@ namespace Iviz.Displays.Helpers
             }
         }
 
-        static unsafe float ReadFloat(byte* ptr) => *(float*)ptr;
-
-        static unsafe int GeneratePointBufferXYZ(float4[] dstBuffer, PointCloud2 msg, int iOffset, int iType)
+        static unsafe int GeneratePointBufferFast(float4[] dstBuffer, PointCloud2 msg, int iOffset, int iType)
         {
             int rowStep = (int)msg.RowStep;
             int pointStep = (int)msg.PointStep;
@@ -261,23 +271,24 @@ namespace Iviz.Displays.Helpers
 
             return iType switch
             {
-                PointField.FLOAT32 when iOffset == 8 && pointStep == 12 => ParseXyz(), // xyz
-                PointField.FLOAT32 when iOffset == 12 && pointStep == 16 => ParseXyzw(), // xyzw
-                PointField.FLOAT32 when iOffset == 8 && pointStep == 16 => ParseXyzz(), // xyzz
-                PointField.FLOAT32 => Parse(new IFloatReader.FloatReader()),
-                PointField.FLOAT64 => Parse(new IFloatReader.DoubleReader()),
-                PointField.INT8 => Parse(new IFloatReader.SbyteReader()),
-                PointField.UINT8 => Parse(new IFloatReader.ByteReader()),
-                PointField.INT16 => Parse(new IFloatReader.ShortReader()),
-                PointField.UINT16 => Parse(new IFloatReader.UshortReader()),
-                PointField.INT32 => Parse(new IFloatReader.IntReader()),
-                PointField.UINT32 => Parse(new IFloatReader.UintReader()),
+                PointField.FLOAT32 when iOffset == 8 && pointStep == 12 => ProcessXyzToXyzz(), // xyz
+                PointField.FLOAT32 when iOffset == 12 && pointStep == 16 => ProcessXyzw(), // xyzw
+                PointField.FLOAT32 when iOffset == 8 && pointStep == 16 => ProcessXyzz(), // xyzz
+                PointField.FLOAT32 when iOffset == 12 && pointStep == 20 => ProcessXyzwtToXyzw(), // xyzz
+                PointField.FLOAT32 => ProcessGeneric(new IFloatReader.FloatReader()),
+                PointField.FLOAT64 => ProcessGeneric(new IFloatReader.DoubleReader()),
+                PointField.INT8 => ProcessGeneric(new IFloatReader.SbyteReader()),
+                PointField.UINT8 => ProcessGeneric(new IFloatReader.ByteReader()),
+                PointField.INT16 => ProcessGeneric(new IFloatReader.ShortReader()),
+                PointField.UINT16 => ProcessGeneric(new IFloatReader.UshortReader()),
+                PointField.INT32 => ProcessGeneric(new IFloatReader.IntReader()),
+                PointField.UINT32 => ProcessGeneric(new IFloatReader.UintReader()),
                 _ => throw new IndexOutOfRangeException()
             };
 
             // ----------       
 
-            int ParseXyz() // xyz -> xyzz
+            int ProcessXyzToXyzz() // xyz -> xyzz
             {
                 int dstOff = 0;
                 var dataRow = msg.Data.AsSpan();
@@ -289,15 +300,15 @@ namespace Iviz.Displays.Helpers
                     fixed (float4* dstPtr = &dst[0])
                     {
                         dstOff += isDense
-                            ? BurstUtilsDense.ParseFloat3(srcPtr, dstPtr, width)
-                            : BurstUtilsNotDense.ParseFloat3(srcPtr, dstPtr, width);
+                            ? BurstUtilsDense.ProcessXyzToXyzz(srcPtr, dstPtr, width)
+                            : BurstUtilsNotDense.ProcessXyzToXyzz(srcPtr, dstPtr, width);
                     }
                 }
 
                 return dstOff;
             }
 
-            int ParseXyzw() // xyzw
+            int ProcessXyzw() // xyzw
             {
                 int dstOff = 0;
                 var dataRow = msg.Data.AsSpan();
@@ -309,15 +320,15 @@ namespace Iviz.Displays.Helpers
                     fixed (float4* dstPtr = &dst[0])
                     {
                         dstOff += isDense
-                            ? BurstUtilsDense.ParseFloat4(srcPtr, dstPtr, width)
-                            : BurstUtilsNotDense.ParseFloat4(srcPtr, dstPtr, width);
+                            ? BurstUtilsDense.ProcessXyzw(srcPtr, dstPtr, width)
+                            : BurstUtilsNotDense.ProcessXyzw(srcPtr, dstPtr, width);
                     }
                 }
 
                 return dstOff;
             }
 
-            int ParseXyzz() // xyzw -> xyzz
+            int ProcessXyzz() // xyzw -> xyzz
             {
                 int dstOff = 0;
                 var dataRow = msg.Data.AsSpan();
@@ -329,22 +340,42 @@ namespace Iviz.Displays.Helpers
                     fixed (float4* dstPtr = &dst[0])
                     {
                         dstOff += isDense
-                            ? BurstUtilsDense.ParseFloat4Z(srcPtr, dstPtr, width)
-                            : BurstUtilsNotDense.ParseFloat4Z(srcPtr, dstPtr, width);
+                            ? BurstUtilsDense.ProcessXyzz(srcPtr, dstPtr, width)
+                            : BurstUtilsNotDense.ProcessXyzz(srcPtr, dstPtr, width);
                     }
                 }
 
                 return dstOff;
             }
 
-            int Parse<T>(T t) where T : struct, IFloatReader
+            int ProcessXyzwtToXyzw() // xyz -> xyzz
+            {
+                int dstOff = 0;
+                var dataRow = msg.Data.AsSpan();
+                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
+                {
+                    var src = dataRow.Cast<float5>()[..width];
+                    var dst = dstBuffer.AsSpan(dstOff, width);
+                    fixed (float5* srcPtr = &src[0])
+                    fixed (float4* dstPtr = &dst[0])
+                    {
+                        dstOff += isDense
+                            ? BurstUtilsDense.ProcessXyzwtToXyzw(srcPtr, dstPtr, width)
+                            : BurstUtilsNotDense.ProcessXyzwtToXyzw(srcPtr, dstPtr, width);
+                    }
+                }
+
+                return dstOff;
+            }
+
+            int ProcessGeneric<T>(T t) where T : struct, IFloatReader
             {
                 return isDense
-                    ? ParseImpl(t, new IBoolTrait.True())
-                    : ParseImpl(t, new IBoolTrait.False());
+                    ? ProcessGenericImpl(t, new IBoolTrait.True())
+                    : ProcessGenericImpl(t, new IBoolTrait.False());
             }
 
-            int ParseImpl<TFloatReader, TBoolTrait>(TFloatReader t, TBoolTrait denseTrait)
+            int ProcessGenericImpl<TFloatReader, TBoolTrait>(TFloatReader t, TBoolTrait denseTrait)
                 where TFloatReader : struct, IFloatReader
                 where TBoolTrait : struct, IBoolTrait
             {
@@ -361,9 +392,9 @@ namespace Iviz.Displays.Helpers
                             ref var point = ref *(float3*)pointPtr;
 
                             float4 f;
-                            f.z = point.x;
-                            f.x = -point.y;
-                            f.y = point.z;
+                            f.x = point.x;
+                            f.y = point.y;
+                            f.z = point.z;
                             f.w = t.Read(pointPtr + iOffset);
 
                             dstBuffer[dstOff] = f;
@@ -380,7 +411,7 @@ namespace Iviz.Displays.Helpers
             // ----------       
         }
 
-        const float MaxPositionMagnitude = PointListDisplay.MaxPositionMagnitude;
+        internal const float MaxPositionMagnitude = PointListDisplay.MaxPositionMagnitude;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool IsPointValid(in float3 point) => IsValid(point.x) && IsValid(point.y) && IsValid(point.z);
@@ -390,246 +421,271 @@ namespace Iviz.Displays.Helpers
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool IsValid(float f) => f.IsValid() && Mathf.Abs(f) < MaxPositionMagnitude;
+    }
 
-        unsafe interface IFloatReader
+    internal unsafe interface IFloatReader
+    {
+        float Read(byte* b);
+
+        struct FloatReader : IFloatReader
         {
-            float Read(byte* b);
-
-            struct FloatReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => *(float*)b;
-            }
-
-            struct DoubleReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => (float)*(double*)b;
-            }
-
-            struct SbyteReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => *(sbyte*)b;
-            }
-
-            struct ByteReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => *b;
-            }
-
-            struct IntReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => *(int*)b;
-            }
-
-            struct UintReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => *(uint*)b;
-            }
-
-            struct ShortReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => *(short*)b;
-            }
-
-            struct UshortReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => *(ushort*)b;
-            }
-
-            struct NullReader : IFloatReader
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public float Read(byte* b) => 0;
-            }
-        }
-
-        interface IBoolTrait
-        {
-            bool Value();
-
-            struct True : IBoolTrait
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public bool Value() => true;
-            }
-
-            struct False : IBoolTrait
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                public bool Value() => false;
-            }
-        }
-
-        [BurstCompile]
-        static unsafe class BurstUtilsDense
-        {
-            [BurstCompile(CompileSynchronously = true)]
-            public static int ParseFloat3([NoAlias] float3* input, [NoAlias] float4* output, int inputLength)
-            {
-                int o = 0;
-                for (int i = 0; i < inputLength; i++)
-                {
-                    float3 point3 = input[i];
-
-                    float4 point;
-                    point.x = point3.x;
-                    point.y = point3.y;
-                    point.z = point3.z;
-                    point.w = point3.z;
-
-                    float4 f;
-                    f.z = point.x;
-                    f.x = -point.y;
-                    f.y = point.z;
-                    f.w = point.w;
-
-                    output[o++] = f;
-                }
-
-                return o;
-            }
-
-            [BurstCompile(CompileSynchronously = true)]
-            public static int ParseFloat4([NoAlias] float4* input, [NoAlias] float4* output, int inputLength)
-            {
-                int o = 0;
-                for (int i = 0; i < inputLength; i++)
-                {
-                    float4 point = input[i];
-
-                    float4 f;
-                    f.z = point.x;
-                    f.x = -point.y;
-                    f.y = point.z;
-                    f.w = point.w;
-
-                    output[o++] = f;
-                }
-
-                return o;
-            }
-
-            [BurstCompile(CompileSynchronously = true)]
-            public static int ParseFloat4Z([NoAlias] float4* input, [NoAlias] float4* output, int inputLength)
-            {
-                int o = 0;
-                for (int i = 0; i < inputLength; i++)
-                {
-                    float4 point = input[i];
-
-                    float4 f;
-                    f.z = point.x;
-                    f.x = -point.y;
-                    f.y = point.z;
-                    f.w = point.z;
-
-                    output[o++] = f;
-                }
-
-                return o;
-            }
-        }
-
-        [BurstCompile]
-        static unsafe class BurstUtilsNotDense
-        {
-            [BurstCompile(CompileSynchronously = true)]
-            public static int ParseFloat3([NoAlias] float3* input, [NoAlias] float4* output, int inputLength)
-            {
-                int o = 0;
-                for (int i = 0; i < inputLength; i++)
-                {
-                    float3 point3 = input[i];
-
-                    float4 point;
-                    point.x = point3.x;
-                    point.y = point3.y;
-                    point.z = point3.z;
-                    point.w = point3.z;
-
-                    float4 f;
-                    f.z = point.x;
-                    f.x = -point.y;
-                    f.y = point.z;
-                    f.w = point.w;
-
-                    output[o] = f;
-
-                    if (Hint.Likely(IsPointValid4(f))) o++;
-                }
-
-                return o;
-            }
-
-            [BurstCompile(CompileSynchronously = true)]
-            public static int ParseFloat4([NoAlias] float4* input, [NoAlias] float4* output, int inputLength)
-            {
-                int o = 0;
-                for (int i = 0; i < inputLength; i++)
-                {
-                    float4 point = input[i];
-
-                    float4 f;
-                    f.z = point.x;
-                    f.x = -point.y;
-                    f.y = point.z;
-                    f.w = point.w;
-
-                    output[o] = f;
-
-                    if (Hint.Likely(IsPointValid3(point))) o++;
-                }
-
-                return o;
-            }
-
-            [BurstCompile(CompileSynchronously = true)]
-            public static int ParseFloat4Z([NoAlias] float4* input, [NoAlias] float4* output, int inputLength)
-            {
-                int o = 0;
-                for (int i = 0; i < inputLength; i++)
-                {
-                    float4 point = input[i];
-
-                    float4 f;
-                    f.z = point.x;
-                    f.x = -point.y;
-                    f.y = point.z;
-                    f.w = point.z;
-
-                    output[o] = f;
-
-                    if (Hint.Likely(IsPointValid4(f))) o++;
-                }
-
-                return o;
-            }
-
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static bool IsPointValid3(in float4 point)
+            public float Read(byte* b) => Unsafe.ReadUnaligned<float>(b);
+        }
+
+        struct DoubleReader : IFloatReader
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public float Read(byte* b) => (float)Unsafe.ReadUnaligned<double>(b);
+        }
+
+        struct SbyteReader : IFloatReader
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public float Read(byte* b) => (sbyte)*b;
+        }
+
+        struct ByteReader : IFloatReader
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public float Read(byte* b) => *b;
+        }
+
+        struct IntReader : IFloatReader
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public float Read(byte* b) => Unsafe.ReadUnaligned<int>(b);
+        }
+
+        struct UintReader : IFloatReader
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public float Read(byte* b) => Unsafe.ReadUnaligned<uint>(b);
+        }
+
+        struct ShortReader : IFloatReader
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public float Read(byte* b) => Unsafe.ReadUnaligned<short>(b);
+        }
+
+        struct UshortReader : IFloatReader
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public float Read(byte* b) => Unsafe.ReadUnaligned<ushort>(b);
+        }
+
+        struct NullReader : IFloatReader
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public float Read(byte* _) => 0;
+        }
+    }
+
+    internal interface IBoolTrait
+    {
+        bool Value();
+
+        struct True : IBoolTrait
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool Value() => true;
+        }
+
+        struct False : IBoolTrait
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool Value() => false;
+        }
+    }
+
+    [BurstCompile]
+    internal static unsafe class BurstUtilsDense
+    {
+        [BurstCompile(CompileSynchronously = true)]
+        public static int ProcessXyzToXyzz([NoAlias] float3* input, [NoAlias] float4* output, int inputLength)
+        {
+            int o = 0;
+            for (int i = 0; i < inputLength; i++)
             {
-                float4 p;
-                p.x = point.x;
-                p.y = point.y;
-                p.z = point.z;
-                p.w = point.z;
-                return IsPointValid4(p);
+                float3 point = input[i];
+
+                float4 f;
+                f.x = point.x;
+                f.y = point.y;
+                f.z = point.z;
+                f.w = point.z;
+
+                output[o++] = f;
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static bool IsPointValid4(in float4 point)
-            {
-                return math.all(math.abs(point) < MaxPositionMagnitude)
-                       && math.all(math.isfinite(point));
-            }
+            return o;
         }
+
+        [BurstCompile(CompileSynchronously = true)]
+        public static int ProcessXyzw([NoAlias] float4* input, [NoAlias] float4* output, int inputLength)
+        {
+            Buffer.MemoryCopy(input, output, inputLength * 16, inputLength * 16);
+
+            return inputLength;
+        }
+
+        [BurstCompile(CompileSynchronously = true)]
+        public static int ProcessXyzz([NoAlias] float4* input, [NoAlias] float4* output, int inputLength)
+        {
+            int o = 0;
+            for (int i = 0; i < inputLength; i++)
+            {
+                float4 point = input[i];
+
+                float4 f;
+                f.x = point.x;
+                f.y = point.y;
+                f.z = point.z;
+                f.w = point.z;
+
+                output[o++] = f;
+            }
+
+            return o;
+        }
+
+        [BurstCompile(CompileSynchronously = true)]
+        public static int ProcessXyzwtToXyzw([NoAlias] float5* input, [NoAlias] float4* output, int inputLength)
+        {
+            int o = 0;
+            for (int i = 0; i < inputLength; i++)
+            {
+                float5 point = input[i];
+
+                float4 f;
+                f.x = point.x;
+                f.y = point.y;
+                f.z = point.z;
+                f.w = point.w;
+
+                output[o++] = f;
+            }
+
+            return o;
+        }
+    }
+
+    [BurstCompile]
+    static unsafe class BurstUtilsNotDense
+    {
+        [BurstCompile(CompileSynchronously = true)]
+        public static int ProcessXyzToXyzz([NoAlias] float3* input, [NoAlias] float4* output, int inputLength)
+        {
+            int o = 0;
+            for (int i = 0; i < inputLength; i++)
+            {
+                float3 point = input[i];
+
+                float4 f;
+                f.x = point.x;
+                f.y = point.y;
+                f.z = point.z;
+                f.w = point.z;
+
+                output[o] = f;
+
+                if (Hint.Likely(IsPointValid4(f))) o++;
+            }
+
+            return o;
+        }
+
+        [BurstCompile(CompileSynchronously = true)]
+        public static int ProcessXyzw([NoAlias] float4* input, [NoAlias] float4* output, int inputLength)
+        {
+            int o = 0;
+            for (int i = 0; i < inputLength; i++)
+            {
+                float4 point = input[i];
+
+                float4 f;
+                f.x = point.x;
+                f.y = point.y;
+                f.z = point.z;
+                f.w = point.w;
+
+                output[o] = f;
+
+                if (Hint.Likely(IsPointValid3(point))) o++;
+            }
+
+            return o;
+        }
+
+        [BurstCompile(CompileSynchronously = true)]
+        public static int ProcessXyzz([NoAlias] float4* input, [NoAlias] float4* output, int inputLength)
+        {
+            int o = 0;
+            for (int i = 0; i < inputLength; i++)
+            {
+                float4 point = input[i];
+
+                float4 f;
+                f.x = point.x;
+                f.y = point.y;
+                f.z = point.z;
+                f.w = point.z;
+
+                output[o] = f;
+
+                if (Hint.Likely(IsPointValid4(f))) o++;
+            }
+
+            return o;
+        }
+
+        [BurstCompile(CompileSynchronously = true)]
+        public static int ProcessXyzwtToXyzw([NoAlias] float5* input, [NoAlias] float4* output, int inputLength)
+        {
+            int o = 0;
+            for (int i = 0; i < inputLength; i++)
+            {
+                float5 point = input[i];
+
+                float4 f;
+                f.x = point.x;
+                f.y = point.y;
+                f.z = point.z;
+                f.w = point.w;
+
+                output[o] = f;
+
+                if (Hint.Likely(IsPointValid4(f))) o++;
+            }
+
+            return o;
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsPointValid3(in float4 point)
+        {
+            float4 p;
+            p.x = point.x;
+            p.y = point.y;
+            p.z = point.z;
+            p.w = point.z;
+            return IsPointValid4(p);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsPointValid4(in float4 point)
+        {
+            return math.all(math.abs(point) < PointCloudHelper.MaxPositionMagnitude)
+                   && math.all(math.isfinite(point));
+        }
+    }
+
+    [UsedImplicitly]
+    internal readonly struct float5
+    {
+        public readonly float x, y, z, w, t;
     }
 
     internal class PointCloudHelperException : Exception

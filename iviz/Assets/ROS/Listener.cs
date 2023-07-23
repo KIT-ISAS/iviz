@@ -19,8 +19,8 @@ namespace Iviz.Ros
         readonly Action<T>? handlerOnGameThread;
         readonly Func<T, IRosConnection, bool>? directHandler;
 
-        Listener(string topic, RosTransportHint transportHint) : 
-            base(topic, BuiltIns.GetMessageType<T>(), transportHint)
+        Listener(string topic, RosSubscriptionProfile? profile) : 
+            base(topic, BuiltIns.GetMessageType<T>(), profile)
         {
         }
 
@@ -31,9 +31,8 @@ namespace Iviz.Ros
         /// <param name="topic">The topic to subscribe to</param>
         /// <param name="handler">The callback to execute in the game thread if a message is available</param>
         /// <param name="maxQueueSize">Max size of the bounded queue</param>
-        /// <param name="transportHint">Tells the subscriber which protocol is preferred</param>
         public Listener(string topic, Action<T> handler, int maxQueueSize = 1,
-            RosTransportHint transportHint = RosTransportHint.PreferTcp) : this(topic, transportHint)
+            RosSubscriptionProfile? profile = RosSubscriptionProfile.Default) : this(topic, profile)
         {
             ThrowHelper.ThrowIfNull(handler, nameof(handler));
             handlerOnGameThread = handler;
@@ -63,9 +62,7 @@ namespace Iviz.Ros
         /// It returns a boolean which indicates whether the message was processed.
         /// This is only used for logging purposes.
         /// </param>
-        /// <param name="transportHint">Tells the subscriber which protocol is preferred</param>
-        public Listener(string topic, Func<T, IRosConnection, bool> handler,
-            RosTransportHint transportHint = RosTransportHint.PreferTcp) : this(topic, transportHint)
+        public Listener(string topic, Func<T, IRosConnection, bool> handler, RosSubscriptionProfile? profile) : this(topic, profile)
         {
             ThrowHelper.ThrowIfNull(handler, nameof(handler));
             directHandler = handler;
@@ -78,8 +75,8 @@ namespace Iviz.Ros
         /// Normal code should use the other constructors.
         /// </summary>
         [Preserve, UsedImplicitly]
-        public Listener(string topic, Func<IMessage, IRosConnection, bool> handler, RosTransportHint transportHint)
-            : this(topic, (T msg, IRosConnection receiver) => handler(msg, receiver), transportHint)
+        public Listener(string topic, Func<IMessage, IRosConnection, bool> handler, RosSubscriptionProfile? profile)
+            : this(topic, (T msg, IRosConnection receiver) => handler(msg, receiver), profile)
         {
         }
 

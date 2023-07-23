@@ -41,12 +41,12 @@ namespace Iviz.Ros
         static (Sender, Listener) CreateSenderAndListener(RosVersion version)
         {
             return (
-                version == RosVersion.ROS1
+                version is RosVersion.ROS1 or RosVersion.ROSBridge
                     ? new Sender<Msgs.RosgraphMsgs.Log>(RosOutTopic)
                     : new Sender<Msgs.RclInterfaces.Log>(RosOutTopic),
-                version == RosVersion.ROS1
-                    ? new Listener<Msgs.RosgraphMsgs.Log>(RosOutAggTopic, Handle, RosTransportHint.PreferUdp)
-                    : new Listener<Msgs.RclInterfaces.Log>(RosOutTopic, Handle, RosTransportHint.PreferUdp)
+                version is RosVersion.ROS1 or RosVersion.ROSBridge
+                    ? new Listener<Msgs.RosgraphMsgs.Log>(RosOutAggTopic, Handle, RosSubscriptionProfile.SpammyCanDrop)
+                    : new Listener<Msgs.RclInterfaces.Log>(RosOutTopic, Handle, RosSubscriptionProfile.SpammyCanDrop)
             );
         }
 

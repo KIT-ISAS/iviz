@@ -56,23 +56,22 @@ namespace Iviz.Displays.XR
                 {
                     tooltip.ReturnToPool();
                     tooltip = null;
+                    return;
                 }
-                else
-                {
-                    if (tooltip == null)
-                    {
-                        tooltip = CreateTooltip(Transform);
-                        Update();
-                    }
 
-                    tooltip.Caption = value;
+                if (tooltip == null)
+                {
+                    tooltip = CreateTooltip(Transform);
+                    Update();
                 }
+
+                tooltip.Caption = value;
             }
         }
 
-        public abstract Color Color { set; }
+        public abstract Color FrameColor { set; }
         
-        public abstract Color SecondColor { set; }
+        public abstract Color InteriorColor { set; }
 
         public abstract float FrameWidth { set; }
         

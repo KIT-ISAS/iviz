@@ -20,8 +20,6 @@ namespace Iviz.Ros
         const int TaskWaitTimeInMs = 2000;
         const int ConnectionRetryTimeInMs = TaskWaitTimeInMs;
 
-        internal const bool HasRos2Implementation = Settings.IsAndroid || Settings.IsIPhone || Settings.IsMacOS;
-
         bool disposed;
 
         readonly SemaphoreSlim signal = new(0);
@@ -29,12 +27,9 @@ namespace Iviz.Ros
         readonly ConcurrentQueue<Func<ValueTask>> toDos = new();
         readonly CancellationTokenSource connectionTs = new();
 
-        ConnectionState connectionState = ConnectionState.Disconnected;
         DateTime lastConnectionTry = DateTime.MinValue;
         bool tryConnectOnce;
 
-        public bool IsConnected => connectionState == ConnectionState.Connected;
-        
         public RosConnection()
         {
             task = TaskUtils.Run(() => Run().AwaitNoThrow(this));
@@ -55,7 +50,7 @@ namespace Iviz.Ros
 
         void DisposeBase()
         {
-            connectionTs.Cancel();
+            connectionTs.CancelNoThrow(this);
             Signal();
             task.WaitNoThrow(this);
             disposed = true;
@@ -120,14 +115,14 @@ namespace Iviz.Ros
                 RosLogger.Error("XXX Left connection thread: ", e);
             }
 
-            connectionTs.Cancel();
+            connectionTs.CancelNoThrow(this);
         }
 
         async ValueTask RunTasks()
         {
             var now = GameThread.Now;
             if ((KeepReconnecting || tryConnectOnce)
-                && connectionState != ConnectionState.Connected
+                && !IsConnected
                 && (now - lastConnectionTry).TotalMilliseconds > ConnectionRetryTimeInMs)
             {
                 await TryToConnect(now);

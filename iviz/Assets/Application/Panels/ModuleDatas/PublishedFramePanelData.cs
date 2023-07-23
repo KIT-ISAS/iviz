@@ -32,7 +32,7 @@ namespace Iviz.App
             panel.Frame.Owner = this;
             panel.Parent.Owner = parentFrameOwner;
             panel.CloseButton.Clicked += Close;
-            panel.ParentId.Value = Frame.ParentId ?? TfModule.OriginFrameId;
+            panel.ParentId.Value = Frame.Parent?.Id ?? TfModule.OriginFrameId;
 
             panel.HideButton.State = !Frame.ForceInvisible;
             panel.HideButton.Clicked += () =>
@@ -68,7 +68,7 @@ namespace Iviz.App
                 {
                     RosLogger.Error(
                         $"{this}: Failed to set '{f}' as a parent to '{Frame.Id}'. Reason: Cycle detected.");
-                    panel.ParentId.Value = Frame.ParentId ?? TfModule.OriginFrameId;
+                    panel.ParentId.Value = Frame.Parent?.Id ?? TfModule.OriginFrameId;
                     parentFrameOwner.Frame = Frame.Parent;
                     return;
                 }

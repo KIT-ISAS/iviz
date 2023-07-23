@@ -153,7 +153,7 @@ namespace Iviz.Controllers
                 node.Dispose();
             }
 
-            public void GenerateLog(StringBuilder description)
+            public virtual void GenerateLog(StringBuilder description)
             {
                 description.Append("<b>").Append(id).Append("</b>").AppendLine();
                 description.Append(typeDescription).AppendLine();

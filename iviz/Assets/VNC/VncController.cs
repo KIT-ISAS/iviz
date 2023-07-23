@@ -1,5 +1,7 @@
 #nullable enable
 
+#if false
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -484,3 +486,4 @@ namespace VNC
         }
     }
 }
+#endif

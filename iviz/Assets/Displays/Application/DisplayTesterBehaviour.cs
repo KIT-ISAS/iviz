@@ -287,12 +287,12 @@ namespace Iviz.Displays
 
         static void CreatePointListResource(float z)
         {
-            using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
+            using (var points = new NativeList<PointWithColor>())
             {
                 var resource = ResourcePool.RentDisplay<PointListDisplay>();
                 for (int i = 0; i < 40; i++)
                 {
-                    points.Add(new PointWithColor(new Vector3(i, 0, z + 1), Color.magenta));
+                    points.Add(new PointWithColor(new Vector3(i, 0, z + 1), Color.red));
                 }
 
                 resource.ElementScale = 0.5f;

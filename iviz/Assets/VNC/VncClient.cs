@@ -1,5 +1,7 @@
 ﻿#nullable enable
 
+#if false
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -16,6 +18,7 @@ using MarcusW.VncClient.Protocol.Implementation.MessageTypes.Outgoing;
 using MarcusW.VncClient.Protocol.Implementation.Services.Transports;
 using MarcusW.VncClient.Rendering;
 using Microsoft.Extensions.Logging.Abstractions;
+
 using VNC.Extensions;
 
 namespace VNC
@@ -195,3 +198,4 @@ namespace VNC
         }
     }
 }
+#endif

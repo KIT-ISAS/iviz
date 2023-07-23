@@ -16,7 +16,7 @@ namespace Iviz.Displays.XR
         MeshMarkerDisplay Cube => cube.AssertNotNull(nameof(cube));
         SelectionFrame Frame => ResourcePool.RentChecked(ref frame, Transform);
 
-        public override Color Color
+        public override Color FrameColor
         {
             set
             {
@@ -32,7 +32,7 @@ namespace Iviz.Displays.XR
             }
         }
 
-        public override Color SecondColor
+        public override Color InteriorColor
         {
             set
             {
@@ -44,7 +44,7 @@ namespace Iviz.Displays.XR
 
                 Cube.Visible = true;
                 Cube.Color = value;
-                //Cube.EmissiveColor = value.ScaledBy(0.7f);
+                Cube.EmissiveColor = value.ScaledBy(0.75f);
             }
         }
 
@@ -63,17 +63,39 @@ namespace Iviz.Displays.XR
             }
         }
 
+        public bool EnableShadows
+        {
+            set
+            {
+                Frame.EnableShadows = value;
+                Cube.EnableShadows = value;
+            }
+        }
+
+        public bool UseFresnelLighting
+        {
+            set => Cube.OverrideMaterial(value 
+                ? Resource.Materials.FancyTransparentLit.Object 
+                : null);
+        }
+
+
         void Awake()
         {
-            Cube.Smoothness = 0;
-            Cube.Metallic = 0;
-            Cube.EnableShadows = true;
+            Cube.Smoothness = 0.25f;
+            Cube.Metallic = 0.25f;
         }
 
         public override void SplitForRecycle()
         {
             base.SplitForRecycle();
             frame.ReturnToPool();
+        }
+        
+        public override void Suspend()
+        {
+            base.Suspend();
+            Cube.OverrideMaterial(null);
         }
     }
 }

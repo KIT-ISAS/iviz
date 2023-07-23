@@ -65,7 +65,7 @@ namespace Iviz.Displays.XR
             set => Lines.ElementScale = value;
         }
 
-        public override Color Color
+        public override Color FrameColor
         {
             set
             {
@@ -80,7 +80,7 @@ namespace Iviz.Displays.XR
             }
         }
 
-        public override Color SecondColor
+        public override Color InteriorColor
         {
             set
             {

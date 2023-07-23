@@ -28,6 +28,8 @@ namespace Iviz.Resources
         public ResourceKey<Material> ImagePreview { get; }
         public ResourceKey<Material> PointCloud { get; }
         public ResourceKey<Material> PointCloudWithColormap { get; }
+        public ResourceKey<Material> PointCloudWithRosSwizzle { get; }
+        public ResourceKey<Material> PointCloudWithWithRosSwizzleColormap { get; }
         public ResourceKey<Material> PointCloudDirect { get; }
         public ResourceKey<Material> PointCloudDirectWithColormap { get; }
         public ResourceKey<Material> DepthCloud { get; }
@@ -52,12 +54,16 @@ namespace Iviz.Resources
         public ResourceKey<Material> LitOcclusionOnly { get; }
 
         public ResourceKey<Material> MeshList { get; }
+        public ResourceKey<Material> MeshListWithRosSwizzle { get; }
         public ResourceKey<Material> MeshListWithColormap { get; }
+        public ResourceKey<Material> MeshListWithRosSwizzleColormap { get; }
         public ResourceKey<Material> MeshListWithColormapScaleY { get; }
         public ResourceKey<Material> MeshListWithColormapScaleAll { get; }
         public ResourceKey<Material> MeshListOcclusionOnly { get; }
         public ResourceKey<Material> MeshListOcclusionOnlyWithScaleY { get; }
         public ResourceKey<Material> MeshListOcclusionOnlyWithScaleAll { get; }
+
+        public ResourceKey<Material> FancyTransparentLit { get; }
 
         public MaterialsType()
         {
@@ -74,12 +80,14 @@ namespace Iviz.Resources
             Lit = Create(assetHolder.Lit, nameof(assetHolder.Lit));
             TexturedLit = Create(assetHolder.TexturedLit, nameof(assetHolder.TexturedLit));
             TransparentLit = Create(assetHolder.TransparentLit, nameof(assetHolder.TransparentLit));
-            TransparentTexturedLit = Create(assetHolder.TransparentTexturedLit, nameof(assetHolder.TransparentTexturedLit));
+            TransparentTexturedLit =
+                Create(assetHolder.TransparentTexturedLit, nameof(assetHolder.TransparentTexturedLit));
             BumpLit = Create(assetHolder.BumpLit, nameof(assetHolder.BumpLit));
             TransparentBumpLit = Create(assetHolder.TransparentBumpLit, nameof(assetHolder.TransparentBumpLit));
 
             LitHalfVisible = Create(assetHolder.LitHalfVisible, nameof(assetHolder.LitHalfVisible));
-            TransparentLitAlwaysVisible = Create(assetHolder.TransparentLitAlwaysVisible, nameof(assetHolder.TransparentLitAlwaysVisible));
+            TransparentLitAlwaysVisible = Create(assetHolder.TransparentLitAlwaysVisible,
+                nameof(assetHolder.TransparentLitAlwaysVisible));
 
             SimpleLit = Create(assetHolder.SimpleLit, nameof(assetHolder.SimpleLit));
             SimpleTransparentLit = Create(assetHolder.SimpleTransparentLit, nameof(assetHolder.SimpleTransparentLit));
@@ -97,19 +105,29 @@ namespace Iviz.Resources
                 ? Create(appAssetHolder.OccupancyGridMat)
                 : Create(appAssetHolder.OccupancyGridClipMat);
 
-            PointCloud = Create(assetHolder.PointCloud);
-            PointCloudDirect = Create(assetHolder.PointCloudDirect);
-            Line = Create(assetHolder.LineMaterial);
-            TransparentLine = Create(assetHolder.TransparentLine);
-            LineSimple = Create(assetHolder.LineSimple);
-            TransparentLineSimple = Create(assetHolder.TransparentLineSimple);
+            PointCloud = Create(assetHolder.PointCloud, nameof(assetHolder.PointCloud));
+            PointCloudWithColormap =
+                Create(assetHolder.PointCloudWithColormap, nameof(assetHolder.PointCloudWithColormap));
+            PointCloudWithRosSwizzle = Create(assetHolder.PointCloudWithRosSwizzle,
+                nameof(assetHolder.PointCloudWithRosSwizzle));
+            PointCloudWithWithRosSwizzleColormap = Create(assetHolder.PointCloudWithRosSwizzleColormap,
+                nameof(assetHolder.PointCloudWithRosSwizzleColormap));
 
-            PointCloudWithColormap = Create(assetHolder.PointCloudWithColormap);
+            Line = Create(assetHolder.LineMaterial, nameof(assetHolder.LineMaterial));
+            TransparentLine = Create(assetHolder.TransparentLine, nameof(assetHolder.TransparentLine));
+            LineSimple = Create(assetHolder.LineSimple, nameof(assetHolder.LineSimple));
+            TransparentLineSimple = Create(assetHolder.TransparentLineSimple,
+                nameof(assetHolder.TransparentLineSimple));
+
+            PointCloudDirect = Create(assetHolder.PointCloudDirect);
             PointCloudDirectWithColormap = Create(assetHolder.PointCloudDirectWithColormap);
             LineWithColormap = Create(assetHolder.LineWithColormap);
             TransparentLineWithColormap = Create(assetHolder.TransparentLineWithColormap);
             LineSimpleWithColormap = Create(assetHolder.LineSimpleWithColormap);
             TransparentLineSimpleWithColormap = Create(assetHolder.TransparentLineSimpleWithColormap);
+
+            FancyTransparentLit = Create(appAssetHolder.FancyTransparentLitMat,
+                nameof(appAssetHolder.FancyTransparentLitMat));
 
             /*
             LinePulse = Create(Settings.SupportsComputeBuffers
@@ -124,27 +142,37 @@ namespace Iviz.Resources
                 : assetHolder.LineMeshSimple);
             LineMesh.Object.SetColor(ShaderIds.TintId, Color.white);
             */
-            
-            LinePulse = Create(assetHolder.LinePulse);
+
+            LinePulse = Create(assetHolder.LinePulse, nameof(assetHolder.LinePulse));
             LinePulse.Object.SetColor(ShaderIds.TintId, Color.white);
-            
-            LineMesh = Create(assetHolder.LineMesh);
+
+            LineMesh = Create(assetHolder.LineMesh, nameof(assetHolder.LineMesh));
             LineMesh.Object.SetColor(ShaderIds.TintId, Color.white);
 
-            MeshList = Create(assetHolder.MeshListMaterial);
-            MeshListWithColormap = Create(assetHolder.MeshListWithColormap);
-            MeshListWithColormapScaleY = Create(assetHolder.MeshListWithColormapScaleY);
+            MeshList = Create(assetHolder.MeshListMaterial,
+                nameof(assetHolder.MeshListMaterial));
+            MeshListWithRosSwizzle = Create(assetHolder.MeshListWithRosSwizzle,
+                nameof(assetHolder.MeshListWithRosSwizzle));
+            MeshListWithColormap = Create(assetHolder.MeshListWithColormap,
+                nameof(assetHolder.MeshListWithColormap));
+            MeshListWithRosSwizzleColormap = Create(assetHolder.MeshListWithRosSwizzleColormap,
+                nameof(assetHolder.MeshListWithRosSwizzleColormap));
+            MeshListWithColormapScaleY = Create(assetHolder.MeshListWithColormapScaleY,
+                nameof(assetHolder.MeshListWithColormapScaleY));
             MeshListWithColormapScaleY.Object.enableInstancing = true; // TODO: is this needed?
-            MeshListWithColormapScaleAll = Create(assetHolder.MeshListWithColormapScaleAll);
+            MeshListWithColormapScaleAll = Create(assetHolder.MeshListWithColormapScaleAll,
+                nameof(assetHolder.MeshListWithColormapScaleAll));
             MeshListWithColormapScaleAll.Object.enableInstancing = true;
-            MeshListOcclusionOnly = Create(assetHolder.MeshListOcclusionOnly);
-            MeshListOcclusionOnlyWithScaleY = Create(assetHolder.MeshListOcclusionOnlyWithScaleY);
-            MeshListOcclusionOnlyWithScaleAll = Create(assetHolder.MeshListOcclusionOnlyWithScaleAll);
+            MeshListOcclusionOnly = Create(assetHolder.MeshListOcclusionOnly,
+                nameof(assetHolder.MeshListOcclusionOnly));
+            MeshListOcclusionOnlyWithScaleY = Create(assetHolder.MeshListOcclusionOnlyWithScaleY,
+                nameof(assetHolder.MeshListOcclusionOnlyWithScaleY));
+            MeshListOcclusionOnlyWithScaleAll = Create(assetHolder.MeshListOcclusionOnlyWithScaleAll,
+                nameof(assetHolder.MeshListOcclusionOnlyWithScaleAll));
 
-            LitOcclusionOnly = Create(assetHolder.LitOcclusionOnly);
+            LitOcclusionOnly = Create(assetHolder.LitOcclusionOnly, nameof(assetHolder.LitOcclusionOnly));
         }
-        
-        static ResourceKey<Material> Create(Material m) => new(m);
-        static ResourceKey<Material> Create(Material m, string name) => new(m, name);
+
+        static ResourceKey<Material> Create(Material m, string? name = null) => new(m, name);
     }
 }

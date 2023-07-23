@@ -20,7 +20,8 @@ namespace Iviz.Core
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
         public const bool IsMobile = true;
 #elif UNITY_WSA || UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-        public static bool IsMobile => IsHololens;
+        //public static bool IsMobile => IsHololens;
+        public const bool IsMobile = false;
 #elif UNITY_EDITOR
         //public static bool IsMobile => false; // don't set as constant, need for debugging
         public const bool IsMobile = false;
@@ -80,7 +81,7 @@ namespace Iviz.Core
             false;
 #endif
 
-#if UNITY_IOS || UNITY_ANDROID
+#if UNITY_IOS || UNITY_ANDROID || UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX || UNITY_STANDALONE
         /// <summary>
         /// Is this being run in a Hololens?
         /// </summary>
@@ -90,16 +91,6 @@ namespace Iviz.Core
         /// Is this being run on an XR platform? (VR or Hololens)
         /// </summary>
         public const bool IsXR = false;
-#elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-        /// <summary>
-        /// Is this being run in a Hololens?
-        /// </summary>
-        public static bool IsHololens => false;
-
-        /// <summary>
-        /// Is this being run on an XR platform? (VR or Hololens)
-        /// </summary>
-        public static bool IsXR => false;
 #else
         static bool? isHololens;
         static bool? isXR;
@@ -141,7 +132,7 @@ namespace Iviz.Core
 
         public static void ClearResources()
         {
-#if !(UNITY_IOS || UNITY_ANDROID || UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX)
+#if !(UNITY_IOS || UNITY_ANDROID || UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX || UNITY_STANDALONE)
             isHololens = null;
             isXR = null;
 #endif

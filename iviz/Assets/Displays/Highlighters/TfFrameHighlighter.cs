@@ -69,7 +69,7 @@ namespace Iviz.Displays.Highlighters
             }
 
             using var description = BuilderPool.Rent();
-            description.Append("<b>").Append(node.ParentId).Append("</b>\n");
+            description.Append("<b>").Append(node.Parent?.Id).Append("</b>\n");
             RosUtils.FormatPose(TfModule.RelativeToFixedFrame(node.Transform), description,
                 RosUtils.PoseFormat.OnlyPosition);
             tooltip.SetCaption(description);

@@ -211,7 +211,7 @@ namespace Iviz.Controllers
         public string Topic => config.Topic;
 
         public override Listener Listener { get; }
-        
+
         public IReadOnlyList<bool> VisibleMask
         {
             get => config.VisibleMask;
@@ -242,7 +242,7 @@ namespace Iviz.Controllers
         }
 
         public int NumEntriesForLog => markers.Count;
-        
+
         public MarkerListener(MarkerConfiguration? config, string topic, string type)
         {
             Config = config ?? new MarkerConfiguration
@@ -252,12 +252,14 @@ namespace Iviz.Controllers
                 Id = topic
             };
 
-            var rosTransportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
+            var rosProfile = PreferUdp 
+                ? RosSubscriptionProfile.SpammyCanDrop 
+                : RosSubscriptionProfile.Default;
 
             Listener = Config.Type switch
             {
-                Marker.MessageType => new Listener<Marker>(Config.Topic, Handle, rosTransportHint),
-                MarkerArray.MessageType => new Listener<MarkerArray>(Config.Topic, Handle, rosTransportHint),
+                Marker.MessageType => new Listener<Marker>(Config.Topic, Handle, rosProfile),
+                MarkerArray.MessageType => new Listener<MarkerArray>(Config.Topic, Handle, rosProfile),
                 _ => Listener.ThrowUnsupportedMessageType(Config.Type)
             };
 
@@ -435,7 +437,7 @@ namespace Iviz.Controllers
                         break;
                     }
 
-                    if (msg.Type < 0  || msg.Type >= config.VisibleMask.Length)
+                    if (msg.Type < 0 || msg.Type >= config.VisibleMask.Length)
                     {
                         RosLogger.Info(
                             $"{this}: Unknown type {msg.Type.ToString()}.  Rejecting marker update {id.ToString()}.");

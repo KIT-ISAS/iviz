@@ -216,6 +216,8 @@ namespace Iviz.App
             {
                 CreateModule(ModuleType.Grid, configuration: new GridConfiguration { Id = "Grid" });
             }
+            
+            UpperCanvasPanel.SetEnabled(UpperCanvas.EnableAR, Settings.IsMobile);
 
             InitializeCallbacks();
 
@@ -311,6 +313,7 @@ namespace Iviz.App
                 connectionData.MyUriChanged += onRosInfoChanged;
                 connectionData.MyIdChanged += onRosInfoChanged;
                 connectionData.RosVersionChanged += onRosInfoChanged;
+                connectionData.BridgeUriChanged += onRosInfoChanged;
 
                 UpperCanvas.MasterUriButton.Clicked += connectionData.Show;
                 UpperCanvas.StopButton.Clicked += () => connectionData.ToggleConnection(false);
@@ -365,23 +368,18 @@ namespace Iviz.App
             var connectionData = Dialogs.ConnectionData;
 
             string uriStrMyId = connectionData.MyId ?? "?";
-            string uriStrMaster = connectionData.RosVersion == RosVersion.ROS1
-                ? connectionData.MasterUri?.Host ?? "?"
-                : "ROS2";
+            string uriStrMaster = connectionData.RosVersion switch
+            {
+                RosVersion.ROS1 => connectionData.MasterUri?.Host ?? "?",
+                RosVersion.ROS2 => "ROS2",
+                RosVersion.ROSBridge => connectionData.BridgeUri?.Host ?? "?",
+                _ => connectionData.RosVersion.ToString()
+            };
+            
             UpperCanvas.MasterUriStr.Text = $"<u>{uriStrMyId}</u>\n<color=grey>{uriStrMaster}</color>";
 
-            if (connectionData.RosVersion == RosVersion.ROS1)
-            {
-                UpperCanvas.RecordBag.enabled = true;
-                UpperCanvas.RecordBagImage.color = Color.black;
-                UpperCanvas.RecordBagText.color = Color.black;
-            }
-            else
-            {
-                UpperCanvas.RecordBag.enabled = false;
-                UpperCanvas.RecordBagImage.color = Color.grey;
-                UpperCanvas.RecordBagText.color = Color.grey;
-            }
+            bool supportsBag = RosProvider.SupportsRosBag(connectionData.RosVersion);
+            UpperCanvasPanel.SetEnabled(UpperCanvas.RecordBag, supportsBag);
         }
 
         public static void CallAfterInitialized(Action action)
@@ -678,7 +676,11 @@ namespace Iviz.App
                     : ConnectionDialogData.DefaultMyId;
                 if (config.LastMasterUris.Count != 0)
                 {
-                    connectionData.LastMasterUris = config.LastMasterUris;
+                    connectionData.LastMasterUris =
+                        config.LastMasterUris
+                            .Select(uriStr => Uri.TryCreate(uriStr, UriKind.Absolute, out var uri) ? uri : null)
+                            .Where<Uri>(uri => uri is not null)
+                            .ToList();
                 }
 
                 connectionData.DomainId = config.DomainId;
@@ -686,6 +688,20 @@ namespace Iviz.App
                 if (config.LastDiscoveryServers.Count != 0)
                 {
                     connectionData.LastDiscoveryServers = config.LastDiscoveryServers;
+                }
+
+                connectionData.BridgeUri =
+                    !string.IsNullOrWhiteSpace(config.BridgeUri) &&
+                    Uri.TryCreate(config.BridgeUri, UriKind.Absolute, out var bridgeUri)
+                        ? bridgeUri
+                        : ConnectionDialogData.DefaultBridgeUri;
+                if (config.LastBridgeUris.Count != 0)
+                {
+                    connectionData.LastBridgeUris =
+                        config.LastBridgeUris
+                            .Select(uriStr => Uri.TryCreate(uriStr, UriKind.Absolute, out var uri) ? uri : null)
+                            .Where<Uri>(uri => uri is not null)
+                            .ToList();
                 }
 
                 Settings.SettingsManager.Config = config.Settings;
@@ -733,12 +749,14 @@ namespace Iviz.App
                 MasterUri = connectionData.MasterUri?.ToString() ?? "",
                 MyUri = connectionData.MyUri?.ToString() ?? "",
                 MyId = connectionData.MyId ?? "",
-                LastMasterUris = new List<Uri>(connectionData.LastMasterUris),
+                LastMasterUris = connectionData.LastMasterUris.Select(uri => uri.ToString()).ToList(),
                 Settings = Settings.SettingsManager.Config,
                 HostAliases = Dialogs.SystemData.HostAliases,
                 DomainId = connectionData.DomainId,
                 DiscoveryServer = connectionData.DiscoveryServer,
-                LastDiscoveryServers = new List<Endpoint?>(connectionData.LastDiscoveryServers)
+                LastDiscoveryServers = new List<Endpoint?>(connectionData.LastDiscoveryServers),
+                BridgeUri = connectionData.BridgeUri?.ToString() ?? "",
+                LastBridgeUris = connectionData.LastBridgeUris.Select(uri => uri.ToString()).ToList(),
             };
 
             try
@@ -861,6 +879,7 @@ namespace Iviz.App
             var connectionData = Dialogs.ConnectionData;
             connectionData.LastMasterUris = new List<Uri>();
             connectionData.LastDiscoveryServers = new List<Endpoint?>();
+            connectionData.LastBridgeUris = new List<Uri>();
             connectionData.ResetPanel();
 
             try
@@ -869,6 +888,7 @@ namespace Iviz.App
                 var config = JsonUtils.DeserializeObject<ConnectionConfiguration>(inText);
                 config.LastMasterUris.Clear();
                 config.LastDiscoveryServers.Clear();
+                config.LastBridgeUris.Clear();
                 config.MasterUri = "";
 
                 string outText = BuiltIns.ToJsonString(config);
@@ -917,9 +937,9 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                throw new InvalidOperationException("Failed to create module of type " + resource + ". " +
-                                                    "Topic='" + topic + "' Type='" + type + "' Configuration: '" +
-                                                    configuration + "'", e);
+                throw new InvalidOperationException(
+                    $"Failed to create module of type {resource}. " +
+                    $"Topic='{topic}' Type='{type}' Configuration: '{configuration}'", e);
             }
 
             if (requestedId != null)

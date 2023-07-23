@@ -34,6 +34,7 @@ namespace Iviz.Displays
         Mesh? mesh;
         Material? currentMaterial;
         bool isDirty;
+        bool useRosSwizzle;
 
         MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
         MeshFilter MeshFilter => meshFilter.AssertNotNull(nameof(meshFilter));
@@ -48,19 +49,38 @@ namespace Iviz.Displays
             set
             {
                 base.UseColormap = value;
-                if (Settings.SupportsComputeBuffers)
+                UpdateMaterial();
+            }
+        }
+        
+        public bool UseRosSwizzle
+        {
+            get => useRosSwizzle;
+            set
+            {
+                useRosSwizzle = value;
+                UpdateMaterial();
+            }
+        }
+
+        void UpdateMaterial()
+        {
+            if (Settings.SupportsComputeBuffers)
+            {
+                currentMaterial = (UseColormap, UseRosSwizzle) switch
                 {
-                    currentMaterial = UseColormap
-                        ? Resource.Materials.PointCloudWithColormap.Object
-                        : Resource.Materials.PointCloud.Object;
-                }
-                else
-                {
-                    currentMaterial = UseColormap
-                        ? Resource.Materials.PointCloudDirectWithColormap.Object
-                        : Resource.Materials.PointCloudDirect.Object;
-                    MeshRenderer.material = currentMaterial;
-                }
+                    (true, true) => Resource.Materials.PointCloudWithWithRosSwizzleColormap.Object,
+                    (false, true) => Resource.Materials.PointCloudWithRosSwizzle.Object,
+                    (true, false) => Resource.Materials.PointCloudWithColormap.Object,
+                    (false, false) => Resource.Materials.PointCloud.Object,
+                };
+            }
+            else
+            {
+                currentMaterial = UseColormap
+                    ? Resource.Materials.PointCloudDirectWithColormap.Object
+                    : Resource.Materials.PointCloudDirect.Object;
+                MeshRenderer.material = currentMaterial;
             }
         }
 
@@ -75,7 +95,7 @@ namespace Iviz.Displays
             }
             else
             {
-                RosLogger.Info($"{this}: Device does not support compute buffers in vertices. " +
+                RosLogger.Info($"{ToString()}: Device does not support compute buffers in vertices. " +
                                "Point clouds may not appear correctly.");
                 mesh = new Mesh { name = "PointCloud Mesh" };
                 mesh.MarkDynamic();
@@ -322,6 +342,7 @@ namespace Iviz.Displays
             pointBuffer.Clear();
             pointBuffer.Reset();
 
+            UseRosSwizzle = false;
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
             Properties.SetBuffer(ShaderIds.PointsId, (ComputeBuffer?)null);

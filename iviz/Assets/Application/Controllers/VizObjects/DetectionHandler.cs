@@ -1,10 +1,14 @@
 #nullable enable
 
+using System;
+using System.Text;
 using Iviz.Core;
 using Iviz.Displays.XR;
+using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.Msgs.VisionMsgs;
 using UnityEngine;
+using Pose = Iviz.Msgs.GeometryMsgs.Pose;
+using System.Collections.Generic;
 
 namespace Iviz.Controllers
 {
@@ -84,6 +88,9 @@ namespace Iviz.Controllers
         {
             readonly ContainerBoundary boundary;
 
+            DetectionBox? lastMsg;
+            readonly List<(string Class, double Score)> lastClassifications = new();
+
             public DetectionObject(DetectionBox msg, string typeDescription) : base(msg.Id, typeDescription)
             {
                 boundary = new ContainerBoundary();
@@ -93,17 +100,79 @@ namespace Iviz.Controllers
             public void Update(DetectionBox msg)
             {
                 node.AttachTo(msg.Header.FrameId);
-                
+
                 boundary.HandlePointCloud(msg.PointCloud);
                 boundary.Scale = msg.Bounds.Size.Ros2Unity().Abs();
                 boundary.Pose = msg.Bounds.Center.Ros2Unity();
+                boundary.Color = msg.Color.A > 0
+                    ? msg.Color.ToUnity()
+                    : Color.white;
+
+                
+                int numClasses = Mathf.Min(msg.Classes.Length, msg.Scores.Length);
+
+                lastClassifications.Clear();
+                for (int i = 0; i < numClasses; i++)
+                {
+                    lastClassifications.Add((msg.Classes[i], msg.Scores[i]));
+                }
+
+                lastClassifications.Sort(
+                    (pairA, pairB) => -pairA.Score.CompareTo(pairB.Score));
+                
+                boundary.Caption = lastClassifications.Count != 0
+                    ? lastClassifications[0].Class
+                    : "";
+                
+                lastMsg = msg;
             }
-            
+
+            public override void GenerateLog(StringBuilder description)
+            {
+                description.Append("<color=#000080ff><b>** Detection #").Append(id).Append(" **</b></color>").AppendLine();
+                if (lastMsg == null)
+                {
+                    description.Append("(No information)").AppendLine();
+                    return;
+                }
+
+                description.Append("<b>Position:</b> [");
+                RosUtils.FormatPose(lastMsg.Bounds.Center, description, RosUtils.PoseFormat.OnlyPosition);
+                description.Append("]").AppendLine();
+
+                description.Append("<b>Orientation:</b> [");
+                RosUtils.FormatPose(lastMsg.Bounds.Center, description, RosUtils.PoseFormat.OnlyRotation);
+                description.Append("]").AppendLine();
+
+                description.Append("<b>Size:</b> [");
+                RosUtils.FormatPose(Pose.Identity.WithPosition(lastMsg.Bounds.Size), description,
+                    RosUtils.PoseFormat.OnlyPosition);
+                description.Append("]").AppendLine();
+
+                description.Append("<b>Classification:</b> ").AppendLine();
+
+                int numClasses = Mathf.Min(lastMsg.Classes.Length, lastMsg.Scores.Length);
+                if (numClasses == 0)
+                {
+                    description.Append("    [empty]").AppendLine();
+                }
+                else
+                {
+                    foreach (var (klass, score) in lastClassifications)
+                    {
+                        description
+                            .Append("    <b>'").Append(klass).Append("'</b> --> ")
+                            .Append(score.ToString("#,0.###")).AppendLine();
+                    }
+                }
+            }
+
+
             public override void Dispose()
             {
                 boundary.Dispose();
                 base.Dispose();
-            }            
+            }
         }
     }
 }

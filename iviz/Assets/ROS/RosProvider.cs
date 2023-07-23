@@ -17,14 +17,17 @@ namespace Iviz.Ros
     public enum RosVersion
     {
         ROS1,
-        ROS2
+        ROS2,
+        ROSBridge
     }
 
     public abstract class RosProvider : Displays.ServiceProvider
     {
-        public const bool IsRos2VersionSupported = RosConnection.HasRos2Implementation;
+        public const bool IsRos2VersionSupported = Settings.IsAndroid || Settings.IsIPhone || Settings.IsMacOS;
 
-        public static bool OwnMasterEnabledByDefault => Settings.IsMacOS || Settings.IsMobile;
+        public const bool OwnMasterEnabledByDefault = Settings.IsMacOS || Settings.IsMobile;
+
+        public static bool SupportsRosBag(RosVersion version) => version != RosVersion.ROS2;
         
         // ROS1 stuff
         Uri? masterUri;
@@ -34,6 +37,11 @@ namespace Iviz.Ros
         // ROS2 stuff
         int domainId;
         Endpoint? discoveryServer;
+
+        // ROSBridge stuff
+        Uri? bridgeUri;
+
+        protected ConnectionState connectionState = ConnectionState.Disconnected;
 
         protected IRosClient? client;
         protected IRosClient Client => client ?? throw new InvalidOperationException("Client not connected");
@@ -90,6 +98,19 @@ namespace Iviz.Ros
                 Disconnect();
             }
         }
+        
+        public Uri? BridgeUri
+        {
+            get => bridgeUri;
+            set
+            {
+                bridgeUri = value;
+                Disconnect();
+            }
+        }
+        
+        
+        public bool IsConnected => connectionState == ConnectionState.Connected;
 
         public bool KeepReconnecting { get; set; }
 

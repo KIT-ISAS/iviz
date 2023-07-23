@@ -89,7 +89,7 @@ namespace Iviz.Displays
                     {
                         dirX = ab / Mathf.Sqrt(abMagnitudeSq);
                         var (x, y, z) = dirX;
-                        if (Hint.Unlikely(Mathf.Approximately(z, 1)))
+                        if (Hint.Unlikely(Mathf.Approximately(Mathf.Abs(z), 1)))
                         {
                             float den = Mathf.Sqrt(x * x + z * z);
                             dirY.x = -z / den;
@@ -126,10 +126,10 @@ namespace Iviz.Displays
                         h = b - halfSumYz,
                         i = b - halfDiffYz,
                         j = b + halfDirX
-                    };   
+                    };
                 }
             }
-            
+
             [StructLayout(LayoutKind.Sequential)]
             struct Batch
             {
@@ -167,10 +167,10 @@ namespace Iviz.Displays
                         h = cb,
                         i = cb,
                         j = cb
-                    };                    
+                    };
                 }
             }
-            
+
             [StructLayout(LayoutKind.Sequential)]
             struct Batch
             {
@@ -188,7 +188,7 @@ namespace Iviz.Displays
             public void Execute()
             {
                 var batchOutput = output.Cast<float2, Batch>();
-                
+
                 for (int index = 0; index < input.Length; index++)
                 {
                     var line = input[index];

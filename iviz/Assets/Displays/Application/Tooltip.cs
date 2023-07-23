@@ -26,6 +26,8 @@ namespace Iviz.Displays
         public RoundedPlaneDisplay Background => ResourcePool.RentChecked(ref background, Transform);
         public Transform Transform => this.EnsureHasTransform(ref mTransform);
 
+        static bool KeepHorizontal => !Settings.IsXR;
+        
         public float Scale
         {
             set => Transform.localScale = value * Vector3.one;
@@ -122,7 +124,12 @@ namespace Iviz.Displays
 
         public void PointToCamera()
         {
-            Transform.LookAt(2 * Transform.position - Settings.MainCameraPose.position, Vector3.up);
+            var mainCameraPose = Settings.MainCameraPose;
+            var lookAtPosition = 2 * Transform.position - mainCameraPose.position;
+            
+            Transform.LookAt(lookAtPosition, KeepHorizontal
+                ? mainCameraPose.Up()
+                : Vector3.up);
         }
 
         void OnEnable()

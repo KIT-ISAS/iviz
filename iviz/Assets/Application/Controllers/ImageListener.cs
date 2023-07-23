@@ -59,7 +59,7 @@ namespace Iviz.Controllers
 
         public Vector2Int ImageSize =>
             Texture != null ? new Vector2Int(Texture.width, Texture.height) : Vector2Int.zero;
-        
+
         public ImageConfiguration Config
         {
             get => config;
@@ -222,8 +222,10 @@ namespace Iviz.Controllers
 
             Listener = Config.Type switch
             {
-                Image.MessageType => new Listener<Image>(Config.Topic, Handler),
-                CompressedImage.MessageType => new Listener<CompressedImage>(Config.Topic, HandlerCompressed),
+                Image.MessageType => new Listener<Image>(Config.Topic, 
+                    Handler, RosSubscriptionProfile.SensorKeepLast),
+                CompressedImage.MessageType => new Listener<CompressedImage>(Config.Topic, 
+                    HandlerCompressed, RosSubscriptionProfile.SensorKeepLast),
                 _ => Listener.ThrowUnsupportedMessageType(Config.Type)
             };
 

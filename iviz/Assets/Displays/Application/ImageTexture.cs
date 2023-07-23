@@ -10,7 +10,7 @@ using Unity.Collections;
 using UnityEngine;
 using Vector2 = UnityEngine.Vector2;
 using Vector4 = UnityEngine.Vector4;
-using MarcusW.VncClient.Protocol.Implementation.Native; // jpeg-turbo stuff
+// using MarcusW.VncClient.Protocol.Implementation.Native;
 
 namespace Iviz.Displays
 {

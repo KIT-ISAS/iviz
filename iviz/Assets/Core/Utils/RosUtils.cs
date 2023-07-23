@@ -71,13 +71,7 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UnityEngine.Quaternion RosRpy2Unity(this in Vector3 v) =>
-            UnityUtils.FromEulerRad(-v.Ros2Unity());
-
-        //public static UnityEngine.Quaternion RosRpy2Unity(this in Vector3 v) =>
-        //    Euler(v.Ros2Unity() * -Mathf.Rad2Deg);
-
-        //static UnityEngine.Quaternion Euler(in Vector3 euler) =>
-        //    UnityUtils.FromEulerRad(euler * Mathf.Deg2Rad);
+            UnityEngine.Quaternion.Euler(v.Ros2Unity() * -Mathf.Rad2Deg);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UnityEngine.Quaternion RosRpy2Unity(this in Msgs.GeometryMsgs.Vector3 v) =>
@@ -408,6 +402,12 @@ namespace Iviz.Core
             OnlyRotation,
             AllWithoutRoll,
             All
+        }
+
+        public static void FormatPose(in Pose rosPose, StringBuilder description,
+            PoseFormat format = PoseFormat.All, int positionPrecision = 3)
+        {
+            FormatPose(rosPose.Ros2Unity(), description, format, positionPrecision);
         }
 
         public static void FormatPose(in UnityEngine.Pose unityPose, StringBuilder description,

@@ -209,7 +209,7 @@ namespace Iviz.Controllers
                 Topic = topic,
             };
 
-            Listener = new Listener<OccupancyGrid>(Config.Topic, Handle);
+            Listener = new Listener<OccupancyGrid>(Config.Topic, Handle, profile: RosSubscriptionProfile.SensorKeepLast);
             isProcessing.Changed = Listener.SetPause;
         }
 

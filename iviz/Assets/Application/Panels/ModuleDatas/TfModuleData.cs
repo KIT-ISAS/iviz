@@ -56,7 +56,6 @@ namespace Iviz.App
             panel.ListenerStatic.Listener = listener.ListenerStatic;
             panel.HideButton.State = listener.Visible;
             panel.FrameSize.Value = listener.FrameSize;
-            panel.PreferUdp.Value = listener.PreferUdp;
             panel.ShowFrameLabels.Value = listener.LabelsVisible;
             panel.ConnectToParent.Value = listener.ParentConnectorVisible;
             panel.KeepAllFrames.Value = listener.KeepAllFrames;
@@ -73,7 +72,6 @@ namespace Iviz.App
             panel.FlipZ.ValueChanged += f => listener.FlipZ = f;
             panel.Interactable.ValueChanged += f => listener.Interactable = f;
             panel.ResetButton.Clicked += () => listener.ResetController();
-            panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
 
             panel.CloseButton.Clicked += () => ModulePanelManager.TogglePanel(this);
         }

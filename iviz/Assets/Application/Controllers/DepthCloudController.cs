@@ -42,7 +42,7 @@ namespace Iviz.Controllers
         public Vector2Int DepthImageSize => depthImageTexture.Texture != null
             ? new Vector2Int(depthImageTexture.Texture.width, depthImageTexture.Texture.height)
             : Vector2Int.zero;
-        
+
         public DepthCloudConfiguration Config
         {
             get => config;
@@ -171,8 +171,10 @@ namespace Iviz.Controllers
                         : null;
                 ColorListener = type switch
                 {
-                    Image.MessageType => new Listener<Image>(colorTopic, ColorHandler),
-                    CompressedImage.MessageType => new Listener<CompressedImage>(colorTopic, ColorHandlerCompressed),
+                    Image.MessageType => new Listener<Image>(colorTopic, ColorHandler,
+                        RosSubscriptionProfile.SensorKeepLast),
+                    CompressedImage.MessageType => new Listener<CompressedImage>(colorTopic, ColorHandlerCompressed,
+                        RosSubscriptionProfile.SensorKeepLast),
                     _ => null
                 };
 
@@ -218,8 +220,10 @@ namespace Iviz.Controllers
                         : null;
                 DepthListener = type switch
                 {
-                    Image.MessageType => new Listener<Image>(depthTopic, DepthHandler),
-                    CompressedImage.MessageType => new Listener<CompressedImage>(depthTopic, DepthHandlerCompressed),
+                    Image.MessageType => new Listener<Image>(depthTopic, DepthHandler,
+                        RosSubscriptionProfile.SensorKeepLast),
+                    CompressedImage.MessageType => new Listener<CompressedImage>(depthTopic, DepthHandlerCompressed,
+                        RosSubscriptionProfile.SensorKeepLast),
                     _ => null
                 };
 

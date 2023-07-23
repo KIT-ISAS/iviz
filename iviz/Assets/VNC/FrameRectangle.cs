@@ -1,5 +1,7 @@
 #nullable enable
 
+#if false
+
 using System;
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
@@ -320,3 +322,4 @@ namespace VNC
         }
     }
 }
+#endif

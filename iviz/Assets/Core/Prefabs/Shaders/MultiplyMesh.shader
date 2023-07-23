@@ -8,6 +8,7 @@ Shader "iviz/MultiplyMesh"
 		[Toggle(USE_TEXTURE)] _UseTexture("Use Texture", Float) = 1
 		[Toggle(USE_TEXTURE_SCALE)] _UseTextureScale("Use Texture ScaleY", Float) = 1
 		[Toggle(USE_TEXTURE_SCALE_ALL)] _UseTextureScaleAll("Use Texture Scale All", Float) = 0
+    	[Toggle(ROS_SWIZZLE)] _UseRosSwizzle("Use ROS Swizzle", Float) = 0		
 		_MainTex("Atlas Texture", 2D) = "defaulttexture" {}    	
     }
     SubShader
@@ -18,6 +19,7 @@ Shader "iviz/MultiplyMesh"
         #pragma surface surf Standard addshadow fullforwardshadows vertex:vert
         #pragma instancing_options procedural:setup 
 		#pragma multi_compile _ USE_TEXTURE USE_TEXTURE_SCALE USE_TEXTURE_SCALE_ALL
+        #pragma multi_compile _ ROS_SWIZZLE
         #pragma target 4.5
 
         struct PointWithColor {
@@ -64,11 +66,10 @@ Shader "iviz/MultiplyMesh"
 #ifdef USING_STEREO_MATRICES
 			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 #endif
-
         	v.normal = normalize(mul(v.normal, (float3x3)_WorldToLocal));
         	
 #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
-            v.vertex *= _LocalScale;
+            v.vertex.xyz *= _LocalScale;
             v.vertex += _LocalOffset;
 
         	uint instanceID = v.instanceID;
@@ -89,7 +90,13 @@ Shader "iviz/MultiplyMesh"
 			v.vertex.xyz *= intensity;
     #endif
 
-            v.vertex.xyz += _Points[instanceID].pos;
+			float3 pos = _Points[instanceID].pos;
+        	
+#if ROS_SWIZZLE
+        	pos = float3(-pos.y, pos.z, pos.x);
+#endif
+        	
+            v.vertex.xyz += pos;
             v.vertex = mul(_LocalToWorld, v.vertex);
             v.vertex -= _BoundaryCenter;
 
@@ -112,6 +119,7 @@ Shader "iviz/MultiplyMesh"
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
             o.Albedo = IN.color;
+            o.Emission = IN.color * 0.1;
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
         }

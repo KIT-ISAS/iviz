@@ -671,30 +671,6 @@ namespace Iviz.Core
         public static Vector3 Up(this in Pose pose) => pose.rotation.Up();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Quaternion FromEulerRad(in Vector3 euler)
-        {
-            // stolen from https://gist.github.com/HelloKitty/91b7af87aac6796c3da9
-            float yaw = euler.x;
-            float pitch = euler.y;
-            float roll = euler.z;
-            float rollOver2 = roll * 0.5f;
-            float sinRollOver2 = Mathf.Sin(rollOver2);
-            float cosRollOver2 = Mathf.Cos(rollOver2);
-            float pitchOver2 = pitch * 0.5f;
-            float sinPitchOver2 = Mathf.Sin(pitchOver2);
-            float cosPitchOver2 = Mathf.Cos(pitchOver2);
-            float yawOver2 = yaw * 0.5f;
-            float sinYawOver2 = Mathf.Sin(yawOver2);
-            float cosYawOver2 = Mathf.Cos(yawOver2);
-            Quaternion result;
-            result.x = cosYawOver2 * cosPitchOver2 * cosRollOver2 + sinYawOver2 * sinPitchOver2 * sinRollOver2;
-            result.y = cosYawOver2 * cosPitchOver2 * sinRollOver2 - sinYawOver2 * sinPitchOver2 * cosRollOver2;
-            result.z = cosYawOver2 * sinPitchOver2 * cosRollOver2 + sinYawOver2 * cosPitchOver2 * sinRollOver2;
-            result.w = sinYawOver2 * cosPitchOver2 * cosRollOver2 - cosYawOver2 * sinPitchOver2 * sinRollOver2;
-            return result;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ApproximatelyZero(this float f) => Mathf.Abs(f) < 8 * float.Epsilon;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -797,61 +773,69 @@ namespace Iviz.Core
 
         public static void SetTextRent(this TMP_Text text, in BuilderPool.BuilderRent rent, int start, int count)
         {
-            if (!MemoryMarshal.TryGetArray(rent.Chunk, out var segment) || segment.Array == null)
+            if (!MemoryMarshal.TryGetArray(rent.Chunk, out var segment)
+                || segment.Array is not { } array)
             {
                 // shouldn't happen
-                RosLogger.Debug(
-                    $"{nameof(UnityUtils)}: Failed to retrieve array from {nameof(StringBuilder)} memory chunk!");
+                RosLogger.Debug($"{nameof(UnityUtils)}: Failed to retrieve array from " +
+                                $"{nameof(StringBuilder)} memory chunk!");
                 return;
             }
 
             int end = start + count;
-            char[] array = segment.Array;
+            const char boxChar = '\u25A1';
 
-            if (NeedsFixing())
+            for (int i = start; i < end; i++)
             {
-                SetFixed();
-            }
-            else
-            {
-                text.SetCharArray(segment.Array, start, count);
-            }
-
-
-            bool NeedsFixing()
-            {
-                for (int i = start; i < end; i++)
+                ref char c = ref array[i];
+                if (IsControlChar(c) && c != '\n')
                 {
-                    if (array[i] < '\n') return true;
+                    c = boxChar;
                 }
-
-                return false;
             }
 
-            void SetFixed()
+            text.SetCharArray(segment.Array, start, count);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsControlChar(char c) => (c < 0x20 || c >= 0x7f && c <= 0x9f);
+
+        public static bool HasValidIdentifierChars(string id)
+        {
+            int length = id.Length;
+            unsafe
             {
-                using var buffer = BuilderPool.Rent();
-                for (int i = start; i < end; i++)
+                fixed (char* idPtr = id)
                 {
-                    char c = array[i];
-                    if (c is (< ' ' and not ('\r' or '\n')) or > '~')
+                    for (int i = 0; i < length; i++)
                     {
-                        buffer.Append("\\u").Append(((int)c).ToString("X4"));
-                    }
-                    else
-                    {
-                        buffer.Append(c);
+                        // control characters screw up display
+                        if (IsControlChar(idPtr[i])) return false;
                     }
                 }
-
-                if (!MemoryMarshal.TryGetArray(buffer.Chunk, out var bufferSegment) || bufferSegment.Array == null)
-                {
-                    // shouldn't happen either
-                    return;
-                }
-
-                text.SetCharArray(bufferSegment.Array, 0, buffer.Length);
             }
+
+            return true;
+        }
+
+        public static string FixName(string name)
+        {
+            using var buffer = BuilderPool.Rent();
+            int length = name.Length;
+            for (int i = 0; i < length; i++)
+            {
+                char c = name[i];
+                if (IsControlChar(c))
+                {
+                    buffer.Append("\\u").Append(((int)c).ToString("X4"));
+                }
+                else
+                {
+                    buffer.Append(c);
+                }
+            }
+
+            return buffer.ToString();
         }
 
         public static TransformEnumerator GetChildren(this Transform t) => new(t);
@@ -885,22 +869,11 @@ namespace Iviz.Core
             display.OverrideMaterial(Resource.Materials.LitHalfVisible.Object);
         }
 
-        public static bool HasOnlyValidIdentifierChars(string id)
-        {
-            int length = id.Length;
-            for (int i = 0; i < length; i++)
-            {
-                if (id[i] < ' ') return true;
-            }
-
-            return false;
-        }
-
         public static void TryRaise(this Action? action, object callerName,
             [CallerMemberName] string? methodName = null)
         {
             if (action == null) return;
-            
+
             try
             {
                 action();

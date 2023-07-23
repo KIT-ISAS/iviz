@@ -18,7 +18,7 @@ namespace Iviz.Ros
         const int WaitBetweenRetriesInMs = 500;
 
         readonly string topic;
-        readonly RosTransportHint transportHint;
+        readonly RosSubscriptionProfile? profile;
         readonly bool requiresDispose;
 
         Listener<T>[] listeners = Array.Empty<Listener<T>>();
@@ -28,11 +28,11 @@ namespace Iviz.Ros
 
         public IRosSubscriber? Subscriber { get; private set; }
 
-        public SubscribedTopic(string topic, RosTransportHint transportHint)
+        public SubscribedTopic(string topic, RosSubscriptionProfile? profile)
         {
             ThrowHelper.ThrowIfNull(topic, nameof(topic));
             this.topic = topic;
-            this.transportHint = transportHint;
+            this.profile = profile;
             requiresDispose = typeof(IDisposable).IsAssignableFrom(typeof(T));
         }
 
@@ -75,7 +75,7 @@ namespace Iviz.Ros
                 try
                 {
                     IRosSubscriber subscriber;
-                    (subscriberId, subscriber) = await client.SubscribeAsync(topic, this, transportHint, token);
+                    (subscriberId, subscriber) = await client.SubscribeAsync(topic, this, profile, token);
                     if (bagListener != null)
                     {
                         bagId = subscriber.Subscribe(bagListener.EnqueueMessage);

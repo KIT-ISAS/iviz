@@ -127,6 +127,8 @@ namespace Iviz.Displays
                 UpdateScale();
             }
         }
+        
+        public bool UseRosSwizzle { get; set; }
 
         public override Bounds? Bounds => Size == 0 ? null : base.Bounds;
 
@@ -175,6 +177,13 @@ namespace Iviz.Displays
 
         Material FindMaterial()
         {
+            if (UseRosSwizzle)
+            {
+                return UseColormap 
+                    ? Resource.Materials.MeshListWithRosSwizzleColormap.Object 
+                    : Resource.Materials.MeshListWithRosSwizzle.Object;
+            }
+            
             if (OcclusionOnly && UseIntensityForScaleY)
             {
                 return Resource.Materials.MeshListOcclusionOnlyWithScaleY.Object;
@@ -200,12 +209,9 @@ namespace Iviz.Displays
                 return Resource.Materials.MeshListWithColormapScaleAll.Object;
             }
 
-            if (UseColormap)
-            {
-                return Resource.Materials.MeshListWithColormap.Object;
-            }
-
-            return Resource.Materials.MeshList.Object;
+            return UseColormap 
+                ? Resource.Materials.MeshListWithColormap.Object 
+                : Resource.Materials.MeshList.Object;
         }
 
         void OnDestroy()

@@ -6,8 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Bridge.Client;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.Ntp;
 using Iviz.Roslib;
 using Iviz.Roslib.XmlRpc;
@@ -72,6 +74,7 @@ namespace Iviz.Ros
                     {
                         RosVersion.ROS1 => "ROS version changed to ROS1/Noetic. You can connect now.",
                         RosVersion.ROS2 => "ROS version changed to ROS2/Foxy (experimental). You can connect now.",
+                        RosVersion.ROSBridge => "ROS version changed to RosBridge. You can connect now.",
                         _ => throw new IndexOutOfRangeException("Invalid ROS version")
                     }
                 );
@@ -123,7 +126,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            runningTs.Cancel();
+            runningTs.CancelNoThrow(this);
             runningTs = new CancellationTokenSource();
             await Client.DisposeAsync(runningTs.Token).AwaitNoThrow(this);
             client = null;
@@ -137,24 +140,34 @@ namespace Iviz.Ros
                 return false;
             }
 
-            if (version != RosVersion.ROS1)
+            switch (RosVersion)
             {
-                return true;
-            }
+                case RosVersion.ROS1:
+                    if (MasterUri == null || MasterUri.Scheme != "http")
+                    {
+                        RosLogger.Internal("Connection request failed! Master uri has not been set or is invalid.");
+                        return false;
+                    }
 
-            if (MasterUri == null || MasterUri.Scheme != "http")
-            {
-                RosLogger.Internal("Connection request failed! Master uri has not been set or is invalid.");
-                return false;
-            }
+                    if (MyUri == null || MyUri.Scheme != "http")
+                    {
+                        RosLogger.Internal("Connection request failed! Own uri has not been set or is invalid.");
+                        return false;
+                    }
 
-            if (MyUri == null || MyUri.Scheme != "http")
-            {
-                RosLogger.Internal("Connection request failed! Own uri has not been set or is invalid.");
-                return false;
-            }
+                    return true;
+                case RosVersion.ROSBridge:
+                    if (BridgeUri == null || BridgeUri.Scheme != "ws")
+                    {
+                        RosLogger.Internal("Connection request failed! Bridge uri has not been set or is invalid.");
+                        return false;
+                    }
 
-            return true;
+                    return true;
+
+                default:
+                    return true;
+            }
         }
 
         internal async ValueTask<bool> ConnectAsync()
@@ -167,9 +180,6 @@ namespace Iviz.Ros
 
             try
             {
-                var currentVersion = version;
-                const int rpcTimeoutInMs = 3000;
-
                 //Tools.Logger.LogDebugCallback = RosLogger.Debug;
                 if (Settings.IsStandalone)
                 {
@@ -184,98 +194,16 @@ namespace Iviz.Ros
 
                 RosLogger.Internal("Connecting...");
 
-                runningTs.Cancel();
+                runningTs.CancelNoThrow(this);
                 runningTs = new CancellationTokenSource();
 
+                var currentVersion = version;
                 var token = runningTs.Token;
 
-                switch (currentVersion)
-                {
-                    case RosVersion.ROS1:
-                        var newRos1Client = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
-                        newRos1Client.ShutdownAction = OnShutdown;
-                        newRos1Client.RosMasterClient.TimeoutInMs = rpcTimeoutInMs;
-                        await newRos1Client.CheckOwnUriAsync(token);
-                        client = newRos1Client;
-                        break;
+                var currentClient = await CreateClientAsync(currentVersion, token);
+                client = currentClient;
 
-                    case RosVersion.ROS2:
-                        if (!IsRos2VersionSupported)
-#pragma warning disable CS0162
-                        {
-                            // do not replace with throw helper!
-                            // we need the remaining lines to be clearly unreachable so they get stripped
-                            // otherwise standalone will fail because the ros2 lib cannot be found
-                            throw new InvalidOperationException("ROS2 not supported!");
-                        }
-#pragma warning restore CS0162
-
-                        SetEnvironmentVariable("FASTRTPS_DEFAULT_PROFILES_FILE", Settings.Ros2Folder + "/profiles.xml");
-                        SetEnvironmentVariable("ROS_DISCOVERY_SERVER", DiscoveryServer?.Description());
-
-                        var newRos2Client = new Ros2Client(MyId,
-                            domainId: DomainId,
-                            wrapperType: new UnityRclWrapper());
-                        await newRos2Client.InitializeParameterServerAsync(token);
-                        client = newRos2Client;
-                        break;
-                    default:
-                        ThrowHelper.ThrowArgumentOutOfRange(nameof(currentVersion));
-                        break; // unreachable
-                }
-
-                var currentClient = client;
-
-                Post(async () =>
-                {
-                    RosLogger.Internal("Resubscribing and readvertising...");
-                    token.ThrowIfCancellationRequested();
-
-                    var ros1Client = currentClient as RosClient;
-                    if (ros1Client != null)
-                    {
-                        try
-                        {
-                            var hosts = await ros1Client.GetParameterAsync("/iviz/hosts", token);
-                            AddHostsParamFromArg(hosts);
-                        }
-                        catch
-                        {
-                            RosLogger.Debug($"[{nameof(RosConnection)}]: Server does not have parameter /iviz/hosts.");
-                        }
-                    }
-
-                    AddConfigHostAliases();
-
-                    token.ThrowIfCancellationRequested();
-                    var serviceTasks = servicesByTopic.Values
-                        .Select(service => ReAdvertiseService(currentClient, service, token).AwaitNoThrow(this));
-                    await Task.WhenAll(serviceTasks);
-
-                    token.ThrowIfCancellationRequested();
-                    var publisherTasks = publishersByTopic.Values
-                        .Select(topic => ReAdvertise(currentClient, topic, token).AwaitNoThrow(this));
-                    await Task.WhenAll(publisherTasks);
-
-                    token.ThrowIfCancellationRequested();
-                    var subscriberTasks = subscribersByTopic.Values
-                        .Select(topic => ReSubscribe(currentClient, topic, token).AwaitNoThrow(this));
-                    await Task.WhenAll(subscriberTasks);
-
-                    token.ThrowIfCancellationRequested();
-                    cachedPublishedTopics = await currentClient.GetSystemPublishedTopicsAsync(token);
-
-                    cachedSystemState = null;
-                    cachedTopics = EmptyTopics;
-
-                    RosLogger.Internal("Finished resubscribing and readvertising!");
-
-                    if (ros1Client != null)
-                    {
-                        watchdogTask = WatchdogTask(ros1Client.RosMasterClient, token).AsTask();
-                        ntpTask = NtpCheckerTask(ros1Client.MasterUri.Host, token).AsTask();
-                    }
-                });
+                Post(async () => await InitializeConnection(currentClient, token));
 
                 RosLogger.Debug($"[{nameof(RosConnection)}]: Connected!");
                 RosLogger.Internal("<b>Connected!</b>");
@@ -317,6 +245,122 @@ namespace Iviz.Ros
 
             await DisconnectCore();
             return false;
+        }
+
+        async ValueTask<IRosClient> CreateClientAsync(RosVersion currentVersion, CancellationToken token)
+        {
+            const int rpcTimeoutInMs = 3000;
+
+            switch (currentVersion)
+            {
+                case RosVersion.ROS1:
+                {
+                    var newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
+                    newClient.ShutdownAction = OnShutdown;
+                    newClient.RosMasterClient.TimeoutInMs = rpcTimeoutInMs;
+                    await newClient.CheckOwnUriAsync(token);
+                    return newClient;
+                }
+
+                case RosVersion.ROS2:
+                {
+                    if (!IsRos2VersionSupported)
+#pragma warning disable CS0162
+                    {
+                        // do not replace with throw helper!
+                        // we need the remaining lines to be clearly unreachable so they get stripped
+                        // otherwise standalone will fail because the ros2 lib cannot be found
+                        throw new InvalidOperationException("ROS2 not supported!");
+                    }
+#pragma warning restore CS0162
+
+                    SetEnvironmentVariable("FASTRTPS_DEFAULT_PROFILES_FILE", Settings.Ros2Folder + "/profiles.xml");
+                    SetEnvironmentVariable("ROS_DISCOVERY_SERVER", DiscoveryServer?.Description());
+
+                    var newClient = new Ros2Client(MyId,
+                        domainId: DomainId,
+                        wrapperType: new UnityRclWrapper());
+                    await newClient.InitializeParameterServerAsync(token);
+                    return newClient;
+                }
+                case RosVersion.ROSBridge:
+                {
+                    var bridgeUri = BridgeUri ?? new Uri("ws://localhost:9090");
+                    return await RosbridgeClient.CreateAsync(bridgeUri, MyId, token: token);
+                }
+                default:
+                    ThrowHelper.ThrowArgumentOutOfRange(nameof(currentVersion));
+                    return null; // unreachable
+            }
+        }
+
+        async ValueTask InitializeConnection(IRosClient currentClient, CancellationToken token)
+        {
+            RosLogger.Internal("Resubscribing and readvertising...");
+            try
+            {
+                token.ThrowIfCancellationRequested();
+
+                var ros1Client = currentClient as RosClient;
+                if (ros1Client != null)
+                {
+                    try
+                    {
+                        var hosts = await ros1Client.GetParameterAsync("/iviz/hosts", token);
+                        AddHostsParamFromArg(hosts);
+                    }
+                    catch
+                    {
+                        RosLogger.Debug($"[{nameof(RosConnection)}]: Server does not have parameter /iviz/hosts.");
+                    }
+
+                    AddConfigHostAliases();
+                }
+
+                //Debug.LogError("1");
+                token.ThrowIfCancellationRequested();
+                var serviceTasks = servicesByTopic.Values
+                    .Select(service => ReAdvertiseService(currentClient, service, token).AwaitNoThrow(this));
+                await Task.WhenAll(serviceTasks);
+
+                //Debug.LogError("2");
+                token.ThrowIfCancellationRequested();
+                var publisherTasks = publishersByTopic.Values
+                    .Select(topic => ReAdvertise(currentClient, topic, token).AwaitNoThrow(this));
+                await Task.WhenAll(publisherTasks);
+
+                //Debug.LogError("3");
+                token.ThrowIfCancellationRequested();
+                var subscriberTasks = subscribersByTopic.Values
+                    .Select(topic => ReSubscribe(currentClient, topic, token).AwaitNoThrow(this));
+                await Task.WhenAll(subscriberTasks);
+
+                //Debug.LogError("4");
+                token.ThrowIfCancellationRequested();
+                cachedPublishedTopics = await currentClient.GetSystemPublishedTopicsAsync(token);
+
+                cachedSystemState = null;
+                cachedTopics = EmptyTopics;
+
+                if (ros1Client != null)
+                {
+                    watchdogTask = Ros1WatchdogTask(ros1Client.RosMasterClient, token).AsTask();
+                    ntpTask = NtpCheckerTask(ros1Client.MasterUri.Host, token).AsTask();
+                }
+
+                if (currentClient is RosbridgeClient rosbridgeClient)
+                {
+                    watchdogTask = RosbridgeWatchdogTask(rosbridgeClient, token).AsTask();
+                }
+
+                //Debug.LogError("5");
+                RosLogger.Internal("Finished resubscribing and readvertising. Ready to go!");
+            }
+            catch (Exception e)
+            {
+                RosLogger.Internal("<b>Error:</b> Session initialization failed! " +
+                                   "Some topics may not have been resubscribed or readvertised.", e);
+            }
         }
 
         static void SetEnvironmentVariable(string variable, string? value)
@@ -432,7 +476,7 @@ namespace Iviz.Ros
             }
         }
 
-        static async ValueTask WatchdogTask(RosMasterClient masterApi, CancellationToken token)
+        static async ValueTask Ros1WatchdogTask(RosMasterClient masterApi, CancellationToken token)
         {
             const int maxTimeMasterUnseenInMs = 10000;
             const int delayBetweenPingsInMs = 5000;
@@ -552,6 +596,73 @@ namespace Iviz.Ros
             }
         }
 
+        static async ValueTask RosbridgeWatchdogTask(RosbridgeClient client, CancellationToken token)
+        {
+            const int maxTimeMasterUnseenInMs = 10000;
+            const int delayBetweenPingsInMs = 5000;
+            DateTime lastBridgeAccess = GameThread.Now;
+            bool warningSet = false;
+            var connection = RosManager.Connection;
+
+
+            SetConnectionWarningState(false);
+            try
+            {
+                for (; !token.IsCancellationRequested; await Task.Delay(delayBetweenPingsInMs, token))
+                {
+                    using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+                    cts.CancelAfter(3000);
+                        
+                    var now = GameThread.Now;
+                    try
+                    {
+                        // check if the bridge is responding to requests.
+                        _ = await client.GetSystemNodesAsync(cts.Token);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        RosLogger.Internal("Connection with the bridge has reset. Restarting!");
+                        connection.Disconnect();
+                    }
+                    catch
+                    {
+                        if (!warningSet)
+                        {
+                            RosLogger.Internal("<b>Warning:</b> The bridge is not responding. It was last seen at" +
+                                               $" [{lastBridgeAccess.ToString("HH:mm:ss")}].");
+                            SetConnectionWarningState(true);
+                            warningSet = true;
+                        }
+
+                        continue;
+                    }
+
+                    var timeSinceLastAccess = now - lastBridgeAccess;
+                    lastBridgeAccess = now;
+                    if (warningSet)
+                    {
+                        RosLogger.Internal("The bridge is visible again, but we may be out of sync. Restarting!");
+                        connection.Disconnect();
+                        break;
+                    }
+
+                    if (timeSinceLastAccess.TotalMilliseconds > maxTimeMasterUnseenInMs)
+                    {
+                        // we haven't seen the master in a while, but no error has been thrown
+                        // by the routine that checks every 5 seconds. maybe the app was suspended?
+                        RosLogger.Internal("Haven't seen the bridge in a while. We may be out of sync. Restarting!");
+                        connection.Disconnect();
+                        break;
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+
+            SetConnectionWarningState(false);
+        }
+
         int GetFreeId()
         {
             for (int i = 0; i < publishers.Length; i++)
@@ -565,7 +676,9 @@ namespace Iviz.Ros
             throw new InvalidOperationException("Ran out of publishers!"); // NYI!
         }
 
-        static Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 1000), token);
+        Task RandomDelay(CancellationToken token) => RosVersion != RosVersion.ROSBridge
+            ? Task.Delay(Random.Next(0, 1000), token)
+            : Task.CompletedTask;
 
         async ValueTask ReAdvertise(IRosClient newClient, AdvertisedTopic topic, CancellationToken token)
         {
@@ -576,13 +689,13 @@ namespace Iviz.Ros
             publishers[id] = topic.Publisher;
         }
 
-        static async ValueTask ReSubscribe(IRosClient newClient, ISubscribedTopic topic, CancellationToken token)
+        async ValueTask ReSubscribe(IRosClient newClient, ISubscribedTopic topic, CancellationToken token)
         {
             await RandomDelay(token);
             await topic.SubscribeAsync(newClient, token: token);
         }
 
-        static async ValueTask ReAdvertiseService(IRosClient newClient, AdvertisedService service,
+        async ValueTask ReAdvertiseService(IRosClient newClient, AdvertisedService service,
             CancellationToken token)
         {
             await RandomDelay(token);
@@ -591,7 +704,7 @@ namespace Iviz.Ros
 
         public override void Disconnect()
         {
-            runningTs.Cancel();
+            runningTs.CancelNoThrow(this);
 
             if (!Connected)
             {
@@ -646,6 +759,10 @@ namespace Iviz.Ros
                     await AdvertiseCore<T>(advertiser, token);
                 }
                 catch (OperationCanceledException)
+                {
+                    // ignore
+                }
+                catch (ObjectDisposedException)
                 {
                     // ignore
                 }
@@ -712,6 +829,10 @@ namespace Iviz.Ros
                 {
                     // ignore
                 }
+                catch (ObjectDisposedException)
+                {
+                    // ignore
+                }
                 catch (Exception e)
                 {
                     RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(AdvertiseService)}", e);
@@ -740,8 +861,27 @@ namespace Iviz.Ros
             }
         }
 
-        public override async ValueTask<bool> CallModelServiceAsync<T>(string service, T srv, int timeoutInMs,
+        public override ValueTask<bool> CallModelServiceAsync(string service, GetModelResource srv, int timeoutInMs,
             CancellationToken token)
+        {
+            return CallModelServiceAsync(service, srv, timeoutInMs, token);
+        }
+
+        public override ValueTask<bool> CallModelServiceAsync(string service, GetModelTexture srv, int timeoutInMs,
+            CancellationToken token)
+        {
+            return CallModelServiceAsync(service, srv, timeoutInMs, token);
+        }
+
+        public override ValueTask<bool> CallModelServiceAsync(string service, GetSdf srv, int timeoutInMs,
+            CancellationToken token)
+        {
+            return CallModelServiceAsync(service, srv, timeoutInMs, token);
+        }
+
+        async ValueTask<bool> CallModelServiceAsync<TRequest, TResponse>(string service,
+            IService<TRequest, TResponse> srv, int timeoutInMs, CancellationToken token)
+            where TRequest : IRequest where TResponse : IResponse
         {
             using var myLock = await modelServiceLock.LockAsync(token);
 
@@ -764,8 +904,9 @@ namespace Iviz.Ros
             }
         }
 
-        async ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs, CancellationToken token)
-            where T : class, IService, new()
+        async ValueTask<bool> CallServiceAsync<TRequest, TResponse>(string service, IService<TRequest, TResponse> srv,
+            int timeoutInMs, CancellationToken token)
+            where TRequest : IRequest where TResponse : IResponse
         {
             ThrowHelper.ThrowIfNull(service, nameof(service));
             ThrowHelper.ThrowIfNull(srv, nameof(srv));
@@ -821,6 +962,11 @@ namespace Iviz.Ros
             {
                 // ignore
             }
+            catch (ObjectDisposedException)
+            {
+                // dead client
+                // ignore, it will get caught in RosbridgeWatchdogTask
+            }
             catch (Exception e)
             {
                 RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(Publish)}", e);
@@ -849,6 +995,10 @@ namespace Iviz.Ros
                 {
                     // ignore
                 }
+                catch (ObjectDisposedException)
+                {
+                    // ignore
+                }
                 catch (Exception e)
                 {
                     RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(Subscribe)}", e);
@@ -866,7 +1016,7 @@ namespace Iviz.Ros
 
             RosLogger.Info($"[{nameof(RosConnection)}]: Subscribing to {listener.Topic} [{listener.Type}].");
 
-            var newSubscribedTopic = new SubscribedTopic<T>(listener.Topic, listener.TransportHint);
+            var newSubscribedTopic = new SubscribedTopic<T>(listener.Topic, listener.Profile);
             subscribersByTopic.Add(listener.Topic, newSubscribedTopic);
             await newSubscribedTopic.SubscribeAsync(Connected ? client : null, listener, token);
         }
@@ -899,6 +1049,10 @@ namespace Iviz.Ros
                     await UnadvertiseCore(advertiser, token);
                 }
                 catch (OperationCanceledException)
+                {
+                    // ignore
+                }
+                catch (ObjectDisposedException)
                 {
                     // ignore
                 }
@@ -948,6 +1102,10 @@ namespace Iviz.Ros
                     await UnsubscribeCore(subscriber, token);
                 }
                 catch (OperationCanceledException)
+                {
+                    // ignore
+                }
+                catch (ObjectDisposedException)
                 {
                     // ignore
                 }
@@ -1006,6 +1164,10 @@ namespace Iviz.Ros
             {
                 // ignore
             }
+            catch (ObjectDisposedException)
+            {
+                // will be caught by RosbridgeWatchdogTask 
+            }
             catch (Exception e)
             {
                 RosLogger.Error(
@@ -1039,6 +1201,10 @@ namespace Iviz.Ros
             {
                 // ignore
             }
+            catch (ObjectDisposedException)
+            {
+                // will be caught by RosbridgeWatchdogTask 
+            }
             catch (Exception e)
             {
                 RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemTopicTypesAsync)}", e);
@@ -1062,9 +1228,8 @@ namespace Iviz.Ros
                 {
                     cachedParameters[nodeId] = Client switch
                     {
-                        RosClient ros1Client => await ros1Client.GetParameterNamesAsync(token),
                         Ros2Client ros2Client => await ros2Client.GetParameterNamesAsync(node, token),
-                        _ => throw new ArgumentOutOfRangeException()
+                        _ => await Client.GetParameterNamesAsync(token),
                     };
                 }
                 catch (Exception e)
@@ -1123,6 +1288,7 @@ namespace Iviz.Ros
                     RosParameterNotFoundException => "Parameter not found",
                     XmlRpcException => "Failed to read parameter",
                     TimeoutException => "Operation timed out",
+                    ObjectDisposedException => "Bridge disconnected",
                     _ => GetErrorMessageFor(e)
                 };
 
@@ -1162,6 +1328,10 @@ namespace Iviz.Ros
                 cachedSystemState = await Client.GetSystemStateAsync(tokenSource.Token);
             }
             catch (OperationCanceledException)
+            {
+                // ignore
+            }
+            catch (ObjectDisposedException)
             {
                 // ignore
             }

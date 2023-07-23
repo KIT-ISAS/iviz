@@ -1,5 +1,7 @@
 #nullable enable
 
+#if false
+
 using System;
 using System.Buffers;
 using System.IO;
@@ -48,3 +50,4 @@ namespace VNC.Extensions
         }
     }
 }
+#endif

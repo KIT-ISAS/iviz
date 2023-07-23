@@ -234,10 +234,12 @@ namespace Iviz.Controllers
 
             trail.DataSource = this;
 
-            var transportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
+            var profile = PreferUdp 
+                ? RosSubscriptionProfile.SpammyCanDrop 
+                : RosSubscriptionProfile.Default;
             Listener = Config.Type switch
             {
-                PoseStamped.MessageType =>  CreateListener<PoseStamped>(Handler),
+                PoseStamped.MessageType => CreateListener<PoseStamped>(Handler),
                 //Pose.MessageType => CreateListener<Pose>(Handler),
                 PointStamped.MessageType => CreateListener<PointStamped>(Handler),
                 //Point.MessageType => CreateListener<Point>(Handler),
@@ -250,20 +252,20 @@ namespace Iviz.Controllers
             };
 
             Listener<T> CreateListener<T>(Action<T> a) where T : IMessage, new() =>
-                new(Config.Topic, a, transportHint: transportHint);
+                new(Config.Topic, a, profile: profile);
 
             switch (Config.Type)
             {
                 case PoseStamped.MessageType:
-                //case Pose.MessageType:
+                    //case Pose.MessageType:
                     RentFrame(frameNode, out axisFrame);
                     break;
                 case PointStamped.MessageType:
-                //case Point.MessageType:
+                    //case Point.MessageType:
                     RentSphere(frameNode, VectorColor, out sphere);
                     break;
                 case WrenchStamped.MessageType:
-                //case Wrench.MessageType:
+                    //case Wrench.MessageType:
                     RentFrame(frameNode, out axisFrame);
                     RentArrow(frameNode, VectorColor, out arrow);
                     RentAngleAxis(frameNode, AngleColor, out angleAxis);

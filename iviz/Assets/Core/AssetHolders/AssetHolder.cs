@@ -34,6 +34,8 @@ namespace Iviz.Displays
 
         public Material PointCloud;
         public Material PointCloudWithColormap;
+        public Material PointCloudWithRosSwizzle;
+        public Material PointCloudWithRosSwizzleColormap;
         public Material PointCloudDirect;
         public Material PointCloudDirectWithColormap;
 
@@ -54,7 +56,9 @@ namespace Iviz.Displays
         public Material LitOcclusionOnly;
 
         public Material MeshListMaterial;
+        public Material MeshListWithRosSwizzle;
         public Material MeshListWithColormap;
+        public Material MeshListWithRosSwizzleColormap;
         public Material MeshListWithColormapScaleY;
         public Material MeshListWithColormapScaleAll;
         public Material MeshListOcclusionOnly;

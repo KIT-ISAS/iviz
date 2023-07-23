@@ -82,6 +82,16 @@ namespace Iviz.App
             }
         }
 
+        public static void SetEnabled(Button button, bool value)
+        {
+            var text = button.transform.GetChild(0).GetComponent<Text>();
+            var image = button.transform.GetChild(1).GetComponent<Image>();
+
+            button.enabled = value;
+            if (text != null) text.color = value ? Color.black : Color.gray;
+            if (image != null) image.color = value ? Color.black : Color.gray;
+        }
+
         static async Task HideStatus(Behaviour status, CancellationToken token)
         {
             try

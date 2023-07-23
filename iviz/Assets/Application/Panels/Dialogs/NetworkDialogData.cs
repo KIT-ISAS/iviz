@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using Iviz.Bridge.Client;
 using Iviz.Core;
 using Iviz.Ros;
 using Iviz.Roslib;
@@ -32,37 +34,51 @@ namespace Iviz.App
 
         public override void UpdatePanel()
         {
-            using var description = BuilderPool.Rent();
             if (!RosManager.TryGetRosClient(out var client))
             {
-                description.Append("<b>State: </b> Disconnected. Nothing to show!").AppendLine();
-            }
-            else
-            {
-                try
-                {
-                    switch (client)
-                    {
-                        case RosClient client1:
-                            GenerateReportRos1(description, client1);
-                            break;
-                        case Ros2Client client2:
-                            GenerateReportRos2(description, client2);
-                            break;
-                    }
-                }
-                catch (InvalidOperationException)
-                {
-                    description.Append("EE Interrupted!").AppendLine().AppendLine();
-                }
+                panel.Text.text = "<b>State: </b> Disconnected. Nothing to show!\n\n";
+                return;
             }
 
-            description.AppendLine().AppendLine();
-
-            panel.Text.SetTextRent(description);
+            GameThread.PostAsync(() => UpdatePanelAsync(client));
         }
 
-        static void GenerateReportRos1(StringBuilder builder, RosClient client)
+        async ValueTask UpdatePanelAsync(IRosClient client)
+        {
+            try
+            {
+                var subscriberStates = await client.GetSubscriberStatisticsAsync();
+                var publisherStates = await client.GetPublisherStatisticsAsync();
+
+
+                using var description = BuilderPool.Rent();
+                switch (client)
+                {
+                    case RosClient client1:
+                        GenerateReportRos1(description, client1, subscriberStates, publisherStates);
+                        break;
+                    case Ros2Client client2:
+                        GenerateReportRos2(description, client2, subscriberStates, publisherStates);
+                        break;
+                    case RosbridgeClient rosbridgeClient:
+                        GenerateReportRosbridge(description, rosbridgeClient, subscriberStates, publisherStates);
+                        break;
+                    default:
+                        GenerateReportUnknown(description, client);
+                        break;
+                }
+
+                description.AppendLine().AppendLine();
+                panel.Text.SetTextRent(description);
+            }
+            catch (InvalidOperationException)
+            {
+                panel.Text.text = "\n\n<b>Internal error: </b> Interrupted!\n\n";
+            }
+        }
+
+        static void GenerateReportRos1(StringBuilder builder, RosClient client,
+            SubscriberState[] subscriberStates, PublisherState[] publisherStats)
         {
             var masterApi = client.RosMasterClient;
             builder.Append("<b>Master</b> (").Append(masterApi.TotalRequests.ToString("N0"))
@@ -76,17 +92,14 @@ namespace Iviz.App
             builder.Append("Sent ").Append(masterSentKb.ToString("N0")).Append(" kB</b>").AppendLine();
             builder.AppendLine();
 
-            var subscriberStats = client.GetSubscriberStatistics();
-            var publisherStats = client.GetPublisherStatistics();
-
-            foreach (var stat in subscriberStats)
+            foreach (var state in subscriberStates)
             {
                 builder.Append("<color=#000080ff><b><< Subscribed to ")
-                    .Append(stat.Topic).Append("</b></color>")
+                    .Append(state.Topic).Append("</b></color>")
                     .AppendLine();
-                builder.Append("<b>Type: </b>[").Append(stat.Type).Append("]").AppendLine();
+                builder.Append("<b>Type: </b>[").Append(state.Type).Append("]").AppendLine();
 
-                var receivers = (IReadOnlyList<Ros1ReceiverState>)stat.Receivers;
+                var receivers = state.Receivers;
 
                 long totalMessages = 0;
                 long totalBytes = 0;
@@ -95,7 +108,7 @@ namespace Iviz.App
                 {
                     totalMessages += receiver.NumReceived;
                     totalBytes += receiver.BytesReceived;
-                    totalDropped += receiver.NumDropped;
+                    totalDropped += ((Ros1ReceiverState)receiver).NumDropped;
                 }
 
                 builder.Append("<b>Received ").Append(totalMessages.ToString("N0")).Append(" msgs | ");
@@ -108,40 +121,42 @@ namespace Iviz.App
                         .Append(percentage).Append("%)</b>").AppendLine();
                 }
 
-                if (stat.Receivers.Count == 0)
+                if (state.Receivers.Length == 0)
                 {
                     builder.Append("  (No publishers)").AppendLine().AppendLine();
                     continue;
                 }
 
-                bool anyErrors = receivers.Any(receiver => receiver.ErrorDescription != null);
+                bool anyErrors = receivers.Any(receiver => ((Ros1ReceiverState)receiver).ErrorDescription != null);
                 foreach (var receiver in receivers)
                 {
+                    var ros1Receiver = (Ros1ReceiverState)receiver;
+                    
                     builder.Append("    <b>[");
-                    if (receiver.RemoteUri == client.CallerUri)
+                    if (ros1Receiver.RemoteUri == client.CallerUri)
                     {
                         builder.Append("<i>Me</i>]</b> ");
                     }
-                    else if (receiver.RemoteId != null)
+                    else if (ros1Receiver.RemoteId != null)
                     {
-                        builder.Append(receiver.RemoteId).Append("]</b> ");
+                        builder.Append(ros1Receiver.RemoteId).Append("]</b> ");
                     }
                     else
                     {
                         builder.Append("unknown]</b> ");
                     }
 
-                    builder.Append(receiver.RemoteUri.Host).Append(':').Append(receiver.RemoteUri.Port);
+                    builder.Append(ros1Receiver.RemoteUri.Host).Append(':').Append(ros1Receiver.RemoteUri.Port);
 
-                    switch (receiver.Status)
+                    switch (ros1Receiver.Status)
                     {
                         case ReceiverStatus.Running:
-                            if (receiver.TransportType is TransportType.Udp)
+                            if (ros1Receiver.TransportType is TransportType.Udp)
                             {
                                 builder.Append(" UDP");
                             }
 
-                            builder.Append(" | ").AppendBandwidth(receiver.BytesReceived);
+                            builder.Append(" | ").AppendBandwidth(ros1Receiver.BytesReceived);
                             break;
                         case ReceiverStatus.ConnectingRpc:
                             // no special message, clear from context
@@ -160,9 +175,9 @@ namespace Iviz.App
                     if (anyErrors)
                     {
                         builder.AppendLine();
-                        if (receiver.ErrorDescription != null)
+                        if (ros1Receiver.ErrorDescription != null)
                         {
-                            var (time, description) = receiver.ErrorDescription;
+                            var (time, description) = ros1Receiver.ErrorDescription;
                             builder.Append("      <color=#a52a2aff>[").Append(time.ToString("HH:mm:ss"))
                                 .Append("] ").Append(description).Append("</color>");
                         }
@@ -178,16 +193,19 @@ namespace Iviz.App
                 builder.AppendLine();
             }
 
-            foreach (var stat in publisherStats)
+            foreach (var state in publisherStats)
             {
-                builder.Append("<color=#800000ff><b>>> Publishing to ").Append(stat.Topic)
+                builder.Append("<color=#800000ff><b>>> Publishing to ").Append(state.Topic)
                     .Append("</b></color>")
                     .AppendLine();
-                builder.Append("<b>Type: </b>[").Append(stat.Type).Append("]").AppendLine();
+                builder.Append("<b>Type: </b>[").Append(state.Type).Append("]").AppendLine();
 
                 long totalMessages = 0;
                 long totalBytes = 0;
-                foreach (var sender in stat.Senders)
+
+                var senders = state.Senders;
+
+                foreach (var sender in senders)
                 {
                     totalMessages += sender.NumSent;
                     totalBytes += sender.BytesSent;
@@ -196,49 +214,50 @@ namespace Iviz.App
                 builder.Append("<b>Sent ").Append(totalMessages.ToString("N0")).Append(" msgs | ")
                     .AppendBandwidth(totalBytes).Append("</b> total").AppendLine();
 
-                if (stat.Senders.Count == 0)
+                if (senders.Length == 0)
                 {
                     builder.Append("  (No subscribers)").AppendLine().AppendLine();
                     continue;
                 }
 
-                var senders = (IReadOnlyList<Ros1SenderState>)stat.Senders;
 
                 foreach (var sender in senders)
                 {
-                    bool isAlive = sender.IsAlive;
+                    var ros1Sender = (Ros1SenderState)sender;
+                    
+                    bool isAlive = ros1Sender.IsAlive;
                     builder.Append("    <b>[");
-                    if (sender.RemoteId == client.CallerId)
+                    if (ros1Sender.RemoteId == client.CallerId)
                     {
                         builder.Append("<i>Me</i>]</b> ");
                     }
-                    else if (sender.RemoteId.Length != 0)
+                    else if (ros1Sender.RemoteId.Length != 0)
                     {
-                        builder.Append(sender.RemoteId).Append("]</b> ");
+                        builder.Append(ros1Sender.RemoteId).Append("]</b> ");
                     }
                     else
                     {
                         builder.Append("unknown]</b> ");
                     }
 
-                    string remoteHostname = sender.RemoteEndpoint.Hostname;
+                    string remoteHostname = ros1Sender.RemoteEndpoint.Hostname;
                     if (remoteHostname.StartsWith("::ffff:")) // remove ipv6 prefix of ipv4
                     {
                         remoteHostname = remoteHostname[7..];
                     }
 
-                    builder.Append(sender.RemoteEndpoint != default
+                    builder.Append(ros1Sender.RemoteEndpoint != default
                         ? remoteHostname
                         : "(Unknown address)");
 
-                    if (sender.TransportType == TransportType.Udp)
+                    if (ros1Sender.TransportType == TransportType.Udp)
                     {
                         builder.Append(" UDP");
                     }
 
                     if (isAlive)
                     {
-                        builder.Append(" | ").AppendBandwidth(sender.BytesSent);
+                        builder.Append(" | ").AppendBandwidth(ros1Sender.BytesSent);
                     }
                     else
                     {
@@ -252,30 +271,28 @@ namespace Iviz.App
             }
         }
 
-        static void GenerateReportRos2(StringBuilder builder, Ros2Client client)
+        static void GenerateReportRos2(StringBuilder builder, Ros2Client client,
+            SubscriberState[] subscriberStats, PublisherState[] publisherStats)
         {
             if (!RosProvider.IsRos2VersionSupported)
             {
                 builder.Append("<b>Error:</b> ROS version not supported!");
                 return;
             }
-            
-            var subscriberStats = client.GetSubscriberStatistics().Cast<Ros2SubscriberState>();
-            var publisherStats = client.GetPublisherStatistics().Cast<Ros2PublisherState>();
 
-            foreach (var stat in subscriberStats)
+            foreach (var state in subscriberStats)
             {
                 builder.Append("<color=#000080ff><b><< Subscribed to ")
-                    .Append(stat.Topic).Append("</b></color>")
+                    .Append(state.Topic).Append("</b></color>")
                     .AppendLine();
 
-                builder.Append("<b>Type: </b>[").Append(stat.Type).Append("]").AppendLine();
+                builder.Append("<b>Type: </b>[").Append(state.Type).Append("]").AppendLine();
 
                 builder.Append("<b>QOS: </b>");
-                Append(stat.Profile);
+                Append(((Ros2SubscriberState)state).Profile);
                 builder.AppendLine();
 
-                var receivers = (IReadOnlyList<Ros2ReceiverState>)stat.Receivers;
+                var receivers = state.Receivers;
 
                 long totalMessages = 0;
                 long totalBytes = 0;
@@ -288,7 +305,7 @@ namespace Iviz.App
                 builder.Append("<b>Received ").Append(totalMessages.ToString("N0")).Append(" msgs | ");
                 builder.AppendBandwidth(totalBytes).Append(" total</b>").AppendLine();
 
-                if (stat.Receivers.Count == 0)
+                if (state.Receivers.Length == 0)
                 {
                     builder.Append("  (No publishers)").AppendLine().AppendLine();
                     continue;
@@ -310,11 +327,13 @@ namespace Iviz.App
                         builder.Append("unknown]</b> ");
                     }
 
-                    builder.Append(receiver.Guid.ToString()).Append('\n');
+                    var ros2Receiver = (Ros2ReceiverState)receiver;
+                    
+                    builder.Append(ros2Receiver.Guid.ToString()).Append('\n');
 
                     builder.Append("        <b>").AppendBandwidth(receiver.BytesReceived).Append("</b> ");
 
-                    Append(receiver.Profile);
+                    Append(ros2Receiver.Profile);
 
                     builder.AppendLine();
                 }
@@ -322,32 +341,32 @@ namespace Iviz.App
                 builder.AppendLine();
             }
 
-            foreach (var stat in publisherStats)
+            foreach (var state in publisherStats)
             {
-                builder.Append("<color=#800000ff><b>>> Publishing to ").Append(stat.Topic)
+                builder.Append("<color=#800000ff><b>>> Publishing to ").Append(state.Topic)
                     .Append("</b></color>")
                     .AppendLine();
 
-                builder.Append("<b>Type: </b>[").Append(stat.Type).Append("]").AppendLine();
+                builder.Append("<b>Type: </b>[").Append(state.Type).Append("]").AppendLine();
 
                 builder.Append("<b>QOS: </b>");
-                Append(stat.Profile);
+                Append(((Ros2PublisherState)state).Profile);
                 builder.AppendLine();
 
-                (long totalMessages, long totalBytes) = stat.Senders.Count == 0
+                (long totalMessages, long totalBytes) = state.Senders.Length == 0
                     ? (0, 0)
-                    : (stat.Senders[0].NumSent, stat.Senders[0].BytesSent);
+                    : (state.Senders[0].NumSent, state.Senders[0].BytesSent);
 
                 builder.Append("<b>Sent ").Append(totalMessages.ToString("N0")).Append(" msgs | ")
                     .AppendBandwidth(totalBytes).Append("</b> total").AppendLine();
 
-                if (stat.Senders.Count == 0)
+                if (state.Senders.Length == 0)
                 {
                     builder.Append("  (No subscribers)").AppendLine().AppendLine();
                     continue;
                 }
 
-                var senders = (IReadOnlyList<Ros2SenderState>)stat.Senders;
+                var senders = (IReadOnlyList<Ros2SenderState>)state.Senders;
 
                 foreach (var sender in senders)
                 {
@@ -370,7 +389,7 @@ namespace Iviz.App
                     builder.Append("        ");
                     Append(sender.Profile);
 
-                    if (sender.TopicType != stat.Type)
+                    if (sender.TopicType != state.Type)
                     {
                         builder.Append($"        <color=red>Topic type mismatch. " +
                                        $"Expects [{sender.TopicType}].</color>");
@@ -410,6 +429,92 @@ namespace Iviz.App
                     _ => " | HistoryPolicy: Unknown (" + (int)profile.History + ")"
                 });
             }
+        }
+
+        static void GenerateReportRosbridge(StringBuilder builder, RosbridgeClient client,
+            SubscriberState[] subscriberStates, PublisherState[] publisherStates)
+        {
+            foreach (var state in subscriberStates)
+            {
+                builder.Append("<color=#000080ff><b><< Subscribed to ")
+                    .Append(state.Topic).Append("</b></color>")
+                    .AppendLine();
+                builder.Append("<b>Type: </b>[").Append(state.Type).Append("]").AppendLine();
+
+                var receivers = (ReceiverState[])state.Receivers;
+
+                if (state.Receivers.Length == 0)
+                {
+                    builder.Append("  (No publishers)").AppendLine().AppendLine();
+                    continue;
+                }
+
+                foreach (var receiver in receivers)
+                {
+                    builder.Append("    <b>[");
+                    if (receiver.RemoteId == client.CallerId)
+                    {
+                        builder.Append("<i>Me</i>]</b> ");
+                    }
+                    else if (receiver.RemoteId != null)
+                    {
+                        builder.Append(receiver.RemoteId).Append("]</b> ");
+                    }
+                    else
+                    {
+                        builder.Append("unknown]</b> ");
+                    }
+
+                    builder.AppendLine();
+                }
+
+                builder.AppendLine();
+            }
+
+            foreach (var state in publisherStates)
+            {
+                builder.Append("<color=#800000ff><b>>> Publishing to ").Append(state.Topic)
+                    .Append("</b></color>")
+                    .AppendLine();
+                builder.Append("<b>Type: </b>[").Append(state.Type).Append("]").AppendLine();
+
+                var senders = state.Senders;
+
+                if (senders.Length == 0)
+                {
+                    builder.Append("  (No subscribers)").AppendLine().AppendLine();
+                    continue;
+                }
+
+                foreach (var sender in senders)
+                {
+                    builder.Append("    <b>[");
+                    if (sender.RemoteId == client.CallerId)
+                    {
+                        builder.Append("<i>Me</i>]</b> ");
+                    }
+                    else if (sender.RemoteId.Length != 0)
+                    {
+                        builder.Append(sender.RemoteId).Append("]</b> ");
+                    }
+                    else
+                    {
+                        builder.Append("unknown]</b> ");
+                    }
+
+                    builder.AppendLine();
+                }
+
+                builder.AppendLine();
+            }
+        }
+
+        static void GenerateReportUnknown(StringBuilder builder, IRosClient client)
+        {
+            builder.Append("<b>Error:</b> Report generation not implemented for type ")
+                .Append(client.GetType().Name)
+                .Append("!");
+            builder.AppendLine();
         }
     }
 }

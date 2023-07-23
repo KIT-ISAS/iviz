@@ -263,18 +263,18 @@ namespace Iviz.Controllers.TF
         {
             var unityPose = transform.Transform.Ros2Unity();
 
-            if (!ValidateName(transform.ChildFrameId))
+            if (!ValidateFrameId(transform.ChildFrameId))
             {
                 SetFailedForName(transform.ChildFrameId);
                 return;
             }
 
-            if (!ValidateName(transform.Header.FrameId))
+            if (!ValidateFrameId(transform.Header.FrameId))
             {
                 SetFailedForName(transform.Header.FrameId);
                 return;
             }
-            
+
             if (unityPose.IsInvalid())
             {
                 SetFailedForInvalid(transform.ChildFrameId);
@@ -305,7 +305,7 @@ namespace Iviz.Controllers.TF
             }
             else if (isStatic)
             {
-                child = GetOrCreateFrame(childId, staticListenerNode);
+                child = GetOrCreateFrame(childId, staticListenerNode, false);
                 if (keepAllFrames)
                 {
                     child.AddListener(keepAllListenerNode);
@@ -313,7 +313,7 @@ namespace Iviz.Controllers.TF
             }
             else if (keepAllFrames)
             {
-                child = GetOrCreateFrame(childId, keepAllListenerNode);
+                child = GetOrCreateFrame(childId, keepAllListenerNode, false);
             }
             else if (!TryGetFrameCore(childId, out child))
             {
@@ -349,12 +349,11 @@ namespace Iviz.Controllers.TF
             }
         }
 
-        static bool ValidateName(string name)
+        static bool ValidateFrameId(string name)
         {
-            return !UnityUtils.HasOnlyValidIdentifierChars(name); // TODO: more sanity tests
+            return UnityUtils.HasValidIdentifierChars(name); // TODO: more sanity tests
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool CheckIfWithinThreshold(in Vector3 t)
         {
             // unity cannot deal with very large floats, so we have to limit translation sizes
@@ -362,7 +361,6 @@ namespace Iviz.Controllers.TF
             return t.MaxAbsCoeff() < maxPoseMagnitude;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool CheckIfWithinThreshold(in Quaternion t)
         {
             // quick sanity check
@@ -391,7 +389,8 @@ namespace Iviz.Controllers.TF
                 return;
             }
 
-            RosLogger.Info($"{nameof(TfModule)}: Ignoring transform id '{id}' with unknown characters");
+            RosLogger.Info($"{nameof(TfModule)}: Ignoring transform id '{UnityUtils.FixName(id)}' " +
+                           $"with invalid characters");
             warningTimestamps[id] = GameThread.GameTime + WarningBlacklistTimeInSec;
         }
 
@@ -479,13 +478,19 @@ namespace Iviz.Controllers.TF
                 : $"{myId}/{frameIdSuffix}";
         }
 
-        public static TfFrame GetOrCreateFrame(string frameId, FrameNode? listener = null)
+        public static TfFrame GetOrCreateFrame(string frameId, FrameNode? listener = null, bool validateName = true)
         {
             ThrowHelper.ThrowIfNull(frameId, nameof(frameId));
 
             if (frameId.Length == 0)
             {
                 ThrowHelper.ThrowArgument("Cannot create frame with empty name", nameof(frameId));
+            }
+
+            if (validateName && !ValidateFrameId(frameId))
+            {
+                ThrowHelper.ThrowArgument($"Requested frame id '{UnityUtils.FixName(frameId)}' " +
+                                          $"has invalid characters", nameof(frameId));
             }
 
             string validatedFrameId = frameId[0] switch

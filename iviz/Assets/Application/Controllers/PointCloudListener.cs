@@ -158,7 +158,7 @@ namespace Iviz.Controllers
             
             processor.Node.Name = Config.Topic;
             
-            Listener = new Listener<PointCloud2>(Config.Topic, processor.Handle);
+            Listener = new Listener<PointCloud2>(Config.Topic, processor.Handle, RosSubscriptionProfile.SensorKeepLast);
             processor.IsProcessingChanged += Listener.SetPause;
         }
 

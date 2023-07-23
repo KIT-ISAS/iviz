@@ -3,7 +3,7 @@
 using System;
 using System.Runtime.InteropServices;
 using Iviz.Core;
-using MarcusW.VncClient.Protocol.Implementation.Native;
+//using MarcusW.VncClient.Protocol.Implementation.Native;
 
 namespace Iviz.ImageDecoders
 {

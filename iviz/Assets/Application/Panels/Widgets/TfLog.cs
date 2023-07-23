@@ -120,8 +120,8 @@ namespace Iviz.App
             PoseAs.Options = new[]
             {
                 "Pose to Root",
-                "Relative to Parent",
-                "Relative to Fixed"
+                "Pose to Parent",
+                "Pose to Fixed"
             };
 
             ShowAs.ValueChanged += (i, _) =>

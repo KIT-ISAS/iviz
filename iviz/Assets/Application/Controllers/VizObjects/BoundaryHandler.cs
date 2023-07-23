@@ -186,8 +186,8 @@ namespace Iviz.Controllers
                     };
                 }
 
-                boundary.Color = msg.Color.ToUnity();
-                boundary.SecondColor = msg.SecondColor.ToUnity();
+                boundary.FrameColor = msg.Color.ToUnity();
+                boundary.InteriorColor = msg.SecondColor.ToUnity();
                 boundary.Caption = msg.Caption;
                 boundary.Scale = msg.Scale.Ros2Unity().Abs();
                 boundary.Behavior = (BehaviorType)msg.Behavior;

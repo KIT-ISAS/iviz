@@ -198,7 +198,7 @@ namespace Iviz.Controllers
                 Id = topic,
             };
 
-            Listener = new Listener<GridMap>(Config.Topic, Handle);
+            Listener = new Listener<GridMap>(Config.Topic, Handle, profile: RosSubscriptionProfile.SensorKeepLast);
         }
 
         void Handle(GridMap msg)

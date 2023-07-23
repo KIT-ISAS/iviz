@@ -29,7 +29,7 @@ namespace Iviz.Controllers
 
         readonly ChannelReader<TransformStamped> outgoingReader;
         readonly ChannelWriter<TransformStamped> outgoingWriter;
-        
+
         uint tfSeq;
 
         static TfListener? instance;
@@ -81,16 +81,6 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool PreferUdp
-        {
-            get => config.PreferUdp;
-            set
-            {
-                config.PreferUdp = value;
-                Listener.TransportHint = value ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
-            }
-        }
-
         public bool ParentConnectorVisible
         {
             get => config.ParentConnectorVisible;
@@ -123,7 +113,6 @@ namespace Iviz.Controllers
 
         string FixedFrameId
         {
-            get => TfModule.FixedFrameId;
             set
             {
                 config.FixedFrameId = value;
@@ -155,8 +144,10 @@ namespace Iviz.Controllers
             instance = this;
 
             Publisher = new Sender<TFMessage>(TfModule.DefaultTopic);
-            ListenerStatic = new Listener<TFMessage>(TfModule.DefaultTopicStatic, HandleStatic);
-            Listener = new Listener<TFMessage>(TfModule.DefaultTopic, HandleNonStatic);
+            ListenerStatic = new Listener<TFMessage>(TfModule.DefaultTopicStatic, HandleStatic,
+                RosSubscriptionProfile.ImportantKeepAll);
+            Listener = new Listener<TFMessage>(TfModule.DefaultTopic, HandleNonStatic,
+                RosSubscriptionProfile.ImportantKeepAll);
 
             Config = config ?? new TfConfiguration
             {
@@ -168,15 +159,14 @@ namespace Iviz.Controllers
 
             var incomingOptions = new BoundedChannelOptions(MaxQueueSize)
                 { SingleReader = true, FullMode = BoundedChannelFullMode.DropOldest };
-            
+
             var incomingMessages = Channel.CreateBounded<(TransformStamped[], bool)>(incomingOptions);
             incomingReader = incomingMessages.Reader;
             incomingWriter = incomingMessages.Writer;
-            
+
             var outgoingMessages = Channel.CreateBounded<TransformStamped>(incomingOptions);
             outgoingReader = outgoingMessages.Reader;
             outgoingWriter = outgoingMessages.Writer;
-
         }
 
         void ProcessMessages()
@@ -201,7 +191,7 @@ namespace Iviz.Controllers
         {
             return incomingWriter.TryWrite((msg.Transforms, true));
         }
-        
+
         public override void ResetController()
         {
             Tf.Reset();

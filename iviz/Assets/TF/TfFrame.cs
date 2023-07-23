@@ -50,24 +50,20 @@ namespace Iviz.Controllers.TF
         /// Pose in relation to the Unity origin in Unity coordinates
         /// </summary>
         public Pose AbsoluteUnityPose => Transform.AsPose();
-
-        public sealed override TfFrame? Parent
+        
+        protected override void SetParent(TfFrame? value)
         {
-            get => base.Parent;
-            set
+            if (TrySetParent(value))
             {
-                if (TrySetParent(value))
-                {
-                    return;
-                }
-
-                string errorMsg = ToString() + (
-                    value == null
-                        ? ": Failed to reset parent"
-                        : $": Failed to set parent '{value.Id}'"
-                );
-                RosLogger.Error(errorMsg);
+                return;
             }
+
+            string errorMsg = ToString() + (
+                value == null
+                    ? ": Failed to reset parent"
+                    : $": Failed to set parent '{value.Id}'"
+            );
+            RosLogger.Error(errorMsg);
         }
 
         protected TfFrame(string id)
@@ -159,10 +155,11 @@ namespace Iviz.Controllers.TF
                 return true;
             }
 
-            if (parent == null)
+            if (parent == null) 
             {
                 Parent?.RemoveChild(this);
-                base.Parent = null;
+                //base.Parent = null;
+                base.SetParent(null);
                 return true;
             }
 
@@ -173,7 +170,8 @@ namespace Iviz.Controllers.TF
             }
 
             Parent?.RemoveChild(this);
-            base.Parent = parent;
+            //base.Parent = parent;
+            base.SetParent(parent);
 
             return parent.AddChild(this);
         }

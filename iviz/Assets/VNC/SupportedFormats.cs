@@ -1,3 +1,5 @@
+#if false
+
 using MarcusW.VncClient;
 
 namespace VNC
@@ -11,3 +13,4 @@ namespace VNC
             new("RFB RGB888", 24, 24, false, true, false, 255, 255, 255, 0, 0, 8, 16, 0);
     }
 }
+#endif

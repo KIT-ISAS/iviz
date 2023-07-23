@@ -13,6 +13,7 @@
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile _ USE_TEXTURE
+            #pragma multi_compile _ ROS_SWIZZLE
 
             #include <UnityCG.cginc>
 
@@ -50,12 +51,17 @@
                 UNITY_INITIALIZE_OUTPUT(v2f, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
+                float4 inPos = In.pos;
+#ifdef ROS_SWIZZLE
+				inPos = float4(-inPos.y, inPos.z, inPos.x, inPos.w);
+#endif                
+
 #ifdef USE_TEXTURE
 				o.color = tex2Dlod(_AtlasTexture, float4(In.uv.x * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0));
 #else
                 o.color = In.color;
 #endif
-                o.pos = UnityObjectToClipPos(In.pos);
+                o.pos = UnityObjectToClipPos(inPos);
 
                 o.color *= _Tint;
                 o.size = max(_Scale * 100, 1);

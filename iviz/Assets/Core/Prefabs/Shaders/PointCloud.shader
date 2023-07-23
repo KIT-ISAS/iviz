@@ -3,6 +3,7 @@ Shader "iviz/PointCloud2"
 	Properties
 	{
 		[Toggle(USE_TEXTURE)] _UseTexture("Use Texture", Float) = 0		
+		[Toggle(ROS_SWIZZLE)] _UseRosSwizzle("Use ROS Swizzle", Float) = 0		
 		_AtlasTexture("Atlas Texture", 2D) = "defaulttexture" {}
 	}
 
@@ -19,6 +20,7 @@ Shader "iviz/PointCloud2"
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile _ USE_TEXTURE
+			#pragma multi_compile _ ROS_SWIZZLE
 
 			float _IntensityCoeff;
 			float _IntensityAdd;
@@ -81,7 +83,15 @@ Shader "iviz/PointCloud2"
 				const float2 extent = abs(float2(UNITY_MATRIX_P._11, UNITY_MATRIX_P._22)) * _Scale;
 				const float4 quad_vertex = Quad[id] * float4(extent, 1, 1);
 				const Point center_point = _Points[inst];
-				const float4 center_vertex = float4(center_point.position, 1);
+				float3 center_position = center_point.position; 
+#ifdef ROS_SWIZZLE
+				center_position = float3(
+					-center_position.y,
+					center_position.z,
+					center_position.x
+					);
+#endif
+				const float4 center_vertex = float4(center_position, 1);
 
 				o.position = UnityObjectToClipPos(center_vertex) + quad_vertex;
 #ifdef USE_TEXTURE

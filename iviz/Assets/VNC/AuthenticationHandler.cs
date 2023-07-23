@@ -1,5 +1,7 @@
 #nullable enable
 
+#if false
+
 using System;
 using System.Threading.Tasks;
 using MarcusW.VncClient;
@@ -40,3 +42,4 @@ namespace VNC
         }
     }
 }
+#endif

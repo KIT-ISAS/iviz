@@ -13,7 +13,6 @@ namespace Iviz.Core.Configurations
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Id { get; set; } = "";
         [DataMember] public bool Visible { get; set; } = true;
-        [DataMember] public bool PreferUdp { get; set; } = false;
         [DataMember] public float FrameSize { get; set; } = 0.125f;
         [DataMember] public bool FrameLabelsVisible { get; set; }
         [DataMember] public bool ParentConnectorVisible { get; set; }

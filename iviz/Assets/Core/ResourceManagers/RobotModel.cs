@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Resources;
+using Iviz.Tools;
 using Iviz.Urdf;
 using UnityEngine;
 using Color = UnityEngine.Color;
@@ -159,7 +161,7 @@ namespace Iviz.Displays
         {
             ThrowHelper.ThrowIfNullOrEmpty(robotDescription, nameof(robotDescription));
 
-            robot = UrdfFile.CreateFromXml(robotDescription);
+            robot = SanityCheck(UrdfFile.CreateFromXml(robotDescription));
 
             Name = robot.Name;
             Description = robotDescription;
@@ -263,6 +265,54 @@ namespace Iviz.Displays
             string errorStr = numErrors == 0 ? "" : $"There were {numErrors.ToString()} errors.";
             RosLogger.Info($"Finished constructing robot '{Name}' with {linkObjects.Count.ToString()} " +
                            $"links and {joints.Count.ToString()} joints. {errorStr}");
+        }
+
+        static Robot SanityCheck(Robot robot)
+        {
+            if (!UnityUtils.HasValidIdentifierChars(robot.Name))
+            {
+                ThrowMalformedUrdf("Robot name contains invalid characters");
+            }
+
+            foreach (var link in robot.Links)
+            {
+                if (link.Name.IsNullOrEmpty())
+                {
+                    ThrowMalformedUrdf("Robot contains a link without name");
+                }
+
+                if (!UnityUtils.HasValidIdentifierChars(link.Name))
+                {
+                    ThrowMalformedUrdf("A robot link name contains invalid characters");
+                }
+            }
+
+            foreach (var joint in robot.Joints)
+            {
+                if (joint.Name.IsNullOrEmpty())
+                {
+                    ThrowMalformedUrdf("Robot contains a joint without name");
+                }
+
+                if (!UnityUtils.HasValidIdentifierChars(joint.Name))
+                {
+                    ThrowMalformedUrdf("A robot joint name contains invalid characters");
+                }
+
+                if (joint.Parent.Link.IsNullOrEmpty()
+                    || !UnityUtils.HasValidIdentifierChars(joint.Parent.Link))
+                {
+                    ThrowMalformedUrdf($"Robot joint '{joint.Name}' has an invalid parent");
+                }
+
+                if (joint.Child.Link.IsNullOrEmpty()
+                    || !UnityUtils.HasValidIdentifierChars(joint.Child.Link))
+                {
+                    ThrowMalformedUrdf($"Robot joint '{joint.Name}' has an invalid child");
+                }
+            }
+
+            return robot;
         }
 
         void HideChildlessLinks()
@@ -561,19 +611,19 @@ namespace Iviz.Displays
 
             if (!linkObjects.TryGetValue(joint.Parent.Link, out var parent))
             {
-                throw new MalformedUrdfException($"Cannot find link '{joint.Parent.Link}'");
+                ThrowMalformedUrdf($"Cannot find link '{joint.Parent.Link}'");
             }
 
             if (!linkObjects.TryGetValue(joint.Child.Link, out var child))
             {
-                throw new MalformedUrdfException($"Cannot find link '{joint.Child.Link}'");
+                ThrowMalformedUrdf($"Cannot find link '{joint.Child.Link}'");
             }
 
             if (parent.transform.IsChildOf(child.transform))
             {
                 Dispose();
-                throw new MalformedUrdfException(
-                    $"Node '{parent.name}' is descendant of '{child.name}' and cannot be set as its parent!");
+                ThrowMalformedUrdf($"Node '{parent.name}' is descendant of '{child.name}' " +
+                                   $"and cannot be set as its parent!");
             }
 
             linkParents[joint.Child.Link] = joint.Parent.Link;
@@ -726,6 +776,8 @@ namespace Iviz.Displays
 
         public void GenerateLog(StringBuilder builder)
         {
+            const int indentSize = 4;
+
             if (BaseLink == null ||
                 !robot.Links.TryGetFirst(link => link.Name == BaseLink, out var baseLink))
             {
@@ -749,7 +801,7 @@ namespace Iviz.Displays
 
             foreach (var child in children[baseLink.Name])
             {
-                stack.Push((child, 4));
+                stack.Push((child, indentSize));
             }
 
             while (stack.TryPop(out var entry))
@@ -759,7 +811,7 @@ namespace Iviz.Displays
                 var link = links[joint.Child.Link];
 
                 WriteJoint(builder, joint, level);
-                WriteLink(builder, link, level + 4);
+                WriteLink(builder, link, level + indentSize);
 
                 if (!children.TryGetValue(link.Name, out var linkChildren))
                 {
@@ -768,7 +820,7 @@ namespace Iviz.Displays
 
                 foreach (var childJoint in linkChildren)
                 {
-                    stack.Push((childJoint, level + 8));
+                    stack.Push((childJoint, level + 2 * indentSize));
                 }
             }
 
@@ -937,5 +989,8 @@ namespace Iviz.Displays
         public bool Equals(RobotModel other) => descriptionHash == other.descriptionHash;
 
         public override bool Equals(object obj) => obj is RobotModel other && Equals(other);
+
+        [DoesNotReturn]
+        static void ThrowMalformedUrdf(string message) => throw new MalformedUrdfException(message);
     }
 }

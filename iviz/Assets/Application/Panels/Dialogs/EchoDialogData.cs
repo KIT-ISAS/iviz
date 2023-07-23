@@ -79,7 +79,7 @@ namespace Iviz.App
             }
 
             listener = csType == typeof(DynamicMessage)
-                ? new Listener<DynamicMessage>(topicName, Handle)
+                ? new Listener<DynamicMessage>(topicName, Handle, RosSubscriptionProfile.SpammyCanDrop)
                 : Listener.Create(topicName, Handle, csType);
         }
 

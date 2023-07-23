@@ -8,6 +8,7 @@ using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.Configurations;
+using Iviz.Displays.PointCloudHelpers;
 using Iviz.Msgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.StdMsgs;
@@ -175,14 +176,22 @@ namespace Iviz.Displays.Helpers
         {
             Node = new FrameNode(nameof(PointCloudProcessor));
             pointCloud = ResourcePool.RentDisplay<PointListDisplay>(Node.Transform);
+            pointCloud.UseRosSwizzle = true;
             meshCloud = ResourcePool.RentDisplay<MeshListDisplay>(Node.Transform);
             meshCloud.EnableShadows = false;
+            meshCloud.UseRosSwizzle = true;
             isProcessing.Changed = IsProcessingChanged;
 
             if (parent != null)
             {
                 Node.Transform.SetParentLocal(parent);
             }
+        }
+
+        public void Reset()
+        {
+            pointCloud.Reset();
+            meshCloud.Reset();
         }
 
         public bool Handle(PointCloud2 msg, IRosConnection? _ = null)
@@ -241,8 +250,7 @@ namespace Iviz.Displays.Helpers
                     fieldNames.Add(field.Name);
                 }
             }
-
-
+            
             bool rgbaHint;
             ReadOnlyMemory<float4> pointBufferToUse;
 

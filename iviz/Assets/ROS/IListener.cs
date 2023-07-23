@@ -21,36 +21,36 @@ namespace Iviz.Ros
         protected int lastMsgBytes;
         protected int totalMsgCounter;
         protected int recentMsgCounter;
-        RosTransportHint transportHint;
+        RosSubscriptionProfile? profile;
 
         public string Topic { get; }
         public string Type { get; }
         public RosListenerStats Stats { get; private set; }
         public bool Subscribed { get; protected set; }
 
-        public RosTransportHint TransportHint
+        public RosSubscriptionProfile? Profile
         {
-            get => transportHint;
+            get => profile;
             set
             {
-                if (transportHint == value)
+                if (profile == value)
                 {
                     return;
                 }
 
-                transportHint = value;
+                profile = value;
                 Reset();
             }
         }
 
-        protected Listener(string topic, string type, RosTransportHint transportHint)
+        protected Listener(string topic, string type, RosSubscriptionProfile? profile)
         {
             ThrowHelper.ThrowIfNullOrEmpty(topic, nameof(topic));
             ThrowHelper.ThrowIfNullOrEmpty(type, nameof(type));
 
             Topic = topic;
             Type = type;
-            this.transportHint = transportHint;
+            this.profile = profile;
 
             GameThread.EverySecond += UpdateStats;
         }
