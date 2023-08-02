@@ -58,7 +58,7 @@ namespace Iviz.Ros
             var initCompletedSignal = TaskUtils.CreateCompletionSource();
 
             // start in background
-            serverTask = TaskUtils.Run(() => server.StartAsync(initCompletedSignal).AwaitNoThrow(this));
+            serverTask = TaskUtils.RunNoThrow(() => server.StartAsync(initCompletedSignal), this);
 
             try
             {

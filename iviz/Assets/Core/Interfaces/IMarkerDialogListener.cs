@@ -14,6 +14,6 @@ namespace Iviz.Common
         void GenerateLog(StringBuilder description, int minIndex, int numEntries);
         string BriefDescription { get; }
         void ResetController();
-        bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds);
+        void HighlightId(string id);
     }
 }

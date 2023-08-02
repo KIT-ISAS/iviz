@@ -32,7 +32,7 @@ namespace Iviz.Ros
 
         public RosConnection()
         {
-            task = TaskUtils.Run(() => Run().AwaitNoThrow(this));
+            task = TaskUtils.RunNoThrow(Run, this);
         }
 
         internal bool TryGetClient([NotNullWhen(true)] out IRosClient? conn)

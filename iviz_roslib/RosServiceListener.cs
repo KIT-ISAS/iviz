@@ -41,7 +41,7 @@ internal sealed class RosServiceListener
 
         Logger.LogDebugFormat("{0}: Starting!", this);
 
-        task = TaskUtils.Run(() => RunLoop().AwaitNoThrow(this));
+        task = TaskUtils.RunNoThrow(RunLoop, this);
     }
 
     async ValueTask RunLoop()

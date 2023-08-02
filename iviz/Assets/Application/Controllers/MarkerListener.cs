@@ -5,11 +5,13 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.Configurations;
+using Iviz.Displays.Highlighters;
 using Iviz.Msgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Ros;
@@ -300,13 +302,40 @@ namespace Iviz.Controllers
             description.AppendLine().AppendLine();
         }
 
-        public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
+        bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
         {
             return markers.Values.TryGetFirst(hasBounds => ((MarkerObject)hasBounds).UniqueNodeName == id, out bounds);
         }
 
-        public Dictionary<(string, int), MarkerObject>.ValueCollection GetAllBounds() => markers.Values;
+        public void HighlightId(string id)
+        {
+            if (!TryGetBoundsFromId(id, out var bounds)
+                || bounds.BoundsTransform is not { } transform)
+            {
+                return;
+            }
 
+            GuiInputModule.Instance.LookAt(transform);
+            if (bounds.AcceptsHighlighter)
+            {
+                FAnimator.Start(new BoundsHighlighter(bounds));
+            }
+        }        
+
+        public void HighlightAll()
+        {
+            const int maxHighlights = 50;
+            
+            var boundsToShow = markers.Values
+                .Where(bounds => !bounds.ShowDescription)
+                .Take(maxHighlights);
+            
+            foreach (var bounds in boundsToShow)
+            {
+                FAnimator.Start(new BoundsHighlighter(bounds));
+            }
+        }
+        
         public override void ResetController()
         {
             DisposeAllMarkers();

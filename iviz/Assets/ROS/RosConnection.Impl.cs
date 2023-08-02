@@ -119,19 +119,6 @@ namespace Iviz.Ros
             hostAliases.AddRange(newHostAliases);
         }
 
-        async ValueTask DisposeClientAsync()
-        {
-            if (!Connected)
-            {
-                return;
-            }
-
-            runningTs.CancelNoThrow(this);
-            runningTs = new CancellationTokenSource();
-            await Client.DisposeAsync(runningTs.Token).AwaitNoThrow(this);
-            client = null;
-        }
-
         bool ValidateCanConnect()
         {
             if (MyId == null)
@@ -255,10 +242,11 @@ namespace Iviz.Ros
             {
                 case RosVersion.ROS1:
                 {
-                    var newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
+                    var newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri,
+                        ensureOwnUriReachable: true,
+                        token: token);
                     newClient.ShutdownAction = OnShutdown;
                     newClient.RosMasterClient.TimeoutInMs = rpcTimeoutInMs;
-                    await newClient.CheckOwnUriAsync(token);
                     return newClient;
                 }
 
@@ -339,8 +327,6 @@ namespace Iviz.Ros
                 token.ThrowIfCancellationRequested();
                 cachedPublishedTopics = await currentClient.GetSystemPublishedTopicsAsync(token);
 
-                cachedSystemState = null;
-                cachedTopics = EmptyTopics;
 
                 if (ros1Client != null)
                 {
@@ -612,16 +598,16 @@ namespace Iviz.Ros
                 {
                     using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
                     cts.CancelAfter(3000);
-                        
+
                     var now = GameThread.Now;
                     try
                     {
                         // check if the bridge is responding to requests.
-                        _ = await client.GetSystemNodesAsync(cts.Token);
+                        await client.GetSystemNodesAsync(cts.Token);
                     }
                     catch (ObjectDisposedException)
                     {
-                        RosLogger.Internal("Connection with the bridge has reset. Restarting!");
+                        RosLogger.Internal("Connection with the bridge has been reset. Restarting!");
                         connection.Disconnect();
                     }
                     catch
@@ -734,6 +720,11 @@ namespace Iviz.Ros
 
             Array.Fill(publishers, null);
 
+            cachedParameters.Clear();
+            cachedPublishedTopics = EmptyTopics;
+            cachedTopics = EmptyTopics;
+            cachedSystemState = null;
+
             RosLogger.Internal("Disconnecting...");
             await DisposeClientAsync();
             RosLogger.Internal("<b>Disconnected.</b>");
@@ -744,6 +735,19 @@ namespace Iviz.Ros
             ntpTask = null;
 
             DisconnectBase();
+        }
+
+        async ValueTask DisposeClientAsync()
+        {
+            if (!Connected)
+            {
+                return;
+            }
+
+            runningTs.CancelNoThrow(this);
+            runningTs = new CancellationTokenSource();
+            await Client.DisposeAsync(runningTs.Token).AwaitNoThrow(this);
+            client = null;
         }
 
         internal void Advertise<T>(Sender<T> advertiser) where T : IMessage, new()
@@ -758,16 +762,9 @@ namespace Iviz.Ros
                 {
                     await AdvertiseCore<T>(advertiser, token);
                 }
-                catch (OperationCanceledException)
-                {
-                    // ignore
-                }
-                catch (ObjectDisposedException)
-                {
-                    // ignore
-                }
                 catch (Exception e)
                 {
+                    if (e is OperationCanceledException or ObjectDisposedException) return;
                     RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(Advertise)}", e);
                 }
             });
@@ -801,7 +798,6 @@ namespace Iviz.Ros
                 publishers[newId] = publisher;
                 id = newId;
             }
-
             else
             {
                 id = null;
@@ -825,16 +821,9 @@ namespace Iviz.Ros
                 {
                     await AdvertiseServiceCore(service, callback, token);
                 }
-                catch (OperationCanceledException)
-                {
-                    // ignore
-                }
-                catch (ObjectDisposedException)
-                {
-                    // ignore
-                }
                 catch (Exception e)
                 {
+                    if (e is OperationCanceledException or ObjectDisposedException) return;
                     RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(AdvertiseService)}", e);
                 }
             });
@@ -934,18 +923,9 @@ namespace Iviz.Ros
 
         internal void Publish(int? advertiserId, IMessage msg)
         {
-            if (runningTs.IsCancellationRequested)
-            {
-                return;
-            }
-
-            if (advertiserId is not { } id)
-            {
-                return;
-            }
-
-            var basePublisher = publishers[id];
-            if (basePublisher == null)
+            if (runningTs.IsCancellationRequested
+                || advertiserId is not { } id
+                || publishers[id] is not { } basePublisher)
             {
                 return;
             }
@@ -958,17 +938,9 @@ namespace Iviz.Ros
             {
                 LogPublisherWrongType(basePublisher, msg);
             }
-            catch (OperationCanceledException)
-            {
-                // ignore
-            }
-            catch (ObjectDisposedException)
-            {
-                // dead client
-                // ignore, it will get caught in RosbridgeWatchdogTask
-            }
             catch (Exception e)
             {
+                if (e is OperationCanceledException or ObjectDisposedException) return;
                 RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(Publish)}", e);
             }
         }
@@ -991,16 +963,9 @@ namespace Iviz.Ros
                 {
                     await SubscribeCore<T>(listener, token);
                 }
-                catch (OperationCanceledException)
-                {
-                    // ignore
-                }
-                catch (ObjectDisposedException)
-                {
-                    // ignore
-                }
                 catch (Exception e)
                 {
+                    if (e is OperationCanceledException or ObjectDisposedException) return;
                     RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(Subscribe)}", e);
                 }
             });
@@ -1048,16 +1013,9 @@ namespace Iviz.Ros
                 {
                     await UnadvertiseCore(advertiser, token);
                 }
-                catch (OperationCanceledException)
-                {
-                    // ignore
-                }
-                catch (ObjectDisposedException)
-                {
-                    // ignore
-                }
                 catch (Exception e)
                 {
+                    if (e is OperationCanceledException or ObjectDisposedException) return;
                     RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(Unadvertise)}", e);
                 }
             });
@@ -1101,16 +1059,9 @@ namespace Iviz.Ros
                 {
                     await UnsubscribeCore(subscriber, token);
                 }
-                catch (OperationCanceledException)
-                {
-                    // ignore
-                }
-                catch (ObjectDisposedException)
-                {
-                    // ignore
-                }
                 catch (Exception e)
                 {
+                    if (e is OperationCanceledException or ObjectDisposedException) return;
                     RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(Unsubscribe)}", e);
                 }
             });
@@ -1139,7 +1090,7 @@ namespace Iviz.Ros
         {
             if (withRefresh)
             {
-                TaskUtils.Run(() => GetSystemPublishedTopicTypesAsync().AsTask(), runningTs.Token);
+                TaskUtils.RunNoThrow(async () => _ = await GetSystemPublishedTopicTypesAsync(), this, runningTs.Token);
             }
 
             return cachedPublishedTopics;
@@ -1160,16 +1111,9 @@ namespace Iviz.Ros
                 tokenSource.CancelAfter(timeoutInMs);
                 cachedPublishedTopics = await Client.GetSystemPublishedTopicsAsync(tokenSource.Token);
             }
-            catch (OperationCanceledException)
-            {
-                // ignore
-            }
-            catch (ObjectDisposedException)
-            {
-                // will be caught by RosbridgeWatchdogTask 
-            }
             catch (Exception e)
             {
+                if (e is OperationCanceledException or ObjectDisposedException) return cachedPublishedTopics;
                 RosLogger.Error(
                     $"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemPublishedTopicTypesAsync)}", e);
             }
@@ -1179,7 +1123,7 @@ namespace Iviz.Ros
 
         public override TopicNameType[] GetSystemTopicTypes()
         {
-            TaskUtils.Run(() => GetSystemTopicTypesAsync().AsTask(), runningTs.Token);
+            TaskUtils.RunNoThrow(() => GetSystemTopicTypesAsync(), this, runningTs.Token);
             return cachedTopics;
         }
 
@@ -1197,16 +1141,9 @@ namespace Iviz.Ros
                 tokenSource.CancelAfter(timeoutInMs);
                 cachedTopics = await Client.GetSystemTopicsAsync(tokenSource.Token);
             }
-            catch (OperationCanceledException)
-            {
-                // ignore
-            }
-            catch (ObjectDisposedException)
-            {
-                // will be caught by RosbridgeWatchdogTask 
-            }
             catch (Exception e)
             {
+                if (e is OperationCanceledException or ObjectDisposedException) return;
                 RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemTopicTypesAsync)}", e);
             }
         }
@@ -1216,7 +1153,7 @@ namespace Iviz.Ros
             var token = runningTs.Token;
             string nodeId = node ?? "";
 
-            TaskUtils.Run(async () =>
+            TaskUtils.RunNoThrow(async () =>
             {
                 if (!Connected || token.IsCancellationRequested)
                 {
@@ -1234,13 +1171,13 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    if (e is not (OperationCanceledException or TimeoutException))
+                    if (e is not (OperationCanceledException or ObjectDisposedException or TimeoutException))
                     {
                         RosLogger.Error($"[{nameof(RosConnection)}]: Exception during " +
                                         $"{nameof(GetSystemParameterList)}", e);
                     }
                 }
-            }, token);
+            }, this, token);
 
             return cachedParameters.TryGetValue(nodeId, out string[] value)
                 ? value
@@ -1268,12 +1205,11 @@ namespace Iviz.Ros
                 using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionToken);
                 tokenSource.CancelAfter(timeoutInMs);
 
+                var innerToken = tokenSource.Token;
                 var param = Client switch
                 {
-                    RosClient ros1Client => await ros1Client.GetParameterAsync(parameter, tokenSource.Token),
-                    Ros2Client ros2Client => await ros2Client.GetParameterAsync(parameter, nodeName,
-                        tokenSource.Token),
-                    _ => throw new ArgumentOutOfRangeException()
+                    Ros2Client ros2Client => await ros2Client.GetParameterAsync(parameter, nodeName, innerToken),
+                    _ => await Client.GetParameterAsync(parameter, innerToken)
                 };
 
                 return (param, null);
@@ -1306,7 +1242,7 @@ namespace Iviz.Ros
         {
             if (withRefresh)
             {
-                TaskUtils.Run(() => GetSystemStateAsync().AsTask(), runningTs.Token);
+                TaskUtils.RunNoThrow(GetSystemStateAsync, this, runningTs.Token);
             }
 
             return cachedSystemState;
@@ -1327,16 +1263,9 @@ namespace Iviz.Ros
                 tokenSource.CancelAfter(timeoutInMs);
                 cachedSystemState = await Client.GetSystemStateAsync(tokenSource.Token);
             }
-            catch (OperationCanceledException)
-            {
-                // ignore
-            }
-            catch (ObjectDisposedException)
-            {
-                // ignore
-            }
             catch (Exception e)
             {
+                if (e is OperationCanceledException or ObjectDisposedException) return;
                 RosLogger.Error($"[{nameof(RosConnection)}]: Exception during {nameof(GetSystemStateAsync)}", e);
             }
         }

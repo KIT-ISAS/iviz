@@ -7,6 +7,7 @@ using Iviz.Core;
 using Iviz.Core.Configurations;
 using Iviz.Resources;
 using Iviz.Tools;
+using Unity.Mathematics;
 
 namespace Iviz.Displays
 {
@@ -22,8 +23,6 @@ namespace Iviz.Displays
             { GridOrientation.YZ, Quaternion.Euler(0, 90, 0) }
         };
 
-        public new Transform Transform => base.Transform;
-
         readonly List<MeshMarkerDisplay> horizontals = new();
         readonly List<MeshMarkerDisplay> verticals = new();
 
@@ -31,8 +30,11 @@ namespace Iviz.Displays
         [SerializeField] Texture2D? darkTexture;
         [SerializeField] MeshRenderer? meshRenderer;
 
+        Transform? pivot;
+
         MeshMarkerDisplay? interiorObject;
         MeshRenderer? interiorRenderer;
+        LineDisplay? interiorLines;
         GridOrientation orientation;
         Color gridColor;
         Color interiorColor;
@@ -48,9 +50,10 @@ namespace Iviz.Displays
                 ? interiorRenderer
                 : interiorRenderer = InteriorObject.GetComponent<MeshRenderer>();
 
-        MeshMarkerDisplay InteriorObject => interiorObject != null
-            ? interiorObject
-            : interiorObject = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, Transform);
+        MeshMarkerDisplay InteriorObject =>
+            ResourcePool.RentChecked(ref interiorObject, Resource.Displays.Cube, Transform);
+
+        LineDisplay InteriorLines => ResourcePool.RentChecked(ref interiorLines, Transform);
 
         public GridOrientation Orientation
         {
@@ -69,6 +72,7 @@ namespace Iviz.Displays
             {
                 gridColor = value;
                 MeshRenderer.SetPropertyColor(value);
+                InteriorLines.Tint = value;
             }
         }
 
@@ -79,6 +83,7 @@ namespace Iviz.Displays
             {
                 interiorColor = value;
                 InteriorObject.Color = value;
+                InteriorLines.Tint = value;
 
                 float colorValue = value.GetValue();
                 var verticalColor = Color.red.WithValue(colorValue).WithSaturation(0.75f);
@@ -133,7 +138,11 @@ namespace Iviz.Displays
 
         public bool ShowInterior
         {
-            set => InteriorObject.Visible = value;
+            set
+            {
+                InteriorObject.Visible = value;
+                InteriorLines.Visible = !value;
+            } 
         }
 
         public bool FollowCamera
@@ -175,10 +184,23 @@ namespace Iviz.Displays
             set => InteriorObject.OcclusionOnly = value;
         }
 
+        Transform PivotTransform
+        {
+            get
+            {
+                if (pivot != null) return pivot;
+                pivot = new GameObject("Pivot").transform;
+                pivot.SetParent(Transform, false);
+                return pivot;
+            }
+        }
+
         void Awake()
         {
+            InteriorLines.ElementScale = 0.005f;
+            
             InteriorObject.name = "Grid Interior";
-            InteriorObject.transform.localPosition = new Vector3(0, 0, 0.01f);
+            InteriorObject.Transform.localPosition = new Vector3(0, 0, 0.01f);
             InteriorObject.Layer = LayerType.IgnoreRaycast;
             InteriorObject.Metallic = 0.5f;
             InteriorObject.Smoothness = 0.5f;
@@ -201,21 +223,10 @@ namespace Iviz.Displays
 
         void Update()
         {
-            if (!FollowCamera)
-            {
-                return;
-            }
+            if (!FollowCamera) return;
 
-            (float camX, _, float camZ) = TfModule.RelativeToOrigin(Settings.MainCameraPose.position);
-            /*
-            switch (Orientation)
-            {
-                case GridOrientation.XY:
-
-                    break;
-                // TODO: others
-            }
-            */
+            (float camX, _, float camZ) = TfModule.RelativeToFixedFrame(Settings.MainCameraPose.position);
+            // TODO: Orientation
             int x = (int)(camX + 0.5f);
             int z = (int)(camZ + 0.5f);
             var (offsetX, offsetY, offsetZ) = Transform.localPosition;
@@ -237,13 +248,14 @@ namespace Iviz.Displays
             Transform.localPosition = new Vector3(x, offsetY, z);
 
             int baseHoriz = Mathf.FloorToInt((z + 5) / 10f) * 10;
+            int baseVert = Mathf.FloorToInt((x + 5) / 10f) * 10;
+
             for (int i = 0; i < horizontals.Count; i++)
             {
                 float za = (i - (horizontals.Count - 1f) / 2) * 10;
                 horizontals[i].Transform.localPosition = new Vector3(0, baseHoriz + za - z, -zPosForX);
             }
 
-            int baseVert = Mathf.FloorToInt((x + 5) / 10f) * 10;
             for (int i = 0; i < verticals.Count; i++)
             {
                 float xa = (i - (verticals.Count - 1f) / 2) * 10;
@@ -285,12 +297,12 @@ namespace Iviz.Displays
             {
                 for (int i = horizontals.Count; i < size; i++)
                 {
-                    var hResource = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Square, transform);
+                    var hResource = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Square, PivotTransform);
                     hResource.Transform.localRotation = Quaternions.Rotate270AroundX;
                     hResource.Layer = LayerType.IgnoreRaycast;
                     horizontals.Add(hResource);
 
-                    var vResource = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Square, transform);
+                    var vResource = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Square, PivotTransform);
                     vResource.Transform.localRotation = Quaternions.Rotate270AroundX;
                     vResource.Layer = LayerType.IgnoreRaycast;
                     verticals.Add(vResource);
@@ -307,6 +319,26 @@ namespace Iviz.Displays
                 resource.Transform.localScale = new Vector3(2 * GridLineWidth, 1, totalSize);
             }
 
+            float color = UnityUtils.AsFloat(Color.white);
+            var lines = new List<float4x2>();
+            for (int i = 0; i < NumberOfGridCells; i++)
+            {
+                float4x2 f;
+                f.c0 = new float4(i, 0, 0, color);
+                f.c1 = new float4(i, NumberOfGridCells, 0, color);
+                lines.Add(f);
+                
+                float4x2 g;
+                g.c0 = new float4(0, i, 0, color);
+                g.c1 = new float4(NumberOfGridCells, i, 0, color);
+                lines.Add(g);
+            }
+            
+            InteriorLines.Set(lines.AsReadOnlySpan(), false);
+            
+            float zPosForLines = InteriorLines.ElementScale / 2;
+            InteriorLines.Transform.localPosition = new Vector3(-NumberOfGridCells / 2f, -NumberOfGridCells / 2f, zPosForLines);
+            
             Color = Color;
         }
 
@@ -323,6 +355,7 @@ namespace Iviz.Displays
             }
 
             interiorObject.ReturnToPool(Resource.Displays.Square);
+            interiorLines.ReturnToPool();
         }
     }
 }

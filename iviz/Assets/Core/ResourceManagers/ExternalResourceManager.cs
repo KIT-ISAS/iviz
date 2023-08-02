@@ -35,7 +35,7 @@ namespace Iviz.Displays
         const string StrCallServiceFailed = "[Model Loader]: Call Service failed! " +
                                             "Are you sure iviz is connected and the Iviz.Model.Service program is running?";
 
-        const int TimeoutInMs = 10000;
+        const int TimeoutInMs = 20000;
         const int Md5SumLength = 32;
 
 
@@ -84,7 +84,7 @@ namespace Iviz.Displays
 
             if (!File.Exists(Settings.ResourcesFilePath))
             {
-                RosLogger.Debug($"{ToString()}: Failed to find file {Settings.ResourcesFilePath}");
+                RosLogger.Debug($"{ToString()}: Failed to find file '{Settings.ResourcesFilePath}'");
                 return;
             }
 
@@ -253,7 +253,7 @@ namespace Iviz.Displays
         }
 
         public ValueTask<ResourceKey<GameObject>?> TryGetGameObjectAsync(string uriString,
-            ServiceProvider? provider, CancellationToken token = default)
+            ServiceProvider? provider, CancellationToken token)
         {
             ThrowHelper.ThrowIfNull(uriString, nameof(uriString));
 

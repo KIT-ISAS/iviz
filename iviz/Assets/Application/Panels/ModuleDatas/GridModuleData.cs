@@ -52,6 +52,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            panel.Frame.Owner = GridController;
             panel.ColorPicker.Value = GridController.InteriorColor;
             panel.ShowInterior.Value = GridController.InteriorVisible;
             panel.HideButton.State = GridController.Visible;
@@ -66,7 +67,8 @@ namespace Iviz.App
                 <= 30 => 1,
                 <= 50 => 2,
                 <= 70 => 3,
-                _ => 4
+                <= 90 => 4,
+                _ => 5,
             };
             
             panel.Metallic.Value = GridController.Metallic;
@@ -95,7 +97,8 @@ namespace Iviz.App
                 1 => 30,
                 2 => 50,
                 3 => 70,
-                _ => 90
+                4 => 90,
+                _ => 190
             };
         }
 

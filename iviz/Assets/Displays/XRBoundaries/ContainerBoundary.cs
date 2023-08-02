@@ -43,6 +43,11 @@ namespace Iviz.Displays.XR
             } 
         }
 
+        public bool Visible
+        {
+            set => Transform.gameObject.SetActive(value);
+        }
+
         public ContainerBoundary()
         {
             Transform = new GameObject("Detection Node").transform;

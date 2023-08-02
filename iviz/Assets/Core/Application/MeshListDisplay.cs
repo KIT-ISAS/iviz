@@ -107,7 +107,7 @@ namespace Iviz.Displays
 
         public override float ElementScale
         {
-            protected get => base.ElementScale;
+            get => base.ElementScale;
             set
             {
                 base.ElementScale = value;

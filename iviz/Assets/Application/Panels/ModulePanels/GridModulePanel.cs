@@ -8,6 +8,7 @@ namespace Iviz.App
     public sealed class GridModulePanel : ModulePanel
     {
         public SimpleButtonWidget CloseButton { get; private set; }
+        public FrameWidget Frame { get; private set; }
         public ToggleWidget ShowInterior { get; private set; }
         public DropdownWidget GridSize { get; private set; }
         public ToggleWidget FollowCamera { get; private set; }
@@ -26,8 +27,9 @@ namespace Iviz.App
             p.AddHeadTitleWidget("Grid");
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
+            Frame = p.AddFrame();
+            GridSize = p.AddDropdown("Size").SetOptions(new[] { "10", "30", "50", "70", "90", "190" });
             ShowInterior = p.AddToggle("Show Interior").SetValue(true);
-            GridSize = p.AddDropdown("Size").SetOptions(new[] { "10", "30", "50", "70", "90" });
             FollowCamera = p.AddToggle("Follow Camera").SetValue(true);
             Interactable = p.AddToggle("Interactable").SetValue(true);
             HideInARMode = p.AddToggle("Hide in AR Mode").SetValue(true);

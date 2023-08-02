@@ -9,11 +9,14 @@ using Iviz.Msgs.IvizMsgs;
 using UnityEngine;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Iviz.Controllers
 {
     public class DetectionHandler : VizHandler, IHandles<DetectionBox>, IHandlesArray<DetectionBoxArray>
     {
+        float minValidScore;
+
         public override string Title => "Boundaries";
 
         public override string BriefDescription
@@ -30,6 +33,19 @@ namespace Iviz.Controllers
                 const string errorStr = "No errors";
 
                 return $"{vizObjectsStr}\n{errorStr}";
+            }
+        }
+
+        public float MinValidScore
+        {
+            get => minValidScore;
+            set
+            {
+                minValidScore = value;
+                foreach (var vizObject in vizObjects.Values.Cast<DetectionObject>())
+                {
+                    vizObject.MinValidScore = value;
+                }
             }
         }
 
@@ -77,7 +93,11 @@ namespace Iviz.Controllers
             else
             {
                 detectionObject = new DetectionObject(msg, nameof(DetectionObject))
-                    { Interactable = Interactable, Visible = Visible };
+                {
+                    Interactable = Interactable,
+                    Visible = Visible,
+                    MinValidScore = MinValidScore
+                };
                 vizObjects[detectionObject.id] = detectionObject;
             }
 
@@ -87,9 +107,25 @@ namespace Iviz.Controllers
         sealed class DetectionObject : VizObject
         {
             readonly ContainerBoundary boundary;
+            readonly List<(string Class, float Score)> lastClassifications = new();
 
             DetectionBox? lastMsg;
-            readonly List<(string Class, double Score)> lastClassifications = new();
+            float minValidScore;
+
+            (string Class, float Score)? MaxClassification =>
+                lastClassifications.Count != 0
+                    ? lastClassifications[0]
+                    : null;
+
+            public float MinValidScore
+            {
+                get => minValidScore;
+                set
+                {
+                    minValidScore = value;
+                    UpdateScoreVisible();
+                }
+            }
 
             public DetectionObject(DetectionBox msg, string typeDescription) : base(msg.Id, typeDescription)
             {
@@ -108,28 +144,37 @@ namespace Iviz.Controllers
                     ? msg.Color.ToUnity()
                     : Color.white;
 
-                
+
                 int numClasses = Mathf.Min(msg.Classes.Length, msg.Scores.Length);
 
                 lastClassifications.Clear();
                 for (int i = 0; i < numClasses; i++)
                 {
-                    lastClassifications.Add((msg.Classes[i], msg.Scores[i]));
+                    lastClassifications.Add((msg.Classes[i], (float)msg.Scores[i]));
                 }
 
                 lastClassifications.Sort(
                     (pairA, pairB) => -pairA.Score.CompareTo(pairB.Score));
-                
-                boundary.Caption = lastClassifications.Count != 0
-                    ? lastClassifications[0].Class
-                    : "";
-                
+
+                boundary.Caption = MaxClassification?.Class ?? "";
+                UpdateScoreVisible();
+
                 lastMsg = msg;
+            }
+
+            void UpdateScoreVisible()
+            {
+                if (MaxClassification?.Score is { } score)
+                {
+                    node.Visible = score > MinValidScore;
+                }
             }
 
             public override void GenerateLog(StringBuilder description)
             {
-                description.Append("<color=#000080ff><b>** Detection #").Append(id).Append(" **</b></color>").AppendLine();
+                description.Append(node.Visible ? "<color=#000080ff>" : "<color=#706060ff>");
+                description.Append("<b>** Detection #").Append(id).Append(" **</b></color>")
+                    .AppendLine();
                 if (lastMsg == null)
                 {
                     description.Append("(No information)").AppendLine();
@@ -160,9 +205,16 @@ namespace Iviz.Controllers
                 {
                     foreach (var (klass, score) in lastClassifications)
                     {
+                        bool invalid = score < MinValidScore; 
+                        if (invalid) description.Append("<color=#706060ff>");
+
                         description
                             .Append("    <b>'").Append(klass).Append("'</b> --> ")
-                            .Append(score.ToString("#,0.###")).AppendLine();
+                            .Append(score.ToString("#,0.###"));
+
+                        if (invalid) description.Append("</color>");
+
+                        description.AppendLine();
                     }
                 }
             }

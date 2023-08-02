@@ -233,10 +233,6 @@ namespace Iviz.Controllers
             };
 
             trail.DataSource = this;
-
-            var profile = PreferUdp 
-                ? RosSubscriptionProfile.SpammyCanDrop 
-                : RosSubscriptionProfile.Default;
             Listener = Config.Type switch
             {
                 PoseStamped.MessageType => CreateListener<PoseStamped>(Handler),
@@ -252,7 +248,7 @@ namespace Iviz.Controllers
             };
 
             Listener<T> CreateListener<T>(Action<T> a) where T : IMessage, new() =>
-                new(Config.Topic, a, profile: profile);
+                new(Config.Topic, a, profile: RosSubscriptionProfile.SpammyCanDrop);
 
             switch (Config.Type)
             {

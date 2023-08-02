@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class MarkerWidget : MonoBehaviour, IWidget
+    public sealed class MarkerDialogWidget : MonoBehaviour, IWidget
     {
         [SerializeField] TMP_Text? text;
         [SerializeField] Button? button;
@@ -18,7 +18,7 @@ namespace Iviz.App
         TMP_Text Text => text.AssertNotNull(nameof(text));
         Button Button => button.AssertNotNull(nameof(button));
         
-        public IMarkerDialogListener? MarkerListener
+        public IMarkerDialogListener? DialogListener
         {
             private get => listener;
             set
@@ -47,9 +47,9 @@ namespace Iviz.App
 
         void OnClick()
         {
-            if (MarkerListener != null)
+            if (DialogListener != null)
             {
-                ModuleListPanel.Instance.ShowMarkerDialog(MarkerListener);
+                ModuleListPanel.Instance.ShowMarkerDialog(DialogListener);
             }
         }
 
@@ -60,7 +60,7 @@ namespace Iviz.App
 
         public void ClearSubscribers()
         {
-            MarkerListener = null;
+            DialogListener = null;
         }
     }
 }

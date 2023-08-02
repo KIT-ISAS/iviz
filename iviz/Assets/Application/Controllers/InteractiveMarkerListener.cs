@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.Configurations;
+using Iviz.Displays.Highlighters;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
@@ -259,21 +261,24 @@ namespace Iviz.Controllers
             FullListener = new Listener<InteractiveMarkerInit>(fullTopic, HandleUpdateFull);
         }
 
-        public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
-        {
-            if (!GetAllMarkers().TryGetFirst(markerObject => markerObject.UniqueNodeName == id, out var marker))
-            {
-                bounds = null;
-                return false;
-            }
-
-            bounds = marker;
-            return true;
-        }
-
         IEnumerable<MarkerObject> GetAllMarkers() =>
             interactiveMarkers.Values.SelectMany(interactiveMarker => interactiveMarker.GetAllMarkers());
 
+        public void HighlightId(string id)
+        {
+            if (!GetAllMarkers().TryGetFirst(markerObject => markerObject.UniqueNodeName == id, out var marker)
+                || marker is not IHasBounds { BoundsTransform: { } transform } bounds)
+            {
+                return;
+            }
+
+            GuiInputModule.Instance.LookAt(transform);
+            if (bounds.AcceptsHighlighter)
+            {
+                FAnimator.Start(new BoundsHighlighter(bounds));
+            }
+        }   
+        
         public override void Dispose()
         {
             base.Dispose();

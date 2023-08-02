@@ -61,11 +61,11 @@ namespace Iviz.MarkerDetection
         {
             if (CvNative.IsEnabled)
             {
-                task = TaskUtils.Run(RunAsync);
+                task = TaskUtils.RunNoThrow(RunAsync, this);
             }
         }
 
-        async Task RunAsync()
+        async ValueTask RunAsync()
         {
             var token = tokenSource.Token;
             ARMarkerType? lastTypeFound = null;

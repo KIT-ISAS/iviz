@@ -194,13 +194,22 @@ namespace Iviz.Displays
             bool keepMeshMaterials = false,
             bool loadColliders = true)
         {
-            if (robot.Links.Length == 0 || robot.Joints.Length == 0)
+            if (robot.Joints.Length == 0)
             {
-                RosLogger.Info($"Finished constructing empty robot '{Name}' with no links and no joints.");
-                return;
+                switch (robot.Links.Length)
+                {
+                    case 0:
+                        RosLogger.Info($"Finished constructing empty robot '{Name}' with no links and no joints.");
+                        return;
+                    case not 1:
+                        BuiltIns.ThrowArgument(nameof(robot), 
+                            $"Robot '{Name}' has no joints but multiple disjoint links!");
+                        return; // unreachable
+                }
             }
 
-            runningTs.Token.ThrowIfCancellationRequested();
+            var token = runningTs.Token;
+            token.ThrowIfCancellationRequested();
 
             var rootMaterials = new Dictionary<string, Material>();
             foreach (var material in robot.Materials)
@@ -231,12 +240,12 @@ namespace Iviz.Displays
 
             HideChildlessLinks();
 
-            runningTs.Token.ThrowIfCancellationRequested();
+            token.ThrowIfCancellationRequested();
             ApplyAnyValidConfiguration();
 
             var modelLoadingTasks = robot.Links.SelectMany(
                 link => ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, loadColliders,
-                    runningTs.Token));
+                    token));
 
             try
             {

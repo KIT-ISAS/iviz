@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Common;
@@ -334,6 +335,12 @@ namespace Iviz.Displays.Helpers
             pointBuffer.Dispose();
 
             IsProcessingChanged = null;
+        }
+
+        public bool TryGetLastMessage([NotNullWhen(true)] out PointCloud2? msg)
+        {
+            msg = lastMessage;
+            return msg != null;
         }
 
         public override string ToString() => $"[{nameof(PointCloudProcessor)} '{Node.Name}']";

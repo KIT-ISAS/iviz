@@ -45,7 +45,7 @@ namespace Iviz.App
             panel.FullListener.Listener = listener.FullListener;
             panel.DescriptionsVisible.Value = listener.DescriptionsVisible;
             panel.Sender.Set(listener.Publisher);
-            panel.Marker.MarkerListener = listener;
+            panel.MarkerDialog.DialogListener = listener;
             panel.HideButton.State = listener.Visible;
 
             panel.TriangleListFlipWinding.Value = listener.TriangleListFlipWinding;

@@ -111,12 +111,13 @@ namespace Iviz.Controllers
             }
         }
 
-        string FixedFrameId
+        public static string FixedFrameId
         {
             set
             {
-                config.FixedFrameId = value;
-                TfModule.FixedFrameId = value;
+                if (instance == null) return;
+                instance.config.FixedFrameId = value;
+                Tf.SetFixedFrameId(value);
             }
         }
 

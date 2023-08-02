@@ -12,12 +12,14 @@ using UnityEngine.Rendering;
 
 namespace Iviz.Controllers
 {
-    public sealed class GridController : Controller
+    public sealed class GridController : Controller, IHasFrame
     {
         readonly FrameNode node;
         readonly ReflectionProbe reflectionProbe;
         readonly GridDisplay grid;
         readonly GridConfiguration config = new();
+
+        public TfFrame Frame => TfModule.FixedFrame;
 
         public GridConfiguration Config
         {
@@ -206,6 +208,7 @@ namespace Iviz.Controllers
         public GridController(GridConfiguration? config)
         {
             node = new FrameNode("GridNode");
+            node.Parent = TfModule.RootFrame;
             
             grid = ResourcePool.RentDisplay<GridDisplay>(node.Transform);
             grid.name = "Grid";

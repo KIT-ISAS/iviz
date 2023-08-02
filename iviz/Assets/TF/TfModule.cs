@@ -167,35 +167,28 @@ namespace Iviz.Controllers.TF
             }
         }
 
-        public static string FixedFrameId
-        {
-            get => Instance.FixedFrameIdImpl;
-            set => Instance.FixedFrameIdImpl = value;
-        }
+        public static string FixedFrameId => FixedFrame.Id;
 
-        string FixedFrameIdImpl
+        // should only be called by TfListener!
+        public void SetFixedFrameId(string value)
         {
-            get => FixedFrame.Id;
-            set
+            if (FixedFrameId == value)
             {
-                if (FixedFrameId == value)
-                {
-                    return;
-                }
-
-                FixedFrame.RemoveListener(fixedFrameListenerNode);
-
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    fixedFrame = mapFrame;
-                    originFrame.Transform.SetLocalPose(Pose.identity);
-                    return;
-                }
-
-                var frame = GetOrCreateFrame(value, fixedFrameListenerNode);
-                fixedFrame = frame;
-                originFrame.Transform.SetLocalPose(frame.OriginWorldPose.Inverse());
+                return;
             }
+
+            FixedFrame.RemoveListener(fixedFrameListenerNode);
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                fixedFrame = mapFrame;
+                originFrame.Transform.SetLocalPose(Pose.identity);
+                return;
+            }
+
+            var frame = GetOrCreateFrame(value, fixedFrameListenerNode);
+            fixedFrame = frame;
+            originFrame.Transform.SetLocalPose(frame.OriginWorldPose.Inverse());
         }
 
         public int NumFrames => frames.Count;
@@ -610,6 +603,12 @@ namespace Iviz.Controllers.TF
             p.position = fixedFrame.InverseTransformPoint(position); // may contain scaling
             p.rotation = fixedFrame.rotation.Inverse() * rotation;
             return p;
+        }
+
+        public static Vector3 RelativeToFixedFrame(in Vector3 absoluteUnityPosition)
+        {
+            var fixedFrame = FixedFrame.Transform;
+            return fixedFrame.InverseTransformPoint(absoluteUnityPosition); // may contain scaling
         }
 
         public static Pose FixedFrameToAbsolute(in Pose relativePose)

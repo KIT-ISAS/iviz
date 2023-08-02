@@ -15,5 +15,6 @@ namespace Iviz.Core.Configurations
         [DataMember] public bool Interactable { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
+        [DataMember] public float MinValidScore { get; set; } = 0.45f;
     }
 }

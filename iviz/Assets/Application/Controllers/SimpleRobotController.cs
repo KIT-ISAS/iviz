@@ -411,7 +411,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                RosLogger.Debug($"{ToString()}: Error parsing description'", e);
+                RosLogger.Debug($"{ToString()}: Error parsing description", e);
                 HelpText = "[Failed to Parse Description]";
                 return false;
             }

@@ -36,8 +36,9 @@ namespace Iviz.App
         {
             panel.Listener.Listener = listener.Listener;
             panel.Frame.Owner = listener;
+            panel.FieldsDialog.DialogListener = listener;
 
-            panel.NumPoints.Text = BuildDescriptionString();
+            panel.Description.Text = listener.Description;
 
             panel.Colormap.Index = (int) listener.Colormap;
             panel.PointSize.Value = listener.PointSize;
@@ -82,21 +83,7 @@ namespace Iviz.App
         {
             base.UpdatePanel();
             panel.IntensityChannel.Hints = listener.FieldNames;
-            panel.NumPoints.Text = BuildDescriptionString();
-        }
-
-        string BuildDescriptionString()
-        {
-            var (x, y) = listener.MeasuredIntensityBounds;
-            string minIntensityStr = UnityUtils.FormatFloat(x);
-            string maxIntensityStr = UnityUtils.FormatFloat(y);
-            return
-                $"<b>{listener.NumValidPoints.ToString("N0")} Points</b>\n" +
-                (listener.NumValidPoints == 0 
-                    ? "Empty" 
-                    : listener.IsIntensityUsed 
-                        ? $"[{minIntensityStr} .. {maxIntensityStr}]" 
-                        : "Color");
+            panel.Description.Text = listener.Description;
         }
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)

@@ -497,7 +497,7 @@ namespace Iviz.Controllers
 
         static Task TrySetFixedFrameAsync(string id)
         {
-            return GameThread.PostAsync(() => TfModule.FixedFrameId = id);
+            return GameThread.PostAsync(() => TfListener.FixedFrameId = id);
         }
 
         /*

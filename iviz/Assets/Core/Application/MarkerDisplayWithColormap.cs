@@ -102,7 +102,7 @@ namespace Iviz.Displays
         /// </summary>
         public virtual float ElementScale
         {
-            protected get => elementScale;
+            get => elementScale;
             set
             {
                 if (value < 0)

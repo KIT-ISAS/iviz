@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+
 using System.Linq;
 using Iviz.Core;
 using JetBrains.Annotations;
@@ -10,19 +11,59 @@ namespace Iviz.App
 {
     public sealed class CollapsibleWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] TMP_Text label;
-        [SerializeField] Button button;
-        [SerializeField] RectTransform childrenTransform;
-        [SerializeField] RectTransform ownTransform;
+        [SerializeField] TMP_Text? label;
+        [SerializeField] Button? button;
+        [SerializeField] RectTransform? childrenTransform;
+        [SerializeField] RectTransform? ownTransform;
 
         bool open;
-        string text;
-        [CanBeNull] DataPanelWidgets parent;
+        bool visible = true;
+        string text = "";
+        DataPanelWidgets? parent;
+        
+        TMP_Text LabelObject => label.AssertNotNull(nameof(label));
+        Button Button => button.AssertNotNull(nameof(button));
+        RectTransform ChildrenTransform => childrenTransform.AssertNotNull(nameof(childrenTransform));
+        RectTransform OwnTransform => ownTransform.AssertNotNull(nameof(ownTransform));
 
-        [NotNull]
+        public bool Visible
+        {
+            get => visible;
+            set
+            {
+                visible = value;
+                UpdateSize();
+                if (parent != null)
+                {
+                    parent.UpdateSize();
+                }
+            }
+        }
+        
+        public bool Open
+        {
+            get => open;
+            set
+            {
+                open = value;
+                UpdateText();
+            
+                var children = ChildrenTransform.Cast<RectTransform>();
+                foreach (var child in children)
+                {
+                    child.gameObject.SetActive(open);
+                }
+            
+                UpdateSize();
+                if (parent != null)
+                {
+                    parent.UpdateSize();
+                }
+            }
+        }
+        
         public string Label
         {
-            get => label.text;
             set
             {
                 ThrowHelper.ThrowIfNull(value, nameof(value));
@@ -34,51 +75,41 @@ namespace Iviz.App
 
         void Awake()
         {
-            button.onClick.AddListener(OnClicked);
+            Button.onClick.AddListener(OnClicked);
         }
 
         void UpdateText()
         {
-            label.text = open
+            LabelObject.text = open
                 ? "- <u>" + text + "</u>"
                 : "<u>" + text + "...</u>";            
         }
-
         void OnClicked()
         {
-            open = !open;
-            UpdateText();
-            
-            var children = childrenTransform.Cast<RectTransform>();
-            foreach (var child in children)
-            {
-                child.gameObject.SetActive(open);
-            }
-            
-            FinishAttaching();
-            if (parent != null)
-            {
-                parent.UpdateSize();
-            }
+            Open = !Open;
         }
 
-        [NotNull]
-        public CollapsibleWidget Attach([NotNull] MonoBehaviour o)
+        public CollapsibleWidget Attach(MonoBehaviour o)
         {
             o.transform.SetParent(childrenTransform);
-            o.gameObject.SetActive(open);
+            o.gameObject.SetActive(Open);
             return this;
         }
-        
-        [NotNull]
-        public CollapsibleWidget FinishAttaching()
+
+        void UpdateSize()
         {
+            if (!Visible)
+            {
+                OwnTransform.sizeDelta = new Vector2(OwnTransform.sizeDelta.x, 0);
+                return;
+            }
+            
             const float yOffset = 5;
 
-            var children = childrenTransform.Cast<RectTransform>();
+            var children = ChildrenTransform.Cast<RectTransform>();
             float y = 0;
 
-            if (open)
+            if (Open)
             {
                 foreach (var child in children)
                 {
@@ -87,21 +118,23 @@ namespace Iviz.App
                 }
             }
 
-            y += ((RectTransform)button.transform).rect.height + yOffset;
-            ownTransform.sizeDelta = new Vector2(ownTransform.sizeDelta.x, y);
-            
+            y += ((RectTransform)Button.transform).rect.height + yOffset;
+            OwnTransform.sizeDelta = new Vector2(OwnTransform.sizeDelta.x, y);
+        }
+        
+        public CollapsibleWidget FinishAttaching()
+        {
+            UpdateSize();
             return this;
         }        
 
-        [NotNull]
-        public CollapsibleWidget SetLabel([NotNull] string f)
+        public CollapsibleWidget SetLabel(string f)
         {
             Label = f;
             return this;
         }
         
-        [NotNull]
-        public CollapsibleWidget SetParent([NotNull] DataPanelWidgets p)
+        public CollapsibleWidget SetParent(DataPanelWidgets p)
         {
             parent = p;
             return this;

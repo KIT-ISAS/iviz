@@ -40,7 +40,7 @@ namespace Iviz.Ros
 
             var messageReader = messageChannel.Reader;
             messageWriter = messageChannel.Writer;
-            task = TaskUtils.Run(() => WriteMessagesAsync(messageReader).AwaitNoThrow(this));
+            task = TaskUtils.RunNoThrow(() => WriteMessagesAsync(messageReader), this);
         }
 
         public async ValueTask DisposeAsync()

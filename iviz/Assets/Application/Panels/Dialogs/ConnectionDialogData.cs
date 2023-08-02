@@ -664,7 +664,9 @@ namespace Iviz.App
             }
             else
             {
-                RosLogger.Internal(connection.IsConnected ? "Disconnection requested." : "Already disconnected.");
+                if (connection.IsConnected) RosLogger.Internal("Disconnection requested.");
+                else RosLogger.Internal(connection.KeepReconnecting ? "Disconnected." : "Already disconnected.");
+                
                 connection.KeepReconnecting = false;
                 connection.Disconnect();
             }

@@ -49,6 +49,7 @@ namespace Iviz.Controllers
                 config.Type = value.Type;
                 Visible = value.Visible;
                 Interactable = value.Interactable;
+                MinValidScore = value.MinValidScore;
             }
         }
 
@@ -69,6 +70,19 @@ namespace Iviz.Controllers
             {
                 config.Interactable = value;
                 vizHandler.Interactable = value;
+            }
+        }
+
+        public float MinValidScore
+        {
+            get => config.MinValidScore;
+            set
+            {
+                config.MinValidScore = value;
+                if (vizHandler is DetectionHandler handler)
+                {
+                    handler.MinValidScore = value;
+                }
             }
         }
 
@@ -101,9 +115,8 @@ namespace Iviz.Controllers
 
                 DetectionBox.MessageType => Create(new DetectionHandler()),
                 DetectionBoxArray.MessageType => CreateForArray(new DetectionHandler()),
-                
-                _ =>
-                    ((VizHandler)null!, Listener.ThrowUnsupportedMessageType(configType)),
+
+                _ => ((VizHandler)null!, Listener.ThrowUnsupportedMessageType(configType)),
             };
 
             Config = configuration ?? new VizWidgetConfiguration
@@ -114,16 +127,17 @@ namespace Iviz.Controllers
             };
 
             FeedbackSender = new Sender<Feedback>($"{config.Topic}/feedback");
-            
-            
+
             // -----
-            const int maxQueueSize = 50;
 
-            (VizHandler, Listener<T>) Create<T>(IHandles<T> handler) where T : class, IMessage, new() =>
-                ((VizHandler)handler, new(configTopic, handler.Handle, maxQueueSize));
+            (VizHandler, Listener<T>) Create<T>(IHandles<T> handler) where T : IMessage, new() =>
+                ((VizHandler)handler, CreateListener<T>(handler.Handle));
 
-            (VizHandler, Listener<T>) CreateForArray<T>(IHandlesArray<T> handler) where T : class, IMessage, new() =>
-                ((VizHandler)handler, new(configTopic, handler.Handle, maxQueueSize));
+            (VizHandler, Listener<T>) CreateForArray<T>(IHandlesArray<T> handler) where T : IMessage, new() =>
+                ((VizHandler)handler, CreateListener<T>(handler.Handle));
+
+            Listener<T> CreateListener<T>(Action<T> handler) where T : IMessage, new() =>
+                new(configTopic, handler, 50, RosSubscriptionProfile.ImportantKeepAll);
         }
 
         public override void ResetController()
@@ -285,11 +299,10 @@ namespace Iviz.Controllers
             vizHandler.GenerateLog(description, minIndex, numEntries);
         }
 
-        public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
+        public void HighlightId(string id)
         {
-            bounds = null;
-            return false;
-        }
+            // NYI
+        }   
 
         public override void Dispose()
         {

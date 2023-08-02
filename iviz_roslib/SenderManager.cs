@@ -83,7 +83,7 @@ internal sealed class SenderManager<TMessage> : LatchedMessageProvider<TMessage>
         listener = new TcpListener(IPAddress.IPv6Any, 0) { Server = { DualMode = true } };
         listener.Start();
 
-        task = TaskUtils.Run(async () => await RunTcpReceiverLoop().AwaitNoThrow(this));
+        task = TaskUtils.RunNoThrow(RunTcpReceiverLoop, this);
 
         Logger.LogDebugFormat("{0}: Starting at :{1}", this, Endpoint.Port.ToString());
     }
@@ -176,7 +176,7 @@ internal sealed class SenderManager<TMessage> : LatchedMessageProvider<TMessage>
             newSender.LoopbackReceiver = loopbackReceiver;
         }
 
-        TaskUtils.Run(async () =>
+        TaskUtils.RunNoThrow(async () =>
         {
             using (await mutex.LockAsync(tokenSource.Token))
             {
@@ -184,7 +184,7 @@ internal sealed class SenderManager<TMessage> : LatchedMessageProvider<TMessage>
                 cachedSenders = senders.ToArray();
                 await CleanupAsync(tokenSource.Token);
             }
-        }).WaitNoThrow(this);
+        }, this);
 
         return new RpcUdpTopicResponse(hostname, newSender.Endpoint.Port, 0, request.MaxPacketSize, responseHeader);
     }

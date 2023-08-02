@@ -84,7 +84,7 @@ internal sealed class TcpSender<TMessage> : ProtocolSender<TMessage>, ITcpSender
 
         Endpoint = new Endpoint(localEndPoint);
         RemoteEndpoint = new Endpoint(remoteEndPoint);
-        task = TaskUtils.Run(() => StartSession(provider).AwaitNoThrow(this), runningTs.Token);
+        task = TaskUtils.RunNoThrow(() => StartSession(provider), this, runningTs.Token);
     }
 
     public override async ValueTask DisposeAsync(CancellationToken token)

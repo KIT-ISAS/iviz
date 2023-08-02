@@ -15,7 +15,7 @@
         public SliderWidget Metallic { get; private set; }
         public SliderWidget Smoothness { get; private set; }
         public DropdownWidget Mask { get; private set; }
-        public MarkerWidget Marker { get; private set; }
+        public MarkerDialogWidget MarkerDialog { get; private set; }
         CollapsibleWidget Visuals { get; set; }
 
         protected override void Initialize()
@@ -48,7 +48,7 @@
             HideButton = p.AddHideButton();
             ResetButton = p.AddResetButton();
 
-            Marker = p.AddMarker();
+            MarkerDialog = p.AddMarkerDialog();
 
             p.UpdateSize();
             gameObject.SetActive(false);

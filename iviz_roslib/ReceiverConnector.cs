@@ -52,7 +52,7 @@ internal sealed class ReceiverConnector
         }
 
         status = ReceiverStatus.ConnectingRpc;
-        task = TaskUtils.Run(async () => await KeepReconnecting().AwaitNoThrow(this));
+        task = TaskUtils.RunNoThrow(KeepReconnecting, this);
     }
 
     async ValueTask KeepReconnecting()

@@ -20,7 +20,7 @@ namespace Iviz.Ros
         readonly Func<T, IRosConnection, bool>? directHandler;
 
         Listener(string topic, RosSubscriptionProfile? profile) : 
-            base(topic, BuiltIns.GetMessageType<T>(), profile)
+            base(topic, BuiltIns.GetMessageType<T>(), profile ?? RosSubscriptionProfile.Default)
         {
         }
 
@@ -32,7 +32,7 @@ namespace Iviz.Ros
         /// <param name="handler">The callback to execute in the game thread if a message is available</param>
         /// <param name="maxQueueSize">Max size of the bounded queue</param>
         public Listener(string topic, Action<T> handler, int maxQueueSize = 1,
-            RosSubscriptionProfile? profile = RosSubscriptionProfile.Default) : this(topic, profile)
+            RosSubscriptionProfile? profile = null) : this(topic, profile)
         {
             ThrowHelper.ThrowIfNull(handler, nameof(handler));
             handlerOnGameThread = handler;
@@ -62,7 +62,7 @@ namespace Iviz.Ros
         /// It returns a boolean which indicates whether the message was processed.
         /// This is only used for logging purposes.
         /// </param>
-        public Listener(string topic, Func<T, IRosConnection, bool> handler, RosSubscriptionProfile? profile) : this(topic, profile)
+        public Listener(string topic, Func<T, IRosConnection, bool> handler, RosSubscriptionProfile profile) : this(topic, profile)
         {
             ThrowHelper.ThrowIfNull(handler, nameof(handler));
             directHandler = handler;
@@ -75,7 +75,7 @@ namespace Iviz.Ros
         /// Normal code should use the other constructors.
         /// </summary>
         [Preserve, UsedImplicitly]
-        public Listener(string topic, Func<IMessage, IRosConnection, bool> handler, RosSubscriptionProfile? profile)
+        public Listener(string topic, Func<IMessage, IRosConnection, bool> handler, RosSubscriptionProfile profile)
             : this(topic, (T msg, IRosConnection receiver) => handler(msg, receiver), profile)
         {
         }

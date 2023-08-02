@@ -443,8 +443,9 @@ public sealed class RosClient : IRosClient
     /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
     /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
     /// <param name="token">An optional cancellation token.</param>        
-    public static async ValueTask<RosClient> CreateAsync(Uri? masterUri = null, string? ownId = null,
-        Uri? ownUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null,
+    public static async ValueTask<RosClient> CreateAsync(
+        Uri? masterUri = null, string? ownId = null, Uri? ownUri = null,
+        bool ensureCleanSlate = true, bool ensureOwnUriReachable = false, string? namespaceOverride = null,
         CancellationToken token = default)
     {
         var client = new RosClient(masterUri, ownId, ownUri, namespaceOverride);
@@ -485,20 +486,32 @@ public sealed class RosClient : IRosClient
 
         Logger.LogDebugFormat("{0}: Initialized.", client);
 
-        if (!ensureCleanSlate)
+        if (ensureOwnUriReachable)
         {
-            return client;
+            try
+            {
+                await client.CheckOwnUriAsync(token);
+            }
+            catch
+            {
+                Logger.LogDebugFormat("{0}: " + nameof(CheckOwnUriAsync) + " failed.", client);
+                await client.listener.DisposeAsync();
+                throw;
+            }
         }
 
-        try
+        if (ensureCleanSlate)
         {
-            await client.EnsureCleanSlateAsync(token);
-        }
-        catch
-        {
-            Logger.LogDebugFormat("{0}: " + nameof(EnsureCleanSlateAsync) + " failed.", client);
-            await client.listener.DisposeAsync();
-            throw;
+            try
+            {
+                await client.EnsureCleanSlateAsync(token);
+            }
+            catch
+            {
+                Logger.LogDebugFormat("{0}: " + nameof(EnsureCleanSlateAsync) + " failed.", client);
+                await client.listener.DisposeAsync();
+                throw;
+            }
         }
 
         return client;
@@ -877,7 +890,7 @@ public sealed class RosClient : IRosClient
         var transportHint = profile is IRos1SubscriptionProfile ros1Profile
             ? ros1Profile.TransportHint
             : RosTransportHint.PreferTcp;
-        
+
         return await SubscribeAsyncCore(topic, callback, transportHint: transportHint, token: token);
     }
 
@@ -1615,5 +1628,5 @@ public sealed class RosClient : IRosClient
 
 public interface IRos1SubscriptionProfile : IRosSubscriptionProfile
 {
-    public RosTransportHint TransportHint { get; } 
+    public RosTransportHint TransportHint { get; }
 }

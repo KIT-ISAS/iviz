@@ -131,7 +131,7 @@ internal sealed class UdpSender<TMessage> : ProtocolSender<TMessage>, IUdpSender
 
         responseHeader = StreamUtils.WriteHeaderToArray(responseHeaderContents);
 
-        task = TaskUtils.Run(() => StartSession(provider).AwaitNoThrow(this));
+        task = TaskUtils.RunNoThrow(() => StartSession(provider), this);
     }
 
     async ValueTask StartSession(LatchedMessageProvider<TMessage> provider)
@@ -173,7 +173,7 @@ internal sealed class UdpSender<TMessage> : ProtocolSender<TMessage>, IUdpSender
         using var writeBuffer = new Rent(MaxPacketSize);
         writeBuffer[..UdpRosParams.HeaderLength].Fill(0);
 
-        _ = TaskUtils.Run(KeepAliveMessages);
+        _ = TaskUtils.RunNoThrow(KeepAliveMessages, this);
 
         if (provider.TryGetLatchedMessage(out var latchedMsg))
         {
@@ -343,7 +343,7 @@ internal sealed class UdpSender<TMessage> : ProtocolSender<TMessage>, IUdpSender
         // total 8
     }
 
-    async Task KeepAliveMessages()
+    async ValueTask KeepAliveMessages()
     {
         while (KeepRunning)
         {

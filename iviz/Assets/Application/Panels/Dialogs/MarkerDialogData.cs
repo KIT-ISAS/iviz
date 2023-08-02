@@ -47,7 +47,7 @@ namespace Iviz.App
 
             panel.Close.Clicked += Close;
             panel.ResetAll += listener.ResetController;
-            panel.LinkClicked += markerId => HighlightMarker(listener, markerId);
+            panel.LinkClicked += listener.HighlightId;
             panel.Flipped += OnFlipped;
 
             textHash = null;
@@ -83,7 +83,8 @@ namespace Iviz.App
 
             UpdateIndex();
         }
-
+    
+        /*
         static void HighlightMarker(IMarkerDialogListener listener, string markerId)
         {
             if (!listener.TryGetBoundsFromId(markerId, out var bounds)
@@ -98,6 +99,7 @@ namespace Iviz.App
                 FAnimator.Start(new BoundsHighlighter(bounds));
             }
         }
+        */
 
         public override void UpdatePanel()
         {

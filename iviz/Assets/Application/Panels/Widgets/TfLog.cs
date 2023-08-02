@@ -393,7 +393,7 @@ namespace Iviz.App
             if (SelectedFrame != null)
             {
                 SelectedFrame.Highlight();
-                TfModule.FixedFrameId = SelectedFrame.Id;
+                TfListener.FixedFrameId = SelectedFrame.Id;
             }
 
             UpdateFrameButtons();

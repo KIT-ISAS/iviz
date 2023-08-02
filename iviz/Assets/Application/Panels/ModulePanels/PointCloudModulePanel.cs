@@ -11,7 +11,8 @@ namespace Iviz.App
     {
         static readonly List<string> DefaultChannels = new() { "x", "y", "z" };
         public FrameWidget Frame { get; private set; }
-        public DataLabelWidget NumPoints { get; private set; }
+        public DataLabelWidget Description { get; private set; }
+        public MarkerDialogWidget FieldsDialog { get; private set; }
         public SliderWidgetWithScale PointSize { get; private set; }
         public DropdownWidget Colormap { get; private set; }
         public InputFieldWithHintsWidget IntensityChannel { get; private set; }
@@ -30,10 +31,11 @@ namespace Iviz.App
             p.AddHeadTitleWidget("PointCloud");
             Listener = p.AddListener();
             Frame = p.AddFrame();
-            NumPoints = p.AddDataLabel("Number of Points").SetHasRichText(true).SetCentered();
-            PointSize = p.AddSliderWidgetWithScale("Point Size").EnableNegative(false);
+            FieldsDialog = p.AddMarkerDialog();
+            Description = p.AddDataLabel("Number of Points").SetHasRichText(true).SetCentered();
             IntensityChannel = p.AddInputFieldWithHints("Intensity Channel")
                 .SetOptions(DefaultChannels);
+            PointSize = p.AddSliderWidgetWithScale("Point Size").EnableNegative(false);
 
             PointCloudType = p.AddDropdown("Show as").SetOptions(new[] { "Points", "Cubes", "Spheres" });
 

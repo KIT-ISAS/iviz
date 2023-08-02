@@ -71,7 +71,7 @@ internal sealed class TcpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
         connectionTimeoutInMs = timeoutInMs;
         cachedInfo = new MessageInfo(this);
         Status = ReceiverStatus.ConnectingTcp;
-        task = TaskUtils.Run(async () => await StartSession().AwaitNoThrow(this), runningTs.Token);
+        task = TaskUtils.RunNoThrow(StartSession, this, runningTs.Token);
     }
 
     public Ros1ReceiverState State => new TcpReceiverState(RemoteUri)

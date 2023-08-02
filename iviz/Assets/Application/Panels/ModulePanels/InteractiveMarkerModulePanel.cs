@@ -14,7 +14,7 @@
         public SliderWidget Metallic { get; private set; }
         public SliderWidget Smoothness { get; private set; }
         public SenderWidget Sender { get; private set; }
-        public MarkerWidget Marker { get; private set; }
+        public MarkerDialogWidget MarkerDialog { get; private set; }
         CollapsibleWidget Visuals { get; set; }
 
         protected override void Initialize()
@@ -41,7 +41,7 @@
                 .FinishAttaching();
 
             Sender = p.AddSender();
-            Marker = p.AddMarker();
+            MarkerDialog = p.AddMarkerDialog();
 
             p.UpdateSize();
             gameObject.SetActive(false);

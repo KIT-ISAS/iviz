@@ -5,6 +5,7 @@ using Iviz.Common;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Core.Configurations;
+using Iviz.Msgs.IvizMsgs;
 using Newtonsoft.Json;
 
 namespace Iviz.App
@@ -38,11 +39,22 @@ namespace Iviz.App
             panel.HideButton.State = listener.Visible;
             panel.Listener.Listener = listener.Listener;
             panel.FeedbackSender.Set(listener.FeedbackSender);
-            panel.Marker.MarkerListener = listener;
+            panel.MarkerDialog.DialogListener = listener;
+
+            panel.MinValidScore.Value = listener.MinValidScore;
 
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
             panel.ResetButton.Clicked += listener.ResetController;
+
+            panel.MinValidScore.ValueChanged += f => listener.MinValidScore = f;
+
+            switch (listener.Listener.Type)
+            {
+                case DetectionBoxArray.MessageType or DetectionBox.MessageType:
+                    panel.Mode = VizWidgetModulePanel.ModeType.Detections;
+                    break;
+            }
             
             HighlightAll();
         }
@@ -55,11 +67,19 @@ namespace Iviz.App
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
+            var config = JsonUtils.DeserializeObject<VizWidgetConfiguration>(configAsJson);
+            
             foreach (string field in fields)
             {
                 switch (field)
                 {
+                    case nameof(IConfiguration.ModuleType):
+                        break;
                     case nameof(VizWidgetConfiguration.Visible):
+                        listener.Visible = config.Visible;
+                        break;
+                    case nameof(VizWidgetConfiguration.MinValidScore):
+                        listener.MinValidScore = config.MinValidScore;
                         break;
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");

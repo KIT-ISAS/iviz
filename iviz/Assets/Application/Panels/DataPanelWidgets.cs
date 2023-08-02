@@ -139,9 +139,9 @@ namespace Iviz.App
             return Resource.Widgets.Listener.Instantiate<ListenerWidget>(NonStatics.transform);
         }
 
-        public MarkerWidget AddMarker()
+        public MarkerDialogWidget AddMarkerDialog()
         {
-            return Resource.Widgets.MarkerWidget.Instantiate<MarkerWidget>(NonStatics.transform);
+            return Resource.Widgets.MarkerWidget.Instantiate<MarkerDialogWidget>(NonStatics.transform);
         }
 
         public RobotWidget AddRobot()

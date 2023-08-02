@@ -39,7 +39,7 @@ internal sealed class ServiceRequest
         this.remoteEndPoint = remoteEndPoint;
         this.serviceInfo = serviceInfo;
 
-        task = TaskUtils.Run(async () => await StartSession().AwaitNoThrow(this), runningTs.Token);
+        task = TaskUtils.RunNoThrow(StartSession, this, runningTs.Token);
     }
 
     public bool IsAlive => !task.IsCompleted;

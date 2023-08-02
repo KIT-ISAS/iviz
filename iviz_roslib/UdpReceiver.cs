@@ -127,7 +127,7 @@ internal sealed class UdpReceiver<TMessage> : LoopbackReceiver<TMessage>, IProto
             }
         }
 
-        task = TaskUtils.Run(() => StartSession().AwaitNoThrow(this));
+        task = TaskUtils.RunNoThrow(StartSession,this);
     }
 
     public Ros1ReceiverState State => new UdpReceiverState(RemoteUri)

@@ -145,7 +145,7 @@ namespace Iviz.Controllers
                 Topic = topic,
             };
 
-            Listener = new Listener<LaserScan>(Config.Topic, Handle);
+            Listener = new Listener<LaserScan>(Config.Topic, Handle, profile: RosSubscriptionProfile.SensorKeepLast);
         }
 
         void Handle(LaserScan msg)

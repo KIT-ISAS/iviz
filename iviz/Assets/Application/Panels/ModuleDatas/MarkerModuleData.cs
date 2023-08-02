@@ -44,7 +44,7 @@ namespace Iviz.App
             panel.Alpha.Value = listener.Tint.a;
             panel.Metallic.Value = listener.Metallic;
             panel.Smoothness.Value = listener.Smoothness;
-            panel.Marker.MarkerListener = listener;
+            panel.MarkerDialog.DialogListener = listener;
             panel.HideButton.State = listener.Visible;
             panel.TriangleListFlipWinding.Value = listener.TriangleListFlipWinding;
             panel.ShowDescriptions.Value = listener.ShowDescriptions;
@@ -72,7 +72,7 @@ namespace Iviz.App
             panel.ResetButton.Clicked += listener.ResetController;
             //panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
 
-            HighlightAll();
+            listener.HighlightAll();
         }
         
         IEnumerable<string> GetMaskEntries()
@@ -83,20 +83,6 @@ namespace Iviz.App
             {
                 string name = ((MarkerType) i).ToString();
                 yield return masks[i] ? name : $"<color=#A0A0A0>({name})</color>";
-            }
-        }        
-
-        void HighlightAll()
-        {
-            const int maxHighlights = 50;
-            
-            var boundsToShow = listener.GetAllBounds()
-                .Where(bounds => !bounds.ShowDescription)
-                .Take(maxHighlights);
-            
-            foreach (var bounds in boundsToShow)
-            {
-                FAnimator.Start(new BoundsHighlighter(bounds));
             }
         }
 
